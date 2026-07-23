@@ -51,6 +51,15 @@ import {
 	unitAliasVoteStat,
 	unitReactionStat,
 	unitTagVoteStat,
+	unitEffectiveTag,
+	unitEffectiveTagVote,
+	unitStructure,
+	unitStructureApplication,
+	unitStructureApplicationVote,
+	unitStructureEdge,
+	unitStructureMember,
+	unitStructureVote,
+	UnitStructureKindValues,
 	searchIndexGeneration,
 	sharedSearchQuery,
 	searchRevisionProjectionSource,
@@ -425,6 +434,7 @@ describe("database schema contracts", () => {
 			"media",
 			"series",
 			"tag",
+			"structure",
 		]);
 		expect(PlatformCapabilityValues).toEqual(
 			expect.arrayContaining([
@@ -438,6 +448,23 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
+	});
+
+	it("models immutable generic Unit structures and rebuildable effective Tags separately", () => {
+		expect(UnitStructureKindValues).toEqual(["tag.hierarchy_path"]);
+		expect(getTableConfig(unitStructure).name).toBe("unit_structure");
+		expect(
+			getTableConfig(unitStructure).uniqueConstraints.map((constraint) => constraint.name),
+		).toContain("unit_structure_definition_key");
+		expect(getTableConfig(unitStructureMember).name).toBe("unit_structure_member");
+		expect(getTableConfig(unitStructureEdge).name).toBe("unit_structure_edge");
+		expect(getTableConfig(unitStructureVote).name).toBe("unit_structure_vote");
+		expect(getTableConfig(unitStructureApplication).name).toBe("unit_structure_application");
+		expect(getTableConfig(unitStructureApplicationVote).name).toBe(
+			"unit_structure_application_vote",
+		);
+		expect(getTableConfig(unitEffectiveTag).name).toBe("unit_effective_tag");
+		expect(getTableConfig(unitEffectiveTagVote).name).toBe("unit_effective_tag_vote");
 	});
 
 	it("keeps Dock kinds closed and gives each Dock a stable identity", () => {

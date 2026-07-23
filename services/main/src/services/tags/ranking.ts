@@ -25,6 +25,43 @@ export function wilsonLowerBound(score: number, voteCount: number): number {
 	return (center - margin) / denominator;
 }
 
+/** PostgreSQL expression equivalent of {@link wilsonLowerBound}. */
+export function wilsonLowerBoundSql(score: SQLWrapper, voteCount: SQLWrapper) {
+	return sql<number>`case
+		when coalesce(${voteCount}, 0) = 0 then 0
+		else (
+			(
+				(
+					(coalesce(${voteCount}, 0)::numeric + coalesce(${score}, 0)::numeric)
+					/ (2 * coalesce(${voteCount}, 0)::numeric)
+				)
+				+ (1.96 * 1.96) / (2 * coalesce(${voteCount}, 0)::numeric)
+				- 1.96 * sqrt(
+					(
+						(
+							(
+								(coalesce(${voteCount}, 0)::numeric
+									+ coalesce(${score}, 0)::numeric)
+								/ (2 * coalesce(${voteCount}, 0)::numeric)
+							)
+							* (
+								1 - (
+									(coalesce(${voteCount}, 0)::numeric
+										+ coalesce(${score}, 0)::numeric)
+									/ (2 * coalesce(${voteCount}, 0)::numeric)
+								)
+							)
+							+ (1.96 * 1.96) / (4 * coalesce(${voteCount}, 0)::numeric)
+						)
+						/ coalesce(${voteCount}, 0)::numeric
+					)
+				)
+			)
+			/ (1 + (1.96 * 1.96) / coalesce(${voteCount}, 0)::numeric)
+		)
+	end`;
+}
+
 export function compareGlobalTagRank(left: GlobalTagRankInput, right: GlobalTagRankInput): number {
 	if (left.pinned !== right.pinned) return left.pinned ? -1 : 1;
 	if (left.pinned && left.position !== right.position)
@@ -47,3 +84,4 @@ export function compareGlobalTagRank(left: GlobalTagRankInput, right: GlobalTagR
 				: left.position.localeCompare(right.position);
 	return left.tagId.localeCompare(right.tagId);
 }
+import { sql, type SQLWrapper } from "drizzle-orm";

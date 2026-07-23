@@ -167,6 +167,21 @@ A lightweight localized-title Unit used as a structural heading or taxonomy entr
 | zh-Hant | approved | inline | 分類標目 |  |
 | zh-Hant | approved | plural | 分類標目 |  |
 
+## tagStructure
+
+A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Tag path | Tag structure, Structure tag |
+| en | approved | pluralLabel | Tag paths | Tag structure, Structure tag |
+| en | approved | inline | tag path | Tag structure, Structure tag |
+| en | approved | plural | tag paths | Tag structure, Structure tag |
+| zh-Hant | approved | label | 標籤路徑 | Tag structure, Structure tag, 結構標籤 |
+| zh-Hant | approved | pluralLabel | 標籤路徑 | Tag structure, Structure tag, 結構標籤 |
+| zh-Hant | approved | inline | 標籤路徑 | Tag structure, Structure tag, 結構標籤 |
+| zh-Hant | approved | plural | 標籤路徑 | Tag structure, Structure tag, 結構標籤 |
+
 ## publicationLicense
 
 The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.

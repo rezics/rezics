@@ -4,12 +4,52 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: followTerms } = zhHantTerminology.follow;
+const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 
 export default {
 	page: {
 		title: "標籤",
 		description: `檢視一般標籤，以及你所選標籤來源對這個作品的${realmTerms.label}情境判斷。`,
 		viewAll: "查看完整標籤頁",
+		manageOnTagPage: `請在專用標籤頁加入標籤或${tagStructureTerms.label}，以保留清楚的投票情境。`,
+	},
+	structures: {
+		title: tagStructureTerms.pluralLabel,
+		description: `${tagStructureTerms.pluralLabel}會保留有意義的階層，並優先於扁平標籤顯示。`,
+		addTitle: `加入${tagStructureTerms.inline}`,
+		addDescription: `請先搜尋已通過的${tagStructureTerms.plural}；加入時會支持整條路徑及路徑上的每個標籤。`,
+		add: `加入${tagStructureTerms.label}`,
+		create: `建立${tagStructureTerms.label}`,
+		empty: `這個作品還沒有通過的${tagStructureTerms.plural}。`,
+		memberFallback: "未命名標籤",
+		pathLabel: `依序排列的${tagStructureTerms.label}`,
+	},
+	detail: {
+		childrenTitle: "直接子標籤",
+		childrenDescription: `這些關係來自通過投票且由社群鎖定的${tagStructureTerms.label}；每個子標籤下方會顯示其直接子標籤。`,
+		noChildren: "這個標籤目前沒有通過的直接子標籤。",
+		grandchildrenTitle: "直接子標籤",
+	},
+	createStructure: {
+		title: `建立${tagStructureTerms.label}`,
+		description:
+			"請依「較廣泛」到「較具體」的順序建立路徑。建立後社群成員不能編輯；平台管理員可進行留有稽核紀錄的修正。",
+		pick: "選擇下一個標籤",
+		addMember: "加入路徑",
+		removeMember: "從路徑移除",
+		moveEarlier: "向前移",
+		moveLater: "向後移",
+		preview: "社群鎖定路徑預覽",
+		minimum: "請加入至少兩個不同的標籤。",
+		submit: `建立${tagStructureTerms.label}並投票`,
+	},
+	adminEditStructure: {
+		title: `修正${tagStructureTerms.label}`,
+		description:
+			"平台管理員可以修正成員或順序；條目身分、既有投票與所有套用關係都會保留，修正內容也會寫入歷史紀錄。",
+		reasonLabel: "修正理由",
+		reasonPlaceholder: "說明為何需要進行這項管理修正。",
+		submit: "儲存並記錄修正",
 	},
 	global: {
 		title: "一般標籤",
@@ -52,4 +92,5 @@ export default {
 	},
 	unnamedTag: "未命名標籤",
 	unnamedRealm: `未命名${realmTerms.label}`,
+	unnamedStructure: `未命名${tagStructureTerms.label}`,
 };

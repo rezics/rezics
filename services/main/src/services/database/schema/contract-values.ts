@@ -16,6 +16,7 @@ export const UnitKindValues = [
 	"entity",
 	"label",
 	"tag",
+	"structure",
 	"series",
 	"zone",
 	"zone_page",
@@ -31,6 +32,7 @@ export const CommunityCatalogUnitKindValues = [
 	"media",
 	"series",
 	"tag",
+	"structure",
 ] as const;
 
 export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
@@ -118,6 +120,15 @@ export function isCreditAttributionRoleForUnitKind(
 export function isSubjectAssociationRole(value: string): value is SubjectAssociationRole {
 	return (SubjectAssociationRoleValues as readonly string[]).includes(value);
 }
+
+/**
+ * Persisted semantic contracts for community-immutable ordered Unit structures.
+ *
+ * The storage primitive is generic; each kind defines which member Unit kinds
+ * and which interpretation of adjacency are valid.
+ */
+export const UnitStructureKindValues = ["tag.hierarchy_path"] as const;
+export type UnitStructureKind = (typeof UnitStructureKindValues)[number];
 
 export const DockKindValues = ["main", "wiki"] as const;
 export type DockKind = (typeof DockKindValues)[number];

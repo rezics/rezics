@@ -19,7 +19,8 @@ import { profile, unit } from "./core";
 import { post } from "./post";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";
-import { realmTagContext, unitTag } from "./tag";
+import { unitEffectiveTag, unitStructure, unitStructureApplication } from "./structure";
+import { realmTagContext } from "./tag";
 
 const aggregateCount = () => bigint({ mode: "bigint" }).default(0n).notNull();
 
@@ -93,11 +94,54 @@ export const unitTagVoteStat = pgTable(
 		primaryKey({ columns: [table.unitId, table.tagId] }),
 		foreignKey({
 			columns: [table.unitId, table.tagId],
-			foreignColumns: [unitTag.unitId, unitTag.tagId],
-			name: "unit_tag_vote_stat_unit_tag_fkey",
+			foreignColumns: [unitEffectiveTag.unitId, unitEffectiveTag.tagId],
+			name: "unit_tag_vote_stat_effective_tag_fkey",
 		}).onDelete("cascade"),
 		check("unit_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("unit_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
+	],
+);
+
+export const unitStructureVoteStat = pgTable(
+	"unit_structure_vote_stat",
+	{
+		structureId: uuid()
+			.primaryKey()
+			.references(() => unitStructure.id, { onDelete: "cascade" }),
+		score: bigint({ mode: "bigint" }).default(0n).notNull(),
+		voteCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check("unit_structure_vote_stat_count_check", sql`${table.voteCount} >= 0`),
+		check(
+			"unit_structure_vote_stat_score_check",
+			sql`abs(${table.score}) <= ${table.voteCount}`,
+		),
+	],
+);
+
+export const unitStructureApplicationVoteStat = pgTable(
+	"unit_structure_application_vote_stat",
+	{
+		unitId: uuid().notNull(),
+		structureId: uuid().notNull(),
+		score: bigint({ mode: "bigint" }).default(0n).notNull(),
+		voteCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.unitId, table.structureId] }),
+		foreignKey({
+			columns: [table.unitId, table.structureId],
+			foreignColumns: [unitStructureApplication.unitId, unitStructureApplication.structureId],
+			name: "unit_structure_application_vote_stat_application_fkey",
+		}).onDelete("cascade"),
+		check("unit_structure_application_vote_stat_count_check", sql`${table.voteCount} >= 0`),
+		check(
+			"unit_structure_application_vote_stat_score_check",
+			sql`abs(${table.score}) <= ${table.voteCount}`,
+		),
 	],
 );
 

@@ -33,7 +33,7 @@ describe("versioned search projection contracts", () => {
 	it("validates a complete current document and rejects private extras", () => {
 		const document = {
 			id: unitId,
-			projectionVersion: 4,
+			projectionVersion: 5,
 			revision: 4,
 			category: "units",
 			unitType: "book",
@@ -116,7 +116,7 @@ describe("versioned search projection contracts", () => {
 	it("rejects unregistered publication License filters", () => {
 		const document = {
 			id: unitId,
-			projectionVersion: 4,
+			projectionVersion: 5,
 			revision: 1,
 			category: "units",
 			unitType: "book",

@@ -94,6 +94,10 @@ export const SearchCategoryRules = {
 		filterableAttributes: CommonFilterableAttributes,
 		sortableAttributes: CommonSortableAttributes,
 	},
+	"tag-structures": {
+		filterableAttributes: [],
+		sortableAttributes: CommonSortableAttributes,
+	},
 	posts: {
 		filterableAttributes: [
 			"creditedUnitId",

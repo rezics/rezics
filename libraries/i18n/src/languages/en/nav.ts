@@ -5,6 +5,7 @@ const { forms: followTerms } = enTerminology.follow;
 const { forms: labelTerms } = enTerminology.label;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: tagStructureTerms } = enTerminology.tagStructure;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
 
@@ -67,6 +68,7 @@ export default {
 			entity: "Entity",
 			label: labelTerms.label,
 			tag: "Tag",
+			structure: tagStructureTerms.label,
 			series: "Series",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} page`,

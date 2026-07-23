@@ -56,6 +56,16 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 		},
 		forbidden: [],
 	},
+	tagStructure: {
+		status: "approved",
+		forms: {
+			label: "標籤路徑",
+			pluralLabel: "標籤路徑",
+			inline: "標籤路徑",
+			plural: "標籤路徑",
+		},
+		forbidden: ["Tag structure", "Structure tag", "結構標籤"],
+	},
 	publicationLicense: {
 		status: "approved",
 		forms: { label: "作品授權條款", inline: "授權條款" },

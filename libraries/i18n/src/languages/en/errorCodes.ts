@@ -5,6 +5,7 @@ const { forms: dockTerms } = enTerminology.dock;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: tagStructureTerms } = enTerminology.tagStructure;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
 
@@ -195,4 +196,9 @@ export default {
 	SearchDocumentRevisionConflict: "The search configuration changed. Reload it before saving.",
 	ZoneSearchFeatureNotFound: `This ${zoneTerms.inline} has no enabled search feature.`,
 	SharedSearchQueryNotFound: "This shared search query could not be found.",
+	InvalidTagStructure: `This ${tagStructureTerms.inline} is invalid.`,
+	TagStructureNotFound: `This ${tagStructureTerms.inline} could not be found.`,
+	TagStructureApplicationNotFound: `This Unit does not have that ${tagStructureTerms.inline}.`,
+	TagStructureChanged: `This ${tagStructureTerms.inline} changed elsewhere. Refresh and try again.`,
+	TagStructureDefinitionConflict: `An identical ${tagStructureTerms.inline} already exists.`,
 } satisfies typeof import("../zh-Hant/errorCodes").default;

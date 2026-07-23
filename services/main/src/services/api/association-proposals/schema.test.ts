@@ -19,7 +19,7 @@ describe("Unit association proposal API contracts", () => {
 			Check(CreateAssociationInvitationBody, {
 				sourceUnitId: id,
 				kind: "subject",
-				role: "person",
+				role: "primary_character",
 				expiresAt: "2026-08-01T00:00:00.000Z",
 			}),
 		).toBe(true);

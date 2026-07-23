@@ -27,8 +27,8 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v4_20260723",
-		projectionVersion: 4,
+		indexUid: "rezics_units_v5_20260723",
+		projectionVersion: 5,
 		settingsFingerprint: "a".repeat(64),
 	}),
 }));
@@ -344,7 +344,7 @@ describe("domain search SQL", () => {
 		expect(query).toContain("with search_candidate(unit_id, revision)");
 		expect(query).toContain('"search_unit_projection_source"."revision"');
 		expect(query).toContain('join "unit_localization" as "facet_unit_localization"');
-		expect(query).toContain('join "unit_tag" as "facet_unit_tag"');
+		expect(query).toContain('join "unit_effective_tag" as "facet_unit_tag"');
 		expect(query).toContain('join "realm_unit" as "facet_realm_unit"');
 		expect(query).toContain('join "credit_attribution" as "facet_credit_attribution"');
 		expect(query).toContain('join "unit_access_binding" as "facet_owner_binding"');

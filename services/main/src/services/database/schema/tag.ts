@@ -1,5 +1,14 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, foreignKey, index, integer, primaryKey, uuid } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	check,
+	foreignKey,
+	index,
+	integer,
+	primaryKey,
+	text,
+	uuid,
+} from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
@@ -8,13 +17,23 @@ import { post } from "./post";
 import { realm, realmUnit } from "./realm";
 
 /** Marker table proving that a Unit is a Tag. */
-export const tag = pgTable("tag", {
-	id: uuid()
-		.primaryKey()
-		.references(() => unit.id, { onDelete: "cascade" }),
-	createdAt: createCreatedAtColumn(),
-	updatedAt: createUpdatedAtColumn(),
-});
+export const tag = pgTable(
+	"tag",
+	{
+		id: uuid().primaryKey(),
+		unitKind: text().$type<"tag">().default("tag").notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.id, table.unitKind],
+			foreignColumns: [unit.id, unit.kind],
+			name: "tag_unit_kind_fkey",
+		}).onDelete("cascade"),
+		check("tag_unit_kind_check", sql`${table.unitKind} = 'tag'`),
+	],
+);
 
 /** Global, community-voted Unit-to-Tag relationship. */
 export const unitTag = pgTable(

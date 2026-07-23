@@ -5,6 +5,7 @@ const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: labelTerms } = zhHantTerminology.label;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
@@ -67,6 +68,7 @@ export default {
 			entity: "實體",
 			label: labelTerms.label,
 			tag: "標籤",
+			structure: tagStructureTerms.label,
 			series: "系列",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label}頁面`,

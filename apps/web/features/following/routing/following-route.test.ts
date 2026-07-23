@@ -17,6 +17,8 @@ describe("following routes", () => {
 		expect(followingHref("software", "software-id")).toBe("/units/software/software-id");
 		expect(followingHref("media", "media-id")).toBe("/units/media/media-id");
 		expect(followingHref("entity", "entity-id")).toBe("/entities/entity-id");
+		expect(followingHref("tag", "tag-id")).toBe("/tags/tag-id");
+		expect(followingHref("structure", "structure-id")).toBe("/tag-structures/structure-id");
 		expect(followingHref("collection", "collection-id")).toBe("/collections/collection-id");
 		expect(followingHref("post", "post-id")).toBe("/posts/post-id");
 		expect(followingHref("poll", "poll-id")).toBe("/polls/poll-id");
@@ -27,7 +29,6 @@ describe("following routes", () => {
 			"slug_namespace",
 			"release",
 			"label",
-			"tag",
 			"series",
 			"realm_rule",
 			"zone_page",
@@ -46,6 +47,7 @@ describe("following routes", () => {
 			"entity",
 			"label",
 			"tag",
+			"structure",
 			"series",
 			"zone",
 			"zone_page",

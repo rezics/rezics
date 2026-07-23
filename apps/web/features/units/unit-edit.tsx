@@ -15,11 +15,11 @@ import {
 	usePostApiUnitsByTypeByUnitIdLinks,
 	usePostApiUnitsByTypeByUnitIdSubjectAssociations,
 	usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage,
-	usePutApiUnitsByTypeByUnitIdTagsByTagId,
 	usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
@@ -510,7 +510,7 @@ function UnitLocalizationForm({
 }
 
 export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
-	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
+	const { t } = useTranslation(["cover", "errors", "tags", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const invalidate = () => invalidateUnitDetail(queryClient, type, unit.id);
 	const credit = usePostApiUnitsByTypeByUnitIdCreditAttributions({
@@ -520,14 +520,12 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 		mutation: { onSuccess: invalidate },
 	});
 	const link = usePostApiUnitsByTypeByUnitIdLinks({ mutation: { onSuccess: invalidate } });
-	const tag = usePutApiUnitsByTypeByUnitIdTagsByTagId({ mutation: { onSuccess: invalidate } });
 	const version = usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId({
 		mutation: { onSuccess: invalidate },
 	});
 	const [creditEntity, setCreditEntity] = useState<SelectedEntity>();
 	const [subjectEntity, setSubjectEntity] = useState<SelectedEntity>();
 	const [linkSource, setLinkSource] = useState<SelectedEntity>();
-	const [selectedTag, setSelectedTag] = useState<SelectedEntity>();
 	const [canonicalUnit, setCanonicalUnit] = useState<SelectedEntity>();
 
 	return (
@@ -681,32 +679,10 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 				</form>
 
 				<div className="grid gap-4">
-					<EntityPicker index="tags" onChange={setSelectedTag} value={selectedTag} />
-					<Button
-						disabled={!selectedTag}
-						isLoading={tag.isPending}
-						onClick={async () => {
-							if (!selectedTag) return;
-							try {
-								await tag.mutateAsync({
-									path: {
-										type,
-										unitId: unit.id,
-										tagId: selectedTag.id,
-									},
-									body: {},
-								});
-								setSelectedTag(undefined);
-							} catch {
-								// The typed mutation state supplies the visible API error.
-							}
-						}}
-						type="button"
-						variant="outline"
-					>
-						{t.units.editor.tag}
+					<p className="text-sm text-muted-foreground">{t.tags.page.manageOnTagPage}</p>
+					<Button asChild className="w-fit" variant="outline">
+						<Link href={`/units/${type}/${unit.id}/tags`}>{t.tags.page.viewAll}</Link>
 					</Button>
-					<RequestFailure error={tag.error} fallback={t.ui.retryLater} />
 				</div>
 
 				{isVariantUnitType(type) ? (

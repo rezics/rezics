@@ -23,7 +23,7 @@ const NullableInteger = Type.Union([Type.Integer(), Type.Null()]);
 const StringList = Type.Array(Type.String());
 const UuidList = Type.Array(Uuid);
 
-export const CurrentSearchProjectionVersion = 4 as const;
+export const CurrentSearchProjectionVersion = 5 as const;
 export const HistorySearchProjectionVersion = 1 as const;
 export const SearchProjectionVersions = {
 	current: CurrentSearchProjectionVersion,
@@ -119,7 +119,7 @@ export const CurrentSearchDocument = Type.Object(
 			engagement24h: Type.Number({ minimum: 0 }),
 		}),
 	},
-	{ additionalProperties: false, $id: "CurrentSearchDocumentV4" },
+	{ additionalProperties: false, $id: "CurrentSearchDocumentV5" },
 );
 export type CurrentSearchDocument = Static<typeof CurrentSearchDocument>;
 
@@ -154,7 +154,7 @@ export type RevisionSearchDocument = Static<typeof RevisionSearchDocument>;
 
 export function parseCurrentSearchDocument(value: unknown): CurrentSearchDocument {
 	if (!Check(CurrentSearchDocument, value))
-		throw new TypeError("Invalid current search document v4");
+		throw new TypeError("Invalid current search document v5");
 	if ((value.unitType === "book") !== (value.book !== null))
 		throw new TypeError("Current search book applicability mismatch");
 	if ((value.unitType === "media") !== (value.media !== null))

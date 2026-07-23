@@ -41,7 +41,9 @@ import {
 	unit,
 	unitAccessBinding,
 	unitLocalization,
-	unitTag,
+	unitEffectiveTag,
+	unitStructureMember,
+	unitStructureVoteStat,
 	unitVariant,
 	VariantCapableUnitKindValues,
 } from "../database/schema";
@@ -63,7 +65,8 @@ const subjectUnit = alias(unit, "subject_unit");
 const searchVariantRelationship = alias(unitVariant, "search_variant_relationship");
 const searchMainUnit = alias(unit, "search_main_unit");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
-const facetUnitTag = alias(unitTag, "facet_unit_tag");
+const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
+const searchStructureMember = alias(unitStructureMember, "search_structure_member");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 const facetCreditAttribution = alias(creditAttribution, "facet_credit_attribution");
 const facetOwnerBinding = alias(unitAccessBinding, "facet_owner_binding");
@@ -75,6 +78,7 @@ const categoryKinds: Record<SearchCategory, readonly string[]> = {
 	users: ["profile"],
 	entity: ["entity"],
 	tags: ["tag"],
+	"tag-structures": ["structure"],
 	posts: ["post"],
 	realms: ["realm"],
 	collections: ["collection"],
@@ -457,12 +461,13 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		const match =
 			filter.operator === "all-of"
 				? sql`array(
-					select ${unitTag.tagId} from ${unitTag} where ${unitTag.unitId} = ${unit.id}
+					select ${unitEffectiveTag.tagId} from ${unitEffectiveTag}
+					where ${unitEffectiveTag.unitId} = ${unit.id}
 				) @> ${toUuidArray(values)}`
 				: sql`exists (
-					select 1 from ${unitTag}
-					where ${unitTag.unitId} = ${unit.id}
-						and ${unitTag.tagId} = any(${toUuidArray(values)})
+					select 1 from ${unitEffectiveTag}
+					where ${unitEffectiveTag.unitId} = ${unit.id}
+						and ${unitEffectiveTag.tagId} = any(${toUuidArray(values)})
 				)`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
 			? sql`not (${match})`
@@ -597,6 +602,24 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 	if (category === "posts")
 		conditions.push(sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`);
 	if (category === "reviews") conditions.push(sql`${post.kind} = 'review'`);
+	if (category === "tag-structures")
+		conditions.push(sql`exists (
+			select 1 from ${unitStructureVoteStat}
+			where ${unitStructureVoteStat.structureId} = ${unit.id}
+				and ${unitStructureVoteStat.score} > 0
+		) and not exists (
+			select 1
+			from ${unitStructureMember} member
+			join ${unit} member_unit on member_unit.id = member.member_unit_id
+			where member.structure_id = ${unit.id}
+				and (
+					member_unit.kind <> 'tag'
+					or member_unit.status <> 'published'
+					or member_unit.visibility <> 'public'
+					or member_unit.moderation_status <> 'approved'
+					or member_unit.deleted_at is not null
+				)
+		)`);
 
 	const query = request.query?.trim() ?? "";
 	if (category === "units" && !query)
@@ -875,12 +898,20 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				'id', ${unit.id},
 				'category', ${category}::text,
 				'kind', ${hitType},
-				'titles', coalesce((
+				'titles', case when ${category}::text = 'tag-structures' then coalesce((
+					select jsonb_build_array(string_agg(
+						coalesce(${primaryUnitTitle(searchStructureMember.memberUnitId)},
+							${searchStructureMember.memberUnitId}::text),
+						' › ' order by ${searchStructureMember.ordinal}
+					))
+					from ${searchStructureMember}
+					where ${searchStructureMember.structureId} = ${unit.id}
+				), '[]'::jsonb) else coalesce((
 					SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
 						FILTER (WHERE ${unitLocalization.title} IS NOT NULL)
 					FROM ${unitLocalization}
 					WHERE ${unitLocalization.unitId} = ${unit.id}
-				), '[]'::jsonb),
+				), '[]'::jsonb) end,
 				'summaries', coalesce((
 					SELECT jsonb_agg(${unitLocalization.summary} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
 						FILTER (WHERE ${unitLocalization.summary} IS NOT NULL)
@@ -1058,7 +1089,7 @@ function facetSpec(
 	if (field === "tag")
 		return {
 			value: sql`${facetUnitTag.tagId}`,
-			join: sql`join ${unitTag} as ${facetUnitTag}
+			join: sql`join ${unitEffectiveTag} as ${facetUnitTag}
 				on ${facetUnitTag.unitId} = ${unit.id}`,
 		};
 	if (field === "realm")

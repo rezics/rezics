@@ -56,6 +56,16 @@ export const enTerminology = defineTerminology("en", {
 		},
 		forbidden: [],
 	},
+	tagStructure: {
+		status: "approved",
+		forms: {
+			label: "Tag path",
+			pluralLabel: "Tag paths",
+			inline: "tag path",
+			plural: "tag paths",
+		},
+		forbidden: ["Tag structure", "Structure tag"],
+	},
 	publicationLicense: {
 		status: "approved",
 		forms: { label: "Publication license", inline: "publication license" },

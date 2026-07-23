@@ -101,7 +101,12 @@ export function TagsPage() {
 	const query = useGetApiTags({ query: { limit: 50 } });
 	return (
 		<CatalogFrame title={t.catalog.tags} createHref="/tags/new">
-			<UnitList items={query.data?.items} pending={query.isPending} error={query.isError} />
+			<UnitList
+				items={query.data?.items}
+				pending={query.isPending}
+				error={query.isError}
+				href={(item) => `/tags/${item.id}`}
+			/>
 		</CatalogFrame>
 	);
 }

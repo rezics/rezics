@@ -7,7 +7,8 @@ import Link from "next/link";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
-import { tagSearchHref, unitTagsHref } from "../routing/tag-links";
+import { TagStructurePath } from "./tag-structure-path";
+import { tagSearchHref, tagStructureHref, unitTagsHref } from "../routing/tag-links";
 
 export function UnitTagSummary({
 	type,
@@ -22,6 +23,7 @@ export function UnitTagSummary({
 		query: {
 			language: toContentLanguage(locale.target),
 			globalLimit: 8,
+			structureLimit: 4,
 			sourceLimit: 3,
 			perRealmLimit: 4,
 		},
@@ -36,6 +38,29 @@ export function UnitTagSummary({
 	return (
 		<Card>
 			<CardContent className="grid gap-5 p-5 sm:p-6">
+				{query.data.structures.length ? (
+					<div className="grid gap-3">
+						<h3 className="font-semibold">{t.tags.structures.title}</h3>
+						{query.data.structures.map((structure) => (
+							<div
+								className="grid gap-2 rounded-xl border border-border-weak p-3"
+								key={structure.structureId}
+							>
+								<TagStructurePath
+									ariaLabel={t.tags.structures.pathLabel}
+									fallback={t.tags.structures.memberFallback}
+									members={structure.members}
+								/>
+								<Link
+									className="w-fit text-xs text-link hover:text-link-hover hover:underline"
+									href={tagStructureHref(structure.structureId)}
+								>
+									{t.tags.page.viewAll}
+								</Link>
+							</div>
+						))}
+					</div>
+				) : null}
 				<div className="grid gap-2">
 					<h3 className="font-semibold">{t.tags.global.title}</h3>
 					{query.data.global.length ? (

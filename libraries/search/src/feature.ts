@@ -4,6 +4,7 @@ import { Check } from "@sinclair/typebox/value";
 import type { SearchFilter as SearchFilterValue } from "./primitives";
 import {
 	SearchCategory,
+	SearchCategoryValues,
 	SearchControl,
 	SearchField,
 	SearchFilter,
@@ -116,7 +117,10 @@ export const SearchDocument = Type.Object(
 			{ id: SearchTemplateId, version: Type.Literal(1) },
 			{ additionalProperties: false },
 		),
-		categories: Type.Array(SearchCategory, { minItems: 1, maxItems: 9 }),
+		categories: Type.Array(SearchCategory, {
+			minItems: 1,
+			maxItems: SearchCategoryValues.length,
+		}),
 		modes: Type.Object(
 			{
 				available: Type.Array(SearchMode, { minItems: 1, maxItems: 2 }),

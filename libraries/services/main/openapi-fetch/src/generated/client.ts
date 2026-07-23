@@ -243,8 +243,28 @@ import type {
 	PutApiStaffMembersByProfileIdResponses,
 	GetApiStaffAuditOptions,
 	GetApiStaffAuditResponses,
+	GetApiTagsByTagIdOptions,
+	GetApiTagsByTagIdResponses,
+	PostApiTagStructuresOptions,
+	PostApiTagStructuresResponses,
+	GetApiTagStructuresByStructureIdOptions,
+	GetApiTagStructuresByStructureIdResponses,
+	PutApiTagStructuresByStructureIdOptions,
+	PutApiTagStructuresByStructureIdResponses,
+	PutApiTagStructuresByStructureIdVoteOptions,
+	PutApiTagStructuresByStructureIdVoteResponses,
+	DeleteApiTagStructuresByStructureIdVoteOptions,
+	DeleteApiTagStructuresByStructureIdVoteResponses,
 	GetApiUnitsByTypeByUnitIdTagsOptions,
 	GetApiUnitsByTypeByUnitIdTagsResponses,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses,
+	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
+	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
+	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
 	GetApiUsersMeTagRealmSubscriptionsOptions,
 	GetApiUsersMeTagRealmSubscriptionsResponses,
 	PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
@@ -2905,6 +2925,116 @@ export function getApiStaffAudit<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Get a Tag with direct children and grandchildren
+ * {@link /api/tags/:tagId}
+ */
+export function getApiTagsByTagId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagsByTagIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/tags/{tagId}", ...config }) as Promise<
+		RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create or find and upvote a community-immutable Tag structure
+ * {@link /api/tag-structures}
+ */
+export function postApiTagStructures<ThrowOnError extends boolean = true>(
+	options: Options<PostApiTagStructuresOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiTagStructuresResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/tag-structures",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiTagStructuresResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get a Tag structure
+ * {@link /api/tag-structures/:structureId}
+ */
+export function getApiTagStructuresByStructureId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagStructuresByStructureIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagStructuresByStructureIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/tag-structures/{structureId}",
+		...config,
+	}) as Promise<RequestResult<GetApiTagStructuresByStructureIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Administratively correct a Tag structure definition
+ * {@link /api/tag-structures/:structureId}
+ */
+export function putApiTagStructuresByStructureId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiTagStructuresByStructureIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiTagStructuresByStructureIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/tag-structures/{structureId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiTagStructuresByStructureIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Vote on a Tag structure
+ * {@link /api/tag-structures/:structureId/vote}
+ */
+export function putApiTagStructuresByStructureIdVote<ThrowOnError extends boolean = true>(
+	options: Options<PutApiTagStructuresByStructureIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiTagStructuresByStructureIdVoteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/tag-structures/{structureId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiTagStructuresByStructureIdVoteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove a Tag structure vote
+ * {@link /api/tag-structures/:structureId/vote}
+ */
+export function deleteApiTagStructuresByStructureIdVote<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiTagStructuresByStructureIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiTagStructuresByStructureIdVoteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/tag-structures/{structureId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiTagStructuresByStructureIdVoteResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Get global and subscribed Realm Tag assertions for a Unit
  * {@link /api/units/:type/:unitId/tags}
  */
@@ -2915,6 +3045,119 @@ export function getApiUnitsByTypeByUnitIdTags<ThrowOnError extends boolean = tru
 
 	return request({ method: "GET", url: "/api/units/{type}/{unitId}/tags", ...config }) as Promise<
 		RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Apply a Tag structure to a Unit
+ * {@link /api/units/:type/:unitId/tag-structures/:structureId}
+ */
+export function putApiUnitsByTypeByUnitIdTagStructuresByStructureId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Remove a Tag structure from a Unit
+ * {@link /api/units/:type/:unitId/tag-structures/:structureId}
+ */
+export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Vote on a Unit Tag structure
+ * {@link /api/units/:type/:unitId/tag-structures/:structureId/vote}
+ */
+export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Remove a Unit Tag structure vote
+ * {@link /api/units/:type/:unitId/tag-structures/:structureId/vote}
+ */
+export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
+			ThrowOnError
+		>
 	>;
 }
 

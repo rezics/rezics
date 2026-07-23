@@ -5,6 +5,7 @@ const { forms: dockTerms } = zhHantTerminology.dock;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
@@ -186,4 +187,9 @@ export default {
 	SearchDocumentRevisionConflict: "搜尋設定已變更，請重新載入後再儲存。",
 	ZoneSearchFeatureNotFound: `此${zoneTerms.inline}尚未啟用搜尋功能。`,
 	SharedSearchQueryNotFound: "找不到這個分享搜尋查詢。",
+	InvalidTagStructure: `這個${tagStructureTerms.inline}無效。`,
+	TagStructureNotFound: `找不到這個${tagStructureTerms.inline}。`,
+	TagStructureApplicationNotFound: `這個內容沒有套用該${tagStructureTerms.inline}。`,
+	TagStructureChanged: `這個${tagStructureTerms.inline}已在其他地方變更，請重新整理後再試一次。`,
+	TagStructureDefinitionConflict: `已有內容完全相同的${tagStructureTerms.inline}。`,
 };

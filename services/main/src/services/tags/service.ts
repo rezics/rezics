@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, notInArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
 
@@ -15,10 +15,12 @@ import {
 	realmUnitTag,
 	tag,
 	unit,
+	unitEffectiveTag,
+	unitEffectiveTagVote,
 	unitTag,
-	unitTagVote,
 	unitTagVoteStat,
 } from "../database/schema";
+import { listVisibleUnitTagStructures } from "../tag-structures/service";
 import {
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
@@ -32,7 +34,7 @@ function presentTagVote(value: number | null): TagVoteValue {
 	throw new Error("Stored Tag vote has an invalid value");
 }
 
-const viewerUnitTagVote = alias(unitTagVote, "viewer_unit_tag_vote");
+const viewerUnitTagVote = alias(unitEffectiveTagVote, "viewer_unit_tag_vote");
 const viewerRealmTagVote = alias(realmTagVote, "viewer_realm_tag_vote");
 const globalTagUnit = alias(unit, "global_tag_unit");
 const realmSourceUnit = alias(unit, "realm_tag_source_unit");
@@ -82,35 +84,43 @@ export async function listGlobalUnitTags(input: {
 	readonly viewerProfileId?: string;
 	readonly language?: ContentLanguage;
 	readonly limit: number;
+	readonly excludedTagIds?: readonly string[];
 }) {
 	const rows = await database
 		.select({
-			tagId: unitTag.tagId,
-			title: resolvedUnitLocalizationTitle(unitTag.tagId, input.language),
-			summary: resolvedUnitLocalizationSummary(unitTag.tagId, input.language),
-			pinned: unitTag.pinned,
+			tagId: unitEffectiveTag.tagId,
+			title: resolvedUnitLocalizationTitle(unitEffectiveTag.tagId, input.language),
+			summary: resolvedUnitLocalizationSummary(unitEffectiveTag.tagId, input.language),
+			pinned: sql<boolean>`coalesce(${unitTag.pinned}, false)`,
 			position: unitTag.position,
 			score: unitTagVoteStat.score,
 			voteCount: unitTagVoteStat.voteCount,
 			viewerVote: viewerUnitTagVote.value,
-			createdAt: unitTag.createdAt,
-			updatedAt: unitTag.updatedAt,
+			createdAt: unitEffectiveTag.createdAt,
+			updatedAt: unitEffectiveTag.updatedAt,
 		})
-		.from(unitTag)
-		.innerJoin(tag, eq(tag.id, unitTag.tagId))
-		.innerJoin(globalTagUnit, eq(globalTagUnit.id, unitTag.tagId))
+		.from(unitEffectiveTag)
+		.innerJoin(tag, eq(tag.id, unitEffectiveTag.tagId))
+		.innerJoin(globalTagUnit, eq(globalTagUnit.id, unitEffectiveTag.tagId))
+		.leftJoin(
+			unitTag,
+			and(
+				eq(unitTag.unitId, unitEffectiveTag.unitId),
+				eq(unitTag.tagId, unitEffectiveTag.tagId),
+			),
+		)
 		.leftJoin(
 			unitTagVoteStat,
 			and(
-				eq(unitTagVoteStat.unitId, unitTag.unitId),
-				eq(unitTagVoteStat.tagId, unitTag.tagId),
+				eq(unitTagVoteStat.unitId, unitEffectiveTag.unitId),
+				eq(unitTagVoteStat.tagId, unitEffectiveTag.tagId),
 			),
 		)
 		.leftJoin(
 			viewerUnitTagVote,
 			and(
-				eq(viewerUnitTagVote.unitId, unitTag.unitId),
-				eq(viewerUnitTagVote.tagId, unitTag.tagId),
+				eq(viewerUnitTagVote.unitId, unitEffectiveTag.unitId),
+				eq(viewerUnitTagVote.tagId, unitEffectiveTag.tagId),
 				input.viewerProfileId
 					? eq(viewerUnitTagVote.profileId, input.viewerProfileId)
 					: sql`false`,
@@ -118,17 +128,20 @@ export async function listGlobalUnitTags(input: {
 		)
 		.where(
 			and(
-				eq(unitTag.unitId, input.unitId),
+				eq(unitEffectiveTag.unitId, input.unitId),
+				input.excludedTagIds?.length
+					? notInArray(unitEffectiveTag.tagId, [...input.excludedTagIds])
+					: undefined,
 				getUnitReadCondition(input.viewerProfileId, {}, globalTagUnit),
 			),
 		)
 		.orderBy(
-			desc(unitTag.pinned),
+			desc(sql`coalesce(${unitTag.pinned}, false)`),
 			sql`case when ${unitTag.pinned} then ${unitTag.position} end asc nulls last`,
 			desc(unitTagWilsonConfidence),
 			desc(unitTagVoteStat.score),
 			desc(unitTagVoteStat.voteCount),
-			unitTag.tagId,
+			unitEffectiveTag.tagId,
 		)
 		.limit(input.limit);
 
@@ -366,30 +379,48 @@ export async function getUnitTagLandscape(input: {
 	readonly viewerProfileId?: string;
 	readonly language?: ContentLanguage;
 	readonly globalLimit: number;
+	readonly structureLimit: number;
 	readonly sourceLimit: number;
 	readonly perRealmLimit: number;
 }) {
-	if (!input.viewerProfileId)
+	if (!input.viewerProfileId) {
+		const structures = await listVisibleUnitTagStructures({
+			unitId: input.unitId,
+			language: input.language,
+			limit: input.structureLimit,
+		});
 		return {
+			structures,
 			global: await listGlobalUnitTags({
 				unitId: input.unitId,
 				language: input.language,
 				limit: input.globalLimit,
+				excludedTagIds: structures.flatMap(({ members }) =>
+					members.map(({ tagId }) => tagId),
+				),
 			}),
 			realms: [],
 		};
-	const [global, allSubscriptions] = await Promise.all([
-		listGlobalUnitTags({
+	}
+	const [structures, allSubscriptions] = await Promise.all([
+		listVisibleUnitTagStructures({
 			unitId: input.unitId,
 			viewerProfileId: input.viewerProfileId,
 			language: input.language,
-			limit: input.globalLimit,
+			limit: input.structureLimit,
 		}),
 		listRealmTagSubscriptions({
 			profileId: input.viewerProfileId,
 			language: input.language,
 		}),
 	]);
+	const global = await listGlobalUnitTags({
+		unitId: input.unitId,
+		viewerProfileId: input.viewerProfileId,
+		language: input.language,
+		limit: input.globalLimit,
+		excludedTagIds: structures.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
+	});
 	const subscriptions = allSubscriptions.slice(0, input.sourceLimit);
 	const realmIds = subscriptions.map(({ realmId }) => realmId);
 	const [votedTags, policyTags] = await Promise.all([
@@ -409,6 +440,7 @@ export async function getUnitTagLandscape(input: {
 		}),
 	]);
 	return {
+		structures,
 		global,
 		realms: subscriptions.map((subscription) => ({
 			...subscription,

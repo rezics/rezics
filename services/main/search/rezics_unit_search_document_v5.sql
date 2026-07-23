@@ -1,10 +1,19 @@
 SELECT
 	source.unit_id,
 	source.revision,
-	(unit_row.id IS NOT NULL AND category.value IS NOT NULL) AS indexable,
-	CASE WHEN unit_row.id IS NULL OR category.value IS NULL THEN NULL ELSE jsonb_build_object(
+	(
+		unit_row.id IS NOT NULL
+		AND category.value IS NOT NULL
+		AND (unit_row.kind <> 'structure' OR structure_path.indexable)
+	) AS indexable,
+	CASE
+		WHEN unit_row.id IS NULL
+			OR category.value IS NULL
+			OR (unit_row.kind = 'structure' AND NOT structure_path.indexable)
+		THEN NULL
+	ELSE jsonb_build_object(
 		'id', source.unit_id,
-		'projectionVersion', 4,
+		'projectionVersion', 5,
 		'revision', source.revision,
 		'category', category.value,
 		'unitType', unit_row.kind,
@@ -13,17 +22,32 @@ SELECT
 			WHEN 'entity' THEN entity_row.kind
 			WHEN 'posts' THEN post_row.kind::text
 			WHEN 'reviews' THEN subject_unit_row.kind
+			WHEN 'tag-structures' THEN structure_row.kind
 			ELSE NULL
 		END,
 		'search', jsonb_build_object(
-			'primaryTitles', coalesce(localization.primary_titles, '[]'::jsonb),
-			'titles', coalesce(localization.titles, '[]'::jsonb),
-			'aliases', coalesce(alias_data.aliases, '[]'::jsonb),
-			'summaries', coalesce(localization.summaries, '[]'::jsonb),
-			'descriptions', coalesce(localization.descriptions, '[]'::jsonb),
-			'publishedContent', coalesce(localization.published_content, '[]'::jsonb)
+			'primaryTitles', CASE WHEN unit_row.kind = 'structure'
+				THEN coalesce(structure_path.primary_titles, '[]'::jsonb)
+				ELSE coalesce(localization.primary_titles, '[]'::jsonb) END,
+			'titles', CASE WHEN unit_row.kind = 'structure'
+				THEN coalesce(structure_path.titles, '[]'::jsonb)
+				ELSE coalesce(localization.titles, '[]'::jsonb) END,
+			'aliases', CASE WHEN unit_row.kind = 'structure'
+				THEN coalesce(structure_path.aliases, '[]'::jsonb)
+				ELSE coalesce(alias_data.aliases, '[]'::jsonb) END,
+			'summaries', CASE WHEN unit_row.kind = 'structure'
+				THEN coalesce(structure_path.summaries, '[]'::jsonb)
+				ELSE coalesce(localization.summaries, '[]'::jsonb) END,
+			'descriptions', CASE WHEN unit_row.kind = 'structure'
+				THEN '[]'::jsonb
+				ELSE coalesce(localization.descriptions, '[]'::jsonb) END,
+			'publishedContent', CASE WHEN unit_row.kind = 'structure'
+				THEN '[]'::jsonb
+				ELSE coalesce(localization.published_content, '[]'::jsonb) END
 		),
-		'languages', coalesce(localization.languages, '[]'::jsonb),
+		'languages', CASE WHEN unit_row.kind = 'structure'
+			THEN coalesce(structure_path.languages, '[]'::jsonb)
+			ELSE coalesce(localization.languages, '[]'::jsonb) END,
 		'filters', jsonb_build_object(
 			'contentRating', unit_row.content_rating,
 			'aiDisclosure', unit_row.ai_disclosure,
@@ -99,6 +123,7 @@ LEFT JOIN public.book AS book_row ON book_row.id = source.unit_id
 LEFT JOIN public.catalog_unit_content_license AS catalog_license_row ON catalog_license_row.unit_id = source.unit_id
 LEFT JOIN public.media AS media_row ON media_row.id = source.unit_id
 LEFT JOIN public.software AS software_row ON software_row.id = source.unit_id
+LEFT JOIN public.unit_structure AS structure_row ON structure_row.id = source.unit_id
 LEFT JOIN public.unit_variant AS variant_row ON variant_row.variant_unit_id = source.unit_id
 LEFT JOIN public.unit_follow_stat AS follow_stat ON follow_stat.unit_id = source.unit_id
 LEFT JOIN LATERAL (
@@ -107,6 +132,7 @@ LEFT JOIN LATERAL (
 		WHEN unit_row.kind = 'profile' THEN 'users'
 		WHEN unit_row.kind = 'entity' THEN 'entity'
 		WHEN unit_row.kind = 'tag' THEN 'tags'
+		WHEN unit_row.kind = 'structure' THEN 'tag-structures'
 		WHEN unit_row.kind = 'post' AND post_row.kind = 'review' THEN 'reviews'
 		WHEN unit_row.kind = 'post' THEN 'posts'
 		WHEN unit_row.kind = 'realm' THEN 'realms'
@@ -114,6 +140,79 @@ LEFT JOIN LATERAL (
 		WHEN unit_row.kind = 'poll' THEN 'polls'
 	END AS value
 ) AS category ON true
+LEFT JOIN LATERAL (
+	SELECT
+		EXISTS (
+			SELECT 1
+			FROM public.unit_structure_vote_stat AS definition_stat
+			WHERE definition_stat.structure_id = source.unit_id
+				AND definition_stat.score > 0
+		)
+		AND NOT EXISTS (
+			SELECT 1
+			FROM public.unit_structure_member AS member
+			JOIN public.unit AS member_unit ON member_unit.id = member.member_unit_id
+			WHERE member.structure_id = source.unit_id
+				AND (
+					member_unit.kind <> 'tag'
+					OR member_unit.status <> 'published'
+					OR member_unit.visibility <> 'public'
+					OR member_unit.moderation_status <> 'approved'
+					OR member_unit.deleted_at IS NOT NULL
+				)
+		) AS indexable,
+		(
+			SELECT jsonb_build_array(string_agg(
+				coalesce(primary_localization.title, member.member_unit_id::text),
+				' › ' ORDER BY member.ordinal
+			))
+			FROM public.unit_structure_member AS member
+			LEFT JOIN LATERAL (
+				SELECT title
+				FROM public.unit_localization
+				WHERE unit_id = member.member_unit_id
+				ORDER BY position, language
+				LIMIT 1
+			) AS primary_localization ON true
+			WHERE member.structure_id = source.unit_id
+		) AS primary_titles,
+		(
+			SELECT jsonb_agg(localization.title ORDER BY member.ordinal,
+				localization.position, localization.language)
+				FILTER (WHERE localization.title IS NOT NULL)
+			FROM public.unit_structure_member AS member
+			JOIN public.unit_localization AS localization
+				ON localization.unit_id = member.member_unit_id
+			WHERE member.structure_id = source.unit_id
+		) AS titles,
+		(
+			SELECT jsonb_agg(DISTINCT localization.language ORDER BY localization.language)
+			FROM public.unit_structure_member AS member
+			JOIN public.unit_localization AS localization
+				ON localization.unit_id = member.member_unit_id
+			WHERE member.structure_id = source.unit_id
+		) AS languages,
+		(
+			SELECT jsonb_agg(localization.summary ORDER BY member.ordinal,
+				localization.position, localization.language)
+				FILTER (WHERE localization.summary IS NOT NULL)
+			FROM public.unit_structure_member AS member
+			JOIN public.unit_localization AS localization
+				ON localization.unit_id = member.member_unit_id
+			WHERE member.structure_id = source.unit_id
+		) AS summaries,
+		(
+			SELECT jsonb_agg(DISTINCT alias_row.term ORDER BY alias_row.term)
+			FROM public.unit_structure_member AS member
+			JOIN public.unit_alias AS alias_row
+				ON alias_row.unit_id = member.member_unit_id
+			LEFT JOIN public.unit_alias_vote_stat AS alias_stat
+				ON alias_stat.alias_id = alias_row.id
+			WHERE member.structure_id = source.unit_id
+				AND alias_row.deleted_at IS NULL
+				AND coalesce(alias_stat.score, 0) >= 3
+		) AS aliases
+) AS structure_path ON true
 LEFT JOIN LATERAL (
 	SELECT
 		jsonb_agg(language ORDER BY position, language) AS languages,
@@ -134,7 +233,7 @@ LEFT JOIN LATERAL (
 	LEFT JOIN public.unit_alias_vote_stat AS alias_stat ON alias_stat.alias_id = alias_row.id
 	WHERE alias_row.unit_id = source.unit_id AND alias_row.deleted_at IS NULL AND coalesce(alias_stat.score, 0) >= 3
 ) AS alias_data ON true
-LEFT JOIN LATERAL (SELECT jsonb_agg(tag_id ORDER BY tag_id) AS tag_ids FROM public.unit_tag WHERE unit_id = source.unit_id) AS tag_data ON true
+LEFT JOIN LATERAL (SELECT jsonb_agg(tag_id ORDER BY tag_id) AS tag_ids FROM public.unit_effective_tag WHERE unit_id = source.unit_id) AS tag_data ON true
 LEFT JOIN LATERAL (SELECT jsonb_agg(realm_id ORDER BY realm_id) AS realm_ids FROM public.realm_unit WHERE unit_id = source.unit_id AND status = 'visible') AS realm_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(

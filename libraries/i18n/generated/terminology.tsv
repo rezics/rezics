@@ -113,6 +113,14 @@ label	A lightweight localized-title Unit used as a structural heading or taxonom
 label	A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.	zh-Hant	approved	pluralLabel	分類標目	-
 label	A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.	zh-Hant	approved	inline	分類標目	-
 label	A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.	zh-Hant	approved	plural	分類標目	-
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	label	Tag path	Tag structure | Structure tag
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	pluralLabel	Tag paths	Tag structure | Structure tag
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	inline	tag path	Tag structure | Structure tag
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	plural	tag paths	Tag structure | Structure tag
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	label	標籤路徑	Tag structure | Structure tag | 結構標籤
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	pluralLabel	標籤路徑	Tag structure | Structure tag | 結構標籤
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	inline	標籤路徑	Tag structure | Structure tag | 結構標籤
+tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	plural	標籤路徑	Tag structure | Structure tag | 結構標籤
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	en	approved	label	Publication license	-
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	en	approved	inline	publication license	-
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	label	作品授權條款	License | 作品 License | 授權 REZICS

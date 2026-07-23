@@ -8,3 +8,11 @@ export function tagSearchHref(type: CatalogDetailUnitType, tagId: string, label:
 	const query = new URLSearchParams({ template: type, tag: tagId, tagLabel: label });
 	return `/search?${query.toString()}`;
 }
+
+export function tagDetailHref(tagId: string): string {
+	return `/tags/${tagId}`;
+}
+
+export function tagStructureHref(structureId: string): string {
+	return `/tag-structures/${structureId}`;
+}

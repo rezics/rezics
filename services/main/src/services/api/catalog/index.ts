@@ -1188,6 +1188,9 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"InvalidTagStructure",
+						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagApplicationNotFound",

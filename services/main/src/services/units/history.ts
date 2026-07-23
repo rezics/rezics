@@ -57,6 +57,8 @@ import {
 	CreditAttributionRoleValues,
 	SubjectAssociationRoleValues,
 	unitRevisionTag,
+	unitStructure,
+	unitStructureApplication,
 	unitTag,
 	unitVariant,
 	zone,
@@ -79,6 +81,10 @@ import { finalizeInitialUnitStatusRevision } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import { ensureDirectCreditAttributionAllowed } from "./attribution-authorization";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
+import {
+	nextUnitStructureDefinitionUpdatedAt,
+	replaceUnitStructureDefinition,
+} from "../tag-structures/definition";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -118,7 +124,7 @@ const RuleSnapshotSchema = z.object({
 	),
 });
 const UnitSnapshotSchema = z.object({
-	version: z.literal(5),
+	version: z.literal(6),
 	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
@@ -130,6 +136,7 @@ const UnitSnapshotSchema = z.object({
 		subjectAssociations: z.array(SnapshotRowSchema),
 		links: z.array(SnapshotRowSchema),
 		tags: z.array(SnapshotRowSchema),
+		structureApplications: z.array(SnapshotRowSchema),
 		variants: z.array(SnapshotRowSchema),
 		seriesReleases: z.array(SnapshotRowSchema),
 		softwareRequirements: z.array(SnapshotRowSchema),
@@ -214,6 +221,9 @@ const collectionStateSchema = schemaFactory
 const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
+const unitStructureStateSchema = schemaFactory
+	.createSelectSchema(unitStructure)
+	.omit({ id: true, unitKind: true, createdAt: true, updatedAt: true });
 const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias, {
 	language: z.enum(ContentLanguageValues).nullable(),
 });
@@ -231,6 +241,10 @@ const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink, {
 const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag, {
 	position: FractionalPositionSchema.nullable(),
 });
+const unitStructureApplicationRowSchema = schemaFactory.createSelectSchema(
+	unitStructureApplication,
+	{ position: FractionalPositionSchema.nullable() },
+);
 const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant, {
 	unitKind: z.enum(VariantCapableUnitKindValues),
 });
@@ -264,7 +278,7 @@ function parseSnapshotState(
 	return row ? schema.parse(row) : null;
 }
 
-async function lockUnitHistory(tx: DatabaseTransaction, unitId: string) {
+export async function lockUnitHistory(tx: DatabaseTransaction, unitId: string) {
 	await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${unitId}::text, 0))`);
 }
 
@@ -333,6 +347,17 @@ async function snapshotExtension(
 			return parseSnapshotState(
 				pollStateSchema,
 				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
+			);
+		case "structure":
+			return parseSnapshotState(
+				unitStructureStateSchema,
+				(
+					await tx
+						.select()
+						.from(unitStructure)
+						.where(eq(unitStructure.id, unitId))
+						.limit(1)
+				)[0],
 			);
 		case "tag":
 		case "label":
@@ -409,6 +434,11 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(unitTag)
 		.where(eq(unitTag.unitId, unitId))
 		.orderBy(unitTag.tagId);
+	const structureApplications = await tx
+		.select()
+		.from(unitStructureApplication)
+		.where(eq(unitStructureApplication.unitId, unitId))
+		.orderBy(unitStructureApplication.structureId);
 	const variants = await tx
 		.select()
 		.from(unitVariant)
@@ -422,6 +452,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		subjectAssociations,
 		links,
 		tags,
+		structureApplications,
 		variants,
 		seriesReleases:
 			record.kind === "series"
@@ -467,7 +498,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
-		version: 5,
+		version: 6,
 		kind: record.kind,
 		unit: unitStateSchema.parse(record),
 		localizations: localizations.map((localization) =>
@@ -549,6 +580,28 @@ async function restoreExtension(
 		case "poll":
 			await tx.update(poll).set(pollStateSchema.parse(value)).where(eq(poll.id, unitId));
 			break;
+		case "structure": {
+			const expected = unitStructureStateSchema.parse(value);
+			const [current] = await tx
+				.select()
+				.from(unitStructure)
+				.where(eq(unitStructure.id, unitId))
+				.limit(1);
+			if (!current) throw new Error("Unit Structure definition is missing");
+			if (
+				current.kind !== expected.kind ||
+				current.definitionVersion !== expected.definitionVersion ||
+				current.createdByProfileId !== expected.createdByProfileId
+			)
+				throw new Error("Unit Structure identity does not match its snapshot");
+			if (canonicalJson(current.memberUnitIds) !== canonicalJson(expected.memberUnitIds))
+				await replaceUnitStructureDefinition(tx, {
+					structureId: unitId,
+					memberUnitIds: expected.memberUnitIds,
+					updatedAt: nextUnitStructureDefinitionUpdatedAt(current.updatedAt),
+				});
+			break;
+		}
 	}
 }
 
@@ -657,6 +710,8 @@ export async function restoreUnitSnapshot(
 		.where(eq(unit.id, unitId))
 		.limit(1);
 	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
+	if (snapshot.kind === "structure")
+		await authorization.platform.ensureCapability("unit.edit", tx);
 	if (snapshot.kind === "post" && snapshot.extension) {
 		const postState = postStateSchema.parse(snapshot.extension);
 		if (postState.subjectUnitId !== current.subjectUnitId)
@@ -682,6 +737,7 @@ export async function restoreUnitSnapshot(
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
 	await tx.delete(unitLink).where(eq(unitLink.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
+	await tx.delete(unitStructureApplication).where(eq(unitStructureApplication.unitId, unitId));
 	await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, unitId));
 	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
@@ -693,6 +749,14 @@ export async function restoreUnitSnapshot(
 		await tx
 			.insert(unitTag)
 			.values(snapshot.owned.tags.map((row) => unitTagRowSchema.parse(row)));
+	if (snapshot.owned.structureApplications.length)
+		await tx
+			.insert(unitStructureApplication)
+			.values(
+				snapshot.owned.structureApplications.map((row) =>
+					unitStructureApplicationRowSchema.parse(row),
+				),
+			);
 	if (snapshot.owned.variants.length)
 		await tx
 			.insert(unitVariant)
@@ -769,7 +833,7 @@ export type UnitRevisionCommitResult = {
 const SlotModels = {
 	main: "rezics.unit.main.v1",
 	localization: "rezics.unit.localization.v1",
-	relations: "rezics.unit.relations.v2",
+	relations: "rezics.unit.relations.v3",
 	structure: "rezics.unit.structure.v5",
 	rules: "rezics.unit.rules.v1",
 } as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], string>;
@@ -789,12 +853,13 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		relations: {
 			model: SlotModels.relations,
 			payload: {
-				version: 2,
+				version: 3,
 				aliases: snapshot.owned.aliases,
 				credits: snapshot.owned.credits,
 				subjectAssociations: snapshot.owned.subjectAssociations,
 				links: snapshot.owned.links,
 				tags: snapshot.owned.tags,
+				structureApplications: snapshot.owned.structureApplications,
 				variants: snapshot.owned.variants,
 			},
 		},
@@ -882,7 +947,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	const structure = fixedSlotPayload(documents, "structure");
 	const rules = documents.rules ? fixedSlotPayload(documents, "rules") : null;
 	return UnitSnapshotSchema.parse({
-		version: 5,
+		version: 6,
 		kind: main.kind,
 		unit: main.unit,
 		localizations: orderedLocalizationStates(documents),
@@ -894,6 +959,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			subjectAssociations: relations.subjectAssociations,
 			links: relations.links,
 			tags: relations.tags,
+			structureApplications: relations.structureApplications,
 			variants: relations.variants,
 			seriesReleases: structure.seriesReleases,
 			softwareRequirements: structure.softwareRequirements,

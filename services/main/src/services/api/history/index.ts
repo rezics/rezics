@@ -210,10 +210,19 @@ export default new Elysia({ prefix: "/history" })
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request.headers, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
-			const [access, restoreDecision] = await Promise.all([
+			const [access, restoreDecision, [targetUnit]] = await Promise.all([
 				getVisibilityAccess(authorization),
 				authorization.unit.decide(params.unitId, "unit.history.restore"),
+				database
+					.select({ kind: unit.kind })
+					.from(unit)
+					.where(eq(unit.id, params.unitId))
+					.limit(1),
 			]);
+			const canRestore =
+				restoreDecision.allowed &&
+				(targetUnit?.kind !== "structure" ||
+					(await authorization.platform.hasCapability("unit.edit")));
 			const scope = `unit:${params.unitId}`;
 			const cursor = decodeCursor(query.cursor, scope);
 			const limit = query.limit ?? 30;
@@ -225,7 +234,7 @@ export default new Elysia({ prefix: "/history" })
 			const last = items.at(-1);
 			return {
 				items: items.map((row) => presentSummary(row, access)),
-				capabilities: { canRestore: restoreDecision.allowed },
+				capabilities: { canRestore },
 				nextCursor:
 					rows.length > limit && last
 						? encodeCursor(scope, last.createdAt, last.id)
@@ -375,12 +384,14 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
 					"EntityAssociationRestricted",
+					"PlatformCapabilityRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"UnitRevisionNotFound",
 					"EntityEntryNotFound",
 				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
 			},
 			detail: { summary: "Restore Unit revision", tags: ["History"] },
 		},
@@ -422,12 +433,14 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
 					"EntityAssociationRestricted",
+					"PlatformCapabilityRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"UnitRevisionNotFound",
 					"EntityEntryNotFound",
 				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
 			},
 			detail: { summary: "Undo Unit revision", tags: ["History"] },
 		},

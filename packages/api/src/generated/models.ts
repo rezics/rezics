@@ -949,6 +949,7 @@ export const ZoneBoundaryDocumentCategoriesEnum = {
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -1445,6 +1446,11 @@ export const ApiErrorCode = {
 	ApiTokenPolicyRevisionConflict: "ApiTokenPolicyRevisionConflict",
 	ApiTokenPolicyNotFound: "ApiTokenPolicyNotFound",
 	TagNotFound: "TagNotFound",
+	TagStructureNotFound: "TagStructureNotFound",
+	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
+	InvalidTagStructure: "InvalidTagStructure",
+	TagStructureChanged: "TagStructureChanged",
+	TagStructureDefinitionConflict: "TagStructureDefinitionConflict",
 	InvalidSearch: "InvalidSearch",
 	SearchUnavailable: "SearchUnavailable",
 	SearchDocumentRevisionConflict: "SearchDocumentRevisionConflict",
@@ -5300,6 +5306,7 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCredite
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -5402,6 +5409,7 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttribu
 		entity: "entity",
 		label: "label",
 		tag: "tag",
+		structure: "structure",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -10200,6 +10208,7 @@ export const GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -10318,6 +10327,7 @@ export const GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnu
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -30845,6 +30855,7 @@ export const GetApiUsersMeFollowingKind = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -30899,6 +30910,7 @@ export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -33149,6 +33161,992 @@ export type GetApiStaffAuditResponse =
 /**
  * @type object
  */
+export type GetApiTagsByTagIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+export const GetApiTagsByTagIdLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiTagsByTagIdLanguage =
+	(typeof GetApiTagsByTagIdLanguage)[keyof typeof GetApiTagsByTagIdLanguage];
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiTagsByTagIdLanguage;
+	/**
+	 * @default 30
+	 */
+	childLimit?: string | number;
+	/**
+	 * @default 12
+	 */
+	grandchildLimit?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+	title: (string | null) | null;
+	summary: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	children: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type array
+		 */
+		children: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			score: string | number;
+			voteCount: string | number;
+		}[];
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagNotFound'
+		 * @type string
+		 */
+		code: "TagNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdOptions = {
+	body?: never;
+	path: GetApiTagsByTagIdPath;
+	query?: GetApiTagsByTagIdQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdResponses = {
+	"200": GetApiTagsByTagIdStatus200;
+	"404": GetApiTagsByTagIdStatus404;
+	"422": GetApiTagsByTagIdStatus422;
+	"500": GetApiTagsByTagIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagsByTagIdResponse =
+	| GetApiTagsByTagIdStatus200
+	| GetApiTagsByTagIdStatus404
+	| GetApiTagsByTagIdStatus422
+	| GetApiTagsByTagIdStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+	/**
+	 * @type boolean
+	 */
+	created: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagNotFound'
+		 * @type string
+		 */
+		code: "TagNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiTagStructuresStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagStructure'
+				 * @type string
+				 */
+				code: "InvalidTagStructure";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresBody = {
+	/**
+	 * @type array
+	 */
+	memberTagIds: string[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresOptions = {
+	body: PostApiTagStructuresBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresResponses = {
+	"200": PostApiTagStructuresStatus200;
+	"404": PostApiTagStructuresStatus404;
+	"422": PostApiTagStructuresStatus422;
+	"429": PostApiTagStructuresStatus429;
+	"500": PostApiTagStructuresStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiTagStructuresResponse =
+	| PostApiTagStructuresStatus200
+	| PostApiTagStructuresStatus404
+	| PostApiTagStructuresStatus422
+	| PostApiTagStructuresStatus429
+	| PostApiTagStructuresStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+export const GetApiTagStructuresByStructureIdLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiTagStructuresByStructureIdLanguage =
+	(typeof GetApiTagStructuresByStructureIdLanguage)[keyof typeof GetApiTagStructuresByStructureIdLanguage];
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiTagStructuresByStructureIdLanguage;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	kind: "tag.hierarchy_path";
+	/**
+	 * @type number
+	 */
+	definitionVersion: 1;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	/**
+	 * @type array
+	 */
+	members: {
+		ordinal: string | number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+	}[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagStructureNotFound'
+		 * @type string
+		 */
+		code: "TagStructureNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdOptions = {
+	body?: never;
+	path: GetApiTagStructuresByStructureIdPath;
+	query?: GetApiTagStructuresByStructureIdQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagStructuresByStructureIdResponses = {
+	"200": GetApiTagStructuresByStructureIdStatus200;
+	"404": GetApiTagStructuresByStructureIdStatus404;
+	"422": GetApiTagStructuresByStructureIdStatus422;
+	"500": GetApiTagStructuresByStructureIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagStructuresByStructureIdResponse =
+	| GetApiTagStructuresByStructureIdStatus200
+	| GetApiTagStructuresByStructureIdStatus404
+	| GetApiTagStructuresByStructureIdStatus422
+	| GetApiTagStructuresByStructureIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+export const PutApiTagStructuresByStructureIdLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiTagStructuresByStructureIdLanguage =
+	(typeof PutApiTagStructuresByStructureIdLanguage)[keyof typeof PutApiTagStructuresByStructureIdLanguage];
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	language?: PutApiTagStructuresByStructureIdLanguage;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	kind: "tag.hierarchy_path";
+	/**
+	 * @type number
+	 */
+	definitionVersion: 1;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+	/**
+	 * @type array
+	 */
+	members: {
+		ordinal: string | number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+	}[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum = {
+	TagNotFound: "TagNotFound",
+	TagStructureNotFound: "TagStructureNotFound",
+} as const;
+
+export type PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum =
+	(typeof PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagNotFound'
+		 * @type string
+		 */
+		code: PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum = {
+	TagStructureChanged: "TagStructureChanged",
+	TagStructureDefinitionConflict: "TagStructureDefinitionConflict",
+} as const;
+
+export type PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum =
+	(typeof PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagStructureChanged'
+		 * @type string
+		 */
+		code: PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiTagStructuresByStructureIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagStructure'
+				 * @type string
+				 */
+				code: "InvalidTagStructure";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdBody = {
+	/**
+	 * @type array
+	 */
+	memberTagIds: string[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string
+	 */
+	reason: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdOptions = {
+	body: PutApiTagStructuresByStructureIdBody;
+	path: PutApiTagStructuresByStructureIdPath;
+	query?: PutApiTagStructuresByStructureIdQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdResponses = {
+	"200": PutApiTagStructuresByStructureIdStatus200;
+	"403": PutApiTagStructuresByStructureIdStatus403;
+	"404": PutApiTagStructuresByStructureIdStatus404;
+	"409": PutApiTagStructuresByStructureIdStatus409;
+	"422": PutApiTagStructuresByStructureIdStatus422;
+	"429": PutApiTagStructuresByStructureIdStatus429;
+	"500": PutApiTagStructuresByStructureIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiTagStructuresByStructureIdResponse =
+	| PutApiTagStructuresByStructureIdStatus200
+	| PutApiTagStructuresByStructureIdStatus403
+	| PutApiTagStructuresByStructureIdStatus404
+	| PutApiTagStructuresByStructureIdStatus409
+	| PutApiTagStructuresByStructureIdStatus422
+	| PutApiTagStructuresByStructureIdStatus429
+	| PutApiTagStructuresByStructureIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteStatus200 = {
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagStructureNotFound'
+		 * @type string
+		 */
+		code: "TagStructureNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteStatus500 = InternalError;
+
+export const PutApiTagStructuresByStructureIdVoteRequestValueEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiTagStructuresByStructureIdVoteRequestValueEnum =
+	(typeof PutApiTagStructuresByStructureIdVoteRequestValueEnum)[keyof typeof PutApiTagStructuresByStructureIdVoteRequestValueEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteBody = {
+	/**
+	 * @type string
+	 */
+	value: PutApiTagStructuresByStructureIdVoteRequestValueEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteOptions = {
+	body: PutApiTagStructuresByStructureIdVoteBody;
+	path: PutApiTagStructuresByStructureIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteResponses = {
+	"200": PutApiTagStructuresByStructureIdVoteStatus200;
+	"404": PutApiTagStructuresByStructureIdVoteStatus404;
+	"422": PutApiTagStructuresByStructureIdVoteStatus422;
+	"429": PutApiTagStructuresByStructureIdVoteStatus429;
+	"500": PutApiTagStructuresByStructureIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiTagStructuresByStructureIdVoteResponse =
+	| PutApiTagStructuresByStructureIdVoteStatus200
+	| PutApiTagStructuresByStructureIdVoteStatus404
+	| PutApiTagStructuresByStructureIdVoteStatus422
+	| PutApiTagStructuresByStructureIdVoteStatus429
+	| PutApiTagStructuresByStructureIdVoteStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteStatus200 = {
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagStructureNotFound'
+		 * @type string
+		 */
+		code: "TagStructureNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteOptions = {
+	body?: never;
+	path: DeleteApiTagStructuresByStructureIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteResponses = {
+	"200": DeleteApiTagStructuresByStructureIdVoteStatus200;
+	"404": DeleteApiTagStructuresByStructureIdVoteStatus404;
+	"422": DeleteApiTagStructuresByStructureIdVoteStatus422;
+	"429": DeleteApiTagStructuresByStructureIdVoteStatus429;
+	"500": DeleteApiTagStructuresByStructureIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiTagStructuresByStructureIdVoteResponse =
+	| DeleteApiTagStructuresByStructureIdVoteStatus200
+	| DeleteApiTagStructuresByStructureIdVoteStatus404
+	| DeleteApiTagStructuresByStructureIdVoteStatus422
+	| DeleteApiTagStructuresByStructureIdVoteStatus429
+	| DeleteApiTagStructuresByStructureIdVoteStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiUnitsByTypeByUnitIdTagsPath = {
 	type: ("book" | "software" | "media") | "series";
 	/**
@@ -33180,6 +34178,10 @@ export type GetApiUnitsByTypeByUnitIdTagsQuery = {
 	 */
 	globalLimit?: string | number;
 	/**
+	 * @default 20
+	 */
+	structureLimit?: string | number;
+	/**
 	 * @default 10
 	 */
 	sourceLimit?: string | number;
@@ -33193,6 +34195,53 @@ export type GetApiUnitsByTypeByUnitIdTagsQuery = {
  * @type object
  */
 export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
+	/**
+	 * @type array
+	 */
+	structures: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		structureId: string;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		viewerVote: ((-1 | 1) | null) | null;
+		definitionScore: string | number;
+		definitionVoteCount: string | number;
+		/**
+		 * @type array
+		 */
+		members: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+		}[];
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
 	/**
 	 * @type array
 	 */
@@ -33410,6 +34459,616 @@ export type GetApiUnitsByTypeByUnitIdTagsResponse =
 	| GetApiUnitsByTypeByUnitIdTagsStatus404
 	| GetApiUnitsByTypeByUnitIdTagsStatus422
 	| GetApiUnitsByTypeByUnitIdTagsStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+};
+
+export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	TagStructureNotFound: "TagStructureNotFound",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagStructure'
+				 * @type string
+				 */
+				code: "InvalidTagStructure";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
+	body?: never;
+	path: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
+	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200;
+	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
+	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
+	"429": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429;
+	"500": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
+	"204": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204;
+	"404": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+};
+
+export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagStructure'
+				 * @type string
+				 */
+				code: "InvalidTagStructure";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500 = InternalError;
+
+export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteBody = {
+	/**
+	 * @type string
+	 */
+	value: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = {
+	body: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteBody;
+	path: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
+	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200;
+	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404;
+	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422;
+	"429": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429;
+	"500": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
+	"200": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200;
+	"404": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
 
 export const GetApiUsersMeTagRealmSubscriptionsLanguage = {
 	zh: "zh",
@@ -33811,6 +35470,7 @@ export const ResolveUnitSlugAddressStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -34142,6 +35802,7 @@ export const ResolveScopedUnitSlugAddressKind = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -34175,6 +35836,7 @@ export const ResolveScopedUnitSlugAddressStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -35987,6 +37649,7 @@ export const GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -36415,6 +38078,7 @@ export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -37840,6 +39504,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum 
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -38874,6 +40539,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnu
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -40388,6 +42054,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCredi
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -41582,6 +43249,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Attribution
 		entity: "entity",
 		label: "label",
 		tag: "tag",
+		structure: "structure",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -42783,6 +44451,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Attributio
 		entity: "entity",
 		label: "label",
 		tag: "tag",
+		structure: "structure",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -44642,6 +46311,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200 = {
 export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
@@ -44740,10 +46410,32 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422 = ValidationError;
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagStructure'
+				 * @type string
+				 */
+				code: "InvalidTagStructure";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -44874,6 +46566,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200 = {
 export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403ErrorCodeEnum =
@@ -44972,10 +46665,32 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422 = ValidationError;
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagStructure'
+				 * @type string
+				 */
+				code: "InvalidTagStructure";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -46278,6 +47993,7 @@ export const GetApiEntitiesByUnitIdStatus200OwnerKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -48045,6 +49761,7 @@ export const GetApiUnitsByTypeByUnitIdAliasesType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -48202,6 +49919,7 @@ export const PostApiUnitsByTypeByUnitIdAliasesType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -48463,6 +50181,7 @@ export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -48652,6 +50371,7 @@ export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -48825,6 +50545,7 @@ export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -49017,6 +50738,7 @@ export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKi
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -50672,10 +52394,32 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 = ValidationError;
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagStructure'
+				 * @type string
+				 */
+				code: "InvalidTagStructure";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -56366,6 +58110,7 @@ export type PostApiCollectionsStatus200 = {
 					| "users"
 					| "entity"
 					| "tags"
+					| "tag-structures"
 					| "posts"
 					| "realms"
 					| "collections"
@@ -57312,6 +59057,7 @@ export type PostApiCollectionsBody = {
 					| "users"
 					| "entity"
 					| "tags"
+					| "tag-structures"
 					| "posts"
 					| "realms"
 					| "collections"
@@ -57858,6 +59604,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 					| "users"
 					| "entity"
 					| "tags"
+					| "tag-structures"
 					| "posts"
 					| "realms"
 					| "collections"
@@ -58637,6 +60384,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 					| "users"
 					| "entity"
 					| "tags"
+					| "tag-structures"
 					| "posts"
 					| "realms"
 					| "collections"
@@ -59397,6 +61145,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 					| "users"
 					| "entity"
 					| "tags"
+					| "tag-structures"
 					| "posts"
 					| "realms"
 					| "collections"
@@ -60412,6 +62161,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 					| "users"
 					| "entity"
 					| "tags"
+					| "tag-structures"
 					| "posts"
 					| "realms"
 					| "collections"
@@ -61824,6 +63574,7 @@ export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -62490,6 +64241,7 @@ export const GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum = 
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -65846,6 +67598,7 @@ export const GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -66614,6 +68367,7 @@ export const GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -67581,6 +69335,7 @@ export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKin
 	entity: "entity",
 	label: "label",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -76201,6 +77956,7 @@ export const GetApiSearchFeaturesByTemplateStatus200DocumentCategoriesEnum = {
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -79163,6 +80919,7 @@ export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategori
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -80586,6 +82343,7 @@ export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategori
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -82008,6 +83766,7 @@ export const PutApiSearchZonesByZoneIdFeatureRequestDocumentCategoriesEnum = {
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -84947,6 +86706,7 @@ export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocument
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -90079,6 +91839,7 @@ export const PostApiSearchRequestIndexesEnum = {
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -93138,6 +94899,7 @@ export const PostApiSearchByIndexIndex = {
 	users: "users",
 	entity: "entity",
 	tags: "tags",
+	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",

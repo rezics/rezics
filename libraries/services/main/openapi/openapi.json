@@ -1579,6 +1579,7 @@
 								"users",
 								"entity",
 								"tags",
+								"tag-structures",
 								"posts",
 								"realms",
 								"collections",
@@ -2346,6 +2347,11 @@
 					"ApiTokenPolicyRevisionConflict",
 					"ApiTokenPolicyNotFound",
 					"TagNotFound",
+					"TagStructureNotFound",
+					"TagStructureApplicationNotFound",
+					"InvalidTagStructure",
+					"TagStructureChanged",
+					"TagStructureDefinitionConflict",
 					"InvalidSearch",
 					"SearchUnavailable",
 					"SearchDocumentRevisionConflict",
@@ -6290,6 +6296,7 @@
 																				"entity",
 																				"label",
 																				"tag",
+																				"structure",
 																				"series",
 																				"zone",
 																				"zone_page",
@@ -7243,6 +7250,7 @@
 																								"entity",
 																								"label",
 																								"tag",
+																								"structure",
 																								"series",
 																								"zone",
 																								"zone_page",
@@ -13126,6 +13134,7 @@
 																						"entity",
 																						"label",
 																						"tag",
+																						"structure",
 																						"series",
 																						"zone",
 																						"zone_page",
@@ -13796,6 +13805,7 @@
 																						"entity",
 																						"label",
 																						"tag",
+																						"structure",
 																						"series",
 																						"zone",
 																						"zone_page",
@@ -14782,6 +14792,7 @@
 																										"entity",
 																										"label",
 																										"tag",
+																										"structure",
 																										"series",
 																										"zone",
 																										"zone_page",
@@ -38817,6 +38828,7 @@
 								"entity",
 								"label",
 								"tag",
+								"structure",
 								"series",
 								"zone",
 								"zone_page",
@@ -38933,6 +38945,7 @@
 															"entity",
 															"label",
 															"tag",
+															"structure",
 															"series",
 															"zone",
 															"zone_page",
@@ -41365,6 +41378,1160 @@
 				"x-rezics-policy-operation-id": "getApiStaffAudit"
 			}
 		},
+		"/api/tags/{tagId}": {
+			"get": {
+				"summary": "Get a Tag with direct children and grandchildren",
+				"tags": ["Tags"],
+				"parameters": [
+					{
+						"name": "tagId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					},
+					{
+						"name": "childLimit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 30,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 30, "type": "integer" }
+							]
+						}
+					},
+					{
+						"name": "grandchildLimit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 12,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 12, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["tagId", "title", "summary", "children"],
+									"properties": {
+										"tagId": { "format": "uuid", "type": "string" },
+										"title": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"summary": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"children": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"tagId",
+													"title",
+													"summary",
+													"score",
+													"voteCount",
+													"children"
+												],
+												"properties": {
+													"tagId": { "format": "uuid", "type": "string" },
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"children": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"tagId",
+																"title",
+																"summary",
+																"score",
+																"voteCount"
+															],
+															"properties": {
+																"tagId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"score": {
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{ "type": "integer" }
+																	]
+																},
+																"voteCount": {
+																	"minimum": 0,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "TagNotFound",
+													"type": "string",
+													"enum": ["TagNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiTagsByTagId",
+				"x-rezics-policy-operation-id": "getApiTagsByTagId"
+			}
+		},
+		"/api/tag-structures": {
+			"post": {
+				"summary": "Create or find and upvote a community-immutable Tag structure",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["memberTagIds"],
+								"properties": {
+									"memberTagIds": {
+										"minItems": 2,
+										"maxItems": 16,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "format": "uuid", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["structureId", "created"],
+									"properties": {
+										"structureId": { "format": "uuid", "type": "string" },
+										"created": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "TagNotFound",
+													"type": "string",
+													"enum": ["TagNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidTagStructure",
+															"type": "string",
+															"enum": ["InvalidTagStructure"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiTag-structures",
+				"x-rezics-policy-operation-id": "postApiTag-structures"
+			}
+		},
+		"/api/tag-structures/{structureId}": {
+			"get": {
+				"summary": "Get a Tag structure",
+				"tags": ["Tags"],
+				"parameters": [
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"kind",
+										"definitionVersion",
+										"createdByProfileId",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"members",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"kind": { "const": "tag.hierarchy_path", "type": "string" },
+										"definitionVersion": { "const": 1, "type": "number" },
+										"createdByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"members": {
+											"minItems": 2,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"ordinal",
+													"tagId",
+													"title",
+													"summary"
+												],
+												"properties": {
+													"ordinal": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"tagId": { "format": "uuid", "type": "string" },
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "TagStructureNotFound",
+													"type": "string",
+													"enum": ["TagStructureNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiTag-structuresByStructureId",
+				"x-rezics-policy-operation-id": "getApiTag-structuresByStructureId"
+			},
+			"put": {
+				"summary": "Administratively correct a Tag structure definition",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["memberTagIds", "updatedAt", "reason"],
+								"properties": {
+									"memberTagIds": {
+										"minItems": 2,
+										"maxItems": 16,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "format": "uuid", "type": "string" }
+									},
+									"updatedAt": { "format": "date-time", "type": "string" },
+									"reason": { "minLength": 1, "maxLength": 500, "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"kind",
+										"definitionVersion",
+										"createdByProfileId",
+										"score",
+										"voteCount",
+										"viewerVote",
+										"members",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"kind": { "const": "tag.hierarchy_path", "type": "string" },
+										"definitionVersion": { "const": 1, "type": "number" },
+										"createdByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"members": {
+											"minItems": 2,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"ordinal",
+													"tagId",
+													"title",
+													"summary"
+												],
+												"properties": {
+													"ordinal": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"tagId": { "format": "uuid", "type": "string" },
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "TagNotFound",
+													"type": "string",
+													"enum": ["TagNotFound", "TagStructureNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "TagStructureChanged",
+													"type": "string",
+													"enum": [
+														"TagStructureChanged",
+														"TagStructureDefinitionConflict"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidTagStructure",
+															"type": "string",
+															"enum": ["InvalidTagStructure"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiTag-structuresByStructureId",
+				"x-rezics-policy-operation-id": "putApiTag-structuresByStructureId"
+			}
+		},
+		"/api/tag-structures/{structureId}/vote": {
+			"put": {
+				"summary": "Vote on a Tag structure",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["value"],
+								"properties": { "value": { "type": "string", "enum": [-1, 1] } }
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["score", "voteCount", "viewerVote"],
+									"properties": {
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "TagStructureNotFound",
+													"type": "string",
+													"enum": ["TagStructureNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiTag-structuresByStructureIdVote",
+				"x-rezics-policy-operation-id": "putApiTag-structuresByStructureIdVote"
+			},
+			"delete": {
+				"summary": "Remove a Tag structure vote",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["score", "voteCount", "viewerVote"],
+									"properties": {
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "TagStructureNotFound",
+													"type": "string",
+													"enum": ["TagStructureNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiTag-structuresByStructureIdVote",
+				"x-rezics-policy-operation-id": "deleteApiTag-structuresByStructureIdVote"
+			}
+		},
 		"/api/units/{type}/{unitId}/tags": {
 			"get": {
 				"summary": "Get global and subscribed Realm Tag assertions for a Unit",
@@ -41414,6 +42581,20 @@
 						}
 					},
 					{
+						"name": "structureLimit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 20,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
+							]
+						}
+					},
+					{
 						"name": "sourceLimit",
 						"in": "query",
 						"required": false,
@@ -41449,8 +42630,158 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["global", "realms"],
+									"required": ["structures", "global", "realms"],
 									"properties": {
+										"structures": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"structureId",
+													"pinned",
+													"position",
+													"score",
+													"voteCount",
+													"viewerVote",
+													"definitionScore",
+													"definitionVoteCount",
+													"members",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"structureId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"pinned": { "type": "boolean" },
+													"position": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"definitionScore": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"definitionVoteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"members": {
+														"minItems": 2,
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"ordinal",
+																"tagId",
+																"title",
+																"summary"
+															],
+															"properties": {
+																"ordinal": {
+																	"minimum": 0,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	]
+																},
+																"tagId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																}
+															}
+														}
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
 										"global": {
 											"type": "array",
 											"items": {
@@ -41795,6 +43126,714 @@
 				},
 				"operationId": "getApiUnitsByTypeByUnitIdTags",
 				"x-rezics-policy-operation-id": "getApiUnitsByTypeByUnitIdTags"
+			}
+		},
+		"/api/units/{type}/{unitId}/tag-structures/{structureId}": {
+			"put": {
+				"summary": "Apply a Tag structure to a Unit",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"unitId",
+										"structureId",
+										"score",
+										"voteCount",
+										"viewerVote"
+									],
+									"properties": {
+										"unitId": { "format": "uuid", "type": "string" },
+										"structureId": { "format": "uuid", "type": "string" },
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "TagStructureNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidTagStructure",
+															"type": "string",
+															"enum": ["InvalidTagStructure"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUnitsByTypeByUnitIdTag-structuresByStructureId",
+				"x-rezics-policy-operation-id": "putApiUnitsByTypeByUnitIdTag-structuresByStructureId"
+			},
+			"delete": {
+				"summary": "Remove a Tag structure from a Unit",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"TagStructureApplicationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiUnitsByTypeByUnitIdTag-structuresByStructureId",
+				"x-rezics-policy-operation-id": "deleteApiUnitsByTypeByUnitIdTag-structuresByStructureId"
+			}
+		},
+		"/api/units/{type}/{unitId}/tag-structures/{structureId}/vote": {
+			"put": {
+				"summary": "Vote on a Unit Tag structure",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["value"],
+								"properties": { "value": { "type": "string", "enum": [-1, 1] } }
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"unitId",
+										"structureId",
+										"score",
+										"voteCount",
+										"viewerVote"
+									],
+									"properties": {
+										"unitId": { "format": "uuid", "type": "string" },
+										"structureId": { "format": "uuid", "type": "string" },
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"TagStructureApplicationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidTagStructure",
+															"type": "string",
+															"enum": ["InvalidTagStructure"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUnitsByTypeByUnitIdTag-structuresByStructureIdVote",
+				"x-rezics-policy-operation-id": "putApiUnitsByTypeByUnitIdTag-structuresByStructureIdVote"
+			},
+			"delete": {
+				"summary": "Remove a Unit Tag structure vote",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "structureId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"unitId",
+										"structureId",
+										"score",
+										"voteCount",
+										"viewerVote"
+									],
+									"properties": {
+										"unitId": { "format": "uuid", "type": "string" },
+										"structureId": { "format": "uuid", "type": "string" },
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"viewerVote": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"TagStructureApplicationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiUnitsByTypeByUnitIdTag-structuresByStructureIdVote",
+				"x-rezics-policy-operation-id": "deleteApiUnitsByTypeByUnitIdTag-structuresByStructureIdVote"
 			}
 		},
 		"/api/users/me/tag-realm-subscriptions": {
@@ -42230,6 +44269,7 @@
 												"entity",
 												"label",
 												"tag",
+												"structure",
 												"series",
 												"zone",
 												"zone_page",
@@ -42527,6 +44567,7 @@
 								"entity",
 								"label",
 								"tag",
+								"structure",
 								"series",
 								"zone",
 								"zone_page",
@@ -42567,6 +44608,7 @@
 												"entity",
 												"label",
 												"tag",
+												"structure",
 												"series",
 												"zone",
 												"zone_page",
@@ -44442,6 +46484,7 @@
 																				"entity",
 																				"label",
 																				"tag",
+																				"structure",
 																				"series",
 																				"zone",
 																				"zone_page",
@@ -45395,6 +47438,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -47119,6 +49163,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -48936,6 +50981,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -50909,6 +52955,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -52673,6 +54720,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -54807,6 +56855,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -57058,7 +59107,8 @@
 													"type": "string",
 													"enum": [
 														"UnitPermissionForbidden",
-														"EntityAssociationRestricted"
+														"EntityAssociationRestricted",
+														"PlatformCapabilityRequired"
 													]
 												},
 												"message": { "type": "string" },
@@ -57130,10 +59180,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidTagStructure",
+															"type": "string",
+															"enum": ["InvalidTagStructure"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -57254,7 +59328,8 @@
 													"type": "string",
 													"enum": [
 														"UnitPermissionForbidden",
-														"EntityAssociationRestricted"
+														"EntityAssociationRestricted",
+														"PlatformCapabilityRequired"
 													]
 												},
 												"message": { "type": "string" },
@@ -57326,10 +59401,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidTagStructure",
+															"type": "string",
+															"enum": ["InvalidTagStructure"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -59490,6 +61589,7 @@
 																"entity",
 																"label",
 																"tag",
+																"structure",
 																"series",
 																"zone",
 																"zone_page",
@@ -61101,6 +63201,7 @@
 								"entity",
 								"label",
 								"tag",
+								"structure",
 								"series",
 								"zone",
 								"zone_page",
@@ -61281,6 +63382,7 @@
 								"entity",
 								"label",
 								"tag",
+								"structure",
 								"series",
 								"zone",
 								"zone_page",
@@ -61640,6 +63742,7 @@
 								"entity",
 								"label",
 								"tag",
+								"structure",
 								"series",
 								"zone",
 								"zone_page",
@@ -61690,6 +63793,7 @@
 								"entity",
 								"label",
 								"tag",
+								"structure",
 								"series",
 								"zone",
 								"zone_page",
@@ -61879,6 +63983,7 @@
 								"entity",
 								"label",
 								"tag",
+								"structure",
 								"series",
 								"zone",
 								"zone_page",
@@ -62174,6 +64279,7 @@
 														"entity",
 														"label",
 														"tag",
+														"structure",
 														"series",
 														"zone",
 														"zone_page",
@@ -63760,10 +65866,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidTagStructure",
+															"type": "string",
+															"enum": ["InvalidTagStructure"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -69969,6 +72099,10 @@
 																	"type": "string"
 																},
 																{
+																	"const": "tag-structures",
+																	"type": "string"
+																},
+																{
 																	"const": "posts",
 																	"type": "string"
 																},
@@ -71453,6 +73587,10 @@
 																	},
 																	{
 																		"const": "tags",
+																		"type": "string"
+																	},
+																	{
+																		"const": "tag-structures",
 																		"type": "string"
 																	},
 																	{
@@ -73293,6 +75431,10 @@
 																		"type": "string"
 																	},
 																	{
+																		"const": "tag-structures",
+																		"type": "string"
+																	},
+																	{
 																		"const": "posts",
 																		"type": "string"
 																	},
@@ -75123,6 +77265,10 @@
 																	},
 																	{
 																		"const": "tags",
+																		"type": "string"
+																	},
+																	{
+																		"const": "tag-structures",
 																		"type": "string"
 																	},
 																	{
@@ -77290,6 +79436,10 @@
 																	"type": "string"
 																},
 																{
+																	"const": "tag-structures",
+																	"type": "string"
+																},
+																{
 																	"const": "posts",
 																	"type": "string"
 																},
@@ -78774,6 +80924,10 @@
 																	},
 																	{
 																		"const": "tags",
+																		"type": "string"
+																	},
+																	{
+																		"const": "tag-structures",
 																		"type": "string"
 																	},
 																	{
@@ -81542,6 +83696,7 @@
 																				"entity",
 																				"label",
 																				"tag",
+																				"structure",
 																				"series",
 																				"zone",
 																				"zone_page",
@@ -82377,6 +84532,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -85974,6 +88130,7 @@
 																				"entity",
 																				"label",
 																				"tag",
+																				"structure",
 																				"series",
 																				"zone",
 																				"zone_page",
@@ -87072,6 +89229,7 @@
 																	"entity",
 																	"label",
 																	"tag",
+																	"structure",
 																	"series",
 																	"zone",
 																	"zone_page",
@@ -88330,6 +90488,7 @@
 																				"entity",
 																				"label",
 																				"tag",
+																				"structure",
 																				"series",
 																				"zone",
 																				"zone_page",
@@ -98152,7 +100311,7 @@
 												},
 												"categories": {
 													"minItems": 1,
-													"maxItems": 9,
+													"maxItems": 10,
 													"type": "array",
 													"items": {
 														"type": "string",
@@ -98161,6 +100320,7 @@
 															"users",
 															"entity",
 															"tags",
+															"tag-structures",
 															"posts",
 															"realms",
 															"collections",
@@ -106143,7 +108303,7 @@
 														},
 														"categories": {
 															"minItems": 1,
-															"maxItems": 9,
+															"maxItems": 10,
 															"type": "array",
 															"items": {
 																"type": "string",
@@ -106152,6 +108312,7 @@
 																	"users",
 																	"entity",
 																	"tags",
+																	"tag-structures",
 																	"posts",
 																	"realms",
 																	"collections",
@@ -109528,7 +111689,7 @@
 											},
 											"categories": {
 												"minItems": 1,
-												"maxItems": 9,
+												"maxItems": 10,
 												"type": "array",
 												"items": {
 													"type": "string",
@@ -109537,6 +111698,7 @@
 														"users",
 														"entity",
 														"tags",
+														"tag-structures",
 														"posts",
 														"realms",
 														"collections",
@@ -112518,7 +114680,7 @@
 														},
 														"categories": {
 															"minItems": 1,
-															"maxItems": 9,
+															"maxItems": 10,
 															"type": "array",
 															"items": {
 																"type": "string",
@@ -112527,6 +114689,7 @@
 																	"users",
 																	"entity",
 																	"tags",
+																	"tag-structures",
 																	"posts",
 																	"realms",
 																	"collections",
@@ -120811,7 +122974,7 @@
 														},
 														"categories": {
 															"minItems": 1,
-															"maxItems": 9,
+															"maxItems": 10,
 															"type": "array",
 															"items": {
 																"type": "string",
@@ -120820,6 +122983,7 @@
 																	"users",
 																	"entity",
 																	"tags",
+																	"tag-structures",
 																	"posts",
 																	"realms",
 																	"collections",
@@ -133554,6 +135718,7 @@
 												"users",
 												"entity",
 												"tags",
+												"tag-structures",
 												"posts",
 												"realms",
 												"collections",
@@ -143018,6 +145183,7 @@
 								"users",
 								"entity",
 								"tags",
+								"tag-structures",
 								"posts",
 								"realms",
 								"collections",

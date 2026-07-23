@@ -1,7 +1,13 @@
 import { eq } from "drizzle-orm";
 
 import { database } from "../../database";
-import { entity, entityAssociationPolicy, unit, unitLocalization } from "../../database/schema";
+import {
+	entity,
+	entityAssociationPolicy,
+	tag,
+	unit,
+	unitLocalization,
+} from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import {
@@ -47,7 +53,7 @@ export async function createCatalogUnit(
 					updatedByProfileId: ownerId,
 				},
 			]);
-		}
+		} else await tx.insert(tag).values({ id: created.id });
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId: created.id, ...toUnitLocalizationStorage(body.localization) });

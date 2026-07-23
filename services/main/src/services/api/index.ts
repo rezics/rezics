@@ -47,6 +47,7 @@ import {
 } from "./errors";
 import { toUnitVariantConstraintError } from "../units/variants";
 import { toPostTargetingConstraintError } from "../posts/targeting";
+import { toTagStructureConstraintError } from "../tag-structures/service";
 
 const { logger } = getActiveObservability();
 
@@ -80,6 +81,12 @@ export default new Elysia()
 			return status(
 				postTargetingConstraintError.status,
 				toApiErrorBody(postTargetingConstraintError, requestId),
+			);
+		const tagStructureConstraintError = toTagStructureConstraintError(error);
+		if (tagStructureConstraintError)
+			return status(
+				tagStructureConstraintError.status,
+				toApiErrorBody(tagStructureConstraintError, requestId),
 			);
 		if (code === "VALIDATION") {
 			const validationError = new ValidationError();

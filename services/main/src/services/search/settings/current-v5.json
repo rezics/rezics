@@ -8,7 +8,7 @@
 		"search.publishedContent",
 		"book.isbn13"
 	],
-	"displayedAttributes": ["id", "revision", "category", "unitType"],
+	"displayedAttributes": ["id", "revision", "category", "unitType", "searchKind"],
 	"filterableAttributes": [
 		{
 			"attributePatterns": [

@@ -40,6 +40,10 @@ export function followingHref(
 			return `/units/${kind}/${id}`;
 		case "entity":
 			return `/entities/${id}`;
+		case "tag":
+			return `/tags/${id}`;
+		case "structure":
+			return `/tag-structures/${id}`;
 		case "collection":
 			return `/collections/${id}`;
 		case "post":
@@ -49,7 +53,6 @@ export function followingHref(
 		case "slug_namespace":
 		case "release":
 		case "label":
-		case "tag":
 		case "series":
 		case "realm_rule":
 		case "zone_page":

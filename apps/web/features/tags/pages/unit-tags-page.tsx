@@ -4,9 +4,12 @@ import { toContentLanguage } from "@rezics/i18n";
 import {
 	getApiUnitsByTypeByUnitIdTagsQueryKey,
 	useDeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
+	useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote,
 	useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote,
 	useGetApiUnitsByTypeByUnitIdTags,
 	usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
+	usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId,
+	usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote,
 	usePutApiUnitsByTypeByUnitIdTagsByTagId,
 	usePutApiUnitsByTypeByUnitIdTagsByTagIdVote,
 } from "@rezics/openapi-tanstack-query";
@@ -31,7 +34,8 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { TagVoteControls } from "../components/tag-vote-controls";
-import { tagSearchHref } from "../routing/tag-links";
+import { TagStructurePath } from "../components/tag-structure-path";
+import { tagSearchHref, tagStructureHref } from "../routing/tag-links";
 
 interface PickedTag {
 	readonly id: string;
@@ -44,10 +48,17 @@ export function UnitTagsPage() {
 	const { locale, t } = useTranslation(["tags", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const [selectedTag, setSelectedTag] = useState<PickedTag>();
+	const [selectedStructure, setSelectedStructure] = useState<PickedTag>();
 	const language = toContentLanguage(locale.target);
 	const queryInput = {
 		path: { type: detail.type, unitId: detail.unit.id },
-		query: { language, globalLimit: 100, sourceLimit: 30, perRealmLimit: 50 },
+		query: {
+			language,
+			globalLimit: 100,
+			structureLimit: 50,
+			sourceLimit: 30,
+			perRealmLimit: 50,
+		},
 	} as const;
 	const query = useGetApiUnitsByTypeByUnitIdTags(queryInput);
 	const invalidate = () =>
@@ -57,6 +68,15 @@ export function UnitTagsPage() {
 			}),
 		});
 	const add = usePutApiUnitsByTypeByUnitIdTagsByTagId({
+		mutation: { onSuccess: invalidate },
+	});
+	const addStructure = usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId({
+		mutation: { onSuccess: invalidate },
+	});
+	const structureVote = usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote({
+		mutation: { onSuccess: invalidate },
+	});
+	const clearStructureVote = useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote({
 		mutation: { onSuccess: invalidate },
 	});
 	const vote = usePutApiUnitsByTypeByUnitIdTagsByTagIdVote({
@@ -93,6 +113,124 @@ export function UnitTagsPage() {
 
 	return (
 		<CatalogDetailSectionFrame description={labels.description} title={labels.title}>
+			<section className="grid gap-3">
+				<div className="grid gap-1">
+					<h2 className="font-heading text-xl font-bold">{t.tags.structures.title}</h2>
+					<p className="text-sm text-muted-foreground">{t.tags.structures.description}</p>
+				</div>
+				<Card>
+					<CardContent className="grid gap-3 p-5">
+						<div className="flex flex-wrap items-start justify-between gap-3">
+							<div className="grid gap-1">
+								<h3 className="font-semibold">{t.tags.structures.addTitle}</h3>
+								<p className="text-sm text-muted-foreground">
+									{t.tags.structures.addDescription}
+								</p>
+							</div>
+							<Button asChild variant="outline">
+								<Link href="/tag-structures/new">{t.tags.structures.create}</Link>
+							</Button>
+						</div>
+						{session ? (
+							<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+								<EntityPicker
+									index="tag-structures"
+									onChange={setSelectedStructure}
+									value={selectedStructure}
+								/>
+								<Button
+									disabled={!selectedStructure}
+									isLoading={addStructure.isPending}
+									onClick={() => {
+										if (!selectedStructure) return;
+										void addStructure
+											.mutateAsync({
+												path: {
+													type: detail.type,
+													unitId: detail.unit.id,
+													structureId: selectedStructure.id,
+												},
+											})
+											.then(() => setSelectedStructure(undefined))
+											.catch(() => undefined);
+									}}
+									type="button"
+								>
+									{t.tags.structures.add}
+								</Button>
+							</div>
+						) : (
+							<SignInButton variant="outline">{t.tags.structures.add}</SignInButton>
+						)}
+						<RequestFailure error={addStructure.error} fallback={t.ui.retryLater} />
+					</CardContent>
+				</Card>
+				{query.data.structures.length ? (
+					<div className="grid gap-3">
+						{query.data.structures.map((structure) => {
+							const isPending =
+								(structureVote.isPending &&
+									structureVote.variables?.path.structureId ===
+										structure.structureId) ||
+								(clearStructureVote.isPending &&
+									clearStructureVote.variables?.path.structureId ===
+										structure.structureId);
+							return (
+								<Card key={structure.structureId}>
+									<CardContent className="grid gap-4 p-4 sm:p-5">
+										<div className="flex flex-wrap items-start justify-between gap-3">
+											<TagStructurePath
+												ariaLabel={t.tags.structures.pathLabel}
+												fallback={t.tags.structures.memberFallback}
+												members={structure.members}
+											/>
+											<Link
+												className="text-sm text-link hover:text-link-hover hover:underline"
+												href={tagStructureHref(structure.structureId)}
+											>
+												{t.tags.page.viewAll}
+											</Link>
+										</div>
+										<TagVoteControls
+											canVote={Boolean(session)}
+											isPending={isPending}
+											onClear={() =>
+												clearStructureVote.mutate({
+													path: {
+														type: detail.type,
+														unitId: detail.unit.id,
+														structureId: structure.structureId,
+													},
+												})
+											}
+											onVote={(value) =>
+												structureVote.mutate({
+													path: {
+														type: detail.type,
+														unitId: detail.unit.id,
+														structureId: structure.structureId,
+													},
+													body: { value },
+												})
+											}
+											score={toFiniteApiNumber(structure.score) ?? 0}
+											viewerVote={structure.viewerVote}
+											voteCount={toNonNegativeApiInteger(structure.voteCount)}
+										/>
+									</CardContent>
+								</Card>
+							);
+						})}
+					</div>
+				) : (
+					<p className="text-sm text-muted-foreground">{t.tags.structures.empty}</p>
+				)}
+				<RequestFailure
+					error={structureVote.error ?? clearStructureVote.error}
+					fallback={t.ui.retryLater}
+				/>
+			</section>
+
 			<section className="grid gap-3">
 				<div className="grid gap-1">
 					<h2 className="font-heading text-xl font-bold">{t.tags.global.title}</h2>

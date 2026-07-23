@@ -5,6 +5,7 @@ import { insert } from "native-i18n";
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: zoneTerms } = enTerminology.zone;
+const { forms: tagStructureTerms } = enTerminology.tagStructure;
 
 export default {
 	title: "Search",
@@ -37,6 +38,7 @@ export default {
 		users: "Users",
 		entity: "Catalog",
 		tags: "Tags",
+		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "Collections",
@@ -48,6 +50,7 @@ export default {
 		users: "Users",
 		entity: "Catalog",
 		tags: "Tags",
+		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "Collections",

@@ -64,6 +64,10 @@ function searchHitHref(hit: SearchHit) {
 			return `/reviews/${hit.id}`;
 		case "entity":
 			return `/entities/${hit.id}`;
+		case "tags":
+			return `/tags/${hit.id}`;
+		case "tag-structures":
+			return `/tag-structures/${hit.id}`;
 		case "polls":
 			return `/polls/${hit.id}`;
 		case "units":

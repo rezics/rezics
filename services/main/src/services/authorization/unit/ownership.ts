@@ -46,3 +46,23 @@ export async function createCommunityCatalogAccess(
 		},
 	]);
 }
+
+/**
+ * Gives an immutable community-owned Unit a single governance owner.
+ *
+ * Structure submitters are attributed in the structure definition and vote as
+ * ordinary community members; editing access would contradict immutability.
+ */
+export async function createCommunityOwnedUnitAccess(
+	tx: DatabaseTransaction,
+	unitId: string,
+): Promise<void> {
+	await tx.insert(unitAccessBinding).values({
+		unitId,
+		subjectKind: "profile",
+		profileId: OfficialProfileIds.community,
+		role: "owner",
+		scope: [],
+		grantedByProfileId: OfficialProfileIds.community,
+	});
+}
