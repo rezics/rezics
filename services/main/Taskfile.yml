@@ -41,6 +41,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/search-index.ts {{.CLI_ARGS}}
 
+    storage:prepare:
+        desc: Idempotently prepare the loopback object-storage bucket used by local development.
+        cmds:
+            - yarn exec tsx scripts/ensure-local-storage-bucket.ts
+
     search:config:check:
         desc: Interpolate and plan the canonical Sequin search configuration.
         cmds:

@@ -120,17 +120,20 @@ async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
 				ON d.tag_id = a.tag_id AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
 			GROUP BY a.unit_id, b.unit_id
 		), credit_degree AS (
-			SELECT entity_id, count(*)::double precision AS degree
+			SELECT credited_unit_id, count(*)::double precision AS degree
 			FROM credit_attribution
-			GROUP BY entity_id
+			GROUP BY credited_unit_id
 		), credit_pair AS (
-			SELECT a.unit_id AS left_id, b.unit_id AS right_id,
+			SELECT a.source_unit_id AS left_id, b.source_unit_id AS right_id,
 				sum(1 / ln(1 + d.degree)) AS score
 			FROM credit_attribution a
-			JOIN credit_attribution b ON b.entity_id = a.entity_id AND a.unit_id < b.unit_id
+			JOIN credit_attribution b
+				ON b.credited_unit_id = a.credited_unit_id
+				AND a.source_unit_id < b.source_unit_id
 			JOIN credit_degree d
-				ON d.entity_id = a.entity_id AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
-			GROUP BY a.unit_id, b.unit_id
+				ON d.credited_unit_id = a.credited_unit_id
+				AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
+			GROUP BY a.source_unit_id, b.source_unit_id
 		), subject_degree AS (
 			SELECT entity_id, count(*)::double precision AS degree
 			FROM subject_association

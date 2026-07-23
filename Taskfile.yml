@@ -107,7 +107,7 @@ tasks:
         desc: Start persistent infrastructure and idempotently initialize object storage.
         cmds:
             - task: infra:start
-            - docker compose run --rm --no-deps rustfs-bucket-init
+            - task: services-main:storage:prepare
 
     infra:up:search:
         desc: Alias for the default search-capable infrastructure graph.

@@ -26,7 +26,7 @@ tasks:
         dir: ..
         cmds:
             - task: doctor
-            - task infra:start
+            - task infra:up
             - task services-main:db:prepare
             - task infra:search:start
             - task services-main:search:index -- check --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
