@@ -192,10 +192,39 @@ const SearchExecutionBase = {
 	query: Type.Optional(Type.String({ maxLength: 500 })),
 	sort: Type.Optional(SearchSort),
 	pageSize: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
-	cursor: Type.Optional(Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
 };
 
 export const SearchFeatureState = Type.Union(
+	[
+		Type.Object(
+			{
+				...SearchExecutionBase,
+				cursor: Type.Optional(
+					Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" }),
+				),
+				mode: Type.Literal("basic"),
+				values: Type.Array(SearchControlValue, { maxItems: 50 }),
+			},
+			{ additionalProperties: false },
+		),
+		Type.Object(
+			{
+				...SearchExecutionBase,
+				cursor: Type.Optional(
+					Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" }),
+				),
+				mode: Type.Literal("advanced"),
+				expression: Type.Optional(SearchControlExpression),
+			},
+			{ additionalProperties: false },
+		),
+	],
+	{ $id: "SearchFeatureState" },
+);
+export type SearchFeatureState = Static<typeof SearchFeatureState>;
+
+/** An immutable, cursor-free Search Feature state suitable for a public share link. */
+export const SharedSearchQueryState = Type.Union(
 	[
 		Type.Object(
 			{
@@ -214,9 +243,35 @@ export const SearchFeatureState = Type.Union(
 			{ additionalProperties: false },
 		),
 	],
-	{ $id: "SearchFeatureState" },
+	{ $id: "SharedSearchQueryState" },
 );
-export type SearchFeatureState = Static<typeof SearchFeatureState>;
+export type SharedSearchQueryState = Static<typeof SharedSearchQueryState>;
+
+/**
+ * Presentation metadata is an untrusted display hint for opaque entity values.
+ * Search execution is still authorized and validated exclusively from `state`.
+ */
+export const SharedSearchQuerySelection = Type.Object(
+	{
+		field: SearchField,
+		value: Type.String({ minLength: 1, maxLength: 500 }),
+		title: Type.String({ minLength: 1, maxLength: 500 }),
+		kind: Type.String({ minLength: 1, maxLength: 100 }),
+	},
+	{ additionalProperties: false, $id: "SharedSearchQuerySelection" },
+);
+export type SharedSearchQuerySelection = Static<typeof SharedSearchQuerySelection>;
+
+export const SharedSearchQueryDocument = Type.Object(
+	{
+		version: Type.Literal(1),
+		template: SearchTemplateId,
+		state: SharedSearchQueryState,
+		selections: Type.Array(SharedSearchQuerySelection, { maxItems: 100 }),
+	},
+	{ additionalProperties: false, $id: "SharedSearchQueryDocumentV1" },
+);
+export type SharedSearchQueryDocument = Static<typeof SharedSearchQueryDocument>;
 
 /** The complete deterministic input boundary consumed by Search Feature. */
 export const SearchFeatureInput = Type.Object(
@@ -404,6 +459,38 @@ export function parseSearchFeatureDefinition(value: unknown): SearchFeatureDefin
 	if (!Check(SearchFeatureDefinition, value))
 		throw new TypeError("Invalid Search Feature definition v1");
 	assertSearchDocument(value.document);
+	return value;
+}
+
+export function parseSharedSearchQueryDocument(value: unknown): SharedSearchQueryDocument {
+	if (!Check(SharedSearchQueryDocument, value))
+		throw new TypeError("Invalid shared Search query document v1");
+	if (
+		!unique(
+			value.selections.map((selection) => JSON.stringify([selection.field, selection.value])),
+		)
+	)
+		throw new TypeError("Shared Search query selections must be unique");
+	const referenced = new Set<string>();
+	const remember = (controlValue: SearchControlValue) => {
+		const { filter } = controlValue;
+		const values =
+			"values" in filter
+				? filter.values
+				: "value" in filter
+					? [filter.value]
+					: [filter.lower, filter.upper];
+		for (const scalar of values)
+			if (typeof scalar === "string") referenced.add(JSON.stringify([filter.field, scalar]));
+	};
+	if (value.state.mode === "basic") value.state.values.forEach(remember);
+	else if (value.state.expression) visitControlExpression(value.state.expression, remember);
+	if (
+		value.selections.some(
+			(selection) => !referenced.has(JSON.stringify([selection.field, selection.value])),
+		)
+	)
+		throw new TypeError("Shared Search query selections must reference executable values");
 	return value;
 }
 

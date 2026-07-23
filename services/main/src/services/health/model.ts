@@ -2,6 +2,7 @@ export const HealthCheckNameValues = [
 	"database",
 	"storage",
 	"recommendations",
+	"search",
 	"worker_loop",
 ] as const;
 export type HealthCheckName = (typeof HealthCheckNameValues)[number];

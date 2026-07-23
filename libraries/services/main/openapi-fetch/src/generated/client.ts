@@ -541,6 +541,10 @@ import type {
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
 	PostApiSearchOptions,
 	PostApiSearchResponses,
+	PostApiSearchSharedQueriesOptions,
+	PostApiSearchSharedQueriesResponses,
+	GetApiSearchSharedQueriesByIdOptions,
+	GetApiSearchSharedQueriesByIdResponses,
 	PostApiSearchByIndexOptions,
 	PostApiSearchByIndexResponses,
 	PostApiImageAssetsOptions,
@@ -5831,6 +5835,40 @@ export function postApiSearch<ThrowOnError extends boolean = true>(
 
 	return request({ method: "POST", url: "/api/search", ...config }) as Promise<
 		RequestResult<PostApiSearchResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create an immutable shared Search query
+ * {@link /api/search/shared-queries}
+ */
+export function postApiSearchSharedQueries<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchSharedQueriesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchSharedQueriesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/shared-queries",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiSearchSharedQueriesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get a shared Search query
+ * {@link /api/search/shared-queries/:id}
+ */
+export function getApiSearchSharedQueriesById<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSearchSharedQueriesByIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/search/shared-queries/{id}", ...config }) as Promise<
+		RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>
 	>;
 }
 

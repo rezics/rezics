@@ -12,6 +12,7 @@ import {
 	SearchFeatureDefinition,
 	SearchFeatureInput,
 	SearchDocument,
+	SharedSearchQueryDocument,
 	SearchTemplateId,
 } from "@rezics/search";
 import { getActiveObservability } from "@rezics/observability";
@@ -19,7 +20,13 @@ import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
-import { InvalidSearch, SearchUnavailable, ZoneSearchFeatureNotFound } from "../../search/errors";
+import { AuthenticationRequired } from "../../auth/errors";
+import {
+	InvalidSearch,
+	SearchUnavailable,
+	SharedSearchQueryNotFound,
+	ZoneSearchFeatureNotFound,
+} from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
 import {
@@ -27,6 +34,11 @@ import {
 	executeSearchFeatureInput,
 	resolveSearchDocument,
 } from "../../search/templates";
+import {
+	createSharedSearchQuery,
+	getSharedSearchQuery,
+	type SharedSearchQueryProjection,
+} from "../../search/shared-queries";
 import { database } from "../../database";
 import { unitDock } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -68,6 +80,12 @@ const ZonePageSearchParams = t.Object({
 	blockKey: BlockKey,
 });
 const SearchFeatureTemplateParams = t.Object({ template: SearchTemplateId });
+const SharedSearchQueryParams = t.Object({ id: Uuid });
+const SharedSearchQueryResponse = t.Object({
+	id: Uuid,
+	document: SharedSearchQueryDocument,
+	createdAt: DateTime,
+});
 const SearchFeatureExecutionBody = t.Omit(SearchFeatureInput, ["document"]);
 const ZoneSearchFeatureParams = t.Object({ zoneId: Uuid });
 const ZoneSearchFeatureExecutionBody = t.Pick(SearchFeatureInput, ["injections", "state"]);
@@ -110,6 +128,14 @@ const ZoneSearchFeatureRevisionListResponse = t.Object({
 		}),
 	),
 });
+
+function presentSharedSearchQuery(record: SharedSearchQueryProjection) {
+	return {
+		id: record.id,
+		document: record.document,
+		createdAt: record.createdAt,
+	} satisfies typeof SharedSearchQueryResponse.static;
+}
 
 function presentZoneSearchFeature(record: ZoneSearchFeatureProjection) {
 	return {
@@ -499,6 +525,46 @@ export default new Elysia({ prefix: "/search" })
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
 			detail: { summary: "Search across public categories", tags: ["Search"] },
+		},
+	)
+	.post(
+		"/shared-queries",
+		async ({ body, request, set, status }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			const createdByProfileId = identity.authorization.profileId;
+			if (!createdByProfileId) throw new AuthenticationRequired();
+			const created = await createSharedSearchQuery(database, {
+				document: body,
+				createdByProfileId,
+			});
+			set.headers.location = `/api/search/shared-queries/${created.id}`;
+			return status(StatusCodes.CREATED, presentSharedSearchQuery(created));
+		},
+		{
+			body: SharedSearchQueryDocument,
+			response: {
+				[StatusCodes.CREATED]: SharedSearchQueryResponse,
+				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+			},
+			detail: { summary: "Create an immutable shared Search query", tags: ["Search"] },
+		},
+	)
+	.get(
+		"/shared-queries/:id",
+		async ({ params }) => {
+			const record = await getSharedSearchQuery(database, params.id);
+			if (!record) throw new SharedSearchQueryNotFound();
+			return presentSharedSearchQuery(record);
+		},
+		{
+			params: SharedSearchQueryParams,
+			response: {
+				[StatusCodes.OK]: SharedSearchQueryResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["SharedSearchQueryNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+			},
+			detail: { summary: "Get a shared Search query", tags: ["Search"] },
 		},
 	)
 	.post(

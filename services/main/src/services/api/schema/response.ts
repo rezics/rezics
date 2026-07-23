@@ -63,6 +63,7 @@ export const ReadinessResponse = t.Object({
 		database: ReadinessCheckResponse,
 		storage: ReadinessCheckResponse,
 		recommendations: ReadinessCheckResponse,
+		search: ReadinessCheckResponse,
 	}),
 });
 
@@ -307,6 +308,7 @@ const SearchHit = t.Object({
 	kind: t.String(),
 	titles: t.Array(t.String()),
 	summaries: t.Array(t.String()),
+	avatar: t.Optional(AvatarResponse),
 	variantRole: t.Optional(t.UnionEnum(["standalone", "main", "variant"])),
 	variantMain: t.Optional(
 		t.Union([

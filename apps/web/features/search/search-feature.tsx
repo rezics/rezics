@@ -1,31 +1,27 @@
 "use client";
 
-import type {
-	ResolvedSearchControl,
-	SearchControlValue,
-	SearchFeatureDefinition,
-	SearchFeatureState,
-	SearchField,
-	SearchFilter,
-	SearchInjection,
-	SearchMode,
-	SearchOperator,
-	SearchScalar,
-} from "@rezics/search";
+import { ContentLanguageValues } from "@rezics/i18n";
 import {
-	Badge,
-	Button,
-	ChoiceSelect,
-	Field,
-	FieldGroup,
-	FieldLabel,
-	Input,
-	Spinner,
-} from "@rezics/ui";
-import { Eye, EyeOff, Search, X } from "lucide-react";
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+	SearchCategoryValues,
+	type ResolvedSearchControl,
+	type SearchControlExpression,
+	type SearchControlValue,
+	type SearchFeatureDefinition,
+	type SearchFeatureState,
+	type SearchField,
+	type SearchInjection,
+	type SearchOperator,
+	type SearchScalar,
+	type SharedSearchQuerySelection,
+	type SharedSearchQueryState,
+} from "@rezics/search";
+import { Badge, Button, ChoiceSelect, Field, FieldLabel, Input } from "@rezics/ui";
+import { Filter, Search, Share2, X } from "lucide-react";
+import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import { AdvancedSearchBuilder } from "./advanced-search-builder";
+import { SearchEntityMultiSelect, type SearchEntityOption } from "./search-entity-multi-select";
 
 export interface SearchFeatureFacet {
 	readonly controlKey?: string;
@@ -38,68 +34,164 @@ export interface SearchFeatureRequest {
 	readonly state: SearchFeatureState;
 }
 
-function sameScalar(left: SearchScalar, right: SearchScalar): boolean {
-	return typeof left === typeof right && left === right;
+export interface SearchFeatureShareRequest {
+	readonly state: SharedSearchQueryState;
+	readonly selections: readonly SharedSearchQuerySelection[];
 }
 
-function optionIsVisible(control: ResolvedSearchControl, value: SearchScalar): boolean {
-	const policy = control.optionPolicy;
-	if (!policy || policy.kind === "all") return true;
-	const listed = policy.values.some((candidate) => sameScalar(candidate, value));
-	return policy.kind === "include" ? listed : !listed;
+function expressionFromClauses(
+	clauses: readonly SearchControlExpression[],
+): SearchControlExpression | undefined {
+	return clauses.length === 0
+		? undefined
+		: clauses.length === 1
+			? clauses[0]
+			: { operator: "all", clauses: [...clauses] };
 }
 
-function selectedValues(filter: SearchFilter | undefined): readonly SearchScalar[] {
-	if (!filter) return [];
+function expressionClauses(
+	expression: SearchControlExpression | undefined,
+): readonly SearchControlExpression[] {
+	return expression && !("controlKey" in expression) && expression.operator === "all"
+		? expression.clauses
+		: expression
+			? [expression]
+			: [];
+}
+
+function classifyInitialState(state: SharedSearchQueryState | undefined): {
+	readonly quick: readonly SearchControlValue[];
+	readonly advanced?: SearchControlExpression;
+} {
+	if (!state) return { quick: [] };
+	if (state.mode === "basic") return { quick: state.values };
+	const quick: SearchControlValue[] = [];
+	const advanced: SearchControlExpression[] = [];
+	for (const clause of expressionClauses(state.expression)) {
+		if (!("controlKey" in clause)) {
+			advanced.push(clause);
+			continue;
+		}
+		const { filter } = clause;
+		const isQuick =
+			(filter.field === "category" || filter.field === "language") &&
+			["equals", "any-of"].includes(filter.operator);
+		const isQuickTag =
+			filter.field === "tag" &&
+			["equals", "not-equals", "any-of", "none-of"].includes(filter.operator);
+		if (isQuick || isQuickTag) quick.push(clause);
+		else advanced.push(clause);
+	}
+	return { quick, advanced: expressionFromClauses(advanced) };
+}
+
+function valuesOf(value: SearchControlValue | undefined): readonly SearchScalar[] {
+	if (!value) return [];
+	const { filter } = value;
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [];
 }
 
-function selectionFilter(
-	control: ResolvedSearchControl,
-	operator: SearchOperator,
-	values: readonly SearchScalar[],
-): SearchFilter | undefined {
-	if (operator === "range" || values.length === 0) return undefined;
-	if (operator === "exists") return { field: control.field, operator, value: values[0] === true };
-	if (operator === "equals" || operator === "not-equals") {
-		const value = values[0];
-		return value === undefined ? undefined : { field: control.field, operator, value };
+function selectionKey(field: SearchField, value: string): string {
+	return `${field}\u0000${value}`;
+}
+
+function expressionContainsSelection(
+	expression: SearchControlExpression | undefined,
+	selection: SharedSearchQuerySelection,
+): boolean {
+	if (!expression) return false;
+	if ("controlKey" in expression) {
+		if (expression.filter.field !== selection.field) return false;
+		const values =
+			"values" in expression.filter
+				? expression.filter.values
+				: "value" in expression.filter
+					? [expression.filter.value]
+					: [expression.filter.lower, expression.filter.upper];
+		return values.some((value) => value === selection.value);
 	}
-	return { field: control.field, operator, values: [...values] };
+	return expression.operator === "not"
+		? expressionContainsSelection(expression.clause, selection)
+		: expression.clauses.some((clause) => expressionContainsSelection(clause, selection));
 }
 
-function rangeFilter(
-	field: SearchField,
-	lower: SearchScalar | undefined,
-	upper: SearchScalar | undefined,
-): SearchFilter | undefined {
-	if (lower !== undefined)
-		return upper === undefined
-			? { field, operator: "range", lower }
-			: { field, operator: "range", lower, upper };
-	return upper === undefined ? undefined : { field, operator: "range", upper };
+function stateContainsSelection(
+	state: SharedSearchQueryState,
+	selection: SharedSearchQuerySelection,
+): boolean {
+	return state.mode === "advanced"
+		? expressionContainsSelection(state.expression, selection)
+		: state.values.some((value) => expressionContainsSelection(value, selection));
 }
 
-function parseRangeValue(control: ResolvedSearchControl, value: string): SearchScalar | undefined {
-	if (!value) return undefined;
-	if (control.component !== "value-range") return value;
-	const parsed = Number(value);
-	return Number.isSafeInteger(parsed) ? parsed : undefined;
-}
-
-function rangeValue(value: SearchScalar | undefined): string {
-	return value === undefined || typeof value === "boolean" ? "" : String(value);
+function summarizeExpression(
+	expression: SearchControlExpression,
+	controls: readonly ResolvedSearchControl[],
+	label: (control: ResolvedSearchControl) => string,
+	valueLabel: (control: ResolvedSearchControl, value: SearchScalar) => string,
+	operatorLabel: (operator: SearchOperator) => string,
+	matchAll: string,
+	matchAny: string,
+): string {
+	if ("controlKey" in expression) {
+		const control = controls.find((candidate) => candidate.key === expression.controlKey);
+		if (!control) return expression.controlKey;
+		const filter = expression.filter;
+		const values =
+			"values" in filter
+				? filter.values
+				: "value" in filter
+					? [filter.value]
+					: [filter.lower, filter.upper].filter(
+							(value): value is SearchScalar => value !== undefined,
+						);
+		return `${label(control)} · ${operatorLabel(filter.operator)}${
+			values.length
+				? ` · ${values.map((value) => valueLabel(control, value)).join(", ")}`
+				: ""
+		}`;
+	}
+	if (expression.operator === "not")
+		return (
+			operatorLabel("not-equals") +
+			" " +
+			summarizeExpression(
+				expression.clause,
+				controls,
+				label,
+				valueLabel,
+				operatorLabel,
+				matchAll,
+				matchAny,
+			)
+		);
+	return expression.clauses
+		.map((clause) =>
+			summarizeExpression(
+				clause,
+				controls,
+				label,
+				valueLabel,
+				operatorLabel,
+				matchAll,
+				matchAny,
+			),
+		)
+		.join(expression.operator === "all" ? ` · ${matchAll} · ` : ` · ${matchAny} · `);
 }
 
 export function SearchFeature({
 	id,
 	definition,
 	initialQuery,
+	initialState,
+	initialSelections = [],
 	injections = [],
 	onInjectionsChange,
 	onExecute,
+	onShare,
 	pending,
 	error,
 	facets,
@@ -107,47 +199,90 @@ export function SearchFeature({
 	resolveLabel,
 	resolveOptionLabel,
 }: {
-	id: string;
-	definition: SearchFeatureDefinition;
-	initialQuery?: string;
-	injections?: readonly SearchInjection[];
-	onInjectionsChange?: (injections: readonly SearchInjection[]) => void;
-	onExecute: (request: SearchFeatureRequest) => void;
-	pending: boolean;
-	error: boolean;
-	facets?: readonly SearchFeatureFacet[];
-	children?: ReactNode;
-	resolveLabel?: (labelUnitId: string) => string | undefined;
-	resolveOptionLabel?: (
+	readonly id: string;
+	readonly definition: SearchFeatureDefinition;
+	readonly initialQuery?: string;
+	readonly initialState?: SharedSearchQueryState;
+	readonly initialSelections?: readonly SharedSearchQuerySelection[];
+	readonly injections?: readonly SearchInjection[];
+	readonly onInjectionsChange?: (injections: readonly SearchInjection[]) => void;
+	readonly onExecute: (request: SearchFeatureRequest) => void;
+	readonly onShare?: (request: SearchFeatureShareRequest) => Promise<void>;
+	readonly pending: boolean;
+	readonly error: boolean;
+	readonly facets?: readonly SearchFeatureFacet[];
+	readonly children?: ReactNode;
+	readonly resolveLabel?: (labelUnitId: string) => string | undefined;
+	readonly resolveOptionLabel?: (
 		control: ResolvedSearchControl,
 		value: SearchScalar,
 	) => string | undefined;
 }) {
 	const { t } = useTranslation("search");
+	const { t: nav } = useTranslation("nav");
+	const { t: units } = useTranslation("units");
 	const { document, controls } = definition;
-	const [mode, setMode] = useState<SearchMode>(document.modes.default);
-	const [query, setQuery] = useState(initialQuery ?? document.query.initial ?? "");
-	const [showHidden, setShowHidden] = useState(false);
-	const [advancedCombination, setAdvancedCombination] = useState<"all" | "any">("all");
-	const [values, setValues] = useState<readonly SearchControlValue[]>(document.defaults);
-	const [operators, setOperators] = useState<Readonly<Record<string, SearchOperator>>>(() =>
-		Object.fromEntries(
-			controls.map((control) => {
-				const defaultOperator = document.defaults.find(
-					(value) => value.controlKey === control.key,
-				)?.filter.operator;
-				return [
-					control.key,
-					defaultOperator ??
-						(control.component === "multi-select" &&
-						control.operators.includes("any-of")
-							? "any-of"
-							: control.operators[0]) ??
-						"equals",
-				];
-			}),
+	const initial = useMemo(() => classifyInitialState(initialState), [initialState]);
+	const initialSelectionByValue = useMemo(
+		() =>
+			new Map(
+				initialSelections.map((selection) => [
+					selectionKey(selection.field, selection.value),
+					selection,
+				]),
+			),
+		[initialSelections],
+	);
+	const [query, setQuery] = useState(
+		initialState?.query ?? initialQuery ?? document.query.initial ?? "",
+	);
+	const [category, setCategory] = useState(() =>
+		valuesOf(initial.quick.find((value) => value.filter.field === "category")).flatMap(
+			(value) => (typeof value === "string" ? [value] : []),
 		),
 	);
+	const [language, setLanguage] = useState(() =>
+		valuesOf(initial.quick.find((value) => value.filter.field === "language")).flatMap(
+			(value) => (typeof value === "string" ? [value] : []),
+		),
+	);
+	const initialTagValues = (excluded: boolean) =>
+		valuesOf(
+			initial.quick.find(
+				(value) =>
+					value.filter.field === "tag" &&
+					(excluded
+						? ["not-equals", "none-of"].includes(value.filter.operator)
+						: ["equals", "any-of"].includes(value.filter.operator)),
+			),
+		).flatMap((value): SearchEntityOption[] => {
+			if (typeof value !== "string") return [];
+			const presentation = initialSelectionByValue.get(selectionKey("tag", value));
+			return [
+				{
+					id: value,
+					label: presentation?.title ?? value,
+					kind: presentation?.kind ?? t.fields.tag,
+				},
+			];
+		});
+	const [includedTags, setIncludedTags] = useState<readonly SearchEntityOption[]>(() =>
+		initialTagValues(false),
+	);
+	const [excludedTags, setExcludedTags] = useState<readonly SearchEntityOption[]>(() =>
+		initialTagValues(true),
+	);
+	const [advanced, setAdvanced] = useState<SearchControlExpression | undefined>(initial.advanced);
+	const [advancedSelections, setAdvancedSelections] =
+		useState<readonly SharedSearchQuerySelection[]>(initialSelections);
+	const [builderOpen, setBuilderOpen] = useState(false);
+	const [shareState, setShareState] = useState<"idle" | "copied" | "failed">("idle");
+
+	const controlByField = (field: SearchField) =>
+		controls.find((control) => control.field === field && control.modes.includes("advanced"));
+	const categoryControl = controlByField("category");
+	const languageControl = controlByField("language");
+	const tagControl = controlByField("tag");
 	const operatorLabels: Record<SearchOperator, string> = {
 		equals: t.operators.equals,
 		"not-equals": t.operators.notEquals,
@@ -157,316 +292,353 @@ export function SearchFeature({
 		range: t.operators.range,
 		exists: t.operators.exists,
 	};
-	const activeControls = useMemo(
-		() =>
-			controls.filter(
-				(control) =>
-					control.modes.includes(mode) &&
-					(control.disclosure === "visible" || showHidden),
-			),
-		[controls, mode, showHidden],
+	const controlLabel = (control: ResolvedSearchControl) =>
+		(control.labelUnitId ? resolveLabel?.(control.labelUnitId) : undefined) ??
+		t.fields[control.field];
+	const selectionCandidates = [
+		...advancedSelections,
+		...includedTags.map(
+			(option) =>
+				({
+					field: "tag",
+					value: option.id,
+					title: option.label,
+					kind: option.kind,
+				}) satisfies SharedSearchQuerySelection,
+		),
+		...excludedTags.map(
+			(option) =>
+				({
+					field: "tag",
+					value: option.id,
+					title: option.label,
+					kind: option.kind,
+				}) satisfies SharedSearchQuerySelection,
+		),
+	];
+	const allSelections = [
+		...new Map(
+			selectionCandidates.map((selection) => [
+				selectionKey(selection.field, selection.value),
+				selection,
+			]),
+		).values(),
+	];
+	const selectionLabels = new Map(
+		allSelections.map((selection) => [
+			selectionKey(selection.field, selection.value),
+			selection.title,
+		]),
 	);
-	const hiddenCount = controls.filter(
-		(control) => control.modes.includes(mode) && control.disclosure === "hidden",
-	).length;
-	const replaceValue = (controlKey: string, filter?: SearchFilter) =>
-		setValues((current) => [
-			...current.filter((value) => value.controlKey !== controlKey),
-			...(filter ? [{ controlKey, filter }] : []),
-		]);
+	const localizedValues: Readonly<Record<string, string>> = {
+		...nav.following.types,
+		...units.rating,
+		...units.aiDisclosure,
+	};
+	const valueLabel = (control: ResolvedSearchControl, value: SearchScalar) =>
+		(typeof value === "string"
+			? selectionLabels.get(selectionKey(control.field, value))
+			: undefined) ??
+		resolveOptionLabel?.(control, value) ??
+		(typeof value === "boolean"
+			? value
+				? t.boolean.yes
+				: t.boolean.no
+			: (localizedValues[String(value)] ?? String(value)));
+
+	function currentState(
+		nextAdvanced: SearchControlExpression | undefined,
+	): SharedSearchQueryState {
+		const clauses: SearchControlExpression[] = [];
+		if (categoryControl && category.length)
+			clauses.push({
+				controlKey: categoryControl.key,
+				filter: { field: "category", operator: "any-of", values: [...category] },
+			});
+		if (languageControl && language.length)
+			clauses.push({
+				controlKey: languageControl.key,
+				filter: { field: "language", operator: "any-of", values: [...language] },
+			});
+		if (tagControl && includedTags.length)
+			clauses.push({
+				controlKey: tagControl.key,
+				filter: {
+					field: "tag",
+					operator: "any-of",
+					values: includedTags.map((option) => option.id),
+				},
+			});
+		if (tagControl && excludedTags.length)
+			clauses.push({
+				controlKey: tagControl.key,
+				filter: {
+					field: "tag",
+					operator: "none-of",
+					values: excludedTags.map((option) => option.id),
+				},
+			});
+		if (nextAdvanced) clauses.push(nextAdvanced);
+		return {
+			mode: "advanced",
+			query,
+			expression: expressionFromClauses(clauses),
+		};
+	}
+
+	function execute(nextAdvanced: SearchControlExpression | undefined) {
+		onExecute({ injections: [...injections], state: currentState(nextAdvanced) });
+	}
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const active = values.filter((value) =>
-			controls.some(
-				(control) => control.key === value.controlKey && control.modes.includes(mode),
-			),
-		);
-		onExecute({
-			injections: [...injections],
-			state:
-				mode === "basic"
-					? { mode, query, values: active }
-					: {
-							mode,
-							query,
-							expression:
-								active.length === 0
-									? undefined
-									: active.length === 1
-										? active[0]
-										: { operator: advancedCombination, clauses: active },
-						},
-		});
+		execute(advanced);
 	}
 
+	const advancedSummary = advanced
+		? summarizeExpression(
+				advanced,
+				controls,
+				controlLabel,
+				valueLabel,
+				(operator) => operatorLabels[operator],
+				t.advancedCombinations.all,
+				t.advancedCombinations.any,
+			)
+		: "";
+
 	return (
-		<form className="rounded-xl border border-border-weak bg-card p-4" onSubmit={submit}>
-			{injections.length ? (
-				<div aria-label={t.appliedContext} className="mb-4 flex flex-wrap gap-2">
-					{injections.map((injection, index) => (
-						<Badge key={`${injection.source}:${injection.value.controlKey}:${index}`}>
-							{t.injectionSources[injection.source]}:{" "}
-							{selectedValues(injection.value.filter)
-								.map((value) => {
-									const control = controls.find(
-										(candidate) => candidate.key === injection.value.controlKey,
-									);
-									return (
-										(control
-											? resolveOptionLabel?.(control, value)
-											: undefined) ?? String(value)
-									);
-								})
-								.join(", ")}
-							{injection.removable && onInjectionsChange ? (
-								<button
-									aria-label={t.removeAppliedContext}
-									onClick={() =>
-										onInjectionsChange(
-											injections.filter(
-												(_, candidate) => candidate !== index,
-											),
-										)
-									}
-									type="button"
+		<>
+			<form className="grid gap-5" onSubmit={submit}>
+				{injections.length ? (
+					<div aria-label={t.appliedContext} className="flex flex-wrap gap-2">
+						{injections.map((injection, index) => {
+							const control = controls.find(
+								(candidate) => candidate.key === injection.value.controlKey,
+							);
+							return (
+								<Badge
+									key={`${injection.source}:${injection.value.controlKey}:${index}`}
+									variant="secondary"
 								>
-									<X aria-hidden className="size-3" />
-								</button>
-							) : null}
-						</Badge>
-					))}
-				</div>
-			) : null}
-			<div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
+									{t.injectionSources[injection.source]}:{" "}
+									{valuesOf(injection.value)
+										.map((value) =>
+											control ? valueLabel(control, value) : String(value),
+										)
+										.join(", ")}
+									{injection.removable && onInjectionsChange ? (
+										<button
+											aria-label={t.removeAppliedContext}
+											onClick={() =>
+												onInjectionsChange(
+													injections.filter(
+														(_, candidate) => candidate !== index,
+													),
+												)
+											}
+											type="button"
+										>
+											<X aria-hidden className="size-3" />
+										</button>
+									) : null}
+								</Badge>
+							);
+						})}
+					</div>
+				) : null}
+
 				{document.query.enabled ? (
-					<Field>
-						<FieldLabel htmlFor={`${id}-query`}>{t.query}</FieldLabel>
-						<Input
-							id={`${id}-query`}
-							maxLength={500}
-							onChange={(event) => setQuery(event.currentTarget.value)}
-							placeholder={t.placeholder}
-							required={document.query.required}
-							type="search"
-							value={query}
-						/>
-					</Field>
+					<div className="flex items-stretch gap-2">
+						<div className="relative min-w-0 flex-1">
+							<Search
+								aria-hidden
+								className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+							/>
+							<Input
+								aria-label={t.query}
+								className="h-12 ps-10 text-base"
+								id={`${id}-query`}
+								maxLength={500}
+								onChange={(event) => setQuery(event.currentTarget.value)}
+								placeholder={t.placeholder}
+								required={document.query.required}
+								type="search"
+								value={query}
+							/>
+						</div>
+						<Button
+							className="h-12 shrink-0 px-5"
+							isLoading={pending}
+							type="submit"
+							variant="solid"
+						>
+							<Search aria-hidden />
+							<span className="max-sm:sr-only">{t.submit}</span>
+						</Button>
+					</div>
 				) : null}
-				{document.modes.available.length > 1 ? (
-					<Field>
-						<FieldLabel>{t.mode}</FieldLabel>
-						<ChoiceSelect
-							appearance="field"
-							ariaLabel={t.mode}
-							onValueChange={(selected) => {
-								const next = selected[0];
-								if (next === "basic" || next === "advanced") setMode(next);
-							}}
-							options={document.modes.available.map((value) => ({
-								value,
-								label: value === "basic" ? t.modes.basic : t.modes.advanced,
-							}))}
-							placeholder={t.mode}
-							value={[mode]}
-						/>
-					</Field>
-				) : null}
-			</div>
-			{hiddenCount ? (
-				<Button
-					className="mt-3"
-					onClick={() => setShowHidden((current) => !current)}
-					size="sm"
-					type="button"
-					variant="quiet"
-				>
-					{showHidden ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
-					{showHidden ? t.hideHiddenFilters : t.showHiddenFilters({ count: hiddenCount })}
-				</Button>
-			) : null}
-			{mode === "advanced" ? (
-				<Field className="mt-4 max-w-sm">
-					<FieldLabel>{t.advancedCombination}</FieldLabel>
-					<ChoiceSelect
-						appearance="field"
-						ariaLabel={t.advancedCombination}
-						onValueChange={(selected) => {
-							const next = selected[0];
-							if (next === "all" || next === "any") setAdvancedCombination(next);
-						}}
-						options={(
-							[
-								["all", t.advancedCombinations.all],
-								["any", t.advancedCombinations.any],
-							] as const
-						).map(([value, label]) => ({ value, label }))}
-						placeholder={t.advancedCombination}
-						value={[advancedCombination]}
-					/>
-				</Field>
-			) : null}
-			{activeControls.length ? (
-				<FieldGroup aria-label={t.filters} className="mt-4 grid gap-3 sm:grid-cols-2">
-					{activeControls.map((control) => {
-						const configured = values.find((value) => value.controlKey === control.key);
-						const filter = configured?.filter;
-						const operator = operators[control.key] ?? control.operators[0] ?? "equals";
-						const label =
-							(control.labelUnitId
-								? resolveLabel?.(control.labelUnitId)
-								: undefined) ?? t.fields[control.field];
-						const facetOptions =
-							facets?.find(
-								(facet) =>
-									facet.controlKey === control.key ||
-									(!facet.controlKey && facet.field === control.field),
-							)?.options ?? [];
-						const candidates =
-							control.optionSource?.kind === "static"
-								? control.optionSource.options.map((option) => option.value)
-								: control.component === "toggle" || operator === "exists"
-									? [true, false]
-									: facetOptions.map((option) => option.value);
-						const scalars = candidates.filter((value) =>
-							optionIsVisible(control, value),
-						);
-						const scalarByKey = new Map(
-							scalars.map((value) => [JSON.stringify(value), value]),
-						);
-						const options = scalars.map((value) => ({
-							value: JSON.stringify(value),
-							label:
-								resolveOptionLabel?.(control, value) ??
-								(typeof value === "boolean"
-									? value
-										? t.boolean.yes
-										: t.boolean.no
-									: String(value)),
-						}));
-						const selected = selectedValues(filter).map((value) =>
-							JSON.stringify(value),
-						);
-						const lower = filter && "lower" in filter ? filter.lower : undefined;
-						const upper = filter && "upper" in filter ? filter.upper : undefined;
-						return (
-							<Field key={control.key}>
-								<FieldLabel>{label}</FieldLabel>
-								{control.operators.length > 1 ? (
-									<ChoiceSelect
-										appearance="field"
-										ariaLabel={`${label} · ${t.operator}`}
-										onValueChange={(selectedOperators) => {
-											const next = selectedOperators[0] as
-												SearchOperator | undefined;
-											if (!next) return;
-											setOperators((current) => ({
-												...current,
-												[control.key]: next,
-											}));
-											replaceValue(
-												control.key,
-												selectionFilter(
-													control,
-													next,
-													selectedValues(filter),
-												),
-											);
-										}}
-										options={control.operators.map((value) => ({
-											value,
-											label: operatorLabels[value],
-										}))}
-										placeholder={t.operator}
-										value={[operator]}
-									/>
-								) : null}
-								{operator === "range" ? (
-									<div className="grid grid-cols-2 gap-2">
-										<Input
-											aria-label={`${label} · ${t.rangeLower}`}
-											onChange={(event) =>
-												replaceValue(
-													control.key,
-													rangeFilter(
-														control.field,
-														parseRangeValue(
-															control,
-															event.currentTarget.value,
-														),
-														upper,
-													),
-												)
-											}
-											placeholder={t.rangeLower}
-											type={
-												control.component === "date-range"
-													? "date"
-													: "number"
-											}
-											value={rangeValue(lower)}
-										/>
-										<Input
-											aria-label={`${label} · ${t.rangeUpper}`}
-											onChange={(event) =>
-												replaceValue(
-													control.key,
-													rangeFilter(
-														control.field,
-														lower,
-														parseRangeValue(
-															control,
-															event.currentTarget.value,
-														),
-													),
-												)
-											}
-											placeholder={t.rangeUpper}
-											type={
-												control.component === "date-range"
-													? "date"
-													: "number"
-											}
-											value={rangeValue(upper)}
-										/>
-									</div>
-								) : (
-									<ChoiceSelect
-										appearance="field"
-										ariaLabel={label}
-										multiple={
-											operator === "any-of" ||
-											operator === "all-of" ||
-											operator === "none-of"
-										}
-										onValueChange={(keys) => {
-											const next = keys.flatMap((key) => {
-												const value = scalarByKey.get(key);
-												return value === undefined ? [] : [value];
-											});
-											replaceValue(
-												control.key,
-												selectionFilter(control, operator, next),
-											);
-										}}
-										options={options}
-										placeholder={t.selectFilter}
-										value={selected}
-									/>
-								)}
+
+				<div aria-label={t.commonFilters} className="grid gap-4 lg:grid-cols-12">
+					{categoryControl ? (
+						<Field className="lg:col-span-3">
+							<FieldLabel>{t.contentCategory}</FieldLabel>
+							<ChoiceSelect
+								appearance="field"
+								ariaLabel={t.contentCategory}
+								multiple
+								onValueChange={(values) => setCategory([...values])}
+								options={SearchCategoryValues.map((value) => ({
+									value,
+									label: t.categoryOptions[value],
+								}))}
+								placeholder={t.allCategories}
+								value={category}
+							/>
+						</Field>
+					) : null}
+					{tagControl ? (
+						<div className="grid gap-3 sm:grid-cols-2 lg:col-span-6">
+							<Field>
+								<FieldLabel>{t.includeTags}</FieldLabel>
+								<SearchEntityMultiSelect
+									emptyLabel={t.entitySearchEmpty}
+									errorLabel={t.entitySearchError}
+									index="tags"
+									loadingLabel={t.entitySearchLoading}
+									onChange={setIncludedTags}
+									placeholder={t.tagSearchPlaceholder}
+									removeLabel={t.removeSelection}
+									selected={includedTags}
+								/>
 							</Field>
-						);
-					})}
-				</FieldGroup>
-			) : null}
-			<div className="mt-4 flex justify-end">
-				<Button disabled={pending} type="submit" variant="solid">
-					{pending ? <Spinner aria-hidden /> : <Search aria-hidden />}
-					{t.submit}
-				</Button>
-			</div>
-			{error ? <p className="mt-3 text-destructive text-sm">{t.failed}</p> : null}
+							<Field>
+								<FieldLabel>{t.excludeTags}</FieldLabel>
+								<SearchEntityMultiSelect
+									emptyLabel={t.entitySearchEmpty}
+									errorLabel={t.entitySearchError}
+									index="tags"
+									loadingLabel={t.entitySearchLoading}
+									onChange={setExcludedTags}
+									placeholder={t.tagSearchPlaceholder}
+									removeLabel={t.removeSelection}
+									selected={excludedTags}
+								/>
+							</Field>
+						</div>
+					) : null}
+					{languageControl ? (
+						<Field className="lg:col-span-3">
+							<FieldLabel>{t.language}</FieldLabel>
+							<ChoiceSelect
+								appearance="field"
+								ariaLabel={t.language}
+								multiple
+								onValueChange={(values) => setLanguage([...values])}
+								options={ContentLanguageValues.map((value) => ({
+									value,
+									label: t.languageOptions[value],
+								}))}
+								placeholder={t.allLanguages}
+								value={language}
+							/>
+						</Field>
+					) : null}
+				</div>
+
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<Button
+						onClick={() => setBuilderOpen(true)}
+						size="sm"
+						type="button"
+						variant="quiet"
+					>
+						<Filter aria-hidden />
+						{t.advancedFilters}
+					</Button>
+					{onShare ? (
+						<Button
+							onClick={() => {
+								setShareState("idle");
+								const state = currentState(advanced);
+								void onShare({
+									state,
+									selections: allSelections.filter((selection) =>
+										stateContainsSelection(state, selection),
+									),
+								}).then(
+									() => setShareState("copied"),
+									() => setShareState("failed"),
+								);
+							}}
+							size="sm"
+							type="button"
+							variant="quiet"
+						>
+							<Share2 aria-hidden />
+							{shareState === "copied" ? t.shareCopied : t.shareQuery}
+						</Button>
+					) : null}
+				</div>
+
+				{shareState === "failed" ? (
+					<p className="text-destructive text-sm" role="alert">
+						{t.shareFailed}
+					</p>
+				) : null}
+
+				{advanced ? (
+					<section className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-3">
+						<span className="font-medium text-sm">{t.appliedAdvancedFilters}</span>
+						<Badge
+							className="max-w-full whitespace-normal text-start leading-5"
+							variant="secondary"
+						>
+							{advancedSummary}
+						</Badge>
+						<Button
+							className="ms-auto"
+							onClick={() => setBuilderOpen(true)}
+							size="sm"
+							type="button"
+							variant="quiet"
+						>
+							{t.editAdvancedFilters}
+						</Button>
+						<Button
+							onClick={() => {
+								setAdvanced(undefined);
+								setAdvancedSelections([]);
+								execute(undefined);
+							}}
+							size="sm"
+							type="button"
+							variant="quiet"
+						>
+							{t.clearAdvancedFilters}
+						</Button>
+					</section>
+				) : null}
+			</form>
+
+			{error ? <p className="sr-only">{t.failed}</p> : null}
 			{children}
-		</form>
+
+			<AdvancedSearchBuilder
+				controls={controls}
+				expression={advanced}
+				facets={facets}
+				onApply={(nextExpression, nextSelections) => {
+					setAdvanced(nextExpression);
+					setAdvancedSelections(nextSelections);
+					execute(nextExpression);
+				}}
+				onOpenChange={setBuilderOpen}
+				open={builderOpen}
+				resolveLabel={resolveLabel}
+				resolveOptionLabel={valueLabel}
+				selections={advancedSelections}
+			/>
+		</>
 	);
 }

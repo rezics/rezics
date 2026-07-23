@@ -87,3 +87,23 @@ promote it. PostgreSQL remains the complete rebuild source.
 
 History generation lifecycle is independent. Existing PostgreSQL history feeds, comparisons,
 restore, and undo never call Meilisearch.
+
+## Product-facing search and shared queries
+
+The search page exposes one everyday search surface: keywords, a small set of promoted filters,
+and a link-style advanced-filter action. Advanced conditions are edited as an explicit boolean
+expression and are rendered back on the main page as a read-only summary. Result groups remain
+separate so category identity and category-specific totals are not lost during presentation.
+
+Shared queries are immutable, cursor-free `SharedSearchQueryDocument` values stored in
+`shared_search_query`. PostgreSQL 18 generates the public bearer identifier with native
+`uuidv7()`. Creation requires an authenticated profile; retrieval is public to anyone who has the
+unpredictable link. A shared document stores display hints separately from executable state, and
+the service recompiles the executable state on both write and read. Running a shared query always
+uses the current viewer and current PostgreSQL authorization state. There are intentionally no
+list or update endpoints, and pagination cursors are never persisted in a share.
+
+API readiness includes the search dependency. It requires a configured Meilisearch endpoint, a
+healthy Meilisearch process, and a current active projection generation; otherwise readiness
+reports the optional search dependency as degraded rather than allowing a broken search surface to
+look healthy or withholding unrelated application traffic.

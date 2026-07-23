@@ -188,4 +188,5 @@ export default {
 	RealmScoreContextPostNotMounted: `The Score context ${postTerms.label} must be mounted in the ${realmTerms.label}.`,
 	SearchDocumentRevisionConflict: "The search configuration changed. Reload it before saving.",
 	ZoneSearchFeatureNotFound: `This ${zoneTerms.inline} has no enabled search feature.`,
+	SharedSearchQueryNotFound: "This shared search query could not be found.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

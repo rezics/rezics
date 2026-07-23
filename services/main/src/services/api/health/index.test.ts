@@ -11,6 +11,7 @@ function report(
 		readonly database: HealthCheckState;
 		readonly storage?: HealthCheckState;
 		readonly recommendations?: HealthCheckState;
+		readonly search?: HealthCheckState;
 	},
 ): ReadinessReport<ApiHealthCheckName> {
 	return {
@@ -33,6 +34,12 @@ function report(
 				criticality: "optional",
 				state: states.recommendations ?? "ready",
 				latencyMs: 6,
+			},
+			{
+				name: "search",
+				criticality: "optional",
+				state: states.search ?? "ready",
+				latencyMs: 7,
 			},
 		],
 	};
@@ -72,6 +79,7 @@ describe("health routes", () => {
 				database: { state: "ready", latencyMs: 4 },
 				storage: { state: "ready", latencyMs: 5 },
 				recommendations: { state: "degraded", latencyMs: 6 },
+				search: { state: "ready", latencyMs: 7 },
 			},
 		});
 	});

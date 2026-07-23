@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { parseSharedSearchQueryDocument } from "@rezics/search";
 
 import {
 	compileSearchFeatureInput,
@@ -182,5 +183,50 @@ describe("Search Feature v1", () => {
 			state: { mode: "basic", values: [] },
 		});
 		expect(compiled.request.maxResultWindow).toBe(10_000);
+	});
+
+	it("accepts a cursor-free shared query and rejects duplicate display hints", () => {
+		const document = {
+			version: 1,
+			template: "global",
+			state: {
+				mode: "advanced",
+				query: "design",
+				expression: {
+					controlKey: "tag",
+					filter: { field: "tag", operator: "any-of", values: [TagId] },
+				},
+			},
+			selections: [{ field: "tag", value: TagId, title: "Design", kind: "concept" }],
+		} as const;
+
+		expect(parseSharedSearchQueryDocument(document)).toBe(document);
+		expect(() =>
+			parseSharedSearchQueryDocument({
+				...document,
+				selections: [...document.selections, ...document.selections],
+			}),
+		).toThrow("must be unique");
+		expect(() =>
+			parseSharedSearchQueryDocument({
+				...document,
+				selections: [
+					{
+						field: "tag",
+						value: SecondTagId,
+						title: "Removed tag",
+						kind: "concept",
+					},
+				],
+			}),
+		).toThrow("must reference executable values");
+		expect(
+			compileSearchFeatureInput({
+				document: createDefaultSearchDocument(document.template),
+				contexts: [],
+				injections: [],
+				state: document.state,
+			}).request.expression,
+		).toMatchObject({ field: "tag", values: [TagId] });
 	});
 });

@@ -50,6 +50,7 @@ export function createHealthRoutes(
 							database: publicCheck(checkByName(report, "database")),
 							storage: publicCheck(checkByName(report, "storage")),
 							recommendations: publicCheck(checkByName(report, "recommendations")),
+							search: publicCheck(checkByName(report, "search")),
 						},
 					},
 				);

@@ -9,6 +9,7 @@ import {
 	type SearchFilter,
 	type SearchScalar,
 } from "@rezics/search";
+import { FontAwesomeProvider } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
 
@@ -844,6 +845,34 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				FROM ${unitLocalization}
 				WHERE ${unitLocalization.unitId} = ${unit.id}
 			), '[]'::jsonb),
+			'avatar', (
+				SELECT case ${unitLocalization.avatarType}
+					when 'image' then jsonb_build_object(
+						'type', 'image',
+						'image', jsonb_build_object(
+							'id', ${unitLocalization.avatarAssetId},
+							'url', '/image-assets/' || ${unitLocalization.avatarAssetId} || '/content'
+						)
+					)
+					when 'emoji' then jsonb_build_object(
+						'type', 'emoji',
+						'emoji', ${unitLocalization.avatarEmoji}
+					)
+					when 'icon' then jsonb_build_object(
+						'type', 'icon',
+						'icon', jsonb_build_object(
+							'provider', ${FontAwesomeProvider},
+							'prefix', ${unitLocalization.avatarIconPrefix},
+							'name', ${unitLocalization.avatarIconName}
+						)
+					)
+				end
+				FROM ${unitLocalization}
+				WHERE ${unitLocalization.unitId} = ${unit.id}
+					AND ${unitLocalization.avatarType} IS NOT NULL
+				ORDER BY ${unitLocalization.position}, ${unitLocalization.language}
+				LIMIT 1
+			),
 			'variantRole', case when ${category}::text = 'units' then case
 				when exists (
 					select 1 from ${unitVariant}

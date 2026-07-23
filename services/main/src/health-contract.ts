@@ -85,6 +85,7 @@ export const apiReadinessPolicy = {
 		// Storage remains optional until the RustFS/R2 contract suite in Plan 5 is accepted.
 		storage: { criticality: "optional", timeoutMs: 1_500 },
 		recommendations: { criticality: "optional", timeoutMs: 1_500 },
+		search: { criticality: "optional", timeoutMs: 1_500 },
 	},
 } as const;
 

@@ -1,6 +1,7 @@
 import { apiReadinessPolicy } from "../../health-contract";
 import { getRecommendationHealth } from "../recommendations/worker";
 import { storage } from "../storage";
+import { checkSearch } from "./search";
 import { checkDatabase } from "./database";
 import {
 	createReadinessEvaluator,
@@ -15,6 +16,7 @@ export interface ApiReadinessDependencies {
 	readonly database: (signal: AbortSignal) => Promise<boolean>;
 	readonly storage: (signal: AbortSignal) => Promise<boolean>;
 	readonly recommendations: (signal: AbortSignal) => Promise<boolean>;
+	readonly search: (signal: AbortSignal) => Promise<boolean>;
 }
 
 const defaultDependencies: ApiReadinessDependencies = {
@@ -27,6 +29,7 @@ const defaultDependencies: ApiReadinessDependencies = {
 		const result = await getRecommendationHealth();
 		return !signal.aborted && result.ready;
 	},
+	search: checkSearch,
 };
 
 export function apiReadinessDefinitions(
@@ -39,7 +42,12 @@ export function apiReadinessDefinitions(
 			probe: dependencies[name],
 		};
 	}
-	return [definition("database"), definition("storage"), definition("recommendations")];
+	return [
+		definition("database"),
+		definition("storage"),
+		definition("recommendations"),
+		definition("search"),
+	];
 }
 
 export function createApiReadinessEvaluator(

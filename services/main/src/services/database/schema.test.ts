@@ -48,6 +48,7 @@ import {
 	unitReactionStat,
 	unitTagVoteStat,
 	searchIndexGeneration,
+	sharedSearchQuery,
 	searchRevisionProjectionSource,
 	searchUnitProjectionSource,
 	unitSlugAddress,
@@ -67,6 +68,18 @@ const dialect = new PgDialect();
 describe("database schema contracts", () => {
 	it("uses PostgreSQL uuidv7 for generated identifiers", () => {
 		expect(dialect.sqlToQuery(unit.id.default as SQL).sql).toBe("uuidv7()");
+		expect(dialect.sqlToQuery(sharedSearchQuery.id.default as SQL).sql).toBe("uuidv7()");
+	});
+
+	it("stores immutable shared Search queries behind a UUIDv7 primary key", () => {
+		const table = getTableConfig(sharedSearchQuery);
+		expect(table.name).toBe("shared_search_query");
+		expect(table.checks.map((constraint) => constraint.name)).toContain(
+			"shared_search_query_document_check",
+		);
+		expect(table.foreignKeys.map((key) => key.getName())).toContain(
+			"shared_search_query_created_by_profile_id_profile_id_fk",
+		);
 	});
 
 	it("owns independent current/history projection ledgers and generation pointers", () => {

@@ -7,6 +7,7 @@ const readyDependencies = {
 	database: async () => true,
 	storage: async () => true,
 	recommendations: async () => true,
+	search: async () => true,
 };
 
 describe("API readiness policy", () => {
@@ -15,6 +16,7 @@ describe("API readiness policy", () => {
 			database: { criticality: "required", timeoutMs: 1_000 },
 			storage: { criticality: "optional", timeoutMs: 1_500 },
 			recommendations: { criticality: "optional", timeoutMs: 1_500 },
+			search: { criticality: "optional", timeoutMs: 1_500 },
 		});
 		expect(
 			apiReadinessDefinitions(readyDependencies).map(({ name, criticality }) => ({
@@ -25,6 +27,7 @@ describe("API readiness policy", () => {
 			{ name: "database", criticality: "required" },
 			{ name: "storage", criticality: "optional" },
 			{ name: "recommendations", criticality: "optional" },
+			{ name: "search", criticality: "optional" },
 		]);
 	});
 

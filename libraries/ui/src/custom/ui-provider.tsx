@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
+import type { PresentedAvatar } from "@rezics/avatar";
 
 export interface UiMessages {
 	loading: ReactNode;
@@ -39,6 +40,8 @@ export type UiMessagesInput = Omit<Partial<UiMessages>, "editor"> & {
 export interface EntityPickerHit {
 	id: string;
 	label: string;
+	kind?: string;
+	avatar?: PresentedAvatar | null;
 }
 
 export type EntitySearch = (

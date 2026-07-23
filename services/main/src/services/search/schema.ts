@@ -5,6 +5,7 @@ import {
 	type SearchExpression,
 	type SearchSort,
 } from "@rezics/search";
+import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 import type { PublicationLicenseId } from "@rezics/license";
 import type { PublicSlugAddressValue } from "@rezics/slug";
@@ -21,6 +22,7 @@ export interface SearchHit {
 	kind: string;
 	titles: string[];
 	summaries: string[];
+	avatar?: PresentedAvatar | null;
 	variantRole?: "standalone" | "main" | "variant";
 	variantMain?:
 		| { readonly state: "unavailable" }

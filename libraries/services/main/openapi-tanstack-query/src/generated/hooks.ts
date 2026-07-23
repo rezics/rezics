@@ -1688,6 +1688,17 @@ import type {
 	PostApiSearchStatus422,
 	PostApiSearchStatus500,
 	PostApiSearchStatus503,
+	PostApiSearchSharedQueriesOptions,
+	PostApiSearchSharedQueriesStatus201,
+	PostApiSearchSharedQueriesStatus401,
+	PostApiSearchSharedQueriesStatus422,
+	PostApiSearchSharedQueriesStatus429,
+	PostApiSearchSharedQueriesStatus500,
+	GetApiSearchSharedQueriesByIdOptions,
+	GetApiSearchSharedQueriesByIdStatus200,
+	GetApiSearchSharedQueriesByIdStatus404,
+	GetApiSearchSharedQueriesByIdStatus422,
+	GetApiSearchSharedQueriesByIdStatus500,
 	PostApiSearchByIndexOptions,
 	PostApiSearchByIndexStatus200,
 	PostApiSearchByIndexStatus422,
@@ -2001,6 +2012,8 @@ import {
 	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
 	postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
 	postApiSearch,
+	postApiSearchSharedQueries,
+	getApiSearchSharedQueriesById,
 	postApiSearchByIndex,
 	postApiImageAssets,
 	postApiImageAssetsByIdComplete,
@@ -28769,6 +28782,199 @@ export function usePostApiSearch<TContext>(
 		PostApiSearchOptions,
 		TContext
 	>;
+}
+
+export const postApiSearchSharedQueriesMutationKey = () =>
+	[{ url: "/api/search/shared-queries" }] as const;
+
+export function postApiSearchSharedQueriesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiSearchSharedQueriesMutationKey();
+	return mutationOptions<
+		PostApiSearchSharedQueriesStatus201,
+		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus401
+			| PostApiSearchSharedQueriesStatus422
+			| PostApiSearchSharedQueriesStatus429
+			| PostApiSearchSharedQueriesStatus500
+		>,
+		PostApiSearchSharedQueriesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiSearchSharedQueries({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create an immutable shared Search query
+ * {@link /api/search/shared-queries}
+ */
+export function usePostApiSearchSharedQueries<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiSearchSharedQueriesStatus201,
+			ResponseErrorConfig<
+				| PostApiSearchSharedQueriesStatus401
+				| PostApiSearchSharedQueriesStatus422
+				| PostApiSearchSharedQueriesStatus429
+				| PostApiSearchSharedQueriesStatus500
+			>,
+			PostApiSearchSharedQueriesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiSearchSharedQueriesMutationKey();
+
+	const baseOptions = postApiSearchSharedQueriesMutationOptions(config) as UseMutationOptions<
+		PostApiSearchSharedQueriesStatus201,
+		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus401
+			| PostApiSearchSharedQueriesStatus422
+			| PostApiSearchSharedQueriesStatus429
+			| PostApiSearchSharedQueriesStatus500
+		>,
+		PostApiSearchSharedQueriesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiSearchSharedQueriesStatus201,
+		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus401
+			| PostApiSearchSharedQueriesStatus422
+			| PostApiSearchSharedQueriesStatus429
+			| PostApiSearchSharedQueriesStatus500
+		>,
+		PostApiSearchSharedQueriesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiSearchSharedQueriesStatus201,
+		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus401
+			| PostApiSearchSharedQueriesStatus422
+			| PostApiSearchSharedQueriesStatus429
+			| PostApiSearchSharedQueriesStatus500
+		>,
+		PostApiSearchSharedQueriesOptions,
+		TContext
+	>;
+}
+
+export const getApiSearchSharedQueriesByIdQueryKey = ({
+	path,
+}: Omit<GetApiSearchSharedQueriesByIdOptions, "headers">) =>
+	[{ url: "/api/search/shared-queries/:id", params: path }] as const;
+
+type GetApiSearchSharedQueriesByIdQueryKey = ReturnType<
+	typeof getApiSearchSharedQueriesByIdQueryKey
+>;
+
+export function getApiSearchSharedQueriesByIdQueryOptions(
+	{ path }: GetApiSearchSharedQueriesByIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiSearchSharedQueriesByIdQueryKey({ path });
+	return queryOptions<
+		GetApiSearchSharedQueriesByIdStatus200,
+		ResponseErrorConfig<
+			| GetApiSearchSharedQueriesByIdStatus404
+			| GetApiSearchSharedQueriesByIdStatus422
+			| GetApiSearchSharedQueriesByIdStatus500
+		>,
+		GetApiSearchSharedQueriesByIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiSearchSharedQueriesById({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get a shared Search query
+ * {@link /api/search/shared-queries/:id}
+ */
+export function useGetApiSearchSharedQueriesById<
+	TData = GetApiSearchSharedQueriesByIdStatus200,
+	TQueryData = GetApiSearchSharedQueriesByIdStatus200,
+	TQueryKey extends QueryKey = GetApiSearchSharedQueriesByIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiSearchSharedQueriesByIdOptions["path"]
+			| (() => GetApiSearchSharedQueriesByIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiSearchSharedQueriesByIdStatus200,
+				ResponseErrorConfig<
+					| GetApiSearchSharedQueriesByIdStatus404
+					| GetApiSearchSharedQueriesByIdStatus422
+					| GetApiSearchSharedQueriesByIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiSearchSharedQueriesByIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiSearchSharedQueriesByIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiSearchSharedQueriesByIdStatus404
+			| GetApiSearchSharedQueriesByIdStatus422
+			| GetApiSearchSharedQueriesByIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const postApiSearchByIndexMutationKey = () => [{ url: "/api/search/:index" }] as const;

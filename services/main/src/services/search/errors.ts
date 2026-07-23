@@ -38,9 +38,16 @@ export class ZoneSearchFeatureNotFound extends Data.TaggedError("ZoneSearchFeatu
 	readonly message = "Zone Search Feature is not configured";
 }
 
+export class SharedSearchQueryNotFound extends Data.TaggedError("SharedSearchQueryNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = SharedSearchQueryNotFound.status;
+	readonly message = "Shared Search query does not exist";
+}
+
 export const SearchErrors = [
 	InvalidSearch,
 	SearchUnavailable,
 	SearchDocumentRevisionConflict,
 	ZoneSearchFeatureNotFound,
+	SharedSearchQueryNotFound,
 ] as const;
