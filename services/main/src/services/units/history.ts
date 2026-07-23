@@ -14,7 +14,7 @@ import {
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
 import type { Static, TSchema } from "@sinclair/typebox";
-import { ContentLanguageValues } from "@rezics/i18n";
+import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import type { DatabaseTransaction } from "../database";
@@ -66,7 +66,11 @@ import {
 	normalizeRevisionJson as normalizeJson,
 	type MaterializedRevisionContent,
 } from "../history/content";
-import { isFractionalPosition } from "../ordering/position";
+import {
+	compareBytewisePositions,
+	compareFractionalPositions,
+	isFractionalPosition,
+} from "../ordering/position";
 import { UnitRevisionConflict } from "./errors";
 import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
@@ -161,6 +165,11 @@ const unitLocalizationStateSchema = schemaFactory
 		content: UnitLocalizationContentSchema.nullable(),
 	})
 	.omit({ unitId: true, createdAt: true, updatedAt: true });
+const UnitLocalizationRevisionDocumentSchema = z.object({
+	version: z.literal(1),
+	localization: unitLocalizationStateSchema,
+});
+type UnitLocalizationState = z.infer<typeof unitLocalizationStateSchema>;
 const profileStateSchema = schemaFactory
 	.createSelectSchema(profile)
 	.omit({ id: true, authUserId: true, joinedAt: true, createdAt: true, updatedAt: true });
@@ -728,8 +737,25 @@ export const UnitRevisionChangeTags = ["mw-undo", "mw-manual-revert"] as const;
 export type UnitRevisionChangeTag = (typeof UnitRevisionChangeTags)[number];
 
 type SlotRole = (typeof UnitRevisionSlotRoleValues)[number];
+type FixedSlotRole = Exclude<SlotRole, "localization">;
 type SlotDocument = { readonly model: string; readonly payload: unknown };
-export type UnitRevisionDocuments = Partial<Record<SlotRole, SlotDocument>>;
+const SlotDocumentSchema = z.object({
+	model: z.string().min(1),
+	payload: z.unknown(),
+});
+export type UnitRevisionSlotIdentity =
+	| { readonly role: "localization"; readonly slotKey: ContentLanguage }
+	| { readonly role: FixedSlotRole; readonly slotKey: "" };
+type UnitRevisionDocumentSlot = UnitRevisionSlotIdentity & {
+	readonly document: SlotDocument;
+};
+export type UnitRevisionDocuments = {
+	main?: SlotDocument;
+	localizations: Partial<Record<ContentLanguage, SlotDocument>>;
+	relations?: SlotDocument;
+	structure?: SlotDocument;
+	rules?: SlotDocument;
+};
 
 export type UnitRevisionCommitResult = {
 	readonly revisionId: string;
@@ -738,7 +764,7 @@ export type UnitRevisionCommitResult = {
 
 const SlotModels = {
 	main: "rezics.unit.main.v1",
-	localizations: "rezics.unit.localizations.v1",
+	localization: "rezics.unit.localization.v1",
 	relations: "rezics.unit.relations.v2",
 	structure: "rezics.unit.structure.v5",
 	rules: "rezics.unit.rules.v1",
@@ -755,10 +781,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				extension: snapshot.extension,
 			},
 		},
-		localizations: {
-			model: SlotModels.localizations,
-			payload: { version: 1, items: snapshot.localizations },
-		},
+		localizations: {},
 		relations: {
 			model: SlotModels.relations,
 			payload: {
@@ -783,6 +806,18 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 			},
 		},
 	};
+	for (const value of snapshot.localizations) {
+		const localization = unitLocalizationStateSchema.parse(value);
+		if (documents.localizations[localization.language])
+			throw new Error(`Duplicate ${localization.language} Unit localization snapshot`);
+		documents.localizations[localization.language] = {
+			model: SlotModels.localization,
+			payload: {
+				version: 1,
+				localization,
+			} satisfies z.infer<typeof UnitLocalizationRevisionDocumentSchema>,
+		};
+	}
 	if (snapshot.owned.realmRules)
 		documents.rules = {
 			model: SlotModels.rules,
@@ -797,17 +832,56 @@ function asRecord(value: unknown, name: string): Record<string, unknown> {
 	return value as Record<string, unknown>;
 }
 
+function assertSlotDocumentModel(role: SlotRole, document: SlotDocument): void {
+	if (document.model !== SlotModels[role])
+		throw new Error(`Unsupported ${role} Unit revision content model ${document.model}`);
+}
+
+function fixedSlotPayload(
+	documents: UnitRevisionDocuments,
+	role: FixedSlotRole,
+): Record<string, unknown> {
+	const document = documents[role];
+	if (!document) throw new Error(`Missing ${role} Unit revision content`);
+	assertSlotDocumentModel(role, document);
+	return asRecord(document.payload, role);
+}
+
+function parseLocalizationSlot(
+	language: ContentLanguage,
+	document: SlotDocument,
+): UnitLocalizationState {
+	assertSlotDocumentModel("localization", document);
+	const parsed = UnitLocalizationRevisionDocumentSchema.parse(document.payload).localization;
+	if (parsed.language !== language)
+		throw new Error(
+			`Unit localization revision slot ${language} contains ${parsed.language} content`,
+		);
+	return parsed;
+}
+
+function orderedLocalizationStates(documents: UnitRevisionDocuments): UnitLocalizationState[] {
+	const localizations = ContentLanguageValues.flatMap((language) => {
+		const document = documents.localizations[language];
+		return document ? [parseLocalizationSlot(language, document)] : [];
+	});
+	return localizations.sort(
+		(left, right) =>
+			compareFractionalPositions(left.position, right.position) ||
+			compareBytewisePositions(left.language, right.language),
+	);
+}
+
 function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
-	const main = asRecord(documents.main?.payload, "main");
-	const localizations = asRecord(documents.localizations?.payload, "localizations");
-	const relations = asRecord(documents.relations?.payload, "relations");
-	const structure = asRecord(documents.structure?.payload, "structure");
-	const rules = documents.rules ? asRecord(documents.rules.payload, "rules") : null;
+	const main = fixedSlotPayload(documents, "main");
+	const relations = fixedSlotPayload(documents, "relations");
+	const structure = fixedSlotPayload(documents, "structure");
+	const rules = documents.rules ? fixedSlotPayload(documents, "rules") : null;
 	return UnitSnapshotSchema.parse({
 		version: 5,
 		kind: main.kind,
 		unit: main.unit,
-		localizations: localizations.items,
+		localizations: orderedLocalizationStates(documents),
 		extension: main.extension,
 		preference: null,
 		owned: {
@@ -835,6 +909,99 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	});
 }
 
+function withoutRevisionDocumentVersion(payload: Record<string, unknown>): Record<string, unknown> {
+	const { version: _version, ...content } = payload;
+	return content;
+}
+
+export function unitRevisionDocumentsToComparisonValue(
+	documents: UnitRevisionDocuments,
+): Record<string, unknown> {
+	documentsToSnapshot(documents);
+	const localizations: Partial<Record<ContentLanguage, UnitLocalizationState>> = {};
+	for (const language of ContentLanguageValues) {
+		const document = documents.localizations[language];
+		if (document) localizations[language] = parseLocalizationSlot(language, document);
+	}
+	return {
+		main: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "main")),
+		localizations,
+		relations: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "relations")),
+		structure: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "structure")),
+		...(documents.rules
+			? {
+					rules: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "rules")),
+				}
+			: {}),
+	};
+}
+
+export function parseUnitRevisionSlotIdentity(row: {
+	readonly role: SlotRole;
+	readonly slotKey: ContentLanguage | "";
+}): UnitRevisionSlotIdentity {
+	if (row.role === "localization") {
+		if (!isContentLanguage(row.slotKey))
+			throw new Error(`Invalid Unit localization revision slot key ${row.slotKey}`);
+		return { role: row.role, slotKey: row.slotKey };
+	}
+	if (row.slotKey !== "")
+		throw new Error(`Fixed Unit revision slot ${row.role} has key ${row.slotKey}`);
+	return { role: row.role, slotKey: "" };
+}
+
+function slotIdentityMapKey(identity: UnitRevisionSlotIdentity): string {
+	return `${identity.role}\u0000${identity.slotKey}`;
+}
+
+export function getUnitRevisionSlotContent(
+	documents: UnitRevisionDocuments,
+	identity: UnitRevisionSlotIdentity,
+): unknown {
+	const document =
+		identity.role === "localization"
+			? documents.localizations[identity.slotKey]
+			: documents[identity.role];
+	if (!document)
+		throw new Error(`Missing Unit revision slot ${identity.role}:${identity.slotKey}`);
+	assertSlotDocumentModel(identity.role, document);
+	if (identity.role === "localization") parseLocalizationSlot(identity.slotKey, document);
+	return document.payload;
+}
+
+function setRevisionDocument(
+	documents: UnitRevisionDocuments,
+	identity: UnitRevisionSlotIdentity,
+	document: SlotDocument,
+): void {
+	assertSlotDocumentModel(identity.role, document);
+	if (identity.role === "localization") {
+		if (documents.localizations[identity.slotKey])
+			throw new Error(`Duplicate Unit localization revision slot ${identity.slotKey}`);
+		parseLocalizationSlot(identity.slotKey, document);
+		documents.localizations[identity.slotKey] = document;
+		return;
+	}
+	if (documents[identity.role]) throw new Error(`Duplicate Unit revision slot ${identity.role}`);
+	documents[identity.role] = document;
+}
+
+function documentsToSlots(documents: UnitRevisionDocuments): UnitRevisionDocumentSlot[] {
+	const slots: UnitRevisionDocumentSlot[] = [];
+	for (const role of UnitRevisionSlotRoleValues) {
+		if (role === "localization") {
+			for (const slotKey of ContentLanguageValues) {
+				const document = documents.localizations[slotKey];
+				if (document) slots.push({ role, slotKey, document });
+			}
+			continue;
+		}
+		const document = documents[role];
+		if (document) slots.push({ role, slotKey: "", document });
+	}
+	return slots;
+}
+
 export async function getUnitRevisionDocuments(
 	tx: DatabaseTransaction,
 	revisionId: string,
@@ -842,6 +1009,7 @@ export async function getUnitRevisionDocuments(
 	const rows = await tx
 		.select({
 			role: unitRevisionSlot.role,
+			slotKey: unitRevisionSlot.slotKey,
 			contentId: unitRevisionSlot.contentId,
 			model: revisionContent.model,
 		})
@@ -849,9 +1017,10 @@ export async function getUnitRevisionDocuments(
 		.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
 		.where(eq(unitRevisionSlot.revisionId, revisionId));
 	const cache = new Map<string, MaterializedRevisionContent>();
-	const documents: UnitRevisionDocuments = {};
-	for (const row of rows)
-		documents[row.role] = {
+	const documents: UnitRevisionDocuments = { localizations: {} };
+	for (const row of rows) {
+		const identity = parseUnitRevisionSlotIdentity(row);
+		const document = {
 			model: row.model,
 			payload: (
 				await materializeStoredRevisionContent(
@@ -867,6 +1036,8 @@ export async function getUnitRevisionDocuments(
 				)
 			).payload,
 		};
+		setRevisionDocument(documents, identity, document);
+	}
 	return documents;
 }
 
@@ -906,6 +1077,7 @@ export async function recordUnitRevision(
 		? await tx
 				.select({
 					role: unitRevisionSlot.role,
+					slotKey: unitRevisionSlot.slotKey,
 					contentId: unitRevisionSlot.contentId,
 					originRevisionId: unitRevisionSlot.originRevisionId,
 					byteSize: revisionContent.byteSize,
@@ -914,39 +1086,59 @@ export async function recordUnitRevision(
 				.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
 				.where(eq(unitRevisionSlot.revisionId, head.revisionId))
 		: [];
-	const previousByRole = new Map(previousSlots.map((slot) => [slot.role, slot]));
+	const parsedPreviousSlots = previousSlots.map((slot) => ({
+		...parseUnitRevisionSlotIdentity(slot),
+		contentId: slot.contentId,
+		originRevisionId: slot.originRevisionId,
+		byteSize: slot.byteSize,
+	}));
+	const previousByIdentity = new Map(
+		parsedPreviousSlots.map((slot) => [slotIdentityMapKey(slot), slot]),
+	);
 	const sourceSlots = input.sourceRevisionId
 		? await tx
 				.select({
 					role: unitRevisionSlot.role,
+					slotKey: unitRevisionSlot.slotKey,
 					contentId: unitRevisionSlot.contentId,
 					originRevisionId: unitRevisionSlot.originRevisionId,
 				})
 				.from(unitRevisionSlot)
 				.where(eq(unitRevisionSlot.revisionId, input.sourceRevisionId))
 		: [];
-	const sourceByRole = new Map(sourceSlots.map((slot) => [slot.role, slot]));
-
-	const contentByRole = new Map(
-		previousSlots.map((slot) => [
-			slot.role,
-			{
-				id: slot.contentId,
-				byteSize: slot.byteSize,
-			},
-		]),
+	const sourceByIdentity = new Map(
+		sourceSlots.map((slot) => {
+			const identity = parseUnitRevisionSlotIdentity(slot);
+			return [
+				slotIdentityMapKey(identity),
+				{
+					...identity,
+					contentId: slot.contentId,
+					originRevisionId: slot.originRevisionId,
+				},
+			] as const;
+		}),
 	);
-	for (const role of UnitRevisionSlotRoleValues) {
-		const document = documents[role];
-		if (!document) continue;
-		const content = await findOrCreateRevisionContent(tx, document);
-		contentByRole.set(role, content);
+
+	const contents: Array<
+		UnitRevisionSlotIdentity & { readonly id: string; readonly byteSize: number }
+	> = [];
+	for (const slot of documentsToSlots(documents)) {
+		const content = await findOrCreateRevisionContent(tx, slot.document);
+		const identity = parseUnitRevisionSlotIdentity(slot);
+		contents.push({
+			...identity,
+			id: content.id,
+			byteSize: content.byteSize,
+		});
 	}
-	const contents = [...contentByRole].map(([role, content]) => ({ role, ...content }));
 	const unchanged =
 		Boolean(head) &&
-		previousSlots.length === contents.length &&
-		contents.every((content) => previousByRole.get(content.role)?.contentId === content.id);
+		parsedPreviousSlots.length === contents.length &&
+		contents.every(
+			(content) =>
+				previousByIdentity.get(slotIdentityMapKey(content))?.contentId === content.id,
+		);
 	if (unchanged && head) return { revisionId: head.revisionId, revisionCreated: false };
 
 	const byteSize = contents.reduce((total, content) => total + content.byteSize, 0);
@@ -964,13 +1156,15 @@ export async function recordUnitRevision(
 	if (!revision) throw new Error("Unit revision insertion did not return an id");
 
 	await tx.insert(unitRevisionSlot).values(
-		[...contentByRole].map(([role, content]) => {
-			const previous = previousByRole.get(role);
-			const source = sourceByRole.get(role);
+		contents.map((content) => {
+			const identityKey = slotIdentityMapKey(content);
+			const previous = previousByIdentity.get(identityKey);
+			const source = sourceByIdentity.get(identityKey);
 			return {
 				revisionId: revision.id,
 				unitId: input.unitId,
-				role,
+				role: content.role,
+				slotKey: content.slotKey,
 				contentId: content.id,
 				originRevisionId:
 					previous?.contentId === content.id
@@ -1196,12 +1390,9 @@ export function undoRevisionDocuments(
 	current: UnitRevisionDocuments,
 ) {
 	const conflicts: string[] = [];
-	const merged: UnitRevisionDocuments = {};
-	for (const role of new Set<SlotRole>([
-		...(Object.keys(before) as SlotRole[]),
-		...(Object.keys(after) as SlotRole[]),
-		...(Object.keys(current) as SlotRole[]),
-	])) {
+	const merged: UnitRevisionDocuments = { localizations: {} };
+	for (const role of UnitRevisionSlotRoleValues) {
+		if (role === "localization") continue;
 		const beforeDocument = before[role] ?? Missing;
 		const afterDocument = after[role] ?? Missing;
 		const currentDocument = current[role] ?? Missing;
@@ -1212,7 +1403,34 @@ export function undoRevisionDocuments(
 			`/${role}`,
 			conflicts,
 		);
-		if (value !== Missing) merged[role] = value as SlotDocument;
+		if (value !== Missing) {
+			const document = SlotDocumentSchema.parse(value);
+			assertSlotDocumentModel(role, document);
+			merged[role] = document;
+		}
+	}
+	for (const language of ContentLanguageValues) {
+		const beforeDocument = before.localizations[language];
+		const afterDocument = after.localizations[language];
+		const currentDocument = current.localizations[language];
+		const value = undoRevisionValue(
+			beforeDocument ? parseLocalizationSlot(language, beforeDocument) : Missing,
+			afterDocument ? parseLocalizationSlot(language, afterDocument) : Missing,
+			currentDocument ? parseLocalizationSlot(language, currentDocument) : Missing,
+			`/localizations/${language}`,
+			conflicts,
+		);
+		if (value === Missing) continue;
+		const localization = unitLocalizationStateSchema.parse(value);
+		if (localization.language !== language)
+			throw new Error(`Undo changed Unit localization identity ${language}`);
+		merged.localizations[language] = {
+			model: SlotModels.localization,
+			payload: {
+				version: 1,
+				localization,
+			} satisfies z.infer<typeof UnitLocalizationRevisionDocumentSchema>,
+		};
 	}
 	return { documents: merged, conflictPaths: [...new Set(conflicts)].sort() };
 }

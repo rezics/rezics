@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
 import { UnitRevisionChangeTags } from "../../units/history";
-import { DateTime, Uuid } from "../schema";
+import { ContentLanguage, DateTime, Uuid } from "../schema";
 
 export const UnitHistoryParams = t.Object({ unitId: Uuid });
 export const UnitRevisionParams = t.Object({ revisionId: Uuid });
@@ -76,12 +76,28 @@ export const UnitScopedHistoryResponse = t.Intersect([
 	t.Object({ capabilities: t.Object({ canRestore: t.Boolean() }) }),
 ]);
 
-export const RevisionSlotResponse = t.Object({
-	role: t.String({ minLength: 1, maxLength: 200 }),
+const RevisionSlotContentResponse = {
 	model: t.String(),
 	originRevisionId: Uuid,
 	content: t.Nullable(t.Unknown()),
-});
+};
+
+export const RevisionSlotResponse = t.Union([
+	t.Object({
+		role: t.Union([
+			t.Literal("main"),
+			t.Literal("relations"),
+			t.Literal("structure"),
+			t.Literal("rules"),
+		]),
+		...RevisionSlotContentResponse,
+	}),
+	t.Object({
+		role: t.Literal("localization"),
+		language: ContentLanguage,
+		...RevisionSlotContentResponse,
+	}),
+]);
 
 export const UnitRevisionResponse = t.Intersect([
 	UnitRevisionSummaryResponse,

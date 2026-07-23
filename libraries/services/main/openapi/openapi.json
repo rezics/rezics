@@ -54324,29 +54324,91 @@
 												"slots": {
 													"type": "array",
 													"items": {
-														"type": "object",
-														"required": [
-															"role",
-															"model",
-															"originRevisionId",
-															"content"
-														],
-														"properties": {
-															"role": {
-																"minLength": 1,
-																"maxLength": 200,
-																"type": "string"
+														"anyOf": [
+															{
+																"type": "object",
+																"required": [
+																	"role",
+																	"model",
+																	"originRevisionId",
+																	"content"
+																],
+																"properties": {
+																	"role": {
+																		"anyOf": [
+																			{
+																				"const": "main",
+																				"type": "string"
+																			},
+																			{
+																				"const": "relations",
+																				"type": "string"
+																			},
+																			{
+																				"const": "structure",
+																				"type": "string"
+																			},
+																			{
+																				"const": "rules",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"model": { "type": "string" },
+																	"originRevisionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"content": {
+																		"nullable": true,
+																		"anyOf": [
+																			{},
+																			{ "type": "null" }
+																		]
+																	}
+																}
 															},
-															"model": { "type": "string" },
-															"originRevisionId": {
-																"format": "uuid",
-																"type": "string"
-															},
-															"content": {
-																"nullable": true,
-																"anyOf": [{}, { "type": "null" }]
+															{
+																"type": "object",
+																"required": [
+																	"role",
+																	"language",
+																	"model",
+																	"originRevisionId",
+																	"content"
+																],
+																"properties": {
+																	"role": {
+																		"const": "localization",
+																		"type": "string"
+																	},
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"model": { "type": "string" },
+																	"originRevisionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"content": {
+																		"nullable": true,
+																		"anyOf": [
+																			{},
+																			{ "type": "null" }
+																		]
+																	}
+																}
 															}
-														}
+														]
 													}
 												}
 											}

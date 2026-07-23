@@ -19,10 +19,13 @@ import {
 import { parseJsonCursor } from "../../pagination";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import {
+	getUnitRevisionSlotContent,
 	getUnitRevisionDocuments,
+	parseUnitRevisionSlotIdentity,
 	restoreUnitRevision,
 	undoUnitRevision,
 	UnitRevisionChangeTags,
+	unitRevisionDocumentsToComparisonValue,
 } from "../../units/history";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -252,21 +255,40 @@ export default new Elysia({ prefix: "/history" })
 				slots: await tx
 					.select({
 						role: unitRevisionSlot.role,
+						slotKey: unitRevisionSlot.slotKey,
 						model: revisionContent.model,
 						originRevisionId: unitRevisionSlot.originRevisionId,
 					})
 					.from(unitRevisionSlot)
 					.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
 					.where(eq(unitRevisionSlot.revisionId, row.id))
-					.orderBy(unitRevisionSlot.role),
-				documents: canSeeContent ? await getUnitRevisionDocuments(tx, row.id) : {},
+					.orderBy(unitRevisionSlot.role, unitRevisionSlot.slotKey),
+				documents: canSeeContent
+					? await getUnitRevisionDocuments(tx, row.id)
+					: { localizations: {} },
 			}));
 			return {
 				...presentSummary(row, access),
-				slots: slots.map((slot) => ({
-					...slot,
-					content: canSeeContent ? documents[slot.role]?.payload : null,
-				})),
+				slots: slots.map((slot) => {
+					const identity = parseUnitRevisionSlotIdentity(slot);
+					const content = canSeeContent
+						? getUnitRevisionSlotContent(documents, identity)
+						: null;
+					return identity.role === "localization"
+						? {
+								role: identity.role,
+								language: identity.slotKey,
+								model: slot.model,
+								originRevisionId: slot.originRevisionId,
+								content,
+							}
+						: {
+								role: identity.role,
+								model: slot.model,
+								originRevisionId: slot.originRevisionId,
+								content,
+							};
+				}),
 			} satisfies Static<typeof UnitRevisionResponse>;
 		},
 		{
@@ -302,7 +324,10 @@ export default new Elysia({ prefix: "/history" })
 			return {
 				fromRevisionId: from.id,
 				toRevisionId: to.id,
-				changes: collectChanges(fromDocuments, toDocuments),
+				changes: collectChanges(
+					unitRevisionDocumentsToComparisonValue(fromDocuments),
+					unitRevisionDocumentsToComparisonValue(toDocuments),
+				),
 			};
 		},
 		{

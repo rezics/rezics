@@ -42114,25 +42114,40 @@ export type GetApiHistoryUnitRevisionsByRevisionIdStatus200 = {
 	/**
 	 * @type array
 	 */
-	slots: {
-		/**
-		 * @minLength 1
-		 * @maxLength 200
-		 * @type string
-		 */
-		role: string;
-		/**
-		 * @type string
-		 */
-		model: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		originRevisionId: string;
-		content: (void | null) | null;
-	}[];
+	slots: (
+		| {
+				role: "main" | "relations" | "structure" | "rules";
+				/**
+				 * @type string
+				 */
+				model: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				originRevisionId: string;
+				content: (void | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "localization";
+				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				model: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				originRevisionId: string;
+				content: (void | null) | null;
+		  }
+	)[];
 };
 
 export const GetApiHistoryUnitRevisionsByRevisionIdStatus404ErrorCodeEnum = {

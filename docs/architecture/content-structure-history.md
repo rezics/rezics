@@ -24,6 +24,45 @@ Content Structure and Dock still reference an owner Unit for authorization, disc
 policy. Their immutable history payloads share the content-addressed `revision_content` store; they
 do not share Unit revision slots or heads.
 
+## Unit history storage
+
+A Unit revision is a complete logical checkpoint represented by an immutable manifest. The manifest
+does not duplicate every byte: each entry points to a content-addressed document in
+`revision_content`, so unchanged documents are shared across revisions.
+
+Fixed Unit state uses one slot each with identities `(main, "")`, `(relations, "")`,
+`(structure, "")`, and, when present, `(rules, "")`. Localized state uses one slot per language with
+identity `(localization, ContentLanguage)`. Each localization slot contains the complete typed state
+for that language, including its position. The primary key and database check enforce this role/key
+relationship, and runtime parsing additionally requires the payload's language to equal the slot
+key.
+
+Every revision writes the exact current manifest:
+
+- unchanged slots reuse both their content ID and origin revision;
+- a changed language creates or reuses only that language's content document;
+- an added language adds one manifest entry;
+- a deleted language is absent from the new manifest;
+- an identical manifest is a no-op and does not create a revision.
+
+Restore, compare, and undo first reconstruct a storage-independent Unit value. Localization
+conflicts are consequently keyed by stable language paths such as `/localizations/en/title`, rather
+than by array index or storage wrapper. Restores write the complete checkpoint back to live rows,
+ordered by fractional position and then language.
+
+Unit History deliberately does not persist generic JSON deltas. JSON Patch is an ordered program
+against a particular base document, so using it as the durable Unit format would add replay,
+inversion, and missing-base failure modes without meaningful savings after language-level
+content-addressing. This manifest-plus-document model follows the same useful separation as Git
+trees and blobs: the revision records a complete view while unchanged content remains shared.
+[Git documents its content-addressed tree model](https://git-scm.com/book/en/v2/Git-Internals-Git-Objects.html);
+[RFC 6902 defines JSON Patch's sequential base-dependent operations](https://www.rfc-editor.org/rfc/rfc6902.html).
+
+`unit_revision.byte_size` is the sum of the materialized documents referenced by that revision. It
+is a logical snapshot size, not the newly allocated physical bytes for the edit. The latter may be
+zero for an already-known content hash and must not be inferred from adjacent revisions'
+`byte_size` values.
+
 ## Naming and identities
 
 Behavior-selecting discriminants are named `kind`. Content Structure uses `kind`, Dock uses `kind`,

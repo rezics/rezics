@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
@@ -15,12 +15,17 @@ import {
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import { UnitStatusActorKindValues, toEnumValues } from "./contract-values";
+import {
+	type ContentLanguage,
+	ContentLanguageValues,
+	UnitStatusActorKindValues,
+	toEnumValues,
+} from "./contract-values";
 import { profile, unit, unitStatus } from "./core";
 
 export const UnitRevisionSlotRoleValues = [
 	"main",
-	"localizations",
+	"localization",
 	"relations",
 	"structure",
 	"rules",
@@ -186,13 +191,14 @@ export const unitRevisionSlot = pgTable(
 		revisionId: uuid().notNull(),
 		unitId: uuid().notNull(),
 		role: unitRevisionSlotRole().notNull(),
+		slotKey: text().$type<ContentLanguage | "">().notNull(),
 		contentId: uuid()
 			.notNull()
 			.references(() => revisionContent.id, { onDelete: "restrict" }),
 		originRevisionId: uuid().notNull(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.revisionId, table.role] }),
+		primaryKey({ columns: [table.revisionId, table.role, table.slotKey] }),
 		foreignKey({
 			columns: [table.revisionId, table.unitId],
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
@@ -205,6 +211,16 @@ export const unitRevisionSlot = pgTable(
 		}).onDelete("restrict"),
 		index("unit_revision_slot_content_idx").on(table.contentId),
 		index("unit_revision_slot_origin_idx").on(table.originRevisionId),
+		check(
+			"unit_revision_slot_key_shape_check",
+			sql`(
+				${table.role} = 'localization'::unit_revision_slot_role
+				and ${inArray(table.slotKey, ContentLanguageValues)}
+			) or (
+				${table.role} <> 'localization'::unit_revision_slot_role
+				and ${table.slotKey} = ''
+			)`,
+		),
 	],
 );
 

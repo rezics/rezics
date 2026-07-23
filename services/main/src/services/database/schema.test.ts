@@ -51,8 +51,10 @@ import {
 	searchRevisionProjectionSource,
 	searchUnitProjectionSource,
 	unitSlugAddress,
+	unitRevisionSlot,
 	unitStatusEvent,
 	unitVariant,
+	UnitRevisionSlotRoleValues,
 	UnitStatusActorKindValues,
 	PlatformCapabilityValues,
 	UnitKindValues,
@@ -160,6 +162,19 @@ describe("database schema contracts", () => {
 				"unit_status_event_publication_idx",
 				"unit_status_event_actor_created_at_idx",
 			]),
+		);
+	});
+
+	it("keys Unit History localizations by language within each revision manifest", () => {
+		expect(unitRevisionSlot.role.enumValues).toEqual(UnitRevisionSlotRoleValues);
+		const slot = getTableConfig(unitRevisionSlot);
+		expect(slot.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"revision_id",
+			"role",
+			"slot_key",
+		]);
+		expect(slot.checks.map((constraint) => constraint.name)).toContain(
+			"unit_revision_slot_key_shape_check",
 		);
 	});
 

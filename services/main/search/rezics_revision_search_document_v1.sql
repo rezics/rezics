@@ -35,7 +35,20 @@ LEFT JOIN LATERAL (
 	SELECT
 		jsonb_agg(localization ->> 'title' ORDER BY localization ->> 'position', localization ->> 'language') FILTER (WHERE jsonb_typeof(localization -> 'title') = 'string') AS titles,
 		jsonb_agg(text_value ORDER BY ordinal) FILTER (WHERE text_value <> '') AS content
-	FROM jsonb_array_elements(coalesce(main_content.payload -> 'localizations', '[]'::jsonb)) WITH ORDINALITY AS item(localization, ordinal)
+	FROM (
+		SELECT
+			localization_content.payload -> 'localization' AS localization,
+			row_number() OVER (
+				ORDER BY
+					localization_content.payload -> 'localization' ->> 'position',
+					localization_slot.slot_key
+			) AS ordinal
+		FROM public.unit_revision_slot AS localization_slot
+		JOIN public.revision_content AS localization_content
+			ON localization_content.id = localization_slot.content_id
+		WHERE localization_slot.revision_id = source.revision_id
+			AND localization_slot.role = 'localization'
+	) AS item
 	CROSS JOIN LATERAL (VALUES (concat_ws(' ', search_document_text_v1(localization -> 'description'), search_document_text_v1(localization -> 'content')))) AS extracted(text_value)
 ) AS snapshot_text ON true
 LEFT JOIN LATERAL (
