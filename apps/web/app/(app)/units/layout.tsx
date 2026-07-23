@@ -15,6 +15,7 @@ export default function UnitsLayout({ children }: { children: ReactNode }) {
 				"licenses",
 				"media",
 				"posts",
+				"tags",
 				"units",
 			]}
 		>

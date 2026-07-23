@@ -3,9 +3,9 @@ export const CatalogDetailUnitTypes = ["book", "media", "software"] as const;
 export type CatalogDetailUnitType = (typeof CatalogDetailUnitTypes)[number];
 
 export const CatalogDetailSections = {
-	book: ["overview", "contents", "reviews", "discussion", "editions"],
-	media: ["overview", "reviews", "discussion", "versions"],
-	software: ["overview", "requirements", "reviews", "discussion", "versions"],
+	book: ["overview", "contents", "tags", "associations", "reviews", "discussion"],
+	media: ["overview", "tags", "associations", "reviews", "discussion"],
+	software: ["overview", "requirements", "tags", "associations", "reviews", "discussion"],
 } as const satisfies Record<CatalogDetailUnitType, readonly string[]>;
 
 export type CatalogDetailSectionId = {

@@ -1442,6 +1442,7 @@ export const ApiErrorCode = {
 	ApiTokenPolicyInvalid: "ApiTokenPolicyInvalid",
 	ApiTokenPolicyRevisionConflict: "ApiTokenPolicyRevisionConflict",
 	ApiTokenPolicyNotFound: "ApiTokenPolicyNotFound",
+	TagNotFound: "TagNotFound",
 	InvalidSearch: "InvalidSearch",
 	SearchUnavailable: "SearchUnavailable",
 	SearchDocumentRevisionConflict: "SearchDocumentRevisionConflict",
@@ -32799,6 +32800,661 @@ export type GetApiStaffAuditResponse =
 	| GetApiStaffAuditStatus422
 	| GetApiStaffAuditStatus500;
 
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiUnitsByTypeByUnitIdTagsLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsLanguage];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiUnitsByTypeByUnitIdTagsLanguage;
+	/**
+	 * @default 50
+	 */
+	globalLimit?: string | number;
+	/**
+	 * @default 10
+	 */
+	sourceLimit?: string | number;
+	/**
+	 * @default 12
+	 */
+	perRealmLimit?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
+	/**
+	 * @type array
+	 */
+	global: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		viewerVote: ((-1 | 1) | null) | null;
+	}[];
+	/**
+	 * @type array
+	 */
+	realms: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		/**
+		 * @type boolean
+		 */
+		canVote: boolean;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @type array
+		 */
+		votedTags: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			realmId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			contextPostId: string;
+			score: string | number;
+			voteCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+		}[];
+		/**
+		 * @type array
+		 */
+		policyTags: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			realmId: string;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+		}[];
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsOptions = {
+	body?: never;
+	path: GetApiUnitsByTypeByUnitIdTagsPath;
+	query?: GetApiUnitsByTypeByUnitIdTagsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdTagsResponses = {
+	"200": GetApiUnitsByTypeByUnitIdTagsStatus200;
+	"404": GetApiUnitsByTypeByUnitIdTagsStatus404;
+	"422": GetApiUnitsByTypeByUnitIdTagsStatus422;
+	"500": GetApiUnitsByTypeByUnitIdTagsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByTypeByUnitIdTagsResponse =
+	| GetApiUnitsByTypeByUnitIdTagsStatus200
+	| GetApiUnitsByTypeByUnitIdTagsStatus404
+	| GetApiUnitsByTypeByUnitIdTagsStatus422
+	| GetApiUnitsByTypeByUnitIdTagsStatus500;
+
+export const GetApiUsersMeTagRealmSubscriptionsLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiUsersMeTagRealmSubscriptionsLanguage =
+	(typeof GetApiUsersMeTagRealmSubscriptionsLanguage)[keyof typeof GetApiUsersMeTagRealmSubscriptionsLanguage];
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeTagRealmSubscriptionsQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiUsersMeTagRealmSubscriptionsLanguage;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeTagRealmSubscriptionsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		/**
+		 * @type boolean
+		 */
+		canVote: boolean;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeTagRealmSubscriptionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeTagRealmSubscriptionsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeTagRealmSubscriptionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeTagRealmSubscriptionsOptions = {
+	body?: never;
+	path?: never;
+	query?: GetApiUsersMeTagRealmSubscriptionsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeTagRealmSubscriptionsResponses = {
+	"200": GetApiUsersMeTagRealmSubscriptionsStatus200;
+	"422": GetApiUsersMeTagRealmSubscriptionsStatus422;
+	"429": GetApiUsersMeTagRealmSubscriptionsStatus429;
+	"500": GetApiUsersMeTagRealmSubscriptionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUsersMeTagRealmSubscriptionsResponse =
+	| GetApiUsersMeTagRealmSubscriptionsStatus200
+	| GetApiUsersMeTagRealmSubscriptionsStatus422
+	| GetApiUsersMeTagRealmSubscriptionsStatus429
+	| GetApiUsersMeTagRealmSubscriptionsStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const PutApiUsersMeTagRealmSubscriptionsByRealmIdLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdLanguage =
+	(typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdLanguage)[keyof typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdLanguage];
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	language?: PutApiUsersMeTagRealmSubscriptionsByRealmIdLanguage;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	title: (string | null) | null;
+	summary: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	canVote: boolean;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: "RealmNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdBody = {
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	position?: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions = {
+	body: PutApiUsersMeTagRealmSubscriptionsByRealmIdBody;
+	path: PutApiUsersMeTagRealmSubscriptionsByRealmIdPath;
+	query?: PutApiUsersMeTagRealmSubscriptionsByRealmIdQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses = {
+	"200": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200;
+	"404": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404;
+	"422": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422;
+	"429": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429;
+	"500": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdResponse =
+	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200
+	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
+	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @type boolean
+	 */
+	subscribed: boolean;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions = {
+	body?: never;
+	path: DeleteApiUsersMeTagRealmSubscriptionsByRealmIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses = {
+	"200": DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200;
+	"422": DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422;
+	"429": DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429;
+	"500": DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponse =
+	| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200
+	| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+	| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+	| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500;
+
 export const ResolveUnitSlugAddressStatus200KindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -48828,6 +49484,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200 = {
 	 * @type string
 	 */
 	tagId: string;
+	createdByProfileId: (string | null) | null;
 	score: string | number;
 	voteCount: string | number;
 	/**
@@ -48850,8 +49507,8 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200 = {
 };
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
+	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
@@ -48866,7 +49523,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'UnitAccessRestricted'
 		 * @type string
 		 */
 		code: PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum;
@@ -48887,6 +49544,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
+	TagNotFound: "TagNotFound",
 	TagApplicationNotFound: "TagApplicationNotFound",
 } as const;
 
@@ -49184,6 +49842,42 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200 = {
 	voteCount: string | number;
 };
 
+export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum = {
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessRestricted'
+		 * @type string
+		 */
+		code: PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	TagApplicationNotFound: "TagApplicationNotFound",
@@ -49287,6 +49981,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200;
+	"403": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422;
 	"429": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429;
@@ -49298,6 +49993,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200
+	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -49331,6 +50027,50 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200 = {
 	voteCount: string | number;
 };
 
+export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum = {
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessRestricted'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	TagApplicationNotFound: "TagApplicationNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -49340,10 +50080,10 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404 = {
 	 */
 	error: {
 		/**
-		 * @default 'TagApplicationNotFound'
+		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "TagApplicationNotFound";
+		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -49408,6 +50148,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
 	"200": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200;
+	"403": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422;
 	"429": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429;
@@ -49419,6 +50160,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200
+	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429

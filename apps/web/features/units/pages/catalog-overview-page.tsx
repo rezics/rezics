@@ -18,6 +18,7 @@ import type { ReactNode } from "react";
 
 import { UnitShelf } from "@/features/explore/unit-shelf";
 import { UnitProgressPanel } from "@/features/progress/components/unit-progress-panel";
+import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
@@ -110,6 +111,39 @@ export function CatalogOverviewPage() {
 					</Card>
 				</DetailSection>
 
+				<DetailSection title={t.units.detail.tags}>
+					<UnitTagSummary type={type} unitId={unit.id} />
+				</DetailSection>
+
+				{unit.subjectAssociations.length ? (
+					<DetailSection title={t.units.detail.subjectAssociations}>
+						<Card>
+							<CardContent className="grid gap-4 p-5 sm:p-6">
+								<div className="flex flex-wrap gap-2">
+									{unit.subjectAssociations.slice(0, 8).map((association) => (
+										<Link
+											className="inline-flex"
+											href={`/entities/${association.entityEntryId}`}
+											key={association.id}
+										>
+											<Badge variant="outline">
+												{association.title ?? t.ui.unnamed} ·{" "}
+												{association.role}
+											</Badge>
+										</Link>
+									))}
+								</div>
+								<Link
+									className="w-fit text-sm font-medium text-link hover:text-link-hover hover:underline"
+									href={`/units/${type}/${unit.id}/associations`}
+								>
+									{t.units.detail.viewAssociations}
+								</Link>
+							</CardContent>
+						</Card>
+					</DetailSection>
+				) : null}
+
 				<UnitProgressPanel domain={{ type, unitId: unit.id }} />
 
 				<DetailSection title={t.feed.relatedWorks}>
@@ -164,26 +198,6 @@ export function CatalogOverviewPage() {
 								})}
 							</CardContent>
 						</Card>
-					</DetailSection>
-				) : null}
-
-				{unit.tags.length ? (
-					<DetailSection title={t.units.detail.tags}>
-						<div className="flex flex-wrap gap-2">
-							{unit.tags.map((tag) => {
-								const label = tag.title ?? tag.tagId;
-								const query = new URLSearchParams({
-									template: type,
-									tag: tag.tagId,
-									tagLabel: label,
-								});
-								return (
-									<Link href={`/search?${query.toString()}`} key={tag.id}>
-										<Badge variant="outline">{label}</Badge>
-									</Link>
-								);
-							})}
-						</div>
 					</DetailSection>
 				) : null}
 			</aside>

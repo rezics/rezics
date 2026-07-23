@@ -900,6 +900,7 @@ export const ExternalLinkResponse = t.Object({
 export const TagApplicationResponse = t.Object({
 	unitId: Uuid,
 	tagId: Uuid,
+	createdByProfileId: t.Nullable(Uuid),
 	score: t.Integer(),
 	voteCount: t.Integer(),
 	pinned: t.Boolean(),

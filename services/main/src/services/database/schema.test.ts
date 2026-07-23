@@ -33,6 +33,7 @@ import {
 	moderationCase,
 	ModerationActionKindValues,
 	PostKindValues,
+	profileRealmTagSubscription,
 	realmUnitStatus,
 	realmUnitStatusEvent,
 	RealmUnitMutationCommandValues,
@@ -454,6 +455,21 @@ describe("database schema contracts", () => {
 		]);
 		expect(realmTag.foreignKeys.map((key) => key.getName())).toContain(
 			"realm_tag_vote_stat_context_fkey",
+		);
+	});
+
+	it("keeps ordered Realm Tag sources separate from following and membership", () => {
+		const subscription = getTableConfig(profileRealmTagSubscription);
+		expect(subscription.name).toBe("profile_realm_tag_subscription");
+		expect(subscription.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"profile_id",
+			"realm_id",
+		]);
+		expect(subscription.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"profile_realm_tag_subscription_profile_position_idx",
+				"profile_realm_tag_subscription_realm_idx",
+			]),
 		);
 	});
 

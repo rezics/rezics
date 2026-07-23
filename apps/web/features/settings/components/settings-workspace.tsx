@@ -6,7 +6,7 @@ import {
 	ManagementWorkspaceHeader,
 	ManagementWorkspaceNavigation,
 } from "@rezics/ui";
-import { CircleUserRound, KeyRound, Settings2, ShieldCheck, UserRound } from "lucide-react";
+import { CircleUserRound, KeyRound, Settings2, ShieldCheck, Tags, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createContext, useContext, type ReactNode } from "react";
@@ -44,6 +44,13 @@ export function SettingsWorkspace({ children }: { children: ReactNode }) {
 			label: labels.preferences.label,
 			description: labels.preferences.description,
 			icon: Settings2,
+		},
+		{
+			id: "tag-sources",
+			href: settingsSectionHref("tag-sources"),
+			label: labels.tagSources.label,
+			description: labels.tagSources.description,
+			icon: Tags,
 		},
 		{
 			id: "account",

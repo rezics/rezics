@@ -328,3 +328,22 @@ export function resolvedUnitLocalizationTitle(
 		limit 1
 	)`;
 }
+
+/** Resolve the requested localization's summary, then fall back to the primary localization. */
+export function resolvedUnitLocalizationSummary(
+	unitId: SQLWrapper,
+	preferredLanguage?: string | null,
+): SQL<string | null> {
+	return sql<string | null>`(
+		select ${unitLocalization.summary}
+		from ${unitLocalization}
+		where ${unitLocalization.unitId} = ${unitId}
+		order by
+			case when ${preferredLanguage ?? null}::text is not null
+				and ${unitLocalization.language} = ${preferredLanguage ?? null}::text
+				then 0 else 1 end,
+			${unitLocalization.position},
+			${unitLocalization.language}
+		limit 1
+	)`;
+}

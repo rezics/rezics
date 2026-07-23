@@ -27,6 +27,10 @@ describe("catalog detail routes", () => {
 		expect(catalogDetailHref("software", UnitId, "requirements")).toBe(
 			`/units/software/${UnitId}/requirements`,
 		);
+		expect(catalogDetailHref("book", UnitId, "tags")).toBe(`/units/book/${UnitId}/tags`);
+		expect(catalogDetailHref("book", UnitId, "associations")).toBe(
+			`/units/book/${UnitId}/associations`,
+		);
 	});
 
 	it("rejects a section that belongs to another domain", () => {
@@ -38,6 +42,12 @@ describe("catalog detail routes", () => {
 		).toBeUndefined();
 		expect(
 			parseCatalogDetailSection(`/units/book/${UnitId}/reviews/extra`, "book", UnitId),
+		).toBeUndefined();
+		expect(
+			parseCatalogDetailSection(`/units/book/${UnitId}/editions`, "book", UnitId),
+		).toBeUndefined();
+		expect(
+			parseCatalogDetailSection(`/units/media/${UnitId}/versions`, "media", UnitId),
 		).toBeUndefined();
 	});
 });

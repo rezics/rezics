@@ -22,6 +22,7 @@ import {
 	entity,
 	entityAssociationPolicy,
 	subjectAssociation,
+	tag,
 	unit,
 	unitAlias,
 	unitAliasVote,
@@ -86,6 +87,7 @@ import {
 	VoteResponse,
 } from "../schema/response";
 import { AliasNotFound, TagApplicationNotFound, UnitVersionNotFound } from "./errors";
+import { TagNotFound } from "../tags/errors";
 import {
 	CreditAttributionNotFound,
 	EntityEntryNotFound,
@@ -102,6 +104,10 @@ const CatalogUnitMutationNotFoundResponse = toApiErrorResponse([
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitProtected",
+]);
+const UnitInteractionForbiddenResponse = toApiErrorResponse([
+	"UnitAccessRestricted",
+	"UnitPermissionForbidden",
 ]);
 const EntityPolicyForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
@@ -1032,17 +1038,41 @@ export default new Elysia()
 				"/tags/:tagId",
 				async ({ params, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, ["tags"]);
+					await Promise.all([
+						authorization.unit.ensureCanRead(params.unitId),
+						authorization.unit.ensureCanRead(params.tagId),
+					]);
+					const [tagRecord] = await database
+						.select({ id: tag.id })
+						.from(tag)
+						.where(eq(tag.id, params.tagId))
+						.limit(1);
+					if (!tagRecord) throw new TagNotFound();
 					await database.transaction(async (tx) => {
 						await tx
 							.insert(unitTag)
-							.values({ unitId: params.unitId, tagId: params.tagId })
+							.values({
+								unitId: params.unitId,
+								tagId: params.tagId,
+								createdByProfileId: authorization.profileId,
+							})
 							.onConflictDoNothing();
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: authorization.profileId,
-							event: "update",
-						});
+						await tx
+							.insert(unitTagVote)
+							.values({
+								unitId: params.unitId,
+								tagId: params.tagId,
+								profileId: authorization.profileId,
+								value: 1,
+							})
+							.onConflictDoUpdate({
+								target: [
+									unitTagVote.unitId,
+									unitTagVote.tagId,
+									unitTagVote.profileId,
+								],
+								set: { value: 1, updatedAt: new Date() },
+							});
 					});
 					const [application] = await database
 						.select()
@@ -1052,17 +1082,23 @@ export default new Elysia()
 						)
 						.limit(1);
 					if (!application) throw new TagApplicationNotFound(true);
-					return { ...application, score: 0, voteCount: 0 };
+					const totals = await getTagVoteSummary(params.unitId, params.tagId, 1);
+					return {
+						...application,
+						score: totals.score,
+						voteCount: totals.voteCount,
+					};
 				},
 				{
-					access: "contribute:unit:update",
+					access: "contribute:interaction:write",
 					params: UnitTagParams,
 					body: TagUnitBody,
 					response: {
 						[StatusCodes.OK]: TagApplicationResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
+							"TagNotFound",
 							"TagApplicationNotFound",
 						]),
 					},
@@ -1094,7 +1130,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					access: "write:interaction:write",
+					access: "write:unit:update",
 					params: UnitTagParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -1114,6 +1150,7 @@ export default new Elysia()
 			.put(
 				"/tags/:tagId/vote",
 				async ({ params, profile, authorization, body }) => {
+					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [application] = await database
 						.select({ tagId: unitTag.tagId })
@@ -1133,16 +1170,17 @@ export default new Elysia()
 						})
 						.onConflictDoUpdate({
 							target: [unitTagVote.unitId, unitTagVote.tagId, unitTagVote.profileId],
-							set: { value: body.value },
+							set: { value: body.value, updatedAt: new Date() },
 						});
 					return getTagVoteSummary(params.unitId, application.tagId, body.value);
 				},
 				{
-					access: "contribute:unit:update",
+					access: "contribute:interaction:write",
 					params: UnitTagParams,
 					body: VoteBody,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagApplicationNotFound",
@@ -1153,7 +1191,9 @@ export default new Elysia()
 			)
 			.delete(
 				"/tags/:tagId/vote",
-				async ({ params, profile }) => {
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
 					const [application] = await database
 						.select({ tagId: unitTag.tagId })
 						.from(unitTag)
@@ -1174,11 +1214,15 @@ export default new Elysia()
 					return getTagVoteSummary(params.unitId, application.tagId, null);
 				},
 				{
-					access: "write:unit:update",
+					access: "write:interaction:write",
 					params: UnitTagParams,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagApplicationNotFound"]),
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"TagApplicationNotFound",
+						]),
 					},
 					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
 				},

@@ -747,6 +747,27 @@ import type {
 	GetApiStaffAuditStatus403,
 	GetApiStaffAuditStatus422,
 	GetApiStaffAuditStatus500,
+	GetApiUnitsByTypeByUnitIdTagsOptions,
+	GetApiUnitsByTypeByUnitIdTagsStatus200,
+	GetApiUnitsByTypeByUnitIdTagsStatus404,
+	GetApiUnitsByTypeByUnitIdTagsStatus422,
+	GetApiUnitsByTypeByUnitIdTagsStatus500,
+	GetApiUsersMeTagRealmSubscriptionsOptions,
+	GetApiUsersMeTagRealmSubscriptionsStatus200,
+	GetApiUsersMeTagRealmSubscriptionsStatus422,
+	GetApiUsersMeTagRealmSubscriptionsStatus429,
+	GetApiUsersMeTagRealmSubscriptionsStatus500,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500,
+	DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+	DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+	DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422,
+	DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429,
+	DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500,
 	ResolveUnitSlugAddressOptions,
 	ResolveUnitSlugAddressStatus200,
 	ResolveUnitSlugAddressStatus400,
@@ -1047,12 +1068,14 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
+	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
+	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429,
@@ -1889,6 +1912,10 @@ import {
 	getApiStaffMembers,
 	putApiStaffMembersByProfileId,
 	getApiStaffAudit,
+	getApiUnitsByTypeByUnitIdTags,
+	getApiUsersMeTagRealmSubscriptions,
+	putApiUsersMeTagRealmSubscriptionsByRealmId,
+	deleteApiUsersMeTagRealmSubscriptionsByRealmId,
 	resolveUnitSlugAddress,
 	getPublicUnitSlugAddress,
 	resolveScopedUnitSlugAddress,
@@ -13723,6 +13750,404 @@ export function useGetApiStaffAudit<
 	return queryResult;
 }
 
+export const getApiUnitsByTypeByUnitIdTagsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiUnitsByTypeByUnitIdTagsOptions, "headers">) =>
+	[{ url: "/api/units/:type/:unitId/tags", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiUnitsByTypeByUnitIdTagsQueryKey = ReturnType<
+	typeof getApiUnitsByTypeByUnitIdTagsQueryKey
+>;
+
+export function getApiUnitsByTypeByUnitIdTagsQueryOptions(
+	{ path, query }: GetApiUnitsByTypeByUnitIdTagsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByTypeByUnitIdTagsQueryKey({ path, query });
+	return queryOptions<
+		GetApiUnitsByTypeByUnitIdTagsStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByTypeByUnitIdTagsStatus404
+			| GetApiUnitsByTypeByUnitIdTagsStatus422
+			| GetApiUnitsByTypeByUnitIdTagsStatus500
+		>,
+		GetApiUnitsByTypeByUnitIdTagsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByTypeByUnitIdTags({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get global and subscribed Realm Tag assertions for a Unit
+ * {@link /api/units/:type/:unitId/tags}
+ */
+export function useGetApiUnitsByTypeByUnitIdTags<
+	TData = GetApiUnitsByTypeByUnitIdTagsStatus200,
+	TQueryData = GetApiUnitsByTypeByUnitIdTagsStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByTypeByUnitIdTagsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiUnitsByTypeByUnitIdTagsOptions["path"]
+			| (() => GetApiUnitsByTypeByUnitIdTagsOptions["path"]);
+		query?:
+			| GetApiUnitsByTypeByUnitIdTagsOptions["query"]
+			| (() => GetApiUnitsByTypeByUnitIdTagsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByTypeByUnitIdTagsStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByTypeByUnitIdTagsStatus404
+					| GetApiUnitsByTypeByUnitIdTagsStatus422
+					| GetApiUnitsByTypeByUnitIdTagsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitsByTypeByUnitIdTagsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByTypeByUnitIdTagsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByTypeByUnitIdTagsStatus404
+			| GetApiUnitsByTypeByUnitIdTagsStatus422
+			| GetApiUnitsByTypeByUnitIdTagsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiUsersMeTagRealmSubscriptionsQueryKey = ({
+	query,
+}: Omit<GetApiUsersMeTagRealmSubscriptionsOptions, "headers"> = {}) =>
+	[{ url: "/api/users/me/tag-realm-subscriptions" }, ...(query ? [query] : [])] as const;
+
+type GetApiUsersMeTagRealmSubscriptionsQueryKey = ReturnType<
+	typeof getApiUsersMeTagRealmSubscriptionsQueryKey
+>;
+
+export function getApiUsersMeTagRealmSubscriptionsQueryOptions(
+	{ query }: GetApiUsersMeTagRealmSubscriptionsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUsersMeTagRealmSubscriptionsQueryKey({ query });
+	return queryOptions<
+		GetApiUsersMeTagRealmSubscriptionsStatus200,
+		ResponseErrorConfig<
+			| GetApiUsersMeTagRealmSubscriptionsStatus422
+			| GetApiUsersMeTagRealmSubscriptionsStatus429
+			| GetApiUsersMeTagRealmSubscriptionsStatus500
+		>,
+		GetApiUsersMeTagRealmSubscriptionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUsersMeTagRealmSubscriptions({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List the current user's ordered Realm Tag sources
+ * {@link /api/users/me/tag-realm-subscriptions}
+ */
+export function useGetApiUsersMeTagRealmSubscriptions<
+	TData = GetApiUsersMeTagRealmSubscriptionsStatus200,
+	TQueryData = GetApiUsersMeTagRealmSubscriptionsStatus200,
+	TQueryKey extends QueryKey = GetApiUsersMeTagRealmSubscriptionsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| GetApiUsersMeTagRealmSubscriptionsOptions["query"]
+			| (() => GetApiUsersMeTagRealmSubscriptionsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUsersMeTagRealmSubscriptionsStatus200,
+				ResponseErrorConfig<
+					| GetApiUsersMeTagRealmSubscriptionsStatus422
+					| GetApiUsersMeTagRealmSubscriptionsStatus429
+					| GetApiUsersMeTagRealmSubscriptionsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUsersMeTagRealmSubscriptionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUsersMeTagRealmSubscriptionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUsersMeTagRealmSubscriptionsStatus422
+			| GetApiUsersMeTagRealmSubscriptionsStatus429
+			| GetApiUsersMeTagRealmSubscriptionsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey = () =>
+	[{ url: "/api/users/me/tag-realm-subscriptions/:realmId" }] as const;
+
+export function putApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey();
+	return mutationOptions<
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, query, body }) => {
+			const { data } = await putApiUsersMeTagRealmSubscriptionsByRealmId({
+				...config,
+				path,
+				query,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Subscribe to or reorder a Realm Tag source
+ * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ */
+export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+			ResponseErrorConfig<
+				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
+				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+			>,
+			PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey();
+
+	const baseOptions = putApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey = () =>
+	[{ url: "/api/users/me/tag-realm-subscriptions/:realmId" }] as const;
+
+export function deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey();
+	return mutationOptions<
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUsersMeTagRealmSubscriptionsByRealmId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Unsubscribe from a Realm Tag source
+ * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ */
+export function useDeleteApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+				| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+				| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+			>,
+			DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationKey();
+
+	const baseOptions = deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
+			| DeleteApiUsersMeTagRealmSubscriptionsByRealmIdStatus500
+		>,
+		DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+		TContext
+	>;
+}
+
 export const resolveUnitSlugAddressMutationKey = () =>
 	[{ url: "/api/slug-addresses/resolve" }] as const;
 
@@ -18525,6 +18950,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TContext
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18555,6 +18981,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18576,6 +19003,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18588,6 +19016,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18605,6 +19034,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18625,6 +19055,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TCont
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18654,6 +19085,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18675,6 +19107,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18687,6 +19120,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
@@ -18704,6 +19138,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429

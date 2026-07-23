@@ -10,7 +10,7 @@ const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 export default {
 	workspace: {
 		title: "設定",
-		description: `管理個人資料、使用偏好、帳戶安全與 ${verbatimTerms.api.value} 權杖。`,
+		description: `管理個人資料、使用偏好、標籤來源、帳戶安全與 ${verbatimTerms.api.value} 權杖。`,
 		backToApplication: "返回應用程式",
 		backToOverview: "返回設定",
 		navigation: "設定導覽",
@@ -23,6 +23,10 @@ export default {
 			preferences: {
 				label: "偏好設定",
 				description: "選擇介面語言、內容語言、內容分級與預設授權。",
+			},
+			tagSources: {
+				label: "標籤來源",
+				description: `選擇並排序要顯示作品標籤判斷的${realmTerms.label}來源。`,
 			},
 			account: {
 				label: "帳戶",

@@ -1,4 +1,4 @@
-import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
+import { and, desc, eq, exists, isNull, lt, not, or } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
 import {
 	PortableTextDocument,
@@ -23,6 +23,7 @@ import {
 	firstUnitLocalizationCoverAssetId,
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationTitle,
 	resolveUnitLocalizationAvatarFromOrdered,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetIds,
@@ -247,17 +248,10 @@ export async function getUnit(
 			entityEntryId: subjectAssociation.entityId,
 			role: subjectAssociation.role,
 			position: subjectAssociation.position,
-			title: unitLocalization.title,
+			title: resolvedUnitLocalizationTitle(subjectAssociation.entityId, primaryLanguage),
 		})
 		.from(subjectAssociation)
 		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
-		.leftJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, entity.id),
-				primaryLanguage ? eq(unitLocalization.language, primaryLanguage) : sql`false`,
-			),
-		)
 		.where(eq(subjectAssociation.unitId, base.id))
 		.orderBy(subjectAssociation.position, subjectAssociation.id);
 	const links = await database
@@ -272,7 +266,7 @@ export async function getUnit(
 			voteCount: unitTagVoteStat.voteCount,
 			pinned: unitTag.pinned,
 			position: unitTag.position,
-			title: unitLocalization.title,
+			title: resolvedUnitLocalizationTitle(unitTag.tagId, primaryLanguage),
 		})
 		.from(unitTag)
 		.leftJoin(
@@ -280,13 +274,6 @@ export async function getUnit(
 			and(
 				eq(unitTagVoteStat.unitId, unitTag.unitId),
 				eq(unitTagVoteStat.tagId, unitTag.tagId),
-			),
-		)
-		.leftJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, unitTag.tagId),
-				primaryLanguage ? eq(unitLocalization.language, primaryLanguage) : sql`false`,
 			),
 		)
 		.where(eq(unitTag.unitId, base.id))

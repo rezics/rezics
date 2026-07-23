@@ -26,6 +26,7 @@ import { PostErrors } from "./posts/errors";
 import { ProgressErrors } from "./progress/errors";
 import { RealmErrors } from "./realms/errors";
 import { ReviewErrors } from "./reviews/errors";
+import { TagErrors } from "./tags/errors";
 import { TokenErrors } from "./tokens/errors";
 import { UserErrors } from "./users/errors";
 
@@ -59,6 +60,7 @@ export const ApiErrors = [
 	...FollowingErrors,
 	...ImageAssetErrors,
 	...TokenErrors,
+	...TagErrors,
 	...SearchErrors,
 	...PaginationErrors,
 	...UserErrors,

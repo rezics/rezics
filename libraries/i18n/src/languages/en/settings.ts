@@ -10,7 +10,7 @@ const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 export default {
 	workspace: {
 		title: "Settings",
-		description: `Manage your profile, preferences, account security, and ${verbatimTerms.api.value} tokens.`,
+		description: `Manage your profile, preferences, Tag sources, account security, and ${verbatimTerms.api.value} tokens.`,
 		backToApplication: "Back to the application",
 		backToOverview: "Back to settings",
 		navigation: "Settings navigation",
@@ -24,6 +24,10 @@ export default {
 				label: "Preferences",
 				description:
 					"Choose interface and content languages, ratings, and a default license.",
+			},
+			tagSources: {
+				label: "Tag sources",
+				description: `Choose and order the ${realmTerms.plural} whose Tag judgments you want to see.`,
 			},
 			account: {
 				label: "Account",

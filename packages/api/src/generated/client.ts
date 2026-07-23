@@ -243,6 +243,14 @@ import type {
 	PutApiStaffMembersByProfileIdResponses,
 	GetApiStaffAuditOptions,
 	GetApiStaffAuditResponses,
+	GetApiUnitsByTypeByUnitIdTagsOptions,
+	GetApiUnitsByTypeByUnitIdTagsResponses,
+	GetApiUsersMeTagRealmSubscriptionsOptions,
+	GetApiUsersMeTagRealmSubscriptionsResponses,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses,
+	DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
+	DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses,
 	ResolveUnitSlugAddressOptions,
 	ResolveUnitSlugAddressResponses,
 	GetPublicUnitSlugAddressOptions,
@@ -2892,6 +2900,84 @@ export function getApiStaffAudit<ThrowOnError extends boolean = true>(
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiStaffAuditResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get global and subscribed Realm Tag assertions for a Unit
+ * {@link /api/units/:type/:unitId/tags}
+ */
+export function getApiUnitsByTypeByUnitIdTags<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByTypeByUnitIdTagsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/units/{type}/{unitId}/tags", ...config }) as Promise<
+		RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List the current user's ordered Realm Tag sources
+ * {@link /api/users/me/tag-realm-subscriptions}
+ */
+export function getApiUsersMeTagRealmSubscriptions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUsersMeTagRealmSubscriptionsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiUsersMeTagRealmSubscriptionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/users/me/tag-realm-subscriptions",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUsersMeTagRealmSubscriptionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Subscribe to or reorder a Realm Tag source
+ * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ */
+export function putApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/users/me/tag-realm-subscriptions/{realmId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Unsubscribe from a Realm Tag source
+ * {@link /api/users/me/tag-realm-subscriptions/:realmId}
+ */
+export function deleteApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/users/me/tag-realm-subscriptions/{realmId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>
+	>;
 }
 
 /**

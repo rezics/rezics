@@ -6,7 +6,7 @@ import { TranslationBoundary } from "@/i18n/translation-boundary";
 export default function SettingsLayout({ children }: { children: ReactNode }) {
 	return (
 		<TranslationBoundary
-			namespaces={["feed", "governance", "licenses", "locale", "media", "settings"]}
+			namespaces={["feed", "governance", "licenses", "locale", "media", "settings", "tags"]}
 		>
 			<SettingsWorkspace>{children}</SettingsWorkspace>
 		</TranslationBoundary>

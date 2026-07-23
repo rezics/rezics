@@ -3,6 +3,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 const { forms: postTerms } = zhHantTerminology.post;
+const { forms: realmTerms } = zhHantTerminology.realm;
 
 export default {
 	types: { book: "書籍", software: "軟體", media: "媒體", series: "系列" },
@@ -74,44 +75,50 @@ export default {
 			book: {
 				overview: "書籍資料",
 				contents: "目錄",
+				tags: "標籤",
+				associations: "關聯",
 				reviews: "讀者書評",
 				discussion: "閱讀討論",
-				editions: "版本",
 			},
 			media: {
 				overview: "媒體資料",
+				tags: "標籤",
+				associations: "關聯",
 				reviews: "觀眾評論",
 				discussion: "觀影討論",
-				versions: "其他版本",
 			},
 			software: {
 				overview: "軟體資訊",
 				requirements: "系統需求",
+				tags: "標籤",
+				associations: "關聯",
 				reviews: "使用者評論",
 				discussion: "使用討論",
-				versions: "軟體版本",
 			},
 		},
 		sectionDescriptions: {
 			book: {
 				overview: "書籍說明、出版資訊與閱讀狀態。",
 				contents: "瀏覽章節結構並繼續閱讀。",
+				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
+				associations: "檢視這本書的內容主體，以及主作品與變體關係。",
 				reviews: "查看或撰寫以評分為選填內容的讀者書評。",
 				discussion: `瀏覽以這本書為討論對象的${postTerms.label}。`,
-				editions: "查看這本書的主版本與其他版本。",
 			},
 			media: {
 				overview: "媒體說明、發行資訊與觀影狀態。",
+				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
+				associations: "檢視這部作品的內容主體，以及主作品與變體關係。",
 				reviews: "查看或撰寫觀眾評論。",
 				discussion: `瀏覽以這部作品為討論對象的${postTerms.label}。`,
-				versions: "查看這部作品的主版本與其他版本。",
 			},
 			software: {
 				overview: "軟體說明、版本資訊與使用狀態。",
 				requirements: "查看各平台與級別的系統需求。",
+				tags: `檢視一般標籤與你所選${realmTerms.label}來源的情境判斷。`,
+				associations: "檢視這套軟體的內容主體，以及主作品與變體關係。",
 				reviews: "查看或撰寫軟體使用者評論。",
 				discussion: `瀏覽以這套軟體為討論對象的${postTerms.label}。`,
-				versions: "查看這套軟體的主版本與其他版本。",
 			},
 		},
 		information: "條目資訊",
@@ -121,6 +128,9 @@ export default {
 		links: "來源連結",
 		tags: "標籤",
 		versions: "版本",
+		variants: "變體",
+		variantsDescription: "同一作品中彼此直接連結的主作品與變體。",
+		viewAssociations: "查看所有關聯",
 		aliases: "別名",
 		primaryLanguage: "主要語言",
 		releasedOn: "發布日期",
@@ -129,8 +139,10 @@ export default {
 		type: "類型",
 		updatedAt: "最後更新",
 		primary: "主版本",
+		main: "主作品",
 		version: "變體",
 		noVersions: "目前沒有其他版本。",
+		noVariants: "目前沒有其他變體。",
 		noRequirements: "目前沒有系統需求資料。",
 		requirementTier: "需求級別",
 		requirementPlatform: "平台識別碼",

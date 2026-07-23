@@ -26,6 +26,9 @@ export const unitTag = pgTable(
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
+		createdByProfileId: uuid().references(() => profile.id, {
+			onDelete: "set null",
+		}),
 		pinned: boolean().default(false).notNull(),
 		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
@@ -34,6 +37,7 @@ export const unitTag = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.unitId, table.tagId] }),
 		index("unit_tag_tag_idx").on(table.tagId),
+		index("unit_tag_created_by_idx").on(table.createdByProfileId),
 		index("unit_tag_unit_position_idx").on(
 			table.unitId,
 			table.pinned,
@@ -41,6 +45,39 @@ export const unitTag = pgTable(
 			table.tagId,
 		),
 		check("unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+	],
+);
+
+/**
+ * A Profile's ordered set of Realm sources for contextual Tag assertions.
+ *
+ * This preference is intentionally independent from Realm membership and Unit
+ * following: it only controls which Realm-scoped Tag votes are surfaced in the
+ * Profile's personalized Tag landscape.
+ */
+export const profileRealmTagSubscription = pgTable(
+	"profile_realm_tag_subscription",
+	{
+		profileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "cascade" }),
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		position: fractionalIndexPosition()
+			.default(sql`'a0' || replace(uuidv7()::text, '-', '') || 'V'`)
+			.notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.profileId, table.realmId] }),
+		index("profile_realm_tag_subscription_profile_position_idx").on(
+			table.profileId,
+			table.position,
+			table.realmId,
+		),
+		index("profile_realm_tag_subscription_realm_idx").on(table.realmId, table.profileId),
 	],
 );
 

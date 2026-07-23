@@ -2343,6 +2343,7 @@
 					"ApiTokenPolicyInvalid",
 					"ApiTokenPolicyRevisionConflict",
 					"ApiTokenPolicyNotFound",
+					"TagNotFound",
 					"InvalidSearch",
 					"SearchUnavailable",
 					"SearchDocumentRevisionConflict",
@@ -41032,6 +41033,812 @@
 				"x-rezics-policy-operation-id": "getApiStaffAudit"
 			}
 		},
+		"/api/units/{type}/{unitId}/tags": {
+			"get": {
+				"summary": "Get global and subscribed Realm Tag assertions for a Unit",
+				"tags": ["Tags"],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					},
+					{
+						"name": "globalLimit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					},
+					{
+						"name": "sourceLimit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 30,
+							"default": 10,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 30, "default": 10, "type": "integer" }
+							]
+						}
+					},
+					{
+						"name": "perRealmLimit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 12,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 12, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["global", "realms"],
+									"properties": {
+										"global": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"tagId",
+													"title",
+													"summary",
+													"createdAt",
+													"updatedAt",
+													"pinned",
+													"position",
+													"score",
+													"voteCount",
+													"viewerVote"
+												],
+												"properties": {
+													"tagId": { "format": "uuid", "type": "string" },
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"pinned": { "type": "boolean" },
+													"position": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"score": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
+													},
+													"voteCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"viewerVote": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": -1,
+																		"type": "number"
+																	},
+																	{ "const": 1, "type": "number" }
+																]
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"realms": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"realmId",
+													"title",
+													"summary",
+													"canVote",
+													"position",
+													"createdAt",
+													"updatedAt",
+													"votedTags",
+													"policyTags"
+												],
+												"properties": {
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"canVote": { "type": "boolean" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"votedTags": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"tagId",
+																"title",
+																"summary",
+																"createdAt",
+																"updatedAt",
+																"realmId",
+																"contextPostId",
+																"score",
+																"voteCount",
+																"viewerVote"
+															],
+															"properties": {
+																"tagId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"createdAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"updatedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"realmId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"contextPostId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"score": {
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{ "type": "integer" }
+																	]
+																},
+																"voteCount": {
+																	"minimum": 0,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	]
+																},
+																"viewerVote": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"anyOf": [
+																				{
+																					"const": -1,
+																					"type": "number"
+																				},
+																				{
+																					"const": 1,
+																					"type": "number"
+																				}
+																			]
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														}
+													},
+													"policyTags": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"tagId",
+																"title",
+																"summary",
+																"createdAt",
+																"updatedAt",
+																"realmId",
+																"position"
+															],
+															"properties": {
+																"tagId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"createdAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"updatedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"realmId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"position": {
+																	"format": "fractional-position",
+																	"minLength": 2,
+																	"maxLength": 512,
+																	"type": "string"
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUnitsByTypeByUnitIdTags",
+				"x-rezics-policy-operation-id": "getApiUnitsByTypeByUnitIdTags"
+			}
+		},
+		"/api/users/me/tag-realm-subscriptions": {
+			"get": {
+				"summary": "List the current user's ordered Realm Tag sources",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"realmId",
+													"title",
+													"summary",
+													"canVote",
+													"position",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"canVote": { "type": "boolean" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUsersMeTag-realm-subscriptions",
+				"x-rezics-policy-operation-id": "getApiUsersMeTag-realm-subscriptions"
+			}
+		},
+		"/api/users/me/tag-realm-subscriptions/{realmId}": {
+			"put": {
+				"summary": "Subscribe to or reorder a Realm Tag source",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {
+									"position": {
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"realmId",
+										"title",
+										"summary",
+										"canVote",
+										"position",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"title": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"summary": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"canVote": { "type": "boolean" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmNotFound",
+													"type": "string",
+													"enum": ["RealmNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUsersMeTag-realm-subscriptionsByRealmId",
+				"x-rezics-policy-operation-id": "putApiUsersMeTag-realm-subscriptionsByRealmId"
+			},
+			"delete": {
+				"summary": "Unsubscribe from a Realm Tag source",
+				"tags": ["Tags"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["realmId", "subscribed"],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"subscribed": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiUsersMeTag-realm-subscriptionsByRealmId",
+				"x-rezics-policy-operation-id": "deleteApiUsersMeTag-realm-subscriptionsByRealmId"
+			}
+		},
 		"/api/slug-addresses/resolve": {
 			"post": {
 				"operationId": "resolveUnitSlugAddress",
@@ -61759,6 +62566,7 @@
 									"required": [
 										"unitId",
 										"tagId",
+										"createdByProfileId",
 										"score",
 										"voteCount",
 										"pinned",
@@ -61769,6 +62577,13 @@
 									"properties": {
 										"unitId": { "format": "uuid", "type": "string" },
 										"tagId": { "format": "uuid", "type": "string" },
+										"createdByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
 										"score": {
 											"anyOf": [
 												{
@@ -61822,11 +62637,11 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "UnitAccessRestricted",
 													"type": "string",
 													"enum": [
-														"UnitPermissionForbidden",
-														"UnitProtected"
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
 													]
 												},
 												"message": { "type": "string" },
@@ -61856,6 +62671,7 @@
 													"type": "string",
 													"enum": [
 														"UnitNotFound",
+														"TagNotFound",
 														"TagApplicationNotFound"
 													]
 												},
@@ -62177,6 +62993,36 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessRestricted",
+													"type": "string",
+													"enum": [
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -62346,6 +63192,36 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessRestricted",
+													"type": "string",
+													"enum": [
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -62359,9 +63235,12 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "TagApplicationNotFound",
+													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["TagApplicationNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"TagApplicationNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}

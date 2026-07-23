@@ -1,6 +1,7 @@
 export const SettingsSectionIds = [
 	"profile",
 	"preferences",
+	"tag-sources",
 	"account",
 	"security",
 	"tokens",

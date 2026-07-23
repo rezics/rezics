@@ -132,6 +132,7 @@ export default {
 	SubjectAssociationNotFound: "找不到這項主題關聯。",
 	AliasNotFound: "找不到這個別名。",
 	TagApplicationNotFound: "找不到這筆標籤套用記錄。",
+	TagNotFound: "找不到這個標籤。",
 	UnitVersionNotFound: "找不到這個條目版本。",
 	UnitVariantKindMismatch: "變體與主版本必須使用相同且受支援的條目類型。",
 	UnitVariantTargetIsVariant: "變體必須直接指向主版本。",
