@@ -11,7 +11,7 @@ import { SessionCacheBoundary } from "@/features/auth/session-cache-boundary";
 import { TranslatedUiProvider } from "@/features/application-shell/components/ui-provider";
 import { PwaLifecycle } from "@/features/pwa/pwa-lifecycle";
 import { TranslationProvider } from "@/i18n/client";
-import { RootTranslationNamespaces } from "@/i18n/namespaces";
+import type { RootTranslationNamespaces } from "@/i18n/namespaces";
 import { shouldRetry } from "@/lib/query-policy";
 import { urlStateOptions } from "@/lib/search-params";
 

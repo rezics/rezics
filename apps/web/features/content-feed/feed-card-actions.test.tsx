@@ -10,7 +10,7 @@ import { FeedShareSurfaceView, FeedVoteControl } from "./feed-card-actions";
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
-	return createReactI18n<typeof resources>();
+	return createReactI18n(resources);
 });
 
 vi.stubGlobal(

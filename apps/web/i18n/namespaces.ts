@@ -1,4 +1,9 @@
-export const RootTranslationNamespaces = [
+import { defineTranslationBundle } from "native-i18n";
+import type { resources } from "@rezics/i18n/resources";
+
+const defineBundle = defineTranslationBundle<typeof resources>();
+
+export const RootTranslationNamespaces = defineBundle([
 	"actions",
 	"auth",
 	"betterAuthErrorCodes",
@@ -10,6 +15,6 @@ export const RootTranslationNamespaces = [
 	"search",
 	"state",
 	"ui",
-] as const;
+]);
 
-export const AppShellTranslationNamespaces = ["locale", "nav", "notifications"] as const;
+export const AppShellTranslationNamespaces = defineBundle(["locale", "nav", "notifications"]);
