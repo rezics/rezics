@@ -27,8 +27,8 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v3_20260722",
-		projectionVersion: 3,
+		indexUid: "rezics_units_v4_20260723",
+		projectionVersion: 4,
 		settingsFingerprint: "a".repeat(64),
 	}),
 }));
@@ -128,6 +128,7 @@ describe("domain search SQL", () => {
 		await searchDomain("posts", {
 			creditedUnitId: "11111111-1111-1111-1111-111111111111",
 			realmId: "22222222-2222-2222-2222-222222222222",
+			kinds: ["reply"],
 			subjectId: "33333333-3333-3333-3333-333333333333",
 			rootId: "44444444-4444-4444-4444-444444444444",
 			parentId: "55555555-5555-5555-5555-555555555555",
@@ -135,6 +136,8 @@ describe("domain search SQL", () => {
 		});
 		const postsQuery = lastQuery();
 		expect(postsQuery).toContain('"credit_attribution"');
+		expect(postsQuery).toContain('AND ("post"."kind")::text = ANY');
+		expect(postsQuery).not.toContain('AND ("unit"."kind")::text = ANY');
 		expect(postsQuery).toContain('FROM "realm_unit"');
 		expect(postsQuery).toContain('"post_reply"."root_post_id"');
 		expect(postsQuery).toContain('"post_reply"."parent_post_id"');
@@ -238,6 +241,40 @@ describe("domain search SQL", () => {
 		expect(softwareQuery).toContain('"software_requirement"."software_id" = "unit"."id"');
 	});
 
+	it("keeps Realm membership and Realm Tag voting predicates independent", async () => {
+		await searchDomain("units", {
+			expression: {
+				operator: "all",
+				clauses: [
+					{
+						field: "realm",
+						operator: "all-of",
+						values: [
+							"019b0000-0000-7000-8000-000000000001",
+							"019b0000-0000-7000-8000-000000000002",
+						],
+					},
+					{
+						field: "realm-tag-vote",
+						operator: "matches",
+						realmId: "019b0000-0000-7000-8000-000000000003",
+						tagId: "019b0000-0000-7000-8000-000000000004",
+						score: { lower: 1 },
+						voteCount: { upper: 20 },
+					},
+				],
+			},
+		});
+
+		const query = lastQuery();
+		expect(query).toContain('from "realm_unit"');
+		expect(query).toContain("@> ARRAY[");
+		expect(query).toContain('from "realm_tag_context"');
+		expect(query).toContain('left join "realm_tag_vote_stat"');
+		expect(query).toContain('coalesce("realm_tag_vote_stat"."score", 0) >=');
+		expect(query).toContain('coalesce("realm_tag_vote_stat"."vote_count", 0) <=');
+	});
+
 	it("hides Variants from browse discovery but annotates exact Unit results", async () => {
 		await searchDomain("units", {});
 		expect(lastQuery()).toContain('select 1 from "unit_variant"');
@@ -312,5 +349,9 @@ describe("domain search SQL", () => {
 		expect(query).toContain('join "credit_attribution" as "facet_credit_attribution"');
 		expect(query).toContain('join "unit_access_binding" as "facet_owner_binding"');
 		expect(query.match(/limit 100/g)).toHaveLength(6);
+
+		execute.mockClear();
+		await expect(searchDomainFacets("users", {}, ["kind"])).resolves.toEqual([]);
+		expect(execute).not.toHaveBeenCalled();
 	});
 });

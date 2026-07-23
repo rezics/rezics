@@ -29,6 +29,24 @@ describe("Meilisearch expression compiler", () => {
 		).toBe('(unitType IN ["book"] AND (book.publicationAt >= 1577836800))');
 	});
 
+	it("pushes only exact Realm Tag voting context identity", () => {
+		const filter = {
+			field: "realm-tag-vote",
+			operator: "matches",
+			realmId: "019b0000-0000-7000-8000-000000000002",
+			tagId: "019b0000-0000-7000-8000-000000000001",
+		} as const;
+		expect(compileMeilisearchExpression("units", filter)).toBe(
+			'(filters.realmTagVoteKeys = "019b0000-0000-7000-8000-000000000002:019b0000-0000-7000-8000-000000000001")',
+		);
+		expect(
+			compileMeilisearchExpression("units", {
+				...filter,
+				score: { lower: 1 },
+			}),
+		).toBeUndefined();
+	});
+
 	it("omits a whole Boolean tree when a residual-only leaf cannot be pushed safely", () => {
 		expect(
 			compileMeilisearchExpression("polls", {
@@ -52,7 +70,7 @@ describe("Meilisearch expression compiler", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 		const common = {
-			indexUid: "rezics_units_v3_20260722",
+			indexUid: "rezics_units_v4_20260723",
 			query: "book",
 			offset: 0,
 			limit: 20,

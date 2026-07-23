@@ -49,6 +49,7 @@ function validateDocument(value: unknown): SearchDocument {
 }
 
 function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [filter.lower, filter.upper].filter(
@@ -67,6 +68,7 @@ async function ensureDocumentReferences(
 		].filter((id): id is string => Boolean(id)),
 	);
 	const tagIds = new Set<string>();
+	const realmIds = new Set<string>();
 	for (const control of document.controls)
 		if (control.field === "tag" && control.optionPolicy?.kind !== "all")
 			for (const value of control.optionPolicy?.values ?? [])
@@ -75,10 +77,13 @@ async function ensureDocumentReferences(
 		...document.constraints,
 		...document.defaults.map((value) => value.filter),
 	])
-		if (filter.field === "tag")
+		if (filter.field === "realm-tag-vote") {
+			realmIds.add(filter.realmId);
+			tagIds.add(filter.tagId);
+		} else if (filter.field === "tag")
 			for (const value of filterValues(filter))
 				if (typeof value === "string") tagIds.add(value);
-	const ids = [...new Set([...labelIds, ...tagIds])];
+	const ids = [...new Set([...labelIds, ...tagIds, ...realmIds])];
 	if (!ids.length) return;
 	const records = await tx
 		.select({
@@ -91,7 +96,7 @@ async function ensureDocumentReferences(
 		.from(unit)
 		.where(and(inArray(unit.id, ids), isNull(unit.deletedAt)));
 	const recordById = new Map(records.map((record) => [record.id, record]));
-	const isPublicKind = (id: string, kind: "label" | "tag") => {
+	const isPublicKind = (id: string, kind: "label" | "realm" | "tag") => {
 		const record = recordById.get(id);
 		return (
 			record?.kind === kind &&
@@ -106,6 +111,10 @@ async function ensureDocumentReferences(
 		);
 	if ([...tagIds].some((id) => !isPublicKind(id, "tag")))
 		throw new InvalidSearch("Search document tag options must target public active Tag Units");
+	if ([...realmIds].some((id) => !isPublicKind(id, "realm")))
+		throw new InvalidSearch(
+			"Search document Realm references must target public active Realms",
+		);
 }
 
 export async function getZoneSearchFeature(

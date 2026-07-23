@@ -7,6 +7,7 @@ import {
 	parseSearchCursor,
 	type SearchExpression,
 	type SearchFilter,
+	type SearchScalarField,
 	type SearchScalar,
 } from "@rezics/search";
 import { FontAwesomeProvider } from "@rezics/avatar";
@@ -31,6 +32,8 @@ import {
 	profile,
 	unitFollowStat,
 	realm,
+	realmTagContext,
+	realmTagVoteStat,
 	realmUnit,
 	software,
 	softwareRequirement,
@@ -176,6 +179,7 @@ function scalarStrings(values: readonly SearchScalar[], field: string): string[]
 }
 
 function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [filter.lower, filter.upper].filter(
@@ -266,6 +270,31 @@ function softwareRequirementRowCondition(filter: SearchFilter, column: SQL): SQL
 }
 
 function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
+	if (filter.field === "realm-tag-vote") {
+		const conditions: SQL[] = [
+			sql`${realmTagContext.unitId} = ${unit.id}`,
+			sql`${realmTagContext.realmId} = ${filter.realmId}::uuid`,
+			sql`${realmTagContext.tagId} = ${filter.tagId}::uuid`,
+		];
+		const addBounds = (
+			column: SQL,
+			range: { readonly lower?: number; readonly upper?: number } | undefined,
+		) => {
+			if (range?.lower !== undefined) conditions.push(sql`${column} >= ${range.lower}`);
+			if (range?.upper !== undefined) conditions.push(sql`${column} <= ${range.upper}`);
+		};
+		addBounds(sql`coalesce(${realmTagVoteStat.score}, 0)`, filter.score);
+		addBounds(sql`coalesce(${realmTagVoteStat.voteCount}, 0)`, filter.voteCount);
+		return sql`exists (
+			select 1
+			from ${realmTagContext}
+			left join ${realmTagVoteStat}
+				on ${realmTagVoteStat.realmId} = ${realmTagContext.realmId}
+				and ${realmTagVoteStat.unitId} = ${realmTagContext.unitId}
+				and ${realmTagVoteStat.tagId} = ${realmTagContext.tagId}
+			where ${sql.join(conditions, sql` and `)}
+		)`;
+	}
 	if (filter.field === "category") {
 		const values = scalarStrings(filterValues(filter), filter.field);
 		const matches = values.includes(category);
@@ -441,12 +470,20 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 	}
 	if (filter.field === "realm") {
 		const values = scalarStrings(filterValues(filter), filter.field);
-		const match = sql`exists (
-			select 1 from ${realmUnit}
-			where ${realmUnit.unitId} = ${unit.id}
-				and ${realmUnit.realmId} = any(${toUuidArray(values)})
-				and ${realmUnit.status} = 'visible'
-		)`;
+		const match =
+			filter.operator === "all-of"
+				? sql`array(
+					select ${realmUnit.realmId}
+					from ${realmUnit}
+					where ${realmUnit.unitId} = ${unit.id}
+						and ${realmUnit.status} = 'visible'
+				) @> ${toUuidArray(values)}`
+				: sql`exists (
+					select 1 from ${realmUnit}
+					where ${realmUnit.unitId} = ${unit.id}
+						and ${realmUnit.realmId} = any(${toUuidArray(values)})
+						and ${realmUnit.status} = 'visible'
+				)`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
 			? sql`not (${match})`
 			: match;
@@ -467,9 +504,11 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		kind:
 			category === "entity"
 				? sql`${entity.kind}`
-				: category === "reviews"
-					? sql`${subjectUnit.kind}`
-					: sql`${unit.kind}`,
+				: category === "posts"
+					? sql`${post.kind}`
+					: category === "reviews"
+						? sql`${subjectUnit.kind}`
+						: sql`${unit.kind}`,
 		"content-rating": sql`${unit.contentRating}`,
 		"ai-disclosure": sql`${unit.aiDisclosure}`,
 		license: sql`${unit.license}`,
@@ -582,9 +621,11 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 		const column =
 			category === "entity"
 				? sql`${entity.kind}`
-				: category === "reviews"
-					? sql`${subjectUnit.kind}`
-					: sql`${unit.kind}`;
+				: category === "posts"
+					? sql`${post.kind}`
+					: category === "reviews"
+						? sql`${subjectUnit.kind}`
+						: sql`${unit.kind}`;
 		addList(conditions, column, request.kinds);
 	}
 	const unitListFilters = [
@@ -679,10 +720,10 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 
 function buildCandidateExpression(request: DomainSearchRequest): SearchExpression | undefined {
 	const filters: SearchFilter[] = [];
-	const addValues = (field: SearchFilter["field"], values: readonly string[] | undefined) => {
+	const addValues = (field: SearchScalarField, values: readonly string[] | undefined) => {
 		if (values?.length) filters.push({ field, operator: "any-of", values: [...values] });
 	};
-	const addValue = (field: SearchFilter["field"], value: string | undefined) => {
+	const addValue = (field: SearchScalarField, value: string | undefined) => {
 		if (value) filters.push({ field, operator: "equals", value });
 	};
 	addValues("language", request.Languages);
@@ -1042,7 +1083,13 @@ function facetSpec(
 				and ${facetOwnerBinding.revokedAt} is null
 				and (${facetOwnerBinding.expiresAt} is null or ${facetOwnerBinding.expiresAt} > now())`,
 		};
-	if (field === "kind")
+	if (
+		field === "kind" &&
+		(category === "units" ||
+			category === "entity" ||
+			category === "posts" ||
+			category === "reviews")
+	)
 		return {
 			value:
 				category === "entity"

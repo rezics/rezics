@@ -109,6 +109,7 @@ export function AdvancedSearchBuilder({
 		"none-of": t.operators.noneOf,
 		range: t.operators.range,
 		exists: t.operators.exists,
+		matches: t.operators.matches,
 	};
 	const controlLabel = (control: ResolvedSearchControl) =>
 		(control.labelUnitId ? resolveLabel?.(control.labelUnitId) : undefined) ??
@@ -129,6 +130,26 @@ export function AdvancedSearchBuilder({
 		}
 		const control = advancedControls.find((candidate) => candidate.key === node.controlKey);
 		if (!control) return "";
+		if (control.field === "realm-tag-vote") {
+			const relation = node.realmTagVote;
+			const bounds = [
+				relation?.scoreLower === undefined
+					? undefined
+					: `${t.realmTagVote.score} ≥ ${relation.scoreLower}`,
+				relation?.scoreUpper === undefined
+					? undefined
+					: `${t.realmTagVote.score} ≤ ${relation.scoreUpper}`,
+				relation?.voteCountLower === undefined
+					? undefined
+					: `${t.realmTagVote.voteCount} ≥ ${relation.voteCountLower}`,
+				relation?.voteCountUpper === undefined
+					? undefined
+					: `${t.realmTagVote.voteCount} ≤ ${relation.voteCountUpper}`,
+			].filter((value): value is string => value !== undefined);
+			return [controlLabel(control), relation?.realm?.label, relation?.tag?.label, ...bounds]
+				.filter(Boolean)
+				.join(" · ");
+		}
 		const values =
 			node.operator === "range"
 				? [node.lower, node.upper]
@@ -174,6 +195,123 @@ export function AdvancedSearchBuilder({
 	}
 
 	function valueEditor(condition: DraftSearchCondition, control: ResolvedSearchControl) {
+		if (control.field === "realm-tag-vote") {
+			const relation = condition.realmTagVote;
+			const entityOption = (
+				value: DraftSearchValue | undefined,
+			): readonly SearchEntityOption[] =>
+				value && typeof value.value === "string"
+					? [
+							{
+								id: value.value,
+								label: value.label,
+								kind: value.kind ?? controlLabel(control),
+								avatar: value.avatar,
+							},
+						]
+					: [];
+			const nextInteger = (value: string): number | undefined => {
+				if (!value) return undefined;
+				const parsed = Number(value);
+				return Number.isSafeInteger(parsed) ? parsed : undefined;
+			};
+			const replaceRelation = (
+				patch: Partial<NonNullable<DraftSearchCondition["realmTagVote"]>>,
+			) =>
+				updateCondition({
+					...condition,
+					realmTagVote: { ...relation, ...patch },
+				});
+			return (
+				<div className="grid gap-3">
+					<div className="grid gap-2 md:grid-cols-2">
+						<div className="grid gap-1">
+							<span className="font-medium text-xs">{t.realmTagVote.realm}</span>
+							<SearchEntityMultiSelect
+								emptyLabel={t.entitySearchEmpty}
+								errorLabel={t.entitySearchError}
+								index="realms"
+								loadingLabel={t.entitySearchLoading}
+								onChange={(next) => {
+									const selected = next.at(-1);
+									replaceRelation({
+										realm: selected
+											? {
+													value: selected.id,
+													label: selected.label,
+													kind: selected.kind,
+													avatar: selected.avatar,
+												}
+											: undefined,
+									});
+								}}
+								placeholder={t.realmTagVote.realmPlaceholder}
+								removeLabel={t.removeSelection}
+								selected={entityOption(relation?.realm)}
+							/>
+						</div>
+						<div className="grid gap-1">
+							<span className="font-medium text-xs">{t.realmTagVote.tag}</span>
+							<SearchEntityMultiSelect
+								emptyLabel={t.entitySearchEmpty}
+								errorLabel={t.entitySearchError}
+								index="tags"
+								loadingLabel={t.entitySearchLoading}
+								onChange={(next) => {
+									const selected = next.at(-1);
+									replaceRelation({
+										tag: selected
+											? {
+													value: selected.id,
+													label: selected.label,
+													kind: selected.kind,
+													avatar: selected.avatar,
+												}
+											: undefined,
+									});
+								}}
+								placeholder={t.realmTagVote.tagPlaceholder}
+								removeLabel={t.removeSelection}
+								selected={entityOption(relation?.tag)}
+							/>
+						</div>
+					</div>
+					<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+						{(
+							[
+								["scoreLower", t.realmTagVote.scoreMinimum, relation?.scoreLower],
+								["scoreUpper", t.realmTagVote.scoreMaximum, relation?.scoreUpper],
+								[
+									"voteCountLower",
+									t.realmTagVote.voteCountMinimum,
+									relation?.voteCountLower,
+								],
+								[
+									"voteCountUpper",
+									t.realmTagVote.voteCountMaximum,
+									relation?.voteCountUpper,
+								],
+							] as const
+						).map(([key, label, value]) => (
+							<Input
+								aria-label={label}
+								key={key}
+								min={key.startsWith("voteCount") ? 0 : undefined}
+								onChange={(event) =>
+									replaceRelation({
+										[key]: nextInteger(event.currentTarget.value),
+									})
+								}
+								placeholder={label}
+								type="number"
+								value={value ?? ""}
+							/>
+						))}
+					</div>
+					<p className="text-muted-foreground text-xs">{t.realmTagVote.boundsOptional}</p>
+				</div>
+			);
+		}
 		if (condition.operator === "range") {
 			const inputType =
 				control.component === "date-range"
@@ -375,6 +513,7 @@ export function AdvancedSearchBuilder({
 								values: [],
 								lower: undefined,
 								upper: undefined,
+								realmTagVote: undefined,
 							});
 						}}
 						options={control.operators.map((operator) => ({

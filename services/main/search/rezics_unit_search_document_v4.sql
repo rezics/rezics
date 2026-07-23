@@ -4,11 +4,17 @@ SELECT
 	(unit_row.id IS NOT NULL AND category.value IS NOT NULL) AS indexable,
 	CASE WHEN unit_row.id IS NULL OR category.value IS NULL THEN NULL ELSE jsonb_build_object(
 		'id', source.unit_id,
-		'projectionVersion', 3,
+		'projectionVersion', 4,
 		'revision', source.revision,
 		'category', category.value,
 		'unitType', unit_row.kind,
-		'subtype', coalesce(entity_row.kind, post_row.kind::text, media_row.kind),
+		'searchKind', CASE category.value
+			WHEN 'units' THEN unit_row.kind
+			WHEN 'entity' THEN entity_row.kind
+			WHEN 'posts' THEN post_row.kind::text
+			WHEN 'reviews' THEN subject_unit_row.kind
+			ELSE NULL
+		END,
 		'search', jsonb_build_object(
 			'primaryTitles', coalesce(localization.primary_titles, '[]'::jsonb),
 			'titles', coalesce(localization.titles, '[]'::jsonb),
@@ -24,6 +30,7 @@ SELECT
 			'license', unit_row.license,
 			'tagIds', coalesce(tag_data.tag_ids, '[]'::jsonb),
 			'realmIds', coalesce(realm_data.realm_ids, '[]'::jsonb),
+			'realmTagVoteKeys', coalesce(realm_tag_vote_data.keys, '[]'::jsonb),
 			'creditedUnitIds', coalesce(attribution_data.credited_unit_ids, '[]'::jsonb),
 			'subjectId', post_row.subject_unit_id,
 			'rootId', reply_row.root_post_id,
@@ -83,6 +90,7 @@ FROM public.search_unit_projection_source AS source
 LEFT JOIN public.unit AS unit_row ON unit_row.id = source.unit_id
 LEFT JOIN public.entity AS entity_row ON entity_row.id = source.unit_id
 LEFT JOIN public.post AS post_row ON post_row.id = source.unit_id
+LEFT JOIN public.unit AS subject_unit_row ON subject_unit_row.id = post_row.subject_unit_id
 LEFT JOIN public.post_reply AS reply_row ON reply_row.post_id = source.unit_id
 LEFT JOIN public.post_reply_stat AS reply_stat ON reply_stat.post_id = source.unit_id
 LEFT JOIN public.realm AS realm_row ON realm_row.id = source.unit_id
@@ -128,6 +136,14 @@ LEFT JOIN LATERAL (
 ) AS alias_data ON true
 LEFT JOIN LATERAL (SELECT jsonb_agg(tag_id ORDER BY tag_id) AS tag_ids FROM public.unit_tag WHERE unit_id = source.unit_id) AS tag_data ON true
 LEFT JOIN LATERAL (SELECT jsonb_agg(realm_id ORDER BY realm_id) AS realm_ids FROM public.realm_unit WHERE unit_id = source.unit_id AND status = 'visible') AS realm_data ON true
+LEFT JOIN LATERAL (
+	SELECT jsonb_agg(
+		(realm_id::text || ':' || tag_id::text)
+		ORDER BY realm_id, tag_id
+	) AS keys
+	FROM public.realm_tag_context
+	WHERE unit_id = source.unit_id
+) AS realm_tag_vote_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(DISTINCT credited_unit_id ORDER BY credited_unit_id) AS credited_unit_ids
 	FROM public.credit_attribution

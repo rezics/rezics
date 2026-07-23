@@ -98,6 +98,7 @@ export const SearchCategoryRules = {
 		filterableAttributes: [
 			"creditedUnitId",
 			...CommonFilterableAttributes,
+			"kind",
 			"subjectId",
 			"rootId",
 			"parentId",

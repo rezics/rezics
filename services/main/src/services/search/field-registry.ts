@@ -1,6 +1,7 @@
 import type { SearchCategory, SearchField, SearchOperator } from "@rezics/search";
 
-export type SearchScalarKind = "boolean" | "date" | "integer" | "string" | "uuid";
+export type SearchScalarKind =
+	"boolean" | "date" | "integer" | "string" | "uuid" | "realm-tag-vote";
 export type SearchFacetPolicy = "none" | "meili-low-cardinality" | "postgres-authorized";
 export type SearchSortPolicy = "none" | "meili" | "postgres-residual";
 
@@ -47,13 +48,13 @@ export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchField
 		residual: false,
 	},
 	kind: {
-		categories: allCategories,
+		categories: ["units", "entity", "posts", "reviews"],
 		scalar: "string",
 		operators: equality,
 		modes: allModes,
 		facet: "meili-low-cardinality",
 		sort: "none",
-		documentPath: "unitType",
+		documentPath: "searchKind",
 		meilisearch: ["equality"],
 		residual: false,
 	},
@@ -133,6 +134,17 @@ export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchField
 		documentPath: "filters.realmIds",
 		meilisearch: ["equality"],
 		residual: false,
+	},
+	"realm-tag-vote": {
+		categories: allCategories,
+		scalar: "realm-tag-vote",
+		operators: ["matches"],
+		modes: advanced,
+		facet: "none",
+		sort: "none",
+		documentPath: "filters.realmTagVoteKeys",
+		meilisearch: ["equality"],
+		residual: true,
 	},
 	zone: {
 		categories: allCategories,

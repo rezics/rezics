@@ -318,6 +318,19 @@ function unique(values: readonly unknown[]): boolean {
 }
 
 function assertFilterShape(filter: SearchFilterValue, path: string): void {
+	if (filter.field === "realm-tag-vote") {
+		for (const [name, range] of [
+			["score", filter.score],
+			["voteCount", filter.voteCount],
+		] as const)
+			if (
+				range?.lower !== undefined &&
+				range.upper !== undefined &&
+				range.lower > range.upper
+			)
+				throw new TypeError(`${path} ${name} lower bound exceeds upper bound`);
+		return;
+	}
 	if (filter.operator === "range" && filter.lower === undefined && filter.upper === undefined)
 		throw new TypeError(`${path} range requires a lower or upper bound`);
 	if ("values" in filter && !unique(filter.values))
@@ -474,6 +487,11 @@ export function parseSharedSearchQueryDocument(value: unknown): SharedSearchQuer
 	const referenced = new Set<string>();
 	const remember = (controlValue: SearchControlValue) => {
 		const { filter } = controlValue;
+		if (filter.field === "realm-tag-vote") {
+			referenced.add(JSON.stringify(["realm", filter.realmId]));
+			referenced.add(JSON.stringify(["tag", filter.tagId]));
+			return;
+		}
 		const values =
 			"values" in filter
 				? filter.values

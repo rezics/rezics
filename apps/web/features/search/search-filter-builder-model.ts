@@ -23,6 +23,14 @@ export interface DraftSearchCondition {
 	readonly values: readonly DraftSearchValue[];
 	readonly lower?: SearchScalar;
 	readonly upper?: SearchScalar;
+	readonly realmTagVote?: {
+		readonly realm?: DraftSearchValue;
+		readonly tag?: DraftSearchValue;
+		readonly scoreLower?: number;
+		readonly scoreUpper?: number;
+		readonly voteCountLower?: number;
+		readonly voteCountUpper?: number;
+	};
 }
 
 export interface DraftSearchGroup {
@@ -41,6 +49,7 @@ export function createDraftId(): string {
 }
 
 function valuesOf(filter: SearchFilter): readonly SearchScalar[] {
+	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [];
@@ -50,6 +59,11 @@ function defaultOperator(control: ResolvedSearchControl): SearchOperator {
 	if (control.component === "multi-select" && control.operators.includes("any-of"))
 		return "any-of";
 	return control.operators[0] ?? "equals";
+}
+
+function numericRange(lower: number | undefined, upper: number | undefined) {
+	if (lower !== undefined) return upper === undefined ? { lower } : { lower, upper };
+	return upper === undefined ? undefined : { upper };
 }
 
 export function createDraftCondition(
@@ -83,6 +97,41 @@ export function draftFromExpression(
 	);
 	function convert(node: SearchControlExpression): DraftSearchNode {
 		if ("controlKey" in node) {
+			if (node.filter.field === "realm-tag-vote") {
+				const realm = presentation.get(presentationKey("realm", node.filter.realmId));
+				const tag = presentation.get(presentationKey("tag", node.filter.tagId));
+				return {
+					id: createDraftId(),
+					kind: "condition",
+					controlKey: node.controlKey,
+					operator: "matches",
+					values: [],
+					realmTagVote: {
+						realm: {
+							value: node.filter.realmId,
+							label: realm?.title ?? node.filter.realmId,
+							...(realm?.kind ? { kind: realm.kind } : {}),
+						},
+						tag: {
+							value: node.filter.tagId,
+							label: tag?.title ?? node.filter.tagId,
+							...(tag?.kind ? { kind: tag.kind } : {}),
+						},
+						...(node.filter.score?.lower === undefined
+							? {}
+							: { scoreLower: node.filter.score.lower }),
+						...(node.filter.score?.upper === undefined
+							? {}
+							: { scoreUpper: node.filter.score.upper }),
+						...(node.filter.voteCount?.lower === undefined
+							? {}
+							: { voteCountLower: node.filter.voteCount.lower }),
+						...(node.filter.voteCount?.upper === undefined
+							? {}
+							: { voteCountUpper: node.filter.voteCount.upper }),
+					},
+				};
+			}
 			const values = valuesOf(node.filter).map((value): DraftSearchValue => {
 				const selected = presentation.get(presentationKey(node.filter.field, value));
 				return {
@@ -173,29 +222,62 @@ export function compileDraftSearch(
 		}
 		const values = node.values.map((value) => value.value);
 		let filter: SearchFilter | undefined;
-		if (node.operator === "range") {
+		const field = control.field;
+		if (field === "realm-tag-vote" && node.operator === "matches") {
+			const realmId = node.realmTagVote?.realm?.value;
+			const tagId = node.realmTagVote?.tag?.value;
+			const { scoreLower, scoreUpper, voteCountLower, voteCountUpper } =
+				node.realmTagVote ?? {};
+			const boundsValid =
+				(scoreLower === undefined ||
+					scoreUpper === undefined ||
+					scoreLower <= scoreUpper) &&
+				(voteCountLower === undefined ||
+					voteCountUpper === undefined ||
+					voteCountLower <= voteCountUpper) &&
+				(voteCountLower === undefined || voteCountLower >= 0) &&
+				(voteCountUpper === undefined || voteCountUpper >= 0);
+			const score = numericRange(scoreLower, scoreUpper);
+			const voteCount = numericRange(voteCountLower, voteCountUpper);
+			if (typeof realmId === "string" && typeof tagId === "string" && boundsValid)
+				filter = {
+					field: "realm-tag-vote",
+					operator: "matches",
+					realmId,
+					tagId,
+					...(score ? { score } : {}),
+					...(voteCount ? { voteCount } : {}),
+				};
+		} else if (field !== "realm-tag-vote" && node.operator === "range") {
 			if (node.lower !== undefined)
 				filter =
 					node.upper === undefined
-						? { field: control.field, operator: "range", lower: node.lower }
+						? { field, operator: "range", lower: node.lower }
 						: {
-								field: control.field,
+								field,
 								operator: "range",
 								lower: node.lower,
 								upper: node.upper,
 							};
 			else if (node.upper !== undefined)
-				filter = { field: control.field, operator: "range", upper: node.upper };
-		} else if (node.operator === "exists") {
+				filter = { field, operator: "range", upper: node.upper };
+		} else if (field !== "realm-tag-vote" && node.operator === "exists") {
 			const value = values[0];
-			if (typeof value === "boolean")
-				filter = { field: control.field, operator: "exists", value };
-		} else if (node.operator === "equals" || node.operator === "not-equals") {
+			if (typeof value === "boolean") filter = { field, operator: "exists", value };
+		} else if (field !== "realm-tag-vote" && node.operator === "equals") {
 			const value = values[0];
-			if (value !== undefined)
-				filter = { field: control.field, operator: node.operator, value };
-		} else if (values.length) {
-			filter = { field: control.field, operator: node.operator, values };
+			if (value !== undefined) filter = { field, operator: "equals", value };
+		} else if (field !== "realm-tag-vote" && node.operator === "not-equals") {
+			const value = values[0];
+			if (value !== undefined) filter = { field, operator: "not-equals", value };
+		} else if (
+			field !== "realm-tag-vote" &&
+			(node.operator === "any-of" ||
+				node.operator === "all-of" ||
+				node.operator === "none-of") &&
+			values.length
+		) {
+			filter = { field, operator: node.operator, values };
 		}
 		if (!filter) {
 			invalidIds.add(node.id);
@@ -246,6 +328,22 @@ export function sharedSelectionsFromDraft(
 		}
 		const control = byKey.get(node.controlKey);
 		if (!control) return;
+		if (control.field === "realm-tag-vote") {
+			for (const [field, selected] of [
+				["realm", node.realmTagVote?.realm],
+				["tag", node.realmTagVote?.tag],
+			] as const) {
+				if (!selected || typeof selected.value !== "string" || !selected.kind) continue;
+				const selection = {
+					field,
+					value: selected.value,
+					title: selected.label,
+					kind: selected.kind,
+				} satisfies SharedSearchQuerySelection;
+				byValue.set(presentationKey(selection.field, selection.value), selection);
+			}
+			return;
+		}
 		for (const selected of node.values) {
 			if (typeof selected.value !== "string" || !selected.kind) continue;
 			const selection = {

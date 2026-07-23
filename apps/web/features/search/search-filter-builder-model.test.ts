@@ -26,6 +26,14 @@ const controls = [
 		operators: ["range", "exists"],
 		disclosure: "hidden",
 	},
+	{
+		key: "realm-tag-vote",
+		field: "realm-tag-vote",
+		component: "realm-tag-vote",
+		modes: ["advanced"],
+		operators: ["matches"],
+		disclosure: "hidden",
+	},
 ] as const satisfies readonly ResolvedSearchControl[];
 
 describe("advanced Search filter builder model", () => {
@@ -117,5 +125,37 @@ describe("advanced Search filter builder model", () => {
 				},
 			},
 		});
+	});
+
+	it("round-trips a structured Realm Tag vote without inheriting sibling state", () => {
+		const expression: SearchControlExpression = {
+			controlKey: "realm-tag-vote",
+			filter: {
+				field: "realm-tag-vote",
+				operator: "matches",
+				realmId: "019b0000-0000-7000-8000-000000000002",
+				tagId: "019b0000-0000-7000-8000-000000000001",
+				score: { lower: 1 },
+				voteCount: { lower: 3, upper: 50 },
+			},
+		};
+		const selections = [
+			{
+				field: "realm",
+				value: "019b0000-0000-7000-8000-000000000002",
+				title: "Realm A",
+				kind: "Realm",
+			},
+			{
+				field: "tag",
+				value: "019b0000-0000-7000-8000-000000000001",
+				title: "Tag B",
+				kind: "Tag",
+			},
+		] as const;
+		const draft = draftFromExpression(expression, selections);
+
+		expect(compileDraftSearch(draft, controls)).toEqual({ ok: true, expression });
+		expect(sharedSelectionsFromDraft(draft, controls)).toEqual(selections);
 	});
 });

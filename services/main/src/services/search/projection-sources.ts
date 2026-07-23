@@ -6,6 +6,7 @@ export const CurrentProjectionSources = {
 	unit_alias_vote: ["alias_id"],
 	unit_alias_vote_stat: ["alias_id"],
 	unit_tag: ["unit_id"],
+	realm_tag_context: ["unit_id"],
 	realm_unit: ["unit_id"],
 	credit_attribution: ["source_unit_id"],
 	content_structure_node: ["owner_unit_id", "content_unit_id"],

@@ -244,6 +244,7 @@ function unique<T>(values: readonly T[]): boolean {
 }
 
 function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [filter.lower, filter.upper].filter(
@@ -274,6 +275,19 @@ function optionAllows(control: SearchControl, filter: SearchFilter): boolean {
 }
 
 function assertFilterShape(filter: SearchFilter, path: string): void {
+	if (filter.field === "realm-tag-vote") {
+		for (const [name, range] of [
+			["score", filter.score],
+			["voteCount", filter.voteCount],
+		] as const)
+			if (
+				range?.lower !== undefined &&
+				range.upper !== undefined &&
+				range.lower > range.upper
+			)
+				throw new TypeError(`${path} ${name} lower bound exceeds upper bound`);
+		return;
+	}
 	if (filter.operator === "range" && filter.lower === undefined && filter.upper === undefined)
 		throw new TypeError(`${path} range requires a lower or upper bound`);
 	if ("values" in filter && !unique(filter.values.map((value) => JSON.stringify(value))))

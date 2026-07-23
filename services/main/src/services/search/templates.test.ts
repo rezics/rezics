@@ -127,6 +127,99 @@ describe("Search Feature v1", () => {
 		});
 	});
 
+	it("keeps Realm, global Tags, and Realm Tag vote as independent sibling predicates", () => {
+		const document = createDefaultSearchDocument("global");
+		const compiled = compileSearchFeatureInput({
+			document,
+			contexts: [],
+			injections: [],
+			state: {
+				mode: "advanced",
+				expression: {
+					operator: "all",
+					clauses: [
+						{
+							controlKey: "realm",
+							filter: { field: "realm", operator: "equals", value: RealmId },
+						},
+						{
+							controlKey: "tag",
+							filter: { field: "tag", operator: "equals", value: TagId },
+						},
+						{
+							controlKey: "realm-tag-vote",
+							filter: {
+								field: "realm-tag-vote",
+								operator: "matches",
+								realmId: RealmId,
+								tagId: SecondTagId,
+								score: { lower: 1 },
+								voteCount: { lower: 2 },
+							},
+						},
+					],
+				},
+			},
+		});
+
+		expect(compiled.request.expression).toEqual({
+			operator: "all",
+			clauses: [
+				{ field: "realm", operator: "equals", value: RealmId },
+				{ field: "tag", operator: "equals", value: TagId },
+				{
+					field: "realm-tag-vote",
+					operator: "matches",
+					realmId: RealmId,
+					tagId: SecondTagId,
+					score: { lower: 1 },
+					voteCount: { lower: 2 },
+				},
+			],
+		});
+	});
+
+	it("normalizes Realm and Tag set operators into ordinary Boolean siblings", () => {
+		const compiled = compileSearchFeatureInput({
+			document: createDefaultSearchDocument("global"),
+			contexts: [],
+			injections: [],
+			state: {
+				mode: "advanced",
+				expression: {
+					operator: "all",
+					clauses: [
+						{
+							controlKey: "realm",
+							filter: {
+								field: "realm",
+								operator: "all-of",
+								values: [RealmId],
+							},
+						},
+						{
+							controlKey: "tag",
+							filter: {
+								field: "tag",
+								operator: "all-of",
+								values: [TagId, SecondTagId],
+							},
+						},
+					],
+				},
+			},
+		});
+
+		expect(compiled.request.expression).toEqual({
+			operator: "all",
+			clauses: [
+				{ field: "realm", operator: "equals", value: RealmId },
+				{ field: "tag", operator: "equals", value: TagId },
+				{ field: "tag", operator: "equals", value: SecondTagId },
+			],
+		});
+	});
+
 	it("rejects a non-integer value for an integer control", () => {
 		expect(() =>
 			compileSearchFeatureInput({
@@ -227,6 +320,6 @@ describe("Search Feature v1", () => {
 				injections: [],
 				state: document.state,
 			}).request.expression,
-		).toMatchObject({ field: "tag", values: [TagId] });
+		).toMatchObject({ field: "tag", operator: "equals", value: TagId });
 	});
 });

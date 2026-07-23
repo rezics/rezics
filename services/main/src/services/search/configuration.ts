@@ -112,6 +112,13 @@ export const GlobalSearchConfiguration = {
 					modes: ["advanced"],
 				}),
 		),
+		control({
+			key: "realm-tag-vote",
+			field: "realm-tag-vote",
+			component: "realm-tag-vote",
+			operators: ["matches"],
+			modes: ["advanced"],
+		}),
 		...(["created-at", "updated-at", "published-at", "closes-at"] as const).map((field) =>
 			control({
 				key: field,

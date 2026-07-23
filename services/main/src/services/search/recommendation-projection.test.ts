@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const enrichmentPath = fileURLToPath(
-	new URL("../../../search/rezics_unit_search_document_v3.sql", import.meta.url),
+	new URL("../../../search/rezics_unit_search_document_v4.sql", import.meta.url),
 );
 const workerPath = fileURLToPath(new URL("../recommendations/worker.ts", import.meta.url));
 
@@ -24,5 +24,17 @@ describe("recommendation search projection boundary", () => {
 			"recommendation_event",
 		])
 			expect(enrichment).not.toContain(privateSource);
+	});
+
+	it("projects one filterable subtype contract and exact Realm Tag context keys", async () => {
+		const enrichment = await readFile(enrichmentPath, "utf8");
+		expect(enrichment).toContain("'searchKind', CASE category.value");
+		expect(enrichment).toContain("WHEN 'posts' THEN post_row.kind::text");
+		expect(enrichment).toContain("WHEN 'reviews' THEN subject_unit_row.kind");
+		expect(enrichment).toContain("'realmTagVoteKeys'");
+		expect(enrichment).toContain("FROM public.realm_tag_context");
+		expect(enrichment).not.toContain(
+			"FROM public.realm_unit WHERE unit_id = source.unit_id AND realm_id",
+		);
 	});
 });

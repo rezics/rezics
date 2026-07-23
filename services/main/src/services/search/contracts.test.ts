@@ -33,11 +33,11 @@ describe("versioned search projection contracts", () => {
 	it("validates a complete current document and rejects private extras", () => {
 		const document = {
 			id: unitId,
-			projectionVersion: 3,
+			projectionVersion: 4,
 			revision: 4,
 			category: "units",
 			unitType: "book",
-			subtype: "book",
+			searchKind: "book",
 			search: {
 				primaryTitles: ["書"],
 				titles: ["書", "Book"],
@@ -53,6 +53,7 @@ describe("versioned search projection contracts", () => {
 				license: null,
 				tagIds: [],
 				realmIds: [],
+				realmTagVoteKeys: [],
 				creditedUnitIds: [],
 				subjectId: null,
 				rootId: null,
@@ -115,11 +116,11 @@ describe("versioned search projection contracts", () => {
 	it("rejects unregistered publication License filters", () => {
 		const document = {
 			id: unitId,
-			projectionVersion: 3,
+			projectionVersion: 4,
 			revision: 1,
 			category: "units",
 			unitType: "book",
-			subtype: "book",
+			searchKind: "book",
 			search: {
 				primaryTitles: [],
 				titles: [],
@@ -135,6 +136,7 @@ describe("versioned search projection contracts", () => {
 				license: "unknown",
 				tagIds: [],
 				realmIds: [],
+				realmTagVoteKeys: [],
 				creditedUnitIds: [],
 				subjectId: null,
 				rootId: null,

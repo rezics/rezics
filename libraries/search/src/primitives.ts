@@ -55,8 +55,8 @@ export const SearchSortValues = [
 export type SearchSort = (typeof SearchSortValues)[number];
 export const SearchSort = stringEnum(SearchSortValues);
 
-/** Engine-independent fields that a product surface may expose. */
-export const SearchFieldValues = [
+/** Engine-independent scalar fields that a product surface may expose. */
+export const SearchScalarFieldValues = [
 	"category",
 	"kind",
 	"language",
@@ -97,6 +97,11 @@ export const SearchFieldValues = [
 	"software-platform",
 	"software-requirement-tier",
 ] as const;
+export type SearchScalarField = (typeof SearchScalarFieldValues)[number];
+export const SearchScalarField = stringEnum(SearchScalarFieldValues);
+
+/** Engine-independent fields that a product surface may expose. */
+export const SearchFieldValues = [...SearchScalarFieldValues, "realm-tag-vote"] as const;
 export type SearchField = (typeof SearchFieldValues)[number];
 export const SearchField = stringEnum(SearchFieldValues);
 
@@ -108,6 +113,7 @@ export const SearchOperatorValues = [
 	"none-of",
 	"range",
 	"exists",
+	"matches",
 ] as const;
 export type SearchOperator = (typeof SearchOperatorValues)[number];
 export const SearchOperator = stringEnum(SearchOperatorValues);
@@ -119,19 +125,66 @@ export const SearchScalar = Type.Union([
 ]);
 export type SearchScalar = Static<typeof SearchScalar>;
 
+const SearchNumericRange = Type.Union([
+	Type.Object(
+		{
+			lower: Type.Integer(),
+			upper: Type.Optional(Type.Integer()),
+		},
+		{ additionalProperties: false },
+	),
+	Type.Object(
+		{
+			lower: Type.Optional(Type.Integer()),
+			upper: Type.Integer(),
+		},
+		{ additionalProperties: false },
+	),
+]);
+
+export const SearchRealmTagVoteFilter = Type.Object(
+	{
+		field: Type.Literal("realm-tag-vote"),
+		operator: Type.Literal("matches"),
+		realmId: SearchUuid,
+		tagId: SearchUuid,
+		score: Type.Optional(SearchNumericRange),
+		voteCount: Type.Optional(
+			Type.Union([
+				Type.Object(
+					{
+						lower: Type.Integer({ minimum: 0 }),
+						upper: Type.Optional(Type.Integer({ minimum: 0 })),
+					},
+					{ additionalProperties: false },
+				),
+				Type.Object(
+					{
+						lower: Type.Optional(Type.Integer({ minimum: 0 })),
+						upper: Type.Integer({ minimum: 0 }),
+					},
+					{ additionalProperties: false },
+				),
+			]),
+		),
+	},
+	{ additionalProperties: false, $id: "SearchRealmTagVoteFilter" },
+);
+export type SearchRealmTagVoteFilter = Static<typeof SearchRealmTagVoteFilter>;
+
 export const SearchFilter = Type.Union(
 	[
 		Type.Object(
-			{ field: SearchField, operator: Type.Literal("equals"), value: SearchScalar },
+			{ field: SearchScalarField, operator: Type.Literal("equals"), value: SearchScalar },
 			{ additionalProperties: false },
 		),
 		Type.Object(
-			{ field: SearchField, operator: Type.Literal("not-equals"), value: SearchScalar },
+			{ field: SearchScalarField, operator: Type.Literal("not-equals"), value: SearchScalar },
 			{ additionalProperties: false },
 		),
 		Type.Object(
 			{
-				field: SearchField,
+				field: SearchScalarField,
 				operator: Type.Union([
 					Type.Literal("any-of"),
 					Type.Literal("all-of"),
@@ -144,7 +197,7 @@ export const SearchFilter = Type.Union(
 		Type.Union([
 			Type.Object(
 				{
-					field: SearchField,
+					field: SearchScalarField,
 					operator: Type.Literal("range"),
 					lower: SearchScalar,
 					upper: Type.Optional(SearchScalar),
@@ -153,7 +206,7 @@ export const SearchFilter = Type.Union(
 			),
 			Type.Object(
 				{
-					field: SearchField,
+					field: SearchScalarField,
 					operator: Type.Literal("range"),
 					lower: Type.Optional(SearchScalar),
 					upper: SearchScalar,
@@ -162,9 +215,10 @@ export const SearchFilter = Type.Union(
 			),
 		]),
 		Type.Object(
-			{ field: SearchField, operator: Type.Literal("exists"), value: Type.Boolean() },
+			{ field: SearchScalarField, operator: Type.Literal("exists"), value: Type.Boolean() },
 			{ additionalProperties: false },
 		),
+		SearchRealmTagVoteFilter,
 	],
 	{ $id: "SearchFilter" },
 );
@@ -244,9 +298,10 @@ export const SearchControl = Type.Object(
 			Type.Literal("toggle"),
 			Type.Literal("date-range"),
 			Type.Literal("value-range"),
+			Type.Literal("realm-tag-vote"),
 		]),
 		modes: Type.Array(SearchMode, { minItems: 1, maxItems: 2 }),
-		operators: Type.Array(SearchOperator, { minItems: 1, maxItems: 7 }),
+		operators: Type.Array(SearchOperator, { minItems: 1, maxItems: 8 }),
 		optionSource: Type.Optional(SearchOptionSource),
 		optionPolicy: Type.Optional(SearchOptionPolicy),
 		labelUnitId: Type.Optional(SearchUuid),

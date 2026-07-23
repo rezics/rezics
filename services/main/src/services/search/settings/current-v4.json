@@ -14,7 +14,7 @@
 			"attributePatterns": [
 				"category",
 				"unitType",
-				"subtype",
+				"searchKind",
 				"languages",
 				"filters.*",
 				"access.*",

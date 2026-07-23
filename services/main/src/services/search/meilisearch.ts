@@ -48,6 +48,7 @@ function literal(value: SearchScalar, definition: SearchFieldDefinition): string
 }
 
 function valuesOf(filter: SearchFilter): readonly SearchScalar[] {
+	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [filter.lower, filter.upper].filter(
@@ -66,7 +67,13 @@ function compileOneFilter(category: SearchCategory, filter: SearchFilter): strin
 	if (definition.meilisearch.length === 0) return undefined;
 	const path = definition.documentPath;
 	let predicate: string;
-	if (filter.operator === "exists") {
+	if (filter.field === "realm-tag-vote") {
+		// Aggregate bounds are authoritative PostgreSQL residuals. Pushing only the
+		// context key would be unsafe below NOT or OR, so bound queries skip pushdown.
+		if (filter.score || filter.voteCount) return undefined;
+		const key = `${filter.realmId.toLowerCase()}:${filter.tagId.toLowerCase()}`;
+		predicate = `${path} = ${JSON.stringify(key)}`;
+	} else if (filter.operator === "exists") {
 		predicate = `${path} ${filter.value ? "EXISTS" : "NOT EXISTS"}`;
 	} else if (filter.operator === "range") {
 		const bounds: string[] = [];

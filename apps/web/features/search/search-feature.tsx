@@ -78,8 +78,10 @@ function classifyInitialState(state: SharedSearchQueryState | undefined): {
 			["equals", "any-of"].includes(filter.operator);
 		const isQuickTag =
 			filter.field === "tag" &&
-			["equals", "not-equals", "any-of", "none-of"].includes(filter.operator);
-		if (isQuick || isQuickTag) quick.push(clause);
+			["equals", "not-equals", "any-of", "all-of", "none-of"].includes(filter.operator);
+		const isQuickRealm =
+			filter.field === "realm" && ["equals", "any-of", "all-of"].includes(filter.operator);
+		if (isQuick || isQuickTag || isQuickRealm) quick.push(clause);
 		else advanced.push(clause);
 	}
 	return { quick, advanced: expressionFromClauses(advanced) };
@@ -88,6 +90,7 @@ function classifyInitialState(state: SharedSearchQueryState | undefined): {
 function valuesOf(value: SearchControlValue | undefined): readonly SearchScalar[] {
 	if (!value) return [];
 	const { filter } = value;
+	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [];
@@ -103,6 +106,11 @@ function expressionContainsSelection(
 ): boolean {
 	if (!expression) return false;
 	if ("controlKey" in expression) {
+		if (expression.filter.field === "realm-tag-vote")
+			return (
+				(selection.field === "realm" && expression.filter.realmId === selection.value) ||
+				(selection.field === "tag" && expression.filter.tagId === selection.value)
+			);
 		if (expression.filter.field !== selection.field) return false;
 		const values =
 			"values" in expression.filter
@@ -132,6 +140,9 @@ function summarizeExpression(
 	label: (control: ResolvedSearchControl) => string,
 	valueLabel: (control: ResolvedSearchControl, value: SearchScalar) => string,
 	operatorLabel: (operator: SearchOperator) => string,
+	relationValueLabel: (field: "realm" | "tag", value: string) => string,
+	relationScoreLabel: string,
+	relationVoteCountLabel: string,
 	matchAll: string,
 	matchAny: string,
 ): string {
@@ -139,6 +150,29 @@ function summarizeExpression(
 		const control = controls.find((candidate) => candidate.key === expression.controlKey);
 		if (!control) return expression.controlKey;
 		const filter = expression.filter;
+		if (filter.field === "realm-tag-vote") {
+			const bounds = [
+				filter.score?.lower === undefined
+					? undefined
+					: `${relationScoreLabel} ≥ ${filter.score.lower}`,
+				filter.score?.upper === undefined
+					? undefined
+					: `${relationScoreLabel} ≤ ${filter.score.upper}`,
+				filter.voteCount?.lower === undefined
+					? undefined
+					: `${relationVoteCountLabel} ≥ ${filter.voteCount.lower}`,
+				filter.voteCount?.upper === undefined
+					? undefined
+					: `${relationVoteCountLabel} ≤ ${filter.voteCount.upper}`,
+			].filter((value): value is string => value !== undefined);
+			return [
+				label(control),
+				operatorLabel(filter.operator),
+				relationValueLabel("realm", filter.realmId),
+				relationValueLabel("tag", filter.tagId),
+				...bounds,
+			].join(" · ");
+		}
 		const values =
 			"values" in filter
 				? filter.values
@@ -163,6 +197,9 @@ function summarizeExpression(
 				label,
 				valueLabel,
 				operatorLabel,
+				relationValueLabel,
+				relationScoreLabel,
+				relationVoteCountLabel,
 				matchAll,
 				matchAny,
 			)
@@ -175,6 +212,9 @@ function summarizeExpression(
 				label,
 				valueLabel,
 				operatorLabel,
+				relationValueLabel,
+				relationScoreLabel,
+				relationVoteCountLabel,
 				matchAll,
 				matchAny,
 			),
@@ -272,6 +312,21 @@ export function SearchFeature({
 	const [excludedTags, setExcludedTags] = useState<readonly SearchEntityOption[]>(() =>
 		initialTagValues(true),
 	);
+	const [realms, setRealms] = useState<readonly SearchEntityOption[]>(() =>
+		valuesOf(initial.quick.find((value) => value.filter.field === "realm")).flatMap(
+			(value): SearchEntityOption[] => {
+				if (typeof value !== "string") return [];
+				const presentation = initialSelectionByValue.get(selectionKey("realm", value));
+				return [
+					{
+						id: value,
+						label: presentation?.title ?? value,
+						kind: presentation?.kind ?? t.fields.realm,
+					},
+				];
+			},
+		),
+	);
 	const [advanced, setAdvanced] = useState<SearchControlExpression | undefined>(initial.advanced);
 	const [advancedSelections, setAdvancedSelections] =
 		useState<readonly SharedSearchQuerySelection[]>(initialSelections);
@@ -283,6 +338,7 @@ export function SearchFeature({
 	const categoryControl = controlByField("category");
 	const languageControl = controlByField("language");
 	const tagControl = controlByField("tag");
+	const realmControl = controlByField("realm");
 	const operatorLabels: Record<SearchOperator, string> = {
 		equals: t.operators.equals,
 		"not-equals": t.operators.notEquals,
@@ -291,6 +347,7 @@ export function SearchFeature({
 		"none-of": t.operators.noneOf,
 		range: t.operators.range,
 		exists: t.operators.exists,
+		matches: t.operators.matches,
 	};
 	const controlLabel = (control: ResolvedSearchControl) =>
 		(control.labelUnitId ? resolveLabel?.(control.labelUnitId) : undefined) ??
@@ -310,6 +367,15 @@ export function SearchFeature({
 			(option) =>
 				({
 					field: "tag",
+					value: option.id,
+					title: option.label,
+					kind: option.kind,
+				}) satisfies SharedSearchQuerySelection,
+		),
+		...realms.map(
+			(option) =>
+				({
+					field: "realm",
 					value: option.id,
 					title: option.label,
 					kind: option.kind,
@@ -365,7 +431,7 @@ export function SearchFeature({
 				controlKey: tagControl.key,
 				filter: {
 					field: "tag",
-					operator: "any-of",
+					operator: "all-of",
 					values: includedTags.map((option) => option.id),
 				},
 			});
@@ -376,6 +442,15 @@ export function SearchFeature({
 					field: "tag",
 					operator: "none-of",
 					values: excludedTags.map((option) => option.id),
+				},
+			});
+		if (realmControl && realms.length)
+			clauses.push({
+				controlKey: realmControl.key,
+				filter: {
+					field: "realm",
+					operator: "all-of",
+					values: realms.map((option) => option.id),
 				},
 			});
 		if (nextAdvanced) clauses.push(nextAdvanced);
@@ -402,6 +477,9 @@ export function SearchFeature({
 				controlLabel,
 				valueLabel,
 				(operator) => operatorLabels[operator],
+				(field, value) => selectionLabels.get(selectionKey(field, value)) ?? value,
+				t.realmTagVote.score,
+				t.realmTagVote.voteCount,
 				t.advancedCombinations.all,
 				t.advancedCombinations.any,
 			)
@@ -481,7 +559,7 @@ export function SearchFeature({
 
 				<div
 					aria-label={t.commonFilters}
-					className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+					className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
 				>
 					{categoryControl ? (
 						<Field>
@@ -530,6 +608,21 @@ export function SearchFeature({
 								/>
 							</Field>
 						</>
+					) : null}
+					{realmControl ? (
+						<Field>
+							<FieldLabel>{t.realms}</FieldLabel>
+							<SearchEntityMultiSelect
+								emptyLabel={t.entitySearchEmpty}
+								errorLabel={t.entitySearchError}
+								index="realms"
+								loadingLabel={t.entitySearchLoading}
+								onChange={setRealms}
+								placeholder={t.realmSearchPlaceholder}
+								removeLabel={t.removeSelection}
+								selected={realms}
+							/>
+						</Field>
 					) : null}
 					{languageControl ? (
 						<Field>

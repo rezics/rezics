@@ -51,6 +51,7 @@ const CommonFields = [
 	"tag",
 	"credit",
 	"realm",
+	"realm-tag-vote",
 	"created-at",
 	"updated-at",
 	"published-at",
@@ -154,6 +155,7 @@ function fieldDefinition(field: SearchField): SearchFieldDefinition {
 }
 
 function componentFor(definition: SearchFieldDefinition): ResolvedSearchControl["component"] {
+	if (definition.scalar === "realm-tag-vote") return "realm-tag-vote";
 	if (definition.scalar === "boolean") return "toggle";
 	if (definition.scalar === "date") return "date-range";
 	if (definition.scalar === "integer") return "value-range";
@@ -330,6 +332,7 @@ export function resolveSearchDocument(documentValue: unknown) {
 }
 
 function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
 	return [filter.lower, filter.upper].filter(
@@ -347,6 +350,8 @@ const DatePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 function validateScalar(field: SearchField, value: SearchScalar): void {
 	const scalar = fieldDefinition(field).scalar;
+	if (scalar === "realm-tag-vote")
+		throw new InvalidSearch(`Search field ${field} does not accept scalar values`);
 	const valid =
 		scalar === "boolean"
 			? typeof value === "boolean"
@@ -361,6 +366,30 @@ function validateScalar(field: SearchField, value: SearchScalar): void {
 }
 
 function validateFilterValue(filter: SearchFilter): void {
+	if (filter.field === "realm-tag-vote") {
+		if (filter.operator !== "matches")
+			throw new InvalidSearch("Realm Tag vote requires the matches operator");
+		for (const [name, range] of [
+			["score", filter.score],
+			["voteCount", filter.voteCount],
+		] as const)
+			if (range) {
+				if (
+					(range.lower !== undefined && !Number.isSafeInteger(range.lower)) ||
+					(range.upper !== undefined && !Number.isSafeInteger(range.upper))
+				)
+					throw new InvalidSearch(`Realm Tag vote ${name} requires safe integer bounds`);
+				if (
+					range.lower !== undefined &&
+					range.upper !== undefined &&
+					range.lower > range.upper
+				)
+					throw new InvalidSearch(
+						`Realm Tag vote ${name} lower bound exceeds its upper bound`,
+					);
+			}
+		return;
+	}
 	for (const value of filterValues(filter)) validateScalar(filter.field, value);
 }
 
@@ -397,6 +426,25 @@ function validateControlValue(
 		throw new InvalidSearch(`Search control ${control.key} uses a hidden option`);
 }
 
+function normalizeFilterExpression(filter: SearchFilter): SearchExpression {
+	if (
+		filter.operator !== "all-of" &&
+		filter.operator !== "any-of" &&
+		filter.operator !== "none-of"
+	)
+		return filter;
+	const clauses = filter.values.map((value): SearchFilter => {
+		if (filter.operator === "none-of")
+			return { field: filter.field, operator: "not-equals", value };
+		return { field: filter.field, operator: "equals", value };
+	});
+	if (clauses.length === 1) return clauses[0]!;
+	return {
+		operator: filter.operator === "any-of" ? "any" : "all",
+		clauses,
+	};
+}
+
 function unwrapExpression(
 	expression: SearchControlExpression,
 	controls: ReadonlyMap<string, ResolvedSearchControl>,
@@ -406,16 +454,21 @@ function unwrapExpression(
 	if ("controlKey" in expression) {
 		validateControlValue(expression, controls.get(expression.controlKey), mode);
 		used.add(expression.controlKey);
-		return expression.filter;
+		return normalizeFilterExpression(expression.filter);
 	}
-	return expression.operator === "not"
-		? { operator: "not", clause: unwrapExpression(expression.clause, controls, mode, used) }
-		: {
-				operator: expression.operator,
-				clauses: expression.clauses.map((clause) =>
-					unwrapExpression(clause, controls, mode, used),
-				),
-			};
+	if (expression.operator === "not")
+		return {
+			operator: "not",
+			clause: unwrapExpression(expression.clause, controls, mode, used),
+		};
+	const clauses = expression.clauses
+		.map((clause) => unwrapExpression(clause, controls, mode, used))
+		.flatMap((clause) =>
+			!("field" in clause) && clause.operator === expression.operator
+				? clause.clauses
+				: [clause],
+		);
+	return { operator: expression.operator, clauses };
 }
 
 function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
@@ -494,7 +547,10 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			used.add(value.controlKey);
 		}
 		expression = values.length
-			? { operator: "all", clauses: values.map((value) => value.filter) }
+			? {
+					operator: "all",
+					clauses: values.map((value) => normalizeFilterExpression(value.filter)),
+				}
 			: undefined;
 	} else {
 		expression = input.state.expression
@@ -512,9 +568,15 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			expression = expression
 				? {
 						operator: "all",
-						clauses: [...defaults.map((value) => value.filter), expression],
+						clauses: [
+							...defaults.map((value) => normalizeFilterExpression(value.filter)),
+							expression,
+						],
 					}
-				: { operator: "all", clauses: defaults.map((value) => value.filter) };
+				: {
+						operator: "all",
+						clauses: defaults.map((value) => normalizeFilterExpression(value.filter)),
+					};
 	}
 	for (const control of resolved.controls)
 		if (control.required && control.modes.includes(mode) && !used.has(control.key))

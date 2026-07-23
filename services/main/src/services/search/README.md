@@ -31,14 +31,27 @@ active generation, normalized request hash, page size, and per-category scan sta
 incompatible active current generation produces `503 SearchUnavailable`; it never appears as an
 empty successful search.
 
+## Filter semantics
+
+- `kind` is the searchable content subtype, not the Unit storage type. It maps to the Unit kind
+  for catalog Units, the Entity kind for Entities, the Post kind for Posts, and the reviewed
+  subject's Unit kind for Reviews. Categories without a meaningful subtype do not expose this
+  filter or facet.
+- Realm and Tag filters are independent sibling predicates. A query containing one Realm and two
+  included Tags means `realm = R AND tag = T1 AND tag = T2`; selecting a Realm never changes the
+  meaning or scope of either Tag predicate.
+- `realm-tag-vote` is a separate atomic relationship filter identified by `(realmId, tagId)` for
+  each candidate Unit. The exact context identity may be pushed to Meilisearch, while score and
+  vote-count bounds are always rechecked against the authoritative PostgreSQL aggregate.
+
 Lifecycle commands:
 
 ```sh
-task services-main:search:index -- check --projection current --index rezics_units_v3_20260722
-task services-main:search:index -- prepare --projection current --index rezics_units_v3_20260722_143000
-task services-main:search:index -- reconcile --projection current --index rezics_units_v3_20260722_143000
-task services-main:search:index -- promote --projection current --index rezics_units_v3_20260722_143000
-task services-main:search:index -- retire --projection current --index rezics_units_v3_20260722_143000
+task services-main:search:index -- check --projection current --index rezics_units_v4_20260723
+task services-main:search:index -- prepare --projection current --index rezics_units_v4_20260723_143000
+task services-main:search:index -- reconcile --projection current --index rezics_units_v4_20260723_143000
+task services-main:search:index -- promote --projection current --index rezics_units_v4_20260723_143000
+task services-main:search:index -- retire --projection current --index rezics_units_v4_20260723_143000
 task services-main:search:config:check
 ```
 
