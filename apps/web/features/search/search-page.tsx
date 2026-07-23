@@ -21,7 +21,7 @@ import {
 	usePostApiSearchFeaturesByTemplateExecute,
 	usePostApiSearchSharedQueries,
 } from "@rezics/openapi-tanstack-query";
-import { Button, PageHeading, QueryFailure, QueryPending, UnitList } from "@rezics/ui";
+import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryStates } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
@@ -35,6 +35,7 @@ import {
 	type SearchFeatureRequest,
 	type SearchFeatureShareRequest,
 } from "./search-feature";
+import { SearchResultCard } from "./search-result-card";
 
 type SearchResponse = PostApiSearchFeaturesByTemplateExecuteStatus200;
 type SearchGroup = SearchResponse["groups"][number];
@@ -206,12 +207,13 @@ export function SearchSurface({
 					{groups.flatMap((group) => {
 						if (!group.hits.length) return [];
 						const category = isSearchCategory(group.index) ? group.index : undefined;
+						const categoryLabel = category
+							? t.search.resultGroups[category]
+							: group.index;
 						return [
 							<section className="grid gap-3" key={group.index}>
 								<header className="flex items-baseline justify-between gap-3 border-b border-border-weak pb-2">
-									<h3 className="font-semibold">
-										{category ? t.search.resultGroups[category] : group.index}
-									</h3>
+									<h3 className="font-semibold">{categoryLabel}</h3>
 									<span className="text-muted-foreground text-sm">
 										{group.total.relation === "lower-bound"
 											? t.search.atLeastResultCount({
@@ -222,17 +224,21 @@ export function SearchSurface({
 												})}
 									</span>
 								</header>
-								<UnitList
-									error={false}
-									items={group.hits.map((hit) => ({
-										id: hit.id,
-										title: hit.titles[0] ?? hit.name ?? null,
-										summary: hit.summaries[0] ?? hit.summary,
-										href: searchHitHref(hit),
-										avatar: hit.avatar,
-									}))}
-									pending={false}
-								/>
+								<ul className="grid gap-3 sm:gap-4">
+									{group.hits.map((hit) => (
+										<li key={hit.id}>
+											<SearchResultCard
+												categoryLabel={categoryLabel}
+												result={{
+													title: hit.titles[0] ?? hit.name,
+													summary: hit.summaries[0] ?? hit.summary,
+													href: searchHitHref(hit),
+													avatar: hit.avatar,
+												}}
+											/>
+										</li>
+									))}
+								</ul>
 							</section>,
 						];
 					})}
