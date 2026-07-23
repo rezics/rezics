@@ -26,14 +26,6 @@ export function parseCatalogDetailSection<Type extends CatalogDetailUnitType>(
 	return !suffix.includes("/") && isCatalogDetailSectionFor(type, suffix) ? suffix : undefined;
 }
 
-export function isCatalogDetailPath(
-	pathname: string,
-	type: CatalogDetailUnitType,
-	unitId: string,
-): boolean {
-	return parseCatalogDetailSection(pathname, type, unitId) !== undefined;
-}
-
 export function getCatalogDetailHrefs<Type extends CatalogDetailUnitType>(
 	type: Type,
 	unitId: string,

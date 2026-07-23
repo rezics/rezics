@@ -18,17 +18,11 @@ import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 import {
 	CatalogDetailSections,
-	isCatalogDetailUnitType,
 	type CatalogDetailSectionIdFor,
 	type CatalogDetailUnitType,
 } from "../model/catalog-detail-section";
 import { isCatalogDetailUnitFor, type CatalogDetailUnit } from "../model/catalog-detail-unit";
-import {
-	catalogDetailHref,
-	isCatalogDetailPath,
-	parseCatalogDetailSection,
-} from "../routing/catalog-detail-routes";
-import type { UnitType } from "../unit-types";
+import { catalogDetailHref, parseCatalogDetailSection } from "../routing/catalog-detail-routes";
 
 type CatalogDetailContextValue = {
 	[Type in CatalogDetailUnitType]: {
@@ -57,12 +51,9 @@ export function CatalogDetailWorkspace({
 	unitId,
 }: {
 	children: ReactNode;
-	type: UnitType;
+	type: CatalogDetailUnitType;
 	unitId: string;
 }) {
-	const pathname = usePathname();
-	if (!isCatalogDetailUnitType(type) || !isCatalogDetailPath(pathname, type, unitId))
-		return children;
 	return (
 		<CatalogDetailWorkspaceContent type={type} unitId={unitId}>
 			{children}
