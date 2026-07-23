@@ -2,6 +2,7 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
+	getFeedCandidateRealmIdExpression,
 	getFeedEligibilityCondition,
 	prioritizeFeedRealmContexts,
 	resolveFeedContentSelection,
@@ -69,6 +70,61 @@ describe("feed eligibility SQL", () => {
 		expect(query.sql).toContain('"post"."kind" in');
 		expect(query.params).toEqual(expect.arrayContaining(["post", "general"]));
 		expect(query.params).not.toContain("reply");
+	});
+});
+
+describe("feed candidate realm SQL", () => {
+	it("uses the physical follow table for personalized realm preference", () => {
+		const profileId = "00000000-0000-4000-8000-000000000001";
+		const query = dialect.sqlToQuery(
+			getFeedCandidateRealmIdExpression({
+				profileId,
+				personalized: true,
+			}),
+		);
+
+		expect(query.sql).toContain('select 1 from "unit_follow"');
+		expect(query.sql).toContain('"unit_follow"."follower_profile_id"');
+		expect(query.sql).toContain('"unit_follow"."unit_id" = candidate_realm.realm_id');
+		expect(query.sql).not.toContain('"preferred_realm_follow"');
+		expect(query.params).toEqual([profileId]);
+	});
+
+	it.each([
+		{
+			name: "signed-in viewer with personalization disabled",
+			viewer: {
+				profileId: "00000000-0000-4000-8000-000000000001",
+				personalized: false,
+			},
+		},
+		{
+			name: "anonymous viewer",
+			viewer: { personalized: false },
+		},
+	])("uses deterministic realm ordering for $name", ({ viewer }) => {
+		const query = dialect.sqlToQuery(getFeedCandidateRealmIdExpression(viewer));
+
+		expect(query.sql).not.toContain('"unit_follow"');
+		expect(query.sql).not.toContain("case when exists");
+		expect(query.sql).toContain("candidate_realm.created_at desc, candidate_realm.realm_id");
+		expect(query.params).toEqual([]);
+	});
+
+	it("uses an explicitly scoped realm without consulting follow state", () => {
+		const realmId = "00000000-0000-4000-8000-000000000002";
+		const query = dialect.sqlToQuery(
+			getFeedCandidateRealmIdExpression(
+				{
+					profileId: "00000000-0000-4000-8000-000000000001",
+					personalized: true,
+				},
+				realmId,
+			),
+		);
+
+		expect(query.sql).toBe("$1::uuid");
+		expect(query.params).toEqual([realmId]);
 	});
 });
 

@@ -83,7 +83,6 @@ import {
 } from "./schema";
 
 const preferredLocalization = alias(unitLocalization, "preferred_localization");
-const preferredRealmFollow = alias(unitFollow, "preferred_realm_follow");
 const feedContextRealm = alias(unit, "feed_context_realm");
 
 interface FeedRealmContextSummary {
@@ -501,6 +500,30 @@ function toCount(value: bigint | null | undefined, name: string) {
 	return toSafeInteger(value ?? 0n, name);
 }
 
+export function getFeedCandidateRealmIdExpression(
+	viewer: Pick<RecommendationViewer, "personalized" | "profileId">,
+	realmId?: string,
+): SQL<string | null> {
+	if (realmId) return sql<string>`${realmId}::uuid`;
+	const followedRealmOrder =
+		viewer.personalized && viewer.profileId
+			? sql`case when exists (
+				select 1 from ${unitFollow}
+				where ${unitFollow.followerProfileId} = ${viewer.profileId}::uuid
+					and ${unitFollow.unitId} = candidate_realm.realm_id
+			) then 0 else 1 end,`
+			: sql``;
+	return sql<string | null>`(
+		select candidate_realm.realm_id from realm_unit candidate_realm
+		where candidate_realm.unit_id = ${unit.id}
+			and candidate_realm.status = 'visible'
+		order by
+			${followedRealmOrder}
+			candidate_realm.created_at desc, candidate_realm.realm_id
+		limit 1
+	)`;
+}
+
 export async function getFeedRankingCandidates(input: {
 	ids: string[];
 	sources: CandidateSources;
@@ -511,25 +534,7 @@ export async function getFeedRankingCandidates(input: {
 	anchorId?: string;
 }): Promise<FeedRankingCandidate[]> {
 	if (!input.ids.length) return [];
-	const selectedRealmId = input.query.realmId
-		? sql<string>`${input.query.realmId}::uuid`
-		: sql<string | null>`(
-			select candidate_realm.realm_id from realm_unit candidate_realm
-			where candidate_realm.unit_id = ${unit.id}
-				and candidate_realm.status = 'visible'
-			order by
-				${
-					input.viewer.personalized && input.viewer.profileId
-						? sql`case when exists (
-					select 1 from ${preferredRealmFollow}
-					where ${preferredRealmFollow.followerProfileId} = ${input.viewer.profileId}::uuid
-						and ${preferredRealmFollow.unitId} = candidate_realm.realm_id
-				) then 0 else 1 end,`
-						: sql``
-				}
-				candidate_realm.created_at desc, candidate_realm.realm_id
-			limit 1
-		)`;
+	const selectedRealmId = getFeedCandidateRealmIdExpression(input.viewer, input.query.realmId);
 	const snapshotJoin = input.snapshotId
 		? and(
 				eq(recommendationUnitStat.snapshotId, input.snapshotId),
