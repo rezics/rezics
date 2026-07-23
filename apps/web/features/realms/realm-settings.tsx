@@ -40,13 +40,13 @@ import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
-} from "@/features/units/localization-image-upload-field";
+} from "@/features/media/components/localization-image-upload-field";
 import {
+	AvatarField,
+	type AvatarFieldOption,
+	type AvatarFieldValue,
 	avatarPresentationToInput,
-	LocalizationAvatarField,
-	type LocalizationAvatarOption,
-	type LocalizationAvatarValue,
-} from "@/features/units/localization-avatar-field";
+} from "@/features/media/components/avatar-field";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
@@ -98,7 +98,7 @@ export function RealmProfileSettings({
 		toContentLanguage(locale.target),
 		realm.language,
 	);
-	const avatarOptions: LocalizationAvatarOption[] = realm.localizations.flatMap((entry) =>
+	const avatarOptions: AvatarFieldOption[] = realm.localizations.flatMap((entry) =>
 		entry.language !== toContentLanguage(locale.target) && entry.avatar
 			? [{ ...entry.avatar, label: entry.language }]
 			: [],
@@ -108,9 +108,7 @@ export function RealmProfileSettings({
 			? [{ ...entry.banner, label: entry.language }]
 			: [],
 	);
-	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(
-		localization?.avatar ?? null,
-	);
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
 		localization?.banner ?? null,
 	);
@@ -185,7 +183,7 @@ export function RealmProfileSettings({
 							</Field>
 							<Field>
 								<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-								<LocalizationAvatarField
+								<AvatarField
 									fallback={avatarOptions[0] ?? null}
 									onChange={setAvatar}
 									options={avatarOptions}

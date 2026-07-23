@@ -32,12 +32,12 @@ import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
-} from "@/features/units/localization-image-upload-field";
+} from "@/features/media/components/localization-image-upload-field";
 import {
+	AvatarField,
+	type AvatarFieldValue,
 	avatarPresentationToInput,
-	LocalizationAvatarField,
-	type LocalizationAvatarValue,
-} from "@/features/units/localization-avatar-field";
+} from "@/features/media/components/avatar-field";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 import { SettingsOverviewHref } from "./routing/settings-routes";
@@ -107,7 +107,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 		},
 	});
 	const [saved, setSaved] = useState(false);
-	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(current.avatar);
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(current.avatar);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(current.banner);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -135,7 +135,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 				<FieldGroup>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<LocalizationAvatarField onChange={setAvatar} value={avatar} />
+						<AvatarField onChange={setAvatar} value={avatar} />
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>

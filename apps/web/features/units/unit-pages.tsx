@@ -28,7 +28,7 @@ import type { UnitType, VariantUnitType } from "./unit-types";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
-} from "./localization-image-upload-field";
+} from "@/features/media/components/localization-image-upload-field";
 
 export function UnitBrowsePage({ type }: { type: UnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);

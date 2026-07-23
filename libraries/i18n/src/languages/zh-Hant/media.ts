@@ -13,8 +13,16 @@ export default {
 	current: "目前語言的覆蓋圖片",
 	displayPreview: "實際顯示範圍",
 	avatarPicker: {
+		setup: "設定頭像",
+		edit: "編輯頭像",
+		dialogTitle: "選擇頭像",
+		dialogDescription: "上傳圖片，或選擇圖示或表情符號。",
+		close: "關閉頭像選擇器",
+		source: "頭像來源",
+		useInherited: "使用繼承頭像",
+		recent: "最近使用",
 		typeLabel: "頭像類型",
-		tabs: { icon: "圖示", emoji: "表情符號", image: "圖片" },
+		tabs: { image: "圖片", icon: "圖示", emoji: "表情符號" },
 		preview: "頭像預覽",
 		inherited: "繼承的頭像",
 		icon: {
@@ -30,6 +38,7 @@ export default {
 		},
 		emoji: {
 			search: "搜尋表情符號",
+			skinTone: "切換膚色",
 			loading: "正在載入表情符號……",
 			empty: "找不到相符的表情符號。",
 		},

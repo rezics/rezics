@@ -38,7 +38,7 @@ import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
-} from "./localization-image-upload-field";
+} from "@/features/media/components/localization-image-upload-field";
 import { isVariantUnitType, type UnitType } from "./unit-types";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;

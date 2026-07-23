@@ -13,8 +13,16 @@ export default {
 	current: "Current language override",
 	displayPreview: "Displayed area",
 	avatarPicker: {
+		setup: "Set up avatar",
+		edit: "Edit avatar",
+		dialogTitle: "Choose an avatar",
+		dialogDescription: "Upload an image, or choose an icon or emoji.",
+		close: "Close avatar picker",
+		source: "Avatar source",
+		useInherited: "Use inherited avatar",
+		recent: "Recently used",
 		typeLabel: "Avatar type",
-		tabs: { icon: "Icon", emoji: "Emoji", image: "Image" },
+		tabs: { image: "Image", icon: "Icon", emoji: "Emoji" },
 		preview: "Avatar preview",
 		inherited: "Inherited avatar",
 		icon: {
@@ -30,6 +38,7 @@ export default {
 		},
 		emoji: {
 			search: "Search emoji",
+			skinTone: "Change skin tone",
 			loading: "Loading emoji…",
 			empty: "No matching emoji were found.",
 		},

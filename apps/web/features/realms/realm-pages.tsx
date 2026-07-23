@@ -37,12 +37,12 @@ import { realmHref, realmSettingsHref } from "@/features/slugs/unit-route";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
-} from "@/features/units/localization-image-upload-field";
+} from "@/features/media/components/localization-image-upload-field";
 import {
+	AvatarField,
+	type AvatarFieldValue,
 	avatarPresentationToInput,
-	LocalizationAvatarField,
-	type LocalizationAvatarValue,
-} from "@/features/units/localization-avatar-field";
+} from "@/features/media/components/avatar-field";
 import { PostList } from "@/features/posts/post-list";
 import { SearchSurface } from "@/features/search/search-page";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -142,7 +142,7 @@ export function RealmCreatePage() {
 	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(null);
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiRealms();
 
@@ -191,7 +191,7 @@ export function RealmCreatePage() {
 						</Field>
 						<Field>
 							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-							<LocalizationAvatarField onChange={setAvatar} value={avatar} />
+							<AvatarField onChange={setAvatar} value={avatar} />
 						</Field>
 						<Field>
 							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>

@@ -54,6 +54,12 @@ Emoji is stored as one Unicode grapheme cluster containing an emoji sequence.
 This preserves flags, keycaps, skin tones, and ZWJ families without pretending
 that an emoji is an icon-font glyph.
 
+The picker uses Frimousse with a pinned, application-hosted Emojibase dataset.
+The dataset route exposes only the supported English and Traditional Chinese
+documents, sends immutable cache headers, and avoids a runtime dependency on a
+third-party CDN. Recently selected emoji are stored locally per picker locale
+so their accessible labels stay in the current language.
+
 Images continue to use managed image assets. Only the image variant owns an
 asset foreign key. Replacing an avatar with emoji or icon clears that foreign
 key and every other inactive payload column.

@@ -46,7 +46,7 @@ import { realmHref } from "@/features/slugs/unit-route";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
-} from "@/features/units/localization-image-upload-field";
+} from "@/features/media/components/localization-image-upload-field";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { selectLocalization } from "@/lib/localization";

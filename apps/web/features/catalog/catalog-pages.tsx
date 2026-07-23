@@ -33,13 +33,13 @@ import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
-} from "@/features/units/localization-image-upload-field";
+} from "@/features/media/components/localization-image-upload-field";
 import {
+	AvatarField,
+	type AvatarFieldOption,
+	type AvatarFieldValue,
 	avatarPresentationToInput,
-	LocalizationAvatarField,
-	type LocalizationAvatarOption,
-	type LocalizationAvatarValue,
-} from "@/features/units/localization-avatar-field";
+} from "@/features/media/components/avatar-field";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
@@ -240,7 +240,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 		toContentLanguage(locale.target),
 		entity.localizations[0]?.language,
 	);
-	const avatarOptions: LocalizationAvatarOption[] = entity.localizations.flatMap((entry) =>
+	const avatarOptions: AvatarFieldOption[] = entity.localizations.flatMap((entry) =>
 		entry.language !== toContentLanguage(locale.target) && entry.avatar
 			? [{ ...entry.avatar, label: entry.language }]
 			: [],
@@ -250,9 +250,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 			? [{ ...entry.banner, label: entry.language }]
 			: [],
 	);
-	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(
-		localization?.avatar ?? null,
-	);
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
 		localization?.banner ?? null,
 	);
@@ -308,7 +306,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<LocalizationAvatarField
+						<AvatarField
 							fallback={avatarOptions[0] ?? null}
 							onChange={setAvatar}
 							options={avatarOptions}
@@ -364,7 +362,7 @@ export function EntityCreatePage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
-	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(null);
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiEntities({
 		mutation: {
@@ -423,7 +421,7 @@ export function EntityCreatePage() {
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<LocalizationAvatarField onChange={setAvatar} value={avatar} />
+						<AvatarField onChange={setAvatar} value={avatar} />
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
