@@ -76,29 +76,25 @@ export function FeedContentSelector<Value extends string>({
 					<ChevronsUpDownIcon aria-hidden className="ms-auto" data-icon="inline-end" />
 				</Button>
 			</MenuTrigger>
-			<MenuContent className="max-h-96 w-[min(22rem,calc(100vw-2rem))] p-1.5">
+			<MenuContent className="max-h-96 w-[min(18rem,calc(100vw-2rem))] p-1.5">
 				{showBulkActions ? (
 					<>
-						<div className="sticky top-0 z-10 grid grid-cols-2 gap-1 bg-popover pb-1">
-							<MenuItem
-								disabled={selectedValues.length === 0}
-								onSelect={() => onValueChange([])}
-								value="clear-feed-content"
-							>
-								<XIcon aria-hidden />
-								{t.feed.content.clear}
-							</MenuItem>
-							<MenuItem
-								disabled={selectedValues.length === options.length}
-								onSelect={() =>
-									onValueChange(options.map((option) => option.value))
-								}
-								value="select-all-feed-content"
-							>
-								<CheckCheckIcon aria-hidden />
-								{t.feed.content.all}
-							</MenuItem>
-						</div>
+						<MenuItem
+							disabled={selectedValues.length === 0}
+							onSelect={() => onValueChange([])}
+							value="clear-feed-content"
+						>
+							<XIcon aria-hidden />
+							{t.feed.content.clear}
+						</MenuItem>
+						<MenuItem
+							disabled={selectedValues.length === options.length}
+							onSelect={() => onValueChange(options.map((option) => option.value))}
+							value="select-all-feed-content"
+						>
+							<CheckCheckIcon aria-hidden />
+							{t.feed.content.all}
+						</MenuItem>
 						<MenuSeparator />
 					</>
 				) : null}
