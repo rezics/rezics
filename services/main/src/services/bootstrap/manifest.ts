@@ -12,6 +12,7 @@ import {
 } from "@rezics/block";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
+import { PlatformCapabilityValues } from "../database/schema/contract-values";
 import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
 
 export { TopLevelSlugNamespaceUnitIds };
@@ -74,6 +75,29 @@ export const OfficialProfileIds = {
 	moderation: OfficialProfileManifest[2].profileId,
 } as const satisfies Record<OfficialProfileKey, string>;
 export const OfficialProfileIdValues: readonly string[] = OfficialProfileManifest.map(
+	(profile) => profile.profileId,
+);
+
+export const BootstrapSuperAdminProfile = {
+	key: "superAdmin",
+	authUserId: "019b76da-a800-7100-8000-000000000004",
+	accountId: "019b76da-a800-7110-8000-000000000004",
+	profileId: "019b76da-a800-7200-8000-000000000004",
+	slug: "rezics-admin",
+	name: `${RezicsBrandName} Administrator`,
+	localizations: [
+		{ language: "zh", title: `${RezicsBrandName} 系統管理員` },
+		{ language: "en", title: `${RezicsBrandName} Administrator` },
+	],
+	email: "admin@rezics.com",
+	capabilities: PlatformCapabilityValues,
+} as const;
+
+export const BootstrapProfileManifest = [
+	...OfficialProfileManifest,
+	BootstrapSuperAdminProfile,
+] as const;
+export const BootstrapProfileIdValues: readonly string[] = BootstrapProfileManifest.map(
 	(profile) => profile.profileId,
 );
 
@@ -321,15 +345,15 @@ export const OfficialZoneManifest = [
 
 export const BootstrapUnitIds = [
 	...SlugNamespaceManifest.map((namespace) => namespace.id),
-	...OfficialProfileManifest.map((profile) => profile.profileId),
+	...BootstrapProfileManifest.map((profile) => profile.profileId),
 	OfficialRealmManifest.id,
 	...OfficialZoneManifest.map((zone) => zone.id),
 	...OfficialZoneManifest.map((zone) => zone.wikiPost.id),
 	...OfficialZoneManifest.map((zone) => zone.homePage.id),
 ] as const;
 
-export const BootstrapAuthUserIds = OfficialProfileManifest.map((profile) => profile.authUserId);
-export const BootstrapAccountIds = OfficialProfileManifest.map((profile) => profile.accountId);
+export const BootstrapAuthUserIds = BootstrapProfileManifest.map((profile) => profile.authUserId);
+export const BootstrapAccountIds = BootstrapProfileManifest.map((profile) => profile.accountId);
 
 export const ReservedBootstrapUuidv7s = [
 	...BootstrapUnitIds,

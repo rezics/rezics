@@ -9,7 +9,7 @@ try {
 		console.info("Bootstrap is already complete; no credentials were changed.");
 	} else {
 		console.info(
-			"Official Profile credentials were issued. Store these passwords now; they will not be shown again.",
+			"Bootstrap Profile credentials were issued. Store these passwords now; they will not be shown again.",
 		);
 		for (const credential of result.issuedCredentials) {
 			console.info(

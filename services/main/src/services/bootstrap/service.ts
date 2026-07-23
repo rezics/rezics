@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
+	auditEvent,
+	capabilityGrant,
 	contentStructure,
 	contentStructureNode,
 	imageAsset,
@@ -45,6 +47,7 @@ import {
 } from "../api/docks/history";
 import type { ContentLanguage } from "../database/schema/contract-values";
 import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
+import { lockPlatformAccessGrants } from "../staff/access-service";
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
@@ -57,10 +60,11 @@ import {
 	BootstrapAccountIds,
 	BootstrapAuthUserIds,
 	BootstrapEpochIso,
+	BootstrapProfileIdValues,
+	BootstrapProfileManifest,
+	BootstrapSuperAdminProfile,
 	BootstrapUnitIds,
-	OfficialProfileIdValues,
 	OfficialProfileIds,
-	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneAvatarAsset,
 	OfficialZoneManifest,
@@ -368,13 +372,13 @@ async function ensureLocalization(
 	return true;
 }
 
-async function ensureOfficialProfiles(
+async function ensureBootstrapProfiles(
 	tx: DatabaseTransaction,
 	credentialMode: BootstrapCredentialMode,
 ): Promise<IssuedBootstrapCredential[]> {
 	const createdAt = bootstrapEpoch();
 	const issuedCredentials: IssuedBootstrapCredential[] = [];
-	for (const value of OfficialProfileManifest) {
+	for (const value of BootstrapProfileManifest) {
 		await tx
 			.insert(users)
 			.values({
@@ -506,10 +510,91 @@ async function ensureOfficialProfiles(
 				unitId: value.profileId,
 				actorProfileId: value.profileId,
 				event: "create",
-				message: "Bootstrap official Profile",
+				message: "Bootstrap Profile",
 			});
 	}
 	return issuedCredentials;
+}
+
+async function ensureBootstrapSuperAdminGrants(tx: DatabaseTransaction): Promise<void> {
+	await lockPlatformAccessGrants(tx);
+	const [permanentGrantManager] = await tx
+		.select({ profileId: capabilityGrant.profileId })
+		.from(capabilityGrant)
+		.where(
+			and(
+				eq(capabilityGrant.authority, "platform"),
+				isNull(capabilityGrant.realmId),
+				eq(capabilityGrant.capability, "platform.grants.manage"),
+				isNull(capabilityGrant.expiresAt),
+				isNull(capabilityGrant.revokedAt),
+			),
+		)
+		.limit(1);
+	if (permanentGrantManager) return;
+	const createdAt = bootstrapEpoch();
+	for (const capability of BootstrapSuperAdminProfile.capabilities) {
+		const [current] = await tx
+			.select({
+				grantedByProfileId: capabilityGrant.grantedByProfileId,
+				expiresAt: capabilityGrant.expiresAt,
+				revokedAt: capabilityGrant.revokedAt,
+			})
+			.from(capabilityGrant)
+			.where(
+				and(
+					eq(capabilityGrant.authority, "platform"),
+					isNull(capabilityGrant.realmId),
+					eq(capabilityGrant.profileId, BootstrapSuperAdminProfile.profileId),
+					eq(capabilityGrant.capability, capability),
+				),
+			)
+			.limit(1);
+		const changed =
+			!current ||
+			current.grantedByProfileId !== BootstrapSuperAdminProfile.profileId ||
+			current.expiresAt !== null ||
+			current.revokedAt !== null;
+		await tx
+			.insert(capabilityGrant)
+			.values({
+				authority: "platform",
+				realmId: null,
+				profileId: BootstrapSuperAdminProfile.profileId,
+				capability,
+				grantedByProfileId: BootstrapSuperAdminProfile.profileId,
+				expiresAt: null,
+				revokedAt: null,
+				revokedByProfileId: null,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoUpdate({
+				target: [
+					capabilityGrant.authority,
+					capabilityGrant.realmId,
+					capabilityGrant.profileId,
+					capabilityGrant.capability,
+				],
+				set: {
+					grantedByProfileId: BootstrapSuperAdminProfile.profileId,
+					expiresAt: null,
+					revokedAt: null,
+					revokedByProfileId: null,
+					updatedAt: createdAt,
+				},
+			});
+		if (changed)
+			await tx.insert(auditEvent).values({
+				actorProfileId: BootstrapSuperAdminProfile.profileId,
+				action: "capability_grant.bootstrap",
+				decisionCode: "allowed",
+				subjectKind: "profile",
+				subjectId: BootstrapSuperAdminProfile.profileId,
+				metadata: { authority: "platform", capability, source: "bootstrap" },
+				createdAt,
+			});
+	}
 }
 
 async function prepareCredential(): Promise<PreparedCredential> {
@@ -1064,10 +1149,10 @@ export async function isBootstrapReady(): Promise<boolean> {
 			scopeUnitId: null,
 			slug: namespace.slug,
 		})),
-		...OfficialProfileManifest.map((officialProfile) => ({
-			targetUnitId: officialProfile.profileId,
+		...BootstrapProfileManifest.map((bootstrapProfile) => ({
+			targetUnitId: bootstrapProfile.profileId,
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
-			slug: officialProfile.slug,
+			slug: bootstrapProfile.slug,
 		})),
 		{
 			targetUnitId: OfficialRealmManifest.id,
@@ -1086,9 +1171,9 @@ export async function isBootstrapReady(): Promise<boolean> {
 		})),
 	];
 	const expectedLocalizations = [
-		...OfficialProfileManifest.flatMap((officialProfile) =>
-			officialProfile.localizations.map((localization, index) => ({
-				unitId: officialProfile.profileId,
+		...BootstrapProfileManifest.flatMap((bootstrapProfile) =>
+			bootstrapProfile.localizations.map((localization, index) => ({
+				unitId: bootstrapProfile.profileId,
 				position: fractionalPositionAt(index),
 				summary: null,
 				...localization,
@@ -1148,10 +1233,11 @@ export async function isBootstrapReady(): Promise<boolean> {
 	const [
 		unitCount,
 		addresses,
-		officialUsers,
+		bootstrapUsers,
 		accountCount,
 		profileCount,
-		officialProfileOwners,
+		bootstrapProfileOwners,
+		permanentGrantManagers,
 		officialRealm,
 		officialZones,
 		officialZoneDocks,
@@ -1191,7 +1277,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 		database
 			.select({ value: count() })
 			.from(profile)
-			.where(inArray(profile.id, OfficialProfileIdValues)),
+			.where(inArray(profile.id, BootstrapProfileIdValues)),
 		database
 			.select({
 				unitId: unitAccessBinding.unitId,
@@ -1202,12 +1288,25 @@ export async function isBootstrapReady(): Promise<boolean> {
 			.from(unitAccessBinding)
 			.where(
 				and(
-					inArray(unitAccessBinding.unitId, OfficialProfileIdValues),
+					inArray(unitAccessBinding.unitId, BootstrapProfileIdValues),
 					eq(unitAccessBinding.subjectKind, "profile"),
 					eq(unitAccessBinding.role, "owner"),
 					isNull(unitAccessBinding.revokedAt),
 				),
 			),
+		database
+			.select({ profileId: capabilityGrant.profileId })
+			.from(capabilityGrant)
+			.where(
+				and(
+					eq(capabilityGrant.authority, "platform"),
+					isNull(capabilityGrant.realmId),
+					eq(capabilityGrant.capability, "platform.grants.manage"),
+					isNull(capabilityGrant.expiresAt),
+					isNull(capabilityGrant.revokedAt),
+				),
+			)
+			.groupBy(capabilityGrant.profileId),
 		database
 			.select({ id: realm.id })
 			.from(realm)
@@ -1311,7 +1410,9 @@ export async function isBootstrapReady(): Promise<boolean> {
 			.from(unitLocalization)
 			.where(
 				inArray(unitLocalization.unitId, [
-					...OfficialProfileManifest.map((officialProfile) => officialProfile.profileId),
+					...BootstrapProfileManifest.map(
+						(bootstrapProfile) => bootstrapProfile.profileId,
+					),
 					OfficialRealmManifest.id,
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.wikiPost.id),
@@ -1330,17 +1431,18 @@ export async function isBootstrapReady(): Promise<boolean> {
 					actual.slug === expected.slug,
 			),
 		) &&
-		officialUsers.length === BootstrapAuthUserIds.length &&
-		officialUsers.every((user) => user.emailVerified) &&
+		bootstrapUsers.length === BootstrapAuthUserIds.length &&
+		bootstrapUsers.every((user) => user.emailVerified) &&
 		accountCount[0]?.value === BootstrapAccountIds.length &&
-		profileCount[0]?.value === OfficialProfileIdValues.length &&
-		officialProfileOwners.length === OfficialProfileIdValues.length &&
-		officialProfileOwners.every(
+		profileCount[0]?.value === BootstrapProfileIdValues.length &&
+		bootstrapProfileOwners.length === BootstrapProfileIdValues.length &&
+		bootstrapProfileOwners.every(
 			(owner) =>
 				owner.profileId === owner.unitId &&
 				owner.scope.length === 0 &&
 				owner.expiresAt === null,
 		) &&
+		permanentGrantManagers.length > 0 &&
 		Boolean(officialRealm[0]) &&
 		officialZones.length === OfficialZoneManifest.length &&
 		OfficialZoneManifest.every((expected) =>
@@ -1456,7 +1558,8 @@ export async function bootstrapDatabase(
 			sql`select pg_advisory_xact_lock(hashtextextended(${BootstrapLockName}, 0))`,
 		);
 		await ensureSlugNamespaces(tx);
-		const credentials = await ensureOfficialProfiles(tx, options.credentialMode);
+		const credentials = await ensureBootstrapProfiles(tx, options.credentialMode);
+		await ensureBootstrapSuperAdminGrants(tx);
 		await ensureOfficialRealm(tx);
 		await ensureOfficialZoneAvatar(tx);
 		await ensureOfficialZones(tx);

@@ -439,12 +439,14 @@ import type {
 	PostApiGovernanceGrantsStatus400,
 	PostApiGovernanceGrantsStatus403,
 	PostApiGovernanceGrantsStatus404,
+	PostApiGovernanceGrantsStatus409,
 	PostApiGovernanceGrantsStatus422,
 	PostApiGovernanceGrantsStatus500,
 	DeleteApiGovernanceGrantsByGrantIdOptions,
 	DeleteApiGovernanceGrantsByGrantIdStatus204,
 	DeleteApiGovernanceGrantsByGrantIdStatus403,
 	DeleteApiGovernanceGrantsByGrantIdStatus404,
+	DeleteApiGovernanceGrantsByGrantIdStatus409,
 	DeleteApiGovernanceGrantsByGrantIdStatus422,
 	DeleteApiGovernanceGrantsByGrantIdStatus500,
 	PostApiSeriesOptions,
@@ -721,6 +723,30 @@ import type {
 	DeleteApiUsersByIdBlockStatus422,
 	DeleteApiUsersByIdBlockStatus429,
 	DeleteApiUsersByIdBlockStatus500,
+	GetApiStaffAccessPolicyStatus200,
+	GetApiStaffAccessPolicyStatus403,
+	GetApiStaffAccessPolicyStatus500,
+	GetApiStaffProfilesOptions,
+	GetApiStaffProfilesStatus200,
+	GetApiStaffProfilesStatus403,
+	GetApiStaffProfilesStatus422,
+	GetApiStaffProfilesStatus500,
+	GetApiStaffMembersStatus200,
+	GetApiStaffMembersStatus403,
+	GetApiStaffMembersStatus500,
+	PutApiStaffMembersByProfileIdOptions,
+	PutApiStaffMembersByProfileIdStatus200,
+	PutApiStaffMembersByProfileIdStatus400,
+	PutApiStaffMembersByProfileIdStatus403,
+	PutApiStaffMembersByProfileIdStatus404,
+	PutApiStaffMembersByProfileIdStatus409,
+	PutApiStaffMembersByProfileIdStatus422,
+	PutApiStaffMembersByProfileIdStatus500,
+	GetApiStaffAuditOptions,
+	GetApiStaffAuditStatus200,
+	GetApiStaffAuditStatus403,
+	GetApiStaffAuditStatus422,
+	GetApiStaffAuditStatus500,
 	ResolveUnitSlugAddressOptions,
 	ResolveUnitSlugAddressStatus200,
 	ResolveUnitSlugAddressStatus400,
@@ -1507,6 +1533,19 @@ import type {
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus422,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus429,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus500,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500,
 	PutApiRealmsByRealmIdRulesOptions,
 	PutApiRealmsByRealmIdRulesStatus200,
 	PutApiRealmsByRealmIdRulesStatus403,
@@ -1808,6 +1847,11 @@ import {
 	getApiUsersMeBlocks,
 	putApiUsersByIdBlock,
 	deleteApiUsersByIdBlock,
+	getApiStaffAccessPolicy,
+	getApiStaffProfiles,
+	getApiStaffMembers,
+	putApiStaffMembersByProfileId,
+	getApiStaffAudit,
 	resolveUnitSlugAddress,
 	getPublicUnitSlugAddress,
 	resolveScopedUnitSlugAddress,
@@ -1932,6 +1976,8 @@ import {
 	deleteApiRealmsByRealmIdMembership,
 	getApiRealmsByRealmIdMembers,
 	patchApiRealmsByRealmIdMembersByProfileId,
+	getApiRealmsByRealmIdMembersByProfileIdCapabilities,
+	putApiRealmsByRealmIdMembersByProfileIdCapabilities,
 	putApiRealmsByRealmIdRules,
 	getApiRealmsByRealmIdRules,
 	getApiRealmsByRealmIdPins,
@@ -8801,6 +8847,7 @@ export function postApiGovernanceGrantsMutationOptions<TContext = unknown>(
 			| PostApiGovernanceGrantsStatus400
 			| PostApiGovernanceGrantsStatus403
 			| PostApiGovernanceGrantsStatus404
+			| PostApiGovernanceGrantsStatus409
 			| PostApiGovernanceGrantsStatus422
 			| PostApiGovernanceGrantsStatus500
 		>,
@@ -8827,6 +8874,7 @@ export function usePostApiGovernanceGrants<TContext>(
 				| PostApiGovernanceGrantsStatus400
 				| PostApiGovernanceGrantsStatus403
 				| PostApiGovernanceGrantsStatus404
+				| PostApiGovernanceGrantsStatus409
 				| PostApiGovernanceGrantsStatus422
 				| PostApiGovernanceGrantsStatus500
 			>,
@@ -8846,6 +8894,7 @@ export function usePostApiGovernanceGrants<TContext>(
 			| PostApiGovernanceGrantsStatus400
 			| PostApiGovernanceGrantsStatus403
 			| PostApiGovernanceGrantsStatus404
+			| PostApiGovernanceGrantsStatus409
 			| PostApiGovernanceGrantsStatus422
 			| PostApiGovernanceGrantsStatus500
 		>,
@@ -8859,6 +8908,7 @@ export function usePostApiGovernanceGrants<TContext>(
 			| PostApiGovernanceGrantsStatus400
 			| PostApiGovernanceGrantsStatus403
 			| PostApiGovernanceGrantsStatus404
+			| PostApiGovernanceGrantsStatus409
 			| PostApiGovernanceGrantsStatus422
 			| PostApiGovernanceGrantsStatus500
 		>,
@@ -8877,6 +8927,7 @@ export function usePostApiGovernanceGrants<TContext>(
 			| PostApiGovernanceGrantsStatus400
 			| PostApiGovernanceGrantsStatus403
 			| PostApiGovernanceGrantsStatus404
+			| PostApiGovernanceGrantsStatus409
 			| PostApiGovernanceGrantsStatus422
 			| PostApiGovernanceGrantsStatus500
 		>,
@@ -8897,6 +8948,7 @@ export function deleteApiGovernanceGrantsByGrantIdMutationOptions<TContext = unk
 		ResponseErrorConfig<
 			| DeleteApiGovernanceGrantsByGrantIdStatus403
 			| DeleteApiGovernanceGrantsByGrantIdStatus404
+			| DeleteApiGovernanceGrantsByGrantIdStatus409
 			| DeleteApiGovernanceGrantsByGrantIdStatus422
 			| DeleteApiGovernanceGrantsByGrantIdStatus500
 		>,
@@ -8926,6 +8978,7 @@ export function useDeleteApiGovernanceGrantsByGrantId<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiGovernanceGrantsByGrantIdStatus403
 				| DeleteApiGovernanceGrantsByGrantIdStatus404
+				| DeleteApiGovernanceGrantsByGrantIdStatus409
 				| DeleteApiGovernanceGrantsByGrantIdStatus422
 				| DeleteApiGovernanceGrantsByGrantIdStatus500
 			>,
@@ -8947,6 +9000,7 @@ export function useDeleteApiGovernanceGrantsByGrantId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiGovernanceGrantsByGrantIdStatus403
 			| DeleteApiGovernanceGrantsByGrantIdStatus404
+			| DeleteApiGovernanceGrantsByGrantIdStatus409
 			| DeleteApiGovernanceGrantsByGrantIdStatus422
 			| DeleteApiGovernanceGrantsByGrantIdStatus500
 		>,
@@ -8959,6 +9013,7 @@ export function useDeleteApiGovernanceGrantsByGrantId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiGovernanceGrantsByGrantIdStatus403
 			| DeleteApiGovernanceGrantsByGrantIdStatus404
+			| DeleteApiGovernanceGrantsByGrantIdStatus409
 			| DeleteApiGovernanceGrantsByGrantIdStatus422
 			| DeleteApiGovernanceGrantsByGrantIdStatus500
 		>,
@@ -8976,6 +9031,7 @@ export function useDeleteApiGovernanceGrantsByGrantId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiGovernanceGrantsByGrantIdStatus403
 			| DeleteApiGovernanceGrantsByGrantIdStatus404
+			| DeleteApiGovernanceGrantsByGrantIdStatus409
 			| DeleteApiGovernanceGrantsByGrantIdStatus422
 			| DeleteApiGovernanceGrantsByGrantIdStatus500
 		>,
@@ -13199,6 +13255,429 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 		DeleteApiUsersByIdBlockOptions,
 		TContext
 	>;
+}
+
+export const getApiStaffAccessPolicyQueryKey = () => [{ url: "/api/staff/access-policy" }] as const;
+
+type GetApiStaffAccessPolicyQueryKey = ReturnType<typeof getApiStaffAccessPolicyQueryKey>;
+
+export function getApiStaffAccessPolicyQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiStaffAccessPolicyQueryKey();
+	return queryOptions<
+		GetApiStaffAccessPolicyStatus200,
+		ResponseErrorConfig<GetApiStaffAccessPolicyStatus403 | GetApiStaffAccessPolicyStatus500>,
+		GetApiStaffAccessPolicyStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiStaffAccessPolicy({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get platform staff access policy
+ * {@link /api/staff/access-policy}
+ */
+export function useGetApiStaffAccessPolicy<
+	TData = GetApiStaffAccessPolicyStatus200,
+	TQueryData = GetApiStaffAccessPolicyStatus200,
+	TQueryKey extends QueryKey = GetApiStaffAccessPolicyQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiStaffAccessPolicyStatus200,
+				ResponseErrorConfig<
+					GetApiStaffAccessPolicyStatus403 | GetApiStaffAccessPolicyStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getApiStaffAccessPolicyQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getApiStaffAccessPolicyQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetApiStaffAccessPolicyStatus403 | GetApiStaffAccessPolicyStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiStaffProfilesQueryKey = ({
+	query,
+}: Omit<GetApiStaffProfilesOptions, "headers">) =>
+	[{ url: "/api/staff/profiles" }, ...(query ? [query] : [])] as const;
+
+type GetApiStaffProfilesQueryKey = ReturnType<typeof getApiStaffProfilesQueryKey>;
+
+export function getApiStaffProfilesQueryOptions(
+	{ query }: GetApiStaffProfilesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiStaffProfilesQueryKey({ query });
+	return queryOptions<
+		GetApiStaffProfilesStatus200,
+		ResponseErrorConfig<
+			| GetApiStaffProfilesStatus403
+			| GetApiStaffProfilesStatus422
+			| GetApiStaffProfilesStatus500
+		>,
+		GetApiStaffProfilesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiStaffProfiles({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Search Profiles for staff access
+ * {@link /api/staff/profiles}
+ */
+export function useGetApiStaffProfiles<
+	TData = GetApiStaffProfilesStatus200,
+	TQueryData = GetApiStaffProfilesStatus200,
+	TQueryKey extends QueryKey = GetApiStaffProfilesQueryKey,
+>(
+	{
+		query,
+	}: { query: GetApiStaffProfilesOptions["query"] | (() => GetApiStaffProfilesOptions["query"]) },
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiStaffProfilesStatus200,
+				ResponseErrorConfig<
+					| GetApiStaffProfilesStatus403
+					| GetApiStaffProfilesStatus422
+					| GetApiStaffProfilesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiStaffProfilesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiStaffProfilesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiStaffProfilesStatus403
+			| GetApiStaffProfilesStatus422
+			| GetApiStaffProfilesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiStaffMembersQueryKey = () => [{ url: "/api/staff/members" }] as const;
+
+type GetApiStaffMembersQueryKey = ReturnType<typeof getApiStaffMembersQueryKey>;
+
+export function getApiStaffMembersQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiStaffMembersQueryKey();
+	return queryOptions<
+		GetApiStaffMembersStatus200,
+		ResponseErrorConfig<GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500>,
+		GetApiStaffMembersStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiStaffMembers({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List active staff access
+ * {@link /api/staff/members}
+ */
+export function useGetApiStaffMembers<
+	TData = GetApiStaffMembersStatus200,
+	TQueryData = GetApiStaffMembersStatus200,
+	TQueryKey extends QueryKey = GetApiStaffMembersQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiStaffMembersStatus200,
+				ResponseErrorConfig<GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getApiStaffMembersQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getApiStaffMembersQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiStaffMembersByProfileIdMutationKey = () =>
+	[{ url: "/api/staff/members/:profileId" }] as const;
+
+export function putApiStaffMembersByProfileIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiStaffMembersByProfileIdMutationKey();
+	return mutationOptions<
+		PutApiStaffMembersByProfileIdStatus200,
+		ResponseErrorConfig<
+			| PutApiStaffMembersByProfileIdStatus400
+			| PutApiStaffMembersByProfileIdStatus403
+			| PutApiStaffMembersByProfileIdStatus404
+			| PutApiStaffMembersByProfileIdStatus409
+			| PutApiStaffMembersByProfileIdStatus422
+			| PutApiStaffMembersByProfileIdStatus500
+		>,
+		PutApiStaffMembersByProfileIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiStaffMembersByProfileId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace a Profile's platform access
+ * {@link /api/staff/members/:profileId}
+ */
+export function usePutApiStaffMembersByProfileId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiStaffMembersByProfileIdStatus200,
+			ResponseErrorConfig<
+				| PutApiStaffMembersByProfileIdStatus400
+				| PutApiStaffMembersByProfileIdStatus403
+				| PutApiStaffMembersByProfileIdStatus404
+				| PutApiStaffMembersByProfileIdStatus409
+				| PutApiStaffMembersByProfileIdStatus422
+				| PutApiStaffMembersByProfileIdStatus500
+			>,
+			PutApiStaffMembersByProfileIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiStaffMembersByProfileIdMutationKey();
+
+	const baseOptions = putApiStaffMembersByProfileIdMutationOptions(config) as UseMutationOptions<
+		PutApiStaffMembersByProfileIdStatus200,
+		ResponseErrorConfig<
+			| PutApiStaffMembersByProfileIdStatus400
+			| PutApiStaffMembersByProfileIdStatus403
+			| PutApiStaffMembersByProfileIdStatus404
+			| PutApiStaffMembersByProfileIdStatus409
+			| PutApiStaffMembersByProfileIdStatus422
+			| PutApiStaffMembersByProfileIdStatus500
+		>,
+		PutApiStaffMembersByProfileIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiStaffMembersByProfileIdStatus200,
+		ResponseErrorConfig<
+			| PutApiStaffMembersByProfileIdStatus400
+			| PutApiStaffMembersByProfileIdStatus403
+			| PutApiStaffMembersByProfileIdStatus404
+			| PutApiStaffMembersByProfileIdStatus409
+			| PutApiStaffMembersByProfileIdStatus422
+			| PutApiStaffMembersByProfileIdStatus500
+		>,
+		PutApiStaffMembersByProfileIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiStaffMembersByProfileIdStatus200,
+		ResponseErrorConfig<
+			| PutApiStaffMembersByProfileIdStatus400
+			| PutApiStaffMembersByProfileIdStatus403
+			| PutApiStaffMembersByProfileIdStatus404
+			| PutApiStaffMembersByProfileIdStatus409
+			| PutApiStaffMembersByProfileIdStatus422
+			| PutApiStaffMembersByProfileIdStatus500
+		>,
+		PutApiStaffMembersByProfileIdOptions,
+		TContext
+	>;
+}
+
+export const getApiStaffAuditQueryKey = ({
+	query,
+}: Omit<GetApiStaffAuditOptions, "headers"> = {}) =>
+	[{ url: "/api/staff/audit" }, ...(query ? [query] : [])] as const;
+
+type GetApiStaffAuditQueryKey = ReturnType<typeof getApiStaffAuditQueryKey>;
+
+export function getApiStaffAuditQueryOptions(
+	{ query }: GetApiStaffAuditOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiStaffAuditQueryKey({ query });
+	return queryOptions<
+		GetApiStaffAuditStatus200,
+		ResponseErrorConfig<
+			GetApiStaffAuditStatus403 | GetApiStaffAuditStatus422 | GetApiStaffAuditStatus500
+		>,
+		GetApiStaffAuditStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiStaffAudit({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List staff access audit events
+ * {@link /api/staff/audit}
+ */
+export function useGetApiStaffAudit<
+	TData = GetApiStaffAuditStatus200,
+	TQueryData = GetApiStaffAuditStatus200,
+	TQueryKey extends QueryKey = GetApiStaffAuditQueryKey,
+>(
+	{
+		query,
+	}: { query?: GetApiStaffAuditOptions["query"] | (() => GetApiStaffAuditOptions["query"]) } = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiStaffAuditStatus200,
+				ResponseErrorConfig<
+					| GetApiStaffAuditStatus403
+					| GetApiStaffAuditStatus422
+					| GetApiStaffAuditStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiStaffAuditQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiStaffAuditQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiStaffAuditStatus403 | GetApiStaffAuditStatus422 | GetApiStaffAuditStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const resolveUnitSlugAddressMutationKey = () =>
@@ -25748,6 +26227,216 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
 		>,
 		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryKey = ({
+	path,
+}: Omit<GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/members/:profileId/capabilities", params: path }] as const;
+
+type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryKey
+>;
+
+export function getApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryOptions(
+	{ path }: GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryKey({ path });
+	return queryOptions<
+		GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+		>,
+		GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdMembersByProfileIdCapabilities({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Realm member capability access
+ * {@link /api/realms/:realmId/members/:profileId/capabilities}
+ */
+export function useGetApiRealmsByRealmIdMembersByProfileIdCapabilities<
+	TData = GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+	TQueryData = GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions["path"]
+			| (() => GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+					| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+					| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+					| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdMembersByProfileIdCapabilitiesQueryOptions(
+				resolvedParams,
+				config,
+			),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+			| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiRealmsByRealmIdMembersByProfileIdCapabilitiesMutationKey = () =>
+	[{ url: "/api/realms/:realmId/members/:profileId/capabilities" }] as const;
+
+export function putApiRealmsByRealmIdMembersByProfileIdCapabilitiesMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiRealmsByRealmIdMembersByProfileIdCapabilitiesMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+		>,
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdMembersByProfileIdCapabilities({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace Realm member capability access
+ * {@link /api/realms/:realmId/members/:profileId/capabilities}
+ */
+export function usePutApiRealmsByRealmIdMembersByProfileIdCapabilities<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400
+				| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+				| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+				| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+				| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+			>,
+			PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiRealmsByRealmIdMembersByProfileIdCapabilitiesMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdMembersByProfileIdCapabilitiesMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+		>,
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+		>,
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+			| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500
+		>,
+		PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
 		TContext
 	>;
 }

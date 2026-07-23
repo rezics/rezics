@@ -30,6 +30,10 @@ export default {
 				label: "Members and roles",
 				description: "Manage member roles, states, and participation eligibility.",
 			},
+			"member-access": {
+				label: "Member capabilities",
+				description: `Review role and platform sources and manage direct ${realmTerms.label} grants for members.`,
+			},
 			rules: {
 				label: "Rules",
 				description: "Edit localized rules and the actions that require acknowledgement.",
@@ -70,6 +74,18 @@ export default {
 	unknownMember: "Unknown member",
 	memberRole: "Role",
 	memberState: "State",
+	memberAccess: {
+		selectMember: "Select a member",
+		selectMemberPlaceholder: "Choose an active member",
+		directAccess: `Direct ${realmTerms.label} grants`,
+		effectiveSources: "Effective sources",
+		expiry: "Direct-grant bundle expiry",
+		noExpiry: "No expiry",
+		mixedExpiry:
+			"These direct grants have different expiries. Choose a new shared expiry before saving.",
+		save: "Save member capabilities",
+		noDirectAccess: `This member currently has no direct ${realmTerms.label} grants.`,
+	},
 	roles: {
 		owner: "Owner",
 		admin: "Administrator",

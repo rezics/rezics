@@ -44,6 +44,12 @@ export class PlatformCapabilityRequired extends Data.TaggedError("PlatformCapabi
 	readonly message = "Platform capability required";
 }
 
+export class PlatformGrantManagerRequired extends Data.TaggedError("PlatformGrantManagerRequired") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = PlatformGrantManagerRequired.status;
+	readonly message = "At least one non-expiring platform grant manager is required";
+}
+
 export class CollectionOwnershipRequired extends Data.TaggedError("CollectionOwnershipRequired") {
 	static readonly status = StatusCodes.FORBIDDEN as const;
 	readonly status = CollectionOwnershipRequired.status;
@@ -56,5 +62,6 @@ export const AuthorizationErrors = [
 	RealmRulesAcceptanceRequired,
 	RealmRoleManagementForbidden,
 	PlatformCapabilityRequired,
+	PlatformGrantManagerRequired,
 	CollectionOwnershipRequired,
 ] as const;

@@ -29,6 +29,7 @@ export default {
 		viewProfile: "View profile",
 		myContent: "My content",
 		settings: "Settings",
+		staff: "Staff console",
 		invitations: "Received access invitations",
 		signOut: "Sign out",
 	},

@@ -37,6 +37,21 @@ describe("realm membership permissions", () => {
 		).toBe(false);
 	});
 
+	it("shows direct member capabilities only to member managers", () => {
+		expect(
+			getRealmSettingsSectionIds({
+				canUpdateSettings: false,
+				canReadMembers: true,
+				canManageMembers: true,
+				canPublishRules: false,
+				canManagePins: false,
+				canModerateUnits: false,
+				canManageAccess: false,
+				canRestoreHistory: false,
+			}),
+		).toEqual(["members", "member-access", "history"]);
+	});
+
 	it.each([
 		[{ role: "owner", state: "active" }, true],
 		[{ role: "owner", state: "banned" }, false],

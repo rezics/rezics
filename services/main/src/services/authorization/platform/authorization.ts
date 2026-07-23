@@ -1,10 +1,11 @@
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../../database";
-import { capabilityGrant, PlatformCapabilityValues } from "../../database/schema";
+import { capabilityGrant } from "../../database/schema";
 import { PlatformCapabilityRequired } from "../errors";
+import type { PlatformCapability } from "./policy";
 
-export type PlatformCapability = (typeof PlatformCapabilityValues)[number];
+export type { PlatformCapability } from "./policy";
 
 async function hasActivePlatformGrant(
 	executor: DatabaseExecutor,
@@ -38,6 +39,31 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 		return this.profileId
 			? hasActivePlatformGrant(executor, this.profileId, capability)
 			: Promise.resolve(false);
+	}
+
+	async decideCapabilities<Capability extends PlatformCapability>(
+		capabilities: readonly [Capability, ...Capability[]],
+		executor: DatabaseExecutor = database,
+	): Promise<ReadonlyMap<Capability, boolean>> {
+		if (!this.profileId) return new Map(capabilities.map((capability) => [capability, false]));
+		const grants = await executor
+			.select({ capability: capabilityGrant.capability })
+			.from(capabilityGrant)
+			.where(
+				and(
+					eq(capabilityGrant.authority, "platform"),
+					isNull(capabilityGrant.realmId),
+					eq(capabilityGrant.profileId, this.profileId),
+					inArray(capabilityGrant.capability, capabilities),
+					isNull(capabilityGrant.revokedAt),
+					or(
+						isNull(capabilityGrant.expiresAt),
+						sql`${capabilityGrant.expiresAt} > now()`,
+					),
+				),
+			);
+		const granted = new Set(grants.map(({ capability }) => capability));
+		return new Map(capabilities.map((capability) => [capability, granted.has(capability)]));
 	}
 
 	async ensureCapability(

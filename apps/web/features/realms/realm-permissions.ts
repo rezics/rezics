@@ -19,6 +19,7 @@ export function getRealmSettingsSectionIds(
 	return RealmSettingsSectionIds.filter((sectionId) => {
 		if (sectionId === "profile") return capabilities.canUpdateSettings;
 		if (sectionId === "members") return capabilities.canReadMembers;
+		if (sectionId === "member-access") return capabilities.canManageMembers;
 		if (sectionId === "rules") return capabilities.canPublishRules;
 		if (sectionId === "pins") return capabilities.canManagePins;
 		if (sectionId === "access") return capabilities.canManageAccess;

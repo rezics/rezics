@@ -24,6 +24,7 @@ import {
 	ContentRatingValues,
 	ContentStructureKindValues,
 	EntityAssociationPolicyModeValues,
+	PlatformCapabilityValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
 import { FeedPostKindValues, FeedUnitKindValues } from "../feed/schema";
@@ -544,7 +545,14 @@ export const PublicProfileResponse = t.Object({
 });
 export const CurrentProfileResponse = t.Intersect([
 	PublicProfileResponse,
-	t.Object({ email: t.String(), emailVerified: t.Boolean(), onboarding: t.String() }),
+	t.Object({
+		email: t.String(),
+		emailVerified: t.Boolean(),
+		onboarding: t.String(),
+		platformCapabilities: t.Array(t.UnionEnum(PlatformCapabilityValues), {
+			uniqueItems: true,
+		}),
+	}),
 ]);
 export const PreferencesResponse = t.Object({
 	profileId: Uuid,

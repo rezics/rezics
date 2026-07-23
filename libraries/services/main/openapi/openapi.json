@@ -2230,6 +2230,7 @@
 					"RealmRulesAcceptanceRequired",
 					"RealmRoleManagementForbidden",
 					"PlatformCapabilityRequired",
+					"PlatformGrantManagerRequired",
 					"CollectionOwnershipRequired",
 					"UnitNotFound",
 					"UnitPermissionForbidden",
@@ -27911,7 +27912,8 @@
 													"type": "string",
 													"enum": [
 														"RealmCapabilityRequired",
-														"PlatformCapabilityRequired"
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired"
 													]
 												},
 												"message": { "type": "string" },
@@ -27940,6 +27942,33 @@
 													"default": "RealmMemberNotFound",
 													"type": "string",
 													"enum": ["RealmMemberNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformGrantManagerRequired",
+													"type": "string",
+													"enum": ["PlatformGrantManagerRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -27998,7 +28027,8 @@
 													"type": "string",
 													"enum": [
 														"RealmCapabilityRequired",
-														"PlatformCapabilityRequired"
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired"
 													]
 												},
 												"message": { "type": "string" },
@@ -28027,6 +28057,33 @@
 													"default": "CapabilityGrantNotFound",
 													"type": "string",
 													"enum": ["CapabilityGrantNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformGrantManagerRequired",
+													"type": "string",
+													"enum": ["PlatformGrantManagerRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -36559,11 +36616,44 @@
 										},
 										{
 											"type": "object",
-											"required": ["email", "emailVerified", "onboarding"],
+											"required": [
+												"email",
+												"emailVerified",
+												"onboarding",
+												"platformCapabilities"
+											],
 											"properties": {
 												"email": { "type": "string" },
 												"emailVerified": { "type": "boolean" },
-												"onboarding": { "type": "string" }
+												"onboarding": { "type": "string" },
+												"platformCapabilities": {
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"default": "entity.associations.override",
+														"type": "string",
+														"enum": [
+															"entity.associations.override",
+															"unit.edit",
+															"unit.ownership.transfer",
+															"unit.slug.manage",
+															"unit.slug.namespace.manage",
+															"unit.slug.redirect.release",
+															"platform.api_token_policy.manage",
+															"platform.moderate",
+															"platform.suppress",
+															"platform.grants.manage",
+															"platform.score-context.manage",
+															"realm.contribute",
+															"realm.settings.update",
+															"realm.members.read",
+															"realm.members.manage",
+															"realm.rules.publish",
+															"realm.pins.manage",
+															"realm.units.moderate"
+														]
+													}
+												}
 											}
 										}
 									]
@@ -39986,6 +40076,827 @@
 				},
 				"operationId": "deleteApiUsersByIdBlock",
 				"x-rezics-policy-operation-id": "deleteApiUsersByIdBlock"
+			}
+		},
+		"/api/staff/access-policy": {
+			"get": {
+				"summary": "Get platform staff access policy",
+				"tags": ["Staff"],
+				"security": [{ "SessionCookie": [] }],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["capabilities"],
+									"properties": {
+										"capabilities": {
+											"uniqueItems": true,
+											"type": "array",
+											"items": {
+												"default": "entity.associations.override",
+												"type": "string",
+												"enum": [
+													"entity.associations.override",
+													"unit.edit",
+													"unit.ownership.transfer",
+													"unit.slug.manage",
+													"unit.slug.namespace.manage",
+													"unit.slug.redirect.release",
+													"platform.api_token_policy.manage",
+													"platform.moderate",
+													"platform.suppress",
+													"platform.grants.manage",
+													"platform.score-context.manage",
+													"realm.contribute",
+													"realm.settings.update",
+													"realm.members.read",
+													"realm.members.manage",
+													"realm.rules.publish",
+													"realm.pins.manage",
+													"realm.units.moderate"
+												]
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiStaffAccess-policy",
+				"x-rezics-policy-operation-id": "getApiStaffAccess-policy"
+			}
+		},
+		"/api/staff/profiles": {
+			"get": {
+				"summary": "Search Profiles for staff access",
+				"tags": ["Staff"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "query",
+						"in": "query",
+						"required": true,
+						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 20,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"email",
+													"grants",
+													"isSuperAdmin"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"email": {
+														"format": "email",
+														"type": "string"
+													},
+													"grants": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"capability",
+																"grantedByProfileId",
+																"expiresAt"
+															],
+															"properties": {
+																"capability": {
+																	"default": "entity.associations.override",
+																	"type": "string",
+																	"enum": [
+																		"entity.associations.override",
+																		"unit.edit",
+																		"unit.ownership.transfer",
+																		"unit.slug.manage",
+																		"unit.slug.namespace.manage",
+																		"unit.slug.redirect.release",
+																		"platform.api_token_policy.manage",
+																		"platform.moderate",
+																		"platform.suppress",
+																		"platform.grants.manage",
+																		"platform.score-context.manage",
+																		"realm.contribute",
+																		"realm.settings.update",
+																		"realm.members.read",
+																		"realm.members.manage",
+																		"realm.rules.publish",
+																		"realm.pins.manage",
+																		"realm.units.moderate"
+																	]
+																},
+																"grantedByProfileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"expiresAt": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"format": "date-time",
+																			"type": "string"
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														}
+													},
+													"isSuperAdmin": { "type": "boolean" }
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiStaffProfiles",
+				"x-rezics-policy-operation-id": "getApiStaffProfiles"
+			}
+		},
+		"/api/staff/members": {
+			"get": {
+				"summary": "List active staff access",
+				"tags": ["Staff"],
+				"security": [{ "SessionCookie": [] }],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"email",
+													"grants",
+													"isSuperAdmin"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"email": {
+														"format": "email",
+														"type": "string"
+													},
+													"grants": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"capability",
+																"grantedByProfileId",
+																"expiresAt"
+															],
+															"properties": {
+																"capability": {
+																	"default": "entity.associations.override",
+																	"type": "string",
+																	"enum": [
+																		"entity.associations.override",
+																		"unit.edit",
+																		"unit.ownership.transfer",
+																		"unit.slug.manage",
+																		"unit.slug.namespace.manage",
+																		"unit.slug.redirect.release",
+																		"platform.api_token_policy.manage",
+																		"platform.moderate",
+																		"platform.suppress",
+																		"platform.grants.manage",
+																		"platform.score-context.manage",
+																		"realm.contribute",
+																		"realm.settings.update",
+																		"realm.members.read",
+																		"realm.members.manage",
+																		"realm.rules.publish",
+																		"realm.pins.manage",
+																		"realm.units.moderate"
+																	]
+																},
+																"grantedByProfileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"expiresAt": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"format": "date-time",
+																			"type": "string"
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														}
+													},
+													"isSuperAdmin": { "type": "boolean" }
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiStaffMembers",
+				"x-rezics-policy-operation-id": "getApiStaffMembers"
+			}
+		},
+		"/api/staff/members/{profileId}": {
+			"put": {
+				"summary": "Replace a Profile's platform access",
+				"tags": ["Staff"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "profileId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["capabilities", "expiresAt"],
+								"properties": {
+									"capabilities": {
+										"maxItems": 18,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"default": "entity.associations.override",
+											"type": "string",
+											"enum": [
+												"entity.associations.override",
+												"unit.edit",
+												"unit.ownership.transfer",
+												"unit.slug.manage",
+												"unit.slug.namespace.manage",
+												"unit.slug.redirect.release",
+												"platform.api_token_policy.manage",
+												"platform.moderate",
+												"platform.suppress",
+												"platform.grants.manage",
+												"platform.score-context.manage",
+												"realm.contribute",
+												"realm.settings.update",
+												"realm.members.read",
+												"realm.members.manage",
+												"realm.rules.publish",
+												"realm.pins.manage",
+												"realm.units.moderate"
+											]
+										}
+									},
+									"expiresAt": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "date-time", "type": "string" },
+											{ "type": "null" }
+										]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"profileId",
+										"name",
+										"email",
+										"grants",
+										"isSuperAdmin"
+									],
+									"properties": {
+										"profileId": { "format": "uuid", "type": "string" },
+										"name": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"email": { "format": "email", "type": "string" },
+										"grants": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"capability",
+													"grantedByProfileId",
+													"expiresAt"
+												],
+												"properties": {
+													"capability": {
+														"default": "entity.associations.override",
+														"type": "string",
+														"enum": [
+															"entity.associations.override",
+															"unit.edit",
+															"unit.ownership.transfer",
+															"unit.slug.manage",
+															"unit.slug.namespace.manage",
+															"unit.slug.redirect.release",
+															"platform.api_token_policy.manage",
+															"platform.moderate",
+															"platform.suppress",
+															"platform.grants.manage",
+															"platform.score-context.manage",
+															"realm.contribute",
+															"realm.settings.update",
+															"realm.members.read",
+															"realm.members.manage",
+															"realm.rules.publish",
+															"realm.pins.manage",
+															"realm.units.moderate"
+														]
+													},
+													"grantedByProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"expiresAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"isSuperAdmin": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "CapabilityGrantExpiryInvalid",
+													"type": "string",
+													"enum": ["CapabilityGrantExpiryInvalid"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ProfileNotFound",
+													"type": "string",
+													"enum": ["ProfileNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformGrantManagerRequired",
+													"type": "string",
+													"enum": ["PlatformGrantManagerRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiStaffMembersByProfileId",
+				"x-rezics-policy-operation-id": "putApiStaffMembersByProfileId"
+			}
+		},
+		"/api/staff/audit": {
+			"get": {
+				"summary": "List staff access audit events",
+				"tags": ["Staff"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"actorProfileId",
+													"actorName",
+													"action",
+													"decisionCode",
+													"subjectProfileId",
+													"subjectName",
+													"metadata",
+													"createdAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"actorProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"actorName": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"action": { "type": "string" },
+													"decisionCode": { "type": "string" },
+													"subjectProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"subjectName": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"metadata": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"patternProperties": {
+																	"^(.*)$": {}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiStaffAudit",
+				"x-rezics-policy-operation-id": "getApiStaffAudit"
 			}
 		},
 		"/api/slug-addresses/resolve": {
@@ -89416,6 +90327,432 @@
 				},
 				"operationId": "patchApiRealmsByRealmIdMembersByProfileId",
 				"x-rezics-policy-operation-id": "patchApiRealmsByRealmIdMembersByProfileId"
+			}
+		},
+		"/api/realms/{realmId}/members/{profileId}/capabilities": {
+			"get": {
+				"summary": "Get Realm member capability access",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "profileId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["realmId", "profileId", "role", "capabilities"],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"profileId": { "format": "uuid", "type": "string" },
+										"role": { "type": "string" },
+										"capabilities": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"capability",
+													"sources",
+													"directGrant"
+												],
+												"properties": {
+													"capability": {
+														"default": "realm.contribute",
+														"type": "string",
+														"enum": [
+															"realm.contribute",
+															"realm.settings.update",
+															"realm.members.read",
+															"realm.members.manage",
+															"realm.rules.publish",
+															"realm.pins.manage",
+															"realm.units.moderate"
+														]
+													},
+													"sources": {
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "role",
+															"type": "string",
+															"enum": [
+																"role",
+																"realm_grant",
+																"platform"
+															]
+														}
+													},
+													"directGrant": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": [
+																	"grantedByProfileId",
+																	"expiresAt"
+																],
+																"properties": {
+																	"grantedByProfileId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"expiresAt": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "date-time",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": ["RealmCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmMemberNotFound",
+													"type": "string",
+													"enum": ["RealmMemberNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiRealmsByRealmIdMembersByProfileIdCapabilities",
+				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdMembersByProfileIdCapabilities"
+			},
+			"put": {
+				"summary": "Replace Realm member capability access",
+				"tags": ["Realms"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "profileId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["capabilities", "expiresAt"],
+								"properties": {
+									"capabilities": {
+										"maxItems": 7,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"default": "realm.contribute",
+											"type": "string",
+											"enum": [
+												"realm.contribute",
+												"realm.settings.update",
+												"realm.members.read",
+												"realm.members.manage",
+												"realm.rules.publish",
+												"realm.pins.manage",
+												"realm.units.moderate"
+											]
+										}
+									},
+									"expiresAt": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "date-time", "type": "string" },
+											{ "type": "null" }
+										]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["realmId", "profileId", "role", "capabilities"],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"profileId": { "format": "uuid", "type": "string" },
+										"role": { "type": "string" },
+										"capabilities": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"capability",
+													"sources",
+													"directGrant"
+												],
+												"properties": {
+													"capability": {
+														"default": "realm.contribute",
+														"type": "string",
+														"enum": [
+															"realm.contribute",
+															"realm.settings.update",
+															"realm.members.read",
+															"realm.members.manage",
+															"realm.rules.publish",
+															"realm.pins.manage",
+															"realm.units.moderate"
+														]
+													},
+													"sources": {
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "role",
+															"type": "string",
+															"enum": [
+																"role",
+																"realm_grant",
+																"platform"
+															]
+														}
+													},
+													"directGrant": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": [
+																	"grantedByProfileId",
+																	"expiresAt"
+																],
+																"properties": {
+																	"grantedByProfileId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"expiresAt": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "date-time",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "CapabilityGrantExpiryInvalid",
+													"type": "string",
+													"enum": ["CapabilityGrantExpiryInvalid"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitProtected",
+														"FreshSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmMemberNotFound",
+													"type": "string",
+													"enum": ["RealmMemberNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiRealmsByRealmIdMembersByProfileIdCapabilities",
+				"x-rezics-policy-operation-id": "putApiRealmsByRealmIdMembersByProfileIdCapabilities"
 			}
 		},
 		"/api/realms/{realmId}/rules": {

@@ -18,7 +18,7 @@ export default {
 	ApiTokenPolicyNotFound: `The requested ${verbatimTerms.api.value} token policy was not found.`,
 	ApiTokenPolicyRevisionConflict: `The ${verbatimTerms.api.value} token policy changed. Reload and try again.`,
 	InteractiveSessionRequired: "Sign in interactively to manage credentials.",
-	FreshSessionRequired: "Sign in again before managing credentials.",
+	FreshSessionRequired: "Sign in again before performing a sensitive administrative action.",
 	EmailVerificationRequired: "Verify your email to continue.",
 	AccountRestricted: "This account is restricted from performing that action.",
 	UnitNotFound: "This content could not be found.",
@@ -40,6 +40,8 @@ export default {
 	RealmRulesAcceptanceRequired: `Accept the current ${realmTerms.label} rules to continue.`,
 	RealmRoleManagementForbidden: `You cannot manage that ${realmTerms.label} role.`,
 	PlatformCapabilityRequired: "A platform permission is required for this action.",
+	PlatformGrantManagerRequired:
+		"The platform must retain at least one non-expiring grant manager.",
 	CollectionOwnershipRequired: "You do not own this collection.",
 	ProfileNotFound: "This profile could not be found.",
 	ProfileChanged: "This profile changed. Refresh and try again.",

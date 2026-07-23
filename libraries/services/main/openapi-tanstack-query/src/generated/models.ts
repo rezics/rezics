@@ -1331,6 +1331,7 @@ export const ApiErrorCode = {
 	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
 	RealmRoleManagementForbidden: "RealmRoleManagementForbidden",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	PlatformGrantManagerRequired: "PlatformGrantManagerRequired",
 	CollectionOwnershipRequired: "CollectionOwnershipRequired",
 	UnitNotFound: "UnitNotFound",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -20695,6 +20696,7 @@ export type PostApiGovernanceGrantsStatus400 = {
 export const PostApiGovernanceGrantsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
 } as const;
 
 export type PostApiGovernanceGrantsStatus403ErrorCodeEnum =
@@ -20741,6 +20743,34 @@ export type PostApiGovernanceGrantsStatus404 = {
 		 * @type string
 		 */
 		code: "RealmMemberNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceGrantsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformGrantManagerRequired'
+		 * @type string
+		 */
+		code: "PlatformGrantManagerRequired";
 		/**
 		 * @type string
 		 */
@@ -20848,6 +20878,7 @@ export type PostApiGovernanceGrantsResponses = {
 	"400": PostApiGovernanceGrantsStatus400;
 	"403": PostApiGovernanceGrantsStatus403;
 	"404": PostApiGovernanceGrantsStatus404;
+	"409": PostApiGovernanceGrantsStatus409;
 	"422": PostApiGovernanceGrantsStatus422;
 	"500": PostApiGovernanceGrantsStatus500;
 };
@@ -20860,6 +20891,7 @@ export type PostApiGovernanceGrantsResponse =
 	| PostApiGovernanceGrantsStatus400
 	| PostApiGovernanceGrantsStatus403
 	| PostApiGovernanceGrantsStatus404
+	| PostApiGovernanceGrantsStatus409
 	| PostApiGovernanceGrantsStatus422
 	| PostApiGovernanceGrantsStatus500;
 
@@ -20883,6 +20915,7 @@ export type DeleteApiGovernanceGrantsByGrantIdStatus204 = void;
 export const DeleteApiGovernanceGrantsByGrantIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
 } as const;
 
 export type DeleteApiGovernanceGrantsByGrantIdStatus403ErrorCodeEnum =
@@ -20947,6 +20980,34 @@ export type DeleteApiGovernanceGrantsByGrantIdStatus404 = {
 /**
  * @type object
  */
+export type DeleteApiGovernanceGrantsByGrantIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformGrantManagerRequired'
+		 * @type string
+		 */
+		code: "PlatformGrantManagerRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiGovernanceGrantsByGrantIdStatus422 = ValidationError;
 
 /**
@@ -20971,6 +21032,7 @@ export type DeleteApiGovernanceGrantsByGrantIdResponses = {
 	"204": DeleteApiGovernanceGrantsByGrantIdStatus204;
 	"403": DeleteApiGovernanceGrantsByGrantIdStatus403;
 	"404": DeleteApiGovernanceGrantsByGrantIdStatus404;
+	"409": DeleteApiGovernanceGrantsByGrantIdStatus409;
 	"422": DeleteApiGovernanceGrantsByGrantIdStatus422;
 	"500": DeleteApiGovernanceGrantsByGrantIdStatus500;
 };
@@ -20982,6 +21044,7 @@ export type DeleteApiGovernanceGrantsByGrantIdResponse =
 	| DeleteApiGovernanceGrantsByGrantIdStatus204
 	| DeleteApiGovernanceGrantsByGrantIdStatus403
 	| DeleteApiGovernanceGrantsByGrantIdStatus404
+	| DeleteApiGovernanceGrantsByGrantIdStatus409
 	| DeleteApiGovernanceGrantsByGrantIdStatus422
 	| DeleteApiGovernanceGrantsByGrantIdStatus500;
 
@@ -28604,6 +28667,30 @@ export const GetApiUsersMeStatus200AvatarIconPrefixEnum = {
 export type GetApiUsersMeStatus200AvatarIconPrefixEnum =
 	(typeof GetApiUsersMeStatus200AvatarIconPrefixEnum)[keyof typeof GetApiUsersMeStatus200AvatarIconPrefixEnum];
 
+export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
+	"entity.associations.override": "entity.associations.override",
+	"unit.edit": "unit.edit",
+	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.moderate": "platform.moderate",
+	"platform.suppress": "platform.suppress",
+	"platform.grants.manage": "platform.grants.manage",
+	"platform.score-context.manage": "platform.score-context.manage",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type GetApiUsersMeStatus200PlatformCapabilitiesEnum =
+	(typeof GetApiUsersMeStatus200PlatformCapabilitiesEnum)[keyof typeof GetApiUsersMeStatus200PlatformCapabilitiesEnum];
+
 export type GetApiUsersMeStatus200 = {
 	/**
 	 * @description
@@ -28876,6 +28963,10 @@ export type GetApiUsersMeStatus200 = {
 	 * @type string
 	 */
 	onboarding: string;
+	/**
+	 * @type array
+	 */
+	platformCapabilities: GetApiUsersMeStatus200PlatformCapabilitiesEnum[];
 };
 
 /**
@@ -31832,6 +31923,772 @@ export type DeleteApiUsersByIdBlockResponse =
 	| DeleteApiUsersByIdBlockStatus422
 	| DeleteApiUsersByIdBlockStatus429
 	| DeleteApiUsersByIdBlockStatus500;
+
+export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
+	"entity.associations.override": "entity.associations.override",
+	"unit.edit": "unit.edit",
+	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.moderate": "platform.moderate",
+	"platform.suppress": "platform.suppress",
+	"platform.grants.manage": "platform.grants.manage",
+	"platform.score-context.manage": "platform.score-context.manage",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type GetApiStaffAccessPolicyStatus200CapabilitiesEnum =
+	(typeof GetApiStaffAccessPolicyStatus200CapabilitiesEnum)[keyof typeof GetApiStaffAccessPolicyStatus200CapabilitiesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiStaffAccessPolicyStatus200 = {
+	/**
+	 * @type array
+	 */
+	capabilities: GetApiStaffAccessPolicyStatus200CapabilitiesEnum[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffAccessPolicyStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffAccessPolicyStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiStaffAccessPolicyOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffAccessPolicyResponses = {
+	"200": GetApiStaffAccessPolicyStatus200;
+	"403": GetApiStaffAccessPolicyStatus403;
+	"500": GetApiStaffAccessPolicyStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiStaffAccessPolicyResponse =
+	| GetApiStaffAccessPolicyStatus200
+	| GetApiStaffAccessPolicyStatus403
+	| GetApiStaffAccessPolicyStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiStaffProfilesQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string
+	 */
+	query: string;
+	/**
+	 * @default 20
+	 */
+	limit?: string | number;
+};
+
+export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
+	"entity.associations.override": "entity.associations.override",
+	"unit.edit": "unit.edit",
+	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.moderate": "platform.moderate",
+	"platform.suppress": "platform.suppress",
+	"platform.grants.manage": "platform.grants.manage",
+	"platform.score-context.manage": "platform.score-context.manage",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum =
+	(typeof GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum)[keyof typeof GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum];
+
+/**
+ * @type object
+ */
+export type GetApiStaffProfilesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `email`
+		 * @type string
+		 */
+		email: string;
+		/**
+		 * @type array
+		 */
+		grants: {
+			/**
+			 * @default 'entity.associations.override'
+			 * @type string
+			 */
+			capability: GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			grantedByProfileId: string;
+			expiresAt: (string | null) | null;
+		}[];
+		/**
+		 * @type boolean
+		 */
+		isSuperAdmin: boolean;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffProfilesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffProfilesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiStaffProfilesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiStaffProfilesOptions = {
+	body?: never;
+	path?: never;
+	query: GetApiStaffProfilesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffProfilesResponses = {
+	"200": GetApiStaffProfilesStatus200;
+	"403": GetApiStaffProfilesStatus403;
+	"422": GetApiStaffProfilesStatus422;
+	"500": GetApiStaffProfilesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiStaffProfilesResponse =
+	| GetApiStaffProfilesStatus200
+	| GetApiStaffProfilesStatus403
+	| GetApiStaffProfilesStatus422
+	| GetApiStaffProfilesStatus500;
+
+export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
+	"entity.associations.override": "entity.associations.override",
+	"unit.edit": "unit.edit",
+	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.moderate": "platform.moderate",
+	"platform.suppress": "platform.suppress",
+	"platform.grants.manage": "platform.grants.manage",
+	"platform.score-context.manage": "platform.score-context.manage",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum =
+	(typeof GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum)[keyof typeof GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum];
+
+/**
+ * @type object
+ */
+export type GetApiStaffMembersStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `email`
+		 * @type string
+		 */
+		email: string;
+		/**
+		 * @type array
+		 */
+		grants: {
+			/**
+			 * @default 'entity.associations.override'
+			 * @type string
+			 */
+			capability: GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			grantedByProfileId: string;
+			expiresAt: (string | null) | null;
+		}[];
+		/**
+		 * @type boolean
+		 */
+		isSuperAdmin: boolean;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffMembersStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffMembersStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiStaffMembersOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffMembersResponses = {
+	"200": GetApiStaffMembersStatus200;
+	"403": GetApiStaffMembersStatus403;
+	"500": GetApiStaffMembersStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiStaffMembersResponse =
+	GetApiStaffMembersStatus200 | GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+};
+
+export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
+	"entity.associations.override": "entity.associations.override",
+	"unit.edit": "unit.edit",
+	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.moderate": "platform.moderate",
+	"platform.suppress": "platform.suppress",
+	"platform.grants.manage": "platform.grants.manage",
+	"platform.score-context.manage": "platform.score-context.manage",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum =
+	(typeof PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum)[keyof typeof PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum];
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	name: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `email`
+	 * @type string
+	 */
+	email: string;
+	/**
+	 * @type array
+	 */
+	grants: {
+		/**
+		 * @default 'entity.associations.override'
+		 * @type string
+		 */
+		capability: PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		grantedByProfileId: string;
+		expiresAt: (string | null) | null;
+	}[];
+	/**
+	 * @type boolean
+	 */
+	isSuperAdmin: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CapabilityGrantExpiryInvalid'
+		 * @type string
+		 */
+		code: "CapabilityGrantExpiryInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum =
+	(typeof PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum)[keyof typeof PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ProfileNotFound'
+		 * @type string
+		 */
+		code: "ProfileNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformGrantManagerRequired'
+		 * @type string
+		 */
+		code: "PlatformGrantManagerRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdStatus500 = InternalError;
+
+export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
+	"entity.associations.override": "entity.associations.override",
+	"unit.edit": "unit.edit",
+	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.moderate": "platform.moderate",
+	"platform.suppress": "platform.suppress",
+	"platform.grants.manage": "platform.grants.manage",
+	"platform.score-context.manage": "platform.score-context.manage",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type PutApiStaffMembersByProfileIdRequestCapabilitiesEnum =
+	(typeof PutApiStaffMembersByProfileIdRequestCapabilitiesEnum)[keyof typeof PutApiStaffMembersByProfileIdRequestCapabilitiesEnum];
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdBody = {
+	/**
+	 * @type array
+	 */
+	capabilities: PutApiStaffMembersByProfileIdRequestCapabilitiesEnum[];
+	expiresAt: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdOptions = {
+	body: PutApiStaffMembersByProfileIdBody;
+	path: PutApiStaffMembersByProfileIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiStaffMembersByProfileIdResponses = {
+	"200": PutApiStaffMembersByProfileIdStatus200;
+	"400": PutApiStaffMembersByProfileIdStatus400;
+	"403": PutApiStaffMembersByProfileIdStatus403;
+	"404": PutApiStaffMembersByProfileIdStatus404;
+	"409": PutApiStaffMembersByProfileIdStatus409;
+	"422": PutApiStaffMembersByProfileIdStatus422;
+	"500": PutApiStaffMembersByProfileIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiStaffMembersByProfileIdResponse =
+	| PutApiStaffMembersByProfileIdStatus200
+	| PutApiStaffMembersByProfileIdStatus400
+	| PutApiStaffMembersByProfileIdStatus403
+	| PutApiStaffMembersByProfileIdStatus404
+	| PutApiStaffMembersByProfileIdStatus409
+	| PutApiStaffMembersByProfileIdStatus422
+	| PutApiStaffMembersByProfileIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiStaffAuditQuery = {
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffAuditStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		actorProfileId: (string | null) | null;
+		actorName: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		action: string;
+		/**
+		 * @type string
+		 */
+		decisionCode: string;
+		subjectProfileId: (string | null) | null;
+		subjectName: (string | null) | null;
+		metadata:
+			| ({
+					[key: string]: unknown;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffAuditStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffAuditStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiStaffAuditStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiStaffAuditOptions = {
+	body?: never;
+	path?: never;
+	query?: GetApiStaffAuditQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStaffAuditResponses = {
+	"200": GetApiStaffAuditStatus200;
+	"403": GetApiStaffAuditStatus403;
+	"422": GetApiStaffAuditStatus422;
+	"500": GetApiStaffAuditStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiStaffAuditResponse =
+	| GetApiStaffAuditStatus200
+	| GetApiStaffAuditStatus403
+	| GetApiStaffAuditStatus422
+	| GetApiStaffAuditStatus500;
 
 export const ResolveUnitSlugAddressStatus200KindEnum = {
 	slug_namespace: "slug_namespace",
@@ -68503,6 +69360,439 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdResponse =
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+};
+
+export const GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
+	{
+		"realm.contribute": "realm.contribute",
+		"realm.settings.update": "realm.settings.update",
+		"realm.members.read": "realm.members.read",
+		"realm.members.manage": "realm.members.manage",
+		"realm.rules.publish": "realm.rules.publish",
+		"realm.pins.manage": "realm.pins.manage",
+		"realm.units.moderate": "realm.units.moderate",
+	} as const;
+
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
+	(typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum)[keyof typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum];
+
+export const GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum = {
+	role: "role",
+	realm_grant: "realm_grant",
+	platform: "platform",
+} as const;
+
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum =
+	(typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum)[keyof typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type array
+	 */
+	capabilities: {
+		/**
+		 * @default 'realm.contribute'
+		 * @type string
+		 */
+		capability: GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum;
+		/**
+		 * @type array
+		 */
+		sources: GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum[];
+		directGrant:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					grantedByProfileId: string;
+					expiresAt: (string | null) | null;
+			  } | null)
+			| null;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmMemberNotFound'
+		 * @type string
+		 */
+		code: "RealmMemberNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses = {
+	"200": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200;
+	"403": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403;
+	"404": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404;
+	"422": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422;
+	"500": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponse =
+	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200
+	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+};
+
+export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
+	{
+		"realm.contribute": "realm.contribute",
+		"realm.settings.update": "realm.settings.update",
+		"realm.members.read": "realm.members.read",
+		"realm.members.manage": "realm.members.manage",
+		"realm.rules.publish": "realm.rules.publish",
+		"realm.pins.manage": "realm.pins.manage",
+		"realm.units.moderate": "realm.units.moderate",
+	} as const;
+
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
+	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum];
+
+export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum = {
+	role: "role",
+	realm_grant: "realm_grant",
+	platform: "platform",
+} as const;
+
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum =
+	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type array
+	 */
+	capabilities: {
+		/**
+		 * @default 'realm.contribute'
+		 * @type string
+		 */
+		capability: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum;
+		/**
+		 * @type array
+		 */
+		sources: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum[];
+		directGrant:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					grantedByProfileId: string;
+					expiresAt: (string | null) | null;
+			  } | null)
+			| null;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CapabilityGrantExpiryInvalid'
+		 * @type string
+		 */
+		code: "CapabilityGrantExpiryInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitProtected: "UnitProtected",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmMemberNotFound'
+		 * @type string
+		 */
+		code: "RealmMemberNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500 = InternalError;
+
+export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum = {
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum =
+	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesBody = {
+	/**
+	 * @type array
+	 */
+	capabilities: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum[];
+	expiresAt: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions = {
+	body: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesBody;
+	path: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses = {
+	"200": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200;
+	"400": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400;
+	"403": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403;
+	"404": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404;
+	"422": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422;
+	"500": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponse =
+	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200
+	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400
+	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
+	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
+	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
+	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
 
 /**
  * @type object

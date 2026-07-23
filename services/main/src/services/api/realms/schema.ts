@@ -4,6 +4,7 @@ import { PortableTextDocument } from "@rezics/block";
 import {
 	GovernanceReasonCodeValues,
 	ModerationActionKindValues,
+	RealmCapabilityValues,
 	RealmJoinPolicyValues,
 	RealmMemberRoleValues,
 	RealmMemberStateValues,
@@ -13,6 +14,7 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
+import { RealmCapabilitySourceValues } from "../../realms/member-access";
 import { DateTime, FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
@@ -81,6 +83,41 @@ export const UpdateRealmMemberBody = t.Object({
 	state: t.Optional(RealmMemberState),
 });
 export type UpdateRealmMemberBody = Static<typeof UpdateRealmMemberBody>;
+
+const RealmCapability = t.UnionEnum(RealmCapabilityValues);
+const RealmCapabilitySource = t.UnionEnum(RealmCapabilitySourceValues);
+
+export const RealmMemberCapabilityAccessResponse = t.Object({
+	realmId: Uuid,
+	profileId: Uuid,
+	role: t.String(),
+	capabilities: t.Array(
+		t.Object({
+			capability: RealmCapability,
+			sources: t.Array(RealmCapabilitySource, { uniqueItems: true }),
+			directGrant: t.Nullable(
+				t.Object({
+					grantedByProfileId: Uuid,
+					expiresAt: t.Nullable(DateTime),
+				}),
+			),
+		}),
+	),
+});
+
+export const ReplaceRealmMemberCapabilityAccessBody = t.Object(
+	{
+		capabilities: t.Array(RealmCapability, {
+			maxItems: RealmCapabilityValues.length,
+			uniqueItems: true,
+		}),
+		expiresAt: t.Nullable(DateTime),
+	},
+	{ additionalProperties: false },
+);
+export type ReplaceRealmMemberCapabilityAccessBody = Static<
+	typeof ReplaceRealmMemberCapabilityAccessBody
+>;
 
 export const PublishRealmRulesBody = t.Object({
 	requireOnJoin: t.Boolean(),

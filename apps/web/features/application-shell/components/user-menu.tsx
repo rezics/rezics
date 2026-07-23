@@ -41,6 +41,7 @@ import {
 	Mail,
 	Palette,
 	Settings,
+	ShieldCheck,
 	UserRound,
 	X,
 } from "lucide-react";
@@ -109,6 +110,8 @@ function useUserMenuModel({
 	const name = profile?.name?.trim() || fallbackName.trim() || t.ui.unnamed;
 	const initial = Array.from(name)[0]?.toLocaleUpperCase(locale);
 	const publicProfileHref = profile ? profileHref(profile) : "/settings/profile";
+	const canManageStaff =
+		profile?.platformCapabilities.includes("platform.grants.manage") ?? false;
 
 	const signOut = async () => {
 		await authClient.signOut();
@@ -118,6 +121,7 @@ function useUserMenuModel({
 	};
 
 	return {
+		canManageStaff,
 		currentLocaleLabel: locale === "zh-Hant" ? t.locale.zh : t.locale.en,
 		currentThemeLabel: t.locale.displayModes[themePreference],
 		initial,
@@ -137,6 +141,7 @@ function useUserMenuModel({
 type UserMenuModel = ReturnType<typeof useUserMenuModel>;
 
 function DesktopUserMenu({
+	canManageStaff,
 	currentLocaleLabel,
 	currentThemeLabel,
 	initial,
@@ -249,6 +254,14 @@ function DesktopUserMenu({
 						{t.nav.userMenu.settings}
 					</Link>
 				</MenuItem>
+				{canManageStaff ? (
+					<MenuItem asChild value="staff">
+						<Link href="/staff">
+							<ShieldCheck aria-hidden />
+							{t.nav.userMenu.staff}
+						</Link>
+					</MenuItem>
+				) : null}
 				<MenuItem asChild value="invitations">
 					<Link href={AccessInvitationsHref}>
 						<Mail aria-hidden />
@@ -269,6 +282,7 @@ function DesktopUserMenu({
 
 function MobileUserMenu(model: UserMenuModel) {
 	const {
+		canManageStaff,
 		currentLocaleLabel,
 		currentThemeLabel,
 		initial,
@@ -429,6 +443,14 @@ function MobileUserMenu(model: UserMenuModel) {
 									{t.nav.userMenu.settings}
 								</Link>
 							</Button>
+							{canManageStaff ? (
+								<Button asChild className={MobileMenuItemClassName} variant="quiet">
+									<Link href="/staff" onClick={close}>
+										<ShieldCheck aria-hidden />
+										{t.nav.userMenu.staff}
+									</Link>
+								</Button>
+							) : null}
 							<Button asChild className={MobileMenuItemClassName} variant="quiet">
 								<Link href={AccessInvitationsHref} onClick={close}>
 									<Mail aria-hidden />

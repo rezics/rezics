@@ -16,6 +16,7 @@ import {
 	profileBlock,
 	unitFollow,
 	profilePreference,
+	PlatformCapabilityValues,
 	unitLocalization,
 } from "../../database/schema";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
@@ -86,12 +87,17 @@ export default new Elysia({ prefix: "/users" })
 	.use(session)
 	.get(
 		"/me",
-		async ({ profile, user }) => {
+		async ({ authorization, profile, user }) => {
+			const platformCapabilities =
+				await authorization.platform.decideCapabilities(PlatformCapabilityValues);
 			return {
 				...(await getProfile(profile.unitId)),
 				email: user.email,
 				emailVerified: user.emailVerified,
 				onboarding: user.emailVerified ? "complete" : "verify_email",
+				platformCapabilities: PlatformCapabilityValues.filter(
+					(capability) => platformCapabilities.get(capability) ?? false,
+				),
 			};
 		},
 		{

@@ -47,6 +47,10 @@ import {
 import { listGovernanceNotes } from "../../governance/note-service";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
+import {
+	getRealmMemberCapabilityAccess,
+	replaceRealmMemberCapabilityAccess,
+} from "../../realms/member-access";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
@@ -90,6 +94,7 @@ import {
 	RealmUnitHistoryQuery,
 	RealmUnitModerationHistoryResponse,
 	RealmMemberParams,
+	RealmMemberCapabilityAccessResponse,
 	RealmParams,
 	RealmDetailQuery,
 	SetRealmScoreContextBody,
@@ -97,6 +102,7 @@ import {
 	RemoveRealmPinQuery,
 	UpdateRealmBody,
 	UpdateRealmMemberBody,
+	ReplaceRealmMemberCapabilityAccessBody,
 } from "./schema";
 import {
 	executeAuthorizedModerationAction,
@@ -837,14 +843,19 @@ export default new Elysia({ prefix: "/realms" })
 	.patch(
 		"/:realmId/members/:profileId",
 		async ({ params, profile, authorization, body }) => {
-			const actor = await authorization.realm.ensureMembershipCapability(
-				params.realmId,
-				"realm.members.manage",
-			);
+			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
 			await authorization.unit.ensureOperationAllowed(params.realmId, ["members"]);
+			const [actor, hasPlatformAuthority] = await Promise.all([
+				findRealmMembership(params.realmId, profile.unitId),
+				authorization.platform.hasCapability("realm.members.manage"),
+			]);
 			const target = await findRealmMembership(params.realmId, params.profileId);
 			if (!target) throw new RealmMemberNotFound();
-			authorization.realm.ensureCanManageMember(actor.role, target.role, body.role);
+			authorization.realm.ensureCanManageMember(
+				hasPlatformAuthority ? "owner" : (actor?.role ?? ""),
+				target.role,
+				body.role,
+			);
 			const result = await database.transaction(async (tx) => {
 				const [row] = await tx
 					.update(realmMember)
@@ -886,6 +897,58 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
 			},
 			detail: { summary: "Update Realm member", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/members/:profileId/capabilities",
+		async ({ params, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
+			return getRealmMemberCapabilityAccess(database, params.realmId, params.profileId);
+		},
+		{
+			access: "session-only",
+			params: RealmMemberParams,
+			response: {
+				[StatusCodes.OK]: RealmMemberCapabilityAccessResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
+			},
+			detail: { summary: "Get Realm member capability access", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/members/:profileId/capabilities",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
+			await authorization.unit.ensureOperationAllowed(params.realmId, ["members"]);
+			return database.transaction((tx) =>
+				replaceRealmMemberCapabilityAccess(tx, {
+					actorProfileId: profile.unitId,
+					realmId: params.realmId,
+					targetProfileId: params.profileId,
+					capabilities: body.capabilities,
+					expiresAt: body.expiresAt,
+				}),
+			);
+		},
+		{
+			access: "fresh-session-only",
+			params: RealmMemberParams,
+			body: ReplaceRealmMemberCapabilityAccessBody,
+			response: {
+				[StatusCodes.OK]: RealmMemberCapabilityAccessResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["CapabilityGrantExpiryInvalid"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"UnitProtected",
+					"FreshSessionRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
+			},
+			detail: {
+				summary: "Replace Realm member capability access",
+				tags: ["Realms"],
+			},
 		},
 	)
 	.put(

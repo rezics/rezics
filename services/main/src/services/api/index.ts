@@ -29,6 +29,7 @@ import reactions from "./reactions";
 import reviews from "./reviews";
 import search from "./search";
 import slugAddresses from "./slug-addresses";
+import staff from "./staff";
 import tokens from "./tokens";
 import tokenInfo from "./token-info";
 import tokenPolicies from "./token-policies";
@@ -112,6 +113,7 @@ export default new Elysia()
 				.use(domainExtensions)
 				.use(docks)
 				.use(users)
+				.use(staff)
 				.use(slugAddresses)
 				.use(units)
 				.use(history)

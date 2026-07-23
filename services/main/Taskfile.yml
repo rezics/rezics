@@ -149,8 +149,8 @@ tasks:
             - yarn exec tsx scripts/check-bootstrap.ts
 
     db:bootstrap:credentials:overwrite:
-        desc: Replace every official Profile password and print the new credentials.
-        prompt: This replaces all official Profile passwords. Continue?
+        desc: Replace every bootstrap Profile password and print the new credentials.
+        prompt: This replaces all bootstrap Profile passwords. Continue?
         cmds:
             - yarn exec tsx scripts/bootstrap.ts --overwrite-credentials --yes
 

@@ -74,10 +74,19 @@ import {
 	executeAuthorizedModerationAction,
 	loadModerationCaseForAction,
 } from "./moderation-service";
+import {
+	ensurePlatformGrantMutationContinuity,
+	lockPlatformAccessGrants,
+} from "../../staff/access-service";
 
 const CapabilityForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
 	"PlatformCapabilityRequired",
+]);
+const GrantMutationForbiddenResponse = toApiErrorResponse([
+	"RealmCapabilityRequired",
+	"PlatformCapabilityRequired",
+	"FreshSessionRequired",
 ]);
 
 const caseSelection = {
@@ -794,6 +803,15 @@ export default new Elysia({ prefix: "/governance" })
 			const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
 			if (expiresAt && expiresAt <= new Date()) throw new CapabilityGrantExpiryInvalid();
 			return database.transaction(async (tx) => {
+				if (body.authority === "platform") {
+					await lockPlatformAccessGrants(tx);
+					await ensurePlatformGrantMutationContinuity(tx, {
+						profileId: body.profileId,
+						capability: body.capability,
+						active: true,
+						expiresAt: expiresAt ?? null,
+					});
+				}
 				const [created] = await tx
 					.insert(capabilityGrant)
 					.values({
@@ -836,7 +854,7 @@ export default new Elysia({ prefix: "/governance" })
 			});
 		},
 		{
-			access: "session-only",
+			access: "fresh-session-only",
 			body: CreateGrantBody,
 			response: {
 				[StatusCodes.OK]: GrantResponse,
@@ -846,8 +864,9 @@ export default new Elysia({ prefix: "/governance" })
 					"RealmGrantCapabilityInvalid",
 					"CapabilityGrantExpiryInvalid",
 				]),
-				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: GrantMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["PlatformGrantManagerRequired"]),
 			},
 			detail: { summary: "Create capability grant", tags: ["Governance"] },
 		},
@@ -869,6 +888,15 @@ export default new Elysia({ prefix: "/governance" })
 				await authorization.realm.ensureCapability(current.realmId, "realm.members.manage");
 			}
 			await database.transaction(async (tx) => {
+				if (current.authority === "platform") {
+					await lockPlatformAccessGrants(tx);
+					await ensurePlatformGrantMutationContinuity(tx, {
+						profileId: current.profileId,
+						capability: current.capability,
+						active: false,
+						expiresAt: null,
+					});
+				}
 				const [updated] = await tx
 					.update(capabilityGrant)
 					.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
@@ -892,12 +920,13 @@ export default new Elysia({ prefix: "/governance" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			access: "session-only",
+			access: "fresh-session-only",
 			params: GrantParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: GrantMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["CapabilityGrantNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["PlatformGrantManagerRequired"]),
 			},
 			detail: {
 				summary: "Revoke capability grant",

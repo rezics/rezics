@@ -5,6 +5,8 @@ import { generateBootstrapPassword, parseBootstrapCredentialMode } from "./crede
 import {
 	assertBootstrapManifest,
 	BootstrapEpochUnixMilliseconds,
+	BootstrapProfileManifest,
+	BootstrapSuperAdminProfile,
 	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
@@ -50,6 +52,18 @@ describe("database bootstrap manifest", () => {
 				"en",
 			]);
 		}
+	});
+
+	it("keeps the bootstrap Super Admin distinct and grants the complete platform policy", () => {
+		expect(BootstrapProfileManifest).toHaveLength(OfficialProfileManifest.length + 1);
+		expect(OfficialProfileManifest).not.toContain(BootstrapSuperAdminProfile);
+		expect(BootstrapSuperAdminProfile.email).toBe("admin@rezics.com");
+		expect(BootstrapSuperAdminProfile.capabilities).toEqual(
+			expect.arrayContaining(["platform.grants.manage", "unit.edit"]),
+		);
+		expect(new Set(BootstrapSuperAdminProfile.capabilities).size).toBe(
+			BootstrapSuperAdminProfile.capabilities.length,
+		);
 	});
 
 	it("bootstraps exactly the three official libraries as renderable Zones", () => {

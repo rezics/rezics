@@ -23,6 +23,7 @@ import {
 	Pin,
 	ScrollText,
 	ShieldCheck,
+	ShieldEllipsis,
 	UserRound,
 	UsersRound,
 } from "lucide-react";
@@ -38,6 +39,7 @@ import { realmHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./realm-moderation";
+import { RealmMemberAccess } from "./realm-member-access";
 import { RealmMembers, RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
 import { invalidateRealmDetails } from "./query";
@@ -110,6 +112,13 @@ function RealmSettingsWorkspaceContent({
 			label: labels.members.label,
 			description: labels.members.description,
 			icon: UsersRound,
+		},
+		{
+			id: "member-access",
+			href: realmSettingsSectionHref(baseHref, "member-access"),
+			label: labels["member-access"].label,
+			description: labels["member-access"].description,
+			icon: ShieldEllipsis,
 		},
 		{
 			id: "rules",
@@ -194,6 +203,8 @@ function RealmSettingsWorkspaceContent({
 					canManage={capabilities.canManageMembers}
 					realmId={realmId}
 				/>
+			) : section === "member-access" ? (
+				<RealmMemberAccessSection baseHref={baseHref} realmId={realmId} />
 			) : section === "rules" ? (
 				<RealmRulesSection baseHref={baseHref} realmId={realmId} />
 			) : section === "pins" ? (
@@ -218,6 +229,24 @@ function RealmSettingsWorkspaceContent({
 				/>
 			)}
 		</ManagementWorkspace>
+	);
+}
+
+function RealmMemberAccessSection({ baseHref, realmId }: { baseHref: string; realmId: string }) {
+	const query = useGetApiRealmsByRealmIdMembers({
+		path: { realmId },
+		query: { limit: 100 },
+	});
+	return (
+		<RealmSettingsSection baseHref={baseHref} section="member-access">
+			{query.isPending ? (
+				<QueryPending />
+			) : query.isError || !query.data ? (
+				<QueryFailure error={query.error} retry={() => void query.refetch()} />
+			) : (
+				<RealmMemberAccess members={query.data.items} realmId={realmId} />
+			)}
+		</RealmSettingsSection>
 	);
 }
 

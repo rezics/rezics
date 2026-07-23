@@ -145,7 +145,7 @@ task services-main:db:status
 # Fill missing required records without changing existing credentials.
 task services-main:db:bootstrap
 
-# Explicitly replace all official Profile passwords and print the replacements.
+# Explicitly replace all bootstrap Profile passwords and print the replacements.
 task services-main:db:bootstrap:credentials:overwrite
 ```
 
@@ -164,7 +164,7 @@ from `dev` and from the target-database `db:migrate` operation.
 `db:prepare` is the reusable one-off administration workflow for a target
 database. It applies pending migrations, reconciles application-role
 privileges, and fills missing bootstrap records. Normal bootstrap never changes
-an existing official Profile password. Credential replacement is available
+an existing bootstrap Profile password. Credential replacement is available
 only through the separately confirmed
 `db:bootstrap:credentials:overwrite` task.
 

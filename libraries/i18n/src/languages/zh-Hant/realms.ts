@@ -26,6 +26,10 @@ export default {
 				description: "管理名稱、摘要、圖片、生命週期、加入方式與公開網址。",
 			},
 			members: { label: "成員與角色", description: "管理成員角色、狀態與參與資格。" },
+			"member-access": {
+				label: "成員細部權限",
+				description: `檢視角色與平台授權來源，並管理成員的${realmTerms.label}直接授權。`,
+			},
 			rules: { label: "規則", description: "編輯多語規則與需要確認規則的操作。" },
 			pins: { label: "置頂內容", description: "管理置頂與精選內容，以及顯示順序。" },
 			access: {
@@ -53,6 +57,17 @@ export default {
 	unknownMember: "未知成員",
 	memberRole: "角色",
 	memberState: "狀態",
+	memberAccess: {
+		selectMember: "選擇成員",
+		selectMemberPlaceholder: "請選擇一位正常狀態的成員",
+		directAccess: `${realmTerms.label}直接授權`,
+		effectiveSources: "生效來源",
+		expiry: "整組直接授權到期時間",
+		noExpiry: "不設到期時間",
+		mixedExpiry: "目前直接授權的到期時間不同；儲存前請明確選擇新的共同到期時間。",
+		save: "儲存成員細部權限",
+		noDirectAccess: `這位成員目前沒有${realmTerms.label}直接授權。`,
+	},
 	roles: {
 		owner: "擁有者",
 		admin: "管理員",

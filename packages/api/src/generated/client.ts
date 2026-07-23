@@ -233,6 +233,16 @@ import type {
 	PutApiUsersByIdBlockResponses,
 	DeleteApiUsersByIdBlockOptions,
 	DeleteApiUsersByIdBlockResponses,
+	GetApiStaffAccessPolicyOptions,
+	GetApiStaffAccessPolicyResponses,
+	GetApiStaffProfilesOptions,
+	GetApiStaffProfilesResponses,
+	GetApiStaffMembersOptions,
+	GetApiStaffMembersResponses,
+	PutApiStaffMembersByProfileIdOptions,
+	PutApiStaffMembersByProfileIdResponses,
+	GetApiStaffAuditOptions,
+	GetApiStaffAuditResponses,
 	ResolveUnitSlugAddressOptions,
 	ResolveUnitSlugAddressResponses,
 	GetPublicUnitSlugAddressOptions,
@@ -481,6 +491,10 @@ import type {
 	GetApiRealmsByRealmIdMembersResponses,
 	PatchApiRealmsByRealmIdMembersByProfileIdOptions,
 	PatchApiRealmsByRealmIdMembersByProfileIdResponses,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
+	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses,
 	PutApiRealmsByRealmIdRulesOptions,
 	PutApiRealmsByRealmIdRulesResponses,
 	GetApiRealmsByRealmIdRulesOptions,
@@ -2781,6 +2795,91 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiUsersByIdBlockResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get platform staff access policy
+ * {@link /api/staff/access-policy}
+ */
+export function getApiStaffAccessPolicy<ThrowOnError extends boolean = true>(
+	options: Options<GetApiStaffAccessPolicyOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiStaffAccessPolicyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/staff/access-policy",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiStaffAccessPolicyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Search Profiles for staff access
+ * {@link /api/staff/profiles}
+ */
+export function getApiStaffProfiles<ThrowOnError extends boolean = true>(
+	options: Options<GetApiStaffProfilesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiStaffProfilesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/staff/profiles",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiStaffProfilesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List active staff access
+ * {@link /api/staff/members}
+ */
+export function getApiStaffMembers<ThrowOnError extends boolean = true>(
+	options: Options<GetApiStaffMembersOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiStaffMembersResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/staff/members",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiStaffMembersResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace a Profile's platform access
+ * {@link /api/staff/members/:profileId}
+ */
+export function putApiStaffMembersByProfileId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiStaffMembersByProfileIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiStaffMembersByProfileIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/staff/members/{profileId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiStaffMembersByProfileIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List staff access audit events
+ * {@link /api/staff/audit}
+ */
+export function getApiStaffAudit<ThrowOnError extends boolean = true>(
+	options: Options<GetApiStaffAuditOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiStaffAuditResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/staff/audit",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiStaffAuditResponses, ThrowOnError>>;
 }
 
 /**
@@ -5268,6 +5367,52 @@ export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends b
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Realm member capability access
+ * {@link /api/realms/:realmId/members/:profileId/capabilities}
+ */
+export function getApiRealmsByRealmIdMembersByProfileIdCapabilities<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions, ThrowOnError>,
+): Promise<
+	RequestResult<GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/members/{profileId}/capabilities",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Replace Realm member capability access
+ * {@link /api/realms/:realmId/members/:profileId/capabilities}
+ */
+export function putApiRealmsByRealmIdMembersByProfileIdCapabilities<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/members/{profileId}/capabilities",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
+	>;
 }
 
 /**

@@ -7,6 +7,7 @@ describe("Realm settings paths", () => {
 		[undefined, { comparison: false }],
 		[[], { comparison: false }],
 		[["profile"], { section: "profile", comparison: false }],
+		[["member-access"], { section: "member-access", comparison: false }],
 		[["access"], { section: "access", comparison: false }],
 		[["history", "compare"], { section: "history", comparison: true }],
 	] as const)("parses %j", (segments, expected) => {

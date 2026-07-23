@@ -1,6 +1,7 @@
 export const RealmSettingsSectionIds = [
 	"profile",
 	"members",
+	"member-access",
 	"rules",
 	"pins",
 	"access",

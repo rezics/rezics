@@ -65,6 +65,10 @@ export function canRealmRolePerform(role: string, capability: RealmCapability) {
 	return isRealmRole(role) && realmRoleCapabilities[role].includes(capability);
 }
 
+export function getRealmRoleCapabilities(role: string): readonly RealmCapability[] {
+	return isRealmRole(role) ? realmRoleCapabilities[role] : [];
+}
+
 export function canManageRealmMember(actorRole: string, targetRole: string, nextRole?: string) {
 	if (!isRealmRole(actorRole) || !isRealmRole(targetRole)) return false;
 	if (roleRank[actorRole] <= roleRank[targetRole]) return false;
