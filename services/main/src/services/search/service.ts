@@ -829,79 +829,86 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				${toBigIntArray(candidateRevisions)}
 			)
 		)
-		SELECT jsonb_strip_nulls(jsonb_build_object(
-			'id', ${unit.id},
-			'category', ${category}::text,
-			'kind', ${hitType},
-			'titles', coalesce((
-				SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
-					FILTER (WHERE ${unitLocalization.title} IS NOT NULL)
-				FROM ${unitLocalization}
-				WHERE ${unitLocalization.unitId} = ${unit.id}
-			), '[]'::jsonb),
-			'summaries', coalesce((
-				SELECT jsonb_agg(${unitLocalization.summary} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
-					FILTER (WHERE ${unitLocalization.summary} IS NOT NULL)
-				FROM ${unitLocalization}
-				WHERE ${unitLocalization.unitId} = ${unit.id}
-			), '[]'::jsonb),
-			'avatar', (
-				SELECT case ${unitLocalization.avatarType}
-					when 'image' then jsonb_build_object(
-						'type', 'image',
-						'image', jsonb_build_object(
-							'id', ${unitLocalization.avatarAssetId},
-							'url', '/image-assets/' || ${unitLocalization.avatarAssetId} || '/content'
+		SELECT (
+			jsonb_build_object(
+				'id', ${unit.id},
+				'category', ${category}::text,
+				'kind', ${hitType},
+				'titles', coalesce((
+					SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
+						FILTER (WHERE ${unitLocalization.title} IS NOT NULL)
+					FROM ${unitLocalization}
+					WHERE ${unitLocalization.unitId} = ${unit.id}
+				), '[]'::jsonb),
+				'summaries', coalesce((
+					SELECT jsonb_agg(${unitLocalization.summary} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
+						FILTER (WHERE ${unitLocalization.summary} IS NOT NULL)
+					FROM ${unitLocalization}
+					WHERE ${unitLocalization.unitId} = ${unit.id}
+				), '[]'::jsonb),
+				'avatar', (
+					SELECT case ${unitLocalization.avatarType}
+						when 'image' then jsonb_build_object(
+							'type', 'image',
+							'image', jsonb_build_object(
+								'id', ${unitLocalization.avatarAssetId},
+								'url', '/image-assets/' || ${unitLocalization.avatarAssetId} || '/content'
+							)
 						)
-					)
-					when 'emoji' then jsonb_build_object(
-						'type', 'emoji',
-						'emoji', ${unitLocalization.avatarEmoji}
-					)
-					when 'icon' then jsonb_build_object(
-						'type', 'icon',
-						'icon', jsonb_build_object(
-							'provider', ${FontAwesomeProvider},
-							'prefix', ${unitLocalization.avatarIconPrefix},
-							'name', ${unitLocalization.avatarIconName}
+						when 'emoji' then jsonb_build_object(
+							'type', 'emoji',
+							'emoji', ${unitLocalization.avatarEmoji}
 						)
-					)
+						when 'icon' then jsonb_build_object(
+							'type', 'icon',
+							'icon', jsonb_build_object(
+								'provider', ${FontAwesomeProvider}::text,
+								'prefix', ${unitLocalization.avatarIconPrefix},
+								'name', ${unitLocalization.avatarIconName}
+							)
+						)
+					end
+					FROM ${unitLocalization}
+					WHERE ${unitLocalization.unitId} = ${unit.id}
+						AND ${unitLocalization.avatarType} IS NOT NULL
+					ORDER BY ${unitLocalization.position}, ${unitLocalization.language}
+					LIMIT 1
+				)
+			)
+			|| case when ${category}::text = 'units' then jsonb_build_object(
+				'variantRole', case
+					when exists (
+						select 1 from ${unitVariant}
+						where ${unitVariant.variantUnitId} = ${unit.id}
+					) then 'variant'
+					when exists (
+						select 1 from ${unitVariant}
+						where ${unitVariant.mainUnitId} = ${unit.id}
+					) then 'main'
+					else 'standalone'
 				end
-				FROM ${unitLocalization}
-				WHERE ${unitLocalization.unitId} = ${unit.id}
-					AND ${unitLocalization.avatarType} IS NOT NULL
-				ORDER BY ${unitLocalization.position}, ${unitLocalization.language}
-				LIMIT 1
-			),
-			'variantRole', case when ${category}::text = 'units' then case
-				when exists (
-					select 1 from ${unitVariant}
-					where ${unitVariant.variantUnitId} = ${unit.id}
-				) then 'variant'
-				when exists (
-					select 1 from ${unitVariant}
-					where ${unitVariant.mainUnitId} = ${unit.id}
-				) then 'main'
-				else 'standalone'
-			end end,
-			'variantMain', case
+			) else '{}'::jsonb end
+			|| case
 				when ${category}::text = 'units'
 					and ${searchVariantRelationship.variantUnitId} is not null
-				then case when ${readableSearchMain} then jsonb_build_object(
-					'state', 'available',
-					'unit', jsonb_build_object(
-						'id', ${searchMainUnit.id},
-						'type', ${searchMainUnit.kind},
-						'title', ${primaryUnitTitle(searchMainUnit.id)},
-						'cover', case when ${searchMainCoverAssetId} is null then null
-							else jsonb_build_object(
-								'id', ${searchMainCoverAssetId},
-								'url', '/image-assets/' || ${searchMainCoverAssetId} || '/content'
-							) end
-					)
-				) else jsonb_build_object('state', 'unavailable') end
+				then jsonb_build_object(
+					'variantMain', case when ${readableSearchMain} then jsonb_build_object(
+						'state', 'available',
+						'unit', jsonb_build_object(
+							'id', ${searchMainUnit.id},
+							'type', ${searchMainUnit.kind},
+							'title', ${primaryUnitTitle(searchMainUnit.id)},
+							'cover', case when ${searchMainCoverAssetId} is null then null
+								else jsonb_build_object(
+									'id', ${searchMainCoverAssetId},
+									'url', '/image-assets/' || ${searchMainCoverAssetId} || '/content'
+								) end
+						)
+					) else jsonb_build_object('state', 'unavailable') end
+				)
+				else '{}'::jsonb
 			end
-		)) AS hit,
+		) AS hit,
 		search_candidate.ordinality
 		FROM search_candidate
 		JOIN ${searchUnitProjectionSource}
@@ -910,10 +917,10 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		JOIN ${unit} ON ${unit.id} = search_candidate.unit_id
 		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}
 		LEFT JOIN ${entity} ON ${entity.id} = ${unit.id}
-			LEFT JOIN ${post} ON ${post.id} = ${unit.id}
-			LEFT JOIN ${postReply} ON ${postReply.postId} = ${unit.id}
-			LEFT JOIN ${postReplyStat} ON ${postReplyStat.postId} = ${unit.id}
-			LEFT JOIN ${unitFollowStat} ON ${unitFollowStat.unitId} = ${unit.id}
+		LEFT JOIN ${post} ON ${post.id} = ${unit.id}
+		LEFT JOIN ${postReply} ON ${postReply.postId} = ${unit.id}
+		LEFT JOIN ${postReplyStat} ON ${postReplyStat.postId} = ${unit.id}
+		LEFT JOIN ${unitFollowStat} ON ${unitFollowStat.unitId} = ${unit.id}
 		LEFT JOIN ${unit} AS ${subjectUnit} ON ${subjectUnit.id} = ${post.subjectUnitId}
 		LEFT JOIN ${unitVariant} AS ${searchVariantRelationship}
 			ON ${searchVariantRelationship.variantUnitId} = ${unit.id}
@@ -1004,27 +1011,32 @@ function facetSpec(
 	if (field === "language")
 		return {
 			value: sql`${facetLocalization.language}`,
-			join: sql`join ${facetLocalization} on ${facetLocalization.unitId} = ${unit.id}`,
+			join: sql`join ${unitLocalization} as ${facetLocalization}
+				on ${facetLocalization.unitId} = ${unit.id}`,
 		};
 	if (field === "tag")
 		return {
 			value: sql`${facetUnitTag.tagId}`,
-			join: sql`join ${facetUnitTag} on ${facetUnitTag.unitId} = ${unit.id}`,
+			join: sql`join ${unitTag} as ${facetUnitTag}
+				on ${facetUnitTag.unitId} = ${unit.id}`,
 		};
 	if (field === "realm")
 		return {
 			value: sql`${facetRealmUnit.realmId}`,
-			join: sql`join ${facetRealmUnit} on ${facetRealmUnit.unitId} = ${unit.id} and ${facetRealmUnit.status} = 'visible'`,
+			join: sql`join ${realmUnit} as ${facetRealmUnit}
+				on ${facetRealmUnit.unitId} = ${unit.id} and ${facetRealmUnit.status} = 'visible'`,
 		};
 	if (field === "credit")
 		return {
 			value: sql`${facetCreditAttribution.creditedUnitId}`,
-			join: sql`join ${facetCreditAttribution} on ${facetCreditAttribution.sourceUnitId} = ${unit.id}`,
+			join: sql`join ${creditAttribution} as ${facetCreditAttribution}
+				on ${facetCreditAttribution.sourceUnitId} = ${unit.id}`,
 		};
 	if (field === "owner")
 		return {
 			value: sql`${facetOwnerBinding.profileId}`,
-			join: sql`join ${facetOwnerBinding} on ${facetOwnerBinding.unitId} = ${unit.id}
+			join: sql`join ${unitAccessBinding} as ${facetOwnerBinding}
+				on ${facetOwnerBinding.unitId} = ${unit.id}
 				and ${facetOwnerBinding.subjectKind} = 'profile'
 				and ${facetOwnerBinding.role} = 'owner'
 				and ${facetOwnerBinding.revokedAt} is null

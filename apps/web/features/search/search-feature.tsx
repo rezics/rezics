@@ -479,13 +479,17 @@ export function SearchFeature({
 					</div>
 				) : null}
 
-				<div aria-label={t.commonFilters} className="grid gap-4 lg:grid-cols-12">
+				<div
+					aria-label={t.commonFilters}
+					className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+				>
 					{categoryControl ? (
-						<Field className="lg:col-span-3">
+						<Field>
 							<FieldLabel>{t.contentCategory}</FieldLabel>
 							<ChoiceSelect
 								appearance="field"
 								ariaLabel={t.contentCategory}
+								className="h-10 w-full"
 								multiple
 								onValueChange={(values) => setCategory([...values])}
 								options={SearchCategoryValues.map((value) => ({
@@ -498,7 +502,7 @@ export function SearchFeature({
 						</Field>
 					) : null}
 					{tagControl ? (
-						<div className="grid gap-3 sm:grid-cols-2 lg:col-span-6">
+						<>
 							<Field>
 								<FieldLabel>{t.includeTags}</FieldLabel>
 								<SearchEntityMultiSelect
@@ -525,14 +529,15 @@ export function SearchFeature({
 									selected={excludedTags}
 								/>
 							</Field>
-						</div>
+						</>
 					) : null}
 					{languageControl ? (
-						<Field className="lg:col-span-3">
+						<Field>
 							<FieldLabel>{t.language}</FieldLabel>
 							<ChoiceSelect
 								appearance="field"
 								ariaLabel={t.language}
+								className="h-10 w-full"
 								multiple
 								onValueChange={(values) => setLanguage([...values])}
 								options={ContentLanguageValues.map((value) => ({
@@ -546,7 +551,7 @@ export function SearchFeature({
 					) : null}
 				</div>
 
-				<div className="flex flex-wrap items-center justify-between gap-3">
+				<div className="flex flex-wrap items-center gap-3">
 					<Button
 						onClick={() => setBuilderOpen(true)}
 						size="sm"

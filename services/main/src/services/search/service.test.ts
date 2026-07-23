@@ -98,6 +98,9 @@ describe("domain search SQL", () => {
 		expect(queries).toContain('"unit_localization"');
 		expect(queries).toContain('LEFT JOIN "unit" AS "subject_unit"');
 		expect(queries).toContain('LEFT JOIN "post_reply"');
+		expect(queries).toMatch(/'provider', \$\d+::text/);
+		expect(queries).not.toContain("jsonb_strip_nulls");
+		expect(queries).toContain("'cover'");
 	});
 
 	it("maps current filters and sorts to their owning tables", async () => {
@@ -284,7 +287,9 @@ describe("domain search SQL", () => {
 			"category",
 			"language",
 			"tag",
-			"join-policy",
+			"realm",
+			"credit",
+			"owner",
 		]);
 		const query = lastQuery();
 
@@ -301,9 +306,11 @@ describe("domain search SQL", () => {
 		expect(query).toContain("union all");
 		expect(query).toContain("with search_candidate(unit_id, revision)");
 		expect(query).toContain('"search_unit_projection_source"."revision"');
-		expect(query).toContain('"facet_unit_localization"');
-		expect(query).toContain('"facet_unit_tag"');
-		expect(query).not.toContain('"realm"."join_policy"');
-		expect(query.match(/limit 100/g)).toHaveLength(3);
+		expect(query).toContain('join "unit_localization" as "facet_unit_localization"');
+		expect(query).toContain('join "unit_tag" as "facet_unit_tag"');
+		expect(query).toContain('join "realm_unit" as "facet_realm_unit"');
+		expect(query).toContain('join "credit_attribution" as "facet_credit_attribution"');
+		expect(query).toContain('join "unit_access_binding" as "facet_owner_binding"');
+		expect(query.match(/limit 100/g)).toHaveLength(6);
 	});
 });
