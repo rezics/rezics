@@ -104,6 +104,7 @@ export * from "./custom/menu";
 export * from "./custom/page-heading";
 export * from "./custom/portable-text-content";
 export * from "./custom/query-state";
+export * from "./custom/show-more-content";
 export * from "./custom/tree-editor";
 export * from "./custom/ui-provider";
 export * from "./custom/unit-list";

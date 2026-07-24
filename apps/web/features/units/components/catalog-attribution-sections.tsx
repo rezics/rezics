@@ -140,34 +140,34 @@ export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditA
 	const { t } = useTranslation(["ui", "units"]);
 	const name = attribution.creditedUnit.title ?? t.ui.unnamed;
 	return (
-		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{t.units.detail.aboutAuthor}</h2>
-			<Card>
-				<CardContent className="grid gap-4 p-5 sm:p-6">
-					<div className="flex items-center justify-between gap-4">
-						<div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-4">
-							<IdentityAvatar
-								avatar={attribution.creditedUnit.avatar}
-								className="size-16"
-								fallback={name.slice(0, 1).toUpperCase()}
-								imageAlt={name}
-							/>
-							<AttributionName attribution={attribution} />
-						</div>
-						<FollowButton
-							className="shrink-0"
-							size="sm"
-							unitId={attribution.creditedUnit.id}
-							variant="solid"
+		<section className="grid gap-2.5">
+			<h2 className="font-heading text-lg font-bold sm:text-xl">
+				{t.units.detail.aboutAuthor}
+			</h2>
+			<div className="grid gap-4">
+				<div className="flex items-center justify-between gap-4">
+					<div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-4">
+						<IdentityAvatar
+							avatar={attribution.creditedUnit.avatar}
+							className="size-16"
+							fallback={name.slice(0, 1).toUpperCase()}
+							imageAlt={name}
 						/>
+						<AttributionName attribution={attribution} />
 					</div>
-					{attribution.creditedUnit.summary ? (
-						<p className="leading-7 text-muted-foreground">
-							{attribution.creditedUnit.summary}
-						</p>
-					) : null}
-				</CardContent>
-			</Card>
+					<FollowButton
+						className="shrink-0"
+						size="sm"
+						unitId={attribution.creditedUnit.id}
+						variant="solid"
+					/>
+				</div>
+				{attribution.creditedUnit.summary ? (
+					<p className="leading-7 text-muted-foreground">
+						{attribution.creditedUnit.summary}
+					</p>
+				) : null}
+			</div>
 		</section>
 	);
 }

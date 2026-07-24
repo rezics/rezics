@@ -215,7 +215,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				className="grid scroll-mt-20 gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]"
 			>
 				<div className="grid min-w-0 gap-8">
-					<DetailSection title={t.ui.summary}>
+					<DetailSection title={t.ui.description}>
 						<Card>
 							<CardContent className="p-6 leading-7 text-muted-foreground">
 								{localization?.description ? (

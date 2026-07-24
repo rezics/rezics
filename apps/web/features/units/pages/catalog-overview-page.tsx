@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import type { Translation } from "@rezics/i18n";
 import { PublicationLicenseRegistry } from "@rezics/license";
 import {
@@ -10,17 +9,13 @@ import {
 	DataListItem,
 	DataListItemLabel,
 	DataListItemValue,
-	PortableTextContent,
 } from "@rezics/ui";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { UnitShelf } from "@/features/explore/unit-shelf";
-import { UnitProgressSummaryCard } from "@/features/progress/components/unit-progress-summary-card";
 import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
-import { readPortableText } from "@/lib/block";
-import { selectLocalization } from "@/lib/localization";
 import { findPrimaryBookAuthor } from "../attribution-role";
 import {
 	CompactCreditAttributionGroups,
@@ -38,8 +33,8 @@ function formatDate(value: string | null, language: string): string | undefined 
 
 function DetailSection({ children, title }: { children: ReactNode; title: string }) {
 	return (
-		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{title}</h2>
+		<section className="grid gap-2.5">
+			<h2 className="font-heading text-lg font-bold sm:text-xl">{title}</h2>
 			{children}
 		</section>
 	);
@@ -47,15 +42,28 @@ function DetailSection({ children, title }: { children: ReactNode; title: string
 
 export function CatalogOverviewPage() {
 	const detail = useCatalogDetail();
-	const { locale, t } = useTranslation(["feed", "licenses", "state", "ui", "units"]);
+	const { locale, t } = useTranslation(["feed", "licenses", "ui", "units"]);
 	const { type, unit } = detail;
-	const localization = selectLocalization(
-		unit.localizations,
-		toContentLanguage(locale.target),
-		unit.language,
-	);
 	const licenseDefinition = unit.license ? PublicationLicenseRegistry[unit.license] : null;
 	const licenseLabel = unit.license ? t.licenses.options[unit.license].label : null;
+	const contentRating =
+		unit.contentRating === "r15"
+			? t.units.rating.r15
+			: unit.contentRating === "r18"
+				? t.units.rating.r18
+				: unit.contentRating === "r18g"
+					? t.units.rating.r18g
+					: t.units.rating.general;
+	const aiDisclosure =
+		unit.aiDisclosure === "none"
+			? t.units.aiDisclosure.none
+			: unit.aiDisclosure === "ai_assisted"
+				? t.units.aiDisclosure.ai_assisted
+				: unit.aiDisclosure === "ai_originated"
+					? t.units.aiDisclosure.ai_originated
+					: unit.aiDisclosure === "machine_generated"
+						? t.units.aiDisclosure.machine_generated
+						: t.units.aiDisclosure.unknown;
 	const licenseValue =
 		licenseDefinition?.kind === "license" ? (
 			<a
@@ -72,6 +80,8 @@ export function CatalogOverviewPage() {
 		);
 	const commonFacts = [
 		[t.units.detail.type, t.units.types[type]],
+		[t.ui.contentRating, contentRating],
+		[t.units.detail.aiDisclosure, aiDisclosure],
 		[
 			t.ui.status,
 			unit.status === "published"
@@ -98,25 +108,8 @@ export function CatalogOverviewPage() {
 	const creditsHref = catalogCreditsHref(type, unit.id);
 
 	return (
-		<div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
-			<div className="grid min-w-0 content-start gap-8">
-				<DetailSection title={t.ui.summary}>
-					<Card>
-						<CardContent className="p-6 leading-7 text-muted-foreground">
-							{localization?.description ? (
-								<div className="prose max-w-none">
-									<PortableTextContent
-										value={readPortableText(localization.description)}
-										variant="article"
-									/>
-								</div>
-							) : (
-								(localization?.summary ?? t.state.empty)
-							)}
-						</CardContent>
-					</Card>
-				</DetailSection>
-
+		<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
+			<div className="grid min-w-0 content-start gap-6">
 				{primaryAuthor ? <PrimaryBookAuthorSection attribution={primaryAuthor} /> : null}
 
 				<DetailSection title={t.units.detail.tags}>
@@ -146,41 +139,33 @@ export function CatalogOverviewPage() {
 				</DetailSection>
 			</div>
 
-			<aside className="grid min-w-0 content-start gap-6">
-				<UnitProgressSummaryCard />
-
+			<aside className="grid min-w-0 content-start gap-5">
 				<DetailSection title={t.units.detail.information}>
-					<Card>
-						<CardContent className="p-5">
-							<DataList>
-								{[...domainFacts, ...commonFacts].map(([label, value]) =>
-									value !== null && value !== undefined && value !== "" ? (
-										<DataListItem key={label}>
-											<DataListItemLabel>{label}</DataListItemLabel>
-											<DataListItemValue className="min-w-0 break-words text-end">
-												{value}
-											</DataListItemValue>
-										</DataListItem>
-									) : null,
-								)}
-							</DataList>
-						</CardContent>
-					</Card>
+					<DataList>
+						{[...domainFacts, ...commonFacts].map(([label, value]) =>
+							value !== null && value !== undefined && value !== "" ? (
+								<DataListItem key={label}>
+									<DataListItemLabel>{label}</DataListItemLabel>
+									<DataListItemValue className="min-w-0 break-words text-end">
+										{value}
+									</DataListItemValue>
+								</DataListItem>
+							) : null,
+						)}
+					</DataList>
 				</DetailSection>
 
 				{unit.attributions.length ? (
 					<DetailSection title={t.units.detail.credits}>
-						<Card>
-							<CardContent className="grid gap-4 p-5">
-								<CompactCreditAttributionGroups attributions={unit.attributions} />
-								<Link
-									className="w-fit text-sm font-medium text-link hover:text-link-hover hover:underline"
-									href={creditsHref}
-								>
-									{t.units.detail.viewAllCredits}
-								</Link>
-							</CardContent>
-						</Card>
+						<div className="grid gap-4">
+							<CompactCreditAttributionGroups attributions={unit.attributions} />
+							<Link
+								className="w-fit text-sm font-medium text-link hover:text-link-hover hover:underline"
+								href={creditsHref}
+							>
+								{t.units.detail.viewAllCredits}
+							</Link>
+						</div>
 					</DetailSection>
 				) : null}
 			</aside>

@@ -485,7 +485,7 @@ function UnitLocalizationForm({
 					/>
 				</Field>
 				<PortableTextEditor
-					label={t.ui.body}
+					label={t.ui.description}
 					onChange={setDescription}
 					value={description}
 				/>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Translation } from "@rezics/i18n";
-import { Button } from "@rezics/ui";
+import { Button, cn } from "@rezics/ui";
 import { CheckCircle2, Gauge, Play, RefreshCw, RotateCcw } from "lucide-react";
 
 import { SignInButton } from "@/features/auth/auth-portal";
@@ -10,7 +10,13 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { useUnitProgress } from "./unit-progress-provider";
 import type { ProgressStatus, UnitProgressDomain } from "../model/progress-record";
 
-export function UnitProgressAction() {
+export function UnitProgressAction({
+	buttonClassName,
+	className,
+}: {
+	readonly buttonClassName?: string;
+	readonly className?: string;
+} = {}) {
 	const {
 		completionFeedbackCount,
 		domain,
@@ -28,7 +34,11 @@ export function UnitProgressAction() {
 
 	if (state.kind === "signed-out")
 		return (
-			<SignInButton className="min-h-9" size="sm" variant="outline">
+			<SignInButton
+				className={cn("min-h-9", className, buttonClassName)}
+				size="sm"
+				variant="outline"
+			>
 				<Gauge aria-hidden data-icon="inline-start" />
 				{copy.recordAction}
 			</SignInButton>
@@ -36,15 +46,25 @@ export function UnitProgressAction() {
 
 	if (state.kind === "loading")
 		return (
-			<Button className="min-h-9" isLoading size="sm" variant="outline">
+			<Button
+				className={cn("min-h-9", className, buttonClassName)}
+				isLoading
+				size="sm"
+				variant="outline"
+			>
 				{copy.recordAction}
 			</Button>
 		);
 
 	if (state.kind === "error")
 		return (
-			<div className="grid justify-items-start gap-1">
-				<Button className="min-h-9" onClick={retryProgress} size="sm" variant="outline">
+			<div className={cn("grid justify-items-start gap-1", className)}>
+				<Button
+					className={cn("min-h-9", buttonClassName)}
+					onClick={retryProgress}
+					size="sm"
+					variant="outline"
+				>
 					<RefreshCw aria-hidden data-icon="inline-start" />
 					{t.actions.retry}
 				</Button>
@@ -74,9 +94,9 @@ export function UnitProgressAction() {
 				: undefined;
 
 	return (
-		<div className="grid justify-items-start gap-1">
+		<div className={cn("grid justify-items-start gap-1", className)}>
 			<Button
-				className="min-h-9 overflow-hidden"
+				className={cn("min-h-9 overflow-hidden", buttonClassName)}
 				disabled={isCompleting}
 				isLoading={isSaving}
 				onClick={() => {

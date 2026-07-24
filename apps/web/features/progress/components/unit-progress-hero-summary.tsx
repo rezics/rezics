@@ -4,15 +4,13 @@ import type { Translation } from "@rezics/i18n";
 import {
 	Badge,
 	Button,
-	Card,
-	CardContent,
 	DataList,
 	DataListItem,
 	DataListItemLabel,
 	DataListItemValue,
 	Skeleton,
 } from "@rezics/ui";
-import { PencilLine, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -20,53 +18,40 @@ import { useUnitProgress } from "./unit-progress-provider";
 import { UnitProgressDisplay } from "./unit-progress-display";
 import type { UnitProgressDomain, UnitProgressRecord } from "../model/progress-record";
 
-export function UnitProgressSummaryCard() {
-	const {
-		chapters,
-		completionFeedbackCount,
-		domain,
-		isCompleting,
-		openEditor,
-		retryProgress,
-		state,
-	} = useUnitProgress();
-	const { t } = useTranslation(["actions", "engagement", "state", "ui"]);
+export function UnitProgressHeroSummary() {
+	const { chapters, completionFeedbackCount, domain, isCompleting, retryProgress, state } =
+		useUnitProgress();
+	const { t } = useTranslation(["actions", "engagement", "ui"]);
 	const copy = t.engagement.progressByType[domain.type];
 
 	if (state.kind === "signed-out") return null;
 
 	return (
-		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{copy.summaryTitle}</h2>
-			<Card appearance="outlined">
-				<CardContent className="grid gap-4 p-5">
-					{state.kind === "loading" ? (
-						<>
-							<Skeleton className="h-6 w-24" />
-							<Skeleton className="h-2 w-full" />
-							<Skeleton className="h-9 w-full" />
-						</>
-					) : state.kind === "error" ? (
-						<div className="grid justify-items-start gap-3">
-							<RequestFailure error={state.error} fallback={t.ui.retryLater} />
-							<Button onClick={retryProgress} size="sm" variant="outline">
-								<RefreshCw aria-hidden data-icon="inline-start" />
-								{t.actions.retry}
-							</Button>
-						</div>
-					) : (
-						<ProgressSummary
-							chapters={chapters}
-							completionFeedbackCount={completionFeedbackCount}
-							domain={domain}
-							isCompleting={isCompleting}
-							onEdit={openEditor}
-							record={state.record}
-							t={t}
-						/>
-					)}
-				</CardContent>
-			</Card>
+		<section className="grid gap-3 border-t border-border-weak pt-4">
+			<h2 className="text-sm font-semibold">{copy.summaryTitle}</h2>
+			{state.kind === "loading" ? (
+				<>
+					<Skeleton className="h-6 w-24" />
+					<Skeleton className="h-2 w-full" />
+				</>
+			) : state.kind === "error" ? (
+				<div className="grid justify-items-start gap-3">
+					<RequestFailure error={state.error} fallback={t.ui.retryLater} />
+					<Button onClick={retryProgress} size="sm" variant="outline">
+						<RefreshCw aria-hidden data-icon="inline-start" />
+						{t.actions.retry}
+					</Button>
+				</div>
+			) : (
+				<ProgressSummary
+					chapters={chapters}
+					completionFeedbackCount={completionFeedbackCount}
+					domain={domain}
+					isCompleting={isCompleting}
+					record={state.record}
+					t={t}
+				/>
+			)}
 		</section>
 	);
 }
@@ -76,7 +61,6 @@ function ProgressSummary({
 	completionFeedbackCount,
 	domain,
 	isCompleting,
-	onEdit,
 	record,
 	t,
 }: {
@@ -84,7 +68,6 @@ function ProgressSummary({
 	readonly completionFeedbackCount: number | undefined;
 	readonly domain: UnitProgressDomain;
 	readonly isCompleting: boolean;
-	readonly onEdit: () => void;
 	readonly record: UnitProgressRecord | null;
 	readonly t: Pick<Translation, "engagement">;
 }) {
@@ -93,7 +76,6 @@ function ProgressSummary({
 	const chapter = chapters.find(
 		(candidate) => candidate.id === record?.lastContentStructureNodeId,
 	);
-	const actionLabel = record ? copy.updateAction : copy.recordAction;
 
 	return (
 		<>
@@ -148,11 +130,6 @@ function ProgressSummary({
 					) : null}
 				</DataList>
 			) : null}
-
-			<Button className="min-h-11 w-full" onClick={onEdit} variant="outline">
-				<PencilLine aria-hidden data-icon="inline-start" />
-				{actionLabel}
-			</Button>
 		</>
 	);
 }
