@@ -47,6 +47,7 @@ import {
 	type UnitProgressDomain,
 	type UnitProgressRecord,
 } from "../model/progress-record";
+import { isEditableProgressState, progressRecordFromEditableState } from "../model/progress-state";
 import { CompleteProgressButton } from "./complete-progress-button";
 import { useUnitProgress } from "./unit-progress-provider";
 
@@ -54,6 +55,7 @@ const ProgressFormId = "unit-progress-editor-form";
 
 export function UnitProgressDialog() {
 	const progress = useUnitProgress();
+	const editorState = isEditableProgressState(progress.state) ? progress.state : undefined;
 	return (
 		<Dialog
 			onOpenChange={({ open }) => {
@@ -62,8 +64,8 @@ export function UnitProgressDialog() {
 			}}
 			open={progress.editorOpen}
 		>
-			{progress.editorOpen && progress.state.kind === "ready" ? (
-				<ProgressEditor record={progress.state.record} />
+			{progress.editorOpen && editorState ? (
+				<ProgressEditor record={progressRecordFromEditableState(editorState)} />
 			) : null}
 		</Dialog>
 	);

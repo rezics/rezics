@@ -7,13 +7,20 @@ export type UnitProgressDomain =
 	| { readonly type: "media"; readonly unitId: string }
 	| { readonly type: "software"; readonly unitId: string };
 
-export interface UnitProgressRecord {
+export interface UnitProgressRecord<Status extends ProgressStatus = ProgressStatus> {
 	readonly completedCount: number;
 	readonly lastContentStructureNodeId: string | null;
 	readonly progress: number;
-	readonly status: ProgressStatus;
+	readonly status: Status;
 	readonly totalTimeMs: number;
 }
+
+export type TrackedUnitProgressState = {
+	[Status in ProgressStatus]: {
+		readonly kind: Status;
+		readonly record: UnitProgressRecord<Status>;
+	};
+}[ProgressStatus];
 
 export interface ProgressDraft {
 	readonly lastNodeId: string;
@@ -85,7 +92,7 @@ export function isCompletionTransition(
 
 export function completeProgressOptimistically(
 	record: UnitProgressRecord | null,
-): UnitProgressRecord {
+): UnitProgressRecord<"completed"> {
 	const source = record ?? EmptyProgressRecord;
 	return {
 		...source,
@@ -93,6 +100,14 @@ export function completeProgressOptimistically(
 		lastContentStructureNodeId: null,
 		progress: 1,
 		status: "completed",
+	};
+}
+
+export function createBacklogUpdate(type: UnitProgressDomain["type"]): UnitProgressUpdate {
+	return {
+		status: "backlog",
+		progress: 0,
+		...(type === "book" ? { lastContentStructureNodeId: null } : {}),
 	};
 }
 
@@ -115,6 +130,21 @@ export function createResumeUpdate(
 			? { lastContentStructureNodeId: record.lastContentStructureNodeId }
 			: { totalTimeMs: record.totalTimeMs }),
 	};
+}
+
+export function toTrackedUnitProgressState(record: UnitProgressRecord): TrackedUnitProgressState {
+	switch (record.status) {
+		case "backlog":
+			return { kind: "backlog", record: { ...record, status: "backlog" } };
+		case "active":
+			return { kind: "active", record: { ...record, status: "active" } };
+		case "paused":
+			return { kind: "paused", record: { ...record, status: "paused" } };
+		case "completed":
+			return { kind: "completed", record: { ...record, status: "completed" } };
+		case "dropped":
+			return { kind: "dropped", record: { ...record, status: "dropped" } };
+	}
 }
 
 export function createProgressUpdate(

@@ -28,6 +28,7 @@ import { invalidateProgressQueries } from "../data/progress-cache";
 import {
 	clampProgress,
 	completeProgressOptimistically,
+	createBacklogUpdate,
 	createRereadUpdate,
 	createResumeUpdate,
 	toProgressStatus,
@@ -35,12 +36,7 @@ import {
 	type UnitProgressRecord,
 	type UnitProgressUpdate,
 } from "../model/progress-record";
-
-type ProgressState =
-	| { readonly kind: "signed-out" }
-	| { readonly kind: "loading" }
-	| { readonly kind: "error"; readonly error: unknown }
-	| { readonly kind: "ready"; readonly record: UnitProgressRecord | null };
+import { deriveUnitProgressState, type UnitProgressState } from "../model/progress-state";
 
 interface ProgressChapter {
 	readonly id: string;
@@ -48,6 +44,7 @@ interface ProgressChapter {
 }
 
 interface UnitProgressContextValue {
+	readonly addToBacklog: () => Promise<boolean>;
 	readonly chapters: readonly ProgressChapter[];
 	readonly chaptersError: unknown;
 	readonly chaptersPending: boolean;
@@ -70,7 +67,7 @@ interface UnitProgressContextValue {
 	readonly saveError: unknown;
 	readonly saveProgress: (update: UnitProgressUpdate) => Promise<boolean>;
 	readonly startAgain: () => Promise<boolean>;
-	readonly state: ProgressState;
+	readonly state: UnitProgressState;
 }
 
 const UnitProgressContext = createContext<UnitProgressContextValue | undefined>(undefined);
@@ -118,22 +115,27 @@ export function UnitProgressProvider({
 		[recordQuery.data],
 	);
 	const displayedRecord = completionPreview ?? confirmedRecord;
-	const state = useMemo<ProgressState>(() => {
-		if (!session.data && session.isPending) return { kind: "loading" };
-		if (!session.data) return { kind: "signed-out" };
-		if (recordQuery.isPending) return { kind: "loading" };
-		if (recordQuery.isError && !recordMissing)
-			return { kind: "error", error: recordQuery.error };
-		return { kind: "ready", record: displayedRecord };
-	}, [
-		displayedRecord,
-		recordMissing,
-		recordQuery.error,
-		recordQuery.isError,
-		recordQuery.isPending,
-		session.data,
-		session.isPending,
-	]);
+	const state = useMemo(
+		() =>
+			deriveUnitProgressState({
+				authenticated,
+				record: displayedRecord,
+				recordError: recordQuery.error,
+				recordFailed: recordQuery.isError,
+				recordMissing,
+				recordPending: recordQuery.isPending,
+				sessionPending: session.isPending,
+			}),
+		[
+			authenticated,
+			displayedRecord,
+			recordMissing,
+			recordQuery.error,
+			recordQuery.isError,
+			recordQuery.isPending,
+			session.isPending,
+		],
+	);
 
 	useEffect(() => {
 		if (completionFeedbackCount === undefined) return;
@@ -232,6 +234,10 @@ export function UnitProgressProvider({
 		() => saveProgress(createRereadUpdate(domain.type)),
 		[domain.type, saveProgress],
 	);
+	const addToBacklog = useCallback(
+		() => saveProgress(createBacklogUpdate(domain.type)),
+		[domain.type, saveProgress],
+	);
 	const resumeProgress = useCallback(
 		() =>
 			confirmedRecord
@@ -242,6 +248,7 @@ export function UnitProgressProvider({
 
 	const value = useMemo<UnitProgressContextValue>(
 		() => ({
+			addToBacklog,
 			chapters: chaptersQuery.data?.items ?? [],
 			chaptersError: chaptersQuery.error,
 			chaptersPending: chaptersQuery.isPending,
@@ -265,6 +272,7 @@ export function UnitProgressProvider({
 			state,
 		}),
 		[
+			addToBacklog,
 			chaptersQuery.data?.items,
 			chaptersQuery.error,
 			chaptersQuery.isPending,

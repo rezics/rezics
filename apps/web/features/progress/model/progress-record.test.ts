@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	changeProgressDraftStatus,
 	completeProgressOptimistically,
+	createBacklogUpdate,
 	createProgressDraft,
 	createProgressUpdate,
 	createRereadUpdate,
@@ -10,6 +11,7 @@ import {
 	isCompletionTransition,
 	parseBoundedNumber,
 	parseNonNegativeInteger,
+	toTrackedUnitProgressState,
 	toProgressStatus,
 	type UnitProgressRecord,
 } from "./progress-record";
@@ -77,6 +79,15 @@ describe("progress record input", () => {
 	});
 
 	it("resets transient reading position without changing completion count inputs", () => {
+		expect(createBacklogUpdate("book")).toEqual({
+			status: "backlog",
+			progress: 0,
+			lastContentStructureNodeId: null,
+		});
+		expect(createBacklogUpdate("media")).toEqual({
+			status: "backlog",
+			progress: 0,
+		});
 		expect(createRereadUpdate("book")).toEqual({
 			status: "active",
 			progress: 0,
@@ -98,6 +109,13 @@ describe("progress record input", () => {
 			status: "active",
 			progress: 0.42,
 			lastContentStructureNodeId: activeBook.lastContentStructureNodeId,
+		});
+	});
+
+	it("preserves the proven status when deriving a tracked control state", () => {
+		expect(toTrackedUnitProgressState({ ...activeBook, status: "paused" })).toEqual({
+			kind: "paused",
+			record: { ...activeBook, status: "paused" },
 		});
 	});
 
