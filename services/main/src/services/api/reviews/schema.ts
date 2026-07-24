@@ -53,3 +53,8 @@ export type SetScoreBody = Static<typeof SetScoreBody>;
 
 export const ScoreAggregateQuery = t.Object({ realmId: Uuid });
 export type ScoreAggregateQuery = Static<typeof ScoreAggregateQuery>;
+
+export const ListViewerScoresQuery = t.Object({
+	language: t.Optional(ContentLanguage),
+});
+export type ListViewerScoresQuery = Static<typeof ListViewerScoresQuery>;

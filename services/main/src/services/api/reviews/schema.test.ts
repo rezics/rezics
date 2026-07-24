@@ -2,7 +2,7 @@ import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CreateReviewBody } from "./schema";
+import { CreateReviewBody, ListViewerScoresQuery } from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
 const realmId = "019b76da-a800-7300-8000-000000000002";
@@ -41,5 +41,13 @@ describe("review creation schema", () => {
 				score: { realmId, value: 8, copied: true },
 			}),
 		).toBe(false);
+	});
+});
+
+describe("viewer Score list schema", () => {
+	it("accepts supported content languages and rejects UI locale identifiers", () => {
+		expect(Check(ListViewerScoresQuery, {})).toBe(true);
+		expect(Check(ListViewerScoresQuery, { language: "zh" })).toBe(true);
+		expect(Check(ListViewerScoresQuery, { language: "zh-Hant" })).toBe(false);
 	});
 });

@@ -6,3 +6,8 @@ export function starValueToUnitScore(starValue: number): UnitScore | undefined {
 	const score = starValue * 2;
 	return UnitScoreValues.find((candidate) => candidate === score);
 }
+
+export function apiValueToUnitScore(value: string | number): UnitScore | undefined {
+	const score = typeof value === "number" ? value : Number(value);
+	return UnitScoreValues.find((candidate) => candidate === score);
+}

@@ -65981,6 +65981,160 @@ export type GetApiScoresByTargetIdResponse =
 /**
  * @type object
  */
+export type GetApiScoresByTargetIdViewerPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetId: string;
+};
+
+export const GetApiScoresByTargetIdViewerLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiScoresByTargetIdViewerLanguage =
+	(typeof GetApiScoresByTargetIdViewerLanguage)[keyof typeof GetApiScoresByTargetIdViewerLanguage];
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiScoresByTargetIdViewerLanguage;
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		scoreId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		value: string | number;
+		realmTitle: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerOptions = {
+	body?: never;
+	path: GetApiScoresByTargetIdViewerPath;
+	query?: GetApiScoresByTargetIdViewerQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoresByTargetIdViewerResponses = {
+	"200": GetApiScoresByTargetIdViewerStatus200;
+	"404": GetApiScoresByTargetIdViewerStatus404;
+	"422": GetApiScoresByTargetIdViewerStatus422;
+	"429": GetApiScoresByTargetIdViewerStatus429;
+	"500": GetApiScoresByTargetIdViewerStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiScoresByTargetIdViewerResponse =
+	| GetApiScoresByTargetIdViewerStatus200
+	| GetApiScoresByTargetIdViewerStatus404
+	| GetApiScoresByTargetIdViewerStatus422
+	| GetApiScoresByTargetIdViewerStatus429
+	| GetApiScoresByTargetIdViewerStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiReactionsUnitsByUnitIdPath = {
 	/**
 	 * @description

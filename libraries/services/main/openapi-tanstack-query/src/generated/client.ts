@@ -449,6 +449,8 @@ import type {
 	PutApiScoresByTargetIdResponses,
 	GetApiScoresByTargetIdOptions,
 	GetApiScoresByTargetIdResponses,
+	GetApiScoresByTargetIdViewerOptions,
+	GetApiScoresByTargetIdViewerResponses,
 	GetApiReactionsUnitsByUnitIdOptions,
 	GetApiReactionsUnitsByUnitIdResponses,
 	PutApiReactionsUnitsByUnitIdOptions,
@@ -5073,6 +5075,26 @@ export function getApiScoresByTargetId<ThrowOnError extends boolean = true>(
 	return request({ method: "GET", url: "/api/scores/{targetId}", ...config }) as Promise<
 		RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary List current user's Scores for a Unit
+ * {@link /api/scores/:targetId/viewer}
+ */
+export function getApiScoresByTargetIdViewer<ThrowOnError extends boolean = true>(
+	options: Options<GetApiScoresByTargetIdViewerOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiScoresByTargetIdViewerResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/scores/{targetId}/viewer",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiScoresByTargetIdViewerResponses, ThrowOnError>>;
 }
 
 /**

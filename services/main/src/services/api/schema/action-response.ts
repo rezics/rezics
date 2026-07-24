@@ -21,6 +21,17 @@ export const ScoreAggregateResponse = t.Object({
 	totalCount: t.Integer(),
 	distribution: t.Record(t.String(), t.Integer()),
 });
+export const ViewerScoreListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			scoreId: Uuid,
+			realmId: Uuid,
+			value: t.Integer({ minimum: 1, maximum: 10 }),
+			realmTitle: t.Nullable(t.String()),
+			updatedAt: DateTime,
+		}),
+	),
+});
 export const ScoreContextResponse = t.Object({ contextPostId: t.Nullable(Uuid) });
 
 export const ReactionSummaryResponse = t.Object({

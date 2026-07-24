@@ -5,7 +5,11 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { isPrimaryUnitLocalization, makePrimaryUnitLocalization } from "../../units/localization";
+import {
+	isPrimaryUnitLocalization,
+	makePrimaryUnitLocalization,
+	resolvedUnitLocalizationTitle,
+} from "../../units/localization";
 import {
 	post,
 	postScore,
@@ -33,6 +37,7 @@ import {
 	NoContentResponse,
 	ScoreAggregateResponse,
 	ScoreResponse,
+	ViewerScoreListResponse,
 } from "../schema/action-response";
 import {
 	toApiErrorResponse,
@@ -44,6 +49,7 @@ import {
 	CreateReviewBody,
 	GetReviewQuery,
 	ListReviewsQuery,
+	ListViewerScoresQuery,
 	ReviewParams,
 	ScoreAggregateQuery,
 	ScoreTargetParams,
@@ -427,6 +433,45 @@ export default new Elysia()
 						]),
 					},
 					detail: { summary: "Score unit", tags: ["Reviews"] },
+				},
+			)
+			.get(
+				"/:targetId/viewer",
+				async ({ params, profile, authorization, query }) => {
+					await authorization.unit.ensureCanRead(params.targetId);
+					const items = await database
+						.select({
+							scoreId: score.id,
+							realmId: score.realmId,
+							value: score.value,
+							realmTitle: resolvedUnitLocalizationTitle(
+								score.realmId,
+								query.language,
+							),
+							updatedAt: score.updatedAt,
+						})
+						.from(score)
+						.where(
+							and(
+								eq(score.profileId, profile.unitId),
+								eq(score.unitId, params.targetId),
+							),
+						)
+						.orderBy(desc(score.updatedAt), asc(score.realmId));
+					return { items };
+				},
+				{
+					access: "interaction:read",
+					params: ScoreTargetParams,
+					query: ListViewerScoresQuery,
+					response: {
+						[StatusCodes.OK]: ViewerScoreListResponse,
+						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+					},
+					detail: {
+						summary: "List current user's Scores for a Unit",
+						tags: ["Reviews"],
+					},
 				},
 			)
 			.get(

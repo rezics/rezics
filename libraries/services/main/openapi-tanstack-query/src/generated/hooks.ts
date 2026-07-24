@@ -1467,6 +1467,12 @@ import type {
 	GetApiScoresByTargetIdStatus404,
 	GetApiScoresByTargetIdStatus422,
 	GetApiScoresByTargetIdStatus500,
+	GetApiScoresByTargetIdViewerOptions,
+	GetApiScoresByTargetIdViewerStatus200,
+	GetApiScoresByTargetIdViewerStatus404,
+	GetApiScoresByTargetIdViewerStatus422,
+	GetApiScoresByTargetIdViewerStatus429,
+	GetApiScoresByTargetIdViewerStatus500,
 	GetApiReactionsUnitsByUnitIdOptions,
 	GetApiReactionsUnitsByUnitIdStatus200,
 	GetApiReactionsUnitsByUnitIdStatus404,
@@ -2165,6 +2171,7 @@ import {
 	deleteApiReviewsByReviewId,
 	putApiScoresByTargetId,
 	getApiScoresByTargetId,
+	getApiScoresByTargetIdViewer,
 	getApiReactionsUnitsByUnitId,
 	putApiReactionsUnitsByUnitId,
 	deleteApiReactionsUnitsByUnitId,
@@ -24813,6 +24820,113 @@ export function useGetApiScoresByTargetId<
 			| GetApiScoresByTargetIdStatus404
 			| GetApiScoresByTargetIdStatus422
 			| GetApiScoresByTargetIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiScoresByTargetIdViewerQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiScoresByTargetIdViewerOptions, "headers">) =>
+	[{ url: "/api/scores/:targetId/viewer", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiScoresByTargetIdViewerQueryKey = ReturnType<typeof getApiScoresByTargetIdViewerQueryKey>;
+
+export function getApiScoresByTargetIdViewerQueryOptions(
+	{ path, query }: GetApiScoresByTargetIdViewerOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiScoresByTargetIdViewerQueryKey({ path, query });
+	return queryOptions<
+		GetApiScoresByTargetIdViewerStatus200,
+		ResponseErrorConfig<
+			| GetApiScoresByTargetIdViewerStatus404
+			| GetApiScoresByTargetIdViewerStatus422
+			| GetApiScoresByTargetIdViewerStatus429
+			| GetApiScoresByTargetIdViewerStatus500
+		>,
+		GetApiScoresByTargetIdViewerStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiScoresByTargetIdViewer({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List current user's Scores for a Unit
+ * {@link /api/scores/:targetId/viewer}
+ */
+export function useGetApiScoresByTargetIdViewer<
+	TData = GetApiScoresByTargetIdViewerStatus200,
+	TQueryData = GetApiScoresByTargetIdViewerStatus200,
+	TQueryKey extends QueryKey = GetApiScoresByTargetIdViewerQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiScoresByTargetIdViewerOptions["path"]
+			| (() => GetApiScoresByTargetIdViewerOptions["path"]);
+		query?:
+			| GetApiScoresByTargetIdViewerOptions["query"]
+			| (() => GetApiScoresByTargetIdViewerOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiScoresByTargetIdViewerStatus200,
+				ResponseErrorConfig<
+					| GetApiScoresByTargetIdViewerStatus404
+					| GetApiScoresByTargetIdViewerStatus422
+					| GetApiScoresByTargetIdViewerStatus429
+					| GetApiScoresByTargetIdViewerStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiScoresByTargetIdViewerQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiScoresByTargetIdViewerQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiScoresByTargetIdViewerStatus404
+			| GetApiScoresByTargetIdViewerStatus422
+			| GetApiScoresByTargetIdViewerStatus429
+			| GetApiScoresByTargetIdViewerStatus500
 		>
 	> & { queryKey: TQueryKey };
 
