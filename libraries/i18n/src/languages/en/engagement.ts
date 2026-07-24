@@ -32,7 +32,11 @@ export default {
 	reviewScore: "Score",
 	reviewScoreOptional: "Score (optional)",
 	reviewWithoutScore: "No score",
-	reviewScoreRealmHint: `Scores are currently stored in a ${realmTerms.label} scope; choose a ${realmTerms.label} when adding a Score.`,
+	reviewScoreRealmHint: `When a review has no ${realmTerms.label}, its Score uses your default scoring ${realmTerms.label}.`,
+	scoreRealmHint: insert(
+		`This Score will be saved in “{{realm}}”. Change the default scoring ${realmTerms.label} in Preferences.`,
+		{ realm: String },
+	),
 	allReviewRealms: `All ${realmTerms.pluralLabel}`,
 	filterReviewRealm: `Filter by ${realmTerms.label}`,
 	scoreOutOfTen: insert("{{score}}/10", { score: String }),

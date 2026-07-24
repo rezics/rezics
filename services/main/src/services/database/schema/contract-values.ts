@@ -391,7 +391,6 @@ export const PlatformCapabilityValues = [
 	"platform.moderate",
 	"platform.suppress",
 	"platform.grants.manage",
-	"platform.score-context.manage",
 	...RealmCapabilityValues,
 ] as const;
 

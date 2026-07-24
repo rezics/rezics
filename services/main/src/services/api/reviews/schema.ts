@@ -53,9 +53,3 @@ export type SetScoreBody = Static<typeof SetScoreBody>;
 
 export const ScoreAggregateQuery = t.Object({ realmId: Uuid });
 export type ScoreAggregateQuery = Static<typeof ScoreAggregateQuery>;
-
-export const SetScoreContextBody = t.Object(
-	{ contextPostId: Uuid },
-	{ additionalProperties: false },
-);
-export type SetScoreContextBody = Static<typeof SetScoreContextBody>;

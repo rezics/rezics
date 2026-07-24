@@ -604,6 +604,7 @@ export const PreferencesResponse = t.Object({
 	interfaceLocale: StoredUiLocale,
 	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean(),
+	defaultScoreRealmId: Uuid,
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
 	contentRatings: t.Array(t.String()),

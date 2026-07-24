@@ -449,12 +449,6 @@ import type {
 	PutApiScoresByTargetIdResponses,
 	GetApiScoresByTargetIdOptions,
 	GetApiScoresByTargetIdResponses,
-	GetApiScoreContextOptions,
-	GetApiScoreContextResponses,
-	PutApiScoreContextOptions,
-	PutApiScoreContextResponses,
-	DeleteApiScoreContextOptions,
-	DeleteApiScoreContextResponses,
 	GetApiReactionsUnitsByUnitIdOptions,
 	GetApiReactionsUnitsByUnitIdResponses,
 	PutApiReactionsUnitsByUnitIdOptions,
@@ -5079,54 +5073,6 @@ export function getApiScoresByTargetId<ThrowOnError extends boolean = true>(
 	return request({ method: "GET", url: "/api/scores/{targetId}", ...config }) as Promise<
 		RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>
 	>;
-}
-
-/**
- * @summary Get global Score context
- * {@link /api/score-context}
- */
-export function getApiScoreContext<ThrowOnError extends boolean = true>(
-	options: Options<GetApiScoreContextOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiScoreContextResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "GET", url: "/api/score-context", ...config }) as Promise<
-		RequestResult<GetApiScoreContextResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Set global Score context
- * {@link /api/score-context}
- */
-export function putApiScoreContext<ThrowOnError extends boolean = true>(
-	options: Options<PutApiScoreContextOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiScoreContextResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/score-context",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiScoreContextResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Clear global Score context
- * {@link /api/score-context}
- */
-export function deleteApiScoreContext<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiScoreContextOptions, ThrowOnError> = {},
-): Promise<RequestResult<DeleteApiScoreContextResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/score-context",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiScoreContextResponses, ThrowOnError>>;
 }
 
 /**

@@ -30,7 +30,8 @@ vi.mock("../units/create", () => ({ insertUnit }));
 vi.mock("../units/history", () => ({ recordUnitRevision }));
 
 import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
-import { unitAccessBinding, unitFollow } from "../database/schema";
+import { profilePreference, realmMember, unitAccessBinding, unitFollow } from "../database/schema";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 import { ensureProfile } from "./profile";
 
 const ProfileId = "019f82aa-db8f-7962-9924-7369b17f5502";
@@ -93,6 +94,26 @@ describe("Profile registration defaults", () => {
 			role: "owner",
 			scope: [],
 			grantedByProfileId: ProfileId,
+		});
+	});
+
+	it("joins the REZICS Score Realm and stores it as the default scoring Realm", async () => {
+		await ensureProfile({
+			id: "019f82aa-db8f-7962-9924-7369b17f5501",
+			email: "reader@example.com",
+			name: "Reader",
+			image: null,
+		});
+
+		expect(valuesByTable.get(profilePreference)).toEqual({
+			profileId: ProfileId,
+			defaultScoreRealmId: OfficialRealmUnitIds.score,
+		});
+		expect(valuesByTable.get(realmMember)).toEqual({
+			realmId: OfficialRealmUnitIds.score,
+			profileId: ProfileId,
+			role: "member",
+			state: "active",
 		});
 	});
 });

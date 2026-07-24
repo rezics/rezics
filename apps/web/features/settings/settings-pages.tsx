@@ -4,6 +4,7 @@ import {
 	getApiUsersByIdQueryKey,
 	getApiUsersMePreferencesQueryKey,
 	getApiUsersMeQueryKey,
+	useGetApiRealmsByRealmId,
 	useGetApiUsersMe,
 	useGetApiUsersMePreferences,
 	usePatchApiUsersMe,
@@ -21,13 +22,15 @@ import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Checkbox, CheckboxGroup } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@rezics/ui";
+import { EntityPicker } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { isContentLanguage, isStoredUiLocale, toUiLocale } from "@rezics/i18n";
+import { isContentLanguage, isStoredUiLocale, toContentLanguage, toUiLocale } from "@rezics/i18n";
 import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
 	LocalizationImageUploadField,
@@ -39,7 +42,9 @@ import {
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
 import { useSetLocale, useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
 import { authClient } from "@/lib/auth-client";
+import { selectLocalization } from "@/lib/localization";
 import { SettingsOverviewHref } from "./routing/settings-routes";
 import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
 
@@ -60,6 +65,11 @@ function SettingsFrame({ title, children }: { title: string; children: React.Rea
 
 const ContentRatings = ["general", "r15", "r18", "r18g"] as const;
 type ContentRating = (typeof ContentRatings)[number];
+
+interface PickedRealm {
+	readonly id: string;
+	readonly label: string;
+}
 
 function isContentRating(value: FormDataEntryValue): value is ContentRating {
 	return typeof value === "string" && ContentRatings.some((rating) => rating === value);
@@ -176,7 +186,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 }
 
 export function PreferenceSettings() {
-	const { t } = useTranslation([
+	const { locale, t } = useTranslation([
 		"errors",
 		"feed",
 		"governance",
@@ -188,6 +198,12 @@ export function PreferenceSettings() {
 	]);
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences();
+	const storedDefaultScoreRealmId =
+		preferences.data?.defaultScoreRealmId ?? OfficialRealmUnitIds.score;
+	const storedDefaultScoreRealm = useGetApiRealmsByRealmId(
+		{ path: { realmId: storedDefaultScoreRealmId } },
+		{ query: { enabled: Boolean(preferences.data) } },
+	);
 	const update = usePutApiUsersMePreferences({
 		mutation: {
 			onSuccess: () =>
@@ -197,9 +213,27 @@ export function PreferenceSettings() {
 	const { setLocale } = useSetLocale();
 	const [saved, setSaved] = useState(false);
 	const [invalid, setInvalid] = useState(false);
+	const [selectedDefaultScoreRealm, setSelectedDefaultScoreRealm] = useState<PickedRealm>();
 	if (preferences.isPending) return <QueryPending />;
 	if (preferences.isError || !preferences.data)
 		return <QueryFailure error={preferences.error} retry={() => void preferences.refetch()} />;
+	if (storedDefaultScoreRealm.isPending) return <QueryPending />;
+	if (storedDefaultScoreRealm.isError || !storedDefaultScoreRealm.data)
+		return (
+			<QueryFailure
+				error={storedDefaultScoreRealm.error}
+				retry={() => void storedDefaultScoreRealm.refetch()}
+			/>
+		);
+	const storedDefaultScoreRealmLocalization = selectLocalization(
+		storedDefaultScoreRealm.data.localizations,
+		toContentLanguage(locale.target),
+		storedDefaultScoreRealm.data.language,
+	);
+	const defaultScoreRealm = selectedDefaultScoreRealm ?? {
+		id: storedDefaultScoreRealm.data.id,
+		label: storedDefaultScoreRealmLocalization?.title ?? storedDefaultScoreRealm.data.id,
+	};
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setSaved(false);
@@ -230,6 +264,7 @@ export function PreferenceSettings() {
 						? submittedDefaultLicense
 						: null,
 					defaultRealmManageMode: data.get("defaultRealmManageMode") === "true",
+					defaultScoreRealmId: defaultScoreRealm.id,
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
 					contentRatings: selectedRatings,
@@ -287,6 +322,17 @@ export function PreferenceSettings() {
 							))}
 						</NativeSelect>
 					</Field>
+					<Field>
+						<FieldLabel>{t.settings.defaultScoreRealm}</FieldLabel>
+						<EntityPicker
+							index="realms"
+							onChange={setSelectedDefaultScoreRealm}
+							value={defaultScoreRealm}
+						/>
+						<p className="text-sm text-muted-foreground">
+							{t.settings.defaultScoreRealmHint}
+						</p>
+					</Field>
 					<FieldSet>
 						<FieldLegend variant="label">{t.ui.contentRating}</FieldLegend>
 						<CheckboxGroup className="grid gap-2 sm:grid-cols-2">
@@ -333,6 +379,7 @@ export function PreferenceSettings() {
 							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
 						</NativeSelect>
 					</Field>
+					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
 					{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}
 					<Button variant="solid" type="submit" isLoading={update.isPending}>
 						{t.ui.save}

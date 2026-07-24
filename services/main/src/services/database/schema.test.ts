@@ -44,7 +44,7 @@ import {
 	scoreStat,
 	score,
 	postScore,
-	globalScoreContext,
+	profilePreference,
 	unitAccessBinding,
 	unitAccessInvitation,
 	unitAccessRestriction,
@@ -382,7 +382,7 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("models live Score identity, ordered Post display, and current contexts", () => {
+	it("models live Score identity, ordered Post display, and Realm context", () => {
 		const scoreConfig = getTableConfig(score);
 		expect(scoreConfig.primaryKeys).toHaveLength(0);
 		expect(score.id.primary).toBe(true);
@@ -403,9 +403,16 @@ describe("database schema contracts", () => {
 		expect(getTableConfig(realmScoreContext).foreignKeys.map((key) => key.getName())).toContain(
 			"realm_score_context_post_realm_fkey",
 		);
-		expect(
-			getTableConfig(globalScoreContext).checks.map((constraint) => constraint.name),
-		).toContain("global_score_context_singleton_check");
+	});
+
+	it("stores a Profile default scoring Realm with referential integrity", () => {
+		const preference = getTableConfig(profilePreference);
+		expect(preference.foreignKeys.map((key) => key.getName())).toContain(
+			"profile_preference_default_score_realm_id_realm_id_fk",
+		);
+		expect(preference.indexes.map((index) => index.config.name)).toContain(
+			"profile_preference_default_score_realm_idx",
+		);
 	});
 
 	it("separates optional Unit slug addresses from ID-addressed Units", () => {
@@ -486,7 +493,6 @@ describe("database schema contracts", () => {
 				"entity.associations.override",
 				"unit.ownership.transfer",
 				"platform.api_token_policy.manage",
-				"platform.score-context.manage",
 			]),
 		);
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");

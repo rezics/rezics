@@ -47,7 +47,6 @@ export default {
 		"platform.moderate": "執行平台內容治理",
 		"platform.suppress": "隱藏平台內容與修訂",
 		"platform.grants.manage": "管理平台工作人員授權",
-		"platform.score-context.manage": "管理平台評分情境",
 		"realm.contribute": `參與所有${realmTerms.pluralLabel}`,
 		"realm.settings.update": `更新${realmTerms.label}設定`,
 		"realm.members.read": `檢視${realmTerms.label}成員`,

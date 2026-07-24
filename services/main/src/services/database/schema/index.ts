@@ -22,6 +22,7 @@ export * from "./media";
 export * from "./poll";
 export * from "./post";
 export * from "./progress";
+export * from "./profile-preference";
 export * from "./reaction";
 export * from "./realm";
 export * from "./recommendation";

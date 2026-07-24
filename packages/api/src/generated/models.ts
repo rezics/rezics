@@ -21436,7 +21436,6 @@ export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
-	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -29316,7 +29315,6 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
-	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -30409,6 +30407,12 @@ export type GetApiUsersMePreferencesStatus200 = {
 	 * @type boolean
 	 */
 	defaultRealmManageMode: boolean;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	defaultScoreRealmId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -30581,6 +30585,12 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	 * @type boolean
 	 */
 	defaultRealmManageMode: boolean;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	defaultScoreRealmId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -30785,6 +30795,12 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 * @type boolean
 	 */
 	defaultRealmManageMode: boolean;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	defaultScoreRealmId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -30821,6 +30837,14 @@ export type PutApiUsersMePreferencesStatus200 = {
  */
 export type PutApiUsersMePreferencesStatus400 = MalformedRequestBody;
 
+export const PutApiUsersMePreferencesStatus403ErrorCodeEnum = {
+	UnitProtected: "UnitProtected",
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+} as const;
+
+export type PutApiUsersMePreferencesStatus403ErrorCodeEnum =
+	(typeof PutApiUsersMePreferencesStatus403ErrorCodeEnum)[keyof typeof PutApiUsersMePreferencesStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -30833,7 +30857,7 @@ export type PutApiUsersMePreferencesStatus403 = {
 		 * @default 'UnitProtected'
 		 * @type string
 		 */
-		code: "UnitProtected";
+		code: PutApiUsersMePreferencesStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -30971,6 +30995,12 @@ export type PutApiUsersMePreferencesBody = {
 	 * @type boolean
 	 */
 	defaultRealmManageMode: boolean;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	defaultScoreRealmId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -32572,7 +32602,6 @@ export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
-	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -32682,7 +32711,6 @@ export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
-	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -32818,7 +32846,6 @@ export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
-	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -32957,7 +32984,6 @@ export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
-	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -33150,7 +33176,6 @@ export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
-	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -65952,259 +65977,6 @@ export type GetApiScoresByTargetIdResponse =
 	| GetApiScoresByTargetIdStatus404
 	| GetApiScoresByTargetIdStatus422
 	| GetApiScoresByTargetIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiScoreContextStatus200 = {
-	contextPostId: (string | null) | null;
-};
-
-/**
- * @type object
- */
-export type GetApiScoreContextStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PostNotFound'
-		 * @type string
-		 */
-		code: "PostNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiScoreContextStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiScoreContextOptions = {
-	body?: never;
-	path?: never;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiScoreContextResponses = {
-	"200": GetApiScoreContextStatus200;
-	"404": GetApiScoreContextStatus404;
-	"500": GetApiScoreContextStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiScoreContextResponse =
-	GetApiScoreContextStatus200 | GetApiScoreContextStatus404 | GetApiScoreContextStatus500;
-
-/**
- * @type object
- */
-export type PutApiScoreContextStatus200 = {
-	contextPostId: (string | null) | null;
-};
-
-/**
- * @type object
- */
-export type PutApiScoreContextStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PutApiScoreContextStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiScoreContextStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PostNotFound'
-		 * @type string
-		 */
-		code: "PostNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiScoreContextStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiScoreContextStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiScoreContextBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	contextPostId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiScoreContextOptions = {
-	body: PutApiScoreContextBody;
-	path?: never;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiScoreContextResponses = {
-	"200": PutApiScoreContextStatus200;
-	"400": PutApiScoreContextStatus400;
-	"403": PutApiScoreContextStatus403;
-	"404": PutApiScoreContextStatus404;
-	"422": PutApiScoreContextStatus422;
-	"500": PutApiScoreContextStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiScoreContextResponse =
-	| PutApiScoreContextStatus200
-	| PutApiScoreContextStatus400
-	| PutApiScoreContextStatus403
-	| PutApiScoreContextStatus404
-	| PutApiScoreContextStatus422
-	| PutApiScoreContextStatus500;
-
-/**
- * @type void
- */
-export type DeleteApiScoreContextStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiScoreContextStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiScoreContextStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiScoreContextOptions = {
-	body?: never;
-	path?: never;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiScoreContextResponses = {
-	"204": DeleteApiScoreContextStatus204;
-	"403": DeleteApiScoreContextStatus403;
-	"500": DeleteApiScoreContextStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiScoreContextResponse =
-	| DeleteApiScoreContextStatus204
-	| DeleteApiScoreContextStatus403
-	| DeleteApiScoreContextStatus500;
 
 /**
  * @type object

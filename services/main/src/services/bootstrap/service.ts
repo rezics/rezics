@@ -62,12 +62,14 @@ import {
 	BootstrapEpochIso,
 	BootstrapProfileIdValues,
 	BootstrapProfileManifest,
+	BootstrapRealmManifest,
 	BootstrapSuperAdminProfile,
 	BootstrapUnitIds,
 	OfficialProfileIds,
 	OfficialRealmManifest,
 	OfficialZoneAvatarAsset,
 	OfficialZoneManifest,
+	RezicsScoreRealmManifest,
 	SlugNamespaceManifest,
 	TopLevelSlugNamespaceUnitIds,
 } from "./manifest";
@@ -648,8 +650,10 @@ async function ensureOwnerBinding(
 	return true;
 }
 
-async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
-	const value = OfficialRealmManifest;
+async function ensureBootstrapRealm(
+	tx: DatabaseTransaction,
+	value: (typeof BootstrapRealmManifest)[number],
+): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	let changed = await ensureBootstrapAddressedUnit(tx, {
 		id: value.id,
@@ -725,6 +729,36 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 			event: "create",
 			message: "Bootstrap official Realm",
 		});
+}
+
+async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise<void> {
+	const profiles = await tx.select({ id: profile.id }).from(profile);
+	if (profiles.length) {
+		await tx
+			.insert(realmMember)
+			.values(
+				profiles.map(({ id }) => ({
+					realmId: RezicsScoreRealmManifest.id,
+					profileId: id,
+					role: "member" as const,
+					state: "active" as const,
+				})),
+			)
+			.onConflictDoNothing();
+		await tx
+			.insert(profilePreference)
+			.values(
+				profiles.map(({ id }) => ({
+					profileId: id,
+					defaultScoreRealmId: RezicsScoreRealmManifest.id,
+				})),
+			)
+			.onConflictDoNothing();
+	}
+	await tx
+		.update(profilePreference)
+		.set({ defaultScoreRealmId: RezicsScoreRealmManifest.id })
+		.where(isNull(profilePreference.defaultScoreRealmId));
 }
 
 async function ensureOfficialZoneAvatar(tx: DatabaseTransaction): Promise<void> {
@@ -1154,11 +1188,11 @@ export async function isBootstrapReady(): Promise<boolean> {
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
 			slug: bootstrapProfile.slug,
 		})),
-		{
-			targetUnitId: OfficialRealmManifest.id,
+		...BootstrapRealmManifest.map((bootstrapRealm) => ({
+			targetUnitId: bootstrapRealm.id,
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
-			slug: OfficialRealmManifest.slug,
-		},
+			slug: bootstrapRealm.slug,
+		})),
 		...OfficialZoneManifest.map((officialZone) => ({
 			targetUnitId: officialZone.id,
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
@@ -1179,11 +1213,13 @@ export async function isBootstrapReady(): Promise<boolean> {
 				...localization,
 			})),
 		),
-		...OfficialRealmManifest.localizations.map((localization, index) => ({
-			unitId: OfficialRealmManifest.id,
-			position: fractionalPositionAt(index),
-			...localization,
-		})),
+		...BootstrapRealmManifest.flatMap((bootstrapRealm) =>
+			bootstrapRealm.localizations.map((localization, index) => ({
+				unitId: bootstrapRealm.id,
+				position: fractionalPositionAt(index),
+				...localization,
+			})),
+		),
 		...OfficialZoneManifest.flatMap((officialZone) =>
 			officialZone.localizations.map((localization, index) => ({
 				unitId: officialZone.id,
@@ -1238,7 +1274,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 		profileCount,
 		bootstrapProfileOwners,
 		permanentGrantManagers,
-		officialRealm,
+		officialRealms,
 		officialZones,
 		officialZoneDocks,
 		officialWikiPosts,
@@ -1246,6 +1282,8 @@ export async function isBootstrapReady(): Promise<boolean> {
 		officialZoneNavigations,
 		officialZoneAvatar,
 		allProfiles,
+		profileScoreMemberships,
+		profilePreferences,
 		profileFollows,
 		localizations,
 	] = await Promise.all([
@@ -1310,8 +1348,12 @@ export async function isBootstrapReady(): Promise<boolean> {
 		database
 			.select({ id: realm.id })
 			.from(realm)
-			.where(eq(realm.id, OfficialRealmManifest.id))
-			.limit(1),
+			.where(
+				inArray(
+					realm.id,
+					BootstrapRealmManifest.map((value) => value.id),
+				),
+			),
 		database
 			.select({
 				id: zone.id,
@@ -1388,6 +1430,16 @@ export async function isBootstrapReady(): Promise<boolean> {
 			.limit(1),
 		database.select({ id: profile.id }).from(profile),
 		database
+			.select({ profileId: realmMember.profileId })
+			.from(realmMember)
+			.where(eq(realmMember.realmId, RezicsScoreRealmManifest.id)),
+		database
+			.select({
+				profileId: profilePreference.profileId,
+				defaultScoreRealmId: profilePreference.defaultScoreRealmId,
+			})
+			.from(profilePreference),
+		database
 			.select({
 				profileId: unitFollow.followerProfileId,
 				unitId: unitFollow.unitId,
@@ -1413,7 +1465,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 					...BootstrapProfileManifest.map(
 						(bootstrapProfile) => bootstrapProfile.profileId,
 					),
-					OfficialRealmManifest.id,
+					...BootstrapRealmManifest.map((bootstrapRealm) => bootstrapRealm.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.wikiPost.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.homePage.id),
@@ -1443,7 +1495,10 @@ export async function isBootstrapReady(): Promise<boolean> {
 				owner.expiresAt === null,
 		) &&
 		permanentGrantManagers.length > 0 &&
-		Boolean(officialRealm[0]) &&
+		officialRealms.length === BootstrapRealmManifest.length &&
+		BootstrapRealmManifest.every((expected) =>
+			officialRealms.some((actual) => actual.id === expected.id),
+		) &&
 		officialZones.length === OfficialZoneManifest.length &&
 		OfficialZoneManifest.every((expected) =>
 			officialZones.some(
@@ -1487,6 +1542,16 @@ export async function isBootstrapReady(): Promise<boolean> {
 		officialZoneAvatar[0]?.access === "public" &&
 		officialZoneAvatar[0]?.objectId === OfficialZoneAvatarAsset.objectId &&
 		officialZoneAvatar[0]?.storageKey === OfficialZoneAvatarAsset.storageKey &&
+		allProfiles.every((targetProfile) =>
+			profileScoreMemberships.some((membership) => membership.profileId === targetProfile.id),
+		) &&
+		allProfiles.every((targetProfile) =>
+			profilePreferences.some(
+				(preference) =>
+					preference.profileId === targetProfile.id &&
+					preference.defaultScoreRealmId !== null,
+			),
+		) &&
 		allProfiles.every((targetProfile) => {
 			const follows = profileFollows.filter(
 				(follow) => follow.profileId === targetProfile.id,
@@ -1560,7 +1625,8 @@ export async function bootstrapDatabase(
 		await ensureSlugNamespaces(tx);
 		const credentials = await ensureBootstrapProfiles(tx, options.credentialMode);
 		await ensureBootstrapSuperAdminGrants(tx);
-		await ensureOfficialRealm(tx);
+		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
+		await ensureScoreRealmProfileDefaults(tx);
 		await ensureOfficialZoneAvatar(tx);
 		await ensureOfficialZones(tx);
 		await ensureOfficialZoneFollows(tx);

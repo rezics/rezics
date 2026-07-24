@@ -1,14 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-	boolean,
-	check,
-	foreignKey,
-	index,
-	integer,
-	primaryKey,
-	unique,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { check, foreignKey, index, integer, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -93,20 +84,4 @@ export const realmScoreContext = pgTable(
 		}).onDelete("restrict"),
 		index("realm_score_context_post_idx").on(table.contextPostId),
 	],
-);
-
-/** Singleton platform-wide scoring-rules explanation. */
-export const globalScoreContext = pgTable(
-	"global_score_context",
-	{
-		singleton: boolean().default(true).primaryKey(),
-		contextPostId: uuid()
-			.notNull()
-			.unique()
-			.references(() => post.id, { onDelete: "restrict" }),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [check("global_score_context_singleton_check", sql`${table.singleton}`)],
 );

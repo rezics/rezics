@@ -8,6 +8,7 @@ import { SignInButton } from "@/features/auth/auth-portal";
 import { ReviewComposer } from "@/features/reviews/components/review-composer";
 import { ScoreOverview } from "@/features/reviews/components/score-overview";
 import { UnitReviewList } from "@/features/reviews/components/unit-review-list";
+import { useDefaultScoreRealm } from "@/features/reviews/data/default-score-realm";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -24,6 +25,8 @@ export function CatalogReviewsPage() {
 	const { data: session } = useHydratedSession();
 	const { locale, t } = useTranslation(["actions", "engagement", "units"]);
 	const [realm, setRealm] = useState<PickedRealm>();
+	const defaultScoreRealm = useDefaultScoreRealm();
+	const scoreRealm = realm ?? defaultScoreRealm.realm;
 	const labels =
 		detail.type === "book"
 			? {
@@ -50,7 +53,9 @@ export function CatalogReviewsPage() {
 				<FieldLabel>{t.engagement.filterReviewRealm}</FieldLabel>
 				<EntityPicker index="realms" onChange={setRealm} value={realm} />
 			</Field>
-			{realm ? <ScoreOverview realmId={realm.id} targetId={detail.unit.id} /> : null}
+			{scoreRealm ? (
+				<ScoreOverview realmId={scoreRealm.id} targetId={detail.unit.id} />
+			) : null}
 			<Card>
 				<CardContent className="p-5 sm:p-6">
 					{session ? (

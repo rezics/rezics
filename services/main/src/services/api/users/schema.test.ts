@@ -75,6 +75,7 @@ describe("user preference inputs", () => {
 			interfaceLocale: "en",
 			defaultLicense: "cc-by-nc-sa-4.0",
 			defaultRealmManageMode: false,
+			defaultScoreRealmId: "019b76da-a800-7300-8000-000000000002",
 			collectionConfig: null,
 			personalizedFeed: true,
 			contentRatings: ["general"],

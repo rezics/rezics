@@ -6,10 +6,12 @@ import {
 	assertBootstrapManifest,
 	BootstrapEpochUnixMilliseconds,
 	BootstrapProfileManifest,
+	BootstrapRealmManifest,
 	BootstrapSuperAdminProfile,
 	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
+	RezicsScoreRealmManifest,
 	ReservedBootstrapUuidv7s,
 	SlugNamespaceManifest,
 	uuidv7UnixMilliseconds,
@@ -126,6 +128,17 @@ describe("database bootstrap manifest", () => {
 		expect(OfficialZoneManifest.map((value) => value.id)).not.toContain(
 			OfficialRealmManifest.id,
 		);
+	});
+
+	it("bootstraps REZICS Score as a distinct fixed-identity Realm", () => {
+		expect(BootstrapRealmManifest).toEqual([OfficialRealmManifest, RezicsScoreRealmManifest]);
+		expect(RezicsScoreRealmManifest.id).toBe("019b76da-a800-7300-8000-000000000002");
+		expect(RezicsScoreRealmManifest.slug).toBe("score");
+		expect(RezicsScoreRealmManifest.localizations).toEqual([
+			expect.objectContaining({ language: "zh", title: "REZICS 評分" }),
+			expect.objectContaining({ language: "en", title: "REZICS Score" }),
+		]);
+		expect(RezicsScoreRealmManifest.id).not.toBe(OfficialRealmManifest.id);
 	});
 
 	it("generates high-entropy URL-safe passwords without persisting them in the manifest", () => {

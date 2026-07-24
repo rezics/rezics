@@ -1,5 +1,6 @@
 import type { User } from "better-auth";
 import { and, eq } from "drizzle-orm";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 import { database } from "../database";
@@ -7,6 +8,7 @@ import { isPrimaryUnitLocalization } from "../units/localization";
 import {
 	profile,
 	profilePreference,
+	realmMember,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
@@ -66,7 +68,16 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 				language: DefaultContentLanguage,
 				title: authUser.name,
 			});
-			await tx.insert(profilePreference).values({ profileId: profileUnit.id });
+			await tx.insert(profilePreference).values({
+				profileId: profileUnit.id,
+				defaultScoreRealmId: OfficialRealmUnitIds.score,
+			});
+			await tx.insert(realmMember).values({
+				realmId: OfficialRealmUnitIds.score,
+				profileId: profileUnit.id,
+				role: "member",
+				state: "active",
+			});
 			await tx.insert(unitAccessBinding).values({
 				unitId: profileUnit.id,
 				subjectKind: "profile",

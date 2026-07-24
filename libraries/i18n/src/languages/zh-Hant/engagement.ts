@@ -31,7 +31,13 @@ export default {
 	reviewScore: "評分",
 	reviewScoreOptional: "評分（選填）",
 	reviewWithoutScore: "不評分",
-	reviewScoreRealmHint: `目前評分依${realmTerms.label}保存；選擇評分時也必須選擇${realmTerms.label}。`,
+	reviewScoreRealmHint: `評論未指定${realmTerms.label}時，評分會使用你的預設評分${realmTerms.label}。`,
+	scoreRealmHint: insert(
+		`此評分會記錄在「{{realm}}」。可在偏好設定變更預設評分${realmTerms.label}。`,
+		{
+			realm: String,
+		},
+	),
 	allReviewRealms: `所有${realmTerms.pluralLabel}`,
 	filterReviewRealm: `依${realmTerms.label}篩選`,
 	scoreOutOfTen: insert("{{score}}／10", { score: String }),

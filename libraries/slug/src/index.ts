@@ -17,6 +17,11 @@ export const TopLevelSlugNamespaceUnitIds = {
 	entities: "019b76da-a800-7000-8000-000000000005",
 } as const;
 
+export const OfficialRealmUnitIds = {
+	community: "019b76da-a800-7300-8000-000000000001",
+	score: "019b76da-a800-7300-8000-000000000002",
+} as const;
+
 export type TopLevelSlugNamespace = keyof typeof TopLevelSlugNamespaceUnitIds;
 
 export const PublicSlugRouteManifest = [

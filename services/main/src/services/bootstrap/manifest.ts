@@ -11,6 +11,7 @@ import {
 	ZonePageBlockHostPolicy,
 } from "@rezics/block";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { PlatformCapabilityValues } from "../database/schema/contract-values";
 import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
@@ -102,7 +103,7 @@ export const BootstrapProfileIdValues: readonly string[] = BootstrapProfileManif
 );
 
 export const OfficialRealmManifest = {
-	id: "019b76da-a800-7300-8000-000000000001",
+	id: OfficialRealmUnitIds.community,
 	slug: "rezics",
 	localizations: [
 		{
@@ -123,6 +124,31 @@ export const OfficialRealmManifest = {
 		{ profileId: OfficialProfileIds.moderation, role: "moderator" as const },
 	],
 } as const;
+
+export const RezicsScoreRealmManifest = {
+	id: OfficialRealmUnitIds.score,
+	slug: "score",
+	localizations: [
+		{
+			language: "zh",
+			title: `${RezicsBrandName} 評分`,
+			summary: `${RezicsBrandName} 評分產品的標準評分領域。`,
+		},
+		{
+			language: "en",
+			title: `${RezicsBrandName} Score`,
+			summary: `The standard rating Realm for the ${RezicsBrandName} Score product.`,
+		},
+	],
+	ownerProfileId: OfficialProfileIds.community,
+	members: [
+		{ profileId: OfficialProfileIds.community, role: "owner" as const },
+		{ profileId: OfficialProfileIds.editorial, role: "admin" as const },
+		{ profileId: OfficialProfileIds.moderation, role: "moderator" as const },
+	],
+} as const;
+
+export const BootstrapRealmManifest = [OfficialRealmManifest, RezicsScoreRealmManifest] as const;
 
 export const OfficialZoneAvatarAsset = {
 	id: "019b76da-a800-7800-8000-000000000001",
@@ -346,7 +372,7 @@ export const OfficialZoneManifest = [
 export const BootstrapUnitIds = [
 	...SlugNamespaceManifest.map((namespace) => namespace.id),
 	...BootstrapProfileManifest.map((profile) => profile.profileId),
-	OfficialRealmManifest.id,
+	...BootstrapRealmManifest.map((realm) => realm.id),
 	...OfficialZoneManifest.map((zone) => zone.id),
 	...OfficialZoneManifest.map((zone) => zone.wikiPost.id),
 	...OfficialZoneManifest.map((zone) => zone.homePage.id),

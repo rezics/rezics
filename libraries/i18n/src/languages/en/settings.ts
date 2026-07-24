@@ -22,8 +22,7 @@ export default {
 			},
 			preferences: {
 				label: "Preferences",
-				description:
-					"Choose interface and content languages, ratings, and a default license.",
+				description: `Choose interface and content languages, ratings, a default scoring ${realmTerms.label}, and a default license.`,
 			},
 			tagSources: {
 				label: "Tag sources",
@@ -178,6 +177,8 @@ export default {
 		invalidLimits: "Check the limit values, operation identifiers, and duplicates.",
 	},
 	defaultLicense: `Default ${publicationLicenseTerms.inline}`,
+	defaultScoreRealm: `Default scoring ${realmTerms.label}`,
+	defaultScoreRealmHint: `Scores from general pages use this ${realmTerms.label}. Scores created inside another ${realmTerms.label} keep that current context.`,
 	general: "General",
 	realmManageMode: `Create ${realmTerms.plural} in manage mode by default`,
 	on: "On",

@@ -15,6 +15,7 @@ import {
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull, notInArray } from "drizzle-orm";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { env } from "../config";
 import { Authorization } from "../authorization";
@@ -466,6 +467,7 @@ async function seedProfiles(
 				profileId: value.id,
 				interfaceLocale,
 				defaultLicense: index % 3 === 0 ? ("cc-by-4.0" as const) : null,
+				defaultScoreRealmId: OfficialRealmUnitIds.score,
 				personalizedFeed: index % 10 !== 0 || index === 0,
 				contentRatings:
 					index % 7 === 0 ? ["general" as const, "r15" as const] : ["general" as const],
@@ -480,6 +482,17 @@ async function seedProfiles(
 			};
 		}),
 		(batch) => tx.insert(profilePreference).values(batch),
+	);
+	await writeBatches(
+		profiles.map((value) => ({
+			realmId: OfficialRealmUnitIds.score,
+			profileId: value.id,
+			role: "member" as const,
+			state: "active" as const,
+			joinedAt: value.createdAt,
+			updatedAt: value.createdAt,
+		})),
+		(batch) => tx.insert(realmMember).values(batch),
 	);
 	const demo = itemAt(profiles, 0);
 	await tx.insert(accounts).values({

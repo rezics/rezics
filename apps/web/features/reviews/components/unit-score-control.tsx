@@ -12,9 +12,6 @@ import {
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
-	EntityPicker,
-	Field,
-	FieldLabel,
 	Rating,
 } from "@rezics/ui";
 import { useState } from "react";
@@ -24,12 +21,8 @@ import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detai
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { useDefaultScoreRealm } from "../data/default-score-realm";
 import { starValueToUnitScore, type UnitScore } from "../model/score-value";
-
-interface PickedRealm {
-	readonly id: string;
-	readonly label: string;
-}
 
 const RatingCount = 5;
 
@@ -46,21 +39,21 @@ export function UnitScoreControl({
 	const mutation = usePutApiScoresByTargetId();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [realm, setRealm] = useState<PickedRealm>();
 	const [score, setScore] = useState<UnitScore>();
+	const defaultScoreRealm = useDefaultScoreRealm();
 	const copy = t.engagement.progressByType[type];
 
 	async function saveScore() {
-		if (!realm || score === undefined) return;
+		if (!defaultScoreRealm.realm || score === undefined) return;
 		try {
 			await mutation.mutateAsync({
-				body: { realmId: realm.id, score },
+				body: { realmId: defaultScoreRealm.realm.id, score },
 				path: { targetId },
 			});
 			await queryClient.invalidateQueries({
 				queryKey: getApiScoresByTargetIdQueryKey({
 					path: { targetId },
-					query: { realmId: realm.id },
+					query: { realmId: defaultScoreRealm.realm.id },
 				}),
 			});
 			setDialogOpen(false);
@@ -105,7 +98,13 @@ export function UnitScoreControl({
 			>
 				<DialogContent showCloseButton={false} size="sm">
 					<DialogHeader
-						description={t.engagement.reviewScoreRealmHint}
+						description={
+							defaultScoreRealm.realm
+								? t.engagement.scoreRealmHint({
+										realm: defaultScoreRealm.realm.label,
+									})
+								: t.ui.loading
+						}
 						title={copy.scoreAction}
 					/>
 					<DialogBody className="grid gap-5">
@@ -127,10 +126,10 @@ export function UnitScoreControl({
 								</span>
 							)}
 						</div>
-						<Field>
-							<FieldLabel>{t.engagement.reviewRealm}</FieldLabel>
-							<EntityPicker index="realms" onChange={setRealm} value={realm} />
-						</Field>
+						<RequestFailure
+							error={defaultScoreRealm.error}
+							fallback={t.ui.retryLater}
+						/>
 						<RequestFailure error={mutation.error} fallback={t.ui.retryLater} />
 					</DialogBody>
 					<DialogFooter>
@@ -138,8 +137,8 @@ export function UnitScoreControl({
 							{t.engagement.cancel}
 						</Button>
 						<Button
-							disabled={!realm || score === undefined}
-							isLoading={mutation.isPending}
+							disabled={!defaultScoreRealm.realm || score === undefined}
+							isLoading={mutation.isPending || defaultScoreRealm.isPending}
 							onClick={() => void saveScore()}
 							variant="solid"
 						>

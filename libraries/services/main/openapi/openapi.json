@@ -28497,7 +28497,6 @@
 											"platform.moderate",
 											"platform.suppress",
 											"platform.grants.manage",
-											"platform.score-context.manage",
 											"realm.contribute",
 											"realm.settings.update",
 											"realm.members.read",
@@ -37442,7 +37441,6 @@
 															"platform.moderate",
 															"platform.suppress",
 															"platform.grants.manage",
-															"platform.score-context.manage",
 															"realm.contribute",
 															"realm.settings.update",
 															"realm.members.read",
@@ -38541,6 +38539,7 @@
 										"interfaceLocale",
 										"defaultLicense",
 										"defaultRealmManageMode",
+										"defaultScoreRealmId",
 										"collectionConfig",
 										"personalizedFeed",
 										"contentRatings",
@@ -38570,6 +38569,10 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
+										"defaultScoreRealmId": {
+											"format": "uuid",
+											"type": "string"
+										},
 										"collectionConfig": {
 											"nullable": true,
 											"anyOf": [
@@ -38714,6 +38717,7 @@
 										"interfaceLocale",
 										"defaultLicense",
 										"defaultRealmManageMode",
+										"defaultScoreRealmId",
 										"collectionConfig",
 										"personalizedFeed",
 										"contentRatings",
@@ -38743,6 +38747,10 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
+										"defaultScoreRealmId": {
+											"format": "uuid",
+											"type": "string"
+										},
 										"collectionConfig": {
 											"nullable": true,
 											"anyOf": [
@@ -38882,6 +38890,7 @@
 									"interfaceLocale",
 									"defaultLicense",
 									"defaultRealmManageMode",
+									"defaultScoreRealmId",
 									"collectionConfig",
 									"personalizedFeed",
 									"contentRatings",
@@ -38913,6 +38922,7 @@
 										"default": false,
 										"type": "boolean"
 									},
+									"defaultScoreRealmId": { "format": "uuid", "type": "string" },
 									"collectionConfig": {
 										"nullable": true,
 										"anyOf": [
@@ -38969,6 +38979,7 @@
 										"interfaceLocale",
 										"defaultLicense",
 										"defaultRealmManageMode",
+										"defaultScoreRealmId",
 										"collectionConfig",
 										"personalizedFeed",
 										"contentRatings",
@@ -38998,6 +39009,10 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
+										"defaultScoreRealmId": {
+											"format": "uuid",
+											"type": "string"
+										},
 										"collectionConfig": {
 											"nullable": true,
 											"anyOf": [
@@ -39058,7 +39073,10 @@
 												"code": {
 													"default": "UnitProtected",
 													"type": "string",
-													"enum": ["UnitProtected"]
+													"enum": [
+														"UnitProtected",
+														"RealmCapabilityRequired"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -40914,7 +40932,6 @@
 													"platform.moderate",
 													"platform.suppress",
 													"platform.grants.manage",
-													"platform.score-context.manage",
 													"realm.contribute",
 													"realm.settings.update",
 													"realm.members.read",
@@ -41057,7 +41074,6 @@
 																		"platform.moderate",
 																		"platform.suppress",
 																		"platform.grants.manage",
-																		"platform.score-context.manage",
 																		"realm.contribute",
 																		"realm.settings.update",
 																		"realm.members.read",
@@ -41206,7 +41222,6 @@
 																		"platform.moderate",
 																		"platform.suppress",
 																		"platform.grants.manage",
-																		"platform.score-context.manage",
 																		"realm.contribute",
 																		"realm.settings.update",
 																		"realm.members.read",
@@ -41304,7 +41319,7 @@
 								"required": ["capabilities", "expiresAt"],
 								"properties": {
 									"capabilities": {
-										"maxItems": 18,
+										"maxItems": 17,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -41321,7 +41336,6 @@
 												"platform.moderate",
 												"platform.suppress",
 												"platform.grants.manage",
-												"platform.score-context.manage",
 												"realm.contribute",
 												"realm.settings.update",
 												"realm.members.read",
@@ -41390,7 +41404,6 @@
 															"platform.moderate",
 															"platform.suppress",
 															"platform.grants.manage",
-															"platform.score-context.manage",
 															"realm.contribute",
 															"realm.settings.update",
 															"realm.members.read",
@@ -87408,241 +87421,6 @@
 				},
 				"operationId": "getApiScoresByTargetId",
 				"x-rezics-policy-operation-id": "getApiScoresByTargetId"
-			}
-		},
-		"/api/score-context": {
-			"get": {
-				"summary": "Get global Score context",
-				"tags": ["Scores"],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["contextPostId"],
-									"properties": {
-										"contextPostId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
-										}
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PostNotFound",
-													"type": "string",
-													"enum": ["PostNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "getApiScore-context",
-				"x-rezics-policy-operation-id": "getApiScore-context"
-			},
-			"put": {
-				"summary": "Set global Score context",
-				"tags": ["Scores"],
-				"security": [{ "SessionCookie": [] }],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["contextPostId"],
-								"properties": {
-									"contextPostId": { "format": "uuid", "type": "string" }
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["contextPostId"],
-									"properties": {
-										"contextPostId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
-										}
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Request body could not be parsed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PostNotFound",
-													"type": "string",
-													"enum": ["PostNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "putApiScore-context",
-				"x-rezics-policy-operation-id": "putApiScore-context"
-			},
-			"delete": {
-				"summary": "Clear global Score context",
-				"tags": ["Scores"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "SessionCookie": [] }],
-				"operationId": "deleteApiScore-context",
-				"x-rezics-policy-operation-id": "deleteApiScore-context"
 			}
 		},
 		"/api/reactions/units/{unitId}": {

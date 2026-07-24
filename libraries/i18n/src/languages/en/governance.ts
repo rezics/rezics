@@ -49,7 +49,6 @@ export default {
 		"platform.moderate": "Moderate platform Units",
 		"platform.suppress": "Suppress platform content and revisions",
 		"platform.grants.manage": "Manage platform staff grants",
-		"platform.score-context.manage": "Manage platform score contexts",
 		"realm.contribute": `Participate in every ${realmTerms.label}`,
 		"realm.settings.update": `Update ${realmTerms.label} settings`,
 		"realm.members.read": `Read ${realmTerms.label} members`,

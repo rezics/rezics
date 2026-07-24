@@ -26,12 +26,9 @@ import {
 	type ContentLanguage,
 	ContentRatingValues,
 	ContentStatusValues,
-	DefaultContentLanguage,
-	DefaultStoredUiLocale,
 	ImageAssetAccessValues,
 	ImageAssetStatusValues,
 	ModerationStatusValues,
-	type StoredUiLocale,
 	type UnitKind,
 	UnitKindValues,
 	UnitStatusValues,
@@ -41,8 +38,6 @@ import {
 import {
 	createCreatedAtColumn,
 	createJsonDocumentColumn,
-	createJsonObjectColumn,
-	createJsonObjectConstraint,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -265,52 +260,6 @@ export const imageObject = pgTable(
 		check(
 			"image_object_metadata_shape_check",
 			sql`(${table.mediaType} is null and ${table.byteSize} is null) or (${table.mediaType} is not null and ${table.byteSize} > 0)`,
-		),
-	],
-);
-
-export const profilePreference = pgTable(
-	"profile_preference",
-	{
-		profileId: uuid()
-			.primaryKey()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		defaultLicense: text().$type<PublicationLicenseId>(),
-		defaultRealmManageMode: boolean().default(false).notNull(),
-		personalizedFeed: boolean().default(true).notNull(),
-		collectionConfig: createJsonObjectColumn(),
-		interfaceLocale: text().$type<StoredUiLocale>().default(DefaultStoredUiLocale).notNull(),
-		contentRatings: contentRating()
-			.array()
-			.default(sql`array[]::content_rating[]`)
-			.notNull(),
-		preferredLanguages: text()
-			.$type<ContentLanguage>()
-			.array()
-			.default(sql.raw(`array['${DefaultContentLanguage}']::text[]`))
-			.notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		check(
-			"profile_preference_default_license_check",
-			sql`${table.defaultLicense} is null or btrim(${table.defaultLicense}) <> ''`,
-		),
-		check(
-			"profile_preference_languages_check",
-			sql`cardinality(${table.preferredLanguages}) > 0
-				and ${table.preferredLanguages} <@ array['zh', 'en']::text[]
-				and cardinality(array_positions(${table.preferredLanguages}, 'zh')) <= 1
-				and cardinality(array_positions(${table.preferredLanguages}, 'en')) <= 1`,
-		),
-		check(
-			"profile_preference_interface_locale_check",
-			sql`${table.interfaceLocale} in ('en', 'zh-hant')`,
-		),
-		createJsonObjectConstraint(
-			"profile_preference_collection_config_json_object_check",
-			table.collectionConfig,
 		),
 	],
 );

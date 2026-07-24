@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { and, eq, or } from "drizzle-orm";
 import Elysia from "elysia";
 import { parseNullablePublicationLicenseId } from "@rezics/license";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
@@ -76,6 +77,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 		interfaceLocale: preference.interfaceLocale,
 		defaultLicense: parseNullablePublicationLicenseId(preference.defaultLicense),
 		defaultRealmManageMode: preference.defaultRealmManageMode,
+		defaultScoreRealmId: preference.defaultScoreRealmId ?? OfficialRealmUnitIds.score,
 		collectionConfig: parseCollectionConfig(preference.collectionConfig),
 		personalizedFeed: preference.personalizedFeed,
 		contentRatings: preference.contentRatings,
@@ -229,6 +231,7 @@ export default new Elysia({ prefix: "/users" })
 		"/me/preferences",
 		async ({ profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(profile.unitId, [["preferences"]]);
+			await authorization.realm.ensureParticipation(body.defaultScoreRealmId);
 			await database.transaction(async (tx) => {
 				const [preference] = await tx
 					.update(profilePreference)
@@ -236,6 +239,7 @@ export default new Elysia({ prefix: "/users" })
 						interfaceLocale: body.interfaceLocale,
 						defaultLicense: body.defaultLicense,
 						defaultRealmManageMode: body.defaultRealmManageMode,
+						defaultScoreRealmId: body.defaultScoreRealmId,
 						collectionConfig: body.collectionConfig,
 						personalizedFeed: body.personalizedFeed,
 						contentRatings: body.contentRatings,
@@ -255,7 +259,10 @@ export default new Elysia({ prefix: "/users" })
 			body: ReplacePreferencesBody,
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitProtected"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitProtected",
+					"RealmCapabilityRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },

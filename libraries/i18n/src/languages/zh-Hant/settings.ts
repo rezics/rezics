@@ -22,7 +22,7 @@ export default {
 			},
 			preferences: {
 				label: "偏好設定",
-				description: "選擇介面語言、內容語言、內容分級與預設授權。",
+				description: `選擇介面語言、內容語言、內容分級、預設評分${realmTerms.label}與預設授權。`,
 			},
 			tagSources: {
 				label: "標籤來源",
@@ -170,6 +170,8 @@ export default {
 		invalidLimits: `請檢查限制值、操作 ${verbatimTerms.id.value} 及重複項目。`,
 	},
 	defaultLicense: `預設${publicationLicenseTerms.label}`,
+	defaultScoreRealm: `預設評分${realmTerms.label}`,
+	defaultScoreRealmHint: `一般頁面的評分會記錄在這個${realmTerms.label}；在其他${realmTerms.label}內評分時，仍會使用當前語境。`,
 	general: "一般",
 	realmManageMode: `預設以${realmTerms.inline}管理模式建立`,
 	on: "開啟",

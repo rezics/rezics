@@ -9,7 +9,6 @@ import { isPrimaryUnitLocalization, makePrimaryUnitLocalization } from "../../un
 import {
 	post,
 	postScore,
-	globalScoreContext,
 	realmUnit,
 	score,
 	scoreStat,
@@ -33,7 +32,6 @@ import {
 	IdResponse,
 	NoContentResponse,
 	ScoreAggregateResponse,
-	ScoreContextResponse,
 	ScoreResponse,
 } from "../schema/action-response";
 import {
@@ -50,12 +48,10 @@ import {
 	ScoreAggregateQuery,
 	ScoreTargetParams,
 	SetScoreBody,
-	SetScoreContextBody,
 	UpdateReviewBody,
 } from "./schema";
 import { upsertScore } from "./service";
 import { ReviewNotFound } from "./errors";
-import { PostNotFound } from "../posts/errors";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
@@ -479,94 +475,6 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 					},
 					detail: { summary: "Get score aggregate", tags: ["Reviews"] },
-				},
-			),
-	)
-	.group("/score-context", (app) =>
-		app
-			.get(
-				"",
-				async ({ request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
-						.authorization;
-					const [context] = await database
-						.select({ contextPostId: globalScoreContext.contextPostId })
-						.from(globalScoreContext)
-						.where(eq(globalScoreContext.singleton, true))
-						.limit(1);
-					if (context)
-						await authorization.unit.ensureCanRead(
-							context.contextPostId,
-							() => new PostNotFound(),
-						);
-					return { contextPostId: context?.contextPostId ?? null };
-				},
-				{
-					response: {
-						[StatusCodes.OK]: ScoreContextResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
-					},
-					detail: { summary: "Get global Score context", tags: ["Scores"] },
-				},
-			)
-			.put(
-				"",
-				async ({ profile, authorization, body }) => {
-					await authorization.platform.ensureCapability("platform.score-context.manage");
-					await authorization.unit.ensureCanRead(
-						body.contextPostId,
-						() => new PostNotFound(),
-					);
-					const [record] = await database
-						.select({ id: post.id })
-						.from(post)
-						.where(eq(post.id, body.contextPostId))
-						.limit(1);
-					if (!record) throw new PostNotFound();
-					await database
-						.insert(globalScoreContext)
-						.values({
-							singleton: true,
-							contextPostId: body.contextPostId,
-							createdByProfileId: profile.unitId,
-						})
-						.onConflictDoUpdate({
-							target: globalScoreContext.singleton,
-							set: { contextPostId: body.contextPostId, updatedAt: new Date() },
-						});
-					return { contextPostId: body.contextPostId };
-				},
-				{
-					access: "session-only",
-					body: SetScoreContextBody,
-					response: {
-						[StatusCodes.OK]: ScoreContextResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
-					},
-					detail: { summary: "Set global Score context", tags: ["Scores"] },
-				},
-			)
-			.delete(
-				"",
-				async ({ authorization }) => {
-					await authorization.platform.ensureCapability("platform.score-context.manage");
-					await database
-						.delete(globalScoreContext)
-						.where(eq(globalScoreContext.singleton, true));
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "session-only",
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-					},
-					detail: {
-						summary: "Clear global Score context",
-						tags: ["Scores"],
-						responses: NoContentResponse,
-					},
 				},
 			),
 	);
