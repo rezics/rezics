@@ -4,6 +4,7 @@ import { BookOpenIcon } from "lucide-react";
 import type { PresentedAvatar } from "@rezics/avatar";
 
 import { useUiMessages } from "./ui-provider";
+import { UnitCard } from "./unit-card";
 import { Cover } from "./cover";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "../ui/item";
@@ -20,19 +21,25 @@ export interface UnitListItem {
 	cover?: { id: string; url: string } | null;
 }
 
-export function UnitList({
-	items,
-	pending,
-	error,
-	href,
-	variant = "list",
-}: {
+interface UnitListStateProps {
 	items: readonly UnitListItem[] | undefined;
 	pending: boolean;
 	error: boolean;
-	href?: (item: UnitListItem) => string | undefined;
-	variant?: "list" | "shelf";
-}) {
+}
+
+type UnitListProps =
+	| (UnitListStateProps & {
+			href: (item: UnitListItem) => string;
+			variant: "shelf";
+	  })
+	| (UnitListStateProps & {
+			href?: (item: UnitListItem) => string | undefined;
+			variant?: "list";
+	  });
+
+export function UnitList(props: UnitListProps) {
+	const { items, pending, error } = props;
+	const variant = props.variant ?? "list";
 	const messages = useUiMessages();
 	if (pending)
 		return (
@@ -60,35 +67,26 @@ export function UnitList({
 			</Alert>
 		);
 	if (!items?.length) return <p className="text-muted-foreground text-sm">{messages.empty}</p>;
-	if (variant === "shelf")
+	if (props.variant === "shelf")
 		return (
 			<div
 				className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5"
 				role="list"
 			>
 				{items.map((item) => {
-					const target = href?.(item) ?? item.href;
 					const title =
 						item.title ??
 						(typeof messages.unnamed === "string" ? messages.unnamed : "Unnamed");
 					return (
-						<LinkBox className="group min-w-0" key={item.id} role="listitem">
-							<Cover
-								alt={title}
-								className="rounded-xl border border-border-weak shadow-sm/5 transition-transform duration-200 group-hover:-translate-y-0.5 motion-reduce:transition-none"
+						<div key={item.id} role="listitem">
+							<UnitCard
+								cover={item.cover}
+								description={item.summary}
 								fallback={<BookOpenIcon aria-hidden className="size-8" />}
-								sizes="(min-width: 1024px) 176px, (min-width: 640px) 28vw, 44vw"
-								src={item.cover?.url}
+								href={props.href(item)}
+								title={title}
 							/>
-							<h2 className="mt-2.5 line-clamp-2 font-semibold text-sm leading-5">
-								{target ? <LinkOverlay href={target}>{title}</LinkOverlay> : title}
-							</h2>
-							{item.summary ? (
-								<p className="mt-1 line-clamp-2 text-muted-foreground text-xs leading-5">
-									{item.summary}
-								</p>
-							) : null}
-						</LinkBox>
+						</div>
 					);
 				})}
 			</div>
@@ -97,7 +95,7 @@ export function UnitList({
 	return (
 		<ItemGroup className="gap-0 overflow-hidden rounded-2xl bg-background">
 			{items.map((item) => {
-				const target = href?.(item) ?? item.href;
+				const target = props.href?.(item) ?? item.href;
 				const usesAvatar = Boolean(item.avatar);
 				const title =
 					item.title ??

@@ -6,29 +6,10 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowRight,
-	BookOpenIcon,
-	Ellipsis,
-	EyeOff,
-	Gamepad2Icon,
-	PlaySquareIcon,
-} from "lucide-react";
-import Link from "next/link";
+import { BookOpenIcon, Ellipsis, EyeOff, Gamepad2Icon, PlaySquareIcon } from "lucide-react";
 import { useState } from "react";
 
-import {
-	Button,
-	Card,
-	CardContent,
-	cn,
-	Cover,
-	Menu,
-	MenuContent,
-	MenuItem,
-	MenuTrigger,
-	Skeleton,
-} from "@rezics/ui";
+import { Button, Menu, MenuContent, MenuItem, MenuTrigger, Skeleton, UnitCard } from "@rezics/ui";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
@@ -52,7 +33,7 @@ export function UnitShelf({
 	personalized?: boolean;
 	seedUnitId?: string;
 }) {
-	const { t } = useTranslation(["actions", "feed", "state", "ui"]);
+	const { t } = useTranslation(["feed", "state", "ui"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsUnits({
@@ -65,9 +46,9 @@ export function UnitShelf({
 	});
 	if (query.isPending)
 		return (
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{Array.from({ length: 3 }, (_, index) => (
-					<Skeleton key={index} className="h-32 rounded-xl" />
+			<div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-6">
+				{Array.from({ length: 6 }, (_, index) => (
+					<Skeleton key={index} className="aspect-[3/4] rounded-xl" />
 				))}
 			</div>
 		);
@@ -82,13 +63,12 @@ export function UnitShelf({
 			return next;
 		});
 	return (
-		<div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-			{items.map((item, index) => (
+		<div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-6">
+			{items.map((item) => (
 				<UnitRecommendationCard
 					key={item.id}
 					item={item}
 					canExclude={Boolean(session)}
-					featuredMobile={index === 0}
 					onHiddenChange={(value) => setItemHidden(item.id, value)}
 				/>
 			))}
@@ -99,15 +79,13 @@ export function UnitShelf({
 function UnitRecommendationCard({
 	item,
 	canExclude,
-	featuredMobile,
 	onHiddenChange,
 }: {
 	item: RecommendedUnit;
 	canExclude: boolean;
-	featuredMobile: boolean;
 	onHiddenChange: (hidden: boolean) => void;
 }) {
-	const { t } = useTranslation(["actions", "feed", "state", "ui"]);
+	const { t } = useTranslation(["feed", "state", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(item.id, item.tracking);
 	const queryClient = useQueryClient();
 	const exclude = usePutApiRecommendationsExclusionsByUnitId({
@@ -134,86 +112,42 @@ function UnitRecommendationCard({
 		});
 	};
 	return (
-		<Card
-			asChild
-			className={cn(
-				"group relative overflow-hidden p-0",
-				!featuredMobile && "hidden sm:flex",
-				featuredMobile &&
-					"grid grid-cols-[7.25rem_minmax(0,1fr)] sm:flex sm:grid-cols-none",
-			)}
-		>
-			<article ref={elementRef}>
-				{canExclude && (
-					<Menu>
-						<MenuTrigger asChild>
-							<Button
-								aria-label={t.feed.recommendationMenu}
-								className="absolute end-2 top-2 z-10 size-11 bg-background/80 backdrop-blur sm:size-6"
-								pill
-								size="icon-xs"
-								variant="secondary"
-							>
-								<Ellipsis aria-hidden />
-							</Button>
-						</MenuTrigger>
-						<MenuContent>
-							<MenuItem
-								disabled={exclude.isPending}
-								onSelect={markNotInterested}
-								value="not-interested"
-							>
-								<EyeOff aria-hidden />
-								{t.feed.notInterested}
-							</MenuItem>
-						</MenuContent>
-					</Menu>
-				)}
-				<Link
-					aria-label={item.title ?? t.ui.unnamed}
-					href={`/units/${item.type}/${item.id}`}
-					onClick={trackOpen}
-				>
-					<Cover
-						alt=""
-						className={cn(
-							"rounded-none",
-							featuredMobile && "h-full min-h-44 sm:h-auto sm:min-h-0",
-						)}
-						fallback={<UnitIcon aria-hidden className="size-9" />}
-						src={item.cover?.url}
-					/>
-				</Link>
-				<CardContent
-					className={cn(
-						"flex min-h-32 flex-col gap-2 p-3",
-						featuredMobile && "min-h-44 sm:min-h-32",
-					)}
-				>
-					<p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-						{item.type}
-					</p>
-					<h3
-						className={cn(
-							"line-clamp-2 text-sm font-semibold",
-							featuredMobile && "text-base sm:text-sm",
-						)}
-					>
-						{item.title ?? t.ui.unnamed}
-					</h3>
-					{reason && (
-						<p className="line-clamp-1 text-muted-foreground text-xs">{reason}</p>
-					)}
-					<Link
-						href={`/units/${item.type}/${item.id}`}
-						className="mt-auto inline-flex items-center gap-1 text-link text-sm hover:text-link-hover"
-						onClick={trackOpen}
-					>
-						{t.actions.view}{" "}
-						<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-					</Link>
-				</CardContent>
-			</article>
-		</Card>
+		<article className="relative min-w-0" ref={elementRef}>
+			<UnitCard
+				cover={item.cover}
+				description={reason}
+				fallback={<UnitIcon aria-hidden className="size-8" />}
+				headingAs="h3"
+				href={`/units/${item.type}/${item.id}`}
+				onClick={trackOpen}
+				sizes="(min-width: 1024px) 160px, (min-width: 640px) 30vw, 44vw"
+				title={item.title ?? t.ui.unnamed}
+			/>
+			{canExclude ? (
+				<Menu>
+					<MenuTrigger asChild>
+						<Button
+							aria-label={t.feed.recommendationMenu}
+							className="absolute end-2 top-2 z-10 size-11 bg-background/80 backdrop-blur sm:size-6"
+							pill
+							size="icon-xs"
+							variant="secondary"
+						>
+							<Ellipsis aria-hidden />
+						</Button>
+					</MenuTrigger>
+					<MenuContent>
+						<MenuItem
+							disabled={exclude.isPending}
+							onSelect={markNotInterested}
+							value="not-interested"
+						>
+							<EyeOff aria-hidden />
+							{t.feed.notInterested}
+						</MenuItem>
+					</MenuContent>
+				</Menu>
+			) : null}
+		</article>
 	);
 }
