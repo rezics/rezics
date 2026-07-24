@@ -21,7 +21,6 @@ import {
 import { InvalidSearch } from "./errors";
 import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
 import { SearchCategories } from "./schema";
-import { executeCompiledSearch } from "./configuration";
 
 interface SearchTemplateDefinition {
 	readonly id: SearchTemplateId;
@@ -644,6 +643,7 @@ export function mapSearchFeatureFacets(
 
 export async function executeSearchFeatureInput(input: unknown, profileId?: string) {
 	const compiled = compileSearchFeatureInput(input);
+	const { executeCompiledSearch } = await import("./configuration");
 	const result = await executeCompiledSearch(
 		compiled.request,
 		profileId,

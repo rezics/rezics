@@ -432,7 +432,32 @@ async function verifyDocuments(
 		throw new TypeError("Invalid Meilisearch index stats response");
 	const countResult = await database.execute<{ count: string }>(
 		kind === "current"
-			? sql`select count(*)::text as count from search_unit_projection_source source join unit on unit.id = source.unit_id where unit.kind in ('book', 'software', 'media', 'profile', 'entity', 'tag', 'post', 'realm', 'collection', 'poll')`
+			? sql`select count(*)::text as count
+				from search_unit_projection_source source
+				join unit on unit.id = source.unit_id
+				where unit.kind in ('book', 'software', 'media', 'profile', 'entity', 'tag', 'post', 'realm', 'collection', 'poll')
+					or (
+						unit.kind = 'structure'
+						and exists (
+							select 1
+							from unit_structure_vote_stat definition_stat
+							where definition_stat.structure_id = source.unit_id
+								and definition_stat.score > 0
+						)
+						and not exists (
+							select 1
+							from unit_structure_member member
+							join unit member_unit on member_unit.id = member.member_unit_id
+							where member.structure_id = source.unit_id
+								and (
+									member_unit.kind <> 'tag'
+									or member_unit.status <> 'published'
+									or member_unit.visibility <> 'public'
+									or member_unit.moderation_status <> 'approved'
+									or member_unit.deleted_at is not null
+								)
+						)
+					)`
 			: sql`select count(*)::text as count from search_revision_projection_source source join unit_revision revision on revision.id = source.revision_id where not revision.suppressed`,
 	);
 	const expected = Number(countResult.rows[0]?.count ?? "0");
