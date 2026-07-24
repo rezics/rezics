@@ -1,8 +1,10 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
+import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 const { forms: postTerms } = enTerminology.post;
+const { forms: followTerms } = enTerminology.follow;
 
 export default {
 	types: { book: "Book", software: "Software", media: "Media", series: "Series" },
@@ -160,6 +162,12 @@ export default {
 		localizations: "Localizations",
 		credits: "Credits",
 		aboutAuthor: "About the author",
+		authorStatistics: {
+			bookOne: "1 book",
+			books: insert("{{count}} books", { count: String }),
+			followerOne: `1 ${followTerms.follower}`,
+			followers: insert(`{{count}} ${followTerms.follower}s`, { count: String }),
+		},
 		viewAllCredits: "View all credits",
 		backToOverview: "Back to overview",
 		subjectAssociations: "Subjects",

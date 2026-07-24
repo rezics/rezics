@@ -51,7 +51,10 @@ import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors"
 import { recordUnitRevision } from "./history";
 import { insertUnit } from "./create";
 import { transitionUnitStatus } from "./status";
-import { getAttributionSummariesByUnitIds } from "./attribution";
+import {
+	getAttributionSummariesByUnitIds,
+	getAttributionSummariesWithStatisticsByUnitIds,
+} from "./attribution";
 import { getUnitVariantContext } from "./variants";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import { presentAvatar } from "./avatar";
@@ -242,7 +245,8 @@ export async function getUnit(
 		.where(eq(unitLocalization.unitId, base.id))
 		.orderBy(unitLocalization.position, unitLocalization.language);
 	const primaryLanguage = localizations[0]?.language ?? null;
-	const attributions = (await getAttributionSummariesByUnitIds([base.id])).get(base.id) ?? [];
+	const attributions =
+		(await getAttributionSummariesWithStatisticsByUnitIds([base.id])).get(base.id) ?? [];
 	const subjectAssociations = await database
 		.select({
 			id: subjectAssociation.id,

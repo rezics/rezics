@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { DateTime } from ".";
 import {
 	toPortableTextResponse,
+	UnitDetailAttributionSummaryResponse,
 	UnitProgressStatisticsResponse,
 	UnitVariantContextResponse,
 } from "./response";
@@ -81,5 +82,37 @@ describe("API response values", () => {
 		);
 		expect(Check(UnitProgressStatisticsResponse, { active: -1, backlog: 0 })).toBe(false);
 		expect(Check(UnitProgressStatisticsResponse, { active: 1.5, backlog: 0 })).toBe(false);
+	});
+
+	it("requires non-negative attribution statistics in Unit summaries", () => {
+		const attribution = {
+			id: "00000000-0000-7000-8000-000000000001",
+			role: "author",
+			position: "a0",
+			creditedUnit: {
+				id: "00000000-0000-7000-8000-000000000002",
+				kind: "profile",
+				slugAddress: null,
+				title: "Author",
+				summary: null,
+				avatar: null,
+				creditedBookCount: 1,
+				followerCount: 746,
+			},
+		};
+
+		expect(Check(UnitDetailAttributionSummaryResponse, attribution)).toBe(true);
+		expect(
+			Check(UnitDetailAttributionSummaryResponse, {
+				...attribution,
+				creditedUnit: { ...attribution.creditedUnit, creditedBookCount: -1 },
+			}),
+		).toBe(false);
+		expect(
+			Check(UnitDetailAttributionSummaryResponse, {
+				...attribution,
+				creditedUnit: { ...attribution.creditedUnit, followerCount: 1.5 },
+			}),
+		).toBe(false);
 	});
 });

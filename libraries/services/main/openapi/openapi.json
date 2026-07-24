@@ -47419,7 +47419,9 @@
 															"slugAddress",
 															"title",
 															"summary",
-															"avatar"
+															"avatar",
+															"creditedBookCount",
+															"followerCount"
 														],
 														"properties": {
 															"id": {
@@ -47599,6 +47601,34 @@
 																		]
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"creditedBookCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"followerCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															}
 														}
@@ -49173,7 +49203,9 @@
 															"slugAddress",
 															"title",
 															"summary",
-															"avatar"
+															"avatar",
+															"creditedBookCount",
+															"followerCount"
 														],
 														"properties": {
 															"id": {
@@ -49353,6 +49385,34 @@
 																		]
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"creditedBookCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"followerCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															}
 														}
@@ -51020,7 +51080,9 @@
 															"slugAddress",
 															"title",
 															"summary",
-															"avatar"
+															"avatar",
+															"creditedBookCount",
+															"followerCount"
 														],
 														"properties": {
 															"id": {
@@ -51200,6 +51262,34 @@
 																		]
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"creditedBookCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"followerCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															}
 														}
@@ -53023,7 +53113,9 @@
 															"slugAddress",
 															"title",
 															"summary",
-															"avatar"
+															"avatar",
+															"creditedBookCount",
+															"followerCount"
 														],
 														"properties": {
 															"id": {
@@ -53203,6 +53295,34 @@
 																		]
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"creditedBookCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"followerCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															}
 														}
@@ -54817,7 +54937,9 @@
 															"slugAddress",
 															"title",
 															"summary",
-															"avatar"
+															"avatar",
+															"creditedBookCount",
+															"followerCount"
 														],
 														"properties": {
 															"id": {
@@ -54997,6 +55119,34 @@
 																		]
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"creditedBookCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"followerCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															}
 														}
@@ -56981,7 +57131,9 @@
 															"slugAddress",
 															"title",
 															"summary",
-															"avatar"
+															"avatar",
+															"creditedBookCount",
+															"followerCount"
 														],
 														"properties": {
 															"id": {
@@ -57161,6 +57313,34 @@
 																		]
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"creditedBookCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"followerCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															}
 														}

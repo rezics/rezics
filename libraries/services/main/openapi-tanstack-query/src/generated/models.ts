@@ -38318,6 +38318,8 @@ export type PostApiUnitsByTypeStatus200 = {
 						| null
 				  )
 				| null;
+			creditedBookCount: string | number;
+			followerCount: string | number;
 		};
 	}[];
 	/**
@@ -39751,6 +39753,8 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 						| null
 				  )
 				| null;
+			creditedBookCount: string | number;
+			followerCount: string | number;
 		};
 	}[];
 	/**
@@ -40793,6 +40797,8 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 						| null
 				  )
 				| null;
+			creditedBookCount: string | number;
+			followerCount: string | number;
 		};
 	}[];
 	/**
@@ -42316,6 +42322,8 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 						| null
 				  )
 				| null;
+			creditedBookCount: string | number;
+			followerCount: string | number;
 		};
 	}[];
 	/**
@@ -43521,6 +43529,8 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 						| null
 				  )
 				| null;
+			creditedBookCount: string | number;
+			followerCount: string | number;
 		};
 	}[];
 	/**
@@ -44731,6 +44741,8 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 						| null
 				  )
 				| null;
+			creditedBookCount: string | number;
+			followerCount: string | number;
 		};
 	}[];
 	/**

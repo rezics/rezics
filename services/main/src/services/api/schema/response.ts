@@ -118,20 +118,35 @@ const LocalizationResponse = t.Object({
 	updatedAt: DateTime,
 });
 
-export const UnitSummaryResponse = t.Object({
+const UnitSummaryFields = {
 	id: Uuid,
 	kind: t.UnionEnum(UnitKindValues),
 	slugAddress: NullablePublicSlugAddressResponse,
 	title: NullableText,
 	summary: NullableText,
 	avatar: AvatarResponse,
-});
+} as const;
 
-export const UnitAttributionSummaryResponse = t.Object({
+export const UnitSummaryResponse = t.Object(UnitSummaryFields);
+
+const UnitAttributionSummaryFields = {
 	id: Uuid,
 	role: t.UnionEnum(CreditAttributionRoleValues),
 	position: FractionalPosition,
+} as const;
+
+export const UnitAttributionSummaryResponse = t.Object({
+	...UnitAttributionSummaryFields,
 	creditedUnit: UnitSummaryResponse,
+});
+
+export const UnitDetailAttributionSummaryResponse = t.Object({
+	...UnitAttributionSummaryFields,
+	creditedUnit: t.Object({
+		...UnitSummaryFields,
+		creditedBookCount: t.Integer({ minimum: 0 }),
+		followerCount: t.Integer({ minimum: 0 }),
+	}),
 });
 
 export const UnitListResponse = t.Object({
@@ -249,7 +264,7 @@ export const UnitDetailResponse = t.Object({
 	license: t.Nullable(PublicationLicense),
 	postTargetingLocked: t.Boolean(),
 	publishedAt: t.Nullable(DateTime),
-	attributions: t.Array(UnitAttributionSummaryResponse),
+	attributions: t.Array(UnitDetailAttributionSummaryResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	primaryLanguage: NullableText,

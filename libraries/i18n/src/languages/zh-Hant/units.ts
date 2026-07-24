@@ -1,9 +1,11 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+import { insert } from "native-i18n";
 
 const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: followTerms } = zhHantTerminology.follow;
 
 export default {
 	types: { book: "書籍", software: "軟體", media: "媒體", series: "系列" },
@@ -148,6 +150,12 @@ export default {
 		localizations: "在地化內容",
 		credits: "署名",
 		aboutAuthor: "關於作者",
+		authorStatistics: {
+			bookOne: "1 本書",
+			books: insert("{{count}} 本書", { count: String }),
+			followerOne: `1 位${followTerms.follower}`,
+			followers: insert(`{{count}} 位${followTerms.follower}`, { count: String }),
+		},
 		viewAllCredits: "查看全部署名",
 		backToOverview: "返回作品資料",
 		subjectAssociations: "內容主體",

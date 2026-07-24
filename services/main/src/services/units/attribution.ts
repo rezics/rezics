@@ -1,7 +1,8 @@
-import { and, asc, eq, inArray, isNull, ne } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
-import { creditAttribution, unit } from "../database/schema";
+import { creditAttribution, unit, unitFollowStat } from "../database/schema";
+import { toSafeInteger } from "../database/integer";
 import type { CreditAttributionRole, UnitKind } from "../database/schema/contract-values";
 import {
 	primaryUnitSummary,
@@ -33,6 +34,13 @@ export type UnitAttributionSummary = {
 
 export type UnitSummary = UnitAttributionSummary["creditedUnit"];
 
+export type UnitAttributionSummaryWithStatistics = Omit<UnitAttributionSummary, "creditedUnit"> & {
+	readonly creditedUnit: UnitSummary & {
+		readonly creditedBookCount: number;
+		readonly followerCount: number;
+	};
+};
+
 export async function getPublicUnitSummariesByIds(
 	unitIds: readonly string[],
 ): Promise<Map<string, UnitSummary>> {
@@ -63,6 +71,61 @@ export async function getPublicUnitSummariesByIds(
 				...row,
 				slugAddress: slugAddresses.get(row.id) ?? null,
 				avatar: presentAvatar(avatar),
+			},
+		]),
+	);
+}
+
+async function getAttributionStatisticsByUnitIds(
+	unitIds: readonly string[],
+): Promise<Map<string, { readonly creditedBookCount: number; readonly followerCount: number }>> {
+	if (!unitIds.length) return new Map();
+	const [followerRows, creditedBookRows] = await Promise.all([
+		database
+			.select({
+				unitId: unitFollowStat.unitId,
+				followerCount: unitFollowStat.followerCount,
+			})
+			.from(unitFollowStat)
+			.where(inArray(unitFollowStat.unitId, [...unitIds])),
+		database
+			.select({
+				creditedUnitId: creditAttribution.creditedUnitId,
+				creditedBookCount: sql<unknown>`count(distinct ${creditAttribution.sourceUnitId})`,
+			})
+			.from(creditAttribution)
+			.innerJoin(unit, eq(unit.id, creditAttribution.sourceUnitId))
+			.where(
+				and(
+					inArray(creditAttribution.creditedUnitId, [...unitIds]),
+					inArray(creditAttribution.role, ["author", "co-author"]),
+					eq(unit.kind, "book"),
+					eq(unit.status, "published"),
+					ne(unit.visibility, "private"),
+					eq(unit.moderationStatus, "approved"),
+					isNull(unit.deletedAt),
+				),
+			)
+			.groupBy(creditAttribution.creditedUnitId),
+	]);
+	const followerCounts = new Map(
+		followerRows.map(({ unitId, followerCount }) => [
+			unitId,
+			toSafeInteger(followerCount, "Unit follower count"),
+		]),
+	);
+	const creditedBookCounts = new Map(
+		creditedBookRows.map(({ creditedUnitId, creditedBookCount }) => [
+			creditedUnitId,
+			toSafeInteger(creditedBookCount, "credited Book count"),
+		]),
+	);
+	return new Map(
+		unitIds.map((unitId) => [
+			unitId,
+			{
+				creditedBookCount: creditedBookCounts.get(unitId) ?? 0,
+				followerCount: followerCounts.get(unitId) ?? 0,
 			},
 		]),
 	);
@@ -122,4 +185,30 @@ export async function getAttributionSummariesByUnitIds(
 		});
 	}
 	return result;
+}
+
+export async function getAttributionSummariesWithStatisticsByUnitIds(
+	sourceUnitIds: readonly string[],
+): Promise<Map<string, UnitAttributionSummaryWithStatistics[]>> {
+	const summaries = await getAttributionSummariesByUnitIds(sourceUnitIds);
+	const statistics = await getAttributionStatisticsByUnitIds(
+		[...summaries.values()].flatMap((items) =>
+			items.map(({ creditedUnit }) => creditedUnit.id),
+		),
+	);
+	return new Map(
+		[...summaries].map(([sourceUnitId, items]) => [
+			sourceUnitId,
+			items.map((item) => ({
+				...item,
+				creditedUnit: {
+					...item.creditedUnit,
+					...(statistics.get(item.creditedUnit.id) ?? {
+						creditedBookCount: 0,
+						followerCount: 0,
+					}),
+				},
+			})),
+		]),
+	);
 }

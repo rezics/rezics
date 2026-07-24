@@ -15,6 +15,7 @@ import { Fragment } from "react";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
 import { useTranslation } from "@/i18n/client";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { groupByAssociationRole } from "../attribution-role";
 import { publicUnitHref } from "../routing/public-unit-route";
 
@@ -35,7 +36,10 @@ function AttributionName({
 	const href = attributionHref(attribution);
 	const name = attribution.creditedUnit.title ?? t.ui.unnamed;
 	const nameContent = href ? (
-		<Link className="font-medium text-link hover:text-link-hover hover:underline" href={href}>
+		<Link
+			className="font-medium text-foreground underline decoration-foreground/35 underline-offset-4 hover:decoration-foreground"
+			href={href}
+		>
 			{name}
 		</Link>
 	) : (
@@ -137,8 +141,20 @@ export function DetailedCreditAttributionGroups({
 }
 
 export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditAttribution }) {
-	const { t } = useTranslation(["ui", "units"]);
+	const { locale, t } = useTranslation(["ui", "units"]);
 	const name = attribution.creditedUnit.title ?? t.ui.unnamed;
+	const creditedBookCount = toNonNegativeApiInteger(attribution.creditedUnit.creditedBookCount);
+	const followerCount = toNonNegativeApiInteger(attribution.creditedUnit.followerCount);
+	const numberFormat = new Intl.NumberFormat(locale.target);
+	const statistics = t.units.detail.authorStatistics;
+	const bookCountLabel =
+		creditedBookCount === 1
+			? statistics.bookOne
+			: statistics.books({ count: numberFormat.format(creditedBookCount) });
+	const followerCountLabel =
+		followerCount === 1
+			? statistics.followerOne
+			: statistics.followers({ count: numberFormat.format(followerCount) });
 	return (
 		<section className="grid gap-2.5">
 			<h2 className="font-heading text-lg font-bold sm:text-xl">
@@ -153,7 +169,14 @@ export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditA
 							fallback={name.slice(0, 1).toUpperCase()}
 							imageAlt={name}
 						/>
-						<AttributionName attribution={attribution} />
+						<div className="grid min-w-0 gap-1">
+							<AttributionName attribution={attribution} />
+							<p className="text-sm tabular-nums text-muted-foreground">
+								{bookCountLabel}
+								<span aria-hidden="true"> · </span>
+								{followerCountLabel}
+							</p>
+						</div>
 					</div>
 					<FollowButton
 						className="shrink-0"
