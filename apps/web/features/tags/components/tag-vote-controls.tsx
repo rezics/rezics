@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@rezics/ui";
+import { Button, cn } from "@rezics/ui";
+import { ArrowBigDownIcon, ArrowBigUpIcon } from "lucide-react";
 
 import { useTranslation } from "@/i18n/client";
 
@@ -23,30 +24,40 @@ export function TagVoteControls({
 }) {
 	const { t } = useTranslation(["tags"]);
 	return (
-		<div className="flex flex-wrap items-center gap-2">
-			<span className="me-auto text-xs text-muted-foreground">
+		<div className="grid gap-2">
+			<span className="text-xs text-muted-foreground">
 				{t.tags.vote.summary({ score: String(score), count: String(voteCount) })}
 			</span>
 			{canVote ? (
-				<>
+				<div className="flex flex-wrap items-center gap-1">
 					<Button
 						aria-pressed={viewerVote === 1}
+						className={cn(viewerVote === 1 && "text-primary hover:text-primary")}
 						disabled={isPending}
-						onClick={() => onVote(1)}
+						onClick={() => (viewerVote === 1 ? onClear() : onVote(1))}
 						size="sm"
 						type="button"
-						variant={viewerVote === 1 ? "solid" : "outline"}
+						variant="quiet"
 					>
+						<ArrowBigUpIcon
+							aria-hidden
+							fill={viewerVote === 1 ? "currentColor" : "none"}
+						/>
 						{t.tags.vote.fits}
 					</Button>
 					<Button
 						aria-pressed={viewerVote === -1}
+						className={cn(viewerVote === -1 && "text-info hover:text-info")}
 						disabled={isPending}
-						onClick={() => onVote(-1)}
+						onClick={() => (viewerVote === -1 ? onClear() : onVote(-1))}
 						size="sm"
 						type="button"
-						variant={viewerVote === -1 ? "solid" : "outline"}
+						variant="quiet"
 					>
+						<ArrowBigDownIcon
+							aria-hidden
+							fill={viewerVote === -1 ? "currentColor" : "none"}
+						/>
 						{t.tags.vote.doesNotFit}
 					</Button>
 					{viewerVote !== null ? (
@@ -60,7 +71,7 @@ export function TagVoteControls({
 							{t.tags.vote.clear}
 						</Button>
 					) : null}
-				</>
+				</div>
 			) : null}
 		</div>
 	);

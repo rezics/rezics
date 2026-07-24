@@ -7,9 +7,9 @@ import { isUnitId } from "@/features/units/model/unit-id";
 export default async function Page({
 	params,
 }: {
-	params: Promise<{ type: string; unit: string }>;
+	readonly params: Promise<{ type: string; unit: string }>;
 }) {
 	const { type, unit } = await params;
 	if (!isCatalogDetailUnitType(type) || !isUnitId(unit)) notFound();
-	return <UnitTagsPage />;
+	return <UnitTagsPage type={type} unitId={unit} />;
 }

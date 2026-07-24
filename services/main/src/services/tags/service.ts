@@ -25,6 +25,7 @@ import {
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
+import { selectPopulatedRealmTagSources } from "./landscape";
 import { compareGlobalTagRank } from "./ranking";
 
 export type TagVoteValue = -1 | 1 | null;
@@ -421,8 +422,7 @@ export async function getUnitTagLandscape(input: {
 		limit: input.globalLimit,
 		excludedTagIds: structures.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
 	});
-	const subscriptions = allSubscriptions.slice(0, input.sourceLimit);
-	const realmIds = subscriptions.map(({ realmId }) => realmId);
+	const realmIds = allSubscriptions.map(({ realmId }) => realmId);
 	const [votedTags, policyTags] = await Promise.all([
 		listRealmVotedTags({
 			unitId: input.unitId,
@@ -442,10 +442,11 @@ export async function getUnitTagLandscape(input: {
 	return {
 		structures,
 		global,
-		realms: subscriptions.map((subscription) => ({
-			...subscription,
-			votedTags: votedTags.get(subscription.realmId) ?? [],
-			policyTags: policyTags.get(subscription.realmId) ?? [],
-		})),
+		realms: selectPopulatedRealmTagSources({
+			sources: allSubscriptions,
+			votedTags,
+			policyTags,
+			limit: input.sourceLimit,
+		}),
 	};
 }

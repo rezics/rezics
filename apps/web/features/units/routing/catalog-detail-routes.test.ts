@@ -28,7 +28,6 @@ describe("catalog detail routes", () => {
 		expect(catalogDetailHref("software", UnitId, "requirements")).toBe(
 			`/units/software/${UnitId}/requirements`,
 		);
-		expect(catalogDetailHref("book", UnitId, "tags")).toBe(`/units/book/${UnitId}/tags`);
 		expect(catalogDetailHref("book", UnitId, "associations")).toBe(
 			`/units/book/${UnitId}/associations`,
 		);
@@ -52,11 +51,12 @@ describe("catalog detail routes", () => {
 		).toBeUndefined();
 	});
 
-	it("keeps the credits page outside the tab section registry", () => {
+	it("keeps dedicated pages outside the tab section registry", () => {
 		expect(catalogCreditsHref("book", UnitId)).toBe(`/units/book/${UnitId}/credits`);
 		expect(parseCatalogDetailSection(catalogCreditsHref("book", UnitId), "book", UnitId)).toBe(
 			undefined,
 		);
 		expect(CatalogDetailSections.book).not.toContain("credits");
+		expect(CatalogDetailSections.book).not.toContain("tags");
 	});
 });
