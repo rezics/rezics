@@ -31,6 +31,13 @@ jobs:
             - run: devenv shell yarn install --immutable
             - run: devenv shell task format:check
             - run: devenv shell task db:check
+            - name: Start Seed contract infrastructure
+              run: devenv shell task infra:up
+            - name: Verify Bootstrap and coverage Seed services
+              run: devenv shell task seed:contract
+            - name: Stop Seed contract infrastructure
+              if: always()
+              run: devenv shell task infra:stop
             - run: devenv shell task openapi:check
             - run: devenv shell task search:check
             - run: devenv shell task typecheck

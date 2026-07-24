@@ -10,12 +10,14 @@ import {
 } from "@rezics/block";
 import { parseSearchFeatureDefinition } from "@rezics/search";
 import {
+	useGetApiCollectionsByCollectionId,
 	useGetApiSearchFeaturesByTemplate,
 	useGetApiSearchZonesByZoneIdFeature,
 	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
 	usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
 } from "@rezics/openapi-tanstack-query";
 import {
+	Button,
 	IdentityAvatar,
 	Menu,
 	MenuContent,
@@ -63,6 +65,19 @@ type SearchResult = {
 	readonly titles: readonly string[];
 	readonly name?: string | null;
 	readonly summary?: string | null;
+};
+type SearchPresentation = Extract<Block, { readonly _type: "search" }>["presentation"];
+type FeedPresentation = Extract<Block, { readonly _type: "feed" }>["presentation"];
+type SearchFacet = {
+	readonly controlKey?: string;
+	readonly field: string;
+	readonly options: readonly { readonly value: string }[];
+};
+type SearchPage = {
+	readonly facets?: readonly SearchFacet[];
+	readonly results: readonly SearchResult[];
+	readonly nextCursor?: string;
+	readonly total: number;
 };
 
 interface ZoneBlockContextValue {
@@ -392,32 +407,58 @@ function ZoneBlocks({ blocks }: { blocks: readonly Block[] }) {
 	);
 }
 
-function SearchResults({ results }: { results: readonly SearchResult[] }) {
+function SearchResults({
+	results,
+	presentation,
+	total,
+	unitListLayout,
+}: {
+	results: readonly SearchResult[];
+	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
+	total: number;
+	unitListLayout?: UnitListLayout;
+}) {
 	const { t } = useTranslation("zones");
+	const { t: search } = useTranslation("search");
 	if (results.length === 0)
 		return <p className="mt-4 text-muted-foreground text-sm">{t.searchEmpty}</p>;
 	return (
-		<ul aria-label={t.searchResults} className="mt-4 grid gap-2">
-			{results.map((result) => {
-				const href = unitIdHref(result.kind, result.id);
-				const title = result.titles[0] ?? result.name ?? t.untitledResult;
-				const content = (
-					<div className="rounded-lg border border-border-weak px-3 py-2 transition-colors hover:bg-accent">
-						<p className="font-medium text-sm">{title}</p>
-						{result.summary ? (
-							<p className="mt-1 line-clamp-2 text-muted-foreground text-xs">
-								{result.summary}
-							</p>
-						) : null}
-					</div>
-				);
-				return (
-					<li key={`${result.kind}:${result.id}`}>
-						{href ? <AppLink href={href}>{content}</AppLink> : content}
-					</li>
-				);
-			})}
-		</ul>
+		<div className="mt-4 grid gap-3">
+			{presentation.showResultCount ? (
+				<p className="text-muted-foreground text-sm">
+					{search.resultCount({ count: total })}
+				</p>
+			) : null}
+			<ul
+				aria-label={t.searchResults}
+				className={cn(
+					"grid gap-2",
+					presentation.results === "grid" && "sm:grid-cols-2 lg:grid-cols-3",
+					unitListLayout === "carousel" &&
+						"grid-flow-col auto-cols-[minmax(16rem,22rem)] overflow-x-auto pb-3 sm:grid-cols-none lg:grid-cols-none",
+				)}
+			>
+				{results.map((result) => {
+					const href = unitIdHref(result.kind, result.id);
+					const title = result.titles[0] ?? result.name ?? t.untitledResult;
+					const content = (
+						<div className="rounded-lg border border-border-weak px-3 py-2 transition-colors hover:bg-accent">
+							<p className="font-medium text-sm">{title}</p>
+							{result.summary ? (
+								<p className="mt-1 line-clamp-2 text-muted-foreground text-xs">
+									{result.summary}
+								</p>
+							) : null}
+						</div>
+					);
+					return (
+						<li key={`${result.kind}:${result.id}`}>
+							{href ? <AppLink href={href}>{content}</AppLink> : content}
+						</li>
+					);
+				})}
+			</ul>
+		</div>
 	);
 }
 
@@ -429,18 +470,24 @@ function ZoneSearchFeature({
 	error,
 	facets,
 	results,
+	presentation,
+	total = 0,
+	autoExecute = false,
+	unitListLayout,
+	initialPageSize,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
 	onExecute: (request: SearchFeatureRequest) => void;
 	pending: boolean;
 	error: boolean;
-	facets?: readonly {
-		controlKey?: string;
-		field: string;
-		options: readonly { value: string }[];
-	}[];
+	facets?: readonly SearchFacet[];
 	results?: readonly SearchResult[];
+	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
+	total?: number;
+	autoExecute?: boolean;
+	unitListLayout?: UnitListLayout;
+	initialPageSize?: number;
 }) {
 	const { t } = useTranslation("zones");
 	const context = useZoneBlocks();
@@ -453,6 +500,26 @@ function ZoneSearchFeature({
 		{ query: { enabled: feature.kind === "zone" } },
 	);
 	const rawDefinition = feature.kind === "template" ? template.data : zone.data?.definition;
+	const autoExecuted = useRef(false);
+	useEffect(() => {
+		if (!autoExecute || !rawDefinition || autoExecuted.current) return;
+		const definition = parseSearchFeatureDefinition(rawDefinition);
+		autoExecuted.current = true;
+		onExecute({
+			injections: [],
+			state:
+				definition.document.modes.default === "basic"
+					? {
+							mode: "basic",
+							values: [],
+							...(initialPageSize ? { pageSize: initialPageSize } : {}),
+						}
+					: {
+							mode: "advanced",
+							...(initialPageSize ? { pageSize: initialPageSize } : {}),
+						},
+		});
+	}, [autoExecute, initialPageSize, onExecute, rawDefinition]);
 	if (feature.kind === "template" ? template.isError : zone.isError)
 		return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
 	if ((feature.kind === "template" ? template.isPending : zone.isPending) || !rawDefinition)
@@ -473,7 +540,14 @@ function ZoneSearchFeature({
 					: undefined
 			}
 		>
-			{results ? <SearchResults results={results} /> : null}
+			{results ? (
+				<SearchResults
+					presentation={presentation}
+					results={results}
+					total={total}
+					unitListLayout={unitListLayout}
+				/>
+			) : null}
 		</SearchFeature>
 	);
 }
@@ -481,9 +555,11 @@ function ZoneSearchFeature({
 function DockSearchBlock({
 	blockKey,
 	feature,
+	presentation,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
+	presentation: SearchPresentation;
 }) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
@@ -500,7 +576,12 @@ function DockSearchBlock({
 				})
 			}
 			pending={mutation.isPending}
+			presentation={presentation}
 			results={mutation.data?.groups.flatMap((group) => group.hits)}
+			total={mutation.data?.groups.reduce(
+				(total, group) => total + Number(group.total.value),
+				0,
+			)}
 		/>
 	);
 }
@@ -509,10 +590,12 @@ function PageSearchBlock({
 	blockKey,
 	feature,
 	slug,
+	presentation,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
 	slug: string;
+	presentation: SearchPresentation;
 }) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute();
@@ -529,7 +612,320 @@ function PageSearchBlock({
 				})
 			}
 			pending={mutation.isPending}
+			presentation={presentation}
 			results={mutation.data?.groups.flatMap((group) => group.hits)}
+			total={mutation.data?.groups.reduce(
+				(total, group) => total + Number(group.total.value),
+				0,
+			)}
+		/>
+	);
+}
+
+interface SearchExecutionResponse {
+	readonly nextCursor?: string;
+	readonly facets?: readonly SearchFacet[];
+	readonly groups: readonly {
+		readonly hits: readonly SearchResult[];
+		readonly total: { readonly value: string | number };
+	}[];
+}
+
+function toSearchPage(value: SearchExecutionResponse): SearchPage {
+	return {
+		facets: value.facets,
+		results: value.groups.flatMap((group) => group.hits),
+		nextCursor: value.nextCursor,
+		total: value.groups.reduce((total, group) => total + Number(group.total.value), 0),
+	};
+}
+
+function appendSearchPage(current: SearchPage | undefined, next: SearchPage): SearchPage {
+	if (!current) return next;
+	const results = new Map(current.results.map((result) => [result.id, result]));
+	for (const result of next.results) results.set(result.id, result);
+	return {
+		facets: next.facets ?? current.facets,
+		results: [...results.values()],
+		nextCursor: next.nextCursor,
+		total: Math.max(current.total, next.total),
+	};
+}
+
+function requestWithCursor(request: SearchFeatureRequest, cursor: string): SearchFeatureRequest {
+	return { ...request, state: { ...request.state, cursor } };
+}
+
+function FeedPagination({
+	infinite,
+	onLoad,
+	pending,
+}: {
+	infinite: boolean;
+	onLoad: () => void;
+	pending: boolean;
+}) {
+	const { t } = useTranslation("actions");
+	const sentinel = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const target = sentinel.current;
+		if (!infinite || !target || pending) return;
+		const observer = new IntersectionObserver((entries) => {
+			if (entries.some((entry) => entry.isIntersecting)) onLoad();
+		});
+		observer.observe(target);
+		return () => observer.disconnect();
+	}, [infinite, onLoad, pending]);
+	return infinite ? (
+		<div className="flex justify-center py-4" ref={sentinel}>
+			<Button isLoading={pending} onClick={onLoad} size="sm" type="button" variant="quiet">
+				{t.loadMore}
+			</Button>
+		</div>
+	) : (
+		<div className="flex justify-center py-4">
+			<Button isLoading={pending} onClick={onLoad} size="sm" type="button" variant="quiet">
+				{t.loadMore}
+			</Button>
+		</div>
+	);
+}
+
+function ZoneFeedBlock({
+	blockKey,
+	execute,
+	feature,
+	pending,
+	error,
+	presentation,
+	maxResults,
+	unitListLayout,
+}: {
+	blockKey: string;
+	execute: (request: SearchFeatureRequest) => Promise<SearchExecutionResponse>;
+	feature: SearchFeatureSource;
+	pending: boolean;
+	error: boolean;
+	presentation: FeedPresentation;
+	maxResults?: number;
+	unitListLayout?: UnitListLayout;
+}) {
+	const [request, setRequest] = useState<SearchFeatureRequest>();
+	const [page, setPage] = useState<SearchPage>();
+	const executionSequence = useRef(0);
+	const run = (nextRequest: SearchFeatureRequest, append: boolean) => {
+		const sequence = ++executionSequence.current;
+		if (!append) {
+			setRequest(nextRequest);
+			setPage(undefined);
+		}
+		void execute(nextRequest).then(
+			(result) => {
+				if (sequence !== executionSequence.current) return;
+				setPage((current) =>
+					append ? appendSearchPage(current, toSearchPage(result)) : toSearchPage(result),
+				);
+			},
+			() => undefined,
+		);
+	};
+	const loadMore = () => {
+		if (!request || !page?.nextCursor || pending) return;
+		run(requestWithCursor(request, page.nextCursor), true);
+	};
+	return (
+		<>
+			<ZoneSearchFeature
+				autoExecute
+				blockKey={blockKey}
+				error={error}
+				facets={page?.facets}
+				feature={feature}
+				initialPageSize={maxResults && maxResults <= 20 ? maxResults : undefined}
+				onExecute={(nextRequest) => run(nextRequest, false)}
+				pending={pending}
+				presentation={presentation}
+				results={maxResults ? page?.results.slice(0, maxResults) : page?.results}
+				total={page?.total}
+				unitListLayout={unitListLayout}
+			/>
+			{page?.nextCursor && (!maxResults || page.results.length < maxResults) ? (
+				<FeedPagination
+					infinite={presentation.pagination === "infinite"}
+					onLoad={loadMore}
+					pending={pending}
+				/>
+			) : null}
+		</>
+	);
+}
+
+function DockFeedBlock({
+	blockKey,
+	feature,
+	presentation,
+}: {
+	blockKey: string;
+	feature: SearchFeatureSource;
+	presentation: FeedPresentation;
+}) {
+	const context = useZoneBlocks();
+	const mutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
+	return (
+		<ZoneFeedBlock
+			blockKey={blockKey}
+			error={mutation.isError}
+			execute={(body) =>
+				mutation.mutateAsync({
+					body,
+					path: { blockKey, zoneId: context.projection.zone.id },
+				})
+			}
+			feature={feature}
+			pending={mutation.isPending}
+			presentation={presentation}
+		/>
+	);
+}
+
+function PageFeedBlock({
+	blockKey,
+	feature,
+	slug,
+	presentation,
+}: {
+	blockKey: string;
+	feature: SearchFeatureSource;
+	slug: string;
+	presentation: FeedPresentation;
+}) {
+	const context = useZoneBlocks();
+	const mutation = usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute();
+	return (
+		<ZoneFeedBlock
+			blockKey={blockKey}
+			error={mutation.isError}
+			execute={(body) =>
+				mutation.mutateAsync({
+					body,
+					path: { blockKey, slug, zoneId: context.projection.zone.id },
+				})
+			}
+			feature={feature}
+			pending={mutation.isPending}
+			presentation={presentation}
+		/>
+	);
+}
+
+type UnitListBlock = Extract<Block, { readonly _type: "unit-list" }>;
+type UnitListLayout = UnitListBlock["layout"];
+
+function unitListClasses(layout: UnitListLayout): string {
+	return cn(
+		"my-6 grid gap-4",
+		layout === "grid" && "sm:grid-cols-2 lg:grid-cols-3",
+		layout === "carousel" &&
+			"grid-flow-col auto-cols-[minmax(16rem,22rem)] overflow-x-auto pb-3",
+	);
+}
+
+function CollectionUnitList({
+	collectionId,
+	layout,
+	limit,
+}: {
+	collectionId: string;
+	layout: UnitListLayout;
+	limit: number;
+}) {
+	const { t } = useTranslation("zones");
+	const query = useGetApiCollectionsByCollectionId({ path: { collectionId } });
+	if (query.isPending) return null;
+	if (query.isError) return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
+	const items = query.data?.items.slice(0, limit) ?? [];
+	if (items.length === 0)
+		return <p className="my-4 text-muted-foreground text-sm">{t.searchEmpty}</p>;
+	return (
+		<ul aria-label={t.contentList} className={unitListClasses(layout)}>
+			{items.map((item) => {
+				const href = unitIdHref(item.type, item.targetId);
+				const content = (
+					<div className="flex min-w-0 items-center gap-3 rounded-xl border border-border-weak bg-card p-4">
+						{item.cover ? (
+							<IdentityAvatar
+								avatar={{ type: "image", image: item.cover }}
+								className="size-10 rounded-lg"
+								fallback={item.title?.slice(0, 1) ?? ""}
+							/>
+						) : null}
+						<p className="truncate font-semibold">{item.title ?? t.untitledResult}</p>
+					</div>
+				);
+				return (
+					<li key={item.targetId}>
+						{href ? <AppLink href={href}>{content}</AppLink> : content}
+					</li>
+				);
+			})}
+		</ul>
+	);
+}
+
+function SearchUnitList({
+	blockKey,
+	feature,
+	layout,
+	limit,
+	slug,
+}: {
+	blockKey: string;
+	feature: SearchFeatureSource;
+	layout: UnitListLayout;
+	limit: number;
+	slug?: string;
+}) {
+	const context = useZoneBlocks();
+	const dockMutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
+	const pageMutation = usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute();
+	const presentation = {
+		results: layout === "grid" || layout === "carousel" ? "grid" : "list",
+		pagination: "load-more",
+		showResultCount: false,
+	} as const;
+	if (slug === undefined)
+		return (
+			<ZoneFeedBlock
+				blockKey={blockKey}
+				error={dockMutation.isError}
+				execute={(body) =>
+					dockMutation.mutateAsync({
+						body,
+						path: { blockKey, zoneId: context.projection.zone.id },
+					})
+				}
+				feature={feature}
+				maxResults={limit}
+				pending={dockMutation.isPending}
+				presentation={presentation}
+				unitListLayout={layout}
+			/>
+		);
+	return (
+		<ZoneFeedBlock
+			blockKey={blockKey}
+			error={pageMutation.isError}
+			execute={(body) =>
+				pageMutation.mutateAsync({
+					body,
+					path: { blockKey, slug, zoneId: context.projection.zone.id },
+				})
+			}
+			feature={feature}
+			maxResults={limit}
+			pending={pageMutation.isPending}
+			presentation={presentation}
+			unitListLayout={layout}
 		/>
 	);
 }
@@ -584,31 +980,70 @@ function ZoneBlock({ block }: { block: Block }) {
 		) : null;
 	}
 	if (block._type === "unit-list") {
-		if (block.source.kind !== "units") return null;
+		if (block.source.kind === "collection")
+			return (
+				<CollectionUnitList
+					collectionId={block.source.collectionId}
+					layout={block.layout}
+					limit={block.limit}
+				/>
+			);
+		if (block.source.kind === "search") {
+			if (!surface) return null;
+			return (
+				<SearchUnitList
+					blockKey={block._key}
+					feature={block.source.feature}
+					layout={block.layout}
+					limit={block.limit}
+					slug={surface.kind === "page" ? surface.slug : undefined}
+				/>
+			);
+		}
 		const units = block.source.unitIds
 			.map((id) => context.units.get(id))
 			.filter((unit): unit is RenderUnit => Boolean(unit))
 			.slice(0, block.limit);
 		return (
-			<div
-				aria-label={t.contentList}
-				className={cn(
-					"my-6 grid gap-4",
-					block.layout === "grid" && "sm:grid-cols-2 lg:grid-cols-3",
-				)}
-			>
+			<div aria-label={t.contentList} className={unitListClasses(block.layout)}>
 				{units.map((unit) => (
 					<ReferencedUnit appearance="card" key={unit.id} unit={unit} />
 				))}
 			</div>
 		);
 	}
-	if (block._type === "search" || block._type === "feed") {
+	if (block._type === "search") {
 		if (!surface) return null;
 		return surface.kind === "dock" ? (
-			<DockSearchBlock blockKey={block._key} feature={block.feature} />
+			<DockSearchBlock
+				blockKey={block._key}
+				feature={block.feature}
+				presentation={block.presentation}
+			/>
 		) : (
-			<PageSearchBlock blockKey={block._key} feature={block.feature} slug={surface.slug} />
+			<PageSearchBlock
+				blockKey={block._key}
+				feature={block.feature}
+				presentation={block.presentation}
+				slug={surface.slug}
+			/>
+		);
+	}
+	if (block._type === "feed") {
+		if (!surface) return null;
+		return surface.kind === "dock" ? (
+			<DockFeedBlock
+				blockKey={block._key}
+				feature={block.feature}
+				presentation={block.presentation}
+			/>
+		) : (
+			<PageFeedBlock
+				blockKey={block._key}
+				feature={block.feature}
+				presentation={block.presentation}
+				slug={surface.slug}
+			/>
 		);
 	}
 	if (block._type === "menu") return <ZoneNavigationMenu navigationId={block.navigationId} />;

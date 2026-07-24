@@ -11,6 +11,21 @@ export const DemoCredentials = {
 	apiToken: "rz_api_7f4fbe85d6f14af18d64c8c32de7e821",
 } as const;
 
+export const SeedFixtureTitles = {
+	book: {
+		zh: "種子服務設計手冊",
+		en: "Seed Service Design Handbook",
+	},
+	media: {
+		zh: "搜尋索引實戰",
+		en: "Search Index Field Notes",
+	},
+	software: {
+		zh: "情境資料工作臺",
+		en: "Scenario Data Workbench",
+	},
+} as const;
+
 export const SeedPlan = {
 	users: 50,
 	entities: 75,

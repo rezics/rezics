@@ -14,7 +14,7 @@ import {
 } from "@rezics/block";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
-import { and, eq, isNull, notInArray } from "drizzle-orm";
+import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { env } from "../config";
@@ -27,7 +27,7 @@ import {
 	OfficialZoneAvatarAsset,
 	TopLevelSlugNamespaceUnitIds,
 } from "../bootstrap/manifest";
-import { isBootstrapReady } from "../bootstrap/service";
+import { databaseBootstrapService } from "../bootstrap/service";
 import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
 import { database, type DatabaseTransaction } from "../database";
 import { createGovernanceNotePost } from "../governance/note-service";
@@ -48,6 +48,7 @@ import {
 	conversation,
 	conversationRead,
 	entity,
+	entityAssociationPolicy,
 	EnforcementKindValues,
 	feedback,
 	label,
@@ -64,10 +65,13 @@ import {
 	pollVote,
 	post,
 	postReply,
+	postScore,
 	profile,
 	profileBlock,
+	profileRealmTagSubscription,
 	unitFollow,
 	profilePreference,
+	profileUnitTag,
 	realm,
 	realmUnit,
 	realmMember,
@@ -75,16 +79,24 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
+	realmScoreContext,
+	realmTagContext,
+	realmTagVote,
+	realmUnitTag,
 	recommendationEvent,
 	recommendationExclusion,
+	release,
 	score,
 	series,
 	seriesRelease,
 	tag,
 	unit,
+	unitAccessInvitation,
 	unitAlias,
 	unitAliasVote,
 	unitAccessBinding,
+	unitAccessRestriction,
+	unitAssociationProposal,
 	creditAttribution,
 	CommunityCatalogUnitKindValues,
 	unitProtection,
@@ -96,6 +108,7 @@ import {
 	unitReaction,
 	unitShare,
 	unitStatusEvent,
+	subjectAssociation,
 	unitTag,
 	unitTagVote,
 	unitVariant,
@@ -115,6 +128,9 @@ import { fractionalPositionAt } from "../ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../units/history";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
+import { bindStandardPolicyToToken } from "../auth/api-token/policy-service";
+import { createSharedSearchQuery } from "../search/shared-queries";
+import { createTagStructureInTransaction } from "../tag-structures/service";
 import {
 	assertLocalDatabaseUrl,
 	chunks,
@@ -127,8 +143,10 @@ import {
 	position,
 	selectSeedRealmModerationTarget,
 	SeedPlan,
+	SeedFixtureTitles,
 	type SeedData,
 } from "./data";
+import { createSeedRunOptions, includesSeedScenario, type SeedRunOptions } from "./contracts";
 
 type UnitKind = (typeof unit.$inferSelect)["kind"];
 type UnitStatus = (typeof unit.$inferSelect)["status"];
@@ -551,6 +569,52 @@ interface SeedStructure {
 	readonly realmUnits: readonly { realmId: string; unitId: string }[];
 }
 
+async function seedOfficialZoneCatalogFixtures(
+	tx: DatabaseTransaction,
+	data: SeedData,
+	input: {
+		readonly book: CreatedUnit;
+		readonly media: CreatedUnit;
+		readonly software: CreatedUnit;
+	},
+): Promise<void> {
+	const fixtures = [
+		["book", input.book],
+		["media", input.media],
+		["software", input.software],
+	] as const;
+	for (const [kind, value] of fixtures) {
+		const titles = SeedFixtureTitles[kind];
+		await tx
+			.insert(unitLocalization)
+			.values(
+				(["zh", "en"] as const).map((language, index) => ({
+					unitId: value.id,
+					language,
+					position: fractionalPositionAt(index),
+					title: titles[language],
+					summary:
+						language === "zh"
+							? "用來驗證官方資料庫搜尋、分面與內容動態的固定情境資料。"
+							: "Stable scenario content for official library search, facets, and feeds.",
+					description: createPortableTextDocument(data.portableText(language, 2)),
+					createdAt: value.createdAt,
+					updatedAt: value.updatedAt,
+				})),
+			)
+			.onConflictDoUpdate({
+				target: [unitLocalization.unitId, unitLocalization.language],
+				set: {
+					title: sql`excluded.title`,
+					summary: sql`excluded.summary`,
+					description: sql`excluded.description`,
+					position: sql`excluded.position`,
+					updatedAt: sql`excluded.updated_at`,
+				},
+			});
+	}
+}
+
 async function seedCatalog(
 	tx: DatabaseTransaction,
 	data: SeedData,
@@ -634,6 +698,18 @@ async function seedCatalog(
 		...polls,
 	];
 	await insertUnitDetails(tx, data, allUnits, OfficialProfileIds.community);
+	const [fixtureBook, fixtureMedia, fixtureSoftware] = [
+		books[0],
+		mediaItems[0],
+		softwareUnits[0],
+	];
+	if (!fixtureBook || !fixtureMedia || !fixtureSoftware)
+		throw new Error("Official Zone catalog scenarios require Book, Media, and Software Units");
+	await seedOfficialZoneCatalogFixtures(tx, data, {
+		book: fixtureBook,
+		media: fixtureMedia,
+		software: fixtureSoftware,
+	});
 
 	await writeBatches(
 		entities.map((value, index) => ({
@@ -2616,6 +2692,249 @@ async function seedRecommendations(
 	);
 }
 
+/**
+ * Covers cross-cutting contracts whose behavior is otherwise invisible in a
+ * large catalog-shaped fixture. Each row is intentionally minimal and points
+ * at the richer scenarios created above.
+ */
+async function seedCoverageContracts(
+	tx: DatabaseTransaction,
+	data: SeedData,
+	profiles: readonly CreatedProfile[],
+	catalog: SeedCatalog,
+	content: SeedContent,
+): Promise<void> {
+	const actor = itemAt(profiles, 0);
+	const collaborator = itemAt(
+		profiles.filter((value) => value.id !== actor.id),
+		0,
+	);
+	const target = itemAt(catalog.works, 0);
+	const targetEntity = itemAt(catalog.entities, 0);
+	const targetTag = itemAt(catalog.tags, 0);
+	const secondTag = itemAt(catalog.tags, 1);
+	const targetRealm = itemAt(catalog.realms, 0);
+	const contextPost = itemAt(content.rootPosts, 0);
+	const createdAt = latestDate(
+		data.pastDate(30),
+		actor.createdAt,
+		collaborator.createdAt,
+		target.createdAt,
+		targetEntity.createdAt,
+		targetTag.createdAt,
+		secondTag.createdAt,
+		targetRealm.createdAt,
+		contextPost.createdAt,
+	);
+	const expiresAt = new Date(data.referenceTime.getTime() + 30 * 86_400_000);
+
+	await createSharedSearchQuery(tx, {
+		createdByProfileId: actor.id,
+		document: {
+			version: 1,
+			template: "global",
+			state: { mode: "basic", values: [] },
+			selections: [],
+		},
+	});
+
+	const [demoToken] = await tx
+		.select({ id: apikeys.id })
+		.from(apikeys)
+		.where(eq(apikeys.referenceId, actor.authUserId))
+		.limit(1);
+	if (!demoToken) throw new Error("Coverage scenario requires the demo API token");
+	await bindStandardPolicyToToken(tx, {
+		tokenId: demoToken.id,
+		actorProfileId: actor.id,
+		override: {
+			limits: { requestsPerMinute: 120 },
+			operations: { getApiUnits: { requestsPerMinute: 90 } },
+		},
+	});
+
+	await tx.insert(entityAssociationPolicy).values({
+		entityId: targetEntity.id,
+		kind: "subject",
+		mode: "approval",
+		updatedByProfileId: targetEntity.ownerProfileId,
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(subjectAssociation).values({
+		unitId: target.id,
+		entityId: targetEntity.id,
+		role: "about",
+		position: fractionalPositionAt(0),
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(unitAssociationProposal).values({
+		sourceUnitId: itemAt(catalog.works, 1).id,
+		targetUnitId: targetEntity.id,
+		kind: "subject",
+		role: "related_subject",
+		direction: "request",
+		createdByProfileId: actor.id,
+		expiresAt,
+		createdAt,
+		updatedAt: createdAt,
+	});
+
+	await tx.insert(unitAccessInvitation).values({
+		unitId: target.id,
+		invitedProfileId: collaborator.id,
+		role: "editor",
+		scope: ["localizations"],
+		invitedByProfileId: target.ownerProfileId,
+		expiresAt,
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(unitAccessRestriction).values({
+		unitId: itemAt(catalog.works, 2).id,
+		subjectKind: "profile",
+		profileId: collaborator.id,
+		permission: "unit.update",
+		scope: [],
+		reasonCode: "administrative",
+		createdByProfileId: actor.id,
+		expiresAt,
+		createdAt,
+		updatedAt: createdAt,
+	});
+
+	await tx.insert(profileRealmTagSubscription).values({
+		profileId: actor.id,
+		realmId: targetRealm.id,
+		position: fractionalPositionAt(0),
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(profileUnitTag).values({
+		profileId: actor.id,
+		unitId: target.id,
+		tagId: targetTag.id,
+		position: fractionalPositionAt(0),
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx
+		.insert(realmUnit)
+		.values([
+			{
+				realmId: targetRealm.id,
+				unitId: target.id,
+				status: "visible",
+				createdAt,
+				updatedAt: createdAt,
+			},
+			{
+				realmId: targetRealm.id,
+				unitId: contextPost.id,
+				status: "visible",
+				createdAt,
+				updatedAt: createdAt,
+			},
+		])
+		.onConflictDoUpdate({
+			target: [realmUnit.realmId, realmUnit.unitId],
+			set: { status: "visible", updatedAt: createdAt },
+		});
+	await tx.insert(realmUnitTag).values({
+		realmId: targetRealm.id,
+		unitId: target.id,
+		tagId: targetTag.id,
+		position: fractionalPositionAt(0),
+		createdByProfileId: actor.id,
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(realmTagContext).values({
+		realmId: targetRealm.id,
+		unitId: target.id,
+		tagId: secondTag.id,
+		contextPostId: contextPost.id,
+		createdByProfileId: actor.id,
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(realmTagVote).values([
+		{
+			realmId: targetRealm.id,
+			unitId: target.id,
+			tagId: secondTag.id,
+			profileId: actor.id,
+			value: 1,
+			createdAt,
+			updatedAt: createdAt,
+		},
+		{
+			realmId: targetRealm.id,
+			unitId: target.id,
+			tagId: secondTag.id,
+			profileId: collaborator.id,
+			value: -1,
+			createdAt,
+			updatedAt: createdAt,
+		},
+	]);
+
+	await createTagStructureInTransaction(tx, {
+		memberTagIds: [targetTag.id, secondTag.id],
+		profileId: actor.id,
+		createdAt,
+	});
+
+	const [seedScore] = await tx.select({ id: score.id }).from(score).limit(1);
+	if (!seedScore) throw new Error("Coverage scenario requires a Score");
+	await tx.insert(postScore).values({
+		postId: contextPost.id,
+		scoreId: seedScore.id,
+		position: fractionalPositionAt(0),
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(realmScoreContext).values({
+		realmId: targetRealm.id,
+		contextPostId: contextPost.id,
+		createdByProfileId: actor.id,
+		createdAt,
+		updatedAt: createdAt,
+	});
+
+	const [releaseUnit] = await insertUnits(tx, [
+		{
+			kind: "release",
+			seedKey: "demo-release",
+			ownerProfileId: actor.id,
+			localizationKind: "description",
+			status: "published",
+			visibility: "public",
+			moderationStatus: "approved",
+			publishedAt: createdAt,
+			createdAt,
+			updatedAt: createdAt,
+		},
+	]);
+	if (!releaseUnit) throw new Error("Coverage scenario failed to create a Release Unit");
+	await insertUnitDetails(tx, data, [releaseUnit]);
+	await tx.insert(release).values({
+		id: releaseUnit.id,
+		parentUnitId: itemAt(catalog.softwareUnits, 0).id,
+		versionLabel: "1.0.0-seed",
+		releasedOn: dateOnly(createdAt),
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await recordUnitRevision(tx, {
+		unitId: releaseUnit.id,
+		actorProfileId: actor.id,
+		event: "create",
+		message: "Seeded release coverage scenario",
+	});
+}
+
 async function seedHistory(
 	tx: DatabaseTransaction,
 	data: SeedData,
@@ -2710,64 +3029,111 @@ async function seedHistory(
 	}
 }
 
-export async function seedDatabase(): Promise<void> {
-	assertLocalDatabaseUrl(env.DATABASE_URL);
-	if (!(await isBootstrapReady())) {
-		throw new Error(
-			"Seed requires a bootstrapped database; run `task services-main:db:bootstrap` first",
-		);
-	}
-	const data = createSeedData(new Date());
-	const demoPasswordHash = await hashPassword(DemoCredentials.password);
-	await database.transaction(
-		async (tx) => {
-			const [existingUser] = await tx
-				.select({ id: users.id })
-				.from(users)
-				.where(notInArray(users.id, [...BootstrapAuthUserIds]))
-				.limit(1);
-			const [existingUnit] = await tx
-				.select({ id: unit.id })
-				.from(unit)
-				.where(notInArray(unit.id, [...BootstrapUnitIds]))
-				.limit(1);
-			if (existingUser || existingUnit) {
-				throw new Error("Seed requires an empty database; run `task --yes local:reset`");
-			}
-
-			console.info("Seeding profiles and authentication");
-			const profiles = await seedProfiles(tx, data, demoPasswordHash);
-			await ensureOfficialZoneFollows(
-				tx,
-				profiles.map(({ id }) => id),
-				{ sequenceIsEmpty: true },
-			);
-			console.info("Seeding catalog Units and relationships");
-			const catalog = await seedCatalog(tx, data, profiles);
-			console.info("Seeding the Toaru Wiki Zone");
-			await seedToaruWiki(tx, data, profiles, catalog);
-			console.info("Seeding posts and book content nodes");
-			const content = await seedContent(tx, data, profiles, catalog);
-			console.info("Seeding collections, Realms, and permissions");
-			const structure = await seedStructure(tx, data, profiles, catalog, content);
-			console.info("Seeding social and content interactions");
-			await seedInteractions(tx, data, profiles, catalog, content);
-			console.info("Seeding conversations and notifications");
-			await seedCommunications(tx, data, profiles, content);
-			console.info("Seeding feedback, moderation, and audit data");
-			await seedGovernance(tx, data, profiles, catalog, content, structure);
-			console.info("Seeding recommendation source events");
-			await seedRecommendations(tx, data, profiles, catalog, content);
-			console.info("Recording Unit history through the domain service");
-			await seedHistory(tx, data, profiles, catalog, content);
-		},
-		{ isolationLevel: "serializable" },
-	);
-	console.info("Database seed completed", {
-		users: SeedPlan.users,
-		recommendationEvents: SeedPlan.recommendationEvents,
-		demoEmail: DemoCredentials.email,
-		demoPassword: DemoCredentials.password,
-		demoApiToken: DemoCredentials.apiToken,
-	});
+export interface SeedResult {
+	readonly profile: SeedRunOptions["profile"];
+	readonly referenceTime: Date;
+	readonly scenarios: SeedRunOptions["scenarios"];
+	readonly users: number;
+	readonly recommendationEvents: number;
 }
+
+const RequiredSeedScenarios = [
+	"identities",
+	"catalog",
+	"official-zone-content",
+	"content",
+	"structure",
+	"interactions",
+	"feature-contracts",
+	"recommendations",
+	"history",
+] as const;
+
+/**
+ * Installs disposable development and test scenarios after Bootstrap has
+ * established the production-safe system graph.
+ */
+export class DatabaseSeedService {
+	async run(options: SeedRunOptions = createSeedRunOptions()): Promise<SeedResult> {
+		assertLocalDatabaseUrl(env.DATABASE_URL);
+		for (const scenario of RequiredSeedScenarios)
+			if (!includesSeedScenario(options, scenario))
+				throw new TypeError(`Seed profile ${options.profile} is missing ${scenario}`);
+		if (!(await databaseBootstrapService.isReady())) {
+			throw new Error(
+				"Seed requires an independently bootstrapped database; run `task services-main:db:bootstrap` first",
+			);
+		}
+		const data = createSeedData(options.referenceTime);
+		const demoPasswordHash = await hashPassword(DemoCredentials.password);
+		await database.transaction(
+			async (tx) => {
+				const [existingUser] = await tx
+					.select({ id: users.id })
+					.from(users)
+					.where(notInArray(users.id, [...BootstrapAuthUserIds]))
+					.limit(1);
+				const [existingUnit] = await tx
+					.select({ id: unit.id })
+					.from(unit)
+					.where(notInArray(unit.id, [...BootstrapUnitIds]))
+					.limit(1);
+				if (existingUser || existingUnit) {
+					throw new Error(
+						"Seed requires an empty database; run `task --yes local:reset`",
+					);
+				}
+
+				console.info("Seeding identities scenario");
+				const profiles = await seedProfiles(tx, data, demoPasswordHash);
+				await ensureOfficialZoneFollows(
+					tx,
+					profiles.map(({ id }) => id),
+					{ sequenceIsEmpty: true },
+				);
+				console.info("Seeding catalog scenario");
+				const catalog = await seedCatalog(tx, data, profiles);
+				console.info("Seeding official Zone content scenario");
+				await seedToaruWiki(tx, data, profiles, catalog);
+				console.info("Seeding content scenario");
+				const content = await seedContent(tx, data, profiles, catalog);
+				console.info("Seeding structure scenario");
+				const structure = await seedStructure(tx, data, profiles, catalog, content);
+				console.info("Seeding interactions scenario");
+				await seedInteractions(tx, data, profiles, catalog, content);
+				console.info("Seeding feature contracts scenario");
+				await seedCoverageContracts(tx, data, profiles, catalog, content);
+				if (includesSeedScenario(options, "communications")) {
+					console.info("Seeding communications scenario");
+					await seedCommunications(tx, data, profiles, content);
+				}
+				if (includesSeedScenario(options, "governance")) {
+					console.info("Seeding governance scenario");
+					await seedGovernance(tx, data, profiles, catalog, content, structure);
+				}
+				console.info("Seeding recommendation scenario");
+				await seedRecommendations(tx, data, profiles, catalog, content);
+				console.info("Seeding history scenario");
+				await seedHistory(tx, data, profiles, catalog, content);
+			},
+			{ isolationLevel: "serializable" },
+		);
+		const result = {
+			profile: options.profile,
+			referenceTime: options.referenceTime,
+			scenarios: options.scenarios,
+			users: SeedPlan.users,
+			recommendationEvents: SeedPlan.recommendationEvents,
+		} satisfies SeedResult;
+		console.info("Database Seed service completed", {
+			...result,
+			referenceTime: result.referenceTime.toISOString(),
+			demoEmail: DemoCredentials.email,
+			demoPassword: DemoCredentials.password,
+			demoApiToken: DemoCredentials.apiToken,
+		});
+		return result;
+	}
+}
+
+export const databaseSeedService = new DatabaseSeedService();

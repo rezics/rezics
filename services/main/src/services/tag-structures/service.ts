@@ -126,64 +126,80 @@ async function upsertDefinitionVote(
 	structureId: string,
 	profileId: string,
 	value: BinaryVote,
+	createdAt?: Date,
 ): Promise<void> {
 	await tx
 		.insert(unitStructureVote)
-		.values({ structureId, profileId, value })
+		.values({ structureId, profileId, value, createdAt, updatedAt: createdAt })
 		.onConflictDoUpdate({
 			target: [unitStructureVote.structureId, unitStructureVote.profileId],
 			set: { value, updatedAt: new Date() },
 		});
 }
 
-export async function createTagStructure(input: {
+export interface CreateTagStructureInput {
 	readonly memberTagIds: readonly string[];
 	readonly profileId: string;
-}): Promise<{ readonly structureId: string; readonly created: boolean }> {
-	validateMemberTagIds(input.memberTagIds);
-	return database.transaction(async (tx) => {
-		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended(${structurePathKey(input.memberTagIds)}, 0))`,
-		);
-		await ensureCreatableTags(tx, input.memberTagIds);
-		const [existing] = await tx
-			.select({ id: unitStructure.id })
-			.from(unitStructure)
-			.where(
-				and(
-					eq(unitStructure.kind, "tag.hierarchy_path"),
-					eq(unitStructure.definitionVersion, 1),
-					eq(unitStructure.memberUnitIds, [...input.memberTagIds]),
-				),
-			)
-			.limit(1);
-		if (existing) {
-			await upsertDefinitionVote(tx, existing.id, input.profileId, 1);
-			return { structureId: existing.id, created: false };
-		}
+	readonly createdAt?: Date;
+}
 
-		const created = await insertUnit(tx, {
-			kind: "structure",
-			status: "published",
-			visibility: "public",
-			publishedAt: new Date(),
-			statusActor: { kind: "profile", profileId: input.profileId },
-		});
-		await tx.insert(unitStructure).values({
-			id: created.id,
-			kind: "tag.hierarchy_path",
-			memberUnitIds: [...input.memberTagIds],
-			createdByProfileId: input.profileId,
-		});
-		await createCommunityOwnedUnitAccess(tx, created.id);
-		await upsertDefinitionVote(tx, created.id, input.profileId, 1);
-		await recordUnitRevision(tx, {
-			unitId: created.id,
-			actorProfileId: input.profileId,
-			event: "create",
-		});
-		return { structureId: created.id, created: true };
+export async function createTagStructureInTransaction(
+	tx: DatabaseTransaction,
+	input: CreateTagStructureInput,
+): Promise<{ readonly structureId: string; readonly created: boolean }> {
+	validateMemberTagIds(input.memberTagIds);
+	await tx.execute(
+		sql`select pg_advisory_xact_lock(hashtextextended(${structurePathKey(input.memberTagIds)}, 0))`,
+	);
+	await ensureCreatableTags(tx, input.memberTagIds);
+	const [existing] = await tx
+		.select({ id: unitStructure.id })
+		.from(unitStructure)
+		.where(
+			and(
+				eq(unitStructure.kind, "tag.hierarchy_path"),
+				eq(unitStructure.definitionVersion, 1),
+				eq(unitStructure.memberUnitIds, [...input.memberTagIds]),
+			),
+		)
+		.limit(1);
+	if (existing) {
+		await upsertDefinitionVote(tx, existing.id, input.profileId, 1, input.createdAt);
+		return { structureId: existing.id, created: false };
+	}
+
+	const createdAt = input.createdAt ?? new Date();
+	const created = await insertUnit(tx, {
+		kind: "structure",
+		status: "published",
+		visibility: "public",
+		publishedAt: createdAt,
+		createdAt,
+		updatedAt: createdAt,
+		statusActor: { kind: "profile", profileId: input.profileId },
 	});
+	await tx.insert(unitStructure).values({
+		id: created.id,
+		kind: "tag.hierarchy_path",
+		memberUnitIds: [...input.memberTagIds],
+		createdByProfileId: input.profileId,
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await createCommunityOwnedUnitAccess(tx, created.id);
+	await upsertDefinitionVote(tx, created.id, input.profileId, 1, createdAt);
+	await recordUnitRevision(tx, {
+		unitId: created.id,
+		actorProfileId: input.profileId,
+		event: "create",
+	});
+	return { structureId: created.id, created: true };
+}
+
+export async function createTagStructure(
+	input: CreateTagStructureInput,
+): Promise<{ readonly structureId: string; readonly created: boolean }> {
+	return database.transaction((tx) => createTagStructureInTransaction(tx, input));
 }
 
 export async function updateTagStructureDefinition(input: {

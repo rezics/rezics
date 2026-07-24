@@ -99,6 +99,33 @@ tasks:
                 test -z "$(rg -i 'pgroonga|pgroonga_query_escape|&@~'
                 --glob '!.temp/**' --glob '!Taskfile.yml' .)"
 
+    seed:contract:
+        desc: Verify Bootstrap, coverage Seed, derived projections, and official Zone Search.
+        cmds:
+            - task: services-main:db:prepare
+            - task: services-main:db:bootstrap:check
+            - task: services-main:db:seed
+              vars:
+                  CLI_ARGS: --profile coverage
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: infra:search:apply
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      rebuild-local --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}} --yes
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: services-main:db:seed:search:check
+
     infra:start:
         desc: Start persistent databases, object storage, Meilisearch, and Sequin state services.
         cmds:
@@ -246,6 +273,7 @@ tasks:
               vars:
                   CLI_ARGS: >-
                       promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: services-main:db:seed:search:check
 
     dev:
         desc: Run Aspire-managed applications against persistent Compose infrastructure.

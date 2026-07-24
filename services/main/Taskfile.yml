@@ -181,10 +181,25 @@ tasks:
             - yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 
     db:seed:
-        desc: Seed a bootstrapped empty local database and build its recommendation snapshot.
+        desc: Run the independent Seed service and rebuild every derived database projection.
         cmds:
-            - yarn exec tsx scripts/seed.ts
+            - yarn exec tsx scripts/seed.ts {{.CLI_ARGS}}
+            - task: content-metrics:rebuild
             - task: recommendations:refresh
+            - task: aggregates:reconcile
+            - task: db:seed:check
+              vars:
+                  CLI_ARGS: "{{.CLI_ARGS}}"
+
+    db:seed:check:
+        desc: Verify the selected Seed profile and all derived database postconditions.
+        cmds:
+            - yarn exec tsx scripts/check-seed.ts {{.CLI_ARGS}}
+
+    db:seed:search:check:
+        desc: Verify official Zone fixtures against the promoted external Search projection.
+        cmds:
+            - yarn exec tsx scripts/check-seed-search.ts
 
     db:reset:
         desc: Internal database-only reset; use the root local:reset task to keep search consistent.

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
+	apiAccessPolicy,
 	auditEvent,
 	capabilityGrant,
 	contentStructure,
@@ -28,6 +29,10 @@ import {
 	users,
 	zone,
 } from "../database/schema";
+import {
+	ApiTokenPolicySchemaVersion,
+	DefaultApiTokenPolicies,
+} from "../auth/api-token/policy-schema";
 import {
 	createNavigationStructure,
 	presentNavigationStructure,
@@ -53,6 +58,12 @@ import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { listZonePageUnits } from "../zones/pages";
+import {
+	getZoneSearchFeature,
+	putZoneSearchFeatureInTransaction,
+	type ZoneSearchFeatureProjection,
+} from "../search/documents";
+import { createDefaultSearchDocument } from "../search/templates";
 import { type BootstrapCredentialMode, generateBootstrapPassword } from "./credentials";
 import { ensureOfficialZoneFollows } from "./official-zone-follows";
 import {
@@ -994,6 +1005,26 @@ async function ensureOfficialZonePage(
 	return changed;
 }
 
+async function ensureOfficialZoneSearchFeature(
+	tx: DatabaseTransaction,
+	value: (typeof OfficialZoneManifest)[number],
+): Promise<boolean> {
+	const expectedDocument = createDefaultSearchDocument(value.searchTemplate);
+	const current = await getZoneSearchFeature(tx, value.id);
+	if (current?.enabled && valuesEqual(current.document, expectedDocument)) return false;
+	await putZoneSearchFeatureInTransaction(tx, {
+		zoneId: value.id,
+		enabled: true,
+		document: expectedDocument,
+		...(current ? { baseRevisionId: current.latestRevisionId } : {}),
+		actorProfileId: value.ownerProfileId,
+		message: current
+			? "Reconcile official Zone Search Feature"
+			: "Bootstrap official Zone Search Feature",
+	});
+	return true;
+}
+
 async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	for (const value of OfficialZoneManifest) {
@@ -1039,6 +1070,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			});
 			changed = true;
 		}
+		changed = (await ensureOfficialZoneSearchFeature(tx, value)) || changed;
 		changed = (await ensureOfficialWikiPost(tx, value)) || changed;
 		changed = (await ensureOfficialZonePage(tx, value)) || changed;
 		const [storedNavigation] = await tx
@@ -1176,7 +1208,21 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	}
 }
 
-export async function isBootstrapReady(): Promise<boolean> {
+async function ensureDefaultApiTokenPolicies(tx: DatabaseTransaction): Promise<void> {
+	for (const definition of Object.values(DefaultApiTokenPolicies))
+		await tx
+			.insert(apiAccessPolicy)
+			.values({
+				...definition,
+				revision: 1,
+				enabled: true,
+				createdAt: bootstrapEpoch(),
+				updatedAt: bootstrapEpoch(),
+			})
+			.onConflictDoNothing({ target: apiAccessPolicy.key });
+}
+
+async function isBootstrapReady(): Promise<boolean> {
 	const expectedAddresses = [
 		...SlugNamespaceManifest.map((namespace) => ({
 			targetUnitId: namespace.id,
@@ -1276,6 +1322,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 		permanentGrantManagers,
 		officialRealms,
 		officialZones,
+		officialZoneSearchFeatures,
 		officialZoneDocks,
 		officialWikiPosts,
 		officialZonePages,
@@ -1286,6 +1333,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 		profilePreferences,
 		profileFollows,
 		localizations,
+		defaultApiTokenPolicies,
 	] = await Promise.all([
 		database
 			.select({ value: count() })
@@ -1367,6 +1415,14 @@ export async function isBootstrapReady(): Promise<boolean> {
 					OfficialZoneManifest.map((value) => value.id),
 				),
 			),
+		database.transaction(async (tx) => {
+			const features: ZoneSearchFeatureProjection[] = [];
+			for (const value of OfficialZoneManifest) {
+				const feature = await getZoneSearchFeature(tx, value.id);
+				if (feature) features.push(feature);
+			}
+			return features;
+		}),
 		database
 			.select({ unitId: unitDock.unitId, document: unitDock.document })
 			.from(unitDock)
@@ -1471,9 +1527,33 @@ export async function isBootstrapReady(): Promise<boolean> {
 					...OfficialZoneManifest.map((officialZone) => officialZone.homePage.id),
 				]),
 			),
+		database
+			.select({
+				key: apiAccessPolicy.key,
+				kind: apiAccessPolicy.kind,
+				schemaVersion: apiAccessPolicy.schemaVersion,
+				enabled: apiAccessPolicy.enabled,
+			})
+			.from(apiAccessPolicy)
+			.where(
+				inArray(
+					apiAccessPolicy.key,
+					Object.values(DefaultApiTokenPolicies).map((value) => value.key),
+				),
+			),
 	]);
 	return (
 		unitCount[0]?.value === BootstrapUnitIds.length &&
+		defaultApiTokenPolicies.length === Object.keys(DefaultApiTokenPolicies).length &&
+		Object.values(DefaultApiTokenPolicies).every((expected) =>
+			defaultApiTokenPolicies.some(
+				(actual) =>
+					actual.key === expected.key &&
+					actual.kind === expected.kind &&
+					actual.schemaVersion === ApiTokenPolicySchemaVersion &&
+					(actual.kind !== "standard" || actual.enabled),
+			),
+		) &&
 		addresses.length === expectedAddresses.length &&
 		expectedAddresses.every((expected) =>
 			addresses.some(
@@ -1506,6 +1586,18 @@ export async function isBootstrapReady(): Promise<boolean> {
 					actual.id === expected.id &&
 					valuesEqual(actual.boundaryDocument, expected.boundaryDocument) &&
 					valuesEqual(actual.themeDocument, expected.themeDocument),
+			),
+		) &&
+		officialZoneSearchFeatures.length === OfficialZoneManifest.length &&
+		OfficialZoneManifest.every((expected) =>
+			officialZoneSearchFeatures.some(
+				(actual) =>
+					actual.zoneId === expected.id &&
+					actual.enabled &&
+					valuesEqual(
+						actual.document,
+						createDefaultSearchDocument(expected.searchTemplate),
+					),
 			),
 		) &&
 		officialWikiPosts.length === OfficialZoneManifest.length &&
@@ -1614,7 +1706,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 	);
 }
 
-export async function bootstrapDatabase(
+async function bootstrapDatabase(
 	options: BootstrapOptions = FillBootstrapOptions,
 ): Promise<BootstrapResult> {
 	assertBootstrapManifest();
@@ -1625,6 +1717,7 @@ export async function bootstrapDatabase(
 		await ensureSlugNamespaces(tx);
 		const credentials = await ensureBootstrapProfiles(tx, options.credentialMode);
 		await ensureBootstrapSuperAdminGrants(tx);
+		await ensureDefaultApiTokenPolicies(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
 		await ensureScoreRealmProfileDefaults(tx);
 		await ensureOfficialZoneAvatar(tx);
@@ -1634,3 +1727,19 @@ export async function bootstrapDatabase(
 	});
 	return { issuedCredentials };
 }
+
+/**
+ * Owns the production-safe, idempotent Bootstrap lifecycle. Seed scenarios are
+ * intentionally not reachable through this service.
+ */
+export class DatabaseBootstrapService {
+	isReady(): Promise<boolean> {
+		return isBootstrapReady();
+	}
+
+	run(options: BootstrapOptions = FillBootstrapOptions): Promise<BootstrapResult> {
+		return bootstrapDatabase(options);
+	}
+}
+
+export const databaseBootstrapService = new DatabaseBootstrapService();

@@ -149,76 +149,92 @@ export async function getZoneSearchFeature(
 	return { ...record, document: validateDocument(record.document) };
 }
 
-export async function putZoneSearchFeature(input: {
+export interface PutZoneSearchFeatureInput {
 	readonly zoneId: string;
 	readonly enabled: boolean;
 	readonly document: SearchDocument;
 	readonly baseRevisionId?: string;
 	readonly actorProfileId: string;
 	readonly message?: string;
-}): Promise<ZoneSearchFeatureProjection> {
-	const document = validateDocument(input.document);
-	return database.transaction(async (tx) => {
-		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-search:${input.zoneId}`}::text, 0))`,
-		);
-		const [zoneRecord] = await tx
-			.select({ id: zone.id })
-			.from(zone)
-			.where(eq(zone.id, input.zoneId))
-			.limit(1);
-		if (!zoneRecord) throw new UnitNotFound("Zone");
-		await ensureDocumentReferences(tx, document);
-		const current = await getZoneSearchFeature(tx, input.zoneId);
-		if (!current) {
-			if (input.baseRevisionId) throw new SearchDocumentRevisionConflict(null);
-			const [created] = await tx.insert(searchDocument).values({ document }).returning();
-			if (!created) throw new Error("SearchDocument insertion returned no row");
-			const revision = await createSearchDocumentHistory(tx, {
-				searchDocumentId: created.id,
-				document,
-				actorProfileId: input.actorProfileId,
-				message: input.message,
-			});
-			await tx.insert(zoneSearchFeature).values({
-				zoneId: input.zoneId,
-				searchDocumentId: created.id,
-				enabled: input.enabled,
-			});
-			const saved = await getZoneSearchFeature(tx, input.zoneId);
-			if (!saved || saved.latestRevisionId !== revision.revisionId)
-				throw new Error("Zone Search Feature creation produced an inconsistent projection");
-			return saved;
-		}
+}
 
-		if (!input.baseRevisionId || input.baseRevisionId !== current.latestRevisionId)
-			throw new SearchDocumentRevisionConflict(current.latestRevisionId);
-		const documentChanged = !isDeepStrictEqual(current.document, document);
-		let revisionId = current.latestRevisionId;
-		if (documentChanged) {
-			const revision = await updateSearchDocumentHistory(tx, {
-				searchDocumentId: current.searchDocumentId,
-				document,
-				baseRevisionId: current.latestRevisionId,
-				actorProfileId: input.actorProfileId,
-				message: input.message,
-			});
-			revisionId = revision.revisionId;
-			await tx
-				.update(searchDocument)
-				.set({ document, updatedAt: new Date() })
-				.where(eq(searchDocument.id, current.searchDocumentId));
-		}
-		if (current.enabled !== input.enabled)
-			await tx
-				.update(zoneSearchFeature)
-				.set({ enabled: input.enabled, updatedAt: new Date() })
-				.where(eq(zoneSearchFeature.zoneId, input.zoneId));
+/**
+ * Reconciles a Zone Search Feature inside an existing domain transaction.
+ *
+ * Bootstrap uses this entry point so its complete official graph remains
+ * atomic. Request-facing callers use `putZoneSearchFeature`, which owns the
+ * transaction boundary.
+ */
+export async function putZoneSearchFeatureInTransaction(
+	tx: DatabaseTransaction,
+	input: PutZoneSearchFeatureInput,
+): Promise<ZoneSearchFeatureProjection> {
+	const document = validateDocument(input.document);
+	await tx.execute(
+		sql`select pg_advisory_xact_lock(hashtextextended(${`zone-search:${input.zoneId}`}::text, 0))`,
+	);
+	const [zoneRecord] = await tx
+		.select({ id: zone.id })
+		.from(zone)
+		.where(eq(zone.id, input.zoneId))
+		.limit(1);
+	if (!zoneRecord) throw new UnitNotFound("Zone");
+	await ensureDocumentReferences(tx, document);
+	const current = await getZoneSearchFeature(tx, input.zoneId);
+	if (!current) {
+		if (input.baseRevisionId) throw new SearchDocumentRevisionConflict(null);
+		const [created] = await tx.insert(searchDocument).values({ document }).returning();
+		if (!created) throw new Error("SearchDocument insertion returned no row");
+		const revision = await createSearchDocumentHistory(tx, {
+			searchDocumentId: created.id,
+			document,
+			actorProfileId: input.actorProfileId,
+			message: input.message,
+		});
+		await tx.insert(zoneSearchFeature).values({
+			zoneId: input.zoneId,
+			searchDocumentId: created.id,
+			enabled: input.enabled,
+		});
 		const saved = await getZoneSearchFeature(tx, input.zoneId);
-		if (!saved || saved.latestRevisionId !== revisionId)
-			throw new Error("Zone Search Feature update produced an inconsistent projection");
+		if (!saved || saved.latestRevisionId !== revision.revisionId)
+			throw new Error("Zone Search Feature creation produced an inconsistent projection");
 		return saved;
-	});
+	}
+
+	if (!input.baseRevisionId || input.baseRevisionId !== current.latestRevisionId)
+		throw new SearchDocumentRevisionConflict(current.latestRevisionId);
+	const documentChanged = !isDeepStrictEqual(current.document, document);
+	let revisionId = current.latestRevisionId;
+	if (documentChanged) {
+		const revision = await updateSearchDocumentHistory(tx, {
+			searchDocumentId: current.searchDocumentId,
+			document,
+			baseRevisionId: current.latestRevisionId,
+			actorProfileId: input.actorProfileId,
+			message: input.message,
+		});
+		revisionId = revision.revisionId;
+		await tx
+			.update(searchDocument)
+			.set({ document, updatedAt: new Date() })
+			.where(eq(searchDocument.id, current.searchDocumentId));
+	}
+	if (current.enabled !== input.enabled)
+		await tx
+			.update(zoneSearchFeature)
+			.set({ enabled: input.enabled, updatedAt: new Date() })
+			.where(eq(zoneSearchFeature.zoneId, input.zoneId));
+	const saved = await getZoneSearchFeature(tx, input.zoneId);
+	if (!saved || saved.latestRevisionId !== revisionId)
+		throw new Error("Zone Search Feature update produced an inconsistent projection");
+	return saved;
+}
+
+export async function putZoneSearchFeature(
+	input: PutZoneSearchFeatureInput,
+): Promise<ZoneSearchFeatureProjection> {
+	return database.transaction((tx) => putZoneSearchFeatureInTransaction(tx, input));
 }
 
 export async function listZoneSearchFeatureRevisions(tx: DatabaseTransaction, zoneId: string) {

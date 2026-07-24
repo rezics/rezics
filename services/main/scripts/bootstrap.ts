@@ -1,10 +1,10 @@
 import { parseBootstrapCredentialMode } from "../src/services/bootstrap/credentials";
-import { bootstrapDatabase } from "../src/services/bootstrap/service";
+import { databaseBootstrapService } from "../src/services/bootstrap/service";
 import { database } from "../src/services/database";
 
 try {
 	const credentialMode = parseBootstrapCredentialMode(process.argv.slice(2));
-	const result = await bootstrapDatabase({ credentialMode });
+	const result = await databaseBootstrapService.run({ credentialMode });
 	if (result.issuedCredentials.length === 0) {
 		console.info("Bootstrap is already complete; no credentials were changed.");
 	} else {

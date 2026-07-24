@@ -168,6 +168,34 @@ an existing bootstrap Profile password. Credential replacement is available
 only through the separately confirmed
 `db:bootstrap:credentials:overwrite` task.
 
+Bootstrap and Seed are separate database services with different safety
+contracts. Bootstrap owns production-safe, idempotent system invariants:
+fixed identities and namespaces, official Realms and Zones, official Zone
+search documents, default API-token policies, navigation, and required media.
+It may run repeatedly against an existing database. Seed owns disposable
+development scenarios and refuses to run when non-Bootstrap data already
+exists.
+
+```sh
+# Reproducible demo data without communication or governance cases.
+task services-main:db:seed -- --profile demo
+
+# Complete CI/development contract, including communication and governance.
+task services-main:db:seed -- --profile coverage
+
+# Read-only postcondition checks; accepts the same profile and clock flags.
+task services-main:db:seed:check -- --profile coverage
+```
+
+Both profiles use the fixed reference time `2026-07-15T12:00:00.000Z` unless
+`--reference-time` is supplied. The Seed task creates authoritative facts,
+then rebuilds localization metrics, recommendation snapshots, and aggregate
+projections before running its verifier. Use the confirmed root
+`task --yes local:reset` workflow when replacing existing disposable data; it
+also coordinates the external search projection. CI runs `task seed:contract`
+against fresh infrastructure, including a full external-index rebuild and
+zone-scoped lookup of each official library fixture.
+
 Existing databases created by the previous Drizzle migrator need a one-time
 baseline before their first Atlas-managed deployment. After taking a backup,
 run

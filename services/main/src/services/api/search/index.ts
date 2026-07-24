@@ -1,13 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
-import {
-	BlockKey,
-	DockDocument,
-	parseDocument,
-	type Block,
-	type SearchFeatureSource,
-	walkBlockTree,
-} from "@rezics/block";
+import { BlockKey, DockDocument, parseDocument, type Block } from "@rezics/block";
 import {
 	SearchFeatureDefinition,
 	SearchFeatureInput,
@@ -53,6 +46,7 @@ import {
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
 import { DateTime, Uuid } from "../schema";
+import { findSearchFeatureSource } from "./block-source";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import { toApiErrorResponse, DomainSearchResponse, SearchResponse } from "../schema/response";
 
@@ -147,22 +141,6 @@ function presentZoneSearchFeature(record: ZoneSearchFeatureProjection) {
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
 	} satisfies typeof ZoneSearchFeatureResponse.static;
-}
-
-function findSearchFeatureSource(
-	document: { readonly blocks: readonly Block[] },
-	blockKey: string,
-) {
-	let found: SearchFeatureSource | undefined;
-	walkBlockTree(document, (block) => {
-		if (block._key === blockKey) {
-			if (block._type !== "search" && block._type !== "feed")
-				throw new InvalidSearch("The selected Block does not use Search Feature");
-			found = block.feature;
-		}
-	});
-	if (!found) throw new InvalidSearch("Search-backed Block does not exist in this surface");
-	return found;
 }
 
 async function executeZoneBlock(input: {

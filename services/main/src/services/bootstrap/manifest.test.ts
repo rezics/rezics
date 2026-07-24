@@ -110,14 +110,28 @@ describe("database bootstrap manifest", () => {
 			expect(value).not.toHaveProperty("official");
 			expect(value.homePage.document.blocks).toEqual([
 				expect.objectContaining({ _type: "post-full-view", postId: value.wikiPost.id }),
+				expect.objectContaining({
+					_type: "feed",
+					feature: { kind: "zone" },
+					presentation: expect.objectContaining({ pagination: "load-more" }),
+				}),
 			]);
 			expect(value.mainDockDocument.blocks).toEqual([
 				expect.objectContaining({
 					_type: "menu",
 					navigationId: value.navigation.id,
 				}),
+				expect.objectContaining({
+					_type: "search",
+					feature: { kind: "zone" },
+				}),
 			]);
 		}
+		expect(OfficialZoneManifest.map((value) => value.searchTemplate)).toEqual([
+			"book",
+			"media",
+			"software",
+		]);
 	});
 
 	it("uses the REZICS title without making the official Realm a Zone default", () => {
