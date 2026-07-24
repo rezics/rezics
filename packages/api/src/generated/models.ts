@@ -38843,6 +38843,13 @@ export type PostApiUnitsByTypeStatus200 = {
 		title: (string | null) | null;
 	}[];
 	/**
+	 * @type object
+	 */
+	progressStatistics: {
+		active: string | number;
+		backlog: string | number;
+	};
+	/**
 	 * @type array
 	 */
 	versions: {
@@ -40269,6 +40276,13 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		title: (string | null) | null;
 	}[];
 	/**
+	 * @type object
+	 */
+	progressStatistics: {
+		active: string | number;
+		backlog: string | number;
+	};
+	/**
 	 * @type array
 	 */
 	versions: {
@@ -41303,6 +41317,13 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		position: (string | null) | null;
 		title: (string | null) | null;
 	}[];
+	/**
+	 * @type object
+	 */
+	progressStatistics: {
+		active: string | number;
+		backlog: string | number;
+	};
 	/**
 	 * @type array
 	 */
@@ -42820,6 +42841,13 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		title: (string | null) | null;
 	}[];
 	/**
+	 * @type object
+	 */
+	progressStatistics: {
+		active: string | number;
+		backlog: string | number;
+	};
+	/**
 	 * @type array
 	 */
 	versions: {
@@ -44017,6 +44045,13 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		position: (string | null) | null;
 		title: (string | null) | null;
 	}[];
+	/**
+	 * @type object
+	 */
+	progressStatistics: {
+		active: string | number;
+		backlog: string | number;
+	};
 	/**
 	 * @type array
 	 */
@@ -45220,6 +45255,13 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		position: (string | null) | null;
 		title: (string | null) | null;
 	}[];
+	/**
+	 * @type object
+	 */
+	progressStatistics: {
+		active: string | number;
+		backlog: string | number;
+	};
 	/**
 	 * @type array
 	 */

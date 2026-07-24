@@ -2,7 +2,11 @@ import { Check, Decode, Encode } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { DateTime } from ".";
-import { toPortableTextResponse, UnitVariantContextResponse } from "./response";
+import {
+	toPortableTextResponse,
+	UnitProgressStatisticsResponse,
+	UnitVariantContextResponse,
+} from "./response";
 
 describe("API response values", () => {
 	it("keeps Date values in code and ISO timestamps on the wire", () => {
@@ -69,5 +73,13 @@ describe("API response values", () => {
 				main: { state: "unavailable", unit: summary },
 			}),
 		).toBe(false);
+	});
+
+	it("accepts only non-negative integer Unit progress statistics", () => {
+		expect(Check(UnitProgressStatisticsResponse, { active: 2_540, backlog: 90_307 })).toBe(
+			true,
+		);
+		expect(Check(UnitProgressStatisticsResponse, { active: -1, backlog: 0 })).toBe(false);
+		expect(Check(UnitProgressStatisticsResponse, { active: 1.5, backlog: 0 })).toBe(false);
 	});
 });

@@ -1,4 +1,4 @@
-import { and, desc, eq, exists, isNull, lt, not, or } from "drizzle-orm";
+import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
 import {
 	PortableTextDocument,
@@ -40,6 +40,7 @@ import {
 	subjectAssociation,
 	unitLink,
 	unitLocalization,
+	unitProgress,
 	unitTag,
 	unitTagVoteStat,
 	unitVariant,
@@ -278,6 +279,13 @@ export async function getUnit(
 		)
 		.where(eq(unitTag.unitId, base.id))
 		.orderBy(desc(unitTag.pinned), unitTag.position, unitTag.tagId);
+	const [progressCounts] = await database
+		.select({
+			active: sql<unknown>`count(*) filter (where ${unitProgress.status} = 'active')`,
+			backlog: sql<unknown>`count(*) filter (where ${unitProgress.status} = 'backlog')`,
+		})
+		.from(unitProgress)
+		.where(and(eq(unitProgress.unitId, base.id), isNull(unitProgress.deletedAt)));
 	const variantContext: UnitDetail["variantContext"] =
 		kind === "series"
 			? { role: "standalone" }
@@ -359,6 +367,10 @@ export async function getUnit(
 			score: toSafeInteger(tag.score ?? 0n, "tag vote score"),
 			voteCount: toSafeInteger(tag.voteCount ?? 0n, "tag vote count"),
 		})),
+		progressStatistics: {
+			active: toSafeInteger(progressCounts?.active ?? 0, "active progress count"),
+			backlog: toSafeInteger(progressCounts?.backlog ?? 0, "backlog progress count"),
+		},
 		versions:
 			kind === "series"
 				? []

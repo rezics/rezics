@@ -1,8 +1,8 @@
 "use client";
 
 import type { Translation } from "@rezics/i18n";
-import { Button, cn } from "@rezics/ui";
-import { CheckCircle2, Gauge, Play, RefreshCw, RotateCcw } from "lucide-react";
+import { Button, ButtonGroup, cn } from "@rezics/ui";
+import { CheckCircle2, ChevronDown, Gauge, Play, RefreshCw, RotateCcw } from "lucide-react";
 
 import { SignInButton } from "@/features/auth/auth-portal";
 import { useTranslation } from "@/i18n/client";
@@ -34,26 +34,47 @@ export function UnitProgressAction({
 
 	if (state.kind === "signed-out")
 		return (
-			<SignInButton
-				className={cn("min-h-9", className, buttonClassName)}
-				size="sm"
-				variant="outline"
-			>
-				<Gauge aria-hidden data-icon="inline-start" />
-				{copy.recordAction}
-			</SignInButton>
+			<ButtonGroup className={cn("w-full", className)}>
+				<SignInButton
+					className={cn("min-h-10 min-w-0 flex-1", buttonClassName)}
+					size="sm"
+					variant="outline"
+				>
+					<Gauge aria-hidden data-icon="inline-start" />
+					{copy.recordAction}
+				</SignInButton>
+				<SignInButton
+					aria-label={copy.title}
+					className="min-h-10 w-10"
+					size="icon-md"
+					variant="outline"
+				>
+					<ChevronDown aria-hidden />
+				</SignInButton>
+			</ButtonGroup>
 		);
 
 	if (state.kind === "loading")
 		return (
-			<Button
-				className={cn("min-h-9", className, buttonClassName)}
-				isLoading
-				size="sm"
-				variant="outline"
-			>
-				{copy.recordAction}
-			</Button>
+			<ButtonGroup className={cn("w-full", className)}>
+				<Button
+					className={cn("min-h-10 min-w-0 flex-1", buttonClassName)}
+					isLoading
+					size="sm"
+					variant="outline"
+				>
+					{copy.recordAction}
+				</Button>
+				<Button
+					aria-label={copy.title}
+					className="min-h-10 w-10"
+					disabled
+					size="icon-md"
+					variant="outline"
+				>
+					<ChevronDown aria-hidden />
+				</Button>
+			</ButtonGroup>
 		);
 
 	if (state.kind === "error")
@@ -92,40 +113,54 @@ export function UnitProgressAction({
 			: state.record?.status === "completed" || state.record?.status === "dropped"
 				? startAgain
 				: undefined;
+	const variant = state.record?.status === "active" ? "secondary" : "outline";
 
 	return (
 		<div className={cn("grid justify-items-start gap-1", className)}>
-			<Button
-				className={cn("min-h-9 overflow-hidden", buttonClassName)}
-				disabled={isCompleting}
-				isLoading={isSaving}
-				onClick={() => {
-					if (activate) void activate();
-					else openEditor();
-				}}
-				size="sm"
-				variant={state.record?.status === "active" ? "secondary" : "outline"}
-			>
-				<Icon
-					aria-hidden
-					className={
-						feedbackCount === undefined
-							? undefined
-							: "animate-in zoom-in-75 fade-in duration-300 motion-reduce:animate-none"
-					}
-					data-icon="inline-start"
-				/>
-				<span
-					className={
-						feedbackCount === undefined
-							? undefined
-							: "animate-in slide-in-from-bottom-1 fade-in duration-300 motion-reduce:animate-none"
-					}
-					key={label}
+			<ButtonGroup className="w-full">
+				<Button
+					className={cn("min-h-10 min-w-0 flex-1 overflow-hidden", buttonClassName)}
+					disabled={isCompleting}
+					isLoading={isSaving}
+					onClick={() => {
+						if (activate) void activate();
+						else openEditor();
+					}}
+					size="sm"
+					variant={variant}
 				>
-					{label}
-				</span>
-			</Button>
+					<Icon
+						aria-hidden
+						className={
+							feedbackCount === undefined
+								? undefined
+								: "animate-in zoom-in-75 fade-in duration-300 motion-reduce:animate-none"
+						}
+						data-icon="inline-start"
+					/>
+					<span
+						className={
+							feedbackCount === undefined
+								? undefined
+								: "animate-in slide-in-from-bottom-1 fade-in duration-300 motion-reduce:animate-none"
+						}
+						key={label}
+					>
+						{label}
+					</span>
+				</Button>
+				<Button
+					aria-haspopup="dialog"
+					aria-label={copy.title}
+					className="min-h-10 w-10"
+					disabled={isCompleting || isSaving}
+					onClick={openEditor}
+					size="icon-md"
+					variant={variant}
+				>
+					<ChevronDown aria-hidden />
+				</Button>
+			</ButtonGroup>
 			<RequestFailure error={saveError} fallback={t.ui.retryLater} />
 		</div>
 	);

@@ -47325,6 +47325,7 @@
 										"subjectAssociations",
 										"links",
 										"tags",
+										"progressStatistics",
 										"versions",
 										"variantContext",
 										"capabilities"
@@ -48623,6 +48624,34 @@
 															{ "type": "null" }
 														]
 													}
+												}
+											}
+										},
+										"progressStatistics": {
+											"type": "object",
+											"required": ["active", "backlog"],
+											"properties": {
+												"active": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"backlog": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												}
 											}
 										},
@@ -49050,6 +49079,7 @@
 										"subjectAssociations",
 										"links",
 										"tags",
+										"progressStatistics",
 										"versions",
 										"variantContext",
 										"capabilities"
@@ -50348,6 +50378,34 @@
 															{ "type": "null" }
 														]
 													}
+												}
+											}
+										},
+										"progressStatistics": {
+											"type": "object",
+											"required": ["active", "backlog"],
+											"properties": {
+												"active": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"backlog": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												}
 											}
 										},
@@ -50868,6 +50926,7 @@
 										"subjectAssociations",
 										"links",
 										"tags",
+										"progressStatistics",
 										"versions",
 										"variantContext",
 										"capabilities"
@@ -52166,6 +52225,34 @@
 															{ "type": "null" }
 														]
 													}
+												}
+											}
+										},
+										"progressStatistics": {
+											"type": "object",
+											"required": ["active", "backlog"],
+											"properties": {
+												"active": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"backlog": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												}
 											}
 										},
@@ -52842,6 +52929,7 @@
 										"subjectAssociations",
 										"links",
 										"tags",
+										"progressStatistics",
 										"versions",
 										"variantContext",
 										"capabilities"
@@ -54140,6 +54228,34 @@
 															{ "type": "null" }
 														]
 													}
+												}
+											}
+										},
+										"progressStatistics": {
+											"type": "object",
+											"required": ["active", "backlog"],
+											"properties": {
+												"active": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"backlog": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												}
 											}
 										},
@@ -54607,6 +54723,7 @@
 										"subjectAssociations",
 										"links",
 										"tags",
+										"progressStatistics",
 										"versions",
 										"variantContext",
 										"capabilities"
@@ -55905,6 +56022,34 @@
 															{ "type": "null" }
 														]
 													}
+												}
+											}
+										},
+										"progressStatistics": {
+											"type": "object",
+											"required": ["active", "backlog"],
+											"properties": {
+												"active": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"backlog": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												}
 											}
 										},
@@ -56742,6 +56887,7 @@
 										"subjectAssociations",
 										"links",
 										"tags",
+										"progressStatistics",
 										"versions",
 										"variantContext",
 										"capabilities"
@@ -58040,6 +58186,34 @@
 															{ "type": "null" }
 														]
 													}
+												}
+											}
+										},
+										"progressStatistics": {
+											"type": "object",
+											"required": ["active", "backlog"],
+											"properties": {
+												"active": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"backlog": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												}
 											}
 										},

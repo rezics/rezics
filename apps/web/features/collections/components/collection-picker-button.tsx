@@ -23,11 +23,13 @@ export function CollectionPickerButton({
 	onOpenChange,
 	open: controlledOpen,
 	targetId,
+	triggerClassName,
 	triggerVariant,
 }: {
 	onOpenChange?: (open: boolean) => void;
 	open?: boolean;
 	targetId: string;
+	triggerClassName?: string;
 	triggerVariant?: "outline" | "secondary";
 }) {
 	const { t } = useTranslation(["engagement", "feed", "ui"]);
@@ -84,7 +86,12 @@ export function CollectionPickerButton({
 	return (
 		<Dialog onOpenChange={({ open: nextOpen }) => setOpen(nextOpen)} open={open}>
 			{triggerVariant ? (
-				<Button onClick={requestOpen} size="sm" variant={triggerVariant}>
+				<Button
+					className={triggerClassName}
+					onClick={requestOpen}
+					size="sm"
+					variant={triggerVariant}
+				>
 					<LibraryIcon aria-hidden data-icon="inline-start" />
 					{t.feed.actions.addToCollection}
 				</Button>

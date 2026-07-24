@@ -88,6 +88,12 @@ export default {
 			restartAction: "Start over",
 			completeAction: "Complete this read",
 			completedFeedback: insert("Completed read {{count}}", { count: Number }),
+			statistics: {
+				active: insert("{{count}} people are currently reading", { count: String }),
+				activeOne: "1 person is currently reading",
+				backlog: insert("{{count}} people want to read", { count: String }),
+				backlogOne: "1 person wants to read",
+			},
 			statuses: {
 				backlog: "Want to read",
 				active: "Reading",
@@ -118,6 +124,12 @@ export default {
 			restartAction: "Start over",
 			completeAction: "Complete this view",
 			completedFeedback: insert("Completed view {{count}}", { count: Number }),
+			statistics: {
+				active: insert("{{count}} people are currently watching", { count: String }),
+				activeOne: "1 person is currently watching",
+				backlog: insert("{{count}} people want to watch", { count: String }),
+				backlogOne: "1 person wants to watch",
+			},
 			statuses: {
 				backlog: "Want to watch",
 				active: "Watching",
@@ -147,6 +159,12 @@ export default {
 			restartAction: "Start over",
 			completeAction: "Complete this use",
 			completedFeedback: insert("Completion {{count}} recorded", { count: Number }),
+			statistics: {
+				active: insert("{{count}} people are currently using this", { count: String }),
+				activeOne: "1 person is currently using this",
+				backlog: insert("{{count}} people want to use this", { count: String }),
+				backlogOne: "1 person wants to use this",
+			},
 			statuses: {
 				backlog: "Want to use",
 				active: "Using",

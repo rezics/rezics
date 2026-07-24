@@ -86,6 +86,12 @@ export default {
 			restartAction: "重新開始",
 			completeAction: "完成本次閱讀",
 			completedFeedback: insert("已完成第 {{count}} 次閱讀", { count: Number }),
+			statistics: {
+				active: insert("有 {{count}} 人正在閱讀", { count: String }),
+				activeOne: "有 1 人正在閱讀",
+				backlog: insert("有 {{count}} 人想讀", { count: String }),
+				backlogOne: "有 1 人想讀",
+			},
 			statuses: {
 				backlog: "想讀",
 				active: "閱讀中",
@@ -115,6 +121,12 @@ export default {
 			restartAction: "重新開始",
 			completeAction: "完成本次觀看",
 			completedFeedback: insert("已完成第 {{count}} 次觀看", { count: Number }),
+			statistics: {
+				active: insert("有 {{count}} 人正在觀看", { count: String }),
+				activeOne: "有 1 人正在觀看",
+				backlog: insert("有 {{count}} 人想看", { count: String }),
+				backlogOne: "有 1 人想看",
+			},
 			statuses: {
 				backlog: "想看",
 				active: "觀看中",
@@ -143,6 +155,12 @@ export default {
 			restartAction: "重新開始",
 			completeAction: "完成本次使用",
 			completedFeedback: insert("已記錄第 {{count}} 次完成", { count: Number }),
+			statistics: {
+				active: insert("有 {{count}} 人正在使用", { count: String }),
+				activeOne: "有 1 人正在使用",
+				backlog: insert("有 {{count}} 人想使用", { count: String }),
+				backlogOne: "有 1 人想使用",
+			},
 			statuses: {
 				backlog: "想使用",
 				active: "使用中",

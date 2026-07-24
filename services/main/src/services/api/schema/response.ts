@@ -233,6 +233,11 @@ const UnitDetailsResponse = t.Union([
 	t.Object({ type: t.Literal("series"), kind: t.String() }, { additionalProperties: false }),
 ]);
 
+export const UnitProgressStatisticsResponse = t.Object({
+	active: t.Integer({ minimum: 0 }),
+	backlog: t.Integer({ minimum: 0 }),
+});
+
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
 	type: CatalogUnitTypeResponse,
@@ -289,6 +294,7 @@ export const UnitDetailResponse = t.Object({
 			title: NullableText,
 		}),
 	),
+	progressStatistics: UnitProgressStatisticsResponse,
 	versions: t.Array(
 		t.Object({
 			id: Uuid,
