@@ -1,13 +1,38 @@
-/** @vitest-environment jsdom */
-
 import { describe, expect, it } from "vitest";
 
 import { readRecentEmojiChoices, rememberRecentEmojiChoice } from "./avatar-emoji-recents";
 
+class MemoryStorage implements Storage {
+	private readonly values = new Map<string, string>();
+
+	get length(): number {
+		return this.values.size;
+	}
+
+	clear(): void {
+		this.values.clear();
+	}
+
+	getItem(key: string): string | null {
+		return this.values.get(key) ?? null;
+	}
+
+	key(index: number): string | null {
+		return [...this.values.keys()][index] ?? null;
+	}
+
+	removeItem(key: string): void {
+		this.values.delete(key);
+	}
+
+	setItem(key: string, value: string): void {
+		this.values.set(key, value);
+	}
+}
+
 describe("avatar recents", () => {
 	it("keeps valid emoji choices in most-recent-first order", () => {
-		const storage = window.localStorage;
-		storage.clear();
+		const storage = new MemoryStorage();
 
 		rememberRecentEmojiChoice(storage, "zh-hant", { emoji: "🦈", label: "鯊魚" });
 		rememberRecentEmojiChoice(storage, "zh-hant", {
@@ -23,8 +48,7 @@ describe("avatar recents", () => {
 	});
 
 	it("rejects malformed stored emoji values", () => {
-		const storage = window.localStorage;
-		storage.clear();
+		const storage = new MemoryStorage();
 		storage.setItem(
 			"rezics-avatar-recent-emojis-v1:en",
 			JSON.stringify({
@@ -40,8 +64,7 @@ describe("avatar recents", () => {
 	});
 
 	it("isolates localized labels by picker locale", () => {
-		const storage = window.localStorage;
-		storage.clear();
+		const storage = new MemoryStorage();
 
 		rememberRecentEmojiChoice(storage, "en", { emoji: "🦈", label: "Shark" });
 		rememberRecentEmojiChoice(storage, "zh-hant", { emoji: "🦈", label: "鯊魚" });
