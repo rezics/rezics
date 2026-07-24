@@ -12,7 +12,6 @@ import {
 } from "../../authorization/unit/invitations";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
-import { deliverNotificationEmail } from "../../notifications/service";
 import { UnitAccessExpiryInvalid } from "./errors";
 import {
 	CreateUnitAccessInvitationBody,
@@ -90,7 +89,6 @@ export default new Elysia({ prefix: "/unit" })
 				expiresAt: futureDate(body.invitationExpiresAt),
 				accessExpiresAt: body.accessExpiresAt ? futureDate(body.accessExpiresAt) : null,
 			});
-			await deliverNotificationEmail(result.notificationId);
 			return result.invitation;
 		},
 		{

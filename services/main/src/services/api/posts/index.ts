@@ -20,7 +20,7 @@ import {
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
-import { createNotification, deliverNotificationEmail } from "../../notifications/service";
+import { createNotification } from "../../notifications/service";
 import { fractionalPositionAt } from "../../ordering/position";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
@@ -737,21 +737,18 @@ export default new Elysia()
 								eq(profileTable.id, creditAttribution.creditedUnitId),
 							)
 							.where(eq(creditAttribution.sourceUnitId, recipientUnitId));
-						const notificationIds: string[] = [];
 						for (const recipient of recipients) {
 							if (!recipient.profileId || recipient.profileId === profile.unitId)
 								continue;
-							const notificationId = await createNotification(tx, {
+							await createNotification(tx, {
 								recipientProfileId: recipient.profileId,
 								actorProfileId: profile.unitId,
 								kind: "reply",
 								subjectUnitId: created.id,
 							});
-							if (notificationId) notificationIds.push(notificationId);
 						}
-						return { id: created.id, notificationIds };
+						return { id: created.id };
 					});
-					await Promise.all(createdReply.notificationIds.map(deliverNotificationEmail));
 					return { id: createdReply.id };
 				},
 				{

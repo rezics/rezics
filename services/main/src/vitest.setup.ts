@@ -5,6 +5,7 @@ const environment: Readonly<Record<string, string>> = {
 	BETTER_AUTH_TRUSTED_ORIGINS: "http://localhost:3000",
 	EMAIL_MODE: "log",
 	EMAIL_FROM: "test@example.com",
+	EMAIL_FROM_NAME: "Rezics",
 	S3_ENDPOINT: "http://localhost:9000",
 	S3_ACCESS_KEY_ID: "test-access-key",
 	S3_SECRET_ACCESS_KEY: "test-secret-key",

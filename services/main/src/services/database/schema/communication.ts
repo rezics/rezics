@@ -3,6 +3,7 @@ import {
 	boolean,
 	check,
 	index,
+	integer,
 	pgEnum,
 	primaryKey,
 	text,
@@ -12,7 +13,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { NotificationKindValues, toEnumValues } from "./contract-values";
+import { type StoredUiLocale, NotificationKindValues, toEnumValues } from "./contract-values";
 import {
 	createCreatedAtColumn,
 	createJsonObjectColumn,
@@ -29,6 +30,22 @@ export const notificationEmailStatus = pgEnum("notification_email_status", [
 	"pending",
 	"sent",
 	"failed",
+]);
+export const emailOutboxKind = pgEnum("email_outbox_kind", [
+	"verify_email",
+	"reset_password",
+	"notification",
+]);
+export const emailOutboxStatus = pgEnum("email_outbox_status", [
+	"pending",
+	"processing",
+	"accepted",
+	"failed",
+]);
+export const emailProviderStatus = pgEnum("email_provider_status", [
+	"logged",
+	"queued",
+	"delivered",
 ]);
 
 export const notification = pgTable(
@@ -77,6 +94,123 @@ export const notification = pgTable(
 			sql`(${table.emailStatus} = 'sent'::notification_email_status and ${table.emailedAt} is not null and ${table.emailError} is null) or (${table.emailStatus} = 'failed'::notification_email_status and ${table.emailedAt} is null and nullif(btrim(${table.emailError}), '') is not null) or (${table.emailStatus} in ('not_requested', 'pending') and ${table.emailedAt} is null and ${table.emailError} is null)`,
 		),
 		createJsonObjectConstraint("notification_payload_json_object_check", table.payload),
+	],
+);
+
+/**
+ * Durable email intent. Authentication intents carry their immutable recipient,
+ * locale, and action URL. Notification intents point at the authoritative
+ * notification row and resolve its recipient and localized copy when claimed.
+ */
+export const emailOutbox = pgTable(
+	"email_outbox",
+	{
+		id: createUuidv7PrimaryKey(),
+		kind: emailOutboxKind().notNull(),
+		notificationId: uuid().references(() => notification.id, { onDelete: "cascade" }),
+		recipientEmail: text(),
+		locale: text().$type<StoredUiLocale>(),
+		actionUrl: text(),
+		status: emailOutboxStatus().default("pending").notNull(),
+		attemptCount: integer().default(0).notNull(),
+		availableAt: createTimestampMsColumn().defaultNow().notNull(),
+		leaseExpiresAt: createTimestampMsColumn(),
+		acceptedAt: createTimestampMsColumn(),
+		failedAt: createTimestampMsColumn(),
+		providerMessageId: text(),
+		providerStatus: emailProviderStatus(),
+		/** @UNIT_LOCALIZATION_EXEMPT Machine diagnostic for operators; never display copy. */
+		lastError: text(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		uniqueIndex("email_outbox_notification_idx")
+			.on(table.notificationId)
+			.where(sql`${table.notificationId} is not null`),
+		uniqueIndex("email_outbox_provider_message_idx")
+			.on(table.providerMessageId)
+			.where(sql`${table.providerMessageId} is not null`),
+		index("email_outbox_pending_idx")
+			.on(table.availableAt, table.createdAt)
+			.where(sql`${table.status} = 'pending'::email_outbox_status`),
+		index("email_outbox_processing_lease_idx")
+			.on(table.leaseExpiresAt)
+			.where(sql`${table.status} = 'processing'::email_outbox_status`),
+		check("email_outbox_attempt_count_check", sql`${table.attemptCount} >= 0`),
+		check(
+			"email_outbox_intent_check",
+			sql`(
+				${table.kind} = 'notification'::email_outbox_kind
+				and ${table.notificationId} is not null
+				and ${table.recipientEmail} is null
+				and ${table.locale} is null
+				and ${table.actionUrl} is null
+			) or (
+				${table.kind} in (
+					'verify_email'::email_outbox_kind,
+					'reset_password'::email_outbox_kind
+				)
+				and ${table.notificationId} is null
+				and (
+					(
+						${table.status} in (
+							'pending'::email_outbox_status,
+							'processing'::email_outbox_status
+						)
+						and nullif(btrim(${table.recipientEmail}), '') is not null
+						and nullif(btrim(${table.actionUrl}), '') is not null
+						and ${table.locale} in ('en', 'zh-hant')
+					) or (
+						${table.status} in (
+							'accepted'::email_outbox_status,
+							'failed'::email_outbox_status
+						)
+						and ${table.recipientEmail} is null
+						and ${table.locale} is null
+						and ${table.actionUrl} is null
+					)
+				)
+			)`,
+		),
+		check(
+			"email_outbox_state_check",
+			sql`(
+				${table.status} = 'pending'::email_outbox_status
+				and ${table.leaseExpiresAt} is null
+				and ${table.acceptedAt} is null
+				and ${table.failedAt} is null
+				and ${table.providerMessageId} is null
+				and ${table.providerStatus} is null
+			) or (
+				${table.status} = 'processing'::email_outbox_status
+				and ${table.leaseExpiresAt} is not null
+				and ${table.acceptedAt} is null
+				and ${table.failedAt} is null
+				and ${table.providerMessageId} is null
+				and ${table.providerStatus} is null
+				and ${table.lastError} is null
+			) or (
+				${table.status} = 'accepted'::email_outbox_status
+				and ${table.leaseExpiresAt} is null
+				and ${table.acceptedAt} is not null
+				and ${table.failedAt} is null
+				and ${table.providerStatus} is not null
+				and (
+					${table.providerStatus} = 'logged'::email_provider_status
+					or nullif(btrim(${table.providerMessageId}), '') is not null
+				)
+				and ${table.lastError} is null
+			) or (
+				${table.status} = 'failed'::email_outbox_status
+				and ${table.leaseExpiresAt} is null
+				and ${table.acceptedAt} is null
+				and ${table.failedAt} is not null
+				and ${table.providerMessageId} is null
+				and ${table.providerStatus} is null
+				and nullif(btrim(${table.lastError}), '') is not null
+			)`,
+		),
 	],
 );
 

@@ -701,7 +701,7 @@ export async function executeAuthorizedModerationAction(
 					subjectIds: [created.id],
 				})
 			).map(({ postId, role }) => ({ postId, role }));
-			return { created: { ...created, notes }, notificationIds: [], replayed: true };
+			return { created: { ...created, notes }, replayed: true };
 		}
 	}
 
@@ -783,10 +783,9 @@ export async function executeAuthorizedModerationAction(
 	const publicNoticePostId = noteBindings.find(
 		(binding) => binding.role === "public_notice",
 	)?.postId;
-	const notificationIds: string[] = [];
 	if (input.body.kind !== "note" || publicNoticePostId)
 		for (const recipientProfileId of target.recipientProfileIds) {
-			const notificationId = await createNotification(tx, {
+			await createNotification(tx, {
 				recipientProfileId,
 				actorProfileId: input.actorProfileId,
 				kind: "moderation",
@@ -799,7 +798,6 @@ export async function executeAuthorizedModerationAction(
 					publicNoticePostId,
 				},
 			});
-			if (notificationId) notificationIds.push(notificationId);
 		}
 	await tx.insert(auditEvent).values({
 		actorProfileId: input.actorProfileId,
@@ -815,5 +813,5 @@ export async function executeAuthorizedModerationAction(
 			notePostIds,
 		},
 	});
-	return { created: { ...created, notes: noteBindings }, notificationIds, replayed: false };
+	return { created: { ...created, notes: noteBindings }, replayed: false };
 }

@@ -63,6 +63,7 @@ tasks:
             - task: libraries:portable-text:test
             - task: libraries:license:test
             - task: libraries:i18n:test
+            - task: libraries:email:test
             - task: libraries:fixture-data:test
             - task: services-main:test
             - task: apps-web:test

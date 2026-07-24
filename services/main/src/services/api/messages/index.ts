@@ -15,7 +15,7 @@ import {
 	profile as profileTable,
 	profileBlock,
 } from "../../database/schema";
-import { createNotification, deliverNotificationEmail } from "../../notifications/service";
+import { createNotification } from "../../notifications/service";
 import { parseJsonCursor } from "../../pagination";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
@@ -378,7 +378,7 @@ export default new Elysia({ prefix: "/messages" })
 					})
 					.returning();
 				if (!created) throw new Error("Message insert did not return a row");
-				const notificationId = await createNotification(tx, {
+				await createNotification(tx, {
 					recipientProfileId: recipientProfileId,
 					actorProfileId: profile.unitId,
 					kind: "direct_message",
@@ -387,10 +387,9 @@ export default new Elysia({ prefix: "/messages" })
 						conversationId: params.conversationId,
 					},
 				});
-				return { created, notificationId };
+				return created;
 			});
-			await deliverNotificationEmail(result.notificationId);
-			return result.created;
+			return result;
 		},
 		{
 			access: "write:message:write",

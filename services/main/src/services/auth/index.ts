@@ -6,8 +6,8 @@ import { getActiveObservability } from "@rezics/observability";
 import { env } from "../config";
 import { database } from "../database";
 import * as schema from "../database/schema/auth";
+import { enqueueAuthenticationEmail } from "../email/outbox";
 import { getRequestTranslation } from "../i18n";
-import { sendMail } from "../mailer";
 
 const { logger } = getActiveObservability();
 
@@ -67,15 +67,16 @@ export const auth = betterAuth({
 		requireEmailVerification: true,
 		revokeSessionsOnPasswordReset: true,
 		async sendResetPassword({ user, url }, request) {
-			const { t } = await getRequestTranslation("emails", request?.headers);
-			void sendMail({
-				to: user.email,
-				subject: t.resetPassword.subject,
-				text: t.resetPassword.text({ url }),
+			const { locale } = await getRequestTranslation("emails", request?.headers);
+			void enqueueAuthenticationEmail({
+				actionUrl: url,
+				kind: "reset_password",
+				locale,
+				recipientEmail: user.email,
 			}).catch((error: unknown) => {
-				logger.error("Failed to send password reset email", {
-					eventName: "email.password_reset.failed",
-					errorCode: "PasswordResetEmailFailed",
+				logger.error("Failed to queue password reset email", {
+					eventName: "email.password_reset.enqueue_failed",
+					errorCode: "PasswordResetEmailEnqueueFailed",
 					error,
 				});
 			});
@@ -85,15 +86,16 @@ export const auth = betterAuth({
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
 		async sendVerificationEmail({ user, url }, request) {
-			const { t } = await getRequestTranslation("emails", request?.headers);
-			void sendMail({
-				to: user.email,
-				subject: t.verifyEmail.subject,
-				text: t.verifyEmail.text({ url }),
+			const { locale } = await getRequestTranslation("emails", request?.headers);
+			void enqueueAuthenticationEmail({
+				actionUrl: url,
+				kind: "verify_email",
+				locale,
+				recipientEmail: user.email,
 			}).catch((error: unknown) => {
-				logger.error("Failed to send verification email", {
-					eventName: "email.verification.failed",
-					errorCode: "VerificationEmailFailed",
+				logger.error("Failed to queue verification email", {
+					eventName: "email.verification.enqueue_failed",
+					errorCode: "VerificationEmailEnqueueFailed",
 					error,
 				});
 			});

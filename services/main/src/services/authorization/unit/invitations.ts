@@ -172,7 +172,7 @@ export async function createUnitAccessInvitation(
 				scope: input.scope,
 			},
 		});
-		const notificationId = await createNotification(tx, {
+		await createNotification(tx, {
 			recipientProfileId: input.invitedProfileId,
 			actorProfileId,
 			subjectUnitId: input.unitId,
@@ -184,7 +184,7 @@ export async function createUnitAccessInvitation(
 			},
 			dedupeKey: `unit-access-invitation:${created.id}`,
 		});
-		return { invitation: presentUnitAccessInvitation(created), notificationId };
+		return { invitation: presentUnitAccessInvitation(created) };
 	});
 }
 

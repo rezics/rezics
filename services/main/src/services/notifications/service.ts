@@ -1,22 +1,9 @@
-import { and, eq, sql } from "drizzle-orm";
-import { getActiveObservability } from "@rezics/observability";
+import { and, eq } from "drizzle-orm";
 
-import { database } from "../database";
-import {
-	notification,
-	profile,
-	notificationPreference,
-	profilePreference,
-	users,
-} from "../database/schema";
+import { notification, notificationPreference } from "../database/schema";
 import type { GovernanceReasonCodeValues, ModerationActionKindValues } from "../database/schema";
-import { DefaultStoredUiLocale } from "../database/schema/contract-values";
-import { getTranslation } from "../i18n";
-import { sendMail } from "../mailer";
 import type { DatabaseTransaction } from "../database";
-import { toUiLocale } from "@rezics/i18n";
-
-const { logger } = getActiveObservability();
+import { enqueueNotificationEmail } from "../email/outbox";
 
 type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 type ModerationActionKind = (typeof ModerationActionKindValues)[number];
@@ -87,7 +74,7 @@ export function notificationTranslationKey(
 }
 
 export async function createNotification(tx: DatabaseTransaction, input: NotificationInput) {
-	if (input.actorProfileId && input.actorProfileId === input.recipientProfileId) return undefined;
+	if (input.actorProfileId && input.actorProfileId === input.recipientProfileId) return;
 	const [preferences] = await tx
 		.select({
 			inApp: notificationPreference.inApp,
@@ -103,7 +90,7 @@ export async function createNotification(tx: DatabaseTransaction, input: Notific
 		.limit(1);
 	const inAppVisible = preferences?.inApp ?? true;
 	const emailEnabled = preferences?.email ?? true;
-	if (!inAppVisible && !emailEnabled) return undefined;
+	if (!inAppVisible && !emailEnabled) return;
 	const [created] = await tx
 		.insert(notification)
 		.values({
@@ -118,63 +105,5 @@ export async function createNotification(tx: DatabaseTransaction, input: Notific
 		})
 		.onConflictDoNothing()
 		.returning({ id: notification.id });
-	return created?.id;
-}
-
-/** Delivery is deliberately single-shot: failure is recorded and never retried. */
-export async function deliverNotificationEmail(notificationId: string | undefined) {
-	if (!notificationId) return;
-	await database.transaction(async (tx) => {
-		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended(${`notification-email:${notificationId}`}::text, 0))`,
-		);
-		const [row] = await tx
-			.select({
-				kind: notification.kind,
-				payload: notification.payload,
-				email: users.email,
-				interfaceLocale: profilePreference.interfaceLocale,
-			})
-			.from(notification)
-			.innerJoin(profile, eq(profile.id, notification.recipientProfileId))
-			.leftJoin(profilePreference, eq(profilePreference.profileId, profile.id))
-			.innerJoin(users, eq(users.id, profile.authUserId))
-			.where(
-				and(eq(notification.id, notificationId), eq(notification.emailStatus, "pending")),
-			)
-			.limit(1);
-		if (!row) return;
-		try {
-			const { t } = await getTranslation("notifications", [
-				toUiLocale(row.interfaceLocale ?? DefaultStoredUiLocale),
-			]);
-			const copy = t[notificationTranslationKey(row.kind, row.payload)];
-			await sendMail({ to: row.email, subject: copy.title, text: copy.body });
-			await tx
-				.update(notification)
-				.set({ emailStatus: "sent", emailedAt: new Date(), emailError: null })
-				.where(
-					and(
-						eq(notification.id, notificationId),
-						eq(notification.emailStatus, "pending"),
-					),
-				);
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			await tx
-				.update(notification)
-				.set({ emailStatus: "failed", emailError: message.slice(0, 2_000) })
-				.where(
-					and(
-						eq(notification.id, notificationId),
-						eq(notification.emailStatus, "pending"),
-					),
-				);
-			logger.error("Notification email delivery failed", {
-				eventName: "notification.email.failed",
-				errorCode: "NotificationEmailFailed",
-				error,
-			});
-		}
-	});
+	if (created && emailEnabled) await enqueueNotificationEmail(tx, created.id);
 }

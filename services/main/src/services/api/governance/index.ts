@@ -22,7 +22,7 @@ import {
 	getGovernanceNote,
 	listGovernanceNotes,
 } from "../../governance/note-service";
-import { createNotification, deliverNotificationEmail } from "../../notifications/service";
+import { createNotification } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import { makePrimaryUnitLocalization } from "../../units/localization";
@@ -401,7 +401,6 @@ export default new Elysia({ prefix: "/governance" })
 					body,
 				});
 			});
-			await Promise.all(result.notificationIds.map(deliverNotificationEmail));
 			return result.created;
 		},
 		{
@@ -449,7 +448,7 @@ export default new Elysia({ prefix: "/governance" })
 				authorization,
 				caseRow ?? { authority: "platform", realmId: null },
 			);
-			const result = await database.transaction(async (tx) => {
+			await database.transaction(async (tx) => {
 				const [current] = await tx
 					.select({
 						id: feedback.id,
@@ -497,7 +496,7 @@ export default new Elysia({ prefix: "/governance" })
 					subjectId: updated.id,
 					metadata: { publicNoticePostId: publicNotice?.postId },
 				});
-				const notificationId = await createNotification(tx, {
+				await createNotification(tx, {
 					recipientProfileId: updated.profileId,
 					actorProfileId: profile.unitId,
 					kind: "moderation",
@@ -508,9 +507,7 @@ export default new Elysia({ prefix: "/governance" })
 						publicNoticePostId: publicNotice?.postId,
 					},
 				});
-				return notificationId;
 			});
-			await deliverNotificationEmail(result);
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
@@ -591,7 +588,7 @@ export default new Elysia({ prefix: "/governance" })
 					.update(moderationCase)
 					.set({ state: "actioned" })
 					.where(eq(moderationCase.id, caseRow.id));
-				const notificationId = await createNotification(tx, {
+				await createNotification(tx, {
 					recipientProfileId: target.id,
 					actorProfileId: profile.unitId,
 					kind: "moderation",
@@ -612,10 +609,9 @@ export default new Elysia({ prefix: "/governance" })
 					subjectId: target.id,
 					metadata: { enforcementId: created.id, kind: body.kind, notePostIds },
 				});
-				return { created, notificationId };
+				return created;
 			});
-			await deliverNotificationEmail(result.notificationId);
-			return result.created;
+			return result;
 		},
 		{
 			access: "session-only",
@@ -700,7 +696,7 @@ export default new Elysia({ prefix: "/governance" })
 					subjectId: current.profileId,
 					metadata: { enforcementId: current.id, notePostIds },
 				});
-				const notificationId = await createNotification(tx, {
+				await createNotification(tx, {
 					recipientProfileId: current.profileId,
 					actorProfileId: profile.unitId,
 					kind: "moderation",
@@ -713,10 +709,9 @@ export default new Elysia({ prefix: "/governance" })
 						publicNoticePostId,
 					},
 				});
-				return { updated, notificationId };
+				return updated;
 			});
-			await deliverNotificationEmail(result.notificationId);
-			return result.updated;
+			return result;
 		},
 		{
 			access: "session-only",

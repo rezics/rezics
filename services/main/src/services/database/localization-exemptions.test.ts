@@ -38,6 +38,10 @@ const reviewedExemptions = [
 	},
 	{
 		file: "src/services/database/schema/communication.ts",
+		rationale: "Machine diagnostic for operators; never display copy.",
+	},
+	{
+		file: "src/services/database/schema/communication.ts",
 		rationale:
 			"Machine diagnostic: raw delivery failure detail for operators, never display copy.",
 	},

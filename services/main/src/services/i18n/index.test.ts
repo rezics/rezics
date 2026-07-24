@@ -44,9 +44,8 @@ describe("backend internationalization", () => {
 
 		expect(locale).toBe("en");
 		expect(t.resetPassword.subject).toBe("Reset your REZICS password");
-		expect(t.resetPassword.text({ url: "https://example.com/reset" })).toBe(
-			"Open this link within one hour to reset your password: https://example.com/reset",
-		);
+		expect(t.resetPassword.actionLabel).toBe("Reset password");
+		expect(t.resetPassword.body).toContain("within one hour");
 	});
 
 	it("matches stored preferences for notification copy", async () => {

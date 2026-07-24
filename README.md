@@ -18,9 +18,10 @@ apps/
 └─ about/                            # Static multilingual Astro site
 
 services/
-└─ main/                             # Elysia/srvx API and recommendation worker
+└─ main/                             # Elysia/srvx API and background worker
 
 libraries/
+├─ email/                            # Internal email templates and rendering
 ├─ i18n/                             # Internal localization library
 ├─ portable-text/                    # Internal Portable Text contracts
 ├─ ui/                               # Internal shared UI

@@ -1,0 +1,21 @@
+{
+	"name": "@rezics/email",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"@react-email/components": "1.0.12",
+		"@react-email/render": "2.1.0",
+		"react": "19.2",
+		"react-dom": "19.2"
+	},
+	"devDependencies": {
+		"@types/react": "19",
+		"@types/react-dom": "19",
+		"typescript": "7",
+		"vitest": "4.1.10"
+	}
+}

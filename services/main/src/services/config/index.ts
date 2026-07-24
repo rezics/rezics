@@ -24,8 +24,17 @@ export const env = createEnv({
 		BETTER_AUTH_URL: origin,
 		EMAIL_MODE: z.enum(["log", "cloudflare"]).default("log"),
 		EMAIL_FROM: z.string().min(1),
+		EMAIL_FROM_NAME: z.string().trim().min(1).default("Rezics"),
 		CLOUDFLARE_ACCOUNT_ID: z.string().min(1).optional(),
 		CLOUDFLARE_EMAIL_API_TOKEN: z.string().min(1).optional(),
+		EMAIL_DISPATCH_POLL_INTERVAL_MS: z.coerce
+			.number()
+			.int()
+			.min(250)
+			.max(60_000)
+			.default(1_000),
+		EMAIL_DISPATCH_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(20),
+		EMAIL_DISPATCH_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(5),
 		BETTER_AUTH_TRUSTED_ORIGINS: z
 			.string()
 			.transform((value) =>

@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check the email rendering package.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        desc: Test email rendering behavior.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts

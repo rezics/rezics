@@ -2,21 +2,24 @@ import { initializeObservability, runWorkerJob } from "@rezics/observability";
 
 const observability = initializeObservability({
 	service: {
-		name: "rezics-recommendation-worker",
+		name: "rezics-main-worker",
 		version: "0.1.0",
 		environment: process.env.DEPLOYMENT_ENVIRONMENT ?? process.env.NODE_ENV ?? "development",
 	},
 });
 
-const [{ serve }, { env }, { database }, recommendationWorker, workerHealth] = await Promise.all([
-	import("srvx"),
-	import("./services/config"),
-	import("./services/database"),
-	import("./services/recommendations/worker"),
-	import("./services/health/worker-health"),
-]);
+const [{ serve }, { env }, { database }, recommendationWorker, emailDispatcher, workerHealth] =
+	await Promise.all([
+		import("srvx"),
+		import("./services/config"),
+		import("./services/database"),
+		import("./services/recommendations/worker"),
+		import("./services/email/dispatcher"),
+		import("./services/health/worker-health"),
+	]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
 	recommendationWorker;
+const { dispatchEmailBatch } = emailDispatcher;
 const { logger } = observability;
 const healthState = new workerHealth.WorkerHealthState();
 const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
@@ -60,32 +63,37 @@ function wait(duration: number) {
 }
 
 async function run() {
+	let nextRecommendationAt = 0;
 	while (!stopping) {
 		healthState.startJob();
 		observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
 		try {
-			await runWorkerJob({ name: "recommendation.refresh", retryCount: 0 }, async () => {
-				const snapshotId = await refreshRecommendationSnapshot();
-				await aggregateRecommendationMetrics();
-				await purgeRecommendationData();
-				logger.info(
-					snapshotId
-						? "Recommendation refresh completed"
-						: "Recommendation refresh skipped",
-					{
-						eventName: snapshotId
-							? "recommendation.refresh.completed"
-							: "recommendation.refresh.skipped",
-					},
-				);
-			});
+			await runWorkerJob({ name: "email.dispatch", retryCount: 0 }, dispatchEmailBatch);
+			if (Date.now() >= nextRecommendationAt) {
+				nextRecommendationAt = Date.now() + env.RECOMMENDATION_REFRESH_INTERVAL_MS;
+				await runWorkerJob({ name: "recommendation.refresh", retryCount: 0 }, async () => {
+					const snapshotId = await refreshRecommendationSnapshot();
+					await aggregateRecommendationMetrics();
+					await purgeRecommendationData();
+					logger.info(
+						snapshotId
+							? "Recommendation refresh completed"
+							: "Recommendation refresh skipped",
+						{
+							eventName: snapshotId
+								? "recommendation.refresh.completed"
+								: "recommendation.refresh.skipped",
+						},
+					);
+				});
+			}
 		} catch {
 			// runWorkerJob records the bounded failure telemetry before control returns here.
 		} finally {
 			healthState.finishJob();
 			observability.metrics.workerHeartbeat();
 		}
-		if (!stopping) await wait(env.RECOMMENDATION_REFRESH_INTERVAL_MS);
+		if (!stopping) await wait(env.EMAIL_DISPATCH_POLL_INTERVAL_MS);
 	}
 }
 

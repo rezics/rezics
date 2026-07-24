@@ -50,7 +50,7 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { listGovernanceNotes } from "../../governance/note-service";
-import { createNotification, deliverNotificationEmail } from "../../notifications/service";
+import { createNotification } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
 import {
 	getRealmMemberCapabilityAccess,
@@ -941,7 +941,7 @@ export default new Elysia({ prefix: "/realms" })
 					)
 					.returning();
 				if (!row) throw new RealmMemberNotFound();
-				const notificationId = await createNotification(tx, {
+				await createNotification(tx, {
 					recipientProfileId: params.profileId,
 					actorProfileId: profile.unitId,
 					kind: "realm",
@@ -951,10 +951,9 @@ export default new Elysia({ prefix: "/realms" })
 				await recordAuditEvent(tx, profile.unitId, "realm.members.update", params.realmId, {
 					profileId: params.profileId,
 				});
-				return { row, notificationId };
+				return row;
 			});
-			await deliverNotificationEmail(result.notificationId);
-			return result.row;
+			return result;
 		},
 		{
 			access: "contribute:realm:manage",
@@ -1732,7 +1731,6 @@ export default new Elysia({ prefix: "/realms" })
 					body: actionBody,
 				});
 			});
-			await Promise.all(result.notificationIds.map(deliverNotificationEmail));
 			return result.created;
 		},
 		{
