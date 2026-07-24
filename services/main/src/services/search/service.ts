@@ -66,7 +66,6 @@ const searchVariantRelationship = alias(unitVariant, "search_variant_relationshi
 const searchMainUnit = alias(unit, "search_main_unit");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
-const searchStructureMember = alias(unitStructureMember, "search_structure_member");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 const facetCreditAttribution = alias(creditAttribution, "facet_credit_attribution");
 const facetOwnerBinding = alias(unitAccessBinding, "facet_owner_binding");
@@ -900,12 +899,12 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				'kind', ${hitType},
 				'titles', case when ${category}::text = 'tag-structures' then coalesce((
 					select jsonb_build_array(string_agg(
-						coalesce(${primaryUnitTitle(searchStructureMember.memberUnitId)},
-							${searchStructureMember.memberUnitId}::text),
-						' › ' order by ${searchStructureMember.ordinal}
+						coalesce(${primaryUnitTitle(unitStructureMember.memberUnitId)},
+							${unitStructureMember.memberUnitId}::text),
+						' › ' order by ${unitStructureMember.ordinal}
 					))
-					from ${searchStructureMember}
-					where ${searchStructureMember.structureId} = ${unit.id}
+					from ${unitStructureMember}
+					where ${unitStructureMember.structureId} = ${unit.id}
 				), '[]'::jsonb) else coalesce((
 					SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
 						FILTER (WHERE ${unitLocalization.title} IS NOT NULL)

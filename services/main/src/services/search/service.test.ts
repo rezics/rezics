@@ -96,6 +96,8 @@ describe("domain search SQL", () => {
 		])
 			expect(queries).not.toContain(legacyIdentifier);
 		expect(queries).toContain('"unit_localization"');
+		expect(queries).toContain('from "unit_structure_member"');
+		expect(queries).not.toContain('from "search_structure_member"');
 		expect(queries).toContain('LEFT JOIN "unit" AS "subject_unit"');
 		expect(queries).toContain('LEFT JOIN "post_reply"');
 		expect(queries).toMatch(/'provider', \$\d+::text/);
