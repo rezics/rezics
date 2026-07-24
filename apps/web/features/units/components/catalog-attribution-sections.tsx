@@ -37,7 +37,7 @@ function AttributionName({
 	const name = attribution.creditedUnit.title ?? t.ui.unnamed;
 	const nameContent = href ? (
 		<Link
-			className="font-medium text-foreground underline decoration-foreground/35 underline-offset-4 hover:decoration-foreground"
+			className="font-medium text-foreground underline-offset-4 hover:underline focus-visible:underline"
 			href={href}
 		>
 			{name}
