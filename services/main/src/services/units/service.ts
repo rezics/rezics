@@ -58,6 +58,7 @@ import {
 import { getUnitVariantContext } from "./variants";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import { presentAvatar } from "./avatar";
+import { listPublishedBookContentMetrics } from "../content-metrics/service";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
@@ -190,6 +191,7 @@ async function getUnitDetails(
 			publicationDate: details.publicationDate,
 			pageCount: details.pageCount,
 			wordCount: details.wordCount,
+			publishedContentMetrics: await listPublishedBookContentMetrics(database, unitId),
 			format: details.format,
 			licensed: contentLicensed,
 		};

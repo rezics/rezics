@@ -118,6 +118,23 @@ const LocalizationResponse = t.Object({
 	updatedAt: DateTime,
 });
 
+export const ContentMetricResponse = t.Object(
+	{
+		wordCount: t.Integer({ minimum: 0 }),
+		characterCount: t.Integer({ minimum: 0 }),
+	},
+	{ additionalProperties: false },
+);
+
+export const LocalizedContentMetricResponse = t.Object(
+	{
+		language: ContentLanguage,
+		chapterCount: t.Integer({ minimum: 0 }),
+		...ContentMetricResponse.properties,
+	},
+	{ additionalProperties: false },
+);
+
 const UnitSummaryFields = {
 	id: Uuid,
 	kind: t.UnionEnum(UnitKindValues),
@@ -218,7 +235,9 @@ const UnitDetailsResponse = t.Union([
 			isbn13: NullableText,
 			publicationDate: t.Nullable(t.String({ format: "date" })),
 			pageCount: t.Nullable(t.Integer({ minimum: 1 })),
+			/** Editorial catalog metadata; never derived from hosted chapters. */
 			wordCount: t.Nullable(t.Integer({ minimum: 0 })),
+			publishedContentMetrics: t.Array(LocalizedContentMetricResponse),
 			format: NullableText,
 			licensed: t.Boolean(),
 		},
@@ -885,6 +904,7 @@ export const ChapterDetailResponse = t.Object({
 	position: FractionalPosition,
 	language: ContentLanguage,
 	content: PortableTextDocument,
+	contentMetrics: ContentMetricResponse,
 	status: t.String(),
 	updatedAt: DateTime,
 	previousChapterId: t.Nullable(Uuid),

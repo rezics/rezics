@@ -243,6 +243,8 @@ export default {
 		language: "章節語言",
 		useLanguage: "切換語言",
 		save: "儲存章節",
+		wordCount: insert("{{count}} 個詞", { count: Number }),
+		characterCount: insert("{{count}} 字", { count: Number }),
 	},
 	reader: {
 		decreaseFontSize: "縮小字級",

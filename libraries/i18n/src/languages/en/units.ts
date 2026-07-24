@@ -255,6 +255,8 @@ export default {
 		language: "Chapter language",
 		useLanguage: "Switch language",
 		save: "Save chapter",
+		wordCount: insert("{{count}} words", { count: Number }),
+		characterCount: insert("{{count}} characters", { count: Number }),
 	},
 	reader: {
 		decreaseFontSize: "Decrease font size",

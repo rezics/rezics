@@ -63,6 +63,24 @@ is a logical snapshot size, not the newly allocated physical bytes for the edit.
 zero for an already-known content hash and must not be inferred from adjacent revisions'
 `byte_size` values.
 
+## Localized content metrics
+
+Word and character counts are rebuildable projections of current localized Portable Text, not
+authored Unit state. `unit_localization_content_metric` is therefore keyed to a current
+`(unit_id, language)` localization and excluded from Unit revision documents. Recording any Unit
+revision synchronizes the projection in the same transaction; restore first replaces semantic
+localization state and then measures it with the current algorithm.
+
+The projection stores locale-aware word-like segments, non-whitespace Unicode grapheme clusters,
+an algorithm version, and a canonical source-document hash. Text spans and visible image captions
+participate. Marks, links, accessibility alt text, and unknown custom blocks do not. A client may
+use the shared pure measuring function for immediate editor feedback, but the server never accepts
+client-supplied counts.
+
+Hosted Book totals sum currently readable, published chapter occurrences by content language.
+They remain explicitly separate from `book.word_count`, which is authoritative editorial catalog
+metadata and may describe a Book whose text is not hosted by REZICS.
+
 ## Naming and identities
 
 Behavior-selecting discriminants are named `kind`. Content Structure uses `kind`, Dock uses `kind`,

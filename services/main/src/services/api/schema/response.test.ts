@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { DateTime } from ".";
 import {
 	toPortableTextResponse,
+	ContentMetricResponse,
+	LocalizedContentMetricResponse,
 	UnitDetailAttributionSummaryResponse,
 	UnitProgressStatisticsResponse,
 	UnitVariantContextResponse,
@@ -82,6 +84,27 @@ describe("API response values", () => {
 		);
 		expect(Check(UnitProgressStatisticsResponse, { active: -1, backlog: 0 })).toBe(false);
 		expect(Check(UnitProgressStatisticsResponse, { active: 1.5, backlog: 0 })).toBe(false);
+	});
+
+	it("keeps word and character content metrics distinct and non-negative", () => {
+		expect(Check(ContentMetricResponse, { wordCount: 2, characterCount: 4 })).toBe(true);
+		expect(Check(ContentMetricResponse, { wordCount: -1, characterCount: 4 })).toBe(false);
+		expect(
+			Check(LocalizedContentMetricResponse, {
+				language: "zh",
+				chapterCount: 3,
+				wordCount: 200,
+				characterCount: 400,
+			}),
+		).toBe(true);
+		expect(
+			Check(LocalizedContentMetricResponse, {
+				language: "zh",
+				chapterCount: 3,
+				wordCount: 200.5,
+				characterCount: 400,
+			}),
+		).toBe(false);
 	});
 
 	it("requires non-negative attribution statistics in Unit summaries", () => {

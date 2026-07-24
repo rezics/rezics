@@ -85,6 +85,7 @@ import {
 	nextUnitStructureDefinitionUpdatedAt,
 	replaceUnitStructureDefinition,
 } from "../tag-structures/definition";
+import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -1143,6 +1144,7 @@ export async function recordUnitRevision(
 		});
 
 	const documents = snapshotToDocuments(await snapshotUnit(tx, input.unitId));
+	await syncUnitLocalizationContentMetrics(tx, input.unitId);
 	const previousSlots = head
 		? await tx
 				.select({

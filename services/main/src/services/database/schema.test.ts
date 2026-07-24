@@ -7,6 +7,7 @@ import {
 	catalogUnitContentLicense,
 	contentStructure,
 	contentStructureNode,
+	unitLocalizationContentMetric,
 	creditAttribution,
 	unitAssociationProposal,
 	entityAssociationPolicy,
@@ -201,6 +202,28 @@ describe("database schema contracts", () => {
 		]);
 		expect(slot.checks.map((constraint) => constraint.name)).toContain(
 			"unit_revision_slot_key_shape_check",
+		);
+	});
+
+	it("keeps localized content metrics as a rebuildable projection", () => {
+		const metric = getTableConfig(unitLocalizationContentMetric);
+		expect(getTableName(unitLocalizationContentMetric)).toBe(
+			"unit_localization_content_metric",
+		);
+		expect(metric.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"unit_id",
+			"language",
+		]);
+		expect(metric.foreignKeys.map((key) => key.getName())).toContain(
+			"unit_localization_content_metric_localization_fkey",
+		);
+		expect(metric.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"unit_localization_content_metric_word_count_check",
+				"unit_localization_content_metric_character_count_check",
+				"unit_localization_content_metric_algorithm_version_check",
+				"unit_localization_content_metric_source_sha256_check",
+			]),
 		);
 	});
 

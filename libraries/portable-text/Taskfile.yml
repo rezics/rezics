@@ -5,3 +5,8 @@ tasks:
         desc: Type-check the Portable Text schema package.
         cmds:
             - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        desc: Test Portable Text normalization and content metrics.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts

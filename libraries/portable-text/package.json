@@ -10,6 +10,7 @@
 		"@sinclair/typebox": "^0.34.41"
 	},
 	"devDependencies": {
-		"typescript": "7"
+		"typescript": "7",
+		"vitest": "4.1.10"
 	}
 }

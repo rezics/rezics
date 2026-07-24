@@ -47657,6 +47657,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
+														"publishedContentMetrics",
 														"format",
 														"licensed"
 													],
@@ -47721,6 +47722,75 @@
 																},
 																{ "type": "null" }
 															]
+														},
+														"publishedContentMetrics": {
+															"type": "array",
+															"items": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"language",
+																	"chapterCount",
+																	"wordCount",
+																	"characterCount"
+																],
+																"properties": {
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"chapterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"wordCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"characterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	}
+																}
+															}
 														},
 														"format": {
 															"nullable": true,
@@ -49441,6 +49511,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
+														"publishedContentMetrics",
 														"format",
 														"licensed"
 													],
@@ -49505,6 +49576,75 @@
 																},
 																{ "type": "null" }
 															]
+														},
+														"publishedContentMetrics": {
+															"type": "array",
+															"items": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"language",
+																	"chapterCount",
+																	"wordCount",
+																	"characterCount"
+																],
+																"properties": {
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"chapterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"wordCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"characterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	}
+																}
+															}
 														},
 														"format": {
 															"nullable": true,
@@ -51318,6 +51458,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
+														"publishedContentMetrics",
 														"format",
 														"licensed"
 													],
@@ -51382,6 +51523,75 @@
 																},
 																{ "type": "null" }
 															]
+														},
+														"publishedContentMetrics": {
+															"type": "array",
+															"items": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"language",
+																	"chapterCount",
+																	"wordCount",
+																	"characterCount"
+																],
+																"properties": {
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"chapterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"wordCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"characterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	}
+																}
+															}
 														},
 														"format": {
 															"nullable": true,
@@ -53351,6 +53561,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
+														"publishedContentMetrics",
 														"format",
 														"licensed"
 													],
@@ -53415,6 +53626,75 @@
 																},
 																{ "type": "null" }
 															]
+														},
+														"publishedContentMetrics": {
+															"type": "array",
+															"items": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"language",
+																	"chapterCount",
+																	"wordCount",
+																	"characterCount"
+																],
+																"properties": {
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"chapterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"wordCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"characterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	}
+																}
+															}
 														},
 														"format": {
 															"nullable": true,
@@ -55175,6 +55455,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
+														"publishedContentMetrics",
 														"format",
 														"licensed"
 													],
@@ -55239,6 +55520,75 @@
 																},
 																{ "type": "null" }
 															]
+														},
+														"publishedContentMetrics": {
+															"type": "array",
+															"items": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"language",
+																	"chapterCount",
+																	"wordCount",
+																	"characterCount"
+																],
+																"properties": {
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"chapterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"wordCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"characterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	}
+																}
+															}
 														},
 														"format": {
 															"nullable": true,
@@ -57369,6 +57719,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
+														"publishedContentMetrics",
 														"format",
 														"licensed"
 													],
@@ -57433,6 +57784,75 @@
 																},
 																{ "type": "null" }
 															]
+														},
+														"publishedContentMetrics": {
+															"type": "array",
+															"items": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"language",
+																	"chapterCount",
+																	"wordCount",
+																	"characterCount"
+																],
+																"properties": {
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"chapterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"wordCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"characterCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	}
+																}
+															}
 														},
 														"format": {
 															"nullable": true,
@@ -69919,6 +70339,7 @@
 										"position",
 										"language",
 										"content",
+										"contentMetrics",
 										"status",
 										"updatedAt",
 										"previousChapterId",
@@ -70196,6 +70617,35 @@
 															}
 														]
 													}
+												}
+											}
+										},
+										"contentMetrics": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["wordCount", "characterCount"],
+											"properties": {
+												"wordCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"characterCount": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
 												}
 											}
 										},

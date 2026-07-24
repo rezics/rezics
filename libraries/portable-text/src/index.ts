@@ -330,3 +330,10 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 		];
 	});
 }
+
+export {
+	measurePortableText,
+	PortableTextMetricAlgorithmVersion,
+	portableTextMetricText,
+	type PortableTextMetrics,
+} from "./metrics";

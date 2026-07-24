@@ -78,6 +78,7 @@ import {
 	restoreContentStructureRevision,
 } from "../../content-structure/history";
 import { toApiErrorResponse } from "../schema/response";
+import { getUnitLocalizationContentMetric } from "../../content-metrics/service";
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden", "UnitProtected"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -861,6 +862,15 @@ export default new Elysia()
 				)
 			)
 				throw new ChapterLanguageNotFound();
+			const contentMetrics = await getUnitLocalizationContentMetric(
+				database,
+				params.chapterId,
+				content.language,
+			);
+			if (!contentMetrics)
+				throw new Error(
+					`Missing content metric for chapter ${params.chapterId} localization ${content.language}`,
+				);
 			const siblings = await database
 				.select({
 					id: contentStructureNode.contentUnitId,
@@ -908,6 +918,7 @@ export default new Elysia()
 				title: content.title ?? "",
 				language: content.language,
 				content: toPortableTextResponse(content.content),
+				contentMetrics,
 				status: content.status,
 				updatedAt: content.updatedAt,
 				previousChapterId: index > 0 ? (readable[index - 1]?.id ?? null) : null,

@@ -38346,6 +38346,15 @@ export type PostApiUnitsByTypeStatus200 = {
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
 				wordCount: ((string | number) | null) | null;
+				/**
+				 * @type array
+				 */
+				publishedContentMetrics: {
+					language: "zh" | "en";
+					chapterCount: string | number;
+					wordCount: string | number;
+					characterCount: string | number;
+				}[];
 				format: (string | null) | null;
 				/**
 				 * @type boolean
@@ -39781,6 +39790,15 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
 				wordCount: ((string | number) | null) | null;
+				/**
+				 * @type array
+				 */
+				publishedContentMetrics: {
+					language: "zh" | "en";
+					chapterCount: string | number;
+					wordCount: string | number;
+					characterCount: string | number;
+				}[];
 				format: (string | null) | null;
 				/**
 				 * @type boolean
@@ -40825,6 +40843,15 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
 				wordCount: ((string | number) | null) | null;
+				/**
+				 * @type array
+				 */
+				publishedContentMetrics: {
+					language: "zh" | "en";
+					chapterCount: string | number;
+					wordCount: string | number;
+					characterCount: string | number;
+				}[];
 				format: (string | null) | null;
 				/**
 				 * @type boolean
@@ -42350,6 +42377,15 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
 				wordCount: ((string | number) | null) | null;
+				/**
+				 * @type array
+				 */
+				publishedContentMetrics: {
+					language: "zh" | "en";
+					chapterCount: string | number;
+					wordCount: string | number;
+					characterCount: string | number;
+				}[];
 				format: (string | null) | null;
 				/**
 				 * @type boolean
@@ -43557,6 +43593,15 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
 				wordCount: ((string | number) | null) | null;
+				/**
+				 * @type array
+				 */
+				publishedContentMetrics: {
+					language: "zh" | "en";
+					chapterCount: string | number;
+					wordCount: string | number;
+					characterCount: string | number;
+				}[];
 				format: (string | null) | null;
 				/**
 				 * @type boolean
@@ -44769,6 +44814,15 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
 				wordCount: ((string | number) | null) | null;
+				/**
+				 * @type array
+				 */
+				publishedContentMetrics: {
+					language: "zh" | "en";
+					chapterCount: string | number;
+					wordCount: string | number;
+					characterCount: string | number;
+				}[];
 				format: (string | null) | null;
 				/**
 				 * @type boolean
@@ -56395,6 +56449,13 @@ export type GetApiChaptersByChapterIdStatus200 = {
 					[key: string]: unknown;
 			  }
 		)[];
+	};
+	/**
+	 * @type object
+	 */
+	contentMetrics: {
+		wordCount: string | number;
+		characterCount: string | number;
 	};
 	/**
 	 * @type string

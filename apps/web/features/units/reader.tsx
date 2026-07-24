@@ -18,7 +18,7 @@ import {
 	usePutApiProgressByUnitIdNodesByNodeId,
 	usePutApiChaptersByChapterIdLocalizationsByLanguageContent,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextValue } from "@rezics/portable-text";
+import { measurePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowLeftIcon,
@@ -29,7 +29,7 @@ import {
 	PlusIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
@@ -609,6 +609,10 @@ function ChapterLocalizationForm({
 	const [content, setContent] = useState<PortableTextValue>(() =>
 		readPortableText(chapter?.content),
 	);
+	const contentMetrics = useMemo(
+		() => measurePortableText(content, language),
+		[content, language],
+	);
 	const update = usePutApiChaptersByChapterIdLocalizationsByLanguageContent({
 		mutation: {
 			onSuccess: async () => invalidateChapterContent(queryClient, chapterId, language),
@@ -662,6 +666,11 @@ function ChapterLocalizationForm({
 					value={content}
 					variant="document"
 				/>
+				<p aria-live="polite" className="text-muted-foreground text-sm">
+					{language === "zh"
+						? t.units.chapter.characterCount({ count: contentMetrics.characterCount })
+						: t.units.chapter.wordCount({ count: contentMetrics.wordCount })}
+				</p>
 				<div className="flex flex-wrap gap-2">
 					<Button variant="solid" isLoading={update.isPending} type="submit">
 						{t.units.chapter.save}

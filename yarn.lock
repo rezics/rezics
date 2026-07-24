@@ -3940,6 +3940,7 @@ __metadata:
   dependencies:
     "@sinclair/typebox": "npm:^0.34.41"
     typescript: "npm:7"
+    vitest: "npm:4.1.10"
   languageName: unknown
   linkType: soft
 

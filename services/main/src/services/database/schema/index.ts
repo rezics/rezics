@@ -7,6 +7,7 @@ export * from "./book";
 export * from "./catalog";
 export * from "./collection";
 export * from "./communication";
+export * from "./content-metric";
 export * from "./content-structure";
 export * from "./content-structure-history";
 export * from "./contract-values";

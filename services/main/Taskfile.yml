@@ -36,6 +36,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/reconcile-aggregates.ts
 
+    content-metrics:rebuild:
+        desc: Rebuild locale-aware metrics from current localized Portable Text.
+        cmds:
+            - yarn exec tsx scripts/rebuild-content-metrics.ts
+
     search:index:
         desc: Check or explicitly manage one versioned Meilisearch projection generation.
         cmds:
@@ -159,6 +164,7 @@ tasks:
         cmds:
             - task: db:migrate
             - task: db:bootstrap
+            - task: content-metrics:rebuild
 
     db:adopt-atlas:
         desc: One-time adoption of an existing Drizzle-managed database at the known baseline.
