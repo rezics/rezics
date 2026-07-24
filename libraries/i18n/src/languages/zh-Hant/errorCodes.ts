@@ -48,7 +48,6 @@ export default {
 	UserNotFound: "找不到這個使用者。",
 	UserSelfFollowForbidden: `不能${followTerms.action}自己。`,
 	UserFollowBlocked: `存在封鎖關係時不能${followTerms.action}。`,
-	UnitNotFollowable: `無法${followTerms.action}這個項目。`,
 	UserSelfBlockForbidden: "不能封鎖自己。",
 	SoftwareSystemRequirementSourceInvalid: "系統需求來源必須屬於這個軟體。",
 	SeriesReleaseNotFound: "找不到這個系列發行項目。",

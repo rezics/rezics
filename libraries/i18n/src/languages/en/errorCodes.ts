@@ -50,7 +50,6 @@ export default {
 	UserNotFound: "This user could not be found.",
 	UserSelfFollowForbidden: `You cannot ${followTerms.action} yourself.`,
 	UserFollowBlocked: `${followTerms.stateLabel} is unavailable between blocked users.`,
-	UnitNotFollowable: `This item cannot be ${followTerms.followed}.`,
 	UserSelfBlockForbidden: "You cannot block yourself.",
 	SoftwareSystemRequirementSourceInvalid:
 		"The system-requirement source must belong to this software.",

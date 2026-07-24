@@ -1,12 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import * as Data from "effect/Data";
 
-export class UnitNotFollowable extends Data.TaggedError("UnitNotFollowable") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitNotFollowable.status;
-	readonly message = "This Unit cannot be followed";
-}
-
 export class UserSelfFollowForbidden extends Data.TaggedError("UserSelfFollowForbidden") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UserSelfFollowForbidden.status;
@@ -19,8 +13,4 @@ export class UserFollowBlocked extends Data.TaggedError("UserFollowBlocked") {
 	readonly message = "Following is unavailable between blocked users";
 }
 
-export const FollowingErrors = [
-	UnitNotFollowable,
-	UserSelfFollowForbidden,
-	UserFollowBlocked,
-] as const;
+export const FollowingErrors = [UserSelfFollowForbidden, UserFollowBlocked] as const;

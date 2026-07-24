@@ -4,9 +4,8 @@ import type { ContentLanguage } from "@rezics/i18n";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
-import { entity, profile, profileBlock, realm, unit, unitFollow, zone } from "../database/schema";
+import { profileBlock, unit, unitFollow } from "../database/schema";
 import type { UnitKind } from "../database/schema/contract-values";
-import { createNotification, deliverNotificationEmail } from "../notifications/service";
 import { UnitNotFound } from "../units/errors";
 import {
 	resolvedUnitLocalizationAvatar,
@@ -22,13 +21,14 @@ import {
 	encodeFollowingCursor,
 	type FollowingCursorBoundary,
 } from "./cursor";
-import { UnitNotFollowable, UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
-import { isFollowableUnitKind, type FollowableUnitKind } from "./policy";
+import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
 
 type FollowTarget = {
 	readonly id: string;
-	readonly kind: FollowableUnitKind;
+	readonly kind: UnitKind;
 };
+
+type FollowAuthorization = Pick<UnitAuthorization<string>, "ensureCanRead">;
 
 type ListFollowingInput = {
 	readonly followerProfileId: string;
@@ -103,50 +103,30 @@ export async function listFollowing(input: ListFollowingInput) {
 
 async function resolveFollowTarget(
 	unitId: string,
-	authorization: UnitAuthorization<string>,
+	authorization: FollowAuthorization,
 ): Promise<FollowTarget> {
 	await authorization.ensureCanRead(unitId, () => new UnitNotFound());
 	const [target] = await database
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			profileId: profile.id,
-			entityId: entity.id,
-			zoneId: zone.id,
-			realmId: realm.id,
 		})
 		.from(unit)
-		.leftJoin(profile, eq(profile.id, unit.id))
-		.leftJoin(entity, eq(entity.id, unit.id))
-		.leftJoin(zone, eq(zone.id, unit.id))
-		.leftJoin(realm, eq(realm.id, unit.id))
 		.where(eq(unit.id, unitId))
 		.limit(1);
 	if (!target) throw new UnitNotFound();
-	if (!isFollowableUnitKind(target.kind)) throw new UnitNotFollowable();
-
-	const extensionId =
-		target.kind === "profile"
-			? target.profileId
-			: target.kind === "entity"
-				? target.entityId
-				: target.kind === "zone"
-					? target.zoneId
-					: target.realmId;
-	if (!extensionId) throw new UnitNotFound();
-	return { id: target.id, kind: target.kind };
+	return target;
 }
 
 export async function followUnit(input: {
 	readonly followerProfileId: string;
 	readonly unitId: string;
-	readonly authorization: UnitAuthorization<string>;
+	readonly authorization: FollowAuthorization;
 }) {
 	const target = await resolveFollowTarget(input.unitId, input.authorization);
-	if (target.kind === "profile" && target.id === input.followerProfileId)
-		throw new UserSelfFollowForbidden();
+	if (target.id === input.followerProfileId) throw new UserSelfFollowForbidden();
 
-	const notificationId = await database.transaction(async (tx) => {
+	await database.transaction(async (tx) => {
 		if (target.kind === "profile") {
 			const [blocked] = await tx
 				.select({ id: profileBlock.blockedProfileId })
@@ -167,21 +147,11 @@ export async function followUnit(input: {
 			if (blocked) throw new UserFollowBlocked();
 		}
 
-		const [inserted] = await tx
+		await tx
 			.insert(unitFollow)
 			.values({ followerProfileId: input.followerProfileId, unitId: target.id })
-			.onConflictDoNothing()
-			.returning({ id: unitFollow.unitId });
-		if (!inserted || target.kind !== "profile") return undefined;
-		return createNotification(tx, {
-			recipientProfileId: target.id,
-			actorProfileId: input.followerProfileId,
-			kind: "new_follower",
-			subjectUnitId: input.followerProfileId,
-			dedupeKey: `new-follower:${input.followerProfileId}`,
-		});
+			.onConflictDoNothing();
 	});
-	await deliverNotificationEmail(notificationId);
 	return { following: true as const };
 }
 
@@ -197,7 +167,7 @@ export async function unfollowUnit(followerProfileId: string, unitId: string) {
 export async function getFollowingStatus(input: {
 	readonly followerProfileId: string;
 	readonly unitId: string;
-	readonly authorization: UnitAuthorization<string>;
+	readonly authorization: FollowAuthorization;
 }) {
 	const target = await resolveFollowTarget(input.unitId, input.authorization);
 	const [record] = await database

@@ -681,7 +681,6 @@ import type {
 	GetApiUsersMeFollowingByUnitIdOptions,
 	GetApiUsersMeFollowingByUnitIdStatus200,
 	GetApiUsersMeFollowingByUnitIdStatus404,
-	GetApiUsersMeFollowingByUnitIdStatus409,
 	GetApiUsersMeFollowingByUnitIdStatus422,
 	GetApiUsersMeFollowingByUnitIdStatus429,
 	GetApiUsersMeFollowingByUnitIdStatus500,
@@ -12694,7 +12693,6 @@ export function getApiUsersMeFollowingByUnitIdQueryOptions(
 		GetApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
 			| GetApiUsersMeFollowingByUnitIdStatus404
-			| GetApiUsersMeFollowingByUnitIdStatus409
 			| GetApiUsersMeFollowingByUnitIdStatus422
 			| GetApiUsersMeFollowingByUnitIdStatus429
 			| GetApiUsersMeFollowingByUnitIdStatus500
@@ -12737,7 +12735,6 @@ export function useGetApiUsersMeFollowingByUnitId<
 				GetApiUsersMeFollowingByUnitIdStatus200,
 				ResponseErrorConfig<
 					| GetApiUsersMeFollowingByUnitIdStatus404
-					| GetApiUsersMeFollowingByUnitIdStatus409
 					| GetApiUsersMeFollowingByUnitIdStatus422
 					| GetApiUsersMeFollowingByUnitIdStatus429
 					| GetApiUsersMeFollowingByUnitIdStatus500
@@ -12767,7 +12764,6 @@ export function useGetApiUsersMeFollowingByUnitId<
 		TData,
 		ResponseErrorConfig<
 			| GetApiUsersMeFollowingByUnitIdStatus404
-			| GetApiUsersMeFollowingByUnitIdStatus409
 			| GetApiUsersMeFollowingByUnitIdStatus422
 			| GetApiUsersMeFollowingByUnitIdStatus429
 			| GetApiUsersMeFollowingByUnitIdStatus500

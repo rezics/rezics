@@ -295,7 +295,6 @@ export default new Elysia({ prefix: "/users" })
 			response: {
 				[StatusCodes.OK]: FollowingStatusResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitNotFollowable"]),
 			},
 			detail: { summary: "Get current user's follow state for a Unit", tags: ["Users"] },
 		},
@@ -315,7 +314,6 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.OK]: FollowResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UnitNotFollowable",
 					"UserSelfFollowForbidden",
 					"UserFollowBlocked",
 				]),

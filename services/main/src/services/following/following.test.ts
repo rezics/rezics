@@ -1,28 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { UnitKindValues } from "../database/schema/contract-values";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import { decodeFollowingCursor, encodeFollowingCursor } from "./cursor";
-import {
-	FollowableUnitKindValues,
-	isFollowableUnitKind,
-	NonFollowableUnitKindValues,
-} from "./policy";
-
-describe("following policy", () => {
-	it("explicitly classifies every Unit kind", () => {
-		expect(FollowableUnitKindValues).toEqual(["profile", "entity", "zone", "realm"]);
-		expect(new Set([...FollowableUnitKindValues, ...NonFollowableUnitKindValues])).toEqual(
-			new Set(UnitKindValues),
-		);
-		expect(FollowableUnitKindValues.length + NonFollowableUnitKindValues.length).toBe(
-			UnitKindValues.length,
-		);
-		for (const kind of FollowableUnitKindValues) expect(isFollowableUnitKind(kind)).toBe(true);
-		for (const kind of NonFollowableUnitKindValues)
-			expect(isFollowableUnitKind(kind)).toBe(false);
-	});
-});
 
 describe("following cursors", () => {
 	const boundary = {

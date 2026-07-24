@@ -2332,7 +2332,6 @@
 					"CreditAttributionNotFound",
 					"CreditAttributionRoleInvalid",
 					"SubjectAssociationNotFound",
-					"UnitNotFollowable",
 					"UserSelfFollowForbidden",
 					"UserFollowBlocked",
 					"ImageAssetNotFound",
@@ -39281,33 +39280,6 @@
 							}
 						}
 					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFollowable",
-													"type": "string",
-													"enum": ["UnitNotFollowable"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"422": {
 						"description": "Request validation failed",
 						"content": {
@@ -39427,10 +39399,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitNotFollowable",
+													"default": "UserSelfFollowForbidden",
 													"type": "string",
 													"enum": [
-														"UnitNotFollowable",
 														"UserSelfFollowForbidden",
 														"UserFollowBlocked"
 													]

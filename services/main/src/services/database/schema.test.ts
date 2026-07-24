@@ -48,6 +48,7 @@ import {
 	unitAccessBinding,
 	unitAccessInvitation,
 	unitAccessRestriction,
+	unitFollow,
 	unitProtection,
 	unitAliasVoteStat,
 	unitReactionStat,
@@ -83,6 +84,24 @@ describe("database schema contracts", () => {
 	it("uses PostgreSQL uuidv7 for generated identifiers", () => {
 		expect(dialect.sqlToQuery(unit.id.default as SQL).sql).toBe("uuidv7()");
 		expect(dialect.sqlToQuery(sharedSearchQuery.id.default as SQL).sql).toBe("uuidv7()");
+	});
+
+	it("keeps Follow generic across Units while preventing self-follow", () => {
+		const follow = getTableConfig(unitFollow);
+
+		expect(follow.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"follower_profile_id",
+			"unit_id",
+		]);
+		expect(follow.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"unit_follow_follower_profile_id_profile_id_fk",
+				"unit_follow_unit_id_unit_id_fk",
+			]),
+		);
+		expect(follow.checks.map((constraint) => constraint.name)).toContain(
+			"unit_follow_not_self_check",
+		);
 	});
 
 	it("stores immutable shared Search queries behind a UUIDv7 primary key", () => {

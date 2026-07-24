@@ -1431,7 +1431,6 @@ export const ApiErrorCode = {
 	CreditAttributionNotFound: "CreditAttributionNotFound",
 	CreditAttributionRoleInvalid: "CreditAttributionRoleInvalid",
 	SubjectAssociationNotFound: "SubjectAssociationNotFound",
-	UnitNotFollowable: "UnitNotFollowable",
 	UserSelfFollowForbidden: "UserSelfFollowForbidden",
 	UserFollowBlocked: "UserFollowBlocked",
 	ImageAssetNotFound: "ImageAssetNotFound",
@@ -31249,34 +31248,6 @@ export type GetApiUsersMeFollowingByUnitIdStatus404 = {
 /**
  * @type object
  */
-export type GetApiUsersMeFollowingByUnitIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFollowable'
-		 * @type string
-		 */
-		code: "UnitNotFollowable";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type GetApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 
 /**
@@ -31324,7 +31295,6 @@ export type GetApiUsersMeFollowingByUnitIdOptions = {
 export type GetApiUsersMeFollowingByUnitIdResponses = {
 	"200": GetApiUsersMeFollowingByUnitIdStatus200;
 	"404": GetApiUsersMeFollowingByUnitIdStatus404;
-	"409": GetApiUsersMeFollowingByUnitIdStatus409;
 	"422": GetApiUsersMeFollowingByUnitIdStatus422;
 	"429": GetApiUsersMeFollowingByUnitIdStatus429;
 	"500": GetApiUsersMeFollowingByUnitIdStatus500;
@@ -31336,7 +31306,6 @@ export type GetApiUsersMeFollowingByUnitIdResponses = {
 export type GetApiUsersMeFollowingByUnitIdResponse =
 	| GetApiUsersMeFollowingByUnitIdStatus200
 	| GetApiUsersMeFollowingByUnitIdStatus404
-	| GetApiUsersMeFollowingByUnitIdStatus409
 	| GetApiUsersMeFollowingByUnitIdStatus422
 	| GetApiUsersMeFollowingByUnitIdStatus429
 	| GetApiUsersMeFollowingByUnitIdStatus500;
@@ -31392,7 +31361,6 @@ export type PutApiUsersMeFollowingByUnitIdStatus404 = {
 };
 
 export const PutApiUsersMeFollowingByUnitIdStatus409ErrorCodeEnum = {
-	UnitNotFollowable: "UnitNotFollowable",
 	UserSelfFollowForbidden: "UserSelfFollowForbidden",
 	UserFollowBlocked: "UserFollowBlocked",
 } as const;
@@ -31409,7 +31377,7 @@ export type PutApiUsersMeFollowingByUnitIdStatus409 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitNotFollowable'
+		 * @default 'UserSelfFollowForbidden'
 		 * @type string
 		 */
 		code: PutApiUsersMeFollowingByUnitIdStatus409ErrorCodeEnum;
