@@ -10,6 +10,7 @@ const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
+	MalformedRequestBody: "無法解析提交內容的格式。",
 	ValidationError: "提交的內容不符合要求。",
 	InternalError: "服務暫時不可用，請稍後重試。",
 	AuthenticationRequired: "請先登入再繼續。",

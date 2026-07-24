@@ -34,6 +34,12 @@ const validationErrorResponse = {
 		"application/json": { schema: { $ref: "#/components/schemas/ValidationError" } },
 	},
 };
+const malformedRequestBodyResponse = {
+	description: "Request body could not be parsed",
+	content: {
+		"application/json": { schema: { $ref: "#/components/schemas/MalformedRequestBody" } },
+	},
+};
 const internalErrorResponse = {
 	description: "Unexpected internal failure",
 	content: {
@@ -102,6 +108,21 @@ document.components.schemas.ApiErrorCode = {
 	type: "string",
 	enum: [...ApiErrorCodes],
 };
+document.components.schemas.MalformedRequestBody = {
+	type: "object",
+	required: ["error", "requestId"],
+	properties: {
+		error: {
+			type: "object",
+			required: ["code", "message"],
+			properties: {
+				code: { type: "string", enum: ["MalformedRequestBody"] },
+				message: { type: "string" },
+			},
+		},
+		requestId: { type: "string" },
+	},
+};
 document.components.schemas.ValidationError = {
 	type: "object",
 	required: ["error", "requestId"],
@@ -154,6 +175,31 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 				pathTemplate.replaceAll(/\{([^}]+)\}/g, ":$1"),
 			),
 		});
+		const badRequest = operation.responses[StatusCodes.BAD_REQUEST];
+		const badRequestResponse = isResponseObject(badRequest) ? badRequest : undefined;
+		const badRequestSchema = badRequestResponse?.content?.["application/json"]?.schema;
+		if (operation.requestBody && badRequest && !badRequestResponse)
+			throw new Error(`Cannot merge referenced 400 response for ${method} ${pathTemplate}`);
+		if (operation.requestBody && badRequestResponse && !badRequestSchema)
+			throw new Error(`Cannot merge non-JSON 400 response for ${method} ${pathTemplate}`);
+		if (operation.requestBody && !containsJsonValue(badRequest, "MalformedRequestBody"))
+			operation.responses[StatusCodes.BAD_REQUEST] = badRequestSchema
+				? {
+						...badRequestResponse,
+						content: {
+							...badRequestResponse.content,
+							"application/json": {
+								...badRequestResponse.content?.["application/json"],
+								schema: {
+									oneOf: [
+										badRequestSchema,
+										{ $ref: "#/components/schemas/MalformedRequestBody" },
+									],
+								},
+							},
+						},
+					}
+				: malformedRequestBodyResponse;
 		const validation = operation.responses[StatusCodes.UNPROCESSABLE_ENTITY];
 		const validationResponse = isResponseObject(validation) ? validation : undefined;
 		const validationSchema = validationResponse?.content?.["application/json"]?.schema;

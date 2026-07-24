@@ -2286,6 +2286,7 @@
 			"ApiErrorCode": {
 				"type": "string",
 				"enum": [
+					"MalformedRequestBody",
 					"ValidationError",
 					"InternalError",
 					"AuthenticationRequired",
@@ -2468,6 +2469,21 @@
 					"UnitRevisionNotFound",
 					"CurrentRevisionContentVisibilityForbidden"
 				]
+			},
+			"MalformedRequestBody": {
+				"type": "object",
+				"required": ["error", "requestId"],
+				"properties": {
+					"error": {
+						"type": "object",
+						"required": ["code", "message"],
+						"properties": {
+							"code": { "type": "string", "enum": ["MalformedRequestBody"] },
+							"message": { "type": "string" }
+						}
+					},
+					"requestId": { "type": "string" }
+				}
 			},
 			"ValidationError": {
 				"type": "object",
@@ -3042,27 +3058,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "AssociationProposalExpiryInvalid",
-													"type": "string",
-													"enum": [
-														"AssociationProposalExpiryInvalid",
-														"AssociationProposalRoleInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "AssociationProposalExpiryInvalid",
+															"type": "string",
+															"enum": [
+																"AssociationProposalExpiryInvalid",
+																"AssociationProposalRoleInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -3369,27 +3390,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "AssociationProposalExpiryInvalid",
-													"type": "string",
-													"enum": [
-														"AssociationProposalExpiryInvalid",
-														"AssociationProposalRoleInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "AssociationProposalExpiryInvalid",
+															"type": "string",
+															"enum": [
+																"AssociationProposalExpiryInvalid",
+																"AssociationProposalRoleInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -3656,6 +3682,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -3915,6 +3949,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -5424,24 +5466,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "InvalidNotificationCursor",
-													"type": "string",
-													"enum": ["InvalidNotificationCursor"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidNotificationCursor",
+															"type": "string",
+															"enum": ["InvalidNotificationCursor"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -5777,6 +5824,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -7752,6 +7807,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -7880,6 +7943,14 @@
 									"required": ["excluded"],
 									"properties": { "excluded": { "type": "boolean" } }
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -8379,6 +8450,14 @@
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -8944,6 +9023,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -9094,6 +9181,14 @@
 										"readAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -10113,6 +10208,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"401": {
 						"description": "Response for status 401",
 						"content": {
@@ -10545,6 +10648,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -11189,6 +11300,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -12281,6 +12400,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"401": {
 						"description": "Response for status 401",
 						"content": {
@@ -12797,6 +12924,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -16943,24 +17078,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "FeedbackRealmMismatch",
-													"type": "string",
-													"enum": ["FeedbackRealmMismatch"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "FeedbackRealmMismatch",
+															"type": "string",
+															"enum": ["FeedbackRealmMismatch"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -17430,6 +17570,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -17611,6 +17759,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -18136,27 +18292,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "UnitAccessExpiryInvalid",
-													"type": "string",
-													"enum": [
-														"UnitAccessExpiryInvalid",
-														"UnitAccessSubjectRoleInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitAccessExpiryInvalid",
+															"type": "string",
+															"enum": [
+																"UnitAccessExpiryInvalid",
+																"UnitAccessSubjectRoleInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -19140,24 +19301,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "UnitAccessExpiryInvalid",
-													"type": "string",
-													"enum": ["UnitAccessExpiryInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitAccessExpiryInvalid",
+															"type": "string",
+															"enum": ["UnitAccessExpiryInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -20007,24 +20173,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "UnitAccessExpiryInvalid",
-													"type": "string",
-													"enum": ["UnitAccessExpiryInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitAccessExpiryInvalid",
+															"type": "string",
+															"enum": ["UnitAccessExpiryInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -20819,27 +20990,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "UnitAccessExpiryInvalid",
-													"type": "string",
-													"enum": [
-														"UnitAccessExpiryInvalid",
-														"UnitAccessInvitationSelfForbidden"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitAccessExpiryInvalid",
+															"type": "string",
+															"enum": [
+																"UnitAccessExpiryInvalid",
+																"UnitAccessInvitationSelfForbidden"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -21097,6 +21273,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -21315,6 +21499,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -22478,6 +22670,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -24397,6 +24597,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -26432,29 +26640,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ModerationReversedActionInvalid",
-													"type": "string",
-													"enum": [
-														"ModerationReversedActionInvalid",
-														"ModerationActionIncompatible",
-														"ModerationNoteRoleDuplicate",
-														"ModerationRealmMissing"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ModerationReversedActionInvalid",
+															"type": "string",
+															"enum": [
+																"ModerationReversedActionInvalid",
+																"ModerationActionIncompatible",
+																"ModerationNoteRoleDuplicate",
+																"ModerationRealmMissing"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -26581,6 +26794,14 @@
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -27418,27 +27639,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "EnforcementExpiryInvalid",
-													"type": "string",
-													"enum": [
-														"EnforcementExpiryInvalid",
-														"ModerationNoteRoleDuplicate"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "EnforcementExpiryInvalid",
+															"type": "string",
+															"enum": [
+																"EnforcementExpiryInvalid",
+																"ModerationNoteRoleDuplicate"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -27926,24 +28152,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ModerationNoteRoleDuplicate",
-													"type": "string",
-													"enum": ["ModerationNoteRoleDuplicate"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ModerationNoteRoleDuplicate",
+															"type": "string",
+															"enum": ["ModerationNoteRoleDuplicate"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -28344,29 +28575,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "PlatformGrantRealmForbidden",
-													"type": "string",
-													"enum": [
-														"PlatformGrantRealmForbidden",
-														"RealmGrantRealmRequired",
-														"RealmGrantCapabilityInvalid",
-														"CapabilityGrantExpiryInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "PlatformGrantRealmForbidden",
+															"type": "string",
+															"enum": [
+																"PlatformGrantRealmForbidden",
+																"RealmGrantRealmRequired",
+																"RealmGrantCapabilityInvalid",
+																"CapabilityGrantExpiryInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -29020,6 +29256,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -29386,24 +29630,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "InvalidSlug",
-													"type": "string",
-													"enum": ["InvalidSlug"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": ["InvalidSlug"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -30844,24 +31093,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ZoneTimeRangeInvalid",
-													"type": "string",
-													"enum": ["ZoneTimeRangeInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ZoneTimeRangeInvalid",
+															"type": "string",
+															"enum": ["ZoneTimeRangeInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -32591,24 +32845,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ZoneDocumentInvalid",
-													"type": "string",
-													"enum": ["ZoneDocumentInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ZoneDocumentInvalid",
+															"type": "string",
+															"enum": ["ZoneDocumentInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -32761,6 +33020,14 @@
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -33106,24 +33373,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ZoneDocumentInvalid",
-													"type": "string",
-													"enum": ["ZoneDocumentInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ZoneDocumentInvalid",
+															"type": "string",
+															"enum": ["ZoneDocumentInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -33401,24 +33673,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ZoneDocumentInvalid",
-													"type": "string",
-													"enum": ["ZoneDocumentInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ZoneDocumentInvalid",
+															"type": "string",
+															"enum": ["ZoneDocumentInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -33571,6 +33848,14 @@
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -33825,6 +34110,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -34516,24 +34809,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ZoneTimeRangeInvalid",
-													"type": "string",
-													"enum": ["ZoneTimeRangeInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ZoneTimeRangeInvalid",
+															"type": "string",
+															"enum": ["ZoneTimeRangeInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -34911,26 +35209,31 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "SoftwareSystemRequirementSourceInvalid",
-													"type": "string",
-													"enum": [
-														"SoftwareSystemRequirementSourceInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SoftwareSystemRequirementSourceInvalid",
+															"type": "string",
+															"enum": [
+																"SoftwareSystemRequirementSourceInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -35198,26 +35501,31 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "SoftwareSystemRequirementSourceInvalid",
-													"type": "string",
-													"enum": [
-														"SoftwareSystemRequirementSourceInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SoftwareSystemRequirementSourceInvalid",
+															"type": "string",
+															"enum": [
+																"SoftwareSystemRequirementSourceInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -35803,27 +36111,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "DockNotSupported",
-													"type": "string",
-													"enum": [
-														"DockNotSupported",
-														"DockDocumentInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "DockNotSupported",
+															"type": "string",
+															"enum": [
+																"DockNotSupported",
+																"DockDocumentInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -35979,24 +36292,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "DockNotSupported",
-													"type": "string",
-													"enum": ["DockNotSupported"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "DockNotSupported",
+															"type": "string",
+															"enum": ["DockNotSupported"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -36412,27 +36730,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "DockNotSupported",
-													"type": "string",
-													"enum": [
-														"DockNotSupported",
-														"DockDocumentInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "DockNotSupported",
+															"type": "string",
+															"enum": [
+																"DockNotSupported",
+																"DockDocumentInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -38054,6 +38377,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -38449,6 +38780,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -38693,6 +39032,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -39601,6 +39948,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -41073,24 +41428,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "CapabilityGrantExpiryInvalid",
-													"type": "string",
-													"enum": ["CapabilityGrantExpiryInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "CapabilityGrantExpiryInvalid",
+															"type": "string",
+															"enum": ["CapabilityGrantExpiryInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -41617,6 +41977,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -42045,6 +42413,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -42278,6 +42654,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -43524,6 +43908,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -44017,6 +44409,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -44284,24 +44684,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "InvalidSlug",
-													"type": "string",
-													"enum": ["InvalidSlug"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": ["InvalidSlug"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -44778,24 +45183,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "InvalidSlug",
-													"type": "string",
-													"enum": ["InvalidSlug"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": ["InvalidSlug"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -45259,24 +45669,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "InvalidSlug",
-													"type": "string",
-													"enum": ["InvalidSlug"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": ["InvalidSlug"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -45550,24 +45965,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "InvalidSlug",
-													"type": "string",
-													"enum": ["InvalidSlug"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": ["InvalidSlug"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -45741,6 +46161,14 @@
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
 					},
 					"401": {
 						"description": "Response for status 401",
@@ -48947,6 +49375,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -52756,24 +53192,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "UnitPrimaryLanguageMissing",
-													"type": "string",
-													"enum": ["UnitPrimaryLanguageMissing"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitPrimaryLanguageMissing",
+															"type": "string",
+															"enum": ["UnitPrimaryLanguageMissing"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -54854,6 +55295,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"401": {
 						"description": "Response for status 401",
 						"content": {
@@ -56745,6 +57194,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -59012,6 +59469,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"401": {
 						"description": "Response for status 401",
 						"content": {
@@ -59835,6 +60300,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -60053,6 +60526,14 @@
 										"revisionCreated": { "type": "boolean" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -60282,6 +60763,14 @@
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -61535,6 +62024,14 @@
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -63039,6 +63536,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -63291,6 +63796,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -63869,6 +64382,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"422": {
 						"description": "Request validation failed",
 						"content": {
@@ -64237,6 +64758,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -64623,6 +65152,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -65189,24 +65726,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "CreditAttributionRoleInvalid",
-													"type": "string",
-													"enum": ["CreditAttributionRoleInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "CreditAttributionRoleInvalid",
+															"type": "string",
+															"enum": ["CreditAttributionRoleInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -65592,6 +66134,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -65953,6 +66503,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -66178,6 +66736,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -66547,6 +67113,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -67309,6 +67883,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -67777,6 +68359,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -68182,6 +68772,14 @@
 										"revisionCreated": { "type": "boolean" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -68596,6 +69194,14 @@
 										"revisionCreated": { "type": "boolean" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -69028,6 +69634,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -69246,6 +69860,14 @@
 										"revisionCreated": { "type": "boolean" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -69868,6 +70490,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -70132,6 +70762,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -70998,6 +71636,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -71594,6 +72240,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -71981,6 +72635,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -76001,6 +76663,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -83341,6 +84011,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -83683,6 +84361,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -83899,6 +84585,14 @@
 									"required": ["saved"],
 									"properties": { "saved": { "type": "boolean" } }
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -85055,6 +85749,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -86146,6 +86848,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -86440,6 +87150,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -86796,6 +87514,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -87066,6 +87792,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -87192,6 +87926,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -87544,24 +88286,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "PollOptionsDuplicated",
-													"type": "string",
-													"enum": ["PollOptionsDuplicated"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "PollOptionsDuplicated",
+															"type": "string",
+															"enum": ["PollOptionsDuplicated"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -87923,27 +88670,32 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "PollSingleChoiceInvalid",
-													"type": "string",
-													"enum": [
-														"PollSingleChoiceInvalid",
-														"PollOptionInvalid"
-													]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "PollSingleChoiceInvalid",
+															"type": "string",
+															"enum": [
+																"PollSingleChoiceInvalid",
+																"PollOptionInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -88623,6 +89375,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -89748,6 +90508,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -90840,6 +91608,14 @@
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -92164,6 +92940,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -92611,6 +93395,14 @@
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -93580,6 +94372,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -93756,24 +94556,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "InvalidSlug",
-													"type": "string",
-													"enum": ["InvalidSlug"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": ["InvalidSlug"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -94836,6 +95641,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -95076,6 +95889,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -95284,6 +96105,14 @@
 									"required": ["state"],
 									"properties": { "state": { "type": "string" } }
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -95805,6 +96634,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -96243,24 +97080,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "CapabilityGrantExpiryInvalid",
-													"type": "string",
-													"enum": ["CapabilityGrantExpiryInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "CapabilityGrantExpiryInvalid",
+															"type": "string",
+															"enum": ["CapabilityGrantExpiryInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -96710,6 +97552,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -97412,6 +98262,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -97892,6 +98750,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -98136,6 +99002,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -100054,24 +100928,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "ModerationActionIncompatible",
-													"type": "string",
-													"enum": ["ModerationActionIncompatible"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ModerationActionIncompatible",
+															"type": "string",
+															"enum": ["ModerationActionIncompatible"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -100381,24 +101260,31 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "RealmNavigationDocumentInvalid",
-													"type": "string",
-													"enum": ["RealmNavigationDocumentInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "RealmNavigationDocumentInvalid",
+															"type": "string",
+															"enum": [
+																"RealmNavigationDocumentInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -100676,24 +101562,31 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
+									"oneOf": [
+										{
 											"type": "object",
-											"required": ["code", "message"],
+											"required": ["error", "requestId"],
 											"properties": {
-												"code": {
-													"default": "RealmNavigationDocumentInvalid",
-													"type": "string",
-													"enum": ["RealmNavigationDocumentInvalid"]
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "RealmNavigationDocumentInvalid",
+															"type": "string",
+															"enum": [
+																"RealmNavigationDocumentInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
 												},
-												"message": { "type": "string" },
-												"details": {}
+												"requestId": { "type": "string" }
 											}
 										},
-										"requestId": { "type": "string" }
-									}
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
 								}
 							}
 						}
@@ -100846,6 +101739,14 @@
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -108924,6 +109825,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -118703,6 +119612,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -123384,6 +124301,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -126994,6 +127919,14 @@
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -131691,6 +132624,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -136367,6 +137308,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -136925,6 +137874,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -142823,6 +143780,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"401": {
 						"description": "Response for status 401",
 						"content": {
@@ -146394,6 +147359,14 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
 					"422": {
 						"description": "Response for status 422",
 						"content": {
@@ -146607,6 +147580,14 @@
 										}
 									]
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},

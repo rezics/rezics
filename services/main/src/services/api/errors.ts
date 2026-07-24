@@ -30,6 +30,12 @@ import { TagErrors } from "./tags/errors";
 import { TokenErrors } from "./tokens/errors";
 import { UserErrors } from "./users/errors";
 
+export class MalformedRequestBody extends Data.TaggedError("MalformedRequestBody") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = MalformedRequestBody.status;
+	readonly message = "Request body is malformed";
+}
+
 export class ValidationError extends Data.TaggedError("ValidationError") {
 	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
 	readonly status = ValidationError.status;
@@ -51,6 +57,7 @@ export class InternalError extends Data.TaggedError("InternalError") {
 }
 
 export const ApiErrors = [
+	MalformedRequestBody,
 	ValidationError,
 	InternalError,
 	...AuthErrors,

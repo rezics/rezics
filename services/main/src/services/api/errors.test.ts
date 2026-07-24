@@ -10,6 +10,7 @@ import {
 	toApiErrorBody,
 	isApiError,
 	isApiErrorCode,
+	MalformedRequestBody,
 } from "./errors";
 
 describe("API errors", () => {
@@ -32,6 +33,16 @@ describe("API errors", () => {
 		const unavailable = new SearchUnavailable(new Error("search diagnostic"));
 		expect(toApiErrorBody(unavailable, "request-1")).toEqual({
 			error: { code: "SearchUnavailable", message: "Search service unavailable" },
+			requestId: "request-1",
+		});
+
+		const malformedRequestBody = new MalformedRequestBody();
+		expect(malformedRequestBody.status).toBe(StatusCodes.BAD_REQUEST);
+		expect(toApiErrorBody(malformedRequestBody, "request-1")).toEqual({
+			error: {
+				code: "MalformedRequestBody",
+				message: "Request body is malformed",
+			},
 			requestId: "request-1",
 		});
 	});

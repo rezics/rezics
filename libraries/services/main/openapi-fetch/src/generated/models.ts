@@ -1385,6 +1385,7 @@ export type ZoneThemeDocument = {
 };
 
 export const ApiErrorCode = {
+	MalformedRequestBody: "MalformedRequestBody",
 	ValidationError: "ValidationError",
 	InternalError: "InternalError",
 	AuthenticationRequired: "AuthenticationRequired",
@@ -1569,6 +1570,29 @@ export const ApiErrorCode = {
 } as const;
 
 export type ApiErrorCode = (typeof ApiErrorCode)[keyof typeof ApiErrorCode];
+
+/**
+ * @type object
+ */
+export type MalformedRequestBody = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "MalformedRequestBody";
+		/**
+		 * @type string
+		 */
+		message: string;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -2145,33 +2169,32 @@ export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEn
 export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'AssociationProposalExpiryInvalid'
-		 * @type string
-		 */
-		code: PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'AssociationProposalExpiryInvalid'
+				 * @type string
+				 */
+				code: PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -2545,33 +2568,32 @@ export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCod
 export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'AssociationProposalExpiryInvalid'
-		 * @type string
-		 */
-		code: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'AssociationProposalExpiryInvalid'
+				 * @type string
+				 */
+				code: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -2943,6 +2965,12 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200 =
 	role: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200RoleEnum;
 };
 
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400 =
+	MalformedRequestBody;
+
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
@@ -3084,6 +3112,7 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions = {
  */
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses = {
 	"200": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200;
+	"400": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400;
 	"403": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403;
 	"404": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404;
 	"409": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409;
@@ -3096,6 +3125,7 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses =
  */
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponse =
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
@@ -3248,6 +3278,12 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200 
 	role: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200RoleEnum;
 };
 
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400 =
+	MalformedRequestBody;
+
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
@@ -3389,6 +3425,7 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions = 
  */
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses = {
 	"200": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200;
+	"400": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400;
 	"403": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403;
 	"404": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404;
 	"409": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409;
@@ -3401,6 +3438,7 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses 
  */
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponse =
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
 	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
@@ -4525,33 +4563,32 @@ export type PutApiNotificationsReadAllStatus200 = {
 	updated: boolean;
 };
 
-/**
- * @type object
- */
-export type PutApiNotificationsReadAllStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InvalidNotificationCursor'
-		 * @type string
-		 */
-		code: "InvalidNotificationCursor";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiNotificationsReadAllStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidNotificationCursor'
+				 * @type string
+				 */
+				code: "InvalidNotificationCursor";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -4879,6 +4916,11 @@ export type PutApiNotificationsPreferencesStatus200 = {
 /**
  * @type object
  */
+export type PutApiNotificationsPreferencesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiNotificationsPreferencesStatus422 = ValidationError;
 
 /**
@@ -4960,6 +5002,7 @@ export type PutApiNotificationsPreferencesOptions = {
  */
 export type PutApiNotificationsPreferencesResponses = {
 	"200": PutApiNotificationsPreferencesStatus200;
+	"400": PutApiNotificationsPreferencesStatus400;
 	"422": PutApiNotificationsPreferencesStatus422;
 	"429": PutApiNotificationsPreferencesStatus429;
 	"500": PutApiNotificationsPreferencesStatus500;
@@ -4970,6 +5013,7 @@ export type PutApiNotificationsPreferencesResponses = {
  */
 export type PutApiNotificationsPreferencesResponse =
 	| PutApiNotificationsPreferencesStatus200
+	| PutApiNotificationsPreferencesStatus400
 	| PutApiNotificationsPreferencesStatus422
 	| PutApiNotificationsPreferencesStatus429
 	| PutApiNotificationsPreferencesStatus500;
@@ -6170,6 +6214,11 @@ export type PostApiRecommendationsEventsStatus200 = {
 /**
  * @type object
  */
+export type PostApiRecommendationsEventsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiRecommendationsEventsStatus404 = {
 	/**
 	 * @type object
@@ -6301,6 +6350,7 @@ export type PostApiRecommendationsEventsOptions = {
  */
 export type PostApiRecommendationsEventsResponses = {
 	"200": PostApiRecommendationsEventsStatus200;
+	"400": PostApiRecommendationsEventsStatus400;
 	"404": PostApiRecommendationsEventsStatus404;
 	"422": PostApiRecommendationsEventsStatus422;
 	"500": PostApiRecommendationsEventsStatus500;
@@ -6311,6 +6361,7 @@ export type PostApiRecommendationsEventsResponses = {
  */
 export type PostApiRecommendationsEventsResponse =
 	| PostApiRecommendationsEventsStatus200
+	| PostApiRecommendationsEventsStatus400
 	| PostApiRecommendationsEventsStatus404
 	| PostApiRecommendationsEventsStatus422
 	| PostApiRecommendationsEventsStatus500;
@@ -6336,6 +6387,11 @@ export type PutApiRecommendationsExclusionsByUnitIdStatus200 = {
 	 */
 	excluded: boolean;
 };
+
+/**
+ * @type object
+ */
+export type PutApiRecommendationsExclusionsByUnitIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -6535,6 +6591,7 @@ export type PutApiRecommendationsExclusionsByUnitIdOptions = {
  */
 export type PutApiRecommendationsExclusionsByUnitIdResponses = {
 	"200": PutApiRecommendationsExclusionsByUnitIdStatus200;
+	"400": PutApiRecommendationsExclusionsByUnitIdStatus400;
 	"401": PutApiRecommendationsExclusionsByUnitIdStatus401;
 	"403": PutApiRecommendationsExclusionsByUnitIdStatus403;
 	"404": PutApiRecommendationsExclusionsByUnitIdStatus404;
@@ -6548,6 +6605,7 @@ export type PutApiRecommendationsExclusionsByUnitIdResponses = {
  */
 export type PutApiRecommendationsExclusionsByUnitIdResponse =
 	| PutApiRecommendationsExclusionsByUnitIdStatus200
+	| PutApiRecommendationsExclusionsByUnitIdStatus400
 	| PutApiRecommendationsExclusionsByUnitIdStatus401
 	| PutApiRecommendationsExclusionsByUnitIdStatus403
 	| PutApiRecommendationsExclusionsByUnitIdStatus404
@@ -6872,6 +6930,11 @@ export type PostApiMessagesConversationsStatus200 = {
 /**
  * @type object
  */
+export type PostApiMessagesConversationsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiMessagesConversationsStatus403 = {
 	/**
 	 * @type object
@@ -7014,6 +7077,7 @@ export type PostApiMessagesConversationsOptions = {
  */
 export type PostApiMessagesConversationsResponses = {
 	"200": PostApiMessagesConversationsStatus200;
+	"400": PostApiMessagesConversationsStatus400;
 	"403": PostApiMessagesConversationsStatus403;
 	"404": PostApiMessagesConversationsStatus404;
 	"409": PostApiMessagesConversationsStatus409;
@@ -7027,6 +7091,7 @@ export type PostApiMessagesConversationsResponses = {
  */
 export type PostApiMessagesConversationsResponse =
 	| PostApiMessagesConversationsStatus200
+	| PostApiMessagesConversationsStatus400
 	| PostApiMessagesConversationsStatus403
 	| PostApiMessagesConversationsStatus404
 	| PostApiMessagesConversationsStatus409
@@ -7420,6 +7485,11 @@ export type PostApiMessagesConversationsByConversationIdMessagesStatus200 = {
 /**
  * @type object
  */
+export type PostApiMessagesConversationsByConversationIdMessagesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiMessagesConversationsByConversationIdMessagesStatus403 = {
 	/**
 	 * @type object
@@ -7535,6 +7605,7 @@ export type PostApiMessagesConversationsByConversationIdMessagesOptions = {
  */
 export type PostApiMessagesConversationsByConversationIdMessagesResponses = {
 	"200": PostApiMessagesConversationsByConversationIdMessagesStatus200;
+	"400": PostApiMessagesConversationsByConversationIdMessagesStatus400;
 	"403": PostApiMessagesConversationsByConversationIdMessagesStatus403;
 	"404": PostApiMessagesConversationsByConversationIdMessagesStatus404;
 	"422": PostApiMessagesConversationsByConversationIdMessagesStatus422;
@@ -7547,6 +7618,7 @@ export type PostApiMessagesConversationsByConversationIdMessagesResponses = {
  */
 export type PostApiMessagesConversationsByConversationIdMessagesResponse =
 	| PostApiMessagesConversationsByConversationIdMessagesStatus200
+	| PostApiMessagesConversationsByConversationIdMessagesStatus400
 	| PostApiMessagesConversationsByConversationIdMessagesStatus403
 	| PostApiMessagesConversationsByConversationIdMessagesStatus404
 	| PostApiMessagesConversationsByConversationIdMessagesStatus422
@@ -7588,6 +7660,11 @@ export type PutApiMessagesConversationsByConversationIdReadStatus200 = {
 	 */
 	readAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PutApiMessagesConversationsByConversationIdReadStatus400 = MalformedRequestBody;
 
 export const PutApiMessagesConversationsByConversationIdReadStatus404ErrorCodeEnum = {
 	ConversationNotFound: "ConversationNotFound",
@@ -7686,6 +7763,7 @@ export type PutApiMessagesConversationsByConversationIdReadOptions = {
  */
 export type PutApiMessagesConversationsByConversationIdReadResponses = {
 	"200": PutApiMessagesConversationsByConversationIdReadStatus200;
+	"400": PutApiMessagesConversationsByConversationIdReadStatus400;
 	"404": PutApiMessagesConversationsByConversationIdReadStatus404;
 	"422": PutApiMessagesConversationsByConversationIdReadStatus422;
 	"429": PutApiMessagesConversationsByConversationIdReadStatus429;
@@ -7697,6 +7775,7 @@ export type PutApiMessagesConversationsByConversationIdReadResponses = {
  */
 export type PutApiMessagesConversationsByConversationIdReadResponse =
 	| PutApiMessagesConversationsByConversationIdReadStatus200
+	| PutApiMessagesConversationsByConversationIdReadStatus400
 	| PutApiMessagesConversationsByConversationIdReadStatus404
 	| PutApiMessagesConversationsByConversationIdReadStatus422
 	| PutApiMessagesConversationsByConversationIdReadStatus429
@@ -8164,6 +8243,11 @@ export type PostApiApiTokensStatus200 = {
 /**
  * @type object
  */
+export type PostApiApiTokensStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiApiTokensStatus401 = {
 	/**
 	 * @type object
@@ -8332,6 +8416,7 @@ export type PostApiApiTokensOptions = {
  */
 export type PostApiApiTokensResponses = {
 	"200": PostApiApiTokensStatus200;
+	"400": PostApiApiTokensStatus400;
 	"401": PostApiApiTokensStatus401;
 	"403": PostApiApiTokensStatus403;
 	"422": PostApiApiTokensStatus422;
@@ -8343,6 +8428,7 @@ export type PostApiApiTokensResponses = {
  */
 export type PostApiApiTokensResponse =
 	| PostApiApiTokensStatus200
+	| PostApiApiTokensStatus400
 	| PostApiApiTokensStatus401
 	| PostApiApiTokensStatus403
 	| PostApiApiTokensStatus422
@@ -8484,6 +8570,11 @@ export type PatchApiApiTokensByTokenIdStatus200 = {
 		};
 	};
 };
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -8640,6 +8731,7 @@ export type PatchApiApiTokensByTokenIdOptions = {
  */
 export type PatchApiApiTokensByTokenIdResponses = {
 	"200": PatchApiApiTokensByTokenIdStatus200;
+	"400": PatchApiApiTokensByTokenIdStatus400;
 	"401": PatchApiApiTokensByTokenIdStatus401;
 	"403": PatchApiApiTokensByTokenIdStatus403;
 	"404": PatchApiApiTokensByTokenIdStatus404;
@@ -8652,6 +8744,7 @@ export type PatchApiApiTokensByTokenIdResponses = {
  */
 export type PatchApiApiTokensByTokenIdResponse =
 	| PatchApiApiTokensByTokenIdStatus200
+	| PatchApiApiTokensByTokenIdStatus400
 	| PatchApiApiTokensByTokenIdStatus401
 	| PatchApiApiTokensByTokenIdStatus403
 	| PatchApiApiTokensByTokenIdStatus404
@@ -8942,6 +9035,11 @@ export type PutApiApiTokensByTokenIdPolicyStatus200 = {
 /**
  * @type object
  */
+export type PutApiApiTokensByTokenIdPolicyStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiApiTokensByTokenIdPolicyStatus401 = {
 	/**
 	 * @type object
@@ -9128,6 +9226,7 @@ export type PutApiApiTokensByTokenIdPolicyOptions = {
  */
 export type PutApiApiTokensByTokenIdPolicyResponses = {
 	"200": PutApiApiTokensByTokenIdPolicyStatus200;
+	"400": PutApiApiTokensByTokenIdPolicyStatus400;
 	"401": PutApiApiTokensByTokenIdPolicyStatus401;
 	"403": PutApiApiTokensByTokenIdPolicyStatus403;
 	"404": PutApiApiTokensByTokenIdPolicyStatus404;
@@ -9141,6 +9240,7 @@ export type PutApiApiTokensByTokenIdPolicyResponses = {
  */
 export type PutApiApiTokensByTokenIdPolicyResponse =
 	| PutApiApiTokensByTokenIdPolicyStatus200
+	| PutApiApiTokensByTokenIdPolicyStatus400
 	| PutApiApiTokensByTokenIdPolicyStatus401
 	| PutApiApiTokensByTokenIdPolicyStatus403
 	| PutApiApiTokensByTokenIdPolicyStatus404
@@ -9601,6 +9701,11 @@ export type PatchApiApiTokenPoliciesByPolicyKeyStatus200 = {
 /**
  * @type object
  */
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PatchApiApiTokenPoliciesByPolicyKeyStatus401 = {
 	/**
 	 * @type object
@@ -9795,6 +9900,7 @@ export type PatchApiApiTokenPoliciesByPolicyKeyOptions = {
  */
 export type PatchApiApiTokenPoliciesByPolicyKeyResponses = {
 	"200": PatchApiApiTokenPoliciesByPolicyKeyStatus200;
+	"400": PatchApiApiTokenPoliciesByPolicyKeyStatus400;
 	"401": PatchApiApiTokenPoliciesByPolicyKeyStatus401;
 	"403": PatchApiApiTokenPoliciesByPolicyKeyStatus403;
 	"404": PatchApiApiTokenPoliciesByPolicyKeyStatus404;
@@ -9808,6 +9914,7 @@ export type PatchApiApiTokenPoliciesByPolicyKeyResponses = {
  */
 export type PatchApiApiTokenPoliciesByPolicyKeyResponse =
 	| PatchApiApiTokenPoliciesByPolicyKeyStatus200
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus400
 	| PatchApiApiTokenPoliciesByPolicyKeyStatus401
 	| PatchApiApiTokenPoliciesByPolicyKeyStatus403
 	| PatchApiApiTokenPoliciesByPolicyKeyStatus404
@@ -9885,6 +9992,11 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200 = {
 		};
 	};
 };
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -10080,6 +10192,7 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdOptions = {
  */
 export type PutApiApiTokenPoliciesBindingsByTokenIdResponses = {
 	"200": PutApiApiTokenPoliciesBindingsByTokenIdStatus200;
+	"400": PutApiApiTokenPoliciesBindingsByTokenIdStatus400;
 	"401": PutApiApiTokenPoliciesBindingsByTokenIdStatus401;
 	"403": PutApiApiTokenPoliciesBindingsByTokenIdStatus403;
 	"404": PutApiApiTokenPoliciesBindingsByTokenIdStatus404;
@@ -10092,6 +10205,7 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdResponses = {
  */
 export type PutApiApiTokenPoliciesBindingsByTokenIdResponse =
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus200
+	| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
@@ -12125,33 +12239,32 @@ export type PostApiFeedbackStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiFeedbackStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FeedbackRealmMismatch'
-		 * @type string
-		 */
-		code: "FeedbackRealmMismatch";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiFeedbackStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FeedbackRealmMismatch'
+				 * @type string
+				 */
+				code: "FeedbackRealmMismatch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -12694,6 +12807,11 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus200 = {
 /**
  * @type object
  */
+export type PutApiGovernanceUnitByUnitIdOwnershipStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiGovernanceUnitByUnitIdOwnershipStatus403 = {
 	/**
 	 * @type object
@@ -12801,6 +12919,7 @@ export type PutApiGovernanceUnitByUnitIdOwnershipOptions = {
  */
 export type PutApiGovernanceUnitByUnitIdOwnershipResponses = {
 	"200": PutApiGovernanceUnitByUnitIdOwnershipStatus200;
+	"400": PutApiGovernanceUnitByUnitIdOwnershipStatus400;
 	"403": PutApiGovernanceUnitByUnitIdOwnershipStatus403;
 	"404": PutApiGovernanceUnitByUnitIdOwnershipStatus404;
 	"422": PutApiGovernanceUnitByUnitIdOwnershipStatus422;
@@ -12812,6 +12931,7 @@ export type PutApiGovernanceUnitByUnitIdOwnershipResponses = {
  */
 export type PutApiGovernanceUnitByUnitIdOwnershipResponse =
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus200
+	| PutApiGovernanceUnitByUnitIdOwnershipStatus400
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus403
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus404
 	| PutApiGovernanceUnitByUnitIdOwnershipStatus422
@@ -12891,6 +13011,11 @@ export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200 = {
 	 */
 	updatedAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -13034,6 +13159,7 @@ export type PostApiGovernanceUnitByUnitIdOwnershipClaimOptions = {
  */
 export type PostApiGovernanceUnitByUnitIdOwnershipClaimResponses = {
 	"200": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200;
+	"400": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400;
 	"401": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401;
 	"403": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403;
 	"404": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404;
@@ -13047,6 +13173,7 @@ export type PostApiGovernanceUnitByUnitIdOwnershipClaimResponses = {
  */
 export type PostApiGovernanceUnitByUnitIdOwnershipClaimResponse =
 	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400
 	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
 	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
 	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
@@ -13323,33 +13450,32 @@ export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum =
 export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum =
 	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitAccessExpiryInvalid'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitAccessExpiryInvalid'
+				 * @type string
+				 */
+				code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -14064,33 +14190,32 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitAccessExpiryInvalid'
-		 * @type string
-		 */
-		code: "UnitAccessExpiryInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitAccessExpiryInvalid'
+				 * @type string
+				 */
+				code: "UnitAccessExpiryInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -14887,33 +15012,32 @@ export type PostApiGovernanceUnitByUnitIdProtectionsStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitAccessExpiryInvalid'
-		 * @type string
-		 */
-		code: "UnitAccessExpiryInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitAccessExpiryInvalid'
+				 * @type string
+				 */
+				code: "UnitAccessExpiryInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -15822,33 +15946,32 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnu
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum =
 	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitAccessExpiryInvalid'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitAccessExpiryInvalid'
+				 * @type string
+				 */
+				code: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -16158,6 +16281,12 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptSt
 /**
  * @type object
  */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400 =
+	MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404 = {
 	/**
 	 * @type object
@@ -16253,6 +16382,7 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOp
  */
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses = {
 	"200": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200;
+	"400": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400;
 	"404": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404;
 	"409": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409;
 	"422": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422;
@@ -16264,6 +16394,7 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptRe
  */
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponse =
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
@@ -16379,6 +16510,12 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineS
 /**
  * @type object
  */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400 =
+	MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404 = {
 	/**
 	 * @type object
@@ -16474,6 +16611,7 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineO
  */
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses = {
 	"200": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200;
+	"400": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400;
 	"404": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404;
 	"409": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409;
 	"422": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422;
@@ -16485,6 +16623,7 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineR
  */
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponse =
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
 	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
@@ -17116,6 +17255,11 @@ export type PatchApiGovernanceNotesByPostIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdStatus400 = MalformedRequestBody;
+
 export const PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -17425,6 +17569,7 @@ export type PatchApiGovernanceNotesByPostIdOptions = {
  */
 export type PatchApiGovernanceNotesByPostIdResponses = {
 	"200": PatchApiGovernanceNotesByPostIdStatus200;
+	"400": PatchApiGovernanceNotesByPostIdStatus400;
 	"403": PatchApiGovernanceNotesByPostIdStatus403;
 	"404": PatchApiGovernanceNotesByPostIdStatus404;
 	"409": PatchApiGovernanceNotesByPostIdStatus409;
@@ -17438,6 +17583,7 @@ export type PatchApiGovernanceNotesByPostIdResponses = {
  */
 export type PatchApiGovernanceNotesByPostIdResponse =
 	| PatchApiGovernanceNotesByPostIdStatus200
+	| PatchApiGovernanceNotesByPostIdStatus400
 	| PatchApiGovernanceNotesByPostIdStatus403
 	| PatchApiGovernanceNotesByPostIdStatus404
 	| PatchApiGovernanceNotesByPostIdStatus409
@@ -18358,6 +18504,11 @@ export type PatchApiGovernanceModerationCasesByCaseIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PatchApiGovernanceModerationCasesByCaseIdStatus400 = MalformedRequestBody;
+
 export const PatchApiGovernanceModerationCasesByCaseIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
@@ -18618,6 +18769,7 @@ export type PatchApiGovernanceModerationCasesByCaseIdOptions = {
  */
 export type PatchApiGovernanceModerationCasesByCaseIdResponses = {
 	"200": PatchApiGovernanceModerationCasesByCaseIdStatus200;
+	"400": PatchApiGovernanceModerationCasesByCaseIdStatus400;
 	"403": PatchApiGovernanceModerationCasesByCaseIdStatus403;
 	"404": PatchApiGovernanceModerationCasesByCaseIdStatus404;
 	"422": PatchApiGovernanceModerationCasesByCaseIdStatus422;
@@ -18629,6 +18781,7 @@ export type PatchApiGovernanceModerationCasesByCaseIdResponses = {
  */
 export type PatchApiGovernanceModerationCasesByCaseIdResponse =
 	| PatchApiGovernanceModerationCasesByCaseIdStatus200
+	| PatchApiGovernanceModerationCasesByCaseIdStatus400
 	| PatchApiGovernanceModerationCasesByCaseIdStatus403
 	| PatchApiGovernanceModerationCasesByCaseIdStatus404
 	| PatchApiGovernanceModerationCasesByCaseIdStatus422
@@ -18712,33 +18865,32 @@ export const PostApiGovernanceModerationActionsStatus400ErrorCodeEnum = {
 export type PostApiGovernanceModerationActionsStatus400ErrorCodeEnum =
 	(typeof PostApiGovernanceModerationActionsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceModerationActionsStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiGovernanceModerationActionsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ModerationReversedActionInvalid'
-		 * @type string
-		 */
-		code: PostApiGovernanceModerationActionsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceModerationActionsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ModerationReversedActionInvalid'
+				 * @type string
+				 */
+				code: PostApiGovernanceModerationActionsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceModerationActionsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -19748,6 +19900,11 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolvePath = {
  */
 export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204 = void;
 
+/**
+ * @type object
+ */
+export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400 = MalformedRequestBody;
+
 export const PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
@@ -20037,6 +20194,7 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveOptions = {
  */
 export type PatchApiGovernanceFeedbackByFeedbackIdResolveResponses = {
 	"204": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204;
+	"400": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400;
 	"403": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403;
 	"404": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404;
 	"409": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409;
@@ -20049,6 +20207,7 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveResponses = {
  */
 export type PatchApiGovernanceFeedbackByFeedbackIdResolveResponse =
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204
+	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
@@ -20115,33 +20274,32 @@ export const PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum = {
 export type PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum =
 	(typeof PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiGovernanceModerationEnforcementsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'EnforcementExpiryInvalid'
-		 * @type string
-		 */
-		code: PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceModerationEnforcementsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'EnforcementExpiryInvalid'
+				 * @type string
+				 */
+				code: PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceModerationEnforcementsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -20526,33 +20684,32 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus20
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ModerationNoteRoleDuplicate'
-		 * @type string
-		 */
-		code: "ModerationNoteRoleDuplicate";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ModerationNoteRoleDuplicate'
+				 * @type string
+				 */
+				code: "ModerationNoteRoleDuplicate";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -21130,33 +21287,32 @@ export const PostApiGovernanceGrantsStatus400ErrorCodeEnum = {
 export type PostApiGovernanceGrantsStatus400ErrorCodeEnum =
 	(typeof PostApiGovernanceGrantsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceGrantsStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformGrantRealmForbidden'
-		 * @type string
-		 */
-		code: PostApiGovernanceGrantsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiGovernanceGrantsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'PlatformGrantRealmForbidden'
+				 * @type string
+				 */
+				code: PostApiGovernanceGrantsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiGovernanceGrantsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -21528,6 +21684,11 @@ export type PostApiSeriesStatus200 = {
 /**
  * @type object
  */
+export type PostApiSeriesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiSeriesStatus404 = {
 	/**
 	 * @type object
@@ -21841,6 +22002,7 @@ export type PostApiSeriesOptions = {
  */
 export type PostApiSeriesResponses = {
 	"200": PostApiSeriesStatus200;
+	"400": PostApiSeriesStatus400;
 	"404": PostApiSeriesStatus404;
 	"422": PostApiSeriesStatus422;
 	"429": PostApiSeriesStatus429;
@@ -21852,6 +22014,7 @@ export type PostApiSeriesResponses = {
  */
 export type PostApiSeriesResponse =
 	| PostApiSeriesStatus200
+	| PostApiSeriesStatus400
 	| PostApiSeriesStatus404
 	| PostApiSeriesStatus422
 	| PostApiSeriesStatus429
@@ -22051,33 +22214,32 @@ export type ReplaceZoneSlugAddressStatus200 = {
 	canonicalPath: string[];
 };
 
-/**
- * @type object
- */
-export type ReplaceZoneSlugAddressStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InvalidSlug'
-		 * @type string
-		 */
-		code: "InvalidSlug";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type ReplaceZoneSlugAddressStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSlug'
+				 * @type string
+				 */
+				code: "InvalidSlug";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const ReplaceZoneSlugAddressStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -22963,33 +23125,32 @@ export type PatchApiZonesByZoneIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiZonesByZoneIdStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ZoneTimeRangeInvalid'
-		 * @type string
-		 */
-		code: "ZoneTimeRangeInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PatchApiZonesByZoneIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ZoneTimeRangeInvalid'
+				 * @type string
+				 */
+				code: "ZoneTimeRangeInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PatchApiZonesByZoneIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -24788,33 +24949,32 @@ export type PutApiZonesByZoneIdPagesBySlugStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesBySlugStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ZoneDocumentInvalid'
-		 * @type string
-		 */
-		code: "ZoneDocumentInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiZonesByZoneIdPagesBySlugStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ZoneDocumentInvalid'
+				 * @type string
+				 */
+				code: "ZoneDocumentInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -25075,6 +25235,11 @@ export type DeleteApiZonesByZoneIdPagesBySlugPath = {
  */
 export type DeleteApiZonesByZoneIdPagesBySlugStatus204 = void;
 
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus400 = MalformedRequestBody;
+
 export const DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -25244,6 +25409,7 @@ export type DeleteApiZonesByZoneIdPagesBySlugOptions = {
  */
 export type DeleteApiZonesByZoneIdPagesBySlugResponses = {
 	"204": DeleteApiZonesByZoneIdPagesBySlugStatus204;
+	"400": DeleteApiZonesByZoneIdPagesBySlugStatus400;
 	"403": DeleteApiZonesByZoneIdPagesBySlugStatus403;
 	"404": DeleteApiZonesByZoneIdPagesBySlugStatus404;
 	"409": DeleteApiZonesByZoneIdPagesBySlugStatus409;
@@ -25257,6 +25423,7 @@ export type DeleteApiZonesByZoneIdPagesBySlugResponses = {
  */
 export type DeleteApiZonesByZoneIdPagesBySlugResponse =
 	| DeleteApiZonesByZoneIdPagesBySlugStatus204
+	| DeleteApiZonesByZoneIdPagesBySlugStatus400
 	| DeleteApiZonesByZoneIdPagesBySlugStatus403
 	| DeleteApiZonesByZoneIdPagesBySlugStatus404
 	| DeleteApiZonesByZoneIdPagesBySlugStatus409
@@ -25440,33 +25607,32 @@ export type PostApiZonesByZoneIdNavigationStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdNavigationStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ZoneDocumentInvalid'
-		 * @type string
-		 */
-		code: "ZoneDocumentInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiZonesByZoneIdNavigationStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ZoneDocumentInvalid'
+				 * @type string
+				 */
+				code: "ZoneDocumentInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -25802,33 +25968,32 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdNavigationByNavigationIdStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ZoneDocumentInvalid'
-		 * @type string
-		 */
-		code: "ZoneDocumentInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiZonesByZoneIdNavigationByNavigationIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ZoneDocumentInvalid'
+				 * @type string
+				 */
+				code: "ZoneDocumentInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -26040,6 +26205,11 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdPath = {
  */
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204 = void;
 
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400 = MalformedRequestBody;
+
 export const DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -26209,6 +26379,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdOptions = {
  */
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdResponses = {
 	"204": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204;
+	"400": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400;
 	"403": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403;
 	"404": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404;
 	"409": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409;
@@ -26222,6 +26393,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdResponses = {
  */
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdResponse =
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204
+	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
@@ -26285,6 +26457,11 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
 	 */
 	updatedAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400 = MalformedRequestBody;
 
 export const PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -26414,6 +26591,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdOptions = {
  */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdResponses = {
 	"200": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200;
+	"400": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400;
 	"403": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403;
 	"404": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404;
 	"422": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422;
@@ -26426,6 +26604,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdResponses = {
  */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdResponse =
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200
+	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -26606,33 +26785,32 @@ export type PostApiZonesStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiZonesStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ZoneTimeRangeInvalid'
-		 * @type string
-		 */
-		code: "ZoneTimeRangeInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiZonesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ZoneTimeRangeInvalid'
+				 * @type string
+				 */
+				code: "ZoneTimeRangeInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -27168,33 +27346,32 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'SoftwareSystemRequirementSourceInvalid'
-		 * @type string
-		 */
-		code: "SoftwareSystemRequirementSourceInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SoftwareSystemRequirementSourceInvalid'
+				 * @type string
+				 */
+				code: "SoftwareSystemRequirementSourceInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -27433,33 +27610,32 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'SoftwareSystemRequirementSourceInvalid'
-		 * @type string
-		 */
-		code: "SoftwareSystemRequirementSourceInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SoftwareSystemRequirementSourceInvalid'
+				 * @type string
+				 */
+				code: "SoftwareSystemRequirementSourceInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -28226,33 +28402,32 @@ export const PutApiUnitsByIdByUnitIdDocksByKindStatus400ErrorCodeEnum = {
 export type PutApiUnitsByIdByUnitIdDocksByKindStatus400ErrorCodeEnum =
 	(typeof PutApiUnitsByIdByUnitIdDocksByKindStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsByIdByUnitIdDocksByKindStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PutApiUnitsByIdByUnitIdDocksByKindStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'DockNotSupported'
-		 * @type string
-		 */
-		code: PutApiUnitsByIdByUnitIdDocksByKindStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiUnitsByIdByUnitIdDocksByKindStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'DockNotSupported'
+				 * @type string
+				 */
+				code: PutApiUnitsByIdByUnitIdDocksByKindStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -28462,33 +28637,32 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindPath = {
  */
 export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus204 = void;
 
-/**
- * @type object
- */
-export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'DockNotSupported'
-		 * @type string
-		 */
-		code: "DockNotSupported";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'DockNotSupported'
+				 * @type string
+				 */
+				code: "DockNotSupported";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const DeleteApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -28909,33 +29083,32 @@ export const PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStat
 export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum =
 	(typeof PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'DockNotSupported'
-		 * @type string
-		 */
-		code: PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'DockNotSupported'
+				 * @type string
+				 */
+				code: PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
 	{
@@ -29795,6 +29968,11 @@ export type PatchApiUsersMeStatus200 = {
 /**
  * @type object
  */
+export type PatchApiUsersMeStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PatchApiUsersMeStatus403 = {
 	/**
 	 * @type object
@@ -30154,6 +30332,7 @@ export type PatchApiUsersMeOptions = {
  */
 export type PatchApiUsersMeResponses = {
 	"200": PatchApiUsersMeStatus200;
+	"400": PatchApiUsersMeStatus400;
 	"403": PatchApiUsersMeStatus403;
 	"404": PatchApiUsersMeStatus404;
 	"409": PatchApiUsersMeStatus409;
@@ -30167,6 +30346,7 @@ export type PatchApiUsersMeResponses = {
  */
 export type PatchApiUsersMeResponse =
 	| PatchApiUsersMeStatus200
+	| PatchApiUsersMeStatus400
 	| PatchApiUsersMeStatus403
 	| PatchApiUsersMeStatus404
 	| PatchApiUsersMeStatus409
@@ -30435,6 +30615,11 @@ export type PatchApiUsersMePreferencesStatus200 = {
 /**
  * @type object
  */
+export type PatchApiUsersMePreferencesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PatchApiUsersMePreferencesStatus404 = {
 	/**
 	 * @type object
@@ -30527,6 +30712,7 @@ export type PatchApiUsersMePreferencesOptions = {
  */
 export type PatchApiUsersMePreferencesResponses = {
 	"200": PatchApiUsersMePreferencesStatus200;
+	"400": PatchApiUsersMePreferencesStatus400;
 	"404": PatchApiUsersMePreferencesStatus404;
 	"422": PatchApiUsersMePreferencesStatus422;
 	"429": PatchApiUsersMePreferencesStatus429;
@@ -30538,6 +30724,7 @@ export type PatchApiUsersMePreferencesResponses = {
  */
 export type PatchApiUsersMePreferencesResponse =
 	| PatchApiUsersMePreferencesStatus200
+	| PatchApiUsersMePreferencesStatus400
 	| PatchApiUsersMePreferencesStatus404
 	| PatchApiUsersMePreferencesStatus422
 	| PatchApiUsersMePreferencesStatus429
@@ -30628,6 +30815,11 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 */
 	preferredLanguages: PutApiUsersMePreferencesStatus200PreferredLanguagesEnum[];
 };
+
+/**
+ * @type object
+ */
+export type PutApiUsersMePreferencesStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -30826,6 +31018,7 @@ export type PutApiUsersMePreferencesOptions = {
  */
 export type PutApiUsersMePreferencesResponses = {
 	"200": PutApiUsersMePreferencesStatus200;
+	"400": PutApiUsersMePreferencesStatus400;
 	"403": PutApiUsersMePreferencesStatus403;
 	"404": PutApiUsersMePreferencesStatus404;
 	"422": PutApiUsersMePreferencesStatus422;
@@ -30838,6 +31031,7 @@ export type PutApiUsersMePreferencesResponses = {
  */
 export type PutApiUsersMePreferencesResponse =
 	| PutApiUsersMePreferencesStatus200
+	| PutApiUsersMePreferencesStatus400
 	| PutApiUsersMePreferencesStatus403
 	| PutApiUsersMePreferencesStatus404
 	| PutApiUsersMePreferencesStatus422
@@ -31593,6 +31787,11 @@ export type PatchApiUsersMeFollowingByUnitIdStatus200 = {
 /**
  * @type object
  */
+export type PatchApiUsersMeFollowingByUnitIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PatchApiUsersMeFollowingByUnitIdStatus404 = {
 	/**
 	 * @type object
@@ -31685,6 +31884,7 @@ export type PatchApiUsersMeFollowingByUnitIdOptions = {
  */
 export type PatchApiUsersMeFollowingByUnitIdResponses = {
 	"200": PatchApiUsersMeFollowingByUnitIdStatus200;
+	"400": PatchApiUsersMeFollowingByUnitIdStatus400;
 	"404": PatchApiUsersMeFollowingByUnitIdStatus404;
 	"422": PatchApiUsersMeFollowingByUnitIdStatus422;
 	"429": PatchApiUsersMeFollowingByUnitIdStatus429;
@@ -31696,6 +31896,7 @@ export type PatchApiUsersMeFollowingByUnitIdResponses = {
  */
 export type PatchApiUsersMeFollowingByUnitIdResponse =
 	| PatchApiUsersMeFollowingByUnitIdStatus200
+	| PatchApiUsersMeFollowingByUnitIdStatus400
 	| PatchApiUsersMeFollowingByUnitIdStatus404
 	| PatchApiUsersMeFollowingByUnitIdStatus422
 	| PatchApiUsersMeFollowingByUnitIdStatus429
@@ -32809,33 +33010,32 @@ export type PutApiStaffMembersByProfileIdStatus200 = {
 	isSuperAdmin: boolean;
 };
 
-/**
- * @type object
- */
-export type PutApiStaffMembersByProfileIdStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'CapabilityGrantExpiryInvalid'
-		 * @type string
-		 */
-		code: "CapabilityGrantExpiryInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiStaffMembersByProfileIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'CapabilityGrantExpiryInvalid'
+				 * @type string
+				 */
+				code: "CapabilityGrantExpiryInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum = {
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
@@ -33294,6 +33494,11 @@ export type PostApiTagStructuresStatus200 = {
 /**
  * @type object
  */
+export type PostApiTagStructuresStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiTagStructuresStatus404 = {
 	/**
 	 * @type object
@@ -33400,6 +33605,7 @@ export type PostApiTagStructuresOptions = {
  */
 export type PostApiTagStructuresResponses = {
 	"200": PostApiTagStructuresStatus200;
+	"400": PostApiTagStructuresStatus400;
 	"404": PostApiTagStructuresStatus404;
 	"422": PostApiTagStructuresStatus422;
 	"429": PostApiTagStructuresStatus429;
@@ -33411,6 +33617,7 @@ export type PostApiTagStructuresResponses = {
  */
 export type PostApiTagStructuresResponse =
 	| PostApiTagStructuresStatus200
+	| PostApiTagStructuresStatus400
 	| PostApiTagStructuresStatus404
 	| PostApiTagStructuresStatus422
 	| PostApiTagStructuresStatus429
@@ -33656,6 +33863,11 @@ export type PutApiTagStructuresByStructureIdStatus200 = {
 /**
  * @type object
  */
+export type PutApiTagStructuresByStructureIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiTagStructuresByStructureIdStatus403 = {
 	/**
 	 * @type object
@@ -33846,6 +34058,7 @@ export type PutApiTagStructuresByStructureIdOptions = {
  */
 export type PutApiTagStructuresByStructureIdResponses = {
 	"200": PutApiTagStructuresByStructureIdStatus200;
+	"400": PutApiTagStructuresByStructureIdStatus400;
 	"403": PutApiTagStructuresByStructureIdStatus403;
 	"404": PutApiTagStructuresByStructureIdStatus404;
 	"409": PutApiTagStructuresByStructureIdStatus409;
@@ -33859,6 +34072,7 @@ export type PutApiTagStructuresByStructureIdResponses = {
  */
 export type PutApiTagStructuresByStructureIdResponse =
 	| PutApiTagStructuresByStructureIdStatus200
+	| PutApiTagStructuresByStructureIdStatus400
 	| PutApiTagStructuresByStructureIdStatus403
 	| PutApiTagStructuresByStructureIdStatus404
 	| PutApiTagStructuresByStructureIdStatus409
@@ -33886,6 +34100,11 @@ export type PutApiTagStructuresByStructureIdVoteStatus200 = {
 	voteCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
 };
+
+/**
+ * @type object
+ */
+export type PutApiTagStructuresByStructureIdVoteStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -33982,6 +34201,7 @@ export type PutApiTagStructuresByStructureIdVoteOptions = {
  */
 export type PutApiTagStructuresByStructureIdVoteResponses = {
 	"200": PutApiTagStructuresByStructureIdVoteStatus200;
+	"400": PutApiTagStructuresByStructureIdVoteStatus400;
 	"404": PutApiTagStructuresByStructureIdVoteStatus404;
 	"422": PutApiTagStructuresByStructureIdVoteStatus422;
 	"429": PutApiTagStructuresByStructureIdVoteStatus429;
@@ -33993,6 +34213,7 @@ export type PutApiTagStructuresByStructureIdVoteResponses = {
  */
 export type PutApiTagStructuresByStructureIdVoteResponse =
 	| PutApiTagStructuresByStructureIdVoteStatus200
+	| PutApiTagStructuresByStructureIdVoteStatus400
 	| PutApiTagStructuresByStructureIdVoteStatus404
 	| PutApiTagStructuresByStructureIdVoteStatus422
 	| PutApiTagStructuresByStructureIdVoteStatus429
@@ -34756,6 +34977,11 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 = {
 	viewerVote: ((-1 | 1) | null) | null;
 };
 
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400 = MalformedRequestBody;
+
 export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
@@ -34881,6 +35107,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200;
+	"400": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400;
 	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422;
 	"429": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429;
@@ -34892,6 +35119,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -35233,6 +35461,11 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
 /**
  * @type object
  */
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404 = {
 	/**
 	 * @type object
@@ -35321,6 +35554,7 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions = {
  */
 export type PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses = {
 	"200": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200;
+	"400": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400;
 	"404": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404;
 	"422": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422;
 	"429": PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429;
@@ -35332,6 +35566,7 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses = {
  */
 export type PutApiUsersMeTagRealmSubscriptionsByRealmIdResponse =
 	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200
+	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400
 	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
 	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
 	| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
@@ -35480,33 +35715,32 @@ export type ResolveUnitSlugAddressStatus200 = {
 	redirected: boolean;
 };
 
-/**
- * @type object
- */
-export type ResolveUnitSlugAddressStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InvalidSlug'
-		 * @type string
-		 */
-		code: "InvalidSlug";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type ResolveUnitSlugAddressStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSlug'
+				 * @type string
+				 */
+				code: "InvalidSlug";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -35974,33 +36208,32 @@ export type ReplaceOwnProfileSlugAddressStatus200 = {
 	canonicalPath: string[];
 };
 
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InvalidSlug'
-		 * @type string
-		 */
-		code: "InvalidSlug";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type ReplaceOwnProfileSlugAddressStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSlug'
+				 * @type string
+				 */
+				code: "InvalidSlug";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -36457,33 +36690,32 @@ export type ReplaceUnitSlugAddressAsStaffStatus200 = {
 	canonicalPath: string[];
 };
 
-/**
- * @type object
- */
-export type ReplaceUnitSlugAddressAsStaffStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InvalidSlug'
-		 * @type string
-		 */
-		code: "InvalidSlug";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type ReplaceUnitSlugAddressAsStaffStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSlug'
+				 * @type string
+				 */
+				code: "InvalidSlug";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -36758,33 +36990,32 @@ export type CreateSlugNamespaceAsStaffStatus201 = {
 	canonicalPath: string[];
 };
 
-/**
- * @type object
- */
-export type CreateSlugNamespaceAsStaffStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InvalidSlug'
-		 * @type string
-		 */
-		code: "InvalidSlug";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type CreateSlugNamespaceAsStaffStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSlug'
+				 * @type string
+				 */
+				code: "InvalidSlug";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -37048,6 +37279,11 @@ export type ReleaseSlugRedirectAsStaffStatus204 = void;
 /**
  * @type object
  */
+export type ReleaseSlugRedirectAsStaffStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type ReleaseSlugRedirectAsStaffStatus401 = {
 	/**
 	 * @type object
@@ -37190,6 +37426,7 @@ export type ReleaseSlugRedirectAsStaffOptions = {
  */
 export type ReleaseSlugRedirectAsStaffResponses = {
 	"204": ReleaseSlugRedirectAsStaffStatus204;
+	"400": ReleaseSlugRedirectAsStaffStatus400;
 	"401": ReleaseSlugRedirectAsStaffStatus401;
 	"403": ReleaseSlugRedirectAsStaffStatus403;
 	"404": ReleaseSlugRedirectAsStaffStatus404;
@@ -37202,6 +37439,7 @@ export type ReleaseSlugRedirectAsStaffResponses = {
  */
 export type ReleaseSlugRedirectAsStaffResponse =
 	| ReleaseSlugRedirectAsStaffStatus204
+	| ReleaseSlugRedirectAsStaffStatus400
 	| ReleaseSlugRedirectAsStaffStatus401
 	| ReleaseSlugRedirectAsStaffStatus403
 	| ReleaseSlugRedirectAsStaffStatus404
@@ -38966,6 +39204,11 @@ export type PostApiUnitsByTypeStatus200 = {
 /**
  * @type object
  */
+export type PostApiUnitsByTypeStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeStatus401 = {
 	/**
 	 * @type object
@@ -39401,6 +39644,7 @@ export type PostApiUnitsByTypeOptions = {
  */
 export type PostApiUnitsByTypeResponses = {
 	"200": PostApiUnitsByTypeStatus200;
+	"400": PostApiUnitsByTypeStatus400;
 	"401": PostApiUnitsByTypeStatus401;
 	"403": PostApiUnitsByTypeStatus403;
 	"404": PostApiUnitsByTypeStatus404;
@@ -39414,6 +39658,7 @@ export type PostApiUnitsByTypeResponses = {
  */
 export type PostApiUnitsByTypeResponse =
 	| PostApiUnitsByTypeStatus200
+	| PostApiUnitsByTypeStatus400
 	| PostApiUnitsByTypeStatus401
 	| PostApiUnitsByTypeStatus403
 	| PostApiUnitsByTypeStatus404
@@ -41460,33 +41705,32 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PatchApiUnitsByTypeByUnitIdStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPrimaryLanguageMissing'
-		 * @type string
-		 */
-		code: "UnitPrimaryLanguageMissing";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PatchApiUnitsByTypeByUnitIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitPrimaryLanguageMissing'
+				 * @type string
+				 */
+				code: "UnitPrimaryLanguageMissing";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -42997,6 +43241,11 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 /**
  * @type object
  */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus401 = {
 	/**
 	 * @type object
@@ -43185,6 +43434,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextOptions = {
  */
 export type PatchApiUnitsByTypeByUnitIdVariantContextResponses = {
 	"200": PatchApiUnitsByTypeByUnitIdVariantContextStatus200;
+	"400": PatchApiUnitsByTypeByUnitIdVariantContextStatus400;
 	"401": PatchApiUnitsByTypeByUnitIdVariantContextStatus401;
 	"403": PatchApiUnitsByTypeByUnitIdVariantContextStatus403;
 	"404": PatchApiUnitsByTypeByUnitIdVariantContextStatus404;
@@ -43199,6 +43449,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextResponses = {
  */
 export type PatchApiUnitsByTypeByUnitIdVariantContextResponse =
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus200
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus400
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus401
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus403
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
@@ -44213,6 +44464,11 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 /**
  * @type object
  */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401 = {
 	/**
 	 * @type object
@@ -44405,6 +44661,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions = {
  */
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses = {
 	"200": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200;
+	"400": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400;
 	"401": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401;
 	"403": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403;
 	"404": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404;
@@ -44419,6 +44676,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses = {
  */
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponse =
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
@@ -45434,6 +45692,11 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 /**
  * @type object
  */
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401 = {
 	/**
 	 * @type object
@@ -45799,6 +46062,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses = {
 	"200": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200;
+	"400": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400;
 	"401": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401;
 	"403": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403;
 	"404": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404;
@@ -45812,6 +46076,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponse =
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200
+	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
@@ -46384,6 +46649,11 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200 = {
 	revisionCreated: boolean;
 };
 
+/**
+ * @type object
+ */
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400 = MalformedRequestBody;
+
 export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
@@ -46579,6 +46849,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions = {
  */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses = {
 	"200": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200;
+	"400": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400;
 	"403": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403;
 	"404": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404;
 	"409": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409;
@@ -46592,6 +46863,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses = {
  */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponse =
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200
+	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
@@ -46638,6 +46910,11 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200 = {
 	 */
 	revisionCreated: boolean;
 };
+
+/**
+ * @type object
+ */
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400 = MalformedRequestBody;
 
 export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -46834,6 +47111,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions = {
  */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponses = {
 	"200": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200;
+	"400": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400;
 	"403": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403;
 	"404": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404;
 	"409": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409;
@@ -46847,6 +47125,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponses = {
  */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponse =
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200
+	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
@@ -46870,6 +47149,11 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityPath = {
  * @type void
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204 = void;
+
+/**
+ * @type object
+ */
+export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -47048,6 +47332,7 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions = {
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponses = {
 	"204": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204;
+	"400": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400;
 	"403": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403;
 	"404": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404;
 	"409": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409;
@@ -47061,6 +47346,7 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponses = {
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponse =
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204
+	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
@@ -47656,6 +47942,11 @@ export type PostApiEntitiesStatus200 = {
 /**
  * @type object
  */
+export type PostApiEntitiesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiEntitiesStatus404 = {
 	/**
 	 * @type object
@@ -47969,6 +48260,7 @@ export type PostApiEntitiesOptions = {
  */
 export type PostApiEntitiesResponses = {
 	"200": PostApiEntitiesStatus200;
+	"400": PostApiEntitiesStatus400;
 	"404": PostApiEntitiesStatus404;
 	"422": PostApiEntitiesStatus422;
 	"429": PostApiEntitiesStatus429;
@@ -47980,6 +48272,7 @@ export type PostApiEntitiesResponses = {
  */
 export type PostApiEntitiesResponse =
 	| PostApiEntitiesStatus200
+	| PostApiEntitiesStatus400
 	| PostApiEntitiesStatus404
 	| PostApiEntitiesStatus422
 	| PostApiEntitiesStatus429
@@ -48793,6 +49086,11 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200 = {
 	id: string;
 };
 
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+
 export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -49130,6 +49428,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageOptions = {
  */
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponses = {
 	"200": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200;
+	"400": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400;
 	"403": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403;
 	"404": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404;
 	"422": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422;
@@ -49142,6 +49441,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponses = {
  */
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponse =
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200
+	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
@@ -49311,6 +49611,11 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyStatus200 = {
 	subjectAssociation: PatchApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum;
 };
 
+/**
+ * @type object
+ */
+export type PatchApiEntitiesByUnitIdAssociationPolicyStatus400 = MalformedRequestBody;
+
 export const PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
@@ -49437,6 +49742,7 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyOptions = {
  */
 export type PatchApiEntitiesByUnitIdAssociationPolicyResponses = {
 	"200": PatchApiEntitiesByUnitIdAssociationPolicyStatus200;
+	"400": PatchApiEntitiesByUnitIdAssociationPolicyStatus400;
 	"403": PatchApiEntitiesByUnitIdAssociationPolicyStatus403;
 	"404": PatchApiEntitiesByUnitIdAssociationPolicyStatus404;
 	"422": PatchApiEntitiesByUnitIdAssociationPolicyStatus422;
@@ -49448,6 +49754,7 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyResponses = {
  */
 export type PatchApiEntitiesByUnitIdAssociationPolicyResponse =
 	| PatchApiEntitiesByUnitIdAssociationPolicyStatus200
+	| PatchApiEntitiesByUnitIdAssociationPolicyStatus400
 	| PatchApiEntitiesByUnitIdAssociationPolicyStatus403
 	| PatchApiEntitiesByUnitIdAssociationPolicyStatus404
 	| PatchApiEntitiesByUnitIdAssociationPolicyStatus422
@@ -49527,6 +49834,11 @@ export type PostApiTagsStatus200 = {
 	 */
 	id: string;
 };
+
+/**
+ * @type object
+ */
+export type PostApiTagsStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -49816,6 +50128,7 @@ export type PostApiTagsOptions = {
  */
 export type PostApiTagsResponses = {
 	"200": PostApiTagsStatus200;
+	"400": PostApiTagsStatus400;
 	"422": PostApiTagsStatus422;
 	"429": PostApiTagsStatus429;
 	"500": PostApiTagsStatus500;
@@ -49825,7 +50138,11 @@ export type PostApiTagsResponses = {
  * @description Union of all possible responses
  */
 export type PostApiTagsResponse =
-	PostApiTagsStatus200 | PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500;
+	| PostApiTagsStatus200
+	| PostApiTagsStatus400
+	| PostApiTagsStatus422
+	| PostApiTagsStatus429
+	| PostApiTagsStatus500;
 
 export const GetApiUnitsByTypeByUnitIdAliasesType = {
 	slug_namespace: "slug_namespace",
@@ -50075,6 +50392,11 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdAliasesStatus400 = MalformedRequestBody;
+
 export const PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -50229,6 +50551,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesOptions = {
  */
 export type PostApiUnitsByTypeByUnitIdAliasesResponses = {
 	"200": PostApiUnitsByTypeByUnitIdAliasesStatus200;
+	"400": PostApiUnitsByTypeByUnitIdAliasesStatus400;
 	"403": PostApiUnitsByTypeByUnitIdAliasesStatus403;
 	"404": PostApiUnitsByTypeByUnitIdAliasesStatus404;
 	"422": PostApiUnitsByTypeByUnitIdAliasesStatus422;
@@ -50241,6 +50564,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponses = {
  */
 export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 	| PostApiUnitsByTypeByUnitIdAliasesStatus200
+	| PostApiUnitsByTypeByUnitIdAliasesStatus400
 	| PostApiUnitsByTypeByUnitIdAliasesStatus403
 	| PostApiUnitsByTypeByUnitIdAliasesStatus404
 	| PostApiUnitsByTypeByUnitIdAliasesStatus422
@@ -50492,6 +50816,11 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200 = {
 	voteCount: string | number;
 };
 
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400 = MalformedRequestBody;
+
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	AliasNotFound: "AliasNotFound",
@@ -50595,6 +50924,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200;
+	"400": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400;
 	"404": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422;
 	"429": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429;
@@ -50606,6 +50936,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200
+	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
@@ -50965,33 +51296,32 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'CreditAttributionRoleInvalid'
-		 * @type string
-		 */
-		code: "CreditAttributionRoleInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'CreditAttributionRoleInvalid'
+				 * @type string
+				 */
+				code: "CreditAttributionRoleInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -51424,6 +51754,11 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 = MalformedRequestBody;
+
 export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -51585,6 +51920,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions = {
  */
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses = {
 	"200": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200;
+	"400": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400;
 	"403": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403;
 	"404": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404;
 	"422": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422;
@@ -51597,6 +51933,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses = {
  */
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponse =
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
@@ -51842,6 +52179,11 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdLinksStatus400 = MalformedRequestBody;
+
 export const PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -51987,6 +52329,7 @@ export type PostApiUnitsByTypeByUnitIdLinksOptions = {
  */
 export type PostApiUnitsByTypeByUnitIdLinksResponses = {
 	"200": PostApiUnitsByTypeByUnitIdLinksStatus200;
+	"400": PostApiUnitsByTypeByUnitIdLinksStatus400;
 	"403": PostApiUnitsByTypeByUnitIdLinksStatus403;
 	"404": PostApiUnitsByTypeByUnitIdLinksStatus404;
 	"422": PostApiUnitsByTypeByUnitIdLinksStatus422;
@@ -51999,6 +52342,7 @@ export type PostApiUnitsByTypeByUnitIdLinksResponses = {
  */
 export type PostApiUnitsByTypeByUnitIdLinksResponse =
 	| PostApiUnitsByTypeByUnitIdLinksStatus200
+	| PostApiUnitsByTypeByUnitIdLinksStatus400
 	| PostApiUnitsByTypeByUnitIdLinksStatus403
 	| PostApiUnitsByTypeByUnitIdLinksStatus404
 	| PostApiUnitsByTypeByUnitIdLinksStatus422
@@ -52061,6 +52405,11 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200 = {
 	 */
 	updatedAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400 = MalformedRequestBody;
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
 	UnitAccessRestricted: "UnitAccessRestricted",
@@ -52189,6 +52538,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200;
+	"400": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400;
 	"403": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422;
@@ -52201,6 +52551,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200
+	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -52398,6 +52749,11 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200 = {
 	voteCount: string | number;
 };
 
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400 = MalformedRequestBody;
+
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum = {
 	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -52559,6 +52915,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200;
+	"400": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400;
 	"403": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422;
@@ -52571,6 +52928,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200
+	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
@@ -53189,6 +53547,11 @@ export type PostApiUnitsByIdByUnitIdContentStructuresStatus200 = {
 	revisionCreated: boolean;
 };
 
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresStatus400 = MalformedRequestBody;
+
 export const PostApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -53343,6 +53706,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresOptions = {
  */
 export type PostApiUnitsByIdByUnitIdContentStructuresResponses = {
 	"200": PostApiUnitsByIdByUnitIdContentStructuresStatus200;
+	"400": PostApiUnitsByIdByUnitIdContentStructuresStatus400;
 	"403": PostApiUnitsByIdByUnitIdContentStructuresStatus403;
 	"404": PostApiUnitsByIdByUnitIdContentStructuresStatus404;
 	"422": PostApiUnitsByIdByUnitIdContentStructuresStatus422;
@@ -53355,6 +53719,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresResponses = {
  */
 export type PostApiUnitsByIdByUnitIdContentStructuresResponse =
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus200
+	| PostApiUnitsByIdByUnitIdContentStructuresStatus400
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus422
@@ -53638,6 +54003,12 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200 = 
 	revisionCreated: boolean;
 };
 
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400 =
+	MalformedRequestBody;
+
 export const DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -53821,6 +54192,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions = {
  */
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses = {
 	"200": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200;
+	"400": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400;
 	"403": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403;
 	"404": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404;
 	"409": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409;
@@ -53834,6 +54206,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses = 
  */
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponse =
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200
+	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
@@ -54041,6 +54414,12 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
 		revisionCreated: boolean;
 	};
 
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400 =
+	MalformedRequestBody;
+
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -54222,6 +54601,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses =
 	{
 		"200": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200;
+		"400": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400;
 		"403": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403;
 		"404": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404;
 		"409": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409;
@@ -54235,6 +54615,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
  */
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponse =
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
@@ -54375,6 +54756,12 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200
 	 */
 	revisionCreated: boolean;
 };
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400 =
+	MalformedRequestBody;
 
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -54657,6 +55044,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions =
  */
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses = {
 	"200": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200;
+	"400": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400;
 	"403": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403;
 	"404": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404;
 	"409": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409;
@@ -54670,6 +55058,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses
  */
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponse =
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
@@ -54816,6 +55205,12 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
 	 */
 	revisionCreated: boolean;
 };
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400 =
+	MalformedRequestBody;
 
 export const PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403ErrorCodeEnum =
 	{
@@ -55071,6 +55466,7 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
  */
 export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses = {
 	"200": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200;
+	"400": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400;
 	"403": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403;
 	"404": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404;
 	"409": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409;
@@ -55084,6 +55480,7 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
  */
 export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponse =
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200
+	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -55134,6 +55531,12 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
 	 */
 	revisionCreated: boolean;
 };
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400 =
+	MalformedRequestBody;
 
 export const DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403ErrorCodeEnum =
 	{
@@ -55300,6 +55703,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
  */
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses = {
 	"200": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200;
+	"400": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400;
 	"403": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403;
 	"404": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404;
 	"409": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409;
@@ -55313,6 +55717,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
  */
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponse =
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200
+	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -55557,6 +55962,11 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 	 */
 	updatedAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus400 = MalformedRequestBody;
 
 export const PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -55890,6 +56300,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesOptions = {
  */
 export type PostApiUnitsBookByUnitIdContentStructureNodesResponses = {
 	"200": PostApiUnitsBookByUnitIdContentStructureNodesStatus200;
+	"400": PostApiUnitsBookByUnitIdContentStructureNodesStatus400;
 	"403": PostApiUnitsBookByUnitIdContentStructureNodesStatus403;
 	"404": PostApiUnitsBookByUnitIdContentStructureNodesStatus404;
 	"409": PostApiUnitsBookByUnitIdContentStructureNodesStatus409;
@@ -55903,6 +56314,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesResponses = {
  */
 export type PostApiUnitsBookByUnitIdContentStructureNodesResponse =
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus200
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
@@ -56012,6 +56424,11 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200 = {
 	 */
 	updatedAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400 = MalformedRequestBody;
 
 export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -56195,6 +56612,7 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions = {
  */
 export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses = {
 	"200": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200;
+	"400": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400;
 	"403": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403;
 	"404": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404;
 	"409": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409;
@@ -56208,6 +56626,7 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses = {
  */
 export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponse =
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200
+	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
@@ -56548,6 +56967,11 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200 = {
 	updated: boolean;
 };
 
+/**
+ * @type object
+ */
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400 = MalformedRequestBody;
+
 export const PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -56813,6 +57237,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions = {
  */
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses = {
 	"200": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200;
+	"400": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400;
 	"403": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403;
 	"404": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404;
 	"422": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422;
@@ -56825,6 +57250,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses = {
  */
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentResponse =
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200
+	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
@@ -57241,6 +57667,11 @@ export type PutApiProgressByUnitIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdStatus400 = MalformedRequestBody;
+
 export const PutApiProgressByUnitIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
@@ -57355,6 +57786,7 @@ export type PutApiProgressByUnitIdOptions = {
  */
 export type PutApiProgressByUnitIdResponses = {
 	"200": PutApiProgressByUnitIdStatus200;
+	"400": PutApiProgressByUnitIdStatus400;
 	"404": PutApiProgressByUnitIdStatus404;
 	"422": PutApiProgressByUnitIdStatus422;
 	"429": PutApiProgressByUnitIdStatus429;
@@ -57366,6 +57798,7 @@ export type PutApiProgressByUnitIdResponses = {
  */
 export type PutApiProgressByUnitIdResponse =
 	| PutApiProgressByUnitIdStatus200
+	| PutApiProgressByUnitIdStatus400
 	| PutApiProgressByUnitIdStatus404
 	| PutApiProgressByUnitIdStatus422
 	| PutApiProgressByUnitIdStatus429
@@ -57664,6 +58097,11 @@ export type PostApiProgressByUnitIdCompleteStatus200 = {
 /**
  * @type object
  */
+export type PostApiProgressByUnitIdCompleteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiProgressByUnitIdCompleteStatus404 = {
 	/**
 	 * @type object
@@ -57745,6 +58183,7 @@ export type PostApiProgressByUnitIdCompleteOptions = {
  */
 export type PostApiProgressByUnitIdCompleteResponses = {
 	"200": PostApiProgressByUnitIdCompleteStatus200;
+	"400": PostApiProgressByUnitIdCompleteStatus400;
 	"404": PostApiProgressByUnitIdCompleteStatus404;
 	"422": PostApiProgressByUnitIdCompleteStatus422;
 	"429": PostApiProgressByUnitIdCompleteStatus429;
@@ -57756,6 +58195,7 @@ export type PostApiProgressByUnitIdCompleteResponses = {
  */
 export type PostApiProgressByUnitIdCompleteResponse =
 	| PostApiProgressByUnitIdCompleteStatus200
+	| PostApiProgressByUnitIdCompleteStatus400
 	| PostApiProgressByUnitIdCompleteStatus404
 	| PostApiProgressByUnitIdCompleteStatus422
 	| PostApiProgressByUnitIdCompleteStatus429
@@ -58770,6 +59210,11 @@ export type PostApiCollectionsStatus200 = {
 	}[];
 };
 
+/**
+ * @type object
+ */
+export type PostApiCollectionsStatus400 = MalformedRequestBody;
+
 export const PostApiCollectionsStatus404ErrorCodeEnum = {
 	CollectionNotFound: "CollectionNotFound",
 	ImageAssetNotFound: "ImageAssetNotFound",
@@ -59566,6 +60011,7 @@ export type PostApiCollectionsOptions = {
  */
 export type PostApiCollectionsResponses = {
 	"200": PostApiCollectionsStatus200;
+	"400": PostApiCollectionsStatus400;
 	"404": PostApiCollectionsStatus404;
 	"422": PostApiCollectionsStatus422;
 	"429": PostApiCollectionsStatus429;
@@ -59577,6 +60023,7 @@ export type PostApiCollectionsResponses = {
  */
 export type PostApiCollectionsResponse =
 	| PostApiCollectionsStatus200
+	| PostApiCollectionsStatus400
 	| PostApiCollectionsStatus404
 	| PostApiCollectionsStatus422
 	| PostApiCollectionsStatus429
@@ -61808,6 +62255,11 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 /**
  * @type object
  */
+export type PatchApiCollectionsByCollectionIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PatchApiCollectionsByCollectionIdStatus403 = {
 	/**
 	 * @type object
@@ -62670,6 +63122,7 @@ export type PatchApiCollectionsByCollectionIdOptions = {
  */
 export type PatchApiCollectionsByCollectionIdResponses = {
 	"200": PatchApiCollectionsByCollectionIdStatus200;
+	"400": PatchApiCollectionsByCollectionIdStatus400;
 	"403": PatchApiCollectionsByCollectionIdStatus403;
 	"404": PatchApiCollectionsByCollectionIdStatus404;
 	"409": PatchApiCollectionsByCollectionIdStatus409;
@@ -62683,6 +63136,7 @@ export type PatchApiCollectionsByCollectionIdResponses = {
  */
 export type PatchApiCollectionsByCollectionIdResponse =
 	| PatchApiCollectionsByCollectionIdStatus200
+	| PatchApiCollectionsByCollectionIdStatus400
 	| PatchApiCollectionsByCollectionIdStatus403
 	| PatchApiCollectionsByCollectionIdStatus404
 	| PatchApiCollectionsByCollectionIdStatus409
@@ -62875,6 +63329,11 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus200 = {
 /**
  * @type object
  */
+export type PostApiCollectionsByCollectionIdItemsBatchStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiCollectionsByCollectionIdItemsBatchStatus403 = {
 	/**
 	 * @type object
@@ -63050,6 +63509,7 @@ export type PostApiCollectionsByCollectionIdItemsBatchOptions = {
  */
 export type PostApiCollectionsByCollectionIdItemsBatchResponses = {
 	"200": PostApiCollectionsByCollectionIdItemsBatchStatus200;
+	"400": PostApiCollectionsByCollectionIdItemsBatchStatus400;
 	"403": PostApiCollectionsByCollectionIdItemsBatchStatus403;
 	"404": PostApiCollectionsByCollectionIdItemsBatchStatus404;
 	"409": PostApiCollectionsByCollectionIdItemsBatchStatus409;
@@ -63063,6 +63523,7 @@ export type PostApiCollectionsByCollectionIdItemsBatchResponses = {
  */
 export type PostApiCollectionsByCollectionIdItemsBatchResponse =
 	| PostApiCollectionsByCollectionIdItemsBatchStatus200
+	| PostApiCollectionsByCollectionIdItemsBatchStatus400
 	| PostApiCollectionsByCollectionIdItemsBatchStatus403
 	| PostApiCollectionsByCollectionIdItemsBatchStatus404
 	| PostApiCollectionsByCollectionIdItemsBatchStatus409
@@ -63097,6 +63558,11 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus200 = {
 	 */
 	saved: boolean;
 };
+
+/**
+ * @type object
+ */
+export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -63250,6 +63716,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdOptions = {
  */
 export type PutApiCollectionsByCollectionIdItemsByTargetIdResponses = {
 	"200": PutApiCollectionsByCollectionIdItemsByTargetIdStatus200;
+	"400": PutApiCollectionsByCollectionIdItemsByTargetIdStatus400;
 	"403": PutApiCollectionsByCollectionIdItemsByTargetIdStatus403;
 	"404": PutApiCollectionsByCollectionIdItemsByTargetIdStatus404;
 	"422": PutApiCollectionsByCollectionIdItemsByTargetIdStatus422;
@@ -63262,6 +63729,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdResponses = {
  */
 export type PutApiCollectionsByCollectionIdItemsByTargetIdResponse =
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus200
+	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
@@ -63909,6 +64377,11 @@ export type PostApiReviewsStatus200 = {
 	id: string;
 };
 
+/**
+ * @type object
+ */
+export type PostApiReviewsStatus400 = MalformedRequestBody;
+
 export const PostApiReviewsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
@@ -64246,6 +64719,7 @@ export type PostApiReviewsOptions = {
  */
 export type PostApiReviewsResponses = {
 	"200": PostApiReviewsStatus200;
+	"400": PostApiReviewsStatus400;
 	"403": PostApiReviewsStatus403;
 	"404": PostApiReviewsStatus404;
 	"409": PostApiReviewsStatus409;
@@ -64259,6 +64733,7 @@ export type PostApiReviewsResponses = {
  */
 export type PostApiReviewsResponse =
 	| PostApiReviewsStatus200
+	| PostApiReviewsStatus400
 	| PostApiReviewsStatus403
 	| PostApiReviewsStatus404
 	| PostApiReviewsStatus409
@@ -64741,6 +65216,11 @@ export type PatchApiReviewsByReviewIdStatus200 = {
 	id: string;
 };
 
+/**
+ * @type object
+ */
+export type PatchApiReviewsByReviewIdStatus400 = MalformedRequestBody;
+
 export const PatchApiReviewsByReviewIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -65010,6 +65490,7 @@ export type PatchApiReviewsByReviewIdOptions = {
  */
 export type PatchApiReviewsByReviewIdResponses = {
 	"200": PatchApiReviewsByReviewIdStatus200;
+	"400": PatchApiReviewsByReviewIdStatus400;
 	"403": PatchApiReviewsByReviewIdStatus403;
 	"404": PatchApiReviewsByReviewIdStatus404;
 	"422": PatchApiReviewsByReviewIdStatus422;
@@ -65022,6 +65503,7 @@ export type PatchApiReviewsByReviewIdResponses = {
  */
 export type PatchApiReviewsByReviewIdResponse =
 	| PatchApiReviewsByReviewIdStatus200
+	| PatchApiReviewsByReviewIdStatus400
 	| PatchApiReviewsByReviewIdStatus403
 	| PatchApiReviewsByReviewIdStatus404
 	| PatchApiReviewsByReviewIdStatus422
@@ -65196,6 +65678,11 @@ export type PutApiScoresByTargetIdStatus200 = {
 /**
  * @type object
  */
+export type PutApiScoresByTargetIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiScoresByTargetIdStatus403 = {
 	/**
 	 * @type object
@@ -65339,6 +65826,7 @@ export type PutApiScoresByTargetIdOptions = {
  */
 export type PutApiScoresByTargetIdResponses = {
 	"200": PutApiScoresByTargetIdStatus200;
+	"400": PutApiScoresByTargetIdStatus400;
 	"403": PutApiScoresByTargetIdStatus403;
 	"404": PutApiScoresByTargetIdStatus404;
 	"409": PutApiScoresByTargetIdStatus409;
@@ -65352,6 +65840,7 @@ export type PutApiScoresByTargetIdResponses = {
  */
 export type PutApiScoresByTargetIdResponse =
 	| PutApiScoresByTargetIdStatus200
+	| PutApiScoresByTargetIdStatus400
 	| PutApiScoresByTargetIdStatus403
 	| PutApiScoresByTargetIdStatus404
 	| PutApiScoresByTargetIdStatus409
@@ -65539,6 +66028,11 @@ export type PutApiScoreContextStatus200 = {
 /**
  * @type object
  */
+export type PutApiScoreContextStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiScoreContextStatus403 = {
 	/**
 	 * @type object
@@ -65629,6 +66123,7 @@ export type PutApiScoreContextOptions = {
  */
 export type PutApiScoreContextResponses = {
 	"200": PutApiScoreContextStatus200;
+	"400": PutApiScoreContextStatus400;
 	"403": PutApiScoreContextStatus403;
 	"404": PutApiScoreContextStatus404;
 	"422": PutApiScoreContextStatus422;
@@ -65640,6 +66135,7 @@ export type PutApiScoreContextResponses = {
  */
 export type PutApiScoreContextResponse =
 	| PutApiScoreContextStatus200
+	| PutApiScoreContextStatus400
 	| PutApiScoreContextStatus403
 	| PutApiScoreContextStatus404
 	| PutApiScoreContextStatus422
@@ -65839,6 +66335,11 @@ export type PutApiReactionsUnitsByUnitIdStatus200 = {
 /**
  * @type object
  */
+export type PutApiReactionsUnitsByUnitIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiReactionsUnitsByUnitIdStatus404 = {
 	/**
 	 * @type object
@@ -65937,6 +66438,7 @@ export type PutApiReactionsUnitsByUnitIdOptions = {
  */
 export type PutApiReactionsUnitsByUnitIdResponses = {
 	"200": PutApiReactionsUnitsByUnitIdStatus200;
+	"400": PutApiReactionsUnitsByUnitIdStatus400;
 	"404": PutApiReactionsUnitsByUnitIdStatus404;
 	"422": PutApiReactionsUnitsByUnitIdStatus422;
 	"429": PutApiReactionsUnitsByUnitIdStatus429;
@@ -65948,6 +66450,7 @@ export type PutApiReactionsUnitsByUnitIdResponses = {
  */
 export type PutApiReactionsUnitsByUnitIdResponse =
 	| PutApiReactionsUnitsByUnitIdStatus200
+	| PutApiReactionsUnitsByUnitIdStatus400
 	| PutApiReactionsUnitsByUnitIdStatus404
 	| PutApiReactionsUnitsByUnitIdStatus422
 	| PutApiReactionsUnitsByUnitIdStatus429
@@ -65971,6 +66474,11 @@ export type DeleteApiReactionsUnitsByUnitIdPath = {
 export type DeleteApiReactionsUnitsByUnitIdStatus200 = {
 	reaction: (string | null) | null;
 };
+
+/**
+ * @type object
+ */
+export type DeleteApiReactionsUnitsByUnitIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -66045,6 +66553,7 @@ export type DeleteApiReactionsUnitsByUnitIdOptions = {
  */
 export type DeleteApiReactionsUnitsByUnitIdResponses = {
 	"200": DeleteApiReactionsUnitsByUnitIdStatus200;
+	"400": DeleteApiReactionsUnitsByUnitIdStatus400;
 	"422": DeleteApiReactionsUnitsByUnitIdStatus422;
 	"429": DeleteApiReactionsUnitsByUnitIdStatus429;
 	"500": DeleteApiReactionsUnitsByUnitIdStatus500;
@@ -66055,6 +66564,7 @@ export type DeleteApiReactionsUnitsByUnitIdResponses = {
  */
 export type DeleteApiReactionsUnitsByUnitIdResponse =
 	| DeleteApiReactionsUnitsByUnitIdStatus200
+	| DeleteApiReactionsUnitsByUnitIdStatus400
 	| DeleteApiReactionsUnitsByUnitIdStatus422
 	| DeleteApiReactionsUnitsByUnitIdStatus429
 	| DeleteApiReactionsUnitsByUnitIdStatus500;
@@ -66271,33 +66781,32 @@ export type PostApiPollsStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiPollsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PollOptionsDuplicated'
-		 * @type string
-		 */
-		code: "PollOptionsDuplicated";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiPollsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'PollOptionsDuplicated'
+				 * @type string
+				 */
+				code: "PollOptionsDuplicated";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -66699,33 +67208,32 @@ export const PutApiPollsByPollIdVoteStatus400ErrorCodeEnum = {
 export type PutApiPollsByPollIdVoteStatus400ErrorCodeEnum =
 	(typeof PutApiPollsByPollIdVoteStatus400ErrorCodeEnum)[keyof typeof PutApiPollsByPollIdVoteStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PutApiPollsByPollIdVoteStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PollSingleChoiceInvalid'
-		 * @type string
-		 */
-		code: PutApiPollsByPollIdVoteStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiPollsByPollIdVoteStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'PollSingleChoiceInvalid'
+				 * @type string
+				 */
+				code: PutApiPollsByPollIdVoteStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiPollsByPollIdVoteStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -67443,6 +67951,11 @@ export type PutApiPostsByPostIdScoresStatus200 = {
 	}[];
 };
 
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresStatus400 = MalformedRequestBody;
+
 export const PutApiPostsByPostIdScoresStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -67599,6 +68112,7 @@ export type PutApiPostsByPostIdScoresOptions = {
  */
 export type PutApiPostsByPostIdScoresResponses = {
 	"200": PutApiPostsByPostIdScoresStatus200;
+	"400": PutApiPostsByPostIdScoresStatus400;
 	"403": PutApiPostsByPostIdScoresStatus403;
 	"404": PutApiPostsByPostIdScoresStatus404;
 	"422": PutApiPostsByPostIdScoresStatus422;
@@ -67611,6 +68125,7 @@ export type PutApiPostsByPostIdScoresResponses = {
  */
 export type PutApiPostsByPostIdScoresResponse =
 	| PutApiPostsByPostIdScoresStatus200
+	| PutApiPostsByPostIdScoresStatus400
 	| PutApiPostsByPostIdScoresStatus403
 	| PutApiPostsByPostIdScoresStatus404
 	| PutApiPostsByPostIdScoresStatus422
@@ -68044,6 +68559,11 @@ export type PostApiPostsStatus200 = {
 	id: string;
 };
 
+/**
+ * @type object
+ */
+export type PostApiPostsStatus400 = MalformedRequestBody;
+
 export const PostApiPostsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
@@ -68364,6 +68884,7 @@ export type PostApiPostsOptions = {
  */
 export type PostApiPostsResponses = {
 	"200": PostApiPostsStatus200;
+	"400": PostApiPostsStatus400;
 	"403": PostApiPostsStatus403;
 	"404": PostApiPostsStatus404;
 	"409": PostApiPostsStatus409;
@@ -68377,6 +68898,7 @@ export type PostApiPostsResponses = {
  */
 export type PostApiPostsResponse =
 	| PostApiPostsStatus200
+	| PostApiPostsStatus400
 	| PostApiPostsStatus403
 	| PostApiPostsStatus404
 	| PostApiPostsStatus409
@@ -68873,6 +69395,11 @@ export type PatchApiPostsByPostIdStatus200 = {
 	id: string;
 };
 
+/**
+ * @type object
+ */
+export type PatchApiPostsByPostIdStatus400 = MalformedRequestBody;
+
 export const PatchApiPostsByPostIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -69177,6 +69704,7 @@ export type PatchApiPostsByPostIdOptions = {
  */
 export type PatchApiPostsByPostIdResponses = {
 	"200": PatchApiPostsByPostIdStatus200;
+	"400": PatchApiPostsByPostIdStatus400;
 	"403": PatchApiPostsByPostIdStatus403;
 	"404": PatchApiPostsByPostIdStatus404;
 	"409": PatchApiPostsByPostIdStatus409;
@@ -69190,6 +69718,7 @@ export type PatchApiPostsByPostIdResponses = {
  */
 export type PatchApiPostsByPostIdResponse =
 	| PatchApiPostsByPostIdStatus200
+	| PatchApiPostsByPostIdStatus400
 	| PatchApiPostsByPostIdStatus403
 	| PatchApiPostsByPostIdStatus404
 	| PatchApiPostsByPostIdStatus409
@@ -69889,6 +70418,11 @@ export type PostApiPostsByPostIdRepliesStatus200 = {
 	id: string;
 };
 
+/**
+ * @type object
+ */
+export type PostApiPostsByPostIdRepliesStatus400 = MalformedRequestBody;
+
 export const PostApiPostsByPostIdRepliesStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	ReplyDepthExceeded: "ReplyDepthExceeded",
@@ -70204,6 +70738,7 @@ export type PostApiPostsByPostIdRepliesOptions = {
  */
 export type PostApiPostsByPostIdRepliesResponses = {
 	"200": PostApiPostsByPostIdRepliesStatus200;
+	"400": PostApiPostsByPostIdRepliesStatus400;
 	"403": PostApiPostsByPostIdRepliesStatus403;
 	"404": PostApiPostsByPostIdRepliesStatus404;
 	"409": PostApiPostsByPostIdRepliesStatus409;
@@ -70217,6 +70752,7 @@ export type PostApiPostsByPostIdRepliesResponses = {
  */
 export type PostApiPostsByPostIdRepliesResponse =
 	| PostApiPostsByPostIdRepliesStatus200
+	| PostApiPostsByPostIdRepliesStatus400
 	| PostApiPostsByPostIdRepliesStatus403
 	| PostApiPostsByPostIdRepliesStatus404
 	| PostApiPostsByPostIdRepliesStatus409
@@ -70253,6 +70789,11 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus200 = {
 	 */
 	id: string;
 };
+
+/**
+ * @type object
+ */
+export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus400 = MalformedRequestBody;
 
 export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -70551,6 +71092,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdOptions = {
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdResponses = {
 	"200": PatchApiPostsByPostIdRepliesByReplyPostIdStatus200;
+	"400": PatchApiPostsByPostIdRepliesByReplyPostIdStatus400;
 	"403": PatchApiPostsByPostIdRepliesByReplyPostIdStatus403;
 	"404": PatchApiPostsByPostIdRepliesByReplyPostIdStatus404;
 	"409": PatchApiPostsByPostIdRepliesByReplyPostIdStatus409;
@@ -70564,6 +71106,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdResponses = {
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdResponse =
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus200
+	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus400
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus403
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
@@ -70952,6 +71495,11 @@ export type PostApiRealmsStatus200 = {
 /**
  * @type object
  */
+export type PostApiRealmsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PostApiRealmsStatus404 = {
 	/**
 	 * @type object
@@ -71284,6 +71832,7 @@ export type PostApiRealmsOptions = {
  */
 export type PostApiRealmsResponses = {
 	"200": PostApiRealmsStatus200;
+	"400": PostApiRealmsStatus400;
 	"404": PostApiRealmsStatus404;
 	"422": PostApiRealmsStatus422;
 	"429": PostApiRealmsStatus429;
@@ -71295,6 +71844,7 @@ export type PostApiRealmsResponses = {
  */
 export type PostApiRealmsResponse =
 	| PostApiRealmsStatus200
+	| PostApiRealmsStatus400
 	| PostApiRealmsStatus404
 	| PostApiRealmsStatus422
 	| PostApiRealmsStatus429
@@ -71343,33 +71893,32 @@ export type ReplaceRealmSlugAddressStatus200 = {
 	canonicalPath: string[];
 };
 
-/**
- * @type object
- */
-export type ReplaceRealmSlugAddressStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InvalidSlug'
-		 * @type string
-		 */
-		code: "InvalidSlug";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type ReplaceRealmSlugAddressStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSlug'
+				 * @type string
+				 */
+				code: "InvalidSlug";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const ReplaceRealmSlugAddressStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -72038,6 +72587,11 @@ export type PatchApiRealmsByRealmIdStatus200 = {
 	id: string;
 };
 
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdStatus400 = MalformedRequestBody;
+
 export const PatchApiRealmsByRealmIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	UnitProtected: "UnitProtected",
@@ -72430,6 +72984,7 @@ export type PatchApiRealmsByRealmIdOptions = {
  */
 export type PatchApiRealmsByRealmIdResponses = {
 	"200": PatchApiRealmsByRealmIdStatus200;
+	"400": PatchApiRealmsByRealmIdStatus400;
 	"403": PatchApiRealmsByRealmIdStatus403;
 	"404": PatchApiRealmsByRealmIdStatus404;
 	"422": PatchApiRealmsByRealmIdStatus422;
@@ -72442,6 +72997,7 @@ export type PatchApiRealmsByRealmIdResponses = {
  */
 export type PatchApiRealmsByRealmIdResponse =
 	| PatchApiRealmsByRealmIdStatus200
+	| PatchApiRealmsByRealmIdStatus400
 	| PatchApiRealmsByRealmIdStatus403
 	| PatchApiRealmsByRealmIdStatus404
 	| PatchApiRealmsByRealmIdStatus422
@@ -72560,6 +73116,11 @@ export type PutApiRealmsByRealmIdScoreContextPath = {
 export type PutApiRealmsByRealmIdScoreContextStatus200 = {
 	contextPostId: (string | null) | null;
 };
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextStatus400 = MalformedRequestBody;
 
 export const PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -72684,6 +73245,7 @@ export type PutApiRealmsByRealmIdScoreContextOptions = {
  */
 export type PutApiRealmsByRealmIdScoreContextResponses = {
 	"200": PutApiRealmsByRealmIdScoreContextStatus200;
+	"400": PutApiRealmsByRealmIdScoreContextStatus400;
 	"403": PutApiRealmsByRealmIdScoreContextStatus403;
 	"404": PutApiRealmsByRealmIdScoreContextStatus404;
 	"422": PutApiRealmsByRealmIdScoreContextStatus422;
@@ -72695,6 +73257,7 @@ export type PutApiRealmsByRealmIdScoreContextResponses = {
  */
 export type PutApiRealmsByRealmIdScoreContextResponse =
 	| PutApiRealmsByRealmIdScoreContextStatus200
+	| PutApiRealmsByRealmIdScoreContextStatus400
 	| PutApiRealmsByRealmIdScoreContextStatus403
 	| PutApiRealmsByRealmIdScoreContextStatus404
 	| PutApiRealmsByRealmIdScoreContextStatus422
@@ -72813,6 +73376,11 @@ export type PutApiRealmsByRealmIdMembershipStatus200 = {
 	 */
 	state: string;
 };
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdMembershipStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -72971,6 +73539,7 @@ export type PutApiRealmsByRealmIdMembershipOptions = {
  */
 export type PutApiRealmsByRealmIdMembershipResponses = {
 	"200": PutApiRealmsByRealmIdMembershipStatus200;
+	"400": PutApiRealmsByRealmIdMembershipStatus400;
 	"403": PutApiRealmsByRealmIdMembershipStatus403;
 	"404": PutApiRealmsByRealmIdMembershipStatus404;
 	"409": PutApiRealmsByRealmIdMembershipStatus409;
@@ -72984,6 +73553,7 @@ export type PutApiRealmsByRealmIdMembershipResponses = {
  */
 export type PutApiRealmsByRealmIdMembershipResponse =
 	| PutApiRealmsByRealmIdMembershipStatus200
+	| PutApiRealmsByRealmIdMembershipStatus400
 	| PutApiRealmsByRealmIdMembershipStatus403
 	| PutApiRealmsByRealmIdMembershipStatus404
 	| PutApiRealmsByRealmIdMembershipStatus409
@@ -73379,6 +73949,11 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdMembersByProfileIdStatus400 = MalformedRequestBody;
+
 export const PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	UnitProtected: "UnitProtected",
@@ -73528,6 +74103,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdOptions = {
  */
 export type PatchApiRealmsByRealmIdMembersByProfileIdResponses = {
 	"200": PatchApiRealmsByRealmIdMembersByProfileIdStatus200;
+	"400": PatchApiRealmsByRealmIdMembersByProfileIdStatus400;
 	"403": PatchApiRealmsByRealmIdMembersByProfileIdStatus403;
 	"404": PatchApiRealmsByRealmIdMembersByProfileIdStatus404;
 	"422": PatchApiRealmsByRealmIdMembersByProfileIdStatus422;
@@ -73540,6 +74116,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdResponses = {
  */
 export type PatchApiRealmsByRealmIdMembersByProfileIdResponse =
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus200
+	| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
@@ -73819,33 +74396,32 @@ export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200 = {
 	}[];
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'CapabilityGrantExpiryInvalid'
-		 * @type string
-		 */
-		code: "CapabilityGrantExpiryInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'CapabilityGrantExpiryInvalid'
+				 * @type string
+				 */
+				code: "CapabilityGrantExpiryInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -74003,6 +74579,11 @@ export type PutApiRealmsByRealmIdRulesStatus200 = {
 	id: string;
 	version: string | number;
 };
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesStatus400 = MalformedRequestBody;
 
 export const PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -74257,6 +74838,7 @@ export type PutApiRealmsByRealmIdRulesOptions = {
  */
 export type PutApiRealmsByRealmIdRulesResponses = {
 	"200": PutApiRealmsByRealmIdRulesStatus200;
+	"400": PutApiRealmsByRealmIdRulesStatus400;
 	"403": PutApiRealmsByRealmIdRulesStatus403;
 	"422": PutApiRealmsByRealmIdRulesStatus422;
 	"429": PutApiRealmsByRealmIdRulesStatus429;
@@ -74268,6 +74850,7 @@ export type PutApiRealmsByRealmIdRulesResponses = {
  */
 export type PutApiRealmsByRealmIdRulesResponse =
 	| PutApiRealmsByRealmIdRulesStatus200
+	| PutApiRealmsByRealmIdRulesStatus400
 	| PutApiRealmsByRealmIdRulesStatus403
 	| PutApiRealmsByRealmIdRulesStatus422
 	| PutApiRealmsByRealmIdRulesStatus429
@@ -74713,6 +75296,11 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdPinsByUnitIdStatus400 = MalformedRequestBody;
+
 export const PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	UnitProtected: "UnitProtected",
@@ -74852,6 +75440,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdOptions = {
  */
 export type PutApiRealmsByRealmIdPinsByUnitIdResponses = {
 	"200": PutApiRealmsByRealmIdPinsByUnitIdStatus200;
+	"400": PutApiRealmsByRealmIdPinsByUnitIdStatus400;
 	"403": PutApiRealmsByRealmIdPinsByUnitIdStatus403;
 	"404": PutApiRealmsByRealmIdPinsByUnitIdStatus404;
 	"422": PutApiRealmsByRealmIdPinsByUnitIdStatus422;
@@ -74864,6 +75453,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdResponses = {
  */
 export type PutApiRealmsByRealmIdPinsByUnitIdResponse =
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus200
+	| PutApiRealmsByRealmIdPinsByUnitIdStatus400
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus422
@@ -75229,6 +75819,11 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400 = MalformedRequestBody;
+
 export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	UnitAccessRestricted: "UnitAccessRestricted",
@@ -75385,6 +75980,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions = {
  */
 export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses = {
 	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200;
+	"400": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400;
 	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403;
 	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404;
 	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422;
@@ -75397,6 +75993,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses = {
  */
 export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponse =
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
@@ -75472,6 +76069,11 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200 = {
 	 */
 	updatedAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400 = MalformedRequestBody;
 
 export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -75613,6 +76215,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions = {
  */
 export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses = {
 	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200;
+	"400": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400;
 	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403;
 	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404;
 	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422;
@@ -75625,6 +76228,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses = {
  */
 export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponse =
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
 	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
@@ -76511,33 +77115,32 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 	createdAt: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ModerationActionIncompatible'
-		 * @type string
-		 */
-		code: "ModerationActionIncompatible";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ModerationActionIncompatible'
+				 * @type string
+				 */
+				code: "ModerationActionIncompatible";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -77215,33 +77818,32 @@ export type PostApiRealmsByRealmIdNavigationStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiRealmsByRealmIdNavigationStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmNavigationDocumentInvalid'
-		 * @type string
-		 */
-		code: "RealmNavigationDocumentInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiRealmsByRealmIdNavigationStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RealmNavigationDocumentInvalid'
+				 * @type string
+				 */
+				code: "RealmNavigationDocumentInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiRealmsByRealmIdNavigationStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -77577,33 +78179,32 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmNavigationDocumentInvalid'
-		 * @type string
-		 */
-		code: "RealmNavigationDocumentInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RealmNavigationDocumentInvalid'
+				 * @type string
+				 */
+				code: "RealmNavigationDocumentInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -77815,6 +78416,11 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdPath = {
  */
 export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204 = void;
 
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400 = MalformedRequestBody;
+
 export const DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -77984,6 +78590,7 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions = {
  */
 export type DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses = {
 	"204": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204;
+	"400": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400;
 	"403": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403;
 	"404": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404;
 	"409": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409;
@@ -77997,6 +78604,7 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses = {
  */
 export type DeleteApiRealmsByRealmIdNavigationByNavigationIdResponse =
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204
+	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
@@ -79620,6 +80228,11 @@ export type PostApiSearchFeaturesByTemplateExecuteStatus200 = {
 	}[];
 };
 
+/**
+ * @type object
+ */
+export type PostApiSearchFeaturesByTemplateExecuteStatus400 = MalformedRequestBody;
+
 export type PostApiSearchFeaturesByTemplateExecuteStatus422 =
 	| {
 			/**
@@ -80961,6 +81574,7 @@ export type PostApiSearchFeaturesByTemplateExecuteOptions = {
  */
 export type PostApiSearchFeaturesByTemplateExecuteResponses = {
 	"200": PostApiSearchFeaturesByTemplateExecuteStatus200;
+	"400": PostApiSearchFeaturesByTemplateExecuteStatus400;
 	"422": PostApiSearchFeaturesByTemplateExecuteStatus422;
 	"500": PostApiSearchFeaturesByTemplateExecuteStatus500;
 	"503": PostApiSearchFeaturesByTemplateExecuteStatus503;
@@ -80971,6 +81585,7 @@ export type PostApiSearchFeaturesByTemplateExecuteResponses = {
  */
 export type PostApiSearchFeaturesByTemplateExecuteResponse =
 	| PostApiSearchFeaturesByTemplateExecuteStatus200
+	| PostApiSearchFeaturesByTemplateExecuteStatus400
 	| PostApiSearchFeaturesByTemplateExecuteStatus422
 	| PostApiSearchFeaturesByTemplateExecuteStatus500
 	| PostApiSearchFeaturesByTemplateExecuteStatus503;
@@ -83710,6 +84325,11 @@ export type PutApiSearchZonesByZoneIdFeatureStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PutApiSearchZonesByZoneIdFeatureStatus400 = MalformedRequestBody;
+
 export const PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -84936,6 +85556,7 @@ export type PutApiSearchZonesByZoneIdFeatureOptions = {
  */
 export type PutApiSearchZonesByZoneIdFeatureResponses = {
 	"200": PutApiSearchZonesByZoneIdFeatureStatus200;
+	"400": PutApiSearchZonesByZoneIdFeatureStatus400;
 	"403": PutApiSearchZonesByZoneIdFeatureStatus403;
 	"404": PutApiSearchZonesByZoneIdFeatureStatus404;
 	"409": PutApiSearchZonesByZoneIdFeatureStatus409;
@@ -84948,6 +85569,7 @@ export type PutApiSearchZonesByZoneIdFeatureResponses = {
  */
 export type PutApiSearchZonesByZoneIdFeatureResponse =
 	| PutApiSearchZonesByZoneIdFeatureStatus200
+	| PutApiSearchZonesByZoneIdFeatureStatus400
 	| PutApiSearchZonesByZoneIdFeatureStatus403
 	| PutApiSearchZonesByZoneIdFeatureStatus404
 	| PutApiSearchZonesByZoneIdFeatureStatus409
@@ -85244,6 +85866,11 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
 		processingTimeMs: number;
 	}[];
 };
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureExecuteStatus400 = MalformedRequestBody;
 
 export const PostApiSearchZonesByZoneIdFeatureExecuteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -86579,6 +87206,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteOptions = {
  */
 export type PostApiSearchZonesByZoneIdFeatureExecuteResponses = {
 	"200": PostApiSearchZonesByZoneIdFeatureExecuteStatus200;
+	"400": PostApiSearchZonesByZoneIdFeatureExecuteStatus400;
 	"404": PostApiSearchZonesByZoneIdFeatureExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdFeatureExecuteStatus422;
 	"500": PostApiSearchZonesByZoneIdFeatureExecuteStatus500;
@@ -86590,6 +87218,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteResponses = {
  */
 export type PostApiSearchZonesByZoneIdFeatureExecuteResponse =
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus200
+	| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -88078,6 +88707,11 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureRestoreStatus400 = MalformedRequestBody;
+
 export const PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -88248,6 +88882,7 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreOptions = {
  */
 export type PostApiSearchZonesByZoneIdFeatureRestoreResponses = {
 	"200": PostApiSearchZonesByZoneIdFeatureRestoreStatus200;
+	"400": PostApiSearchZonesByZoneIdFeatureRestoreStatus400;
 	"403": PostApiSearchZonesByZoneIdFeatureRestoreStatus403;
 	"404": PostApiSearchZonesByZoneIdFeatureRestoreStatus404;
 	"409": PostApiSearchZonesByZoneIdFeatureRestoreStatus409;
@@ -88260,6 +88895,7 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreResponses = {
  */
 export type PostApiSearchZonesByZoneIdFeatureRestoreResponse =
 	| PostApiSearchZonesByZoneIdFeatureRestoreStatus200
+	| PostApiSearchZonesByZoneIdFeatureRestoreStatus400
 	| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
 	| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
 	| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
@@ -88566,6 +89202,11 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 		processingTimeMs: number;
 	}[];
 };
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400 = MalformedRequestBody;
 
 export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -89902,6 +90543,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions = {
  */
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses = {
 	"200": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200;
+	"400": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400;
 	"404": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422;
 	"500": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500;
@@ -89913,6 +90555,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses = {
  */
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -90225,6 +90868,12 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 		processingTimeMs: number;
 	}[];
 };
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400 =
+	MalformedRequestBody;
 
 export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -91562,6 +92211,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions 
  */
 export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses = {
 	"200": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200;
+	"400": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400;
 	"404": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422;
 	"500": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500;
@@ -91573,6 +92223,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponse
  */
 export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200
+	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
@@ -91857,6 +92508,11 @@ export type PostApiSearchStatus200 = {
 	}[];
 };
 
+/**
+ * @type object
+ */
+export type PostApiSearchStatus400 = MalformedRequestBody;
+
 export type PostApiSearchStatus422 =
 	| {
 			/**
@@ -91980,6 +92636,7 @@ export type PostApiSearchOptions = {
  */
 export type PostApiSearchResponses = {
 	"200": PostApiSearchStatus200;
+	"400": PostApiSearchStatus400;
 	"422": PostApiSearchStatus422;
 	"500": PostApiSearchStatus500;
 	"503": PostApiSearchStatus503;
@@ -91990,6 +92647,7 @@ export type PostApiSearchResponses = {
  */
 export type PostApiSearchResponse =
 	| PostApiSearchStatus200
+	| PostApiSearchStatus400
 	| PostApiSearchStatus422
 	| PostApiSearchStatus500
 	| PostApiSearchStatus503;
@@ -92921,6 +93579,11 @@ export type PostApiSearchSharedQueriesStatus201 = {
 	 */
 	createdAt: string;
 };
+
+/**
+ * @type object
+ */
+export type PostApiSearchSharedQueriesStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -93932,6 +94595,7 @@ export type PostApiSearchSharedQueriesOptions = {
  */
 export type PostApiSearchSharedQueriesResponses = {
 	"201": PostApiSearchSharedQueriesStatus201;
+	"400": PostApiSearchSharedQueriesStatus400;
 	"401": PostApiSearchSharedQueriesStatus401;
 	"422": PostApiSearchSharedQueriesStatus422;
 	"429": PostApiSearchSharedQueriesStatus429;
@@ -93943,6 +94607,7 @@ export type PostApiSearchSharedQueriesResponses = {
  */
 export type PostApiSearchSharedQueriesResponse =
 	| PostApiSearchSharedQueriesStatus201
+	| PostApiSearchSharedQueriesStatus400
 	| PostApiSearchSharedQueriesStatus401
 	| PostApiSearchSharedQueriesStatus422
 	| PostApiSearchSharedQueriesStatus429
@@ -95228,6 +95893,11 @@ export type PostApiSearchByIndexStatus200 = {
 	processingTimeMs: number;
 };
 
+/**
+ * @type object
+ */
+export type PostApiSearchByIndexStatus400 = MalformedRequestBody;
+
 export type PostApiSearchByIndexStatus422 =
 	| {
 			/**
@@ -95443,6 +96113,7 @@ export type PostApiSearchByIndexOptions = {
  */
 export type PostApiSearchByIndexResponses = {
 	"200": PostApiSearchByIndexStatus200;
+	"400": PostApiSearchByIndexStatus400;
 	"422": PostApiSearchByIndexStatus422;
 	"500": PostApiSearchByIndexStatus500;
 	"503": PostApiSearchByIndexStatus503;
@@ -95453,6 +96124,7 @@ export type PostApiSearchByIndexResponses = {
  */
 export type PostApiSearchByIndexResponse =
 	| PostApiSearchByIndexStatus200
+	| PostApiSearchByIndexStatus400
 	| PostApiSearchByIndexStatus422
 	| PostApiSearchByIndexStatus500
 	| PostApiSearchByIndexStatus503;
@@ -95492,6 +96164,11 @@ export type PostApiImageAssetsStatus200 = {
 		};
 	};
 };
+
+/**
+ * @type object
+ */
+export type PostApiImageAssetsStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -95623,6 +96300,7 @@ export type PostApiImageAssetsOptions = {
  */
 export type PostApiImageAssetsResponses = {
 	"200": PostApiImageAssetsStatus200;
+	"400": PostApiImageAssetsStatus400;
 	"401": PostApiImageAssetsStatus401;
 	"415": PostApiImageAssetsStatus415;
 	"422": PostApiImageAssetsStatus422;
@@ -95635,6 +96313,7 @@ export type PostApiImageAssetsResponses = {
  */
 export type PostApiImageAssetsResponse =
 	| PostApiImageAssetsStatus200
+	| PostApiImageAssetsStatus400
 	| PostApiImageAssetsStatus401
 	| PostApiImageAssetsStatus415
 	| PostApiImageAssetsStatus422

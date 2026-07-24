@@ -55,6 +55,36 @@ describe("API root", () => {
 		});
 	});
 
+	it.each([
+		["POST", "/api/polls/00000000-0000-7000-8000-000000000001/close"],
+		["PUT", "/api/users/me/following/00000000-0000-7000-8000-000000000001"],
+		["DELETE", "/api/users/me/following/00000000-0000-7000-8000-000000000001"],
+	] as const)("does not parse a bodyless %s request as JSON", async (method, path) => {
+		const response = await api.handle(new Request(`http://localhost${path}`, { method }));
+
+		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+		expect((await readErrorBody(response)).error).toEqual({
+			code: "AuthenticationRequired",
+			message: "Authentication required",
+		});
+	});
+
+	it("maps malformed request bodies to the public client-error contract", async () => {
+		const response = await api.handle(
+			new Request("http://localhost/api/users/me/preferences", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: "{",
+			}),
+		);
+
+		expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+		expect((await readErrorBody(response)).error).toEqual({
+			code: "MalformedRequestBody",
+			message: "Request body is malformed",
+		});
+	});
+
 	it("preserves unmatched routes as not found", async () => {
 		const response = await api.handle(new Request("http://localhost/__test/unknown"));
 
@@ -84,5 +114,17 @@ describe("API root", () => {
 		]);
 		expect(document.paths["/api/api-tokens"]?.get?.security).toEqual([{ SessionCookie: [] }]);
 		expect(document.paths["/api/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
+	});
+
+	it("documents JSON only for routes that declare a request body", () => {
+		const document = toOpenAPISchema(api);
+
+		expect(
+			document.paths["/api/users/me/following/{unitId}"]?.put?.requestBody,
+		).toBeUndefined();
+		const preferencesBody = document.paths["/api/users/me/preferences"]?.put?.requestBody;
+		if (!preferencesBody || "$ref" in preferencesBody)
+			throw new Error("Expected an inline preferences request body");
+		expect(Object.keys(preferencesBody.content)).toEqual(["application/json"]);
 	});
 });

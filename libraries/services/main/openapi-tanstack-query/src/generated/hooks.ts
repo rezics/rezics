@@ -70,6 +70,7 @@ import type {
 	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409,
@@ -77,6 +78,7 @@ import type {
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409,
@@ -120,6 +122,7 @@ import type {
 	GetApiNotificationsPreferencesStatus500,
 	PutApiNotificationsPreferencesOptions,
 	PutApiNotificationsPreferencesStatus200,
+	PutApiNotificationsPreferencesStatus400,
 	PutApiNotificationsPreferencesStatus422,
 	PutApiNotificationsPreferencesStatus429,
 	PutApiNotificationsPreferencesStatus500,
@@ -137,11 +140,13 @@ import type {
 	GetApiRecommendationsPostsByPostIdStatus500,
 	PostApiRecommendationsEventsOptions,
 	PostApiRecommendationsEventsStatus200,
+	PostApiRecommendationsEventsStatus400,
 	PostApiRecommendationsEventsStatus404,
 	PostApiRecommendationsEventsStatus422,
 	PostApiRecommendationsEventsStatus500,
 	PutApiRecommendationsExclusionsByUnitIdOptions,
 	PutApiRecommendationsExclusionsByUnitIdStatus200,
+	PutApiRecommendationsExclusionsByUnitIdStatus400,
 	PutApiRecommendationsExclusionsByUnitIdStatus401,
 	PutApiRecommendationsExclusionsByUnitIdStatus403,
 	PutApiRecommendationsExclusionsByUnitIdStatus404,
@@ -156,6 +161,7 @@ import type {
 	GetApiMessagesConversationsStatus500,
 	PostApiMessagesConversationsOptions,
 	PostApiMessagesConversationsStatus200,
+	PostApiMessagesConversationsStatus400,
 	PostApiMessagesConversationsStatus403,
 	PostApiMessagesConversationsStatus404,
 	PostApiMessagesConversationsStatus409,
@@ -177,6 +183,7 @@ import type {
 	GetApiMessagesConversationsByConversationIdMessagesStatus500,
 	PostApiMessagesConversationsByConversationIdMessagesOptions,
 	PostApiMessagesConversationsByConversationIdMessagesStatus200,
+	PostApiMessagesConversationsByConversationIdMessagesStatus400,
 	PostApiMessagesConversationsByConversationIdMessagesStatus403,
 	PostApiMessagesConversationsByConversationIdMessagesStatus404,
 	PostApiMessagesConversationsByConversationIdMessagesStatus422,
@@ -184,6 +191,7 @@ import type {
 	PostApiMessagesConversationsByConversationIdMessagesStatus500,
 	PutApiMessagesConversationsByConversationIdReadOptions,
 	PutApiMessagesConversationsByConversationIdReadStatus200,
+	PutApiMessagesConversationsByConversationIdReadStatus400,
 	PutApiMessagesConversationsByConversationIdReadStatus404,
 	PutApiMessagesConversationsByConversationIdReadStatus422,
 	PutApiMessagesConversationsByConversationIdReadStatus429,
@@ -194,12 +202,14 @@ import type {
 	GetApiApiTokensStatus500,
 	PostApiApiTokensOptions,
 	PostApiApiTokensStatus200,
+	PostApiApiTokensStatus400,
 	PostApiApiTokensStatus401,
 	PostApiApiTokensStatus403,
 	PostApiApiTokensStatus422,
 	PostApiApiTokensStatus500,
 	PatchApiApiTokensByTokenIdOptions,
 	PatchApiApiTokensByTokenIdStatus200,
+	PatchApiApiTokensByTokenIdStatus400,
 	PatchApiApiTokensByTokenIdStatus401,
 	PatchApiApiTokensByTokenIdStatus403,
 	PatchApiApiTokensByTokenIdStatus404,
@@ -207,6 +217,7 @@ import type {
 	PatchApiApiTokensByTokenIdStatus500,
 	PutApiApiTokensByTokenIdPolicyOptions,
 	PutApiApiTokensByTokenIdPolicyStatus200,
+	PutApiApiTokensByTokenIdPolicyStatus400,
 	PutApiApiTokensByTokenIdPolicyStatus401,
 	PutApiApiTokensByTokenIdPolicyStatus403,
 	PutApiApiTokensByTokenIdPolicyStatus404,
@@ -223,6 +234,7 @@ import type {
 	GetApiApiTokenPoliciesStatus500,
 	PatchApiApiTokenPoliciesByPolicyKeyOptions,
 	PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus400,
 	PatchApiApiTokenPoliciesByPolicyKeyStatus401,
 	PatchApiApiTokenPoliciesByPolicyKeyStatus403,
 	PatchApiApiTokenPoliciesByPolicyKeyStatus404,
@@ -231,6 +243,7 @@ import type {
 	PatchApiApiTokenPoliciesByPolicyKeyStatus500,
 	PutApiApiTokenPoliciesBindingsByTokenIdOptions,
 	PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+	PutApiApiTokenPoliciesBindingsByTokenIdStatus400,
 	PutApiApiTokenPoliciesBindingsByTokenIdStatus401,
 	PutApiApiTokenPoliciesBindingsByTokenIdStatus403,
 	PutApiApiTokenPoliciesBindingsByTokenIdStatus404,
@@ -259,12 +272,14 @@ import type {
 	GetApiGovernanceUnitByUnitIdAccessEffectiveStatus500,
 	PutApiGovernanceUnitByUnitIdOwnershipOptions,
 	PutApiGovernanceUnitByUnitIdOwnershipStatus200,
+	PutApiGovernanceUnitByUnitIdOwnershipStatus400,
 	PutApiGovernanceUnitByUnitIdOwnershipStatus403,
 	PutApiGovernanceUnitByUnitIdOwnershipStatus404,
 	PutApiGovernanceUnitByUnitIdOwnershipStatus422,
 	PutApiGovernanceUnitByUnitIdOwnershipStatus500,
 	PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
 	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400,
 	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401,
 	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403,
 	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404,
@@ -351,12 +366,14 @@ import type {
 	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409,
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422,
@@ -375,6 +392,7 @@ import type {
 	GetApiGovernanceNotesByPostIdStatus500,
 	PatchApiGovernanceNotesByPostIdOptions,
 	PatchApiGovernanceNotesByPostIdStatus200,
+	PatchApiGovernanceNotesByPostIdStatus400,
 	PatchApiGovernanceNotesByPostIdStatus403,
 	PatchApiGovernanceNotesByPostIdStatus404,
 	PatchApiGovernanceNotesByPostIdStatus409,
@@ -394,6 +412,7 @@ import type {
 	GetApiGovernanceModerationCasesByCaseIdStatus500,
 	PatchApiGovernanceModerationCasesByCaseIdOptions,
 	PatchApiGovernanceModerationCasesByCaseIdStatus200,
+	PatchApiGovernanceModerationCasesByCaseIdStatus400,
 	PatchApiGovernanceModerationCasesByCaseIdStatus403,
 	PatchApiGovernanceModerationCasesByCaseIdStatus404,
 	PatchApiGovernanceModerationCasesByCaseIdStatus422,
@@ -408,6 +427,7 @@ import type {
 	PostApiGovernanceModerationActionsStatus500,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
+	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409,
@@ -451,6 +471,7 @@ import type {
 	DeleteApiGovernanceGrantsByGrantIdStatus500,
 	PostApiSeriesOptions,
 	PostApiSeriesStatus200,
+	PostApiSeriesStatus400,
 	PostApiSeriesStatus404,
 	PostApiSeriesStatus422,
 	PostApiSeriesStatus429,
@@ -508,6 +529,7 @@ import type {
 	PutApiZonesByZoneIdPagesBySlugStatus500,
 	DeleteApiZonesByZoneIdPagesBySlugOptions,
 	DeleteApiZonesByZoneIdPagesBySlugStatus204,
+	DeleteApiZonesByZoneIdPagesBySlugStatus400,
 	DeleteApiZonesByZoneIdPagesBySlugStatus403,
 	DeleteApiZonesByZoneIdPagesBySlugStatus404,
 	DeleteApiZonesByZoneIdPagesBySlugStatus409,
@@ -543,6 +565,7 @@ import type {
 	PutApiZonesByZoneIdNavigationByNavigationIdStatus500,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409,
@@ -551,6 +574,7 @@ import type {
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
+	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422,
@@ -649,6 +673,7 @@ import type {
 	GetApiUsersMeStatus500,
 	PatchApiUsersMeOptions,
 	PatchApiUsersMeStatus200,
+	PatchApiUsersMeStatus400,
 	PatchApiUsersMeStatus403,
 	PatchApiUsersMeStatus404,
 	PatchApiUsersMeStatus409,
@@ -661,12 +686,14 @@ import type {
 	GetApiUsersMePreferencesStatus500,
 	PatchApiUsersMePreferencesOptions,
 	PatchApiUsersMePreferencesStatus200,
+	PatchApiUsersMePreferencesStatus400,
 	PatchApiUsersMePreferencesStatus404,
 	PatchApiUsersMePreferencesStatus422,
 	PatchApiUsersMePreferencesStatus429,
 	PatchApiUsersMePreferencesStatus500,
 	PutApiUsersMePreferencesOptions,
 	PutApiUsersMePreferencesStatus200,
+	PutApiUsersMePreferencesStatus400,
 	PutApiUsersMePreferencesStatus403,
 	PutApiUsersMePreferencesStatus404,
 	PutApiUsersMePreferencesStatus422,
@@ -698,6 +725,7 @@ import type {
 	DeleteApiUsersMeFollowingByUnitIdStatus500,
 	PatchApiUsersMeFollowingByUnitIdOptions,
 	PatchApiUsersMeFollowingByUnitIdStatus200,
+	PatchApiUsersMeFollowingByUnitIdStatus400,
 	PatchApiUsersMeFollowingByUnitIdStatus404,
 	PatchApiUsersMeFollowingByUnitIdStatus422,
 	PatchApiUsersMeFollowingByUnitIdStatus429,
@@ -753,6 +781,7 @@ import type {
 	GetApiTagsByTagIdStatus500,
 	PostApiTagStructuresOptions,
 	PostApiTagStructuresStatus200,
+	PostApiTagStructuresStatus400,
 	PostApiTagStructuresStatus404,
 	PostApiTagStructuresStatus422,
 	PostApiTagStructuresStatus429,
@@ -764,6 +793,7 @@ import type {
 	GetApiTagStructuresByStructureIdStatus500,
 	PutApiTagStructuresByStructureIdOptions,
 	PutApiTagStructuresByStructureIdStatus200,
+	PutApiTagStructuresByStructureIdStatus400,
 	PutApiTagStructuresByStructureIdStatus403,
 	PutApiTagStructuresByStructureIdStatus404,
 	PutApiTagStructuresByStructureIdStatus409,
@@ -772,6 +802,7 @@ import type {
 	PutApiTagStructuresByStructureIdStatus500,
 	PutApiTagStructuresByStructureIdVoteOptions,
 	PutApiTagStructuresByStructureIdVoteStatus200,
+	PutApiTagStructuresByStructureIdVoteStatus400,
 	PutApiTagStructuresByStructureIdVoteStatus404,
 	PutApiTagStructuresByStructureIdVoteStatus422,
 	PutApiTagStructuresByStructureIdVoteStatus429,
@@ -801,6 +832,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429,
@@ -818,6 +850,7 @@ import type {
 	GetApiUsersMeTagRealmSubscriptionsStatus500,
 	PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
 	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
+	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400,
 	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404,
 	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422,
 	PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429,
@@ -873,6 +906,7 @@ import type {
 	ReplaceUnitSlugAddressAsStaffStatus500,
 	ReleaseSlugRedirectAsStaffOptions,
 	ReleaseSlugRedirectAsStaffStatus204,
+	ReleaseSlugRedirectAsStaffStatus400,
 	ReleaseSlugRedirectAsStaffStatus401,
 	ReleaseSlugRedirectAsStaffStatus403,
 	ReleaseSlugRedirectAsStaffStatus404,
@@ -896,6 +930,7 @@ import type {
 	GetApiUnitsByTypeStatus500,
 	PostApiUnitsByTypeOptions,
 	PostApiUnitsByTypeStatus200,
+	PostApiUnitsByTypeStatus400,
 	PostApiUnitsByTypeStatus401,
 	PostApiUnitsByTypeStatus403,
 	PostApiUnitsByTypeStatus404,
@@ -927,6 +962,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdStatus500,
 	PatchApiUnitsByTypeByUnitIdVariantContextOptions,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus200,
+	PatchApiUnitsByTypeByUnitIdVariantContextStatus400,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus401,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus403,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus404,
@@ -936,6 +972,7 @@ import type {
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus500,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200,
+	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404,
@@ -945,6 +982,7 @@ import type {
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200,
+	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404,
@@ -969,6 +1007,7 @@ import type {
 	GetApiHistoryUnitsByUnitIdCompareStatus500,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200,
+	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409,
@@ -977,6 +1016,7 @@ import type {
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200,
+	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409,
@@ -985,6 +1025,7 @@ import type {
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204,
+	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409,
@@ -1009,6 +1050,7 @@ import type {
 	GetApiEntitiesStatus500,
 	PostApiEntitiesOptions,
 	PostApiEntitiesStatus200,
+	PostApiEntitiesStatus400,
 	PostApiEntitiesStatus404,
 	PostApiEntitiesStatus422,
 	PostApiEntitiesStatus429,
@@ -1020,6 +1062,7 @@ import type {
 	GetApiEntitiesByUnitIdStatus500,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422,
@@ -1032,6 +1075,7 @@ import type {
 	GetApiEntitiesByUnitIdAssociationPolicyStatus500,
 	PatchApiEntitiesByUnitIdAssociationPolicyOptions,
 	PatchApiEntitiesByUnitIdAssociationPolicyStatus200,
+	PatchApiEntitiesByUnitIdAssociationPolicyStatus400,
 	PatchApiEntitiesByUnitIdAssociationPolicyStatus403,
 	PatchApiEntitiesByUnitIdAssociationPolicyStatus404,
 	PatchApiEntitiesByUnitIdAssociationPolicyStatus422,
@@ -1042,6 +1086,7 @@ import type {
 	GetApiTagsStatus500,
 	PostApiTagsOptions,
 	PostApiTagsStatus200,
+	PostApiTagsStatus400,
 	PostApiTagsStatus422,
 	PostApiTagsStatus429,
 	PostApiTagsStatus500,
@@ -1052,6 +1097,7 @@ import type {
 	GetApiUnitsByTypeByUnitIdAliasesStatus500,
 	PostApiUnitsByTypeByUnitIdAliasesOptions,
 	PostApiUnitsByTypeByUnitIdAliasesStatus200,
+	PostApiUnitsByTypeByUnitIdAliasesStatus400,
 	PostApiUnitsByTypeByUnitIdAliasesStatus403,
 	PostApiUnitsByTypeByUnitIdAliasesStatus404,
 	PostApiUnitsByTypeByUnitIdAliasesStatus422,
@@ -1066,6 +1112,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
+	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429,
@@ -1093,6 +1140,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422,
@@ -1107,6 +1155,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500,
 	PostApiUnitsByTypeByUnitIdLinksOptions,
 	PostApiUnitsByTypeByUnitIdLinksStatus200,
+	PostApiUnitsByTypeByUnitIdLinksStatus400,
 	PostApiUnitsByTypeByUnitIdLinksStatus403,
 	PostApiUnitsByTypeByUnitIdLinksStatus404,
 	PostApiUnitsByTypeByUnitIdLinksStatus422,
@@ -1114,6 +1163,7 @@ import type {
 	PostApiUnitsByTypeByUnitIdLinksStatus500,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
+	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422,
@@ -1128,6 +1178,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
+	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422,
@@ -1155,6 +1206,7 @@ import type {
 	GetApiUnitsByIdByUnitIdContentStructuresStatus500,
 	PostApiUnitsByIdByUnitIdContentStructuresOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus200,
+	PostApiUnitsByIdByUnitIdContentStructuresStatus400,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus403,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus422,
@@ -1167,6 +1219,7 @@ import type {
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409,
@@ -1180,6 +1233,7 @@ import type {
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus500,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409,
@@ -1188,6 +1242,7 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409,
@@ -1196,6 +1251,7 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
+	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409,
@@ -1204,6 +1260,7 @@ import type {
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409,
@@ -1217,6 +1274,7 @@ import type {
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus500,
 	PostApiUnitsBookByUnitIdContentStructureNodesOptions,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus400,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus403,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus404,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus409,
@@ -1225,6 +1283,7 @@ import type {
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus500,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409,
@@ -1238,6 +1297,7 @@ import type {
 	GetApiChaptersByChapterIdStatus500,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200,
+	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422,
@@ -1256,6 +1316,7 @@ import type {
 	GetApiProgressByUnitIdStatus500,
 	PutApiProgressByUnitIdOptions,
 	PutApiProgressByUnitIdStatus200,
+	PutApiProgressByUnitIdStatus400,
 	PutApiProgressByUnitIdStatus404,
 	PutApiProgressByUnitIdStatus422,
 	PutApiProgressByUnitIdStatus429,
@@ -1273,6 +1334,7 @@ import type {
 	GetApiProgressByUnitIdNodesStatus500,
 	PostApiProgressByUnitIdCompleteOptions,
 	PostApiProgressByUnitIdCompleteStatus200,
+	PostApiProgressByUnitIdCompleteStatus400,
 	PostApiProgressByUnitIdCompleteStatus404,
 	PostApiProgressByUnitIdCompleteStatus422,
 	PostApiProgressByUnitIdCompleteStatus429,
@@ -1294,6 +1356,7 @@ import type {
 	GetApiCollectionsStatus500,
 	PostApiCollectionsOptions,
 	PostApiCollectionsStatus200,
+	PostApiCollectionsStatus400,
 	PostApiCollectionsStatus404,
 	PostApiCollectionsStatus422,
 	PostApiCollectionsStatus429,
@@ -1309,6 +1372,7 @@ import type {
 	GetApiCollectionsByCollectionIdStatus500,
 	PatchApiCollectionsByCollectionIdOptions,
 	PatchApiCollectionsByCollectionIdStatus200,
+	PatchApiCollectionsByCollectionIdStatus400,
 	PatchApiCollectionsByCollectionIdStatus403,
 	PatchApiCollectionsByCollectionIdStatus404,
 	PatchApiCollectionsByCollectionIdStatus409,
@@ -1324,6 +1388,7 @@ import type {
 	DeleteApiCollectionsByCollectionIdStatus500,
 	PostApiCollectionsByCollectionIdItemsBatchOptions,
 	PostApiCollectionsByCollectionIdItemsBatchStatus200,
+	PostApiCollectionsByCollectionIdItemsBatchStatus400,
 	PostApiCollectionsByCollectionIdItemsBatchStatus403,
 	PostApiCollectionsByCollectionIdItemsBatchStatus404,
 	PostApiCollectionsByCollectionIdItemsBatchStatus409,
@@ -1332,6 +1397,7 @@ import type {
 	PostApiCollectionsByCollectionIdItemsBatchStatus500,
 	PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
+	PutApiCollectionsByCollectionIdItemsByTargetIdStatus400,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus403,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus404,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus422,
@@ -1360,6 +1426,7 @@ import type {
 	GetApiReviewsStatus500,
 	PostApiReviewsOptions,
 	PostApiReviewsStatus200,
+	PostApiReviewsStatus400,
 	PostApiReviewsStatus403,
 	PostApiReviewsStatus404,
 	PostApiReviewsStatus409,
@@ -1373,6 +1440,7 @@ import type {
 	GetApiReviewsByReviewIdStatus500,
 	PatchApiReviewsByReviewIdOptions,
 	PatchApiReviewsByReviewIdStatus200,
+	PatchApiReviewsByReviewIdStatus400,
 	PatchApiReviewsByReviewIdStatus403,
 	PatchApiReviewsByReviewIdStatus404,
 	PatchApiReviewsByReviewIdStatus422,
@@ -1387,6 +1455,7 @@ import type {
 	DeleteApiReviewsByReviewIdStatus500,
 	PutApiScoresByTargetIdOptions,
 	PutApiScoresByTargetIdStatus200,
+	PutApiScoresByTargetIdStatus400,
 	PutApiScoresByTargetIdStatus403,
 	PutApiScoresByTargetIdStatus404,
 	PutApiScoresByTargetIdStatus409,
@@ -1403,6 +1472,7 @@ import type {
 	GetApiScoreContextStatus500,
 	PutApiScoreContextOptions,
 	PutApiScoreContextStatus200,
+	PutApiScoreContextStatus400,
 	PutApiScoreContextStatus403,
 	PutApiScoreContextStatus404,
 	PutApiScoreContextStatus422,
@@ -1417,12 +1487,14 @@ import type {
 	GetApiReactionsUnitsByUnitIdStatus500,
 	PutApiReactionsUnitsByUnitIdOptions,
 	PutApiReactionsUnitsByUnitIdStatus200,
+	PutApiReactionsUnitsByUnitIdStatus400,
 	PutApiReactionsUnitsByUnitIdStatus404,
 	PutApiReactionsUnitsByUnitIdStatus422,
 	PutApiReactionsUnitsByUnitIdStatus429,
 	PutApiReactionsUnitsByUnitIdStatus500,
 	DeleteApiReactionsUnitsByUnitIdOptions,
 	DeleteApiReactionsUnitsByUnitIdStatus200,
+	DeleteApiReactionsUnitsByUnitIdStatus400,
 	DeleteApiReactionsUnitsByUnitIdStatus422,
 	DeleteApiReactionsUnitsByUnitIdStatus429,
 	DeleteApiReactionsUnitsByUnitIdStatus500,
@@ -1480,6 +1552,7 @@ import type {
 	GetApiPostsByPostIdScoresStatus500,
 	PutApiPostsByPostIdScoresOptions,
 	PutApiPostsByPostIdScoresStatus200,
+	PutApiPostsByPostIdScoresStatus400,
 	PutApiPostsByPostIdScoresStatus403,
 	PutApiPostsByPostIdScoresStatus404,
 	PutApiPostsByPostIdScoresStatus422,
@@ -1491,6 +1564,7 @@ import type {
 	GetApiPostsStatus500,
 	PostApiPostsOptions,
 	PostApiPostsStatus200,
+	PostApiPostsStatus400,
 	PostApiPostsStatus403,
 	PostApiPostsStatus404,
 	PostApiPostsStatus409,
@@ -1504,6 +1578,7 @@ import type {
 	GetApiPostsByPostIdStatus500,
 	PatchApiPostsByPostIdOptions,
 	PatchApiPostsByPostIdStatus200,
+	PatchApiPostsByPostIdStatus400,
 	PatchApiPostsByPostIdStatus403,
 	PatchApiPostsByPostIdStatus404,
 	PatchApiPostsByPostIdStatus409,
@@ -1525,6 +1600,7 @@ import type {
 	GetApiPostsByPostIdRepliesStatus500,
 	PostApiPostsByPostIdRepliesOptions,
 	PostApiPostsByPostIdRepliesStatus200,
+	PostApiPostsByPostIdRepliesStatus400,
 	PostApiPostsByPostIdRepliesStatus403,
 	PostApiPostsByPostIdRepliesStatus404,
 	PostApiPostsByPostIdRepliesStatus409,
@@ -1533,6 +1609,7 @@ import type {
 	PostApiPostsByPostIdRepliesStatus500,
 	PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
+	PatchApiPostsByPostIdRepliesByReplyPostIdStatus400,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus403,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus404,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus409,
@@ -1552,6 +1629,7 @@ import type {
 	GetApiRealmsStatus500,
 	PostApiRealmsOptions,
 	PostApiRealmsStatus200,
+	PostApiRealmsStatus400,
 	PostApiRealmsStatus404,
 	PostApiRealmsStatus422,
 	PostApiRealmsStatus429,
@@ -1572,6 +1650,7 @@ import type {
 	GetApiRealmsByRealmIdStatus500,
 	PatchApiRealmsByRealmIdOptions,
 	PatchApiRealmsByRealmIdStatus200,
+	PatchApiRealmsByRealmIdStatus400,
 	PatchApiRealmsByRealmIdStatus403,
 	PatchApiRealmsByRealmIdStatus404,
 	PatchApiRealmsByRealmIdStatus422,
@@ -1584,6 +1663,7 @@ import type {
 	GetApiRealmsByRealmIdScoreContextStatus500,
 	PutApiRealmsByRealmIdScoreContextOptions,
 	PutApiRealmsByRealmIdScoreContextStatus200,
+	PutApiRealmsByRealmIdScoreContextStatus400,
 	PutApiRealmsByRealmIdScoreContextStatus403,
 	PutApiRealmsByRealmIdScoreContextStatus404,
 	PutApiRealmsByRealmIdScoreContextStatus422,
@@ -1595,6 +1675,7 @@ import type {
 	DeleteApiRealmsByRealmIdScoreContextStatus500,
 	PutApiRealmsByRealmIdMembershipOptions,
 	PutApiRealmsByRealmIdMembershipStatus200,
+	PutApiRealmsByRealmIdMembershipStatus400,
 	PutApiRealmsByRealmIdMembershipStatus403,
 	PutApiRealmsByRealmIdMembershipStatus404,
 	PutApiRealmsByRealmIdMembershipStatus409,
@@ -1617,6 +1698,7 @@ import type {
 	GetApiRealmsByRealmIdMembersStatus500,
 	PatchApiRealmsByRealmIdMembersByProfileIdOptions,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
+	PatchApiRealmsByRealmIdMembersByProfileIdStatus400,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus403,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus404,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus422,
@@ -1637,6 +1719,7 @@ import type {
 	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500,
 	PutApiRealmsByRealmIdRulesOptions,
 	PutApiRealmsByRealmIdRulesStatus200,
+	PutApiRealmsByRealmIdRulesStatus400,
 	PutApiRealmsByRealmIdRulesStatus403,
 	PutApiRealmsByRealmIdRulesStatus422,
 	PutApiRealmsByRealmIdRulesStatus429,
@@ -1653,6 +1736,7 @@ import type {
 	GetApiRealmsByRealmIdPinsStatus500,
 	PutApiRealmsByRealmIdPinsByUnitIdOptions,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus200,
+	PutApiRealmsByRealmIdPinsByUnitIdStatus400,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus403,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus404,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus422,
@@ -1671,6 +1755,7 @@ import type {
 	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422,
@@ -1678,6 +1763,7 @@ import type {
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422,
@@ -1739,6 +1825,7 @@ import type {
 	PutApiRealmsByRealmIdNavigationByNavigationIdStatus500,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409,
@@ -1751,6 +1838,7 @@ import type {
 	GetApiSearchFeaturesByTemplateStatus500,
 	PostApiSearchFeaturesByTemplateExecuteOptions,
 	PostApiSearchFeaturesByTemplateExecuteStatus200,
+	PostApiSearchFeaturesByTemplateExecuteStatus400,
 	PostApiSearchFeaturesByTemplateExecuteStatus422,
 	PostApiSearchFeaturesByTemplateExecuteStatus500,
 	PostApiSearchFeaturesByTemplateExecuteStatus503,
@@ -1762,6 +1850,7 @@ import type {
 	GetApiSearchZonesByZoneIdFeatureStatus500,
 	PutApiSearchZonesByZoneIdFeatureOptions,
 	PutApiSearchZonesByZoneIdFeatureStatus200,
+	PutApiSearchZonesByZoneIdFeatureStatus400,
 	PutApiSearchZonesByZoneIdFeatureStatus403,
 	PutApiSearchZonesByZoneIdFeatureStatus404,
 	PutApiSearchZonesByZoneIdFeatureStatus409,
@@ -1769,6 +1858,7 @@ import type {
 	PutApiSearchZonesByZoneIdFeatureStatus500,
 	PostApiSearchZonesByZoneIdFeatureExecuteOptions,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus400,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus404,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus422,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus500,
@@ -1781,6 +1871,7 @@ import type {
 	GetApiSearchZonesByZoneIdFeatureRevisionsStatus500,
 	PostApiSearchZonesByZoneIdFeatureRestoreOptions,
 	PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
+	PostApiSearchZonesByZoneIdFeatureRestoreStatus400,
 	PostApiSearchZonesByZoneIdFeatureRestoreStatus403,
 	PostApiSearchZonesByZoneIdFeatureRestoreStatus404,
 	PostApiSearchZonesByZoneIdFeatureRestoreStatus409,
@@ -1788,23 +1879,27 @@ import type {
 	PostApiSearchZonesByZoneIdFeatureRestoreStatus500,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
+	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200,
+	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503,
 	PostApiSearchOptions,
 	PostApiSearchStatus200,
+	PostApiSearchStatus400,
 	PostApiSearchStatus422,
 	PostApiSearchStatus500,
 	PostApiSearchStatus503,
 	PostApiSearchSharedQueriesOptions,
 	PostApiSearchSharedQueriesStatus201,
+	PostApiSearchSharedQueriesStatus400,
 	PostApiSearchSharedQueriesStatus401,
 	PostApiSearchSharedQueriesStatus422,
 	PostApiSearchSharedQueriesStatus429,
@@ -1816,11 +1911,13 @@ import type {
 	GetApiSearchSharedQueriesByIdStatus500,
 	PostApiSearchByIndexOptions,
 	PostApiSearchByIndexStatus200,
+	PostApiSearchByIndexStatus400,
 	PostApiSearchByIndexStatus422,
 	PostApiSearchByIndexStatus500,
 	PostApiSearchByIndexStatus503,
 	PostApiImageAssetsOptions,
 	PostApiImageAssetsStatus200,
+	PostApiImageAssetsStatus400,
 	PostApiImageAssetsStatus401,
 	PostApiImageAssetsStatus415,
 	PostApiImageAssetsStatus422,
@@ -2593,6 +2690,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutatio
 	return mutationOptions<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
@@ -2624,6 +2722,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TCo
 		mutation?: UseMutationOptions<
 			PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400
 				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
 				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
 				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
@@ -2647,6 +2746,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TCo
 	) as UseMutationOptions<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
@@ -2660,6 +2760,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TCo
 	return useMutation<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
@@ -2678,6 +2779,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TCo
 	) as UseMutationResult<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
@@ -2699,6 +2801,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutati
 	return mutationOptions<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
@@ -2730,6 +2833,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TC
 		mutation?: UseMutationOptions<
 			PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400
 				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
 				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
 				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
@@ -2753,6 +2857,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TC
 	) as UseMutationOptions<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
@@ -2766,6 +2871,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TC
 	return useMutation<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
@@ -2784,6 +2890,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TC
 	) as UseMutationResult<
 		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
 			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
@@ -3642,6 +3749,7 @@ export function putApiNotificationsPreferencesMutationOptions<TContext = unknown
 	return mutationOptions<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiNotificationsPreferencesStatus400
 			| PutApiNotificationsPreferencesStatus422
 			| PutApiNotificationsPreferencesStatus429
 			| PutApiNotificationsPreferencesStatus500
@@ -3670,6 +3778,7 @@ export function usePutApiNotificationsPreferences<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiNotificationsPreferencesStatus200,
 			ResponseErrorConfig<
+				| PutApiNotificationsPreferencesStatus400
 				| PutApiNotificationsPreferencesStatus422
 				| PutApiNotificationsPreferencesStatus429
 				| PutApiNotificationsPreferencesStatus500
@@ -3687,6 +3796,7 @@ export function usePutApiNotificationsPreferences<TContext>(
 	const baseOptions = putApiNotificationsPreferencesMutationOptions(config) as UseMutationOptions<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiNotificationsPreferencesStatus400
 			| PutApiNotificationsPreferencesStatus422
 			| PutApiNotificationsPreferencesStatus429
 			| PutApiNotificationsPreferencesStatus500
@@ -3698,6 +3808,7 @@ export function usePutApiNotificationsPreferences<TContext>(
 	return useMutation<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiNotificationsPreferencesStatus400
 			| PutApiNotificationsPreferencesStatus422
 			| PutApiNotificationsPreferencesStatus429
 			| PutApiNotificationsPreferencesStatus500
@@ -3714,6 +3825,7 @@ export function usePutApiNotificationsPreferences<TContext>(
 	) as UseMutationResult<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiNotificationsPreferencesStatus400
 			| PutApiNotificationsPreferencesStatus422
 			| PutApiNotificationsPreferencesStatus429
 			| PutApiNotificationsPreferencesStatus500
@@ -3943,6 +4055,7 @@ export function postApiRecommendationsEventsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
+			| PostApiRecommendationsEventsStatus400
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500
@@ -3971,6 +4084,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiRecommendationsEventsStatus200,
 			ResponseErrorConfig<
+				| PostApiRecommendationsEventsStatus400
 				| PostApiRecommendationsEventsStatus404
 				| PostApiRecommendationsEventsStatus422
 				| PostApiRecommendationsEventsStatus500
@@ -3988,6 +4102,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 	const baseOptions = postApiRecommendationsEventsMutationOptions(config) as UseMutationOptions<
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
+			| PostApiRecommendationsEventsStatus400
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500
@@ -3999,6 +4114,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 	return useMutation<
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
+			| PostApiRecommendationsEventsStatus400
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500
@@ -4015,6 +4131,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 	) as UseMutationResult<
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
+			| PostApiRecommendationsEventsStatus400
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500
@@ -4034,6 +4151,7 @@ export function putApiRecommendationsExclusionsByUnitIdMutationOptions<TContext 
 	return mutationOptions<
 		PutApiRecommendationsExclusionsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRecommendationsExclusionsByUnitIdStatus400
 			| PutApiRecommendationsExclusionsByUnitIdStatus401
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
@@ -4066,6 +4184,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRecommendationsExclusionsByUnitIdStatus200,
 			ResponseErrorConfig<
+				| PutApiRecommendationsExclusionsByUnitIdStatus400
 				| PutApiRecommendationsExclusionsByUnitIdStatus401
 				| PutApiRecommendationsExclusionsByUnitIdStatus403
 				| PutApiRecommendationsExclusionsByUnitIdStatus404
@@ -4089,6 +4208,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 	) as UseMutationOptions<
 		PutApiRecommendationsExclusionsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRecommendationsExclusionsByUnitIdStatus400
 			| PutApiRecommendationsExclusionsByUnitIdStatus401
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
@@ -4103,6 +4223,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 	return useMutation<
 		PutApiRecommendationsExclusionsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRecommendationsExclusionsByUnitIdStatus400
 			| PutApiRecommendationsExclusionsByUnitIdStatus401
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
@@ -4122,6 +4243,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 	) as UseMutationResult<
 		PutApiRecommendationsExclusionsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRecommendationsExclusionsByUnitIdStatus400
 			| PutApiRecommendationsExclusionsByUnitIdStatus401
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
@@ -4346,6 +4468,7 @@ export function postApiMessagesConversationsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiMessagesConversationsStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsStatus400
 			| PostApiMessagesConversationsStatus403
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
@@ -4377,6 +4500,7 @@ export function usePostApiMessagesConversations<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiMessagesConversationsStatus200,
 			ResponseErrorConfig<
+				| PostApiMessagesConversationsStatus400
 				| PostApiMessagesConversationsStatus403
 				| PostApiMessagesConversationsStatus404
 				| PostApiMessagesConversationsStatus409
@@ -4397,6 +4521,7 @@ export function usePostApiMessagesConversations<TContext>(
 	const baseOptions = postApiMessagesConversationsMutationOptions(config) as UseMutationOptions<
 		PostApiMessagesConversationsStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsStatus400
 			| PostApiMessagesConversationsStatus403
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
@@ -4411,6 +4536,7 @@ export function usePostApiMessagesConversations<TContext>(
 	return useMutation<
 		PostApiMessagesConversationsStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsStatus400
 			| PostApiMessagesConversationsStatus403
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
@@ -4430,6 +4556,7 @@ export function usePostApiMessagesConversations<TContext>(
 	) as UseMutationResult<
 		PostApiMessagesConversationsStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsStatus400
 			| PostApiMessagesConversationsStatus403
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
@@ -4672,6 +4799,7 @@ export function postApiMessagesConversationsByConversationIdMessagesMutationOpti
 	return mutationOptions<
 		PostApiMessagesConversationsByConversationIdMessagesStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsByConversationIdMessagesStatus400
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
@@ -4703,6 +4831,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 		mutation?: UseMutationOptions<
 			PostApiMessagesConversationsByConversationIdMessagesStatus200,
 			ResponseErrorConfig<
+				| PostApiMessagesConversationsByConversationIdMessagesStatus400
 				| PostApiMessagesConversationsByConversationIdMessagesStatus403
 				| PostApiMessagesConversationsByConversationIdMessagesStatus404
 				| PostApiMessagesConversationsByConversationIdMessagesStatus422
@@ -4726,6 +4855,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 	) as UseMutationOptions<
 		PostApiMessagesConversationsByConversationIdMessagesStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsByConversationIdMessagesStatus400
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
@@ -4739,6 +4869,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 	return useMutation<
 		PostApiMessagesConversationsByConversationIdMessagesStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsByConversationIdMessagesStatus400
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
@@ -4757,6 +4888,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 	) as UseMutationResult<
 		PostApiMessagesConversationsByConversationIdMessagesStatus200,
 		ResponseErrorConfig<
+			| PostApiMessagesConversationsByConversationIdMessagesStatus400
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
@@ -4778,6 +4910,7 @@ export function putApiMessagesConversationsByConversationIdReadMutationOptions<T
 	return mutationOptions<
 		PutApiMessagesConversationsByConversationIdReadStatus200,
 		ResponseErrorConfig<
+			| PutApiMessagesConversationsByConversationIdReadStatus400
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
 			| PutApiMessagesConversationsByConversationIdReadStatus429
@@ -4808,6 +4941,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiMessagesConversationsByConversationIdReadStatus200,
 			ResponseErrorConfig<
+				| PutApiMessagesConversationsByConversationIdReadStatus400
 				| PutApiMessagesConversationsByConversationIdReadStatus404
 				| PutApiMessagesConversationsByConversationIdReadStatus422
 				| PutApiMessagesConversationsByConversationIdReadStatus429
@@ -4829,6 +4963,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 	) as UseMutationOptions<
 		PutApiMessagesConversationsByConversationIdReadStatus200,
 		ResponseErrorConfig<
+			| PutApiMessagesConversationsByConversationIdReadStatus400
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
 			| PutApiMessagesConversationsByConversationIdReadStatus429
@@ -4841,6 +4976,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 	return useMutation<
 		PutApiMessagesConversationsByConversationIdReadStatus200,
 		ResponseErrorConfig<
+			| PutApiMessagesConversationsByConversationIdReadStatus400
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
 			| PutApiMessagesConversationsByConversationIdReadStatus429
@@ -4858,6 +4994,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 	) as UseMutationResult<
 		PutApiMessagesConversationsByConversationIdReadStatus200,
 		ResponseErrorConfig<
+			| PutApiMessagesConversationsByConversationIdReadStatus400
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
 			| PutApiMessagesConversationsByConversationIdReadStatus429
@@ -5048,6 +5185,7 @@ export function postApiApiTokensMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
+			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
@@ -5073,6 +5211,7 @@ export function usePostApiApiTokens<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiApiTokensStatus200,
 			ResponseErrorConfig<
+				| PostApiApiTokensStatus400
 				| PostApiApiTokensStatus401
 				| PostApiApiTokensStatus403
 				| PostApiApiTokensStatus422
@@ -5091,6 +5230,7 @@ export function usePostApiApiTokens<TContext>(
 	const baseOptions = postApiApiTokensMutationOptions(config) as UseMutationOptions<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
+			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
@@ -5103,6 +5243,7 @@ export function usePostApiApiTokens<TContext>(
 	return useMutation<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
+			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
@@ -5120,6 +5261,7 @@ export function usePostApiApiTokens<TContext>(
 	) as UseMutationResult<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
+			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
@@ -5140,6 +5282,7 @@ export function patchApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PatchApiApiTokensByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus400
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
@@ -5171,6 +5314,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiApiTokensByTokenIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiApiTokensByTokenIdStatus400
 				| PatchApiApiTokensByTokenIdStatus401
 				| PatchApiApiTokensByTokenIdStatus403
 				| PatchApiApiTokensByTokenIdStatus404
@@ -5190,6 +5334,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 	const baseOptions = patchApiApiTokensByTokenIdMutationOptions(config) as UseMutationOptions<
 		PatchApiApiTokensByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus400
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
@@ -5203,6 +5348,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 	return useMutation<
 		PatchApiApiTokensByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus400
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
@@ -5221,6 +5367,7 @@ export function usePatchApiApiTokensByTokenId<TContext>(
 	) as UseMutationResult<
 		PatchApiApiTokensByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus400
 			| PatchApiApiTokensByTokenIdStatus401
 			| PatchApiApiTokensByTokenIdStatus403
 			| PatchApiApiTokensByTokenIdStatus404
@@ -5343,6 +5490,7 @@ export function putApiApiTokensByTokenIdPolicyMutationOptions<TContext = unknown
 	return mutationOptions<
 		PutApiApiTokensByTokenIdPolicyStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus400
 			| PutApiApiTokensByTokenIdPolicyStatus401
 			| PutApiApiTokensByTokenIdPolicyStatus403
 			| PutApiApiTokensByTokenIdPolicyStatus404
@@ -5375,6 +5523,7 @@ export function usePutApiApiTokensByTokenIdPolicy<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiApiTokensByTokenIdPolicyStatus200,
 			ResponseErrorConfig<
+				| PutApiApiTokensByTokenIdPolicyStatus400
 				| PutApiApiTokensByTokenIdPolicyStatus401
 				| PutApiApiTokensByTokenIdPolicyStatus403
 				| PutApiApiTokensByTokenIdPolicyStatus404
@@ -5395,6 +5544,7 @@ export function usePutApiApiTokensByTokenIdPolicy<TContext>(
 	const baseOptions = putApiApiTokensByTokenIdPolicyMutationOptions(config) as UseMutationOptions<
 		PutApiApiTokensByTokenIdPolicyStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus400
 			| PutApiApiTokensByTokenIdPolicyStatus401
 			| PutApiApiTokensByTokenIdPolicyStatus403
 			| PutApiApiTokensByTokenIdPolicyStatus404
@@ -5409,6 +5559,7 @@ export function usePutApiApiTokensByTokenIdPolicy<TContext>(
 	return useMutation<
 		PutApiApiTokensByTokenIdPolicyStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus400
 			| PutApiApiTokensByTokenIdPolicyStatus401
 			| PutApiApiTokensByTokenIdPolicyStatus403
 			| PutApiApiTokensByTokenIdPolicyStatus404
@@ -5428,6 +5579,7 @@ export function usePutApiApiTokensByTokenIdPolicy<TContext>(
 	) as UseMutationResult<
 		PutApiApiTokensByTokenIdPolicyStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus400
 			| PutApiApiTokensByTokenIdPolicyStatus401
 			| PutApiApiTokensByTokenIdPolicyStatus403
 			| PutApiApiTokensByTokenIdPolicyStatus404
@@ -5608,6 +5760,7 @@ export function patchApiApiTokenPoliciesByPolicyKeyMutationOptions<TContext = un
 	return mutationOptions<
 		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
@@ -5640,6 +5793,7 @@ export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiApiTokenPoliciesByPolicyKeyStatus200,
 			ResponseErrorConfig<
+				| PatchApiApiTokenPoliciesByPolicyKeyStatus400
 				| PatchApiApiTokenPoliciesByPolicyKeyStatus401
 				| PatchApiApiTokenPoliciesByPolicyKeyStatus403
 				| PatchApiApiTokenPoliciesByPolicyKeyStatus404
@@ -5663,6 +5817,7 @@ export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
 	) as UseMutationOptions<
 		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
@@ -5677,6 +5832,7 @@ export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
 	return useMutation<
 		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
@@ -5696,6 +5852,7 @@ export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
 	) as UseMutationResult<
 		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
 		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus400
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
 			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
@@ -5718,6 +5875,7 @@ export function putApiApiTokenPoliciesBindingsByTokenIdMutationOptions<TContext 
 	return mutationOptions<
 		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
@@ -5749,6 +5907,7 @@ export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
 			ResponseErrorConfig<
+				| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
 				| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
 				| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
 				| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
@@ -5771,6 +5930,7 @@ export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
 	) as UseMutationOptions<
 		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
@@ -5784,6 +5944,7 @@ export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
 	return useMutation<
 		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
@@ -5802,6 +5963,7 @@ export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
 	) as UseMutationResult<
 		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
 		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus400
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
 			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
@@ -6188,6 +6350,7 @@ export function putApiGovernanceUnitByUnitIdOwnershipMutationOptions<TContext = 
 	return mutationOptions<
 		PutApiGovernanceUnitByUnitIdOwnershipStatus200,
 		ResponseErrorConfig<
+			| PutApiGovernanceUnitByUnitIdOwnershipStatus400
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus403
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus404
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus422
@@ -6218,6 +6381,7 @@ export function usePutApiGovernanceUnitByUnitIdOwnership<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiGovernanceUnitByUnitIdOwnershipStatus200,
 			ResponseErrorConfig<
+				| PutApiGovernanceUnitByUnitIdOwnershipStatus400
 				| PutApiGovernanceUnitByUnitIdOwnershipStatus403
 				| PutApiGovernanceUnitByUnitIdOwnershipStatus404
 				| PutApiGovernanceUnitByUnitIdOwnershipStatus422
@@ -6239,6 +6403,7 @@ export function usePutApiGovernanceUnitByUnitIdOwnership<TContext>(
 	) as UseMutationOptions<
 		PutApiGovernanceUnitByUnitIdOwnershipStatus200,
 		ResponseErrorConfig<
+			| PutApiGovernanceUnitByUnitIdOwnershipStatus400
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus403
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus404
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus422
@@ -6251,6 +6416,7 @@ export function usePutApiGovernanceUnitByUnitIdOwnership<TContext>(
 	return useMutation<
 		PutApiGovernanceUnitByUnitIdOwnershipStatus200,
 		ResponseErrorConfig<
+			| PutApiGovernanceUnitByUnitIdOwnershipStatus400
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus403
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus404
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus422
@@ -6268,6 +6434,7 @@ export function usePutApiGovernanceUnitByUnitIdOwnership<TContext>(
 	) as UseMutationResult<
 		PutApiGovernanceUnitByUnitIdOwnershipStatus200,
 		ResponseErrorConfig<
+			| PutApiGovernanceUnitByUnitIdOwnershipStatus400
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus403
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus404
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus422
@@ -6288,6 +6455,7 @@ export function postApiGovernanceUnitByUnitIdOwnershipClaimMutationOptions<TCont
 	return mutationOptions<
 		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
@@ -6320,6 +6488,7 @@ export function usePostApiGovernanceUnitByUnitIdOwnershipClaim<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
 			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400
 				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
 				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
 				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
@@ -6343,6 +6512,7 @@ export function usePostApiGovernanceUnitByUnitIdOwnershipClaim<TContext>(
 	) as UseMutationOptions<
 		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
@@ -6357,6 +6527,7 @@ export function usePostApiGovernanceUnitByUnitIdOwnershipClaim<TContext>(
 	return useMutation<
 		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
@@ -6376,6 +6547,7 @@ export function usePostApiGovernanceUnitByUnitIdOwnershipClaim<TContext>(
 	) as UseMutationResult<
 		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
 			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
@@ -7649,6 +7821,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 	return mutationOptions<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
@@ -7680,6 +7853,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdA
 		mutation?: UseMutationOptions<
 			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
 			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
@@ -7703,6 +7877,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdA
 		) as UseMutationOptions<
 			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
 			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
@@ -7715,6 +7890,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdA
 	return useMutation<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
@@ -7732,6 +7908,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdA
 	) as UseMutationResult<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus400
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
@@ -7753,6 +7930,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 	return mutationOptions<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
@@ -7784,6 +7962,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdD
 		mutation?: UseMutationOptions<
 			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
 			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
@@ -7807,6 +7986,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdD
 		) as UseMutationOptions<
 			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
 			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
 				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
@@ -7819,6 +7999,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdD
 	return useMutation<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
@@ -7836,6 +8017,7 @@ export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdD
 	) as UseMutationResult<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus400
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
 			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
@@ -8059,6 +8241,7 @@ export function patchApiGovernanceNotesByPostIdMutationOptions<TContext = unknow
 	return mutationOptions<
 		PatchApiGovernanceNotesByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus400
 			| PatchApiGovernanceNotesByPostIdStatus403
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
@@ -8091,6 +8274,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiGovernanceNotesByPostIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiGovernanceNotesByPostIdStatus400
 				| PatchApiGovernanceNotesByPostIdStatus403
 				| PatchApiGovernanceNotesByPostIdStatus404
 				| PatchApiGovernanceNotesByPostIdStatus409
@@ -8113,6 +8297,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 	) as UseMutationOptions<
 		PatchApiGovernanceNotesByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus400
 			| PatchApiGovernanceNotesByPostIdStatus403
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
@@ -8127,6 +8312,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 	return useMutation<
 		PatchApiGovernanceNotesByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus400
 			| PatchApiGovernanceNotesByPostIdStatus403
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
@@ -8146,6 +8332,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 	) as UseMutationResult<
 		PatchApiGovernanceNotesByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus400
 			| PatchApiGovernanceNotesByPostIdStatus403
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
@@ -8366,6 +8553,7 @@ export function patchApiGovernanceModerationCasesByCaseIdMutationOptions<TContex
 	return mutationOptions<
 		PatchApiGovernanceModerationCasesByCaseIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceModerationCasesByCaseIdStatus400
 			| PatchApiGovernanceModerationCasesByCaseIdStatus403
 			| PatchApiGovernanceModerationCasesByCaseIdStatus404
 			| PatchApiGovernanceModerationCasesByCaseIdStatus422
@@ -8396,6 +8584,7 @@ export function usePatchApiGovernanceModerationCasesByCaseId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiGovernanceModerationCasesByCaseIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiGovernanceModerationCasesByCaseIdStatus400
 				| PatchApiGovernanceModerationCasesByCaseIdStatus403
 				| PatchApiGovernanceModerationCasesByCaseIdStatus404
 				| PatchApiGovernanceModerationCasesByCaseIdStatus422
@@ -8417,6 +8606,7 @@ export function usePatchApiGovernanceModerationCasesByCaseId<TContext>(
 	) as UseMutationOptions<
 		PatchApiGovernanceModerationCasesByCaseIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceModerationCasesByCaseIdStatus400
 			| PatchApiGovernanceModerationCasesByCaseIdStatus403
 			| PatchApiGovernanceModerationCasesByCaseIdStatus404
 			| PatchApiGovernanceModerationCasesByCaseIdStatus422
@@ -8429,6 +8619,7 @@ export function usePatchApiGovernanceModerationCasesByCaseId<TContext>(
 	return useMutation<
 		PatchApiGovernanceModerationCasesByCaseIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceModerationCasesByCaseIdStatus400
 			| PatchApiGovernanceModerationCasesByCaseIdStatus403
 			| PatchApiGovernanceModerationCasesByCaseIdStatus404
 			| PatchApiGovernanceModerationCasesByCaseIdStatus422
@@ -8446,6 +8637,7 @@ export function usePatchApiGovernanceModerationCasesByCaseId<TContext>(
 	) as UseMutationResult<
 		PatchApiGovernanceModerationCasesByCaseIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiGovernanceModerationCasesByCaseIdStatus400
 			| PatchApiGovernanceModerationCasesByCaseIdStatus403
 			| PatchApiGovernanceModerationCasesByCaseIdStatus404
 			| PatchApiGovernanceModerationCasesByCaseIdStatus422
@@ -8575,6 +8767,7 @@ export function patchApiGovernanceFeedbackByFeedbackIdResolveMutationOptions<TCo
 	return mutationOptions<
 		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
 		ResponseErrorConfig<
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
@@ -8606,6 +8799,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
 			ResponseErrorConfig<
+				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
 				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
 				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
@@ -8628,6 +8822,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 	) as UseMutationOptions<
 		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
 		ResponseErrorConfig<
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
@@ -8641,6 +8836,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 	return useMutation<
 		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
 		ResponseErrorConfig<
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
@@ -8659,6 +8855,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 	) as UseMutationResult<
 		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
 		ResponseErrorConfig<
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
@@ -9196,6 +9393,7 @@ export function postApiSeriesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
+			| PostApiSeriesStatus400
 			| PostApiSeriesStatus404
 			| PostApiSeriesStatus422
 			| PostApiSeriesStatus429
@@ -9221,6 +9419,7 @@ export function usePostApiSeries<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSeriesStatus200,
 			ResponseErrorConfig<
+				| PostApiSeriesStatus400
 				| PostApiSeriesStatus404
 				| PostApiSeriesStatus422
 				| PostApiSeriesStatus429
@@ -9239,6 +9438,7 @@ export function usePostApiSeries<TContext>(
 	const baseOptions = postApiSeriesMutationOptions(config) as UseMutationOptions<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
+			| PostApiSeriesStatus400
 			| PostApiSeriesStatus404
 			| PostApiSeriesStatus422
 			| PostApiSeriesStatus429
@@ -9251,6 +9451,7 @@ export function usePostApiSeries<TContext>(
 	return useMutation<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
+			| PostApiSeriesStatus400
 			| PostApiSeriesStatus404
 			| PostApiSeriesStatus422
 			| PostApiSeriesStatus429
@@ -9268,6 +9469,7 @@ export function usePostApiSeries<TContext>(
 	) as UseMutationResult<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
+			| PostApiSeriesStatus400
 			| PostApiSeriesStatus404
 			| PostApiSeriesStatus422
 			| PostApiSeriesStatus429
@@ -10108,6 +10310,7 @@ export function deleteApiZonesByZoneIdPagesBySlugMutationOptions<TContext = unkn
 	return mutationOptions<
 		DeleteApiZonesByZoneIdPagesBySlugStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdPagesBySlugStatus400
 			| DeleteApiZonesByZoneIdPagesBySlugStatus403
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
@@ -10140,6 +10343,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiZonesByZoneIdPagesBySlugStatus204,
 			ResponseErrorConfig<
+				| DeleteApiZonesByZoneIdPagesBySlugStatus400
 				| DeleteApiZonesByZoneIdPagesBySlugStatus403
 				| DeleteApiZonesByZoneIdPagesBySlugStatus404
 				| DeleteApiZonesByZoneIdPagesBySlugStatus409
@@ -10163,6 +10367,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 	) as UseMutationOptions<
 		DeleteApiZonesByZoneIdPagesBySlugStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdPagesBySlugStatus400
 			| DeleteApiZonesByZoneIdPagesBySlugStatus403
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
@@ -10177,6 +10382,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 	return useMutation<
 		DeleteApiZonesByZoneIdPagesBySlugStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdPagesBySlugStatus400
 			| DeleteApiZonesByZoneIdPagesBySlugStatus403
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
@@ -10196,6 +10402,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 	) as UseMutationResult<
 		DeleteApiZonesByZoneIdPagesBySlugStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdPagesBySlugStatus400
 			| DeleteApiZonesByZoneIdPagesBySlugStatus403
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
@@ -10635,6 +10842,7 @@ export function deleteApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TC
 	return mutationOptions<
 		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
@@ -10667,6 +10875,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400
 				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
 				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
@@ -10690,6 +10899,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
@@ -10704,6 +10914,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 	return useMutation<
 		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
@@ -10723,6 +10934,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 	) as UseMutationResult<
 		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
@@ -10745,6 +10957,7 @@ export function putApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TContex
 	return mutationOptions<
 		PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
 		ResponseErrorConfig<
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -10776,6 +10989,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
 			ResponseErrorConfig<
+				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -10798,6 +11012,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	) as UseMutationOptions<
 		PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
 		ResponseErrorConfig<
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -10811,6 +11026,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	return useMutation<
 		PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
 		ResponseErrorConfig<
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -10829,6 +11045,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	) as UseMutationResult<
 		PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
 		ResponseErrorConfig<
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -12208,6 +12425,7 @@ export function patchApiUsersMeMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PatchApiUsersMeStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeStatus400
 			| PatchApiUsersMeStatus403
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
@@ -12235,6 +12453,7 @@ export function usePatchApiUsersMe<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiUsersMeStatus200,
 			ResponseErrorConfig<
+				| PatchApiUsersMeStatus400
 				| PatchApiUsersMeStatus403
 				| PatchApiUsersMeStatus404
 				| PatchApiUsersMeStatus409
@@ -12255,6 +12474,7 @@ export function usePatchApiUsersMe<TContext>(
 	const baseOptions = patchApiUsersMeMutationOptions(config) as UseMutationOptions<
 		PatchApiUsersMeStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeStatus400
 			| PatchApiUsersMeStatus403
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
@@ -12269,6 +12489,7 @@ export function usePatchApiUsersMe<TContext>(
 	return useMutation<
 		PatchApiUsersMeStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeStatus400
 			| PatchApiUsersMeStatus403
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
@@ -12288,6 +12509,7 @@ export function usePatchApiUsersMe<TContext>(
 	) as UseMutationResult<
 		PatchApiUsersMeStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeStatus400
 			| PatchApiUsersMeStatus403
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
@@ -12392,6 +12614,7 @@ export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PatchApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus400
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
 			| PatchApiUsersMePreferencesStatus429
@@ -12421,6 +12644,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiUsersMePreferencesStatus200,
 			ResponseErrorConfig<
+				| PatchApiUsersMePreferencesStatus400
 				| PatchApiUsersMePreferencesStatus404
 				| PatchApiUsersMePreferencesStatus422
 				| PatchApiUsersMePreferencesStatus429
@@ -12439,6 +12663,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 	const baseOptions = patchApiUsersMePreferencesMutationOptions(config) as UseMutationOptions<
 		PatchApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus400
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
 			| PatchApiUsersMePreferencesStatus429
@@ -12451,6 +12676,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 	return useMutation<
 		PatchApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus400
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
 			| PatchApiUsersMePreferencesStatus429
@@ -12468,6 +12694,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 	) as UseMutationResult<
 		PatchApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus400
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
 			| PatchApiUsersMePreferencesStatus429
@@ -12488,6 +12715,7 @@ export function putApiUsersMePreferencesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PutApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMePreferencesStatus400
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
@@ -12518,6 +12746,7 @@ export function usePutApiUsersMePreferences<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUsersMePreferencesStatus200,
 			ResponseErrorConfig<
+				| PutApiUsersMePreferencesStatus400
 				| PutApiUsersMePreferencesStatus403
 				| PutApiUsersMePreferencesStatus404
 				| PutApiUsersMePreferencesStatus422
@@ -12537,6 +12766,7 @@ export function usePutApiUsersMePreferences<TContext>(
 	const baseOptions = putApiUsersMePreferencesMutationOptions(config) as UseMutationOptions<
 		PutApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMePreferencesStatus400
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
@@ -12550,6 +12780,7 @@ export function usePutApiUsersMePreferences<TContext>(
 	return useMutation<
 		PutApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMePreferencesStatus400
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
@@ -12568,6 +12799,7 @@ export function usePutApiUsersMePreferences<TContext>(
 	) as UseMutationResult<
 		PutApiUsersMePreferencesStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMePreferencesStatus400
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
@@ -12980,6 +13212,7 @@ export function patchApiUsersMeFollowingByUnitIdMutationOptions<TContext = unkno
 	return mutationOptions<
 		PatchApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeFollowingByUnitIdStatus400
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
 			| PatchApiUsersMeFollowingByUnitIdStatus429
@@ -13010,6 +13243,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiUsersMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiUsersMeFollowingByUnitIdStatus400
 				| PatchApiUsersMeFollowingByUnitIdStatus404
 				| PatchApiUsersMeFollowingByUnitIdStatus422
 				| PatchApiUsersMeFollowingByUnitIdStatus429
@@ -13031,6 +13265,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 	) as UseMutationOptions<
 		PatchApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeFollowingByUnitIdStatus400
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
 			| PatchApiUsersMeFollowingByUnitIdStatus429
@@ -13043,6 +13278,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 	return useMutation<
 		PatchApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeFollowingByUnitIdStatus400
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
 			| PatchApiUsersMeFollowingByUnitIdStatus429
@@ -13060,6 +13296,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 	) as UseMutationResult<
 		PatchApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUsersMeFollowingByUnitIdStatus400
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
 			| PatchApiUsersMeFollowingByUnitIdStatus429
@@ -13928,6 +14165,7 @@ export function postApiTagStructuresMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiTagStructuresStatus400
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -13953,6 +14191,7 @@ export function usePostApiTagStructures<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiTagStructuresStatus200,
 			ResponseErrorConfig<
+				| PostApiTagStructuresStatus400
 				| PostApiTagStructuresStatus404
 				| PostApiTagStructuresStatus422
 				| PostApiTagStructuresStatus429
@@ -13971,6 +14210,7 @@ export function usePostApiTagStructures<TContext>(
 	const baseOptions = postApiTagStructuresMutationOptions(config) as UseMutationOptions<
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiTagStructuresStatus400
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -13983,6 +14223,7 @@ export function usePostApiTagStructures<TContext>(
 	return useMutation<
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiTagStructuresStatus400
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -14000,6 +14241,7 @@ export function usePostApiTagStructures<TContext>(
 	) as UseMutationResult<
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiTagStructuresStatus400
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -14126,6 +14368,7 @@ export function putApiTagStructuresByStructureIdMutationOptions<TContext = unkno
 	return mutationOptions<
 		PutApiTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdStatus400
 			| PutApiTagStructuresByStructureIdStatus403
 			| PutApiTagStructuresByStructureIdStatus404
 			| PutApiTagStructuresByStructureIdStatus409
@@ -14159,6 +14402,7 @@ export function usePutApiTagStructuresByStructureId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiTagStructuresByStructureIdStatus200,
 			ResponseErrorConfig<
+				| PutApiTagStructuresByStructureIdStatus400
 				| PutApiTagStructuresByStructureIdStatus403
 				| PutApiTagStructuresByStructureIdStatus404
 				| PutApiTagStructuresByStructureIdStatus409
@@ -14182,6 +14426,7 @@ export function usePutApiTagStructuresByStructureId<TContext>(
 	) as UseMutationOptions<
 		PutApiTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdStatus400
 			| PutApiTagStructuresByStructureIdStatus403
 			| PutApiTagStructuresByStructureIdStatus404
 			| PutApiTagStructuresByStructureIdStatus409
@@ -14196,6 +14441,7 @@ export function usePutApiTagStructuresByStructureId<TContext>(
 	return useMutation<
 		PutApiTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdStatus400
 			| PutApiTagStructuresByStructureIdStatus403
 			| PutApiTagStructuresByStructureIdStatus404
 			| PutApiTagStructuresByStructureIdStatus409
@@ -14215,6 +14461,7 @@ export function usePutApiTagStructuresByStructureId<TContext>(
 	) as UseMutationResult<
 		PutApiTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdStatus400
 			| PutApiTagStructuresByStructureIdStatus403
 			| PutApiTagStructuresByStructureIdStatus404
 			| PutApiTagStructuresByStructureIdStatus409
@@ -14237,6 +14484,7 @@ export function putApiTagStructuresByStructureIdVoteMutationOptions<TContext = u
 	return mutationOptions<
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdVoteStatus400
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14267,6 +14515,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiTagStructuresByStructureIdVoteStatus200,
 			ResponseErrorConfig<
+				| PutApiTagStructuresByStructureIdVoteStatus400
 				| PutApiTagStructuresByStructureIdVoteStatus404
 				| PutApiTagStructuresByStructureIdVoteStatus422
 				| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14288,6 +14537,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 	) as UseMutationOptions<
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdVoteStatus400
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14300,6 +14550,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 	return useMutation<
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdVoteStatus400
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14317,6 +14568,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 	) as UseMutationResult<
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiTagStructuresByStructureIdVoteStatus400
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14742,6 +14994,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationO
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -14772,6 +15025,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -14794,6 +15048,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -14806,6 +15061,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -14823,6 +15079,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15040,6 +15297,7 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TCont
 	return mutationOptions<
 		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
@@ -15071,6 +15329,7 @@ export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
 			ResponseErrorConfig<
+				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400
 				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
 				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
 				| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
@@ -15092,6 +15351,7 @@ export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 	) as UseMutationOptions<
 		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
@@ -15104,6 +15364,7 @@ export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 	return useMutation<
 		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
@@ -15121,6 +15382,7 @@ export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
 	) as UseMutationResult<
 		PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus400
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus404
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus422
 			| PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus429
@@ -15982,6 +16244,7 @@ export function releaseSlugRedirectAsStaffMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		ReleaseSlugRedirectAsStaffStatus204,
 		ResponseErrorConfig<
+			| ReleaseSlugRedirectAsStaffStatus400
 			| ReleaseSlugRedirectAsStaffStatus401
 			| ReleaseSlugRedirectAsStaffStatus403
 			| ReleaseSlugRedirectAsStaffStatus404
@@ -16014,6 +16277,7 @@ export function useReleaseSlugRedirectAsStaff<TContext>(
 		mutation?: UseMutationOptions<
 			ReleaseSlugRedirectAsStaffStatus204,
 			ResponseErrorConfig<
+				| ReleaseSlugRedirectAsStaffStatus400
 				| ReleaseSlugRedirectAsStaffStatus401
 				| ReleaseSlugRedirectAsStaffStatus403
 				| ReleaseSlugRedirectAsStaffStatus404
@@ -16033,6 +16297,7 @@ export function useReleaseSlugRedirectAsStaff<TContext>(
 	const baseOptions = releaseSlugRedirectAsStaffMutationOptions(config) as UseMutationOptions<
 		ReleaseSlugRedirectAsStaffStatus204,
 		ResponseErrorConfig<
+			| ReleaseSlugRedirectAsStaffStatus400
 			| ReleaseSlugRedirectAsStaffStatus401
 			| ReleaseSlugRedirectAsStaffStatus403
 			| ReleaseSlugRedirectAsStaffStatus404
@@ -16046,6 +16311,7 @@ export function useReleaseSlugRedirectAsStaff<TContext>(
 	return useMutation<
 		ReleaseSlugRedirectAsStaffStatus204,
 		ResponseErrorConfig<
+			| ReleaseSlugRedirectAsStaffStatus400
 			| ReleaseSlugRedirectAsStaffStatus401
 			| ReleaseSlugRedirectAsStaffStatus403
 			| ReleaseSlugRedirectAsStaffStatus404
@@ -16064,6 +16330,7 @@ export function useReleaseSlugRedirectAsStaff<TContext>(
 	) as UseMutationResult<
 		ReleaseSlugRedirectAsStaffStatus204,
 		ResponseErrorConfig<
+			| ReleaseSlugRedirectAsStaffStatus400
 			| ReleaseSlugRedirectAsStaffStatus401
 			| ReleaseSlugRedirectAsStaffStatus403
 			| ReleaseSlugRedirectAsStaffStatus404
@@ -16389,6 +16656,7 @@ export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -16421,6 +16689,7 @@ export function usePostApiUnitsByType<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByTypeStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByTypeStatus400
 				| PostApiUnitsByTypeStatus401
 				| PostApiUnitsByTypeStatus403
 				| PostApiUnitsByTypeStatus404
@@ -16441,6 +16710,7 @@ export function usePostApiUnitsByType<TContext>(
 	const baseOptions = postApiUnitsByTypeMutationOptions(config) as UseMutationOptions<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -16455,6 +16725,7 @@ export function usePostApiUnitsByType<TContext>(
 	return useMutation<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -16474,6 +16745,7 @@ export function usePostApiUnitsByType<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -16813,6 +17085,7 @@ export function patchApiUnitsByTypeByUnitIdVariantContextMutationOptions<TContex
 	return mutationOptions<
 		PatchApiUnitsByTypeByUnitIdVariantContextStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus400
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus401
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus403
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
@@ -16846,6 +17119,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiUnitsByTypeByUnitIdVariantContextStatus200,
 			ResponseErrorConfig<
+				| PatchApiUnitsByTypeByUnitIdVariantContextStatus400
 				| PatchApiUnitsByTypeByUnitIdVariantContextStatus401
 				| PatchApiUnitsByTypeByUnitIdVariantContextStatus403
 				| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
@@ -16870,6 +17144,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 	) as UseMutationOptions<
 		PatchApiUnitsByTypeByUnitIdVariantContextStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus400
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus401
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus403
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
@@ -16885,6 +17160,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 	return useMutation<
 		PatchApiUnitsByTypeByUnitIdVariantContextStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus400
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus401
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus403
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
@@ -16905,6 +17181,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 	) as UseMutationResult<
 		PatchApiUnitsByTypeByUnitIdVariantContextStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus400
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus401
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus403
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
@@ -16928,6 +17205,7 @@ export function postApiUnitsByTypeByUnitIdVariantContextPromoteMutationOptions<T
 	return mutationOptions<
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
@@ -16961,6 +17239,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400
 				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401
 				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403
 				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
@@ -16985,6 +17264,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 	) as UseMutationOptions<
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
@@ -17000,6 +17280,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 	return useMutation<
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
@@ -17020,6 +17301,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
@@ -17043,6 +17325,7 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationOptions<
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
@@ -17075,6 +17358,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400
 				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401
 				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
@@ -17099,6 +17383,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
@@ -17113,6 +17398,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
@@ -17132,6 +17418,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
@@ -17472,6 +17759,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreMutationO
 	return mutationOptions<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
@@ -17504,6 +17792,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 		mutation?: UseMutationOptions<
 			PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200,
 			ResponseErrorConfig<
+				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
@@ -17528,6 +17817,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 	) as UseMutationOptions<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
@@ -17542,6 +17832,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 	return useMutation<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
@@ -17561,6 +17852,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 	) as UseMutationResult<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
@@ -17583,6 +17875,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoMutationOpti
 	return mutationOptions<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
@@ -17615,6 +17908,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 		mutation?: UseMutationOptions<
 			PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200,
 			ResponseErrorConfig<
+				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
@@ -17639,6 +17933,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 	) as UseMutationOptions<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
@@ -17653,6 +17948,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 	return useMutation<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
@@ -17672,6 +17968,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 	) as UseMutationResult<
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200,
 		ResponseErrorConfig<
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
@@ -17694,6 +17991,7 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationOption
 	return mutationOptions<
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204,
 		ResponseErrorConfig<
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
@@ -17726,6 +18024,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204,
 			ResponseErrorConfig<
+				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400
 				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403
 				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
@@ -17750,6 +18049,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 	) as UseMutationOptions<
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204,
 		ResponseErrorConfig<
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
@@ -17764,6 +18064,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 	return useMutation<
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204,
 		ResponseErrorConfig<
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
@@ -17783,6 +18084,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 	) as UseMutationResult<
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204,
 		ResponseErrorConfig<
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus403
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
@@ -18152,6 +18454,7 @@ export function postApiEntitiesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
+			| PostApiEntitiesStatus400
 			| PostApiEntitiesStatus404
 			| PostApiEntitiesStatus422
 			| PostApiEntitiesStatus429
@@ -18177,6 +18480,7 @@ export function usePostApiEntities<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiEntitiesStatus200,
 			ResponseErrorConfig<
+				| PostApiEntitiesStatus400
 				| PostApiEntitiesStatus404
 				| PostApiEntitiesStatus422
 				| PostApiEntitiesStatus429
@@ -18195,6 +18499,7 @@ export function usePostApiEntities<TContext>(
 	const baseOptions = postApiEntitiesMutationOptions(config) as UseMutationOptions<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
+			| PostApiEntitiesStatus400
 			| PostApiEntitiesStatus404
 			| PostApiEntitiesStatus422
 			| PostApiEntitiesStatus429
@@ -18207,6 +18512,7 @@ export function usePostApiEntities<TContext>(
 	return useMutation<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
+			| PostApiEntitiesStatus400
 			| PostApiEntitiesStatus404
 			| PostApiEntitiesStatus422
 			| PostApiEntitiesStatus429
@@ -18224,6 +18530,7 @@ export function usePostApiEntities<TContext>(
 	) as UseMutationResult<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
+			| PostApiEntitiesStatus400
 			| PostApiEntitiesStatus404
 			| PostApiEntitiesStatus422
 			| PostApiEntitiesStatus429
@@ -18344,6 +18651,7 @@ export function putApiEntitiesByUnitIdLocalizationsByLanguageMutationOptions<TCo
 	return mutationOptions<
 		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
@@ -18375,6 +18683,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
 			ResponseErrorConfig<
+				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400
 				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
@@ -18397,6 +18706,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 	) as UseMutationOptions<
 		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
@@ -18410,6 +18720,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 	return useMutation<
 		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
@@ -18428,6 +18739,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 	) as UseMutationResult<
 		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
 		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
@@ -18547,6 +18859,7 @@ export function patchApiEntitiesByUnitIdAssociationPolicyMutationOptions<TContex
 	return mutationOptions<
 		PatchApiEntitiesByUnitIdAssociationPolicyStatus200,
 		ResponseErrorConfig<
+			| PatchApiEntitiesByUnitIdAssociationPolicyStatus400
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus403
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus404
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus422
@@ -18577,6 +18890,7 @@ export function usePatchApiEntitiesByUnitIdAssociationPolicy<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiEntitiesByUnitIdAssociationPolicyStatus200,
 			ResponseErrorConfig<
+				| PatchApiEntitiesByUnitIdAssociationPolicyStatus400
 				| PatchApiEntitiesByUnitIdAssociationPolicyStatus403
 				| PatchApiEntitiesByUnitIdAssociationPolicyStatus404
 				| PatchApiEntitiesByUnitIdAssociationPolicyStatus422
@@ -18598,6 +18912,7 @@ export function usePatchApiEntitiesByUnitIdAssociationPolicy<TContext>(
 	) as UseMutationOptions<
 		PatchApiEntitiesByUnitIdAssociationPolicyStatus200,
 		ResponseErrorConfig<
+			| PatchApiEntitiesByUnitIdAssociationPolicyStatus400
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus403
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus404
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus422
@@ -18610,6 +18925,7 @@ export function usePatchApiEntitiesByUnitIdAssociationPolicy<TContext>(
 	return useMutation<
 		PatchApiEntitiesByUnitIdAssociationPolicyStatus200,
 		ResponseErrorConfig<
+			| PatchApiEntitiesByUnitIdAssociationPolicyStatus400
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus403
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus404
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus422
@@ -18627,6 +18943,7 @@ export function usePatchApiEntitiesByUnitIdAssociationPolicy<TContext>(
 	) as UseMutationResult<
 		PatchApiEntitiesByUnitIdAssociationPolicyStatus200,
 		ResponseErrorConfig<
+			| PatchApiEntitiesByUnitIdAssociationPolicyStatus400
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus403
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus404
 			| PatchApiEntitiesByUnitIdAssociationPolicyStatus422
@@ -18718,7 +19035,12 @@ export function postApiTagsMutationOptions<TContext = unknown>(
 	const mutationKey = postApiTagsMutationKey();
 	return mutationOptions<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
+		ResponseErrorConfig<
+			| PostApiTagsStatus400
+			| PostApiTagsStatus422
+			| PostApiTagsStatus429
+			| PostApiTagsStatus500
+		>,
 		PostApiTagsOptions,
 		TContext
 	>({
@@ -18738,7 +19060,12 @@ export function usePostApiTags<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
 			PostApiTagsStatus200,
-			ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
+			ResponseErrorConfig<
+				| PostApiTagsStatus400
+				| PostApiTagsStatus422
+				| PostApiTagsStatus429
+				| PostApiTagsStatus500
+			>,
 			PostApiTagsOptions,
 			TContext
 		> & { client?: QueryClient };
@@ -18751,14 +19078,24 @@ export function usePostApiTags<TContext>(
 
 	const baseOptions = postApiTagsMutationOptions(config) as UseMutationOptions<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
+		ResponseErrorConfig<
+			| PostApiTagsStatus400
+			| PostApiTagsStatus422
+			| PostApiTagsStatus429
+			| PostApiTagsStatus500
+		>,
 		PostApiTagsOptions,
 		TContext
 	>;
 
 	return useMutation<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
+		ResponseErrorConfig<
+			| PostApiTagsStatus400
+			| PostApiTagsStatus422
+			| PostApiTagsStatus429
+			| PostApiTagsStatus500
+		>,
 		PostApiTagsOptions,
 		TContext
 	>(
@@ -18770,7 +19107,12 @@ export function usePostApiTags<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
+		ResponseErrorConfig<
+			| PostApiTagsStatus400
+			| PostApiTagsStatus422
+			| PostApiTagsStatus429
+			| PostApiTagsStatus500
+		>,
 		PostApiTagsOptions,
 		TContext
 	>;
@@ -18883,6 +19225,7 @@ export function postApiUnitsByTypeByUnitIdAliasesMutationOptions<TContext = unkn
 	return mutationOptions<
 		PostApiUnitsByTypeByUnitIdAliasesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdAliasesStatus400
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
@@ -18914,6 +19257,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByTypeByUnitIdAliasesStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByTypeByUnitIdAliasesStatus400
 				| PostApiUnitsByTypeByUnitIdAliasesStatus403
 				| PostApiUnitsByTypeByUnitIdAliasesStatus404
 				| PostApiUnitsByTypeByUnitIdAliasesStatus422
@@ -18936,6 +19280,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 	) as UseMutationOptions<
 		PostApiUnitsByTypeByUnitIdAliasesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdAliasesStatus400
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
@@ -18949,6 +19294,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 	return useMutation<
 		PostApiUnitsByTypeByUnitIdAliasesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdAliasesStatus400
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
@@ -18967,6 +19313,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByTypeByUnitIdAliasesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdAliasesStatus400
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
@@ -19092,6 +19439,7 @@ export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<TCo
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
@@ -19122,6 +19470,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400
 				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
@@ -19143,6 +19492,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
@@ -19155,6 +19505,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
@@ -19172,6 +19523,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
@@ -19508,6 +19860,7 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions<TCo
 	return mutationOptions<
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
@@ -19539,6 +19892,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
 				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
@@ -19561,6 +19915,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 	) as UseMutationOptions<
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
@@ -19574,6 +19929,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 	return useMutation<
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
@@ -19592,6 +19948,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
@@ -19719,6 +20076,7 @@ export function postApiUnitsByTypeByUnitIdLinksMutationOptions<TContext = unknow
 	return mutationOptions<
 		PostApiUnitsByTypeByUnitIdLinksStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdLinksStatus400
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
@@ -19750,6 +20108,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByTypeByUnitIdLinksStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByTypeByUnitIdLinksStatus400
 				| PostApiUnitsByTypeByUnitIdLinksStatus403
 				| PostApiUnitsByTypeByUnitIdLinksStatus404
 				| PostApiUnitsByTypeByUnitIdLinksStatus422
@@ -19771,6 +20130,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 	) as UseMutationOptions<
 		PostApiUnitsByTypeByUnitIdLinksStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdLinksStatus400
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
@@ -19784,6 +20144,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 	return useMutation<
 		PostApiUnitsByTypeByUnitIdLinksStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdLinksStatus400
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
@@ -19802,6 +20163,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByTypeByUnitIdLinksStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdLinksStatus400
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
@@ -19823,6 +20185,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext = u
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -19854,6 +20217,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -19876,6 +20240,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -19889,6 +20254,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -19907,6 +20273,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -20032,6 +20399,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TContext
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
@@ -20063,6 +20431,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
@@ -20085,6 +20454,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
@@ -20098,6 +20468,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
@@ -20116,6 +20487,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus400
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
@@ -20449,6 +20821,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresMutationOptions<TContex
 	return mutationOptions<
 		PostApiUnitsByIdByUnitIdContentStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
@@ -20480,6 +20853,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByIdByUnitIdContentStructuresStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdContentStructuresStatus400
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus422
@@ -20502,6 +20876,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 	) as UseMutationOptions<
 		PostApiUnitsByIdByUnitIdContentStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
@@ -20515,6 +20890,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 	return useMutation<
 		PostApiUnitsByIdByUnitIdContentStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
@@ -20533,6 +20909,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByIdByUnitIdContentStructuresStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
@@ -20655,6 +21032,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdMutation
 	return mutationOptions<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
@@ -20687,6 +21065,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
@@ -20711,6 +21090,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 	) as UseMutationOptions<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
@@ -20725,6 +21105,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 	return useMutation<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
@@ -20744,6 +21125,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 	) as UseMutationResult<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
@@ -20889,6 +21271,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 	return mutationOptions<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
@@ -20921,6 +21304,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 		mutation?: UseMutationOptions<
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
@@ -20946,6 +21330,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 		) as UseMutationOptions<
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
@@ -20960,6 +21345,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 	return useMutation<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
@@ -20979,6 +21365,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 	) as UseMutationResult<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
@@ -21001,6 +21388,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutat
 	return mutationOptions<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
@@ -21033,6 +21421,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 		mutation?: UseMutationOptions<
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
@@ -21057,6 +21446,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 	) as UseMutationOptions<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
@@ -21071,6 +21461,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 	return useMutation<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
@@ -21090,6 +21481,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 	) as UseMutationResult<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
@@ -21113,6 +21505,7 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 	return mutationOptions<
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21146,6 +21539,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 		mutation?: UseMutationOptions<
 			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21171,6 +21565,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 		) as UseMutationOptions<
 			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21185,6 +21580,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 	return useMutation<
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21204,6 +21600,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 	) as UseMutationResult<
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21230,6 +21627,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 	return mutationOptions<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21263,6 +21661,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21288,6 +21687,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 		) as UseMutationOptions<
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21302,6 +21702,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 	return useMutation<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21321,6 +21722,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 	) as UseMutationResult<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus400
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
@@ -21441,6 +21843,7 @@ export function postApiUnitsBookByUnitIdContentStructureNodesMutationOptions<TCo
 	return mutationOptions<
 		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
@@ -21473,6 +21876,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
@@ -21496,6 +21900,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 	) as UseMutationOptions<
 		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
@@ -21510,6 +21915,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 	return useMutation<
 		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
@@ -21529,6 +21935,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
@@ -21551,6 +21958,7 @@ export function patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationOp
 	return mutationOptions<
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
@@ -21583,6 +21991,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 		mutation?: UseMutationOptions<
 			PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
 				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
 				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
@@ -21607,6 +22016,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 	) as UseMutationOptions<
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
@@ -21621,6 +22031,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 	return useMutation<
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
@@ -21640,6 +22051,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 	) as UseMutationResult<
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
@@ -21765,6 +22177,7 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContentMutationO
 	return mutationOptions<
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200,
 		ResponseErrorConfig<
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
@@ -21796,6 +22209,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 		mutation?: UseMutationOptions<
 			PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200,
 			ResponseErrorConfig<
+				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
@@ -21819,6 +22233,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 	) as UseMutationOptions<
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200,
 		ResponseErrorConfig<
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
@@ -21832,6 +22247,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 	return useMutation<
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200,
 		ResponseErrorConfig<
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
@@ -21850,6 +22266,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 	) as UseMutationResult<
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200,
 		ResponseErrorConfig<
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
@@ -22047,6 +22464,7 @@ export function putApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdStatus400
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -22077,6 +22495,7 @@ export function usePutApiProgressByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiProgressByUnitIdStatus200,
 			ResponseErrorConfig<
+				| PutApiProgressByUnitIdStatus400
 				| PutApiProgressByUnitIdStatus404
 				| PutApiProgressByUnitIdStatus422
 				| PutApiProgressByUnitIdStatus429
@@ -22095,6 +22514,7 @@ export function usePutApiProgressByUnitId<TContext>(
 	const baseOptions = putApiProgressByUnitIdMutationOptions(config) as UseMutationOptions<
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdStatus400
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -22107,6 +22527,7 @@ export function usePutApiProgressByUnitId<TContext>(
 	return useMutation<
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdStatus400
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -22124,6 +22545,7 @@ export function usePutApiProgressByUnitId<TContext>(
 	) as UseMutationResult<
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdStatus400
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -22333,6 +22755,7 @@ export function postApiProgressByUnitIdCompleteMutationOptions<TContext = unknow
 	return mutationOptions<
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus400
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -22363,6 +22786,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiProgressByUnitIdCompleteStatus200,
 			ResponseErrorConfig<
+				| PostApiProgressByUnitIdCompleteStatus400
 				| PostApiProgressByUnitIdCompleteStatus404
 				| PostApiProgressByUnitIdCompleteStatus422
 				| PostApiProgressByUnitIdCompleteStatus429
@@ -22383,6 +22807,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 	) as UseMutationOptions<
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus400
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -22395,6 +22820,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 	return useMutation<
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus400
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -22412,6 +22838,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 	) as UseMutationResult<
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus400
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -22704,6 +23131,7 @@ export function postApiCollectionsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsStatus400
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -22729,6 +23157,7 @@ export function usePostApiCollections<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiCollectionsStatus200,
 			ResponseErrorConfig<
+				| PostApiCollectionsStatus400
 				| PostApiCollectionsStatus404
 				| PostApiCollectionsStatus422
 				| PostApiCollectionsStatus429
@@ -22747,6 +23176,7 @@ export function usePostApiCollections<TContext>(
 	const baseOptions = postApiCollectionsMutationOptions(config) as UseMutationOptions<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsStatus400
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -22759,6 +23189,7 @@ export function usePostApiCollections<TContext>(
 	return useMutation<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsStatus400
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -22776,6 +23207,7 @@ export function usePostApiCollections<TContext>(
 	) as UseMutationResult<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsStatus400
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -22975,6 +23407,7 @@ export function patchApiCollectionsByCollectionIdMutationOptions<TContext = unkn
 	return mutationOptions<
 		PatchApiCollectionsByCollectionIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiCollectionsByCollectionIdStatus400
 			| PatchApiCollectionsByCollectionIdStatus403
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
@@ -23007,6 +23440,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiCollectionsByCollectionIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiCollectionsByCollectionIdStatus400
 				| PatchApiCollectionsByCollectionIdStatus403
 				| PatchApiCollectionsByCollectionIdStatus404
 				| PatchApiCollectionsByCollectionIdStatus409
@@ -23030,6 +23464,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 	) as UseMutationOptions<
 		PatchApiCollectionsByCollectionIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiCollectionsByCollectionIdStatus400
 			| PatchApiCollectionsByCollectionIdStatus403
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
@@ -23044,6 +23479,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 	return useMutation<
 		PatchApiCollectionsByCollectionIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiCollectionsByCollectionIdStatus400
 			| PatchApiCollectionsByCollectionIdStatus403
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
@@ -23063,6 +23499,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 	) as UseMutationResult<
 		PatchApiCollectionsByCollectionIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiCollectionsByCollectionIdStatus400
 			| PatchApiCollectionsByCollectionIdStatus403
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
@@ -23189,6 +23626,7 @@ export function postApiCollectionsByCollectionIdItemsBatchMutationOptions<TConte
 	return mutationOptions<
 		PostApiCollectionsByCollectionIdItemsBatchStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchStatus400
 			| PostApiCollectionsByCollectionIdItemsBatchStatus403
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
@@ -23221,6 +23659,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiCollectionsByCollectionIdItemsBatchStatus200,
 			ResponseErrorConfig<
+				| PostApiCollectionsByCollectionIdItemsBatchStatus400
 				| PostApiCollectionsByCollectionIdItemsBatchStatus403
 				| PostApiCollectionsByCollectionIdItemsBatchStatus404
 				| PostApiCollectionsByCollectionIdItemsBatchStatus409
@@ -23244,6 +23683,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 	) as UseMutationOptions<
 		PostApiCollectionsByCollectionIdItemsBatchStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchStatus400
 			| PostApiCollectionsByCollectionIdItemsBatchStatus403
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
@@ -23258,6 +23698,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 	return useMutation<
 		PostApiCollectionsByCollectionIdItemsBatchStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchStatus400
 			| PostApiCollectionsByCollectionIdItemsBatchStatus403
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
@@ -23277,6 +23718,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 	) as UseMutationResult<
 		PostApiCollectionsByCollectionIdItemsBatchStatus200,
 		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemsBatchStatus400
 			| PostApiCollectionsByCollectionIdItemsBatchStatus403
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
@@ -23299,6 +23741,7 @@ export function putApiCollectionsByCollectionIdItemsByTargetIdMutationOptions<TC
 	return mutationOptions<
 		PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
@@ -23330,6 +23773,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 			ResponseErrorConfig<
+				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
@@ -23352,6 +23796,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	) as UseMutationOptions<
 		PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
@@ -23365,6 +23810,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	return useMutation<
 		PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
@@ -23383,6 +23829,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	) as UseMutationResult<
 		PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
@@ -23772,6 +24219,7 @@ export function postApiReviewsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
+			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -23799,6 +24247,7 @@ export function usePostApiReviews<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiReviewsStatus200,
 			ResponseErrorConfig<
+				| PostApiReviewsStatus400
 				| PostApiReviewsStatus403
 				| PostApiReviewsStatus404
 				| PostApiReviewsStatus409
@@ -23819,6 +24268,7 @@ export function usePostApiReviews<TContext>(
 	const baseOptions = postApiReviewsMutationOptions(config) as UseMutationOptions<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
+			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -23833,6 +24283,7 @@ export function usePostApiReviews<TContext>(
 	return useMutation<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
+			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -23852,6 +24303,7 @@ export function usePostApiReviews<TContext>(
 	) as UseMutationResult<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
+			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -23976,6 +24428,7 @@ export function patchApiReviewsByReviewIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PatchApiReviewsByReviewIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
@@ -24007,6 +24460,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiReviewsByReviewIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiReviewsByReviewIdStatus400
 				| PatchApiReviewsByReviewIdStatus403
 				| PatchApiReviewsByReviewIdStatus404
 				| PatchApiReviewsByReviewIdStatus422
@@ -24026,6 +24480,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 	const baseOptions = patchApiReviewsByReviewIdMutationOptions(config) as UseMutationOptions<
 		PatchApiReviewsByReviewIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
@@ -24039,6 +24494,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 	return useMutation<
 		PatchApiReviewsByReviewIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
@@ -24057,6 +24513,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 	) as UseMutationResult<
 		PatchApiReviewsByReviewIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
@@ -24178,6 +24635,7 @@ export function putApiScoresByTargetIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PutApiScoresByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
@@ -24210,6 +24668,7 @@ export function usePutApiScoresByTargetId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiScoresByTargetIdStatus200,
 			ResponseErrorConfig<
+				| PutApiScoresByTargetIdStatus400
 				| PutApiScoresByTargetIdStatus403
 				| PutApiScoresByTargetIdStatus404
 				| PutApiScoresByTargetIdStatus409
@@ -24230,6 +24689,7 @@ export function usePutApiScoresByTargetId<TContext>(
 	const baseOptions = putApiScoresByTargetIdMutationOptions(config) as UseMutationOptions<
 		PutApiScoresByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
@@ -24244,6 +24704,7 @@ export function usePutApiScoresByTargetId<TContext>(
 	return useMutation<
 		PutApiScoresByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
@@ -24263,6 +24724,7 @@ export function usePutApiScoresByTargetId<TContext>(
 	) as UseMutationResult<
 		PutApiScoresByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
@@ -24453,6 +24915,7 @@ export function putApiScoreContextMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PutApiScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiScoreContextStatus400
 			| PutApiScoreContextStatus403
 			| PutApiScoreContextStatus404
 			| PutApiScoreContextStatus422
@@ -24478,6 +24941,7 @@ export function usePutApiScoreContext<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiScoreContextStatus200,
 			ResponseErrorConfig<
+				| PutApiScoreContextStatus400
 				| PutApiScoreContextStatus403
 				| PutApiScoreContextStatus404
 				| PutApiScoreContextStatus422
@@ -24496,6 +24960,7 @@ export function usePutApiScoreContext<TContext>(
 	const baseOptions = putApiScoreContextMutationOptions(config) as UseMutationOptions<
 		PutApiScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiScoreContextStatus400
 			| PutApiScoreContextStatus403
 			| PutApiScoreContextStatus404
 			| PutApiScoreContextStatus422
@@ -24508,6 +24973,7 @@ export function usePutApiScoreContext<TContext>(
 	return useMutation<
 		PutApiScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiScoreContextStatus400
 			| PutApiScoreContextStatus403
 			| PutApiScoreContextStatus404
 			| PutApiScoreContextStatus422
@@ -24525,6 +24991,7 @@ export function usePutApiScoreContext<TContext>(
 	) as UseMutationResult<
 		PutApiScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiScoreContextStatus400
 			| PutApiScoreContextStatus403
 			| PutApiScoreContextStatus404
 			| PutApiScoreContextStatus422
@@ -24715,6 +25182,7 @@ export function putApiReactionsUnitsByUnitIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PutApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiReactionsUnitsByUnitIdStatus400
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
 			| PutApiReactionsUnitsByUnitIdStatus429
@@ -24745,6 +25213,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiReactionsUnitsByUnitIdStatus200,
 			ResponseErrorConfig<
+				| PutApiReactionsUnitsByUnitIdStatus400
 				| PutApiReactionsUnitsByUnitIdStatus404
 				| PutApiReactionsUnitsByUnitIdStatus422
 				| PutApiReactionsUnitsByUnitIdStatus429
@@ -24763,6 +25232,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 	const baseOptions = putApiReactionsUnitsByUnitIdMutationOptions(config) as UseMutationOptions<
 		PutApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiReactionsUnitsByUnitIdStatus400
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
 			| PutApiReactionsUnitsByUnitIdStatus429
@@ -24775,6 +25245,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 	return useMutation<
 		PutApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiReactionsUnitsByUnitIdStatus400
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
 			| PutApiReactionsUnitsByUnitIdStatus429
@@ -24792,6 +25263,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 	) as UseMutationResult<
 		PutApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiReactionsUnitsByUnitIdStatus400
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
 			| PutApiReactionsUnitsByUnitIdStatus429
@@ -24812,6 +25284,7 @@ export function deleteApiReactionsUnitsByUnitIdMutationOptions<TContext = unknow
 	return mutationOptions<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiReactionsUnitsByUnitIdStatus400
 			| DeleteApiReactionsUnitsByUnitIdStatus422
 			| DeleteApiReactionsUnitsByUnitIdStatus429
 			| DeleteApiReactionsUnitsByUnitIdStatus500
@@ -24841,6 +25314,7 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiReactionsUnitsByUnitIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiReactionsUnitsByUnitIdStatus400
 				| DeleteApiReactionsUnitsByUnitIdStatus422
 				| DeleteApiReactionsUnitsByUnitIdStatus429
 				| DeleteApiReactionsUnitsByUnitIdStatus500
@@ -24860,6 +25334,7 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiReactionsUnitsByUnitIdStatus400
 			| DeleteApiReactionsUnitsByUnitIdStatus422
 			| DeleteApiReactionsUnitsByUnitIdStatus429
 			| DeleteApiReactionsUnitsByUnitIdStatus500
@@ -24871,6 +25346,7 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	return useMutation<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiReactionsUnitsByUnitIdStatus400
 			| DeleteApiReactionsUnitsByUnitIdStatus422
 			| DeleteApiReactionsUnitsByUnitIdStatus429
 			| DeleteApiReactionsUnitsByUnitIdStatus500
@@ -24887,6 +25363,7 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	) as UseMutationResult<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiReactionsUnitsByUnitIdStatus400
 			| DeleteApiReactionsUnitsByUnitIdStatus422
 			| DeleteApiReactionsUnitsByUnitIdStatus429
 			| DeleteApiReactionsUnitsByUnitIdStatus500
@@ -25695,6 +26172,7 @@ export function putApiPostsByPostIdScoresMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PutApiPostsByPostIdScoresStatus200,
 		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus400
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
@@ -25726,6 +26204,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiPostsByPostIdScoresStatus200,
 			ResponseErrorConfig<
+				| PutApiPostsByPostIdScoresStatus400
 				| PutApiPostsByPostIdScoresStatus403
 				| PutApiPostsByPostIdScoresStatus404
 				| PutApiPostsByPostIdScoresStatus422
@@ -25745,6 +26224,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 	const baseOptions = putApiPostsByPostIdScoresMutationOptions(config) as UseMutationOptions<
 		PutApiPostsByPostIdScoresStatus200,
 		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus400
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
@@ -25758,6 +26238,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 	return useMutation<
 		PutApiPostsByPostIdScoresStatus200,
 		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus400
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
@@ -25776,6 +26257,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 	) as UseMutationResult<
 		PutApiPostsByPostIdScoresStatus200,
 		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus400
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
@@ -25869,6 +26351,7 @@ export function postApiPostsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiPostsStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsStatus400
 			| PostApiPostsStatus403
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
@@ -25896,6 +26379,7 @@ export function usePostApiPosts<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiPostsStatus200,
 			ResponseErrorConfig<
+				| PostApiPostsStatus400
 				| PostApiPostsStatus403
 				| PostApiPostsStatus404
 				| PostApiPostsStatus409
@@ -25916,6 +26400,7 @@ export function usePostApiPosts<TContext>(
 	const baseOptions = postApiPostsMutationOptions(config) as UseMutationOptions<
 		PostApiPostsStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsStatus400
 			| PostApiPostsStatus403
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
@@ -25930,6 +26415,7 @@ export function usePostApiPosts<TContext>(
 	return useMutation<
 		PostApiPostsStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsStatus400
 			| PostApiPostsStatus403
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
@@ -25949,6 +26435,7 @@ export function usePostApiPosts<TContext>(
 	) as UseMutationResult<
 		PostApiPostsStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsStatus400
 			| PostApiPostsStatus403
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
@@ -26069,6 +26556,7 @@ export function patchApiPostsByPostIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PatchApiPostsByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdStatus400
 			| PatchApiPostsByPostIdStatus403
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
@@ -26101,6 +26589,7 @@ export function usePatchApiPostsByPostId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiPostsByPostIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiPostsByPostIdStatus400
 				| PatchApiPostsByPostIdStatus403
 				| PatchApiPostsByPostIdStatus404
 				| PatchApiPostsByPostIdStatus409
@@ -26121,6 +26610,7 @@ export function usePatchApiPostsByPostId<TContext>(
 	const baseOptions = patchApiPostsByPostIdMutationOptions(config) as UseMutationOptions<
 		PatchApiPostsByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdStatus400
 			| PatchApiPostsByPostIdStatus403
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
@@ -26135,6 +26625,7 @@ export function usePatchApiPostsByPostId<TContext>(
 	return useMutation<
 		PatchApiPostsByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdStatus400
 			| PatchApiPostsByPostIdStatus403
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
@@ -26154,6 +26645,7 @@ export function usePatchApiPostsByPostId<TContext>(
 	) as UseMutationResult<
 		PatchApiPostsByPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdStatus400
 			| PatchApiPostsByPostIdStatus403
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
@@ -26379,6 +26871,7 @@ export function postApiPostsByPostIdRepliesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiPostsByPostIdRepliesStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsByPostIdRepliesStatus400
 			| PostApiPostsByPostIdRepliesStatus403
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
@@ -26411,6 +26904,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiPostsByPostIdRepliesStatus200,
 			ResponseErrorConfig<
+				| PostApiPostsByPostIdRepliesStatus400
 				| PostApiPostsByPostIdRepliesStatus403
 				| PostApiPostsByPostIdRepliesStatus404
 				| PostApiPostsByPostIdRepliesStatus409
@@ -26431,6 +26925,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 	const baseOptions = postApiPostsByPostIdRepliesMutationOptions(config) as UseMutationOptions<
 		PostApiPostsByPostIdRepliesStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsByPostIdRepliesStatus400
 			| PostApiPostsByPostIdRepliesStatus403
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
@@ -26445,6 +26940,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 	return useMutation<
 		PostApiPostsByPostIdRepliesStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsByPostIdRepliesStatus400
 			| PostApiPostsByPostIdRepliesStatus403
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
@@ -26464,6 +26960,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 	) as UseMutationResult<
 		PostApiPostsByPostIdRepliesStatus200,
 		ResponseErrorConfig<
+			| PostApiPostsByPostIdRepliesStatus400
 			| PostApiPostsByPostIdRepliesStatus403
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
@@ -26486,6 +26983,7 @@ export function patchApiPostsByPostIdRepliesByReplyPostIdMutationOptions<TContex
 	return mutationOptions<
 		PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus400
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
@@ -26518,6 +27016,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus400
 				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus403
 				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
@@ -26541,6 +27040,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 	) as UseMutationOptions<
 		PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus400
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
@@ -26555,6 +27055,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 	return useMutation<
 		PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus400
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
@@ -26574,6 +27075,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 	) as UseMutationResult<
 		PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus400
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
@@ -26773,6 +27275,7 @@ export function postApiRealmsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
+			| PostApiRealmsStatus400
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -26798,6 +27301,7 @@ export function usePostApiRealms<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiRealmsStatus200,
 			ResponseErrorConfig<
+				| PostApiRealmsStatus400
 				| PostApiRealmsStatus404
 				| PostApiRealmsStatus422
 				| PostApiRealmsStatus429
@@ -26816,6 +27320,7 @@ export function usePostApiRealms<TContext>(
 	const baseOptions = postApiRealmsMutationOptions(config) as UseMutationOptions<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
+			| PostApiRealmsStatus400
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -26828,6 +27333,7 @@ export function usePostApiRealms<TContext>(
 	return useMutation<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
+			| PostApiRealmsStatus400
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -26845,6 +27351,7 @@ export function usePostApiRealms<TContext>(
 	) as UseMutationResult<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
+			| PostApiRealmsStatus400
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -27077,6 +27584,7 @@ export function patchApiRealmsByRealmIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PatchApiRealmsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdStatus400
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
@@ -27108,6 +27616,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiRealmsByRealmIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiRealmsByRealmIdStatus400
 				| PatchApiRealmsByRealmIdStatus403
 				| PatchApiRealmsByRealmIdStatus404
 				| PatchApiRealmsByRealmIdStatus422
@@ -27127,6 +27636,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 	const baseOptions = patchApiRealmsByRealmIdMutationOptions(config) as UseMutationOptions<
 		PatchApiRealmsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdStatus400
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
@@ -27140,6 +27650,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 	return useMutation<
 		PatchApiRealmsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdStatus400
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
@@ -27158,6 +27669,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 	) as UseMutationResult<
 		PatchApiRealmsByRealmIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdStatus400
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
@@ -27276,6 +27788,7 @@ export function putApiRealmsByRealmIdScoreContextMutationOptions<TContext = unkn
 	return mutationOptions<
 		PutApiRealmsByRealmIdScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus400
 			| PutApiRealmsByRealmIdScoreContextStatus403
 			| PutApiRealmsByRealmIdScoreContextStatus404
 			| PutApiRealmsByRealmIdScoreContextStatus422
@@ -27306,6 +27819,7 @@ export function usePutApiRealmsByRealmIdScoreContext<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdScoreContextStatus200,
 			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdScoreContextStatus400
 				| PutApiRealmsByRealmIdScoreContextStatus403
 				| PutApiRealmsByRealmIdScoreContextStatus404
 				| PutApiRealmsByRealmIdScoreContextStatus422
@@ -27327,6 +27841,7 @@ export function usePutApiRealmsByRealmIdScoreContext<TContext>(
 	) as UseMutationOptions<
 		PutApiRealmsByRealmIdScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus400
 			| PutApiRealmsByRealmIdScoreContextStatus403
 			| PutApiRealmsByRealmIdScoreContextStatus404
 			| PutApiRealmsByRealmIdScoreContextStatus422
@@ -27339,6 +27854,7 @@ export function usePutApiRealmsByRealmIdScoreContext<TContext>(
 	return useMutation<
 		PutApiRealmsByRealmIdScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus400
 			| PutApiRealmsByRealmIdScoreContextStatus403
 			| PutApiRealmsByRealmIdScoreContextStatus404
 			| PutApiRealmsByRealmIdScoreContextStatus422
@@ -27356,6 +27872,7 @@ export function usePutApiRealmsByRealmIdScoreContext<TContext>(
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdScoreContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus400
 			| PutApiRealmsByRealmIdScoreContextStatus403
 			| PutApiRealmsByRealmIdScoreContextStatus404
 			| PutApiRealmsByRealmIdScoreContextStatus422
@@ -27470,6 +27987,7 @@ export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknow
 	return mutationOptions<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
@@ -27502,6 +28020,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdMembershipStatus200,
 			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdMembershipStatus400
 				| PutApiRealmsByRealmIdMembershipStatus403
 				| PutApiRealmsByRealmIdMembershipStatus404
 				| PutApiRealmsByRealmIdMembershipStatus409
@@ -27524,6 +28043,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	) as UseMutationOptions<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
@@ -27538,6 +28058,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	return useMutation<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
@@ -27557,6 +28078,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
@@ -27795,6 +28317,7 @@ export function patchApiRealmsByRealmIdMembersByProfileIdMutationOptions<TContex
 	return mutationOptions<
 		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
@@ -27826,6 +28349,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
 				| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 				| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 				| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
@@ -27848,6 +28372,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 	) as UseMutationOptions<
 		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
@@ -27861,6 +28386,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 	return useMutation<
 		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
@@ -27879,6 +28405,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 	) as UseMutationResult<
 		PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
@@ -28110,6 +28637,7 @@ export function putApiRealmsByRealmIdRulesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PutApiRealmsByRealmIdRulesStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
@@ -28140,6 +28668,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdRulesStatus200,
 			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdRulesStatus400
 				| PutApiRealmsByRealmIdRulesStatus403
 				| PutApiRealmsByRealmIdRulesStatus422
 				| PutApiRealmsByRealmIdRulesStatus429
@@ -28158,6 +28687,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 	const baseOptions = putApiRealmsByRealmIdRulesMutationOptions(config) as UseMutationOptions<
 		PutApiRealmsByRealmIdRulesStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
@@ -28170,6 +28700,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 	return useMutation<
 		PutApiRealmsByRealmIdRulesStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
@@ -28187,6 +28718,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdRulesStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
@@ -28396,6 +28928,7 @@ export function putApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = unkn
 	return mutationOptions<
 		PutApiRealmsByRealmIdPinsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus400
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
@@ -28427,6 +28960,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdPinsByUnitIdStatus200,
 			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdPinsByUnitIdStatus400
 				| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 				| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 				| PutApiRealmsByRealmIdPinsByUnitIdStatus422
@@ -28449,6 +28983,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 	) as UseMutationOptions<
 		PutApiRealmsByRealmIdPinsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus400
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
@@ -28462,6 +28997,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 	return useMutation<
 		PutApiRealmsByRealmIdPinsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus400
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
@@ -28480,6 +29016,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdPinsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus400
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
@@ -28702,6 +29239,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextMutationOpti
 	return mutationOptions<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
@@ -28733,6 +29271,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<TContext
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
 			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
@@ -28756,6 +29295,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<TContext
 	) as UseMutationOptions<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
@@ -28769,6 +29309,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<TContext
 	return useMutation<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
@@ -28787,6 +29328,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<TContext
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
@@ -28808,6 +29350,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOptions
 	return mutationOptions<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
@@ -28839,6 +29382,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
 			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
 				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
@@ -28862,6 +29406,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationOptions<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
@@ -28875,6 +29420,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 	return useMutation<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
@@ -28893,6 +29439,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
 			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
@@ -29771,6 +30318,7 @@ export function deleteApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<
 	return mutationOptions<
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
@@ -29803,6 +30351,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
 				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
 				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
@@ -29827,6 +30376,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
@@ -29841,6 +30391,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 	return useMutation<
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
@@ -29860,6 +30411,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 	) as UseMutationResult<
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
@@ -29974,6 +30526,7 @@ export function postApiSearchFeaturesByTemplateExecuteMutationOptions<TContext =
 	return mutationOptions<
 		PostApiSearchFeaturesByTemplateExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
@@ -30003,6 +30556,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSearchFeaturesByTemplateExecuteStatus200,
 			ResponseErrorConfig<
+				| PostApiSearchFeaturesByTemplateExecuteStatus400
 				| PostApiSearchFeaturesByTemplateExecuteStatus422
 				| PostApiSearchFeaturesByTemplateExecuteStatus500
 				| PostApiSearchFeaturesByTemplateExecuteStatus503
@@ -30023,6 +30577,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 	) as UseMutationOptions<
 		PostApiSearchFeaturesByTemplateExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
@@ -30034,6 +30589,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 	return useMutation<
 		PostApiSearchFeaturesByTemplateExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
@@ -30050,6 +30606,7 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 	) as UseMutationResult<
 		PostApiSearchFeaturesByTemplateExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateExecuteStatus400
 			| PostApiSearchFeaturesByTemplateExecuteStatus422
 			| PostApiSearchFeaturesByTemplateExecuteStatus500
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
@@ -30169,6 +30726,7 @@ export function putApiSearchZonesByZoneIdFeatureMutationOptions<TContext = unkno
 	return mutationOptions<
 		PutApiSearchZonesByZoneIdFeatureStatus200,
 		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus400
 			| PutApiSearchZonesByZoneIdFeatureStatus403
 			| PutApiSearchZonesByZoneIdFeatureStatus404
 			| PutApiSearchZonesByZoneIdFeatureStatus409
@@ -30200,6 +30758,7 @@ export function usePutApiSearchZonesByZoneIdFeature<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiSearchZonesByZoneIdFeatureStatus200,
 			ResponseErrorConfig<
+				| PutApiSearchZonesByZoneIdFeatureStatus400
 				| PutApiSearchZonesByZoneIdFeatureStatus403
 				| PutApiSearchZonesByZoneIdFeatureStatus404
 				| PutApiSearchZonesByZoneIdFeatureStatus409
@@ -30222,6 +30781,7 @@ export function usePutApiSearchZonesByZoneIdFeature<TContext>(
 	) as UseMutationOptions<
 		PutApiSearchZonesByZoneIdFeatureStatus200,
 		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus400
 			| PutApiSearchZonesByZoneIdFeatureStatus403
 			| PutApiSearchZonesByZoneIdFeatureStatus404
 			| PutApiSearchZonesByZoneIdFeatureStatus409
@@ -30235,6 +30795,7 @@ export function usePutApiSearchZonesByZoneIdFeature<TContext>(
 	return useMutation<
 		PutApiSearchZonesByZoneIdFeatureStatus200,
 		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus400
 			| PutApiSearchZonesByZoneIdFeatureStatus403
 			| PutApiSearchZonesByZoneIdFeatureStatus404
 			| PutApiSearchZonesByZoneIdFeatureStatus409
@@ -30253,6 +30814,7 @@ export function usePutApiSearchZonesByZoneIdFeature<TContext>(
 	) as UseMutationResult<
 		PutApiSearchZonesByZoneIdFeatureStatus200,
 		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus400
 			| PutApiSearchZonesByZoneIdFeatureStatus403
 			| PutApiSearchZonesByZoneIdFeatureStatus404
 			| PutApiSearchZonesByZoneIdFeatureStatus409
@@ -30274,6 +30836,7 @@ export function postApiSearchZonesByZoneIdFeatureExecuteMutationOptions<TContext
 	return mutationOptions<
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -30304,6 +30867,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -30325,6 +30889,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 	) as UseMutationOptions<
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -30337,6 +30902,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 	return useMutation<
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -30354,6 +30920,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 	) as UseMutationResult<
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -30475,6 +31042,7 @@ export function postApiSearchZonesByZoneIdFeatureRestoreMutationOptions<TContext
 	return mutationOptions<
 		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus400
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
@@ -30506,6 +31074,7 @@ export function usePostApiSearchZonesByZoneIdFeatureRestore<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
 			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdFeatureRestoreStatus400
 				| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
 				| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
 				| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
@@ -30528,6 +31097,7 @@ export function usePostApiSearchZonesByZoneIdFeatureRestore<TContext>(
 	) as UseMutationOptions<
 		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus400
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
@@ -30541,6 +31111,7 @@ export function usePostApiSearchZonesByZoneIdFeatureRestore<TContext>(
 	return useMutation<
 		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus400
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
@@ -30559,6 +31130,7 @@ export function usePostApiSearchZonesByZoneIdFeatureRestore<TContext>(
 	) as UseMutationResult<
 		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus400
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
 			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
@@ -30580,6 +31152,7 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOpt
 	return mutationOptions<
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -30610,6 +31183,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 		mutation?: UseMutationOptions<
 			PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -30632,6 +31206,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 	) as UseMutationOptions<
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -30644,6 +31219,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 	return useMutation<
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -30661,6 +31237,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 	) as UseMutationResult<
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -30681,6 +31258,7 @@ export function postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteMuta
 	return mutationOptions<
 		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
@@ -30711,6 +31289,7 @@ export function usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
 		mutation?: UseMutationOptions<
 			PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200,
 			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400
 				| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
 				| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
@@ -30733,6 +31312,7 @@ export function usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
 	) as UseMutationOptions<
 		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
@@ -30745,6 +31325,7 @@ export function usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
 	return useMutation<
 		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
@@ -30762,6 +31343,7 @@ export function usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
 	) as UseMutationResult<
 		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
@@ -30781,7 +31363,10 @@ export function postApiSearchMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiSearchStatus200,
 		ResponseErrorConfig<
-			PostApiSearchStatus422 | PostApiSearchStatus500 | PostApiSearchStatus503
+			| PostApiSearchStatus400
+			| PostApiSearchStatus422
+			| PostApiSearchStatus500
+			| PostApiSearchStatus503
 		>,
 		PostApiSearchOptions,
 		TContext
@@ -30803,7 +31388,10 @@ export function usePostApiSearch<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSearchStatus200,
 			ResponseErrorConfig<
-				PostApiSearchStatus422 | PostApiSearchStatus500 | PostApiSearchStatus503
+				| PostApiSearchStatus400
+				| PostApiSearchStatus422
+				| PostApiSearchStatus500
+				| PostApiSearchStatus503
 			>,
 			PostApiSearchOptions,
 			TContext
@@ -30818,7 +31406,10 @@ export function usePostApiSearch<TContext>(
 	const baseOptions = postApiSearchMutationOptions(config) as UseMutationOptions<
 		PostApiSearchStatus200,
 		ResponseErrorConfig<
-			PostApiSearchStatus422 | PostApiSearchStatus500 | PostApiSearchStatus503
+			| PostApiSearchStatus400
+			| PostApiSearchStatus422
+			| PostApiSearchStatus500
+			| PostApiSearchStatus503
 		>,
 		PostApiSearchOptions,
 		TContext
@@ -30827,7 +31418,10 @@ export function usePostApiSearch<TContext>(
 	return useMutation<
 		PostApiSearchStatus200,
 		ResponseErrorConfig<
-			PostApiSearchStatus422 | PostApiSearchStatus500 | PostApiSearchStatus503
+			| PostApiSearchStatus400
+			| PostApiSearchStatus422
+			| PostApiSearchStatus500
+			| PostApiSearchStatus503
 		>,
 		PostApiSearchOptions,
 		TContext
@@ -30841,7 +31435,10 @@ export function usePostApiSearch<TContext>(
 	) as UseMutationResult<
 		PostApiSearchStatus200,
 		ResponseErrorConfig<
-			PostApiSearchStatus422 | PostApiSearchStatus500 | PostApiSearchStatus503
+			| PostApiSearchStatus400
+			| PostApiSearchStatus422
+			| PostApiSearchStatus500
+			| PostApiSearchStatus503
 		>,
 		PostApiSearchOptions,
 		TContext
@@ -30858,6 +31455,7 @@ export function postApiSearchSharedQueriesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiSearchSharedQueriesStatus201,
 		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus400
 			| PostApiSearchSharedQueriesStatus401
 			| PostApiSearchSharedQueriesStatus422
 			| PostApiSearchSharedQueriesStatus429
@@ -30887,6 +31485,7 @@ export function usePostApiSearchSharedQueries<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSearchSharedQueriesStatus201,
 			ResponseErrorConfig<
+				| PostApiSearchSharedQueriesStatus400
 				| PostApiSearchSharedQueriesStatus401
 				| PostApiSearchSharedQueriesStatus422
 				| PostApiSearchSharedQueriesStatus429
@@ -30905,6 +31504,7 @@ export function usePostApiSearchSharedQueries<TContext>(
 	const baseOptions = postApiSearchSharedQueriesMutationOptions(config) as UseMutationOptions<
 		PostApiSearchSharedQueriesStatus201,
 		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus400
 			| PostApiSearchSharedQueriesStatus401
 			| PostApiSearchSharedQueriesStatus422
 			| PostApiSearchSharedQueriesStatus429
@@ -30917,6 +31517,7 @@ export function usePostApiSearchSharedQueries<TContext>(
 	return useMutation<
 		PostApiSearchSharedQueriesStatus201,
 		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus400
 			| PostApiSearchSharedQueriesStatus401
 			| PostApiSearchSharedQueriesStatus422
 			| PostApiSearchSharedQueriesStatus429
@@ -30934,6 +31535,7 @@ export function usePostApiSearchSharedQueries<TContext>(
 	) as UseMutationResult<
 		PostApiSearchSharedQueriesStatus201,
 		ResponseErrorConfig<
+			| PostApiSearchSharedQueriesStatus400
 			| PostApiSearchSharedQueriesStatus401
 			| PostApiSearchSharedQueriesStatus422
 			| PostApiSearchSharedQueriesStatus429
@@ -31050,6 +31652,7 @@ export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchByIndexStatus400
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
@@ -31079,6 +31682,7 @@ export function usePostApiSearchByIndex<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSearchByIndexStatus200,
 			ResponseErrorConfig<
+				| PostApiSearchByIndexStatus400
 				| PostApiSearchByIndexStatus422
 				| PostApiSearchByIndexStatus500
 				| PostApiSearchByIndexStatus503
@@ -31096,6 +31700,7 @@ export function usePostApiSearchByIndex<TContext>(
 	const baseOptions = postApiSearchByIndexMutationOptions(config) as UseMutationOptions<
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchByIndexStatus400
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
@@ -31107,6 +31712,7 @@ export function usePostApiSearchByIndex<TContext>(
 	return useMutation<
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchByIndexStatus400
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
@@ -31123,6 +31729,7 @@ export function usePostApiSearchByIndex<TContext>(
 	) as UseMutationResult<
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
+			| PostApiSearchByIndexStatus400
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
@@ -31141,6 +31748,7 @@ export function postApiImageAssetsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsStatus400
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422
@@ -31167,6 +31775,7 @@ export function usePostApiImageAssets<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiImageAssetsStatus200,
 			ResponseErrorConfig<
+				| PostApiImageAssetsStatus400
 				| PostApiImageAssetsStatus401
 				| PostApiImageAssetsStatus415
 				| PostApiImageAssetsStatus422
@@ -31186,6 +31795,7 @@ export function usePostApiImageAssets<TContext>(
 	const baseOptions = postApiImageAssetsMutationOptions(config) as UseMutationOptions<
 		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsStatus400
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422
@@ -31199,6 +31809,7 @@ export function usePostApiImageAssets<TContext>(
 	return useMutation<
 		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsStatus400
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422
@@ -31217,6 +31828,7 @@ export function usePostApiImageAssets<TContext>(
 	) as UseMutationResult<
 		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsStatus400
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422

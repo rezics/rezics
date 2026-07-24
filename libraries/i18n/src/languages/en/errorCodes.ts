@@ -10,6 +10,7 @@ const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
+	MalformedRequestBody: "The submitted content could not be read.",
 	ValidationError: "The submitted content is invalid.",
 	InternalError: "The service is temporarily unavailable. Try again later.",
 	AuthenticationRequired: "Sign in to continue.",

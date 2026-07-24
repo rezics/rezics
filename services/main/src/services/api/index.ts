@@ -43,6 +43,7 @@ import {
 	toApiErrorBody,
 	InternalError,
 	isApiError,
+	MalformedRequestBody,
 	ValidationError,
 } from "./errors";
 import { toUnitVariantConstraintError } from "../units/variants";
@@ -54,6 +55,10 @@ const { logger } = getActiveObservability();
 export default new Elysia()
 	.use(createElysiaObservability())
 	.model({ JsonValue })
+	.parser("empty-body", ({ request }) => {
+		// A null Fetch body proves there is nothing for the following JSON parser to consume.
+		return request.body === null ? null : undefined;
+	})
 	.error(ApiErrorRegistry)
 	.use(
 		cors({
@@ -88,6 +93,13 @@ export default new Elysia()
 				tagStructureConstraintError.status,
 				toApiErrorBody(tagStructureConstraintError, requestId),
 			);
+		if (code === "PARSE") {
+			const malformedRequestBody = new MalformedRequestBody();
+			return status(
+				malformedRequestBody.status,
+				toApiErrorBody(malformedRequestBody, requestId),
+			);
+		}
 		if (code === "VALIDATION") {
 			const validationError = new ValidationError();
 			return status(validationError.status, toApiErrorBody(validationError, requestId));
@@ -105,7 +117,7 @@ export default new Elysia()
 	.mount(auth.handler)
 	.use(imageAssetContent)
 	.group("/api", (api) =>
-		api.guard({ parse: "json" }, (api) =>
+		api.guard({ parse: ["empty-body", "json"] }, (api) =>
 			api
 				.use(associationProposals)
 				.use(health)
