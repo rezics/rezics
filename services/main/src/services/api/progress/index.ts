@@ -195,6 +195,7 @@ export default new Elysia({ prefix: "/progress" })
 						progress: body.progress,
 						totalTimeMs:
 							body.totalTimeMs === undefined ? undefined : BigInt(body.totalTimeMs),
+						firstSeenAt: now,
 						lastContentStructureNodeId: body.lastContentStructureNodeId,
 						deletedAt: null,
 						lastSeenAt: now,
@@ -255,6 +256,7 @@ export default new Elysia({ prefix: "/progress" })
 						completedCount: 1,
 						totalTimeMs:
 							body.totalTimeMs === undefined ? undefined : BigInt(body.totalTimeMs),
+						firstSeenAt: now,
 						lastContentStructureNodeId: null,
 						lastSeenAt: now,
 					})
