@@ -2,7 +2,7 @@ import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CreateReviewBody, ListViewerScoresQuery } from "./schema";
+import { CreateReviewBody, ListReviewsQuery, ListViewerScoresQuery } from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
 const realmId = "019b76da-a800-7300-8000-000000000002";
@@ -49,5 +49,26 @@ describe("viewer Score list schema", () => {
 		expect(Check(ListViewerScoresQuery, {})).toBe(true);
 		expect(Check(ListViewerScoresQuery, { language: "zh" })).toBe(true);
 		expect(Check(ListViewerScoresQuery, { language: "zh-Hant" })).toBe(false);
+	});
+});
+
+describe("review list schema", () => {
+	it("accepts supported discovery filters", () => {
+		expect(
+			Check(ListReviewsQuery, {
+				targetId,
+				language: "zh",
+				search: "好看",
+				scoreRealmId: realmId,
+				score: 10,
+				limit: 3,
+			}),
+		).toBe(true);
+	});
+
+	it("rejects unsupported languages and out-of-range Scores", () => {
+		expect(Check(ListReviewsQuery, { language: "zh-Hant" })).toBe(false);
+		expect(Check(ListReviewsQuery, { score: 0 })).toBe(false);
+		expect(Check(ListReviewsQuery, { score: 11 })).toBe(false);
 	});
 });

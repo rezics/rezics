@@ -1,17 +1,14 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
-import { Card, CardContent, EntityPicker, Field, FieldLabel } from "@rezics/ui";
+import { Button, EntityPicker, Field, FieldLabel } from "@rezics/ui";
+import Link from "next/link";
 import { useState } from "react";
 
-import { SignInButton } from "@/features/auth/auth-portal";
-import { ReviewComposer } from "@/features/reviews/components/review-composer";
 import { ScoreOverview } from "@/features/reviews/components/score-overview";
 import { UnitReviewList } from "@/features/reviews/components/unit-review-list";
 import { useDefaultScoreRealm } from "@/features/reviews/data/default-score-realm";
+import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
 import { useTranslation } from "@/i18n/client";
-import { selectLocalization } from "@/lib/localization";
-import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { CatalogDetailSectionFrame } from "../components/catalog-detail-section-frame";
 import { useCatalogDetail } from "../components/catalog-detail-workspace";
 
@@ -22,8 +19,7 @@ interface PickedRealm {
 
 export function CatalogReviewsPage() {
 	const detail = useCatalogDetail();
-	const { data: session } = useHydratedSession();
-	const { locale, t } = useTranslation(["actions", "engagement", "units"]);
+	const { t } = useTranslation(["engagement", "units"]);
 	const [realm, setRealm] = useState<PickedRealm>();
 	const defaultScoreRealm = useDefaultScoreRealm();
 	const scoreRealm = realm ?? defaultScoreRealm.realm;
@@ -42,13 +38,18 @@ export function CatalogReviewsPage() {
 						title: t.units.detail.tabs.software.reviews,
 						description: t.units.detail.sectionDescriptions.software.reviews,
 					};
-	const title = selectLocalization(
-		detail.unit.localizations,
-		toContentLanguage(locale.target),
-		detail.unit.language,
-	)?.title;
 	return (
-		<CatalogDetailSectionFrame description={labels.description} title={labels.title}>
+		<CatalogDetailSectionFrame
+			action={
+				<Button asChild variant="solid">
+					<Link href={targetedReviewCreateHref(detail.type, detail.unit.id)}>
+						{t.engagement.newReview}
+					</Link>
+				</Button>
+			}
+			description={labels.description}
+			title={labels.title}
+		>
 			<Field>
 				<FieldLabel>{t.engagement.filterReviewRealm}</FieldLabel>
 				<EntityPicker index="realms" onChange={setRealm} value={realm} />
@@ -56,21 +57,6 @@ export function CatalogReviewsPage() {
 			{scoreRealm ? (
 				<ScoreOverview realmId={scoreRealm.id} targetId={detail.unit.id} />
 			) : null}
-			<Card>
-				<CardContent className="p-5 sm:p-6">
-					{session ? (
-						<ReviewComposer
-							onCreated={() => undefined}
-							target={{
-								id: detail.unit.id,
-								label: title ?? detail.unit.id,
-							}}
-						/>
-					) : (
-						<SignInButton variant="outline">{t.actions.login}</SignInButton>
-					)}
-				</CardContent>
-			</Card>
 			<UnitReviewList realmId={realm?.id} targetId={detail.unit.id} />
 		</CatalogDetailSectionFrame>
 	);

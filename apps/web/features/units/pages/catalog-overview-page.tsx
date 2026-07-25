@@ -14,6 +14,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { UnitShelf } from "@/features/explore/unit-shelf";
+import { UnitRatingsReviewsSection } from "@/features/reviews/components/unit-ratings-reviews-section";
+import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
 import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
 import { findPrimaryBookAuthor } from "../attribution-role";
@@ -23,7 +25,7 @@ import {
 } from "../components/catalog-attribution-sections";
 import { CatalogSubjectGroups } from "../components/catalog-subject-groups";
 import { useCatalogDetail } from "../components/catalog-detail-workspace";
-import { catalogCreditsHref } from "../routing/catalog-detail-routes";
+import { catalogCreditsHref, catalogDetailHref } from "../routing/catalog-detail-routes";
 
 function formatDate(value: string | null, language: string): string | undefined {
 	if (!value) return undefined;
@@ -112,9 +114,14 @@ export function CatalogOverviewPage() {
 			<div className="grid min-w-0 content-start gap-6">
 				{primaryAuthor ? <PrimaryBookAuthorSection attribution={primaryAuthor} /> : null}
 
-				<DetailSection title={t.units.detail.tags}>
-					<UnitTagSummary type={type} unitId={unit.id} />
-				</DetailSection>
+				<UnitTagSummary type={type} unitId={unit.id} />
+
+				<UnitRatingsReviewsSection
+					moreReviewsHref={catalogDetailHref(type, unit.id, "reviews")}
+					targetId={unit.id}
+					type={type}
+					writeReviewHref={targetedReviewCreateHref(type, unit.id)}
+				/>
 
 				{unit.subjectAssociations.length ? (
 					<DetailSection title={t.units.detail.subjectAssociations}>

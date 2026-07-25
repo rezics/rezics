@@ -141,7 +141,18 @@ export function UnitTagExplorer({
 
 	return (
 		<div className="grid gap-8">
-			<div className="flex flex-wrap items-center justify-end gap-2">
+			<div
+				className={
+					surface === "section"
+						? "flex flex-wrap items-center justify-between gap-3"
+						: "flex flex-wrap items-center justify-end gap-2"
+				}
+			>
+				{surface === "section" ? (
+					<h2 className="font-heading text-lg font-bold sm:text-xl">
+						{t.tags.page.title}
+					</h2>
+				) : null}
 				{surface === "page" ? (
 					<Button asChild variant="outline">
 						<Link href="/settings/tag-sources">{t.tags.sources.manage}</Link>

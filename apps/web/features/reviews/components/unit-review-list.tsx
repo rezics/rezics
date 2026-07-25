@@ -1,7 +1,9 @@
 "use client";
 
-import { useGetApiReviews } from "@rezics/openapi-tanstack-query";
+import type { ContentLanguage } from "@rezics/i18n";
+import { type GetApiReviewsStatus200, useGetApiReviews } from "@rezics/openapi-tanstack-query";
 import {
+	Badge,
 	Button,
 	Card,
 	CardAction,
@@ -14,10 +16,37 @@ import Link from "next/link";
 
 import { AttributionLinks } from "@/features/posts/attribution-list";
 import { useTranslation } from "@/i18n/client";
+import type { UnitScore } from "../model/score-value";
 
-export function UnitReviewList({ realmId, targetId }: { realmId?: string; targetId: string }) {
+export interface UnitReviewListProps {
+	readonly language?: ContentLanguage;
+	readonly limit?: number;
+	readonly realmId?: string;
+	readonly score?: UnitScore;
+	readonly scoreRealmId?: string;
+	readonly search?: string;
+	readonly targetId: string;
+}
+
+export function UnitReviewList({
+	language,
+	limit = 50,
+	realmId,
+	score,
+	scoreRealmId,
+	search,
+	targetId,
+}: UnitReviewListProps) {
 	const query = useGetApiReviews({
-		query: { targetId, ...(realmId ? { realmId } : {}), limit: 50 },
+		query: {
+			targetId,
+			...(realmId ? { realmId } : {}),
+			...(language ? { language } : {}),
+			...(search ? { search } : {}),
+			...(score ? { score } : {}),
+			...(score && scoreRealmId ? { scoreRealmId } : {}),
+			limit,
+		},
 	});
 	const { t } = useTranslation(["engagement", "posts", "ui"]);
 	if (query.isPending) return <QueryPending />;
@@ -25,9 +54,16 @@ export function UnitReviewList({ realmId, targetId }: { realmId?: string; target
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data?.items.length)
 		return <p className="text-sm text-muted-foreground">{t.engagement.emptyReviews}</p>;
+	return <ReviewCards items={query.data.items} />;
+}
+
+type ReviewListItem = GetApiReviewsStatus200["items"][number];
+
+export function ReviewCards({ items }: { readonly items: readonly ReviewListItem[] }) {
+	const { t } = useTranslation(["engagement", "posts", "search", "ui"]);
 	return (
-		<div className="grid gap-3">
-			{query.data.items.map((review) => (
+		<div className="grid gap-4">
+			{items.map((review) => (
 				<Card className="transition-colors hover:bg-surface-hover" key={review.id}>
 					<CardHeader
 						description={review.summary ?? undefined}
@@ -40,10 +76,17 @@ export function UnitReviewList({ realmId, targetId }: { realmId?: string; target
 						</CardAction>
 					</CardHeader>
 					<CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-						<AttributionLinks
-							attributions={review.attributions}
-							emptyLabel={t.posts.unknownAttribution}
-						/>
+						<div className="flex min-w-0 flex-wrap items-center gap-2">
+							<AttributionLinks
+								attributions={review.attributions}
+								emptyLabel={t.posts.unknownAttribution}
+							/>
+							{review.language ? (
+								<Badge variant="secondary">
+									{t.search.languageOptions[review.language]}
+								</Badge>
+							) : null}
+						</div>
 						{review.scores.length ? (
 							<span className="font-medium text-foreground">
 								{review.scores

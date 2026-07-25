@@ -23,10 +23,7 @@ import {
 	DialogBody,
 	DialogContent,
 	DialogHeader,
-	Field,
 	FieldGroup,
-	FieldLabel,
-	Input,
 	type ButtonProps,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
@@ -34,6 +31,7 @@ import { getErrorText } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
 import { getSafeAuthDestination, type AuthPortalMode } from "@/lib/auth-redirect";
 import { authSearchParamsParsers } from "@/lib/search-params";
+import { AuthPasswordField, AuthTextField } from "./components/auth-form-field";
 
 type AuthPortalOptions = {
 	destination?: string;
@@ -296,6 +294,8 @@ function LoginForm({
 	]);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const passwordVisibilityLabel = (visible: boolean) =>
+		visible ? t.auth.hidePassword : t.auth.showPassword;
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -321,29 +321,20 @@ function LoginForm({
 		<>
 			<form onSubmit={onSubmit}>
 				<FieldGroup>
-					<Field>
-						<FieldLabel className="sr-only">{t.auth.email}</FieldLabel>
-						<Input
-							autoComplete="email"
-							name="email"
-							placeholder={t.auth.emailPlaceholder}
-							required
-							size="lg"
-							type="email"
-						/>
-					</Field>
-					<Field>
-						<FieldLabel className="sr-only">{t.auth.password}</FieldLabel>
-						<Input
-							autoComplete="current-password"
-							minLength={8}
-							name="password"
-							placeholder={t.auth.password}
-							required
-							size="lg"
-							type="password"
-						/>
-					</Field>
+					<AuthTextField
+						autoComplete="email"
+						label={t.auth.email}
+						name="email"
+						placeholder={t.auth.emailPlaceholder}
+						type="email"
+					/>
+					<AuthPasswordField
+						autoComplete="current-password"
+						label={t.auth.password}
+						minLength={8}
+						name="password"
+						visibilityLabel={passwordVisibilityLabel}
+					/>
 					<div className="text-end text-sm">
 						<ModeButton onClick={() => onModeChange("forgot-password")}>
 							{t.auth.forgotPassword}
@@ -383,6 +374,8 @@ function RegisterForm({
 	]);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const passwordVisibilityLabel = (visible: boolean) =>
+		visible ? t.auth.hidePassword : t.auth.showPassword;
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -410,39 +403,22 @@ function RegisterForm({
 		<>
 			<form onSubmit={onSubmit}>
 				<FieldGroup>
-					<Field>
-						<FieldLabel className="sr-only">{t.auth.name}</FieldLabel>
-						<Input
-							autoComplete="name"
-							name="name"
-							placeholder={t.auth.name}
-							required
-							size="lg"
-						/>
-					</Field>
-					<Field>
-						<FieldLabel className="sr-only">{t.auth.email}</FieldLabel>
-						<Input
-							autoComplete="email"
-							name="email"
-							placeholder={t.auth.emailPlaceholder}
-							required
-							size="lg"
-							type="email"
-						/>
-					</Field>
-					<Field>
-						<FieldLabel className="sr-only">{t.auth.password}</FieldLabel>
-						<Input
-							autoComplete="new-password"
-							minLength={8}
-							name="password"
-							placeholder={t.auth.passwordMinimum}
-							required
-							size="lg"
-							type="password"
-						/>
-					</Field>
+					<AuthTextField autoComplete="name" label={t.auth.name} name="name" />
+					<AuthTextField
+						autoComplete="email"
+						label={t.auth.email}
+						name="email"
+						placeholder={t.auth.emailPlaceholder}
+						type="email"
+					/>
+					<AuthPasswordField
+						autoComplete="new-password"
+						description={t.auth.passwordMinimum}
+						label={t.auth.password}
+						minLength={8}
+						name="password"
+						visibilityLabel={passwordVisibilityLabel}
+					/>
 					<FormError error={error} />
 					<Button
 						variant="solid"
@@ -506,17 +482,13 @@ function ForgotPasswordForm({
 			) : (
 				<form onSubmit={onSubmit}>
 					<FieldGroup>
-						<Field>
-							<FieldLabel className="sr-only">{t.auth.email}</FieldLabel>
-							<Input
-								autoComplete="email"
-								name="email"
-								placeholder={t.auth.emailPlaceholder}
-								required
-								size="lg"
-								type="email"
-							/>
-						</Field>
+						<AuthTextField
+							autoComplete="email"
+							label={t.auth.email}
+							name="email"
+							placeholder={t.auth.emailPlaceholder}
+							type="email"
+						/>
 						<FormError error={error} />
 						<Button
 							variant="solid"
@@ -557,6 +529,10 @@ function ResetPasswordForm({
 	const [error, setError] = useState<string>();
 	const [isComplete, setIsComplete] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const newPasswordVisibilityLabel = (visible: boolean) =>
+		visible ? t.auth.hideNewPassword : t.auth.showNewPassword;
+	const confirmPasswordVisibilityLabel = (visible: boolean) =>
+		visible ? t.auth.hideConfirmPassword : t.auth.showConfirmPassword;
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -597,30 +573,21 @@ function ResetPasswordForm({
 			) : (
 				<form onSubmit={onSubmit}>
 					<FieldGroup>
-						<Field>
-							<FieldLabel className="sr-only">{t.auth.newPassword}</FieldLabel>
-							<Input
-								autoComplete="new-password"
-								minLength={8}
-								name="password"
-								placeholder={t.auth.passwordMinimum}
-								required
-								size="lg"
-								type="password"
-							/>
-						</Field>
-						<Field>
-							<FieldLabel className="sr-only">{t.auth.confirmPassword}</FieldLabel>
-							<Input
-								autoComplete="new-password"
-								minLength={8}
-								name="confirmPassword"
-								placeholder={t.auth.confirmPassword}
-								required
-								size="lg"
-								type="password"
-							/>
-						</Field>
+						<AuthPasswordField
+							autoComplete="new-password"
+							description={t.auth.passwordMinimum}
+							label={t.auth.newPassword}
+							minLength={8}
+							name="password"
+							visibilityLabel={newPasswordVisibilityLabel}
+						/>
+						<AuthPasswordField
+							autoComplete="new-password"
+							label={t.auth.confirmPassword}
+							minLength={8}
+							name="confirmPassword"
+							visibilityLabel={confirmPasswordVisibilityLabel}
+						/>
 						<FormError error={error} />
 						<Button
 							variant="solid"
@@ -683,16 +650,14 @@ function VerifyEmailForm({
 		<>
 			<form onSubmit={resend}>
 				<FieldGroup>
-					<Field>
-						<FieldLabel className="sr-only">{t.auth.email}</FieldLabel>
-						<Input
-							autoComplete="email"
-							onChange={(event) => setEmail(event.currentTarget.value)}
-							required
-							type="email"
-							value={email}
-						/>
-					</Field>
+					<AuthTextField
+						autoComplete="email"
+						label={t.auth.email}
+						name="email"
+						onChange={(event) => setEmail(event.currentTarget.value)}
+						type="email"
+						value={email}
+					/>
 					{isSent ? (
 						<p className="text-muted-foreground text-sm">{t.auth.verificationSent}</p>
 					) : null}

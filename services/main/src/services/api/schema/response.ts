@@ -552,6 +552,7 @@ export const PostFeedResponse = t.Object({
 	nextCursor: NullableText,
 });
 export const ReviewListResponse = t.Object({
+	totalCount: t.Integer({ minimum: 0 }),
 	items: t.Array(
 		t.Object({
 			id: Uuid,
@@ -565,6 +566,7 @@ export const ReviewListResponse = t.Object({
 			),
 			targetId: Uuid,
 			realmId: t.Nullable(Uuid),
+			language: t.Nullable(ContentLanguage),
 			title: NullableText,
 			summary: NullableText,
 			createdAt: DateTime,

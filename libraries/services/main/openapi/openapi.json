@@ -85065,6 +85065,37 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					},
+					{
+						"name": "search",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "scoreRealmId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "score",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 10,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 10, "type": "integer" }
+							]
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -85086,8 +85117,19 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["totalCount", "items"],
 									"properties": {
+										"totalCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
 										"items": {
 											"type": "array",
 											"items": {
@@ -85098,6 +85140,7 @@
 													"scores",
 													"targetId",
 													"realmId",
+													"language",
 													"title",
 													"summary",
 													"createdAt",
@@ -85394,6 +85437,24 @@
 														"nullable": true,
 														"anyOf": [
 															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
 															{ "type": "null" }
 														]
 													},

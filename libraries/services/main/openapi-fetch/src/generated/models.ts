@@ -64094,6 +64094,14 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdResponse =
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500;
 
+export const GetApiReviewsLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiReviewsLanguage =
+	(typeof GetApiReviewsLanguage)[keyof typeof GetApiReviewsLanguage];
+
 /**
  * @type object
  */
@@ -64110,6 +64118,23 @@ export type GetApiReviewsQuery = {
 	 * @type string | undefined
 	 */
 	realmId?: string;
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiReviewsLanguage;
+	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	search?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	scoreRealmId?: string;
+	score?: string | number;
 	/**
 	 * @default 20
 	 */
@@ -64176,6 +64201,7 @@ export type GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixE
  * @type object
  */
 export type GetApiReviewsStatus200 = {
+	totalCount: string | number;
 	/**
 	 * @type array
 	 */
@@ -64338,6 +64364,7 @@ export type GetApiReviewsStatus200 = {
 		 */
 		targetId: string;
 		realmId: (string | null) | null;
+		language: (("zh" | "en") | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		/**

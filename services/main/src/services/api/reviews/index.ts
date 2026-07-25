@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -72,38 +72,77 @@ export default new Elysia()
 			.get(
 				"",
 				async ({ query }) => {
-					const items = await database
-						.select({
-							id: post.id,
-							targetId: post.subjectUnitId,
-							title: unitLocalization.title,
-							summary: unitLocalization.summary,
-							createdAt: unit.createdAt,
-							updatedAt: unit.updatedAt,
-						})
-						.from(post)
-						.innerJoin(unit, eq(unit.id, post.id))
-						.leftJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, post.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
-							),
-						)
-						.where(
-							and(
-								eq(post.kind, "review"),
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
-								isNull(unit.deletedAt),
-								query.targetId ? eq(post.subjectUnitId, query.targetId) : undefined,
-								query.realmId
-									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
-									: undefined,
-							),
-						)
-						.orderBy(desc(unit.createdAt), desc(unit.id))
-						.limit(query.limit ?? 20);
+					const search = query.search?.trim();
+					const searchPattern = search
+						? `%${search
+								.replaceAll("\\", "\\\\")
+								.replaceAll("%", "\\%")
+								.replaceAll("_", "\\_")}%`
+						: undefined;
+					const reviewFilter = and(
+						eq(post.kind, "review"),
+						eq(unit.status, "published"),
+						eq(unit.visibility, "public"),
+						isNull(unit.deletedAt),
+						query.targetId ? eq(post.subjectUnitId, query.targetId) : undefined,
+						query.realmId
+							? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
+							: undefined,
+						query.language ? eq(unitLocalization.language, query.language) : undefined,
+						searchPattern
+							? or(
+									sql`${unitLocalization.title} ilike ${searchPattern} escape '\\'`,
+									sql`${unitLocalization.summary} ilike ${searchPattern} escape '\\'`,
+									sql`${unitLocalization.content}::text ilike ${searchPattern} escape '\\'`,
+								)
+							: undefined,
+						query.score
+							? sql`exists(
+								select 1
+								from post_score review_post_score
+								inner join score review_score on review_score.id = review_post_score.score_id
+								where review_post_score.post_id = ${post.id}
+									and review_score.value = ${query.score}
+									${query.scoreRealmId ? sql`and review_score.realm_id = ${query.scoreRealmId}` : sql``}
+							)`
+							: undefined,
+					);
+					const [items, [total]] = await Promise.all([
+						database
+							.select({
+								id: post.id,
+								targetId: post.subjectUnitId,
+								language: unitLocalization.language,
+								title: unitLocalization.title,
+								summary: unitLocalization.summary,
+								createdAt: unit.createdAt,
+								updatedAt: unit.updatedAt,
+							})
+							.from(post)
+							.innerJoin(unit, eq(unit.id, post.id))
+							.leftJoin(
+								unitLocalization,
+								and(
+									eq(unitLocalization.unitId, post.id),
+									isPrimaryUnitLocalization(unitLocalization.unitId),
+								),
+							)
+							.where(reviewFilter)
+							.orderBy(desc(unit.createdAt), desc(unit.id))
+							.limit(query.limit ?? 20),
+						database
+							.select({ value: count() })
+							.from(post)
+							.innerJoin(unit, eq(unit.id, post.id))
+							.leftJoin(
+								unitLocalization,
+								and(
+									eq(unitLocalization.unitId, post.id),
+									isPrimaryUnitLocalization(unitLocalization.unitId),
+								),
+							)
+							.where(reviewFilter),
+					]);
 					const attributions = await getAttributionSummariesByUnitIds(
 						items.map(({ id }) => id),
 					);
@@ -140,6 +179,7 @@ export default new Elysia()
 						scoresByPostId.set(postId, current);
 					}
 					return {
+						totalCount: toSafeInteger(total?.value ?? 0, "review count"),
 						items: items.flatMap((item) =>
 							item.targetId
 								? [
