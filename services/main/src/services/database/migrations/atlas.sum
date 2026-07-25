@@ -1,4 +1,4 @@
-h1:63B+aqq9/l12GlKg7cLT7QsbRSBqtQRZJyyvSdYP6Ok=
+h1:93EwwO+kwkMXV446bQKwDsBCskbxumCZtoRzOXcW68w=
 20260718070400_current_baseline.sql h1:u9QkCNmNKf+J8LE4/Lz03NbMrJf4RTid39bT22xn5ew=
 20260718070401_history_invariants.sql h1:ZtbZeYtN6E3/SM2hzpdVuXS7pICASEq93v29wpj7dDs=
 20260718154924_unit_realm_restrictions.sql h1:87+KV38BAlkYD150B4fAMEe19exDPGV12bR3dfNuHjA=
@@ -50,4 +50,5 @@ h1:63B+aqq9/l12GlKg7cLT7QsbRSBqtQRZJyyvSdYP6Ok=
 20260724081857_localized_content_metrics.sql h1:HyrZic9FYjszRLCQPdrGBLZdCrA8JwfmBdhEfAdDUlE=
 20260724134753_score_realm_defaults.sql h1:GXgGPfYNwMwKDYJ7TC9blWyBqdJeQTCCUl/zvcC4R4o=
 20260724152039_email_outbox.sql h1:ZC5eOGU8Xn4gNl60h1i+snCFnGUMplnb6K2mQjf2DGY=
-20260725043954_excerpt_posts.sql h1:eOvs2WBBH4sEmfAQBADgCFgxmJc3ZZ1kjkC9YkwBZSA=
+20260725043954_excerpt_posts.sql h1:4wK4aJuXDoN3lT3rNkLPyAxiPvZtSWbseyzcpw+QL1I=
+20260725050100_excerpt_post_subject_constraint.sql h1:8FEFhGiO8S64Dhqp43lGc/D9WCWa0ispX+GrcckWUNg=
