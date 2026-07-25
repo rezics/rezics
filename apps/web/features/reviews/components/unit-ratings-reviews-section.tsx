@@ -1,21 +1,7 @@
 "use client";
 
-import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { useGetApiReviews } from "@rezics/openapi-tanstack-query";
-import {
-	Button,
-	ChoiceSelect,
-	Field,
-	FieldLabel,
-	Input,
-	Popover,
-	PopoverBody,
-	PopoverContent,
-	PopoverHeader,
-	PopoverTrigger,
-	QueryFailure,
-	QueryPending,
-} from "@rezics/ui";
+import { Button, Input, QueryFailure, QueryPending } from "@rezics/ui";
 import { BookOpen, ChevronRight, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useDeferredValue, useState } from "react";
@@ -24,13 +10,17 @@ import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detai
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useDefaultScoreRealm } from "../data/default-score-realm";
-import { apiValueToUnitScore, type UnitScore } from "../model/score-value";
+import {
+	EmptyReviewFilters,
+	hasReviewFilters,
+	reviewFilterCount,
+	toggleReviewScore,
+	type ReviewFilterModel,
+} from "../model/review-filter-model";
 import { CommunityScoreOverview } from "./community-score-overview";
+import { ReviewFiltersDialog } from "./review-filters-dialog";
 import { ReviewCards } from "./unit-review-list";
 import { UnitScoreControl } from "./unit-score-control";
-
-const ScoreFilterValues = ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"] as const;
-type ScoreFilterValue = (typeof ScoreFilterValues)[number];
 
 export function UnitRatingsReviewsSection({
 	moreReviewsHref,
@@ -43,29 +33,32 @@ export function UnitRatingsReviewsSection({
 	readonly type: CatalogDetailUnitType;
 	readonly writeReviewHref: string;
 }) {
-	const { t } = useTranslation(["engagement", "search"]);
+	const { t } = useTranslation(["engagement"]);
 	const defaultScoreRealm = useDefaultScoreRealm();
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search);
-	const [languages, setLanguages] = useState<readonly ContentLanguage[]>([]);
-	const [scores, setScores] = useState<readonly ScoreFilterValue[]>([]);
-	const language = languages[0];
-	const score = selectedScore(scores[0]);
+	const [filters, setFilters] = useState<ReviewFilterModel>(EmptyReviewFilters);
+	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+	const scoreRealm = filters.realm ?? defaultScoreRealm.realm;
 	const trimmedSearch = deferredSearch.trim();
 	const baseReviewQuery = { targetId, limit: 3 } as const;
 	const summaryQuery = useGetApiReviews({ query: baseReviewQuery });
 	const reviewsQuery = useGetApiReviews({
 		query: {
 			...baseReviewQuery,
-			...(language ? { language } : {}),
+			...(filters.realm ? { realmId: filters.realm.id } : {}),
+			...(filters.languages.length ? { languages: [...filters.languages] } : {}),
 			...(trimmedSearch ? { search: trimmedSearch } : {}),
-			...(score ? { score } : {}),
-			...(score && defaultScoreRealm.realm
-				? { scoreRealmId: defaultScoreRealm.realm.id }
+			...(filters.scores.length && scoreRealm
+				? {
+						scoreRealmId: scoreRealm.id,
+						scores: [...filters.scores],
+					}
 				: {}),
 		},
 	});
-	const hasFilters = Boolean(search || language || score);
+	const appliedFilterCount = reviewFilterCount(filters);
+	const hasFilters = Boolean(search.trim()) || hasReviewFilters(filters);
 
 	return (
 		<section className="grid gap-8 border-t border-border-weak pt-8">
@@ -93,8 +86,12 @@ export function UnitRatingsReviewsSection({
 					{t.engagement.communityReviews}
 				</h3>
 				<CommunityScoreOverview
-					realmId={defaultScoreRealm.realm?.id}
+					onScoreFilterToggle={(score) =>
+						setFilters((current) => toggleReviewScore(current, score))
+					}
+					realmId={scoreRealm?.id}
 					reviewCount={toNonNegativeApiInteger(summaryQuery.data?.totalCount)}
+					selectedScores={filters.scores}
 					targetId={targetId}
 				/>
 				{summaryQuery.isError ? (
@@ -113,76 +110,27 @@ export function UnitRatingsReviewsSection({
 						className="pointer-events-none absolute start-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
 					/>
 					<Input
-						className="h-11 rounded-full ps-11"
+						className="h-11 ps-11"
 						onChange={(event) => setSearch(event.currentTarget.value)}
 						placeholder={t.engagement.searchReviews}
 						type="search"
 						value={search}
 					/>
 				</label>
-				<Popover positioning={{ placement: "bottom-end" }}>
-					<PopoverTrigger asChild>
-						<Button className="rounded-full px-5" variant="outline">
-							<SlidersHorizontal aria-hidden />
-							{t.engagement.reviewFilters}
-							{hasFilters ? (
-								<span className="rounded-full bg-foreground px-1.5 text-xs text-background">
-									{Number(Boolean(language)) +
-										Number(Boolean(score)) +
-										Number(Boolean(search))}
-								</span>
-							) : null}
-						</Button>
-					</PopoverTrigger>
-					<PopoverContent className="w-[min(22rem,calc(100vw-2rem))]">
-						<PopoverHeader title={t.engagement.reviewFilters} />
-						<PopoverBody className="grid gap-5">
-							<Field>
-								<FieldLabel>{t.engagement.reviewLanguage}</FieldLabel>
-								<ChoiceSelect
-									appearance="field"
-									ariaLabel={t.engagement.reviewLanguage}
-									onValueChange={setLanguages}
-									options={ContentLanguageValues.map((value) => ({
-										label: t.search.languageOptions[value],
-										value,
-									}))}
-									placeholder={t.engagement.allReviewLanguages}
-									value={languages}
-								/>
-							</Field>
-							<Field>
-								<FieldLabel>{t.engagement.reviewScoreFilter}</FieldLabel>
-								<ChoiceSelect
-									appearance="field"
-									ariaLabel={t.engagement.reviewScoreFilter}
-									onValueChange={setScores}
-									options={ScoreFilterValues.map((value) => ({
-										label: t.engagement.reviewScoreOption({
-											score: Number(value),
-										}),
-										value,
-									}))}
-									placeholder={t.engagement.allReviewScores}
-									value={scores}
-								/>
-							</Field>
-							{hasFilters ? (
-								<Button
-									className="w-fit"
-									onClick={() => {
-										setSearch("");
-										setLanguages([]);
-										setScores([]);
-									}}
-									variant="quiet"
-								>
-									{t.engagement.clearReviewFilters}
-								</Button>
-							) : null}
-						</PopoverBody>
-					</PopoverContent>
-				</Popover>
+				<Button
+					className="h-11 px-4"
+					onClick={() => setFilterDialogOpen(true)}
+					type="button"
+					variant="outline"
+				>
+					<SlidersHorizontal aria-hidden />
+					{t.engagement.reviewFilters}
+					{appliedFilterCount ? (
+						<span className="min-w-5 rounded-sm bg-foreground px-1 text-xs text-background">
+							{appliedFilterCount}
+						</span>
+					) : null}
+				</Button>
 			</div>
 
 			<div aria-live="polite">
@@ -213,10 +161,17 @@ export function UnitRatingsReviewsSection({
 				</Link>
 				<span aria-hidden className="h-px flex-1 bg-border-weak" />
 			</div>
+
+			{filterDialogOpen ? (
+				<ReviewFiltersDialog
+					initialFilters={filters}
+					onApply={(nextFilters) => {
+						setFilters(nextFilters);
+						setFilterDialogOpen(false);
+					}}
+					onClose={() => setFilterDialogOpen(false)}
+				/>
+			) : null}
 		</section>
 	);
-}
-
-function selectedScore(value: ScoreFilterValue | undefined): UnitScore | undefined {
-	return value ? apiValueToUnitScore(Number(value)) : undefined;
 }

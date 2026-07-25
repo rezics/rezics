@@ -85068,10 +85068,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "languages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 50,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					},
 					{
 						"name": "search",
@@ -85086,16 +85092,22 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "score",
+						"name": "scores",
 						"in": "query",
 						"required": false,
 						"schema": {
-							"minimum": 1,
-							"maximum": 10,
-							"anyOf": [
-								{ "format": "integer", "default": 0, "type": "string" },
-								{ "minimum": 1, "maximum": 10, "type": "integer" }
-							]
+							"minItems": 1,
+							"maxItems": 10,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"minimum": 1,
+								"maximum": 10,
+								"anyOf": [
+									{ "format": "integer", "default": 0, "type": "string" },
+									{ "minimum": 1, "maximum": 10, "type": "integer" }
+								]
+							}
 						}
 					},
 					{

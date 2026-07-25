@@ -88,7 +88,9 @@ export default new Elysia()
 						query.realmId
 							? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
 							: undefined,
-						query.language ? eq(unitLocalization.language, query.language) : undefined,
+						query.languages?.length
+							? inArray(unitLocalization.language, query.languages)
+							: undefined,
 						searchPattern
 							? or(
 									sql`${unitLocalization.title} ilike ${searchPattern} escape '\\'`,
@@ -96,13 +98,16 @@ export default new Elysia()
 									sql`${unitLocalization.content}::text ilike ${searchPattern} escape '\\'`,
 								)
 							: undefined,
-						query.score
+						query.scores?.length
 							? sql`exists(
 								select 1
 								from post_score review_post_score
 								inner join score review_score on review_score.id = review_post_score.score_id
 								where review_post_score.post_id = ${post.id}
-									and review_score.value = ${query.score}
+									and review_score.value in (${sql.join(
+										query.scores.map((value) => sql`${value}`),
+										sql`, `,
+									)})
 									${query.scoreRealmId ? sql`and review_score.realm_id = ${query.scoreRealmId}` : sql``}
 							)`
 							: undefined,

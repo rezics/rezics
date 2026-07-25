@@ -64097,13 +64097,13 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdResponse =
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500;
 
-export const GetApiReviewsLanguage = {
+export const GetApiReviewsLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 } as const;
 
-export type GetApiReviewsLanguage =
-	(typeof GetApiReviewsLanguage)[keyof typeof GetApiReviewsLanguage];
+export type GetApiReviewsLanguagesEnum =
+	(typeof GetApiReviewsLanguagesEnum)[keyof typeof GetApiReviewsLanguagesEnum];
 
 /**
  * @type object
@@ -64122,9 +64122,9 @@ export type GetApiReviewsQuery = {
 	 */
 	realmId?: string;
 	/**
-	 * @type string | undefined
+	 * @type array | undefined
 	 */
-	language?: GetApiReviewsLanguage;
+	languages?: GetApiReviewsLanguagesEnum[];
 	/**
 	 * @minLength 1
 	 * @maxLength 200
@@ -64137,7 +64137,10 @@ export type GetApiReviewsQuery = {
 	 * @type string | undefined
 	 */
 	scoreRealmId?: string;
-	score?: string | number;
+	/**
+	 * @type array | undefined
+	 */
+	scores?: (string | number)[];
 	/**
 	 * @default 20
 	 */

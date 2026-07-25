@@ -1,30 +1,32 @@
 "use client";
 
 import { useGetApiScoresByTargetId } from "@rezics/openapi-tanstack-query";
-import { Rating } from "@rezics/ui";
+import { cn, Rating } from "@rezics/ui";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
-import type { UnitScore } from "../model/score-value";
-
-const ScoreDistributionValues = [
-	1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-] as const satisfies readonly UnitScore[];
+import { UnitScoreValues, type UnitScore } from "../model/score-value";
 
 export function CommunityScoreOverview({
+	onScoreFilterToggle,
 	realmId,
 	reviewCount,
+	selectedScores,
 	targetId,
 }: {
+	readonly onScoreFilterToggle: (score: UnitScore) => void;
 	readonly realmId?: string;
 	readonly reviewCount: number;
+	readonly selectedScores: readonly UnitScore[];
 	readonly targetId: string;
 }) {
 	return realmId ? (
 		<LoadedCommunityScoreOverview
+			onScoreFilterToggle={onScoreFilterToggle}
 			realmId={realmId}
 			reviewCount={reviewCount}
+			selectedScores={selectedScores}
 			targetId={targetId}
 		/>
 	) : (
@@ -33,6 +35,7 @@ export function CommunityScoreOverview({
 			counts={EmptyDistribution}
 			ratingCount={0}
 			reviewCount={reviewCount}
+			selectedScores={selectedScores}
 		/>
 	);
 }
@@ -51,12 +54,16 @@ const EmptyDistribution: Readonly<Record<UnitScore, number>> = {
 };
 
 function LoadedCommunityScoreOverview({
+	onScoreFilterToggle,
 	realmId,
 	reviewCount,
+	selectedScores,
 	targetId,
 }: {
+	readonly onScoreFilterToggle: (score: UnitScore) => void;
 	readonly realmId: string;
 	readonly reviewCount: number;
+	readonly selectedScores: readonly UnitScore[];
 	readonly targetId: string;
 }) {
 	const query = useGetApiScoresByTargetId({
@@ -88,8 +95,10 @@ function LoadedCommunityScoreOverview({
 			<CommunityScoreOverviewContent
 				average={average}
 				counts={counts}
+				onScoreFilterToggle={onScoreFilterToggle}
 				ratingCount={ratingCount}
 				reviewCount={reviewCount}
+				selectedScores={selectedScores}
 			/>
 			<RequestFailure error={query.error} fallback={t.ui.retryLater} />
 		</>
@@ -99,17 +108,21 @@ function LoadedCommunityScoreOverview({
 function CommunityScoreOverviewContent({
 	average,
 	counts,
+	onScoreFilterToggle,
 	ratingCount,
 	reviewCount,
+	selectedScores,
 }: {
 	readonly average: number;
 	readonly counts: Readonly<Record<UnitScore, number>>;
+	readonly onScoreFilterToggle?: (score: UnitScore) => void;
 	readonly ratingCount: number;
 	readonly reviewCount: number;
+	readonly selectedScores: readonly UnitScore[];
 }) {
 	const { locale, t } = useTranslation(["engagement"]);
 	const numberFormat = new Intl.NumberFormat(locale.current);
-	const maximumCount = ScoreDistributionValues.reduce(
+	const maximumCount = UnitScoreValues.reduce(
 		(maximum, score) => Math.max(maximum, counts[score]),
 		0,
 	);
@@ -134,42 +147,46 @@ function CommunityScoreOverviewContent({
 				</span>
 			</div>
 
-			<div className="grid max-w-3xl grid-cols-10 gap-2 sm:gap-3" role="list">
-				{ScoreDistributionValues.map((score) => {
+			<div className="mx-auto grid w-full max-w-[44rem] grid-cols-10 gap-1 sm:gap-2">
+				{UnitScoreValues.map((score) => {
 					const count = counts[score];
 					const percent = ratingCount ? Math.round((count / ratingCount) * 100) : 0;
 					const heightPercent = maximumCount
 						? Math.round((count / maximumCount) * 100)
 						: 0;
+					const isSelected = selectedScores.includes(score);
+					const scoreLabel = t.engagement.scoreDistributionLabel({ score });
+					const distributionLabel = t.engagement.scoreDistribution({
+						count: numberFormat.format(count),
+						percent: numberFormat.format(percent),
+					});
 					return (
-						<div
-							className="grid min-w-0 grid-rows-[7rem_auto] gap-2 text-center text-xs"
+						<button
+							aria-label={`${scoreLabel} ${distributionLabel}`}
+							aria-pressed={isSelected}
+							className="relative isolate grid min-w-0 grid-rows-[7rem_auto_auto] gap-1 rounded-md px-0.5 pb-1 text-center text-xs before:pointer-events-none before:absolute before:inset-x-0 before:-inset-y-2 before:-z-10 before:rounded-md before:bg-surface-hover before:opacity-0 before:shadow-sm/5 before:transition-opacity before:duration-200 before:content-[''] hover:before:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:before:opacity-100 aria-pressed:before:bg-surface-selected aria-pressed:before:opacity-100 motion-reduce:before:transition-none sm:px-1"
+							disabled={!onScoreFilterToggle}
 							key={score}
-							role="listitem"
+							onClick={() => onScoreFilterToggle?.(score)}
+							type="button"
 						>
 							<span className="flex h-28 items-end border-b border-border px-0.5 sm:px-1">
-								<span className="sr-only">
-									{t.engagement.scoreDistributionLabel({ score })}{" "}
-									{t.engagement.scoreDistribution({
-										count: numberFormat.format(count),
-										percent: numberFormat.format(percent),
-									})}
-								</span>
 								<span
 									aria-hidden
-									className="block w-full rounded-t-sm bg-warning"
+									className={cn(
+										"block w-full rounded-t-sm bg-warning transition-[height,opacity]",
+										!isSelected && selectedScores.length > 0 && "opacity-45",
+									)}
 									style={{
 										height: count ? `${Math.max(heightPercent, 2)}%` : "0%",
 									}}
 								/>
 							</span>
-							<span
-								aria-hidden
-								className="font-semibold tabular-nums text-muted-foreground"
-							>
-								{score}
+							<span className="font-semibold tabular-nums">{score}</span>
+							<span className="min-w-0 text-[0.625rem] leading-4 tabular-nums text-muted-foreground sm:whitespace-nowrap">
+								{distributionLabel}
 							</span>
-						</div>
+						</button>
 					);
 				})}
 			</div>

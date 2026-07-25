@@ -19,20 +19,20 @@ import { useTranslation } from "@/i18n/client";
 import type { UnitScore } from "../model/score-value";
 
 export interface UnitReviewListProps {
-	readonly language?: ContentLanguage;
+	readonly languages?: readonly ContentLanguage[];
 	readonly limit?: number;
 	readonly realmId?: string;
-	readonly score?: UnitScore;
+	readonly scores?: readonly UnitScore[];
 	readonly scoreRealmId?: string;
 	readonly search?: string;
 	readonly targetId: string;
 }
 
 export function UnitReviewList({
-	language,
+	languages,
 	limit = 50,
 	realmId,
-	score,
+	scores,
 	scoreRealmId,
 	search,
 	targetId,
@@ -41,10 +41,10 @@ export function UnitReviewList({
 		query: {
 			targetId,
 			...(realmId ? { realmId } : {}),
-			...(language ? { language } : {}),
+			...(languages?.length ? { languages: [...languages] } : {}),
 			...(search ? { search } : {}),
-			...(score ? { score } : {}),
-			...(score && scoreRealmId ? { scoreRealmId } : {}),
+			...(scores?.length ? { scores: [...scores] } : {}),
+			...(scores?.length && scoreRealmId ? { scoreRealmId } : {}),
 			limit,
 		},
 	});

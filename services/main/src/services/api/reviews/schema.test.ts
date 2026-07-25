@@ -57,18 +57,21 @@ describe("review list schema", () => {
 		expect(
 			Check(ListReviewsQuery, {
 				targetId,
-				language: "zh",
+				languages: ["zh", "en"],
 				search: "好看",
 				scoreRealmId: realmId,
-				score: 10,
+				scores: [8, 9, 10],
 				limit: 3,
 			}),
 		).toBe(true);
 	});
 
 	it("rejects unsupported languages and out-of-range Scores", () => {
-		expect(Check(ListReviewsQuery, { language: "zh-Hant" })).toBe(false);
-		expect(Check(ListReviewsQuery, { score: 0 })).toBe(false);
-		expect(Check(ListReviewsQuery, { score: 11 })).toBe(false);
+		expect(Check(ListReviewsQuery, { languages: ["zh-Hant"] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scores: [0] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scores: [11] })).toBe(false);
+		expect(Check(ListReviewsQuery, { languages: [] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scores: [] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scores: [10, 10] })).toBe(false);
 	});
 });

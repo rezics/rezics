@@ -6,10 +6,18 @@ import { ContentLanguage, Uuid } from "../schema";
 export const ListReviewsQuery = t.Object({
 	targetId: t.Optional(Uuid),
 	realmId: t.Optional(Uuid),
-	language: t.Optional(ContentLanguage),
+	languages: t.Optional(
+		t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true }),
+	),
 	search: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
 	scoreRealmId: t.Optional(Uuid),
-	score: t.Optional(t.Integer({ minimum: 1, maximum: 10 })),
+	scores: t.Optional(
+		t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
+			minItems: 1,
+			maxItems: 10,
+			uniqueItems: true,
+		}),
+	),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 });
 export type ListReviewsQuery = Static<typeof ListReviewsQuery>;
