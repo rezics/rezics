@@ -75,6 +75,10 @@ import { useUiMessages } from "./ui-provider";
 export type PortableTextEditorValue = PortableTextValue;
 export type PortableTextEditorVariant = "compact" | "document";
 
+const editorFrameClassName =
+	"overflow-hidden rounded-xl border border-input bg-background shadow-xs/5 outline-none transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/32 motion-reduce:transition-none!";
+const toolbarToggleClassName = "aria-pressed:bg-surface-selected aria-pressed:text-foreground";
+
 const schemaDefinition = defineSchema({
 	decorators: [{ name: "strong" }, { name: "em" }],
 	styles: [{ name: "normal" }, { name: "h2" }, { name: "h3" }, { name: "blockquote" }],
@@ -129,15 +133,19 @@ const extendStyle: ExtendStyleSchemaType = (style) =>
 
 const renderStyle: RenderStyleFunction = ({ schemaType, children }) =>
 	schemaType.value === "h2" ? (
-		<h2 className="mt-7 font-serif font-semibold text-2xl leading-tight">{children}</h2>
+		<h2 className="mt-8 pb-2 font-serif font-semibold text-xl leading-tight tracking-tight first:mt-0">
+			{children}
+		</h2>
 	) : schemaType.value === "h3" ? (
-		<h3 className="mt-6 font-serif font-semibold text-xl leading-tight">{children}</h3>
+		<h3 className="mt-8 font-serif font-semibold text-lg leading-tight tracking-tight first:mt-0">
+			{children}
+		</h3>
 	) : schemaType.value === "blockquote" ? (
-		<blockquote className="my-4 border-s-2 border-brand/45 ps-4 text-muted-foreground italic">
+		<blockquote className="my-5 border-s-2 border-brand/45 ps-4 text-muted-foreground italic first:mt-0 last:mb-0">
 			{children}
 		</blockquote>
 	) : (
-		<p className="my-2 leading-7">{children}</p>
+		<p className="my-3 leading-7 first:mt-0 last:mb-0">{children}</p>
 	);
 
 const renderDecorator: RenderDecoratorFunction = ({ value, children }) =>
@@ -221,7 +229,7 @@ function StyleSelector({ schemaTypes }: { schemaTypes: readonly ToolbarStyleSche
 	return (
 		<NativeSelect
 			aria-label={labels.style}
-			className="w-32 shrink-0"
+			className="w-32 shrink-0 [&_[data-slot=native-select]]:border-transparent [&_[data-slot=native-select]]:shadow-none [&_[data-slot=native-select]]:hover:bg-surface-hover dark:[&_[data-slot=native-select]]:bg-transparent"
 			disabled={selector.snapshot.matches("disabled")}
 			id={id}
 			onChange={(event) => selector.send({ type: "toggle", style: event.target.value })}
@@ -251,10 +259,11 @@ function DecoratorButton({ schemaType }: { schemaType: ToolbarDecoratorSchemaTyp
 			<Button
 				aria-label={label}
 				aria-pressed={active}
+				className={toolbarToggleClassName}
 				disabled={button.snapshot.matches("disabled")}
 				onClick={() => button.send({ type: "toggle" })}
 				size="icon-sm"
-				variant={active ? "secondary" : "quiet"}
+				variant="quiet"
 			>
 				{Icon ? <Icon /> : label}
 			</Button>
@@ -276,10 +285,11 @@ function ListButton({ schemaType }: { schemaType: ToolbarListSchemaType }) {
 			<Button
 				aria-label={label}
 				aria-pressed={active}
+				className={toolbarToggleClassName}
 				disabled={button.snapshot.matches("disabled")}
 				onClick={() => button.send({ type: "toggle" })}
 				size="icon-sm"
-				variant={active ? "secondary" : "quiet"}
+				variant="quiet"
 			>
 				{Icon ? <Icon /> : label}
 			</Button>
@@ -307,10 +317,11 @@ function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType })
 				<Button
 					aria-label={labels.removeLink}
 					aria-pressed
+					className={toolbarToggleClassName}
 					disabled={button.snapshot.matches("disabled")}
 					onClick={() => button.send({ type: "remove" })}
 					size="icon-sm"
-					variant="secondary"
+					variant="quiet"
 				>
 					<LinkIcon />
 				</Button>
@@ -422,23 +433,29 @@ function Toolbar({ variant }: { variant: PortableTextEditorVariant }) {
 	return (
 		<div
 			aria-label="Portable Text"
-			className="flex min-h-12 items-center gap-1 overflow-x-auto border-b bg-muted/35 px-2 py-2"
+			className="flex min-h-11 items-center gap-1 overflow-x-auto overscroll-x-contain border-border-weak border-b bg-muted/20 px-2 py-1.5 [scrollbar-width:thin]"
 			role="toolbar"
 		>
 			{variant === "document" ? <HistoryButtons /> : null}
-			{variant === "document" ? <span className="mx-1 h-5 w-px shrink-0 bg-border" /> : null}
+			{variant === "document" ? (
+				<span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border-weak" />
+			) : null}
 			<StyleSelector schemaTypes={schema.styles} />
-			<span className="mx-1 h-5 w-px shrink-0 bg-border" />
-			{schema.decorators.map((schemaType) => (
-				<DecoratorButton key={schemaType.name} schemaType={schemaType} />
-			))}
-			{schema.annotations.map((schemaType) => (
-				<LinkButton key={schemaType.name} schemaType={schemaType} />
-			))}
-			<span className="mx-1 h-5 w-px shrink-0 bg-border" />
-			{schema.lists.map((schemaType) => (
-				<ListButton key={schemaType.name} schemaType={schemaType} />
-			))}
+			<span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border-weak" />
+			<div className="flex shrink-0 items-center gap-0.5">
+				{schema.decorators.map((schemaType) => (
+					<DecoratorButton key={schemaType.name} schemaType={schemaType} />
+				))}
+				{schema.annotations.map((schemaType) => (
+					<LinkButton key={schemaType.name} schemaType={schemaType} />
+				))}
+			</div>
+			<span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border-weak" />
+			<div className="flex shrink-0 items-center gap-0.5">
+				{schema.lists.map((schemaType) => (
+					<ListButton key={schemaType.name} schemaType={schemaType} />
+				))}
+			</div>
 		</div>
 	);
 }
@@ -471,10 +488,10 @@ function EditorSurface({
 				aria-labelledby={ariaLabelledBy}
 				aria-required={required}
 				className={cn(
-					"max-w-none overflow-y-auto p-4 font-sans text-[15px] outline-none sm:p-5",
-					"[&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6",
-					"focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/40",
-					variant === "document" ? "min-h-[30rem]" : "min-h-40",
+					"max-w-none overflow-y-auto px-5 py-4 font-sans outline-none sm:px-6 sm:py-5",
+					"[&_ol]:my-3 [&_ol]:list-decimal [&_ol]:ps-6 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:ps-6",
+					"focus-visible:outline-none",
+					variant === "document" ? "min-h-[30rem] text-base" : "min-h-44 text-[15px]",
 				)}
 				renderAnnotation={renderAnnotation}
 				renderDecorator={renderDecorator}
@@ -523,20 +540,17 @@ export function PortableTextEditor({
 				<div
 					{...frameLabel}
 					aria-required={required}
-					className={cn(
-						"grid overflow-hidden rounded-lg border bg-card lg:grid-cols-2",
-						className,
-					)}
+					className={cn("grid lg:grid-cols-2", editorFrameClassName, className)}
 					role="group"
 				>
-					<div className="min-w-0 border-b lg:border-e lg:border-b-0">
+					<div className="min-w-0 border-border-weak border-b lg:border-e lg:border-b-0">
 						{surface(variant)}
 					</div>
-					<section className="min-w-0 bg-background/45" aria-label={labels.preview}>
-						<div className="border-b px-5 py-3 font-medium text-muted-foreground text-sm">
+					<section className="min-w-0 bg-muted/10" aria-label={labels.preview}>
+						<div className="flex min-h-11 items-center border-border-weak border-b bg-muted/20 px-5 font-medium text-muted-foreground text-sm">
 							{labels.preview}
 						</div>
-						<div className="max-h-[36rem] overflow-y-auto p-6 sm:p-8">
+						<div className="max-h-[36rem] overflow-y-auto px-6 py-5 sm:px-8 sm:py-7">
 							<PortableTextContent value={normalized} variant="article" />
 						</div>
 					</section>
@@ -551,7 +565,7 @@ export function PortableTextEditor({
 			<div
 				{...frameLabel}
 				aria-required={required}
-				className={cn("overflow-hidden rounded-lg border bg-card", className)}
+				className={cn(editorFrameClassName, className)}
 				role="group"
 			>
 				{surface(variant)}
