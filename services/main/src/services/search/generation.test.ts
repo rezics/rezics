@@ -13,13 +13,14 @@ vi.mock("../database", () => ({
 }));
 
 import { SearchUnavailable } from "./errors";
+import { CurrentSearchProjectionVersion } from "./contracts";
 import { clearActiveSearchGenerationCache, getActiveSearchGeneration } from "./generation";
 import { getSearchSettingsFingerprint } from "./settings";
 
 const currentGeneration = {
 	id: "019f8293-faf7-7521-98d5-9cd4ea6c77f5",
-	indexUid: "rezics_units_v5_20260723",
-	projectionVersion: 5,
+	indexUid: "rezics_units_v6_20260725",
+	projectionVersion: CurrentSearchProjectionVersion,
 	settingsFingerprint: getSearchSettingsFingerprint("current"),
 } as const;
 

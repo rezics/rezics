@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { CurrentSearchProjectionVersion } from "./contracts";
 
-const generationDate = "20260723";
+const generationDate = "20260725";
 const currentIndexUid = `rezics_units_v${CurrentSearchProjectionVersion}_${generationDate}`;
 const currentSinkName = currentIndexUid.replaceAll("_", "-");
 
@@ -23,11 +23,14 @@ function taskDefinition(taskfile: string, name: string): string {
 
 describe("current search generation deployment wiring", () => {
 	it("keeps the versioned index, sink, settings, and enrichment configuration aligned", async () => {
-		const [environment, compose, sequin, settings, rootTaskfile, appHostTaskfile] =
+		const [environment, compose, sequin, enrichment, settings, rootTaskfile, appHostTaskfile] =
 			await Promise.all([
 				readRepositoryFile(".env.example"),
 				readRepositoryFile("compose.yaml"),
 				readRepositoryFile("services/main/search/sequin.yaml"),
+				readRepositoryFile(
+					`services/main/search/rezics_unit_search_document_v${CurrentSearchProjectionVersion}.sql`,
+				),
 				readRepositoryFile("services/main/src/services/search/settings.ts"),
 				readRepositoryFile("Taskfile.yml"),
 				readRepositoryFile("aspire-apphost/Taskfile.yml"),
@@ -45,6 +48,11 @@ describe("current search generation deployment wiring", () => {
 		expect(sequin).toContain(
 			`file: "rezics_unit_search_document_v${CurrentSearchProjectionVersion}.sql"`,
 		);
+		expect(enrichment).toContain(`'projectionVersion', ${CurrentSearchProjectionVersion}`);
+		expect(enrichment).toContain(
+			"WHEN unit_row.kind IN ('book', 'software', 'media', 'zone') THEN 'units'",
+		);
+		expect(enrichment).toContain("WHEN unit_row.kind = 'realm' THEN 'realms'");
 		expect(settings).toContain(`"./settings/current-v${CurrentSearchProjectionVersion}.json"`);
 		for (const taskfile of [rootTaskfile, appHostTaskfile])
 			expect(taskfile).toContain("{{.MEILISEARCH_CURRENT_INDEX_UID}}");

@@ -19,6 +19,18 @@ describe("Search Feature v1", () => {
 		expect(resolved.controls.length).toBeGreaterThan(0);
 	});
 
+	it("uses the dedicated Realms category without a redundant kind constraint", () => {
+		const compiled = compileSearchFeatureInput({
+			document: createDefaultSearchDocument("realm"),
+			contexts: [],
+			injections: [],
+			state: { mode: "basic", values: [] },
+		});
+
+		expect(compiled.request.categories).toEqual(["realms"]);
+		expect(compiled.request.constraints).toEqual([]);
+	});
+
 	it("lets a Zone selectively disable fields without widening its template", () => {
 		const original = createDefaultSearchDocument("book");
 		const document = {

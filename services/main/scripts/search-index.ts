@@ -435,7 +435,7 @@ async function verifyDocuments(
 			? sql`select count(*)::text as count
 				from search_unit_projection_source source
 				join unit on unit.id = source.unit_id
-				where unit.kind in ('book', 'software', 'media', 'profile', 'entity', 'tag', 'post', 'realm', 'collection', 'poll')
+				where unit.kind in ('book', 'software', 'media', 'zone', 'profile', 'entity', 'tag', 'post', 'realm', 'collection', 'poll')
 					or (
 						unit.kind = 'structure'
 						and exists (

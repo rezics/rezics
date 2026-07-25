@@ -73,7 +73,7 @@ const { metrics } = getActiveObservability();
 type SearchHitWithoutSlugAddress = Omit<SearchHit, "slugAddress">;
 
 const categoryKinds: Record<SearchCategory, readonly string[]> = {
-	units: ["book", "software", "media"],
+	units: ["book", "software", "media", "zone"],
 	users: ["profile"],
 	entity: ["entity"],
 	tags: ["tag"],

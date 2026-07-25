@@ -70,7 +70,7 @@ describe("Meilisearch expression compiler", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 		const common = {
-			indexUid: "rezics_units_v5_20260723",
+			indexUid: "rezics_units_v6_20260725",
 			query: "book",
 			offset: 0,
 			limit: 20,

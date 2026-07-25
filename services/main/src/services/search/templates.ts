@@ -151,9 +151,9 @@ const TemplateDefinitions = {
 	},
 	realm: {
 		id: "realm",
-		categories: ["units"],
+		categories: ["realms"],
 		fields: [...CommonFields],
-		constraints: [{ field: "kind", operator: "equals", value: "realm" }],
+		constraints: [],
 		visible: new Set<SearchField>(["language", "tag"]),
 		defaultFacets: ["language", "tag"],
 		sorts: CommonSorts,

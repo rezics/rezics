@@ -116,8 +116,7 @@ describe("database bootstrap manifest", () => {
 				filter: { kind: { in: ["software"] } },
 			}),
 			expect.objectContaining({
-				categories: ["units"],
-				filter: { kind: { in: ["realm"] } },
+				categories: ["realms"],
 			}),
 			expect.objectContaining({
 				categories: ["units"],

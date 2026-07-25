@@ -421,8 +421,8 @@ export const OfficialZoneManifest = [
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "realm",
 		boundaryDocument: createZoneBoundaryDocument(
-			["units"],
-			{ kind: { in: ["realm"] } },
+			["realms"],
+			undefined,
 			"b00757a7000a",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#7c3aed" }, "b00757a7000b"),

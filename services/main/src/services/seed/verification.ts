@@ -1,4 +1,4 @@
-import { and, count, eq, inArray, isNotNull, isNull, notInArray } from "drizzle-orm";
+import { and, count, eq, inArray, isNotNull, isNull, notInArray, sql } from "drizzle-orm";
 
 import { databaseBootstrapService } from "../bootstrap/service";
 import { BootstrapUnitIds, OfficialZoneManifest } from "../bootstrap/manifest";
@@ -151,6 +151,7 @@ export async function verifySeedDatabase(
 			.where(
 				and(
 					isNotNull(unitLocalization.content),
+					sql`${unitLocalization.content}->>'_type' = 'portable-text'`,
 					isNull(unitLocalizationContentMetric.unitId),
 				),
 			),

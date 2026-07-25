@@ -132,7 +132,7 @@ function preferredLanguageOrder(
 ): SQL {
 	const languages =
 		typeof preference === "string" ? [preference] : preference ? [...preference] : [];
-	if (!languages.length) return sql`0`;
+	if (!languages.length) return sql`0::int`;
 	return sql`case ${languageColumn}
 		${sql.join(
 			languages.map((language, index) => sql`when ${language}::text then ${index}`),
