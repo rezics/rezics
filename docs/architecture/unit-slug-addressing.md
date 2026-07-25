@@ -99,6 +99,29 @@ that slug exists. Canonical selection is therefore state-dependent:
 The backend field `canonicalPath` names the current path in the slug registry;
 it does not imply that frontend slug paths use the long ID-route prefix.
 
+### Zone Page addresses
+
+A Zone Page's immutable Unit ID and its `zone_page.zone_id` ownership relation
+are authoritative. Its Zone-scoped slug is optional and independent of the
+optional `page-structure` visual index.
+
+| Page state             | Browser route                                             |
+| ---------------------- | --------------------------------------------------------- |
+| slug is exactly `home` | the owning Zone root: `/z/{zoneSlug}` or `/zone/{zoneId}` |
+| another slug exists    | `/z/{zoneSlug}/{pageSlug}` or `/zone/{zoneId}/{pageSlug}` |
+| no slug exists         | `/zone/{zoneId}/page/{pageId}`                            |
+
+The `home` segment is canonicalized away: visiting a Zone Page through
+`.../home` permanently redirects to the owning Zone root when the Zone address
+itself is canonical. At most one Page in a Zone holds the canonical `home`
+address. Assigning it to another Page removes that role from the former Page;
+it does not retain `home` as a redirect to the former homepage.
+
+Zone Page navigation references and mutations store Page Unit IDs. Rendering
+prefers the current slug route, but falls back to the long Page ID route when a
+slug is absent. The Zone child labels `manage`, `page`, and `search` are
+reserved for application routes and cannot be assigned as Page slugs.
+
 Candidates such as Collection `/collection` and `/c`, Entity `/entity` and
 `/e`, Tag `/tag` and `/t`, Post `/post` and `/p`, Poll `/poll` and `/q`, Book
 `/book` and `/b`, Software `/software` and `/s`, Media `/media` and `/m`, Review
@@ -143,8 +166,10 @@ may only target that Profile's system Favorites Collection.
 
 - Slugs are explicitly assigned; localized titles do not silently generate or
   rename addresses.
-- An unaddressed Unit remains ID-only. After a public address is assigned it may
-  be renamed, but not removed; this preserves link durability.
+- An unaddressed Unit remains ID-only. After a top-level public address is
+  assigned it may be renamed, but not removed; this preserves link durability.
+  Zone Page addresses are the documented exception: they may be removed because
+  the Page retains its stable `/zone/{zoneId}/page/{pageId}` route.
 - Renames retain the former address as a temporary Redirect record. Retained
   addresses issue temporary redirects and may be released for reuse through an
   audited staff action. The automated retention and quarantine schedule remains

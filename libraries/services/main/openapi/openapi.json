@@ -33707,6 +33707,12 @@
 							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
 							"type": "string"
 						}
+					},
+					{
+						"name": "pageId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
 				"responses": {
@@ -34133,17 +34139,13 @@
 														"id",
 														"zoneId",
 														"slug",
-														"structureId",
-														"nodeId",
-														"parentPageId",
 														"document",
-														"position",
 														"home",
+														"placement",
 														"language",
 														"title",
 														"localizations",
 														"latestUnitRevisionId",
-														"latestStructureRevisionId",
 														"createdAt",
 														"updatedAt"
 													],
@@ -34156,35 +34158,63 @@
 															"format": "uuid",
 															"type": "string"
 														},
-														"slug": { "type": "string" },
-														"structureId": {
-															"format": "uuid",
-															"type": "string"
-														},
-														"nodeId": {
-															"format": "uuid",
-															"type": "string"
-														},
-														"parentPageId": {
+														"slug": {
 															"nullable": true,
 															"anyOf": [
-																{
-																	"format": "uuid",
-																	"type": "string"
-																},
+																{ "type": "string" },
 																{ "type": "null" }
 															]
 														},
 														"document": {
 															"$ref": "UnitReferencedBlockDocument"
 														},
-														"position": {
-															"format": "fractional-position",
-															"minLength": 2,
-															"maxLength": 512,
-															"type": "string"
-														},
 														"home": { "type": "boolean" },
+														"placement": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"type": "object",
+																	"required": [
+																		"structureId",
+																		"nodeId",
+																		"parentPageId",
+																		"position",
+																		"latestStructureRevisionId"
+																	],
+																	"properties": {
+																		"structureId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"nodeId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"parentPageId": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"position": {
+																			"format": "fractional-position",
+																			"minLength": 2,
+																			"maxLength": 512,
+																			"type": "string"
+																		},
+																		"latestStructureRevisionId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																},
+																{ "type": "null" }
+															]
+														},
 														"language": {
 															"anyOf": [
 																{ "const": "zh", "type": "string" },
@@ -34232,10 +34262,6 @@
 															}
 														},
 														"latestUnitRevisionId": {
-															"format": "uuid",
-															"type": "string"
-														},
-														"latestStructureRevisionId": {
 															"format": "uuid",
 															"type": "string"
 														},
@@ -34802,7 +34828,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "pageStructure"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -34812,17 +34838,13 @@
 													"id",
 													"zoneId",
 													"slug",
-													"structureId",
-													"nodeId",
-													"parentPageId",
 													"document",
-													"position",
 													"home",
+													"placement",
 													"language",
 													"title",
 													"localizations",
 													"latestUnitRevisionId",
-													"latestStructureRevisionId",
 													"createdAt",
 													"updatedAt"
 												],
@@ -34832,32 +34854,63 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"slug": { "type": "string" },
-													"structureId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"nodeId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"parentPageId": {
+													"slug": {
 														"nullable": true,
 														"anyOf": [
-															{ "format": "uuid", "type": "string" },
+															{ "type": "string" },
 															{ "type": "null" }
 														]
 													},
 													"document": {
 														"$ref": "UnitReferencedBlockDocument"
 													},
-													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
-													},
 													"home": { "type": "boolean" },
+													"placement": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": [
+																	"structureId",
+																	"nodeId",
+																	"parentPageId",
+																	"position",
+																	"latestStructureRevisionId"
+																],
+																"properties": {
+																	"structureId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"nodeId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"parentPageId": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"position": {
+																		"format": "fractional-position",
+																		"minLength": 2,
+																		"maxLength": 512,
+																		"type": "string"
+																	},
+																	"latestStructureRevisionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
 													"language": {
 														"type": "string",
 														"enum": ["zh", "en"]
@@ -34898,10 +34951,6 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"latestStructureRevisionId": {
-														"format": "uuid",
-														"type": "string"
-													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -34912,6 +34961,26 @@
 													}
 												}
 											}
+										},
+										"pageStructure": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "latestRevisionId"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"latestRevisionId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										}
 									}
 								}
@@ -34964,170 +35033,9 @@
 				},
 				"operationId": "getApiZonesByZoneIdPages",
 				"x-rezics-policy-operation-id": "getApiZonesByZoneIdPages"
-			}
-		},
-		"/api/zones/{zoneId}/pages/{slug}": {
-			"get": {
-				"summary": "Get Zone page",
-				"tags": ["Zones"],
-				"parameters": [
-					{
-						"name": "zoneId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					},
-					{
-						"name": "slug",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"minLength": 1,
-							"maxLength": 100,
-							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": [
-										"id",
-										"zoneId",
-										"slug",
-										"structureId",
-										"nodeId",
-										"parentPageId",
-										"document",
-										"position",
-										"home",
-										"language",
-										"title",
-										"localizations",
-										"latestUnitRevisionId",
-										"latestStructureRevisionId",
-										"createdAt",
-										"updatedAt"
-									],
-									"properties": {
-										"id": { "format": "uuid", "type": "string" },
-										"zoneId": { "format": "uuid", "type": "string" },
-										"slug": { "type": "string" },
-										"structureId": { "format": "uuid", "type": "string" },
-										"nodeId": { "format": "uuid", "type": "string" },
-										"parentPageId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"document": { "$ref": "UnitReferencedBlockDocument" },
-										"position": {
-											"format": "fractional-position",
-											"minLength": 2,
-											"maxLength": 512,
-											"type": "string"
-										},
-										"home": { "type": "boolean" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
-										"title": { "type": "string" },
-										"localizations": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"required": [
-													"language",
-													"title",
-													"document",
-													"contentStatus"
-												],
-												"properties": {
-													"language": {
-														"type": "string",
-														"enum": ["zh", "en"]
-													},
-													"title": { "type": "string" },
-													"document": {
-														"$ref": "UnitReferencedBlockDocument"
-													},
-													"contentStatus": {
-														"default": "draft",
-														"type": "string",
-														"enum": ["draft", "published", "archived"]
-													}
-												}
-											}
-										},
-										"latestUnitRevisionId": {
-											"format": "uuid",
-											"type": "string"
-										},
-										"latestStructureRevisionId": {
-											"format": "uuid",
-											"type": "string"
-										},
-										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound", "ZonePageNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "getApiZonesByZoneIdPagesBySlug",
-				"x-rezics-policy-operation-id": "getApiZonesByZoneIdPagesBySlug"
 			},
-			"put": {
-				"summary": "Create or replace Zone page",
+			"post": {
+				"summary": "Create Zone page",
 				"tags": ["Zones"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -35136,17 +35044,6 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
-					},
-					{
-						"name": "slug",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"minLength": 1,
-							"maxLength": 100,
-							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-							"type": "string"
-						}
 					}
 				],
 				"requestBody": {
@@ -35155,9 +35052,20 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["localization", "home"],
+								"required": ["localization"],
 								"properties": {
-									"pageId": { "format": "uuid", "type": "string" },
+									"slug": {
+										"nullable": true,
+										"anyOf": [
+											{
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											},
+											{ "type": "null" }
+										]
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -35171,24 +35079,6 @@
 											},
 											"document": { "$ref": "UnitReferencedBlockDocument" }
 										}
-									},
-									"position": {
-										"format": "fractional-position",
-										"minLength": 2,
-										"maxLength": 512,
-										"type": "string"
-									},
-									"parentPageId": {
-										"nullable": true,
-										"anyOf": [
-											{ "format": "uuid", "type": "string" },
-											{ "type": "null" }
-										]
-									},
-									"home": { "type": "boolean" },
-									"baseStructureRevisionId": {
-										"format": "uuid",
-										"type": "string"
 									},
 									"baseUnitRevisionId": { "format": "uuid", "type": "string" }
 								}
@@ -35208,41 +35098,71 @@
 										"id",
 										"zoneId",
 										"slug",
-										"structureId",
-										"nodeId",
-										"parentPageId",
 										"document",
-										"position",
 										"home",
+										"placement",
 										"language",
 										"title",
 										"localizations",
 										"latestUnitRevisionId",
-										"latestStructureRevisionId",
 										"createdAt",
 										"updatedAt"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"zoneId": { "format": "uuid", "type": "string" },
-										"slug": { "type": "string" },
-										"structureId": { "format": "uuid", "type": "string" },
-										"nodeId": { "format": "uuid", "type": "string" },
-										"parentPageId": {
+										"slug": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"document": { "$ref": "UnitReferencedBlockDocument" },
+										"home": { "type": "boolean" },
+										"placement": {
 											"nullable": true,
 											"anyOf": [
-												{ "format": "uuid", "type": "string" },
+												{
+													"type": "object",
+													"required": [
+														"structureId",
+														"nodeId",
+														"parentPageId",
+														"position",
+														"latestStructureRevisionId"
+													],
+													"properties": {
+														"structureId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentPageId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"position": {
+															"format": "fractional-position",
+															"minLength": 2,
+															"maxLength": 512,
+															"type": "string"
+														},
+														"latestStructureRevisionId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
 												{ "type": "null" }
 											]
 										},
-										"document": { "$ref": "UnitReferencedBlockDocument" },
-										"position": {
-											"format": "fractional-position",
-											"minLength": 2,
-											"maxLength": 512,
-											"type": "string"
-										},
-										"home": { "type": "boolean" },
 										"language": { "type": "string", "enum": ["zh", "en"] },
 										"title": { "type": "string" },
 										"localizations": {
@@ -35273,10 +35193,6 @@
 											}
 										},
 										"latestUnitRevisionId": {
-											"format": "uuid",
-											"type": "string"
-										},
-										"latestStructureRevisionId": {
 											"format": "uuid",
 											"type": "string"
 										},
@@ -35302,9 +35218,12 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "ZoneDocumentInvalid",
+															"default": "InvalidSlug",
 															"type": "string",
-															"enum": ["ZoneDocumentInvalid"]
+															"enum": [
+																"InvalidSlug",
+																"ZoneDocumentInvalid"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -35364,7 +35283,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -35389,12 +35308,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitRevisionConflict",
+													"default": "SlugTaken",
 													"type": "string",
-													"enum": [
-														"UnitRevisionConflict",
-														"ContentStructureRevisionConflict"
-													]
+													"enum": ["SlugTaken", "UnitRevisionConflict"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -35457,11 +35373,1038 @@
 						}
 					}
 				},
-				"operationId": "putApiZonesByZoneIdPagesBySlug",
-				"x-rezics-policy-operation-id": "putApiZonesByZoneIdPagesBySlug"
+				"operationId": "postApiZonesByZoneIdPages",
+				"x-rezics-policy-operation-id": "postApiZonesByZoneIdPages"
+			}
+		},
+		"/api/zones/{zoneId}/pages/{pageId}": {
+			"get": {
+				"summary": "Get Zone page by Unit ID",
+				"tags": ["Zones"],
+				"parameters": [
+					{
+						"name": "zoneId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "pageId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"zoneId",
+										"slug",
+										"document",
+										"home",
+										"placement",
+										"language",
+										"title",
+										"localizations",
+										"latestUnitRevisionId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"zoneId": { "format": "uuid", "type": "string" },
+										"slug": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"document": { "$ref": "UnitReferencedBlockDocument" },
+										"home": { "type": "boolean" },
+										"placement": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": [
+														"structureId",
+														"nodeId",
+														"parentPageId",
+														"position",
+														"latestStructureRevisionId"
+													],
+													"properties": {
+														"structureId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentPageId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"position": {
+															"format": "fractional-position",
+															"minLength": 2,
+															"maxLength": 512,
+															"type": "string"
+														},
+														"latestStructureRevisionId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
+										"title": { "type": "string" },
+										"localizations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"language",
+													"title",
+													"document",
+													"contentStatus"
+												],
+												"properties": {
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
+													"title": { "type": "string" },
+													"document": {
+														"$ref": "UnitReferencedBlockDocument"
+													},
+													"contentStatus": {
+														"default": "draft",
+														"type": "string",
+														"enum": ["draft", "published", "archived"]
+													}
+												}
+											}
+										},
+										"latestUnitRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ZonePageNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiZonesByZoneIdPagesByPageId",
+				"x-rezics-policy-operation-id": "getApiZonesByZoneIdPagesByPageId"
+			},
+			"put": {
+				"summary": "Replace Zone page",
+				"tags": ["Zones"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "zoneId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "pageId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["localization"],
+								"properties": {
+									"slug": {
+										"nullable": true,
+										"anyOf": [
+											{
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											},
+											{ "type": "null" }
+										]
+									},
+									"localization": {
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["language", "title", "document"],
+										"properties": {
+											"language": { "type": "string", "enum": ["zh", "en"] },
+											"title": {
+												"minLength": 1,
+												"maxLength": 500,
+												"type": "string"
+											},
+											"document": { "$ref": "UnitReferencedBlockDocument" }
+										}
+									},
+									"baseUnitRevisionId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"zoneId",
+										"slug",
+										"document",
+										"home",
+										"placement",
+										"language",
+										"title",
+										"localizations",
+										"latestUnitRevisionId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"zoneId": { "format": "uuid", "type": "string" },
+										"slug": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"document": { "$ref": "UnitReferencedBlockDocument" },
+										"home": { "type": "boolean" },
+										"placement": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": [
+														"structureId",
+														"nodeId",
+														"parentPageId",
+														"position",
+														"latestStructureRevisionId"
+													],
+													"properties": {
+														"structureId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentPageId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"position": {
+															"format": "fractional-position",
+															"minLength": 2,
+															"maxLength": 512,
+															"type": "string"
+														},
+														"latestStructureRevisionId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
+										"title": { "type": "string" },
+										"localizations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"language",
+													"title",
+													"document",
+													"contentStatus"
+												],
+												"properties": {
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
+													"title": { "type": "string" },
+													"document": {
+														"$ref": "UnitReferencedBlockDocument"
+													},
+													"contentStatus": {
+														"default": "draft",
+														"type": "string",
+														"enum": ["draft", "published", "archived"]
+													}
+												}
+											}
+										},
+										"latestUnitRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": [
+																"InvalidSlug",
+																"ZoneDocumentInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugTaken",
+													"type": "string",
+													"enum": ["SlugTaken", "UnitRevisionConflict"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiZonesByZoneIdPagesByPageId",
+				"x-rezics-policy-operation-id": "putApiZonesByZoneIdPagesByPageId"
 			},
 			"delete": {
 				"summary": "Delete Zone page",
+				"tags": ["Zones"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ZonePageNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ZonePageInUse",
+													"type": "string",
+													"enum": ["ZonePageInUse"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "zoneId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "pageId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiZonesByZoneIdPagesByPageId",
+				"x-rezics-policy-operation-id": "deleteApiZonesByZoneIdPagesByPageId"
+			}
+		},
+		"/api/zones/{zoneId}/pages/{pageId}/placement": {
+			"put": {
+				"summary": "Index Zone page in page-structure",
+				"tags": ["Zones"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "zoneId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "pageId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {
+									"position": {
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
+										"type": "string"
+									},
+									"parentPageId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"baseStructureRevisionId": {
+										"format": "uuid",
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"zoneId",
+										"slug",
+										"document",
+										"home",
+										"placement",
+										"language",
+										"title",
+										"localizations",
+										"latestUnitRevisionId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"zoneId": { "format": "uuid", "type": "string" },
+										"slug": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"document": { "$ref": "UnitReferencedBlockDocument" },
+										"home": { "type": "boolean" },
+										"placement": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": [
+														"structureId",
+														"nodeId",
+														"parentPageId",
+														"position",
+														"latestStructureRevisionId"
+													],
+													"properties": {
+														"structureId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"nodeId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"parentPageId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"position": {
+															"format": "fractional-position",
+															"minLength": 2,
+															"maxLength": 512,
+															"type": "string"
+														},
+														"latestStructureRevisionId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
+										"title": { "type": "string" },
+										"localizations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"language",
+													"title",
+													"document",
+													"contentStatus"
+												],
+												"properties": {
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
+													"title": { "type": "string" },
+													"document": {
+														"$ref": "UnitReferencedBlockDocument"
+													},
+													"contentStatus": {
+														"default": "draft",
+														"type": "string",
+														"enum": ["draft", "published", "archived"]
+													}
+												}
+											}
+										},
+										"latestUnitRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ContentStructureRevisionConflict",
+													"type": "string",
+													"enum": ["ContentStructureRevisionConflict"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ContentStructureInvalid",
+															"type": "string",
+															"enum": ["ContentStructureInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiZonesByZoneIdPagesByPageIdPlacement",
+				"x-rezics-policy-operation-id": "putApiZonesByZoneIdPagesByPageIdPlacement"
+			},
+			"delete": {
+				"summary": "Remove Zone page from page-structure",
 				"tags": ["Zones"],
 				"responses": {
 					"204": {
@@ -35521,7 +36464,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "ZonePageNotFound"]
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -35623,15 +36566,10 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "slug",
+						"name": "pageId",
 						"in": "path",
 						"required": true,
-						"schema": {
-							"minLength": 1,
-							"maxLength": 100,
-							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-							"type": "string"
-						}
+						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
 				"requestBody": {
@@ -35652,8 +36590,8 @@
 					},
 					"required": true
 				},
-				"operationId": "deleteApiZonesByZoneIdPagesBySlug",
-				"x-rezics-policy-operation-id": "deleteApiZonesByZoneIdPagesBySlug"
+				"operationId": "deleteApiZonesByZoneIdPagesByPageIdPlacement",
+				"x-rezics-policy-operation-id": "deleteApiZonesByZoneIdPagesByPageIdPlacement"
 			}
 		},
 		"/api/zones/{zoneId}/navigation": {
@@ -70193,7 +71131,7 @@
 															"realm.taxonomy",
 															"realm.navigation",
 															"zone.navigation",
-															"zone.pages"
+															"page-structure"
 														]
 													},
 													"documentKey": {
@@ -70338,7 +71276,7 @@
 														"realm.taxonomy",
 														"realm.navigation",
 														"zone.navigation",
-														"zone.pages"
+														"page-structure"
 													]
 												},
 												"documentKey": {
@@ -70567,7 +71505,7 @@
 														"realm.taxonomy",
 														"realm.navigation",
 														"zone.navigation",
-														"zone.pages"
+														"page-structure"
 													]
 												},
 												"documentKey": {
@@ -136388,7 +137326,7 @@
 				"x-rezics-policy-operation-id": "postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute"
 			}
 		},
-		"/api/search/zones/{zoneId}/pages/{slug}/blocks/{blockKey}/execute": {
+		"/api/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute": {
 			"post": {
 				"summary": "Execute a trusted Zone Page Search Block",
 				"tags": ["Search"],
@@ -136400,15 +137338,10 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "slug",
+						"name": "pageId",
 						"in": "path",
 						"required": true,
-						"schema": {
-							"minLength": 1,
-							"maxLength": 100,
-							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-							"type": "string"
-						}
+						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
 						"name": "blockKey",
@@ -141068,8 +142001,8 @@
 						}
 					}
 				},
-				"operationId": "postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute",
-				"x-rezics-policy-operation-id": "postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute"
+				"operationId": "postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute",
+				"x-rezics-policy-operation-id": "postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute"
 			}
 		},
 		"/api/search/zones/{zoneId}/feed-blocks/{blockKey}/execute": {
@@ -145240,15 +146173,10 @@
 											{
 												"additionalProperties": false,
 												"type": "object",
-												"required": ["kind", "slug"],
+												"required": ["kind", "pageId"],
 												"properties": {
 													"kind": { "const": "page", "type": "string" },
-													"slug": {
-														"minLength": 1,
-														"maxLength": 100,
-														"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-														"type": "string"
-													}
+													"pageId": { "format": "uuid", "type": "string" }
 												}
 											}
 										]

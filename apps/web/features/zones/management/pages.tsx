@@ -9,10 +9,14 @@ import {
 import {
 	getApiZonesByZoneIdPagesQueryKey,
 	type GetApiZonesByZoneIdPagesStatus200,
-	useDeleteApiZonesByZoneIdPagesBySlug,
+	useDeleteApiZonesByZoneIdPagesByPageId,
+	useDeleteApiZonesByZoneIdPagesByPageIdPlacement,
 	useGetApiZonesByZoneIdPages,
-	usePutApiZonesByZoneIdPagesBySlug,
+	usePostApiZonesByZoneIdPages,
+	usePutApiZonesByZoneIdPagesByPageId,
+	usePutApiZonesByZoneIdPagesByPageIdPlacement,
 } from "@rezics/openapi-tanstack-query";
+import { ZoneHomePageSlug } from "@rezics/slug";
 import {
 	Button,
 	Card,
@@ -46,20 +50,29 @@ import { useMemo, useState, type FormEvent } from "react";
 import { BlockDocumentEditor } from "@/features/blocks/block-document-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { useZoneManagement } from "./workspace";
 import { zoneManagementHref } from "./model";
+import { useZoneManagement } from "./workspace";
 
 type Page = GetApiZonesByZoneIdPagesStatus200["items"][number];
+type Placement = NonNullable<Page["placement"]>;
+type PlacedPage = Page & { readonly placement: Placement };
 
 interface PageTreeNode extends TreeNodeType {
-	readonly page: Page | null;
+	readonly page: PlacedPage | null;
 	readonly children?: PageTreeNode[];
 }
 
-function toPageTree(pages: readonly Page[], parentPageId: string | null = null): PageTreeNode[] {
+function isPlacedPage(page: Page): page is PlacedPage {
+	return page.placement !== null;
+}
+
+function toPageTree(
+	pages: readonly PlacedPage[],
+	parentPageId: string | null = null,
+): PageTreeNode[] {
 	return pages
-		.filter((page) => page.parentPageId === parentPageId)
-		.toSorted((left, right) => left.position.localeCompare(right.position))
+		.filter((page) => page.placement.parentPageId === parentPageId)
+		.toSorted((left, right) => left.placement.position.localeCompare(right.placement.position))
 		.map((page) => {
 			const children = toPageTree(pages, page.id);
 			return {
@@ -77,11 +90,11 @@ function expandedIds(nodes: readonly PageTreeNode[]): string[] {
 	);
 }
 
-function descendantPageIds(pages: readonly Page[], pageId: string): ReadonlySet<string> {
+function descendantPageIds(pages: readonly PlacedPage[], pageId: string): ReadonlySet<string> {
 	const descendants = new Set<string>();
 	const visit = (parentId: string) => {
 		for (const page of pages)
-			if (page.parentPageId === parentId && !descendants.has(page.id)) {
+			if (page.placement.parentPageId === parentId && !descendants.has(page.id)) {
 				descendants.add(page.id);
 				visit(page.id);
 			}
@@ -90,25 +103,36 @@ function descendantPageIds(pages: readonly Page[], pageId: string): ReadonlySet<
 	return descendants;
 }
 
+function nextPosition(pages: readonly PlacedPage[], parentPageId: string | null): string {
+	const last = pages
+		.filter((page) => page.placement.parentPageId === parentPageId)
+		.toSorted((left, right) => left.placement.position.localeCompare(right.placement.position))
+		.at(-1);
+	return generateKeyBetween(last?.placement.position ?? null, null);
+}
+
 export function ZonePagesManagement() {
 	const { zoneId } = useZoneManagement();
 	const { t } = useTranslation(["errors", "locale", "ui", "zones"]);
 	const query = useGetApiZonesByZoneIdPages({ path: { zoneId } });
 	const queryClient = useQueryClient();
-	const move = usePutApiZonesByZoneIdPagesBySlug({
-		mutation: {
-			onSuccess: () =>
-				queryClient.invalidateQueries({
-					queryKey: getApiZonesByZoneIdPagesQueryKey({ path: { zoneId } }),
-				}),
-		},
+	const invalidate = () =>
+		queryClient.invalidateQueries({
+			queryKey: getApiZonesByZoneIdPagesQueryKey({ path: { zoneId } }),
+		});
+	const move = usePutApiZonesByZoneIdPagesByPageIdPlacement({
+		mutation: { onSuccess: invalidate },
 	});
 	const [selectedId, setSelectedId] = useState<string | "new">("new");
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+
 	const pages = query.data.items;
+	const placedPages = pages.filter(isPlacedPage);
+	const unplacedPages = pages.filter((page) => !page.placement);
 	const selected = pages.find((page) => page.id === selectedId);
+
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
@@ -117,25 +141,28 @@ export function ZonePagesManagement() {
 						<Plus aria-hidden /> {t.zones.management.pages.newPage}
 					</Button>
 				}
-				description={t.zones.management.sections.pages.description}
 				backHref={zoneManagementHref(zoneId)}
 				backLabel={t.zones.management.title}
+				description={t.zones.management.sections.pages.description}
 				link={Link}
 				title={t.zones.management.sections.pages.label}
 			/>
 			<div className="grid gap-6 lg:grid-cols-[minmax(15rem,0.7fr)_minmax(0,1.3fr)]">
 				<Card appearance="outlined">
-					<CardContent className="p-4">
-						{pages.length ? (
+					<CardContent className="grid gap-5 p-4">
+						{placedPages.length ? (
 							<PageTree
 								onMove={async (page, direction) => {
-									const siblings = pages
+									const siblings = placedPages
 										.filter(
 											(candidate) =>
-												candidate.parentPageId === page.parentPageId,
+												candidate.placement.parentPageId ===
+												page.placement.parentPageId,
 										)
 										.toSorted((left, right) =>
-											left.position.localeCompare(right.position),
+											left.placement.position.localeCompare(
+												right.placement.position,
+											),
 										);
 									const index = siblings.findIndex(
 										(candidate) => candidate.id === page.id,
@@ -144,28 +171,20 @@ export function ZonePagesManagement() {
 									const position =
 										direction === -1
 											? generateKeyBetween(
-													siblings[index - 2]?.position ?? null,
-													siblings[index - 1]?.position ?? null,
+													siblings[index - 2]?.placement.position ?? null,
+													siblings[index - 1]?.placement.position ?? null,
 												)
 											: generateKeyBetween(
-													siblings[index + 1]?.position ?? null,
-													siblings[index + 2]?.position ?? null,
+													siblings[index + 1]?.placement.position ?? null,
+													siblings[index + 2]?.placement.position ?? null,
 												);
 									try {
 										await move.mutateAsync({
-											path: { zoneId, slug: page.slug },
+											path: { zoneId, pageId: page.id },
 											body: {
-												pageId: page.id,
-												baseUnitRevisionId: page.latestUnitRevisionId,
 												baseStructureRevisionId:
-													page.latestStructureRevisionId,
-												localization: {
-													language: page.language,
-													title: page.title,
-													document: page.document,
-												},
-												parentPageId: page.parentPageId,
-												home: page.home,
+													page.placement.latestStructureRevisionId,
+												parentPageId: page.placement.parentPageId,
 												position,
 											},
 										});
@@ -173,23 +192,48 @@ export function ZonePagesManagement() {
 										// Typed mutation state supplies the visible request failure.
 									}
 								}}
-								pages={pages}
+								pages={placedPages}
 								pending={move.isPending}
 								selectedId={selected?.id}
 								setSelectedId={setSelectedId}
 							/>
-						) : (
+						) : pages.length ? null : (
 							<p className="text-sm text-muted-foreground">
 								{t.zones.management.pages.empty}
 							</p>
 						)}
+						{unplacedPages.length ? (
+							<div className="grid gap-2">
+								<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+									{t.zones.management.pages.notIndexed}
+								</p>
+								{unplacedPages.map((page) => (
+									<button
+										className={
+											selected?.id === page.id
+												? "flex items-center gap-2 rounded-md bg-accent px-2 py-1.5 text-start font-semibold text-primary text-sm"
+												: "flex items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm hover:bg-accent"
+										}
+										key={page.id}
+										onClick={() => setSelectedId(page.id)}
+										type="button"
+									>
+										{page.home ? <Home aria-hidden className="size-4" /> : null}
+										<span className="truncate">{page.title}</span>
+									</button>
+								))}
+							</div>
+						) : null}
 						<RequestFailure error={move.error} fallback={t.ui.retryLater} />
 					</CardContent>
 				</Card>
 				<PageEditor
 					key={selected?.id ?? "new"}
+					onSaved={setSelectedId}
 					page={selected}
+					pageStructureRevisionId={query.data.pageStructure?.latestRevisionId}
 					pages={pages}
+					placedPages={placedPages}
 					zoneId={zoneId}
 				/>
 			</div>
@@ -204,9 +248,9 @@ function PageTree({
 	selectedId,
 	setSelectedId,
 }: {
-	readonly pages: readonly Page[];
+	readonly pages: readonly PlacedPage[];
 	readonly pending: boolean;
-	readonly onMove: (page: Page, direction: -1 | 1) => Promise<void>;
+	readonly onMove: (page: PlacedPage, direction: -1 | 1) => Promise<void>;
 	readonly selectedId?: string;
 	readonly setSelectedId: (id: string) => void;
 }) {
@@ -246,8 +290,8 @@ function PageTreeRow({
 }: {
 	readonly node: PageTreeNode;
 	readonly indexPath: number[];
-	readonly onMove: (page: Page, direction: -1 | 1) => Promise<void>;
-	readonly pages: readonly Page[];
+	readonly onMove: (page: PlacedPage, direction: -1 | 1) => Promise<void>;
+	readonly pages: readonly PlacedPage[];
 	readonly pending: boolean;
 	readonly selectedId?: string;
 	readonly setSelectedId: (id: string) => void;
@@ -255,8 +299,10 @@ function PageTreeRow({
 	const { t } = useTranslation("zones");
 	if (!node.page) return null;
 	const siblings = pages
-		.filter((candidate) => candidate.parentPageId === node.page?.parentPageId)
-		.toSorted((left, right) => left.position.localeCompare(right.position));
+		.filter(
+			(candidate) => candidate.placement.parentPageId === node.page?.placement.parentPageId,
+		)
+		.toSorted((left, right) => left.placement.position.localeCompare(right.placement.position));
 	const siblingIndex = siblings.findIndex((candidate) => candidate.id === node.page?.id);
 	const label = (
 		<div className="flex w-full items-center gap-1">
@@ -337,12 +383,18 @@ function PageTreeRow({
 
 function PageEditor({
 	page,
+	pageStructureRevisionId,
 	pages,
+	placedPages,
 	zoneId,
+	onSaved,
 }: {
-	page?: Page;
-	pages: readonly Page[];
-	zoneId: string;
+	readonly page?: Page;
+	readonly pageStructureRevisionId?: string;
+	readonly pages: readonly Page[];
+	readonly placedPages: readonly PlacedPage[];
+	readonly zoneId: string;
+	readonly onSaved: (pageId: string) => void;
 }) {
 	const { t, locale } = useTranslation(["errors", "locale", "ui", "zones"]);
 	const queryClient = useQueryClient();
@@ -350,10 +402,21 @@ function PageEditor({
 		queryClient.invalidateQueries({
 			queryKey: getApiZonesByZoneIdPagesQueryKey({ path: { zoneId } }),
 		});
-	const save = usePutApiZonesByZoneIdPagesBySlug({ mutation: { onSuccess: invalidate } });
-	const remove = useDeleteApiZonesByZoneIdPagesBySlug({ mutation: { onSuccess: invalidate } });
+	const createPage = usePostApiZonesByZoneIdPages({ mutation: { onSuccess: invalidate } });
+	const updatePage = usePutApiZonesByZoneIdPagesByPageId({
+		mutation: { onSuccess: invalidate },
+	});
+	const removePage = useDeleteApiZonesByZoneIdPagesByPageId({
+		mutation: { onSuccess: invalidate },
+	});
+	const savePlacement = usePutApiZonesByZoneIdPagesByPageIdPlacement({
+		mutation: { onSuccess: invalidate },
+	});
+	const removePlacement = useDeleteApiZonesByZoneIdPagesByPageIdPlacement({
+		mutation: { onSuccess: invalidate },
+	});
 	const defaultLanguage = locale.target.startsWith("zh") ? "zh" : "en";
-	const [slug, setSlug] = useState(page?.slug ?? "");
+	const [slug, setSlug] = useState(page?.home ? "" : (page?.slug ?? ""));
 	const [language, setLanguage] = useState<"zh" | "en">(page?.language ?? defaultLanguage);
 	const initialLocalization = page?.localizations.find((entry) => entry.language === language);
 	const [title, setTitle] = useState(initialLocalization?.title ?? page?.title ?? "");
@@ -362,10 +425,11 @@ function PageEditor({
 			? parseDocument(UnitReferencedBlockDocument, initialLocalization.document)
 			: createUnitReferencedBlockDocument(),
 	);
-	const [parentPageId, setParentPageId] = useState(page?.parentPageId ?? "");
-	const [home, setHome] = useState(page?.home ?? pages.length === 0);
+	const [parentPageId, setParentPageId] = useState(page?.placement?.parentPageId ?? "");
+	const [home, setHome] = useState(page?.home ?? !pages.some((candidate) => candidate.home));
+	const [indexed, setIndexed] = useState(Boolean(page?.placement));
 	const [confirmingRemove, setConfirmingRemove] = useState(false);
-	const excludedParents = page ? descendantPageIds(pages, page.id) : new Set<string>();
+	const excludedParents = page ? descendantPageIds(placedPages, page.id) : new Set<string>();
 
 	function chooseLanguage(nextLanguage: "zh" | "en") {
 		setLanguage(nextLanguage);
@@ -380,28 +444,71 @@ function PageEditor({
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		const normalizedSlug = home ? ZoneHomePageSlug : slug || null;
 		try {
-			await save.mutateAsync({
-				path: { zoneId, slug },
-				body: {
-					...(page
-						? {
-								pageId: page.id,
-								baseUnitRevisionId: page.latestUnitRevisionId,
-								baseStructureRevisionId: page.latestStructureRevisionId,
-							}
-						: pages[0]
-							? { baseStructureRevisionId: pages[0].latestStructureRevisionId }
+			const saved = page
+				? await updatePage.mutateAsync({
+						path: { zoneId, pageId: page.id },
+						body: {
+							slug: normalizedSlug,
+							localization: { language, title, document },
+							baseUnitRevisionId: page.latestUnitRevisionId,
+						},
+					})
+				: await createPage.mutateAsync({
+						path: { zoneId },
+						body: {
+							slug: normalizedSlug,
+							localization: { language, title, document },
+						},
+					});
+
+			if (indexed) {
+				const targetParentId = parentPageId || null;
+				const position =
+					page?.placement?.parentPageId === targetParentId
+						? page.placement.position
+						: nextPosition(placedPages, targetParentId);
+				const structureRevisionId =
+					page?.placement?.latestStructureRevisionId ??
+					placedPages[0]?.placement.latestStructureRevisionId ??
+					pageStructureRevisionId;
+				await savePlacement.mutateAsync({
+					path: { zoneId, pageId: saved.id },
+					body: {
+						parentPageId: targetParentId,
+						position,
+						...(structureRevisionId
+							? { baseStructureRevisionId: structureRevisionId }
 							: {}),
-					localization: { language, title, document },
-					parentPageId: home ? null : parentPageId || null,
-					home,
-				},
-			});
+					},
+				});
+			} else if (page?.placement) {
+				await removePlacement.mutateAsync({
+					path: { zoneId, pageId: page.id },
+					body: {
+						baseStructureRevisionId: page.placement.latestStructureRevisionId,
+					},
+				});
+			}
+			onSaved(saved.id);
 		} catch {
-			// The typed mutation state supplies the visible request failure.
+			// Typed mutation states supply the visible request failure.
 		}
 	}
+
+	const pending =
+		createPage.isPending ||
+		updatePage.isPending ||
+		removePage.isPending ||
+		savePlacement.isPending ||
+		removePlacement.isPending;
+	const error =
+		createPage.error ??
+		updatePage.error ??
+		removePage.error ??
+		savePlacement.error ??
+		removePlacement.error;
 
 	return (
 		<Card appearance="outlined">
@@ -413,14 +520,14 @@ function PageEditor({
 							: t.zones.management.pages.newPage}
 					</h2>
 					<FieldGroup className="grid gap-4 sm:grid-cols-2">
-						<Field required>
-							<FieldLabel>{t.zones.management.pages.slug}</FieldLabel>
+						<Field>
+							<FieldLabel>{t.zones.management.pages.slugOptional}</FieldLabel>
 							<Input
+								disabled={home}
 								maxLength={100}
 								onChange={(event) => setSlug(event.currentTarget.value)}
 								pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-								required
-								value={slug}
+								value={home ? ZoneHomePageSlug : slug}
 							/>
 						</Field>
 						<Field>
@@ -447,15 +554,14 @@ function PageEditor({
 						<Field>
 							<FieldLabel>{t.zones.management.pages.parent}</FieldLabel>
 							<NativeSelect
-								disabled={home}
+								disabled={!indexed}
 								onChange={(event) => setParentPageId(event.currentTarget.value)}
-								required={!home && Boolean(page)}
 								value={parentPageId}
 							>
 								<NativeSelectOption value="">
 									{t.zones.management.pages.noParent}
 								</NativeSelectOption>
-								{pages
+								{placedPages
 									.filter(
 										(candidate) =>
 											candidate.id !== page?.id &&
@@ -475,6 +581,13 @@ function PageEditor({
 							/>
 							{t.zones.management.pages.home}
 						</label>
+						<label className="flex items-center gap-2 text-sm">
+							<Checkbox
+								checked={indexed}
+								onCheckedChange={(details) => setIndexed(details.checked === true)}
+							/>
+							{t.zones.management.pages.indexed}
+						</label>
 					</FieldGroup>
 					<BlockDocumentEditor
 						document={document}
@@ -484,24 +597,29 @@ function PageEditor({
 						}
 					/>
 					<div className="flex flex-wrap gap-3">
-						<Button isLoading={save.isPending} type="submit">
+						<Button isLoading={pending} type="submit">
 							{t.zones.management.pages.save}
 						</Button>
 						{page ? (
 							<Button
-								isLoading={remove.isPending}
+								isLoading={pending}
 								onClick={async () => {
 									if (!confirmingRemove) return setConfirmingRemove(true);
 									try {
-										await remove.mutateAsync({
-											path: { zoneId, slug: page.slug },
-											body: {
-												baseStructureRevisionId:
-													page.latestStructureRevisionId,
-											},
+										if (page.placement)
+											await removePlacement.mutateAsync({
+												path: { zoneId, pageId: page.id },
+												body: {
+													baseStructureRevisionId:
+														page.placement.latestStructureRevisionId,
+												},
+											});
+										await removePage.mutateAsync({
+											path: { zoneId, pageId: page.id },
 										});
+										onSaved("new");
 									} catch {
-										// The typed mutation state supplies the visible request failure.
+										// Typed mutation states supply the visible request failure.
 									}
 								}}
 								type="button"
@@ -513,7 +631,7 @@ function PageEditor({
 							</Button>
 						) : null}
 					</div>
-					<RequestFailure error={save.error ?? remove.error} fallback={t.ui.retryLater} />
+					<RequestFailure error={error} fallback={t.ui.retryLater} />
 				</form>
 			</CardContent>
 		</Card>

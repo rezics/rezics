@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -45,7 +45,7 @@ const SingletonContentStructureKinds = new Set<ContentStructureKind>([
 	"book.contents",
 	"post.contents",
 	"realm.taxonomy",
-	"zone.pages",
+	"page-structure",
 ]);
 
 function ensureDirectContentStructureEditing(kind: ContentStructureKind): void {
@@ -367,128 +367,6 @@ export async function updateContentStructureNode(
 					delta,
 					checkpoint: () =>
 						loadContentStructureSnapshot(tx, { structureId: structure.id }),
-				},
-			};
-		},
-	);
-}
-
-/**
- * Re-roots a tree without exposing a two-root or cyclic intermediate revision.
- *
- * This operation is intentionally restricted to `zone.pages`: its root is the
- * Zone home page, so promoting a descendant must also attach the former root
- * below the promoted node as one atomic history change.
- */
-export async function rerootZonePagesContentStructure(
-	tx: DatabaseTransaction,
-	input: ExistingStructureMutation & {
-		readonly nodeId: string;
-		readonly position?: string;
-	},
-) {
-	return mutateContentStructureWithHistory(
-		tx,
-		{
-			structureId: input.structureId,
-			baseRevisionId: input.baseRevisionId,
-			actorProfileId: input.actorProfileId,
-			message: input.message,
-			minor: input.minor,
-		},
-		async () => {
-			const snapshot = await loadContentStructureSnapshot(tx, {
-				structureId: input.structureId,
-				ownerUnitId: input.ownerUnitId,
-			});
-			if (snapshot.structure.kind !== "zone.pages")
-				throw new ContentStructureInvalid("Only zone.pages supports re-rooting");
-			const promoted = snapshot.nodes.find((node) => node.id === input.nodeId);
-			if (!promoted) throw new ContentStructureNotFound();
-			const formerRoot = snapshot.nodes.find((node) => node.parentId === null);
-			if (!formerRoot) throw new ContentStructureInvalid("Zone pages tree has no root page");
-			if (formerRoot.id === promoted.id) {
-				if (input.position === undefined) return { result: { node: promoted } };
-				const [updated] = await tx
-					.update(contentStructureNode)
-					.set({ position: input.position })
-					.where(eq(contentStructureNode.id, promoted.id))
-					.returning();
-				if (!updated) throw new Error("Zone pages root update returned no row");
-				const updatedStructure = await touchStructure(tx, snapshot.structure.id);
-				return {
-					result: { node: updated },
-					change: {
-						kind: "delta" as const,
-						delta: {
-							version: 1 as const,
-							structureId: snapshot.structure.id,
-							operations: [
-								{
-									kind: "node.update" as const,
-									before: promoted,
-									after: ContentStructureNodeStateSchema.parse(updated),
-								},
-								{
-									kind: "structure.update" as const,
-									before: snapshot.structure,
-									after: updatedStructure,
-								},
-							],
-						},
-						checkpoint: () =>
-							loadContentStructureSnapshot(tx, {
-								structureId: snapshot.structure.id,
-							}),
-					},
-				};
-			}
-
-			// The database invariant is deferred only inside this transaction. Both
-			// rows are changed before the single valid history delta is committed.
-			await tx.execute(sql`set constraints zone_pages_node_invariants deferred`);
-			const [updatedPromoted] = await tx
-				.update(contentStructureNode)
-				.set({ parentId: null, position: input.position })
-				.where(eq(contentStructureNode.id, promoted.id))
-				.returning();
-			const [updatedFormerRoot] = await tx
-				.update(contentStructureNode)
-				.set({ parentId: promoted.id })
-				.where(eq(contentStructureNode.id, formerRoot.id))
-				.returning();
-			if (!updatedPromoted || !updatedFormerRoot)
-				throw new Error("Zone pages re-root update returned no row");
-			const updatedStructure = await touchStructure(tx, snapshot.structure.id);
-			return {
-				result: { node: updatedPromoted },
-				change: {
-					kind: "delta" as const,
-					delta: {
-						version: 1 as const,
-						structureId: snapshot.structure.id,
-						operations: [
-							{
-								kind: "node.update" as const,
-								before: promoted,
-								after: ContentStructureNodeStateSchema.parse(updatedPromoted),
-							},
-							{
-								kind: "node.update" as const,
-								before: formerRoot,
-								after: ContentStructureNodeStateSchema.parse(updatedFormerRoot),
-							},
-							{
-								kind: "structure.update" as const,
-								before: snapshot.structure,
-								after: updatedStructure,
-							},
-						],
-					},
-					checkpoint: () =>
-						loadContentStructureSnapshot(tx, {
-							structureId: snapshot.structure.id,
-						}),
 				},
 			};
 		},

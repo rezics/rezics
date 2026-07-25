@@ -15,10 +15,12 @@ make one resource part of another resource's revision:
   correlate revisions, but it cannot reuse another aggregate's concurrency token.
 
 A Zone Page is a `zone_page` Unit, not a separate aggregate. Its localized title and Block document
-use the ordinary Unit localization and Unit revision stream. Zone membership, hierarchy, ordering,
-and the single home/root invariant belong to the Zone's singleton `zone.pages` Content Structure and
-its independent revision head. A page mutation may update both aggregates in one database
-transaction, but each optimistic-concurrency token and history stream retains its own meaning.
+use the ordinary Unit localization and Unit revision stream. The `zone_page` ownership relation
+proves Zone membership independently of addressing and presentation. A Zone-scoped canonical slug
+is optional; the exact slug `home` assigns the homepage role. The singleton `page-structure` is an
+optional visual index for hierarchy and ordering. A valid Zone Page does not need to be indexed by
+it. Page, address, and placement mutations therefore remain separate operations with separate
+proofs; the Content Structure retains its own optimistic-concurrency token and history stream.
 
 Content Structure and Dock still reference an owner Unit for authorization, discovery, and deletion
 policy. Their immutable history payloads share the content-addressed `revision_content` store; they
@@ -100,10 +102,14 @@ the human-facing address does not invalidate the reference.
 | `realm.taxonomy`   | Realm | Label, Tag, or wiki Post      | content                | none            |
 | `realm.navigation` | Realm | readable Unit                 | Unit, HTTPS URL, group | none            |
 | `zone.navigation`  | Zone  | readable Unit                 | Unit, HTTPS URL, group | none            |
-| `zone.pages`       | Zone  | `zone_page` Unit              | content                | none            |
+| `page-structure`   | Zone  | owned `zone_page` Unit        | content                | none            |
 
 Kinds are PostgreSQL `text` with a closed database check and a matching runtime discriminated
 union. Adding a kind requires a policy, runtime schema, migration, and tests.
+
+`page-structure` is deliberately not an ownership registry, page inventory, homepage selector, or
+routing authority. Its nodes only describe an optional visual hierarchy. Multiple root nodes and
+an empty or absent structure are valid.
 
 A Label is a localized display Unit. Content Structure nodes do not embed search configuration.
 Tags remain independent Units and relations; putting a Tag in a taxonomy does not assign it to
@@ -161,6 +167,14 @@ Normal and advanced modes and hidden-filter disclosure are renderer concerns ove
 engine. Controls retain stable `controlKey` identity, including repeated Tag controls, through UI
 state, compilation, facet results, and canonical input hashing. Search and Feed Blocks store only a
 stable template-or-Zone Search Feature source; Content Structure nodes never embed a query schema.
+A Feed Block adds presentation settings only and does not persist Feed-owned filter defaults.
+Search owns query, product-specific filtering, facets, and relevance; a Search Feature may then be
+presented through the Feed item renderer without widening the general Feed API.
+
+The general Feed endpoint accepts only ordered language and Realm ID arrays as eligibility filters.
+Its recommendation sorts use `best` as the default and never expose Search relevance. Specialized
+surfaces such as review feeds retain their domain payload, including the score values required to
+render those items.
 
 ## Meilisearch plus PostgreSQL
 

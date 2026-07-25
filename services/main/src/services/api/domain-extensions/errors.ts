@@ -24,7 +24,8 @@ export class ZonePageNotFound extends Data.TaggedError("ZonePageNotFound") {
 export class ZonePageInUse extends Data.TaggedError("ZonePageInUse") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = ZonePageInUse.status;
-	readonly message = "Zone page is still referenced by a Block or navigation document";
+	readonly message =
+		"Zone page is still referenced by page-structure, a Block, or a navigation document";
 }
 
 export class ZoneNavigationNotFound extends Data.TaggedError("ZoneNavigationNotFound") {

@@ -91,11 +91,9 @@ export const ZoneRenderQuery = t.Object({
 	page: t.Optional(
 		t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 	),
+	pageId: t.Optional(Uuid),
 });
-export const ZonePageParams = t.Object({
-	zoneId: Uuid,
-	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
-});
+export const ZonePageIdParams = t.Object({ zoneId: Uuid, pageId: Uuid });
 export const ZoneNavigationParams = t.Object({
 	zoneId: Uuid,
 	navigationId: Uuid,
@@ -112,7 +110,15 @@ export const UpdateZoneBody = t.Object(
 );
 export const ZonePageBody = t.Object(
 	{
-		pageId: t.Optional(Uuid),
+		slug: t.Optional(
+			t.Nullable(
+				t.String({
+					minLength: 1,
+					maxLength: 63,
+					pattern: "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+				}),
+			),
+		),
 		localization: t.Object(
 			{
 				language: ContentLanguage,
@@ -121,15 +127,19 @@ export const ZonePageBody = t.Object(
 			},
 			{ additionalProperties: false },
 		),
-		position: t.Optional(FractionalPosition),
-		parentPageId: t.Optional(t.Nullable(Uuid)),
-		home: t.Boolean(),
-		baseStructureRevisionId: t.Optional(Uuid),
 		baseUnitRevisionId: t.Optional(Uuid),
 	},
 	{ additionalProperties: false },
 );
-export const ZonePageDeleteBody = t.Object(
+export const ZonePagePlacementBody = t.Object(
+	{
+		position: t.Optional(FractionalPosition),
+		parentPageId: t.Optional(t.Nullable(Uuid)),
+		baseStructureRevisionId: t.Optional(Uuid),
+	},
+	{ additionalProperties: false },
+);
+export const ZonePagePlacementDeleteBody = t.Object(
 	{ baseStructureRevisionId: Uuid },
 	{ additionalProperties: false },
 );
@@ -217,13 +227,18 @@ export const ZoneResponse = t.Object({
 export const ZonePageResponse = t.Object({
 	id: Uuid,
 	zoneId: Uuid,
-	slug: t.String(),
-	structureId: Uuid,
-	nodeId: Uuid,
-	parentPageId: t.Nullable(Uuid),
+	slug: t.Nullable(t.String()),
 	document: UnitReferencedBlockResponseDocument,
-	position: FractionalPosition,
 	home: t.Boolean(),
+	placement: t.Nullable(
+		t.Object({
+			structureId: Uuid,
+			nodeId: Uuid,
+			parentPageId: t.Nullable(Uuid),
+			position: FractionalPosition,
+			latestStructureRevisionId: Uuid,
+		}),
+	),
 	language: ContentLanguage,
 	title: t.String(),
 	localizations: t.Array(
@@ -235,11 +250,18 @@ export const ZonePageResponse = t.Object({
 		}),
 	),
 	latestUnitRevisionId: Uuid,
-	latestStructureRevisionId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const ZonePageListResponse = t.Object({ items: t.Array(ZonePageResponse) });
+export const ZonePageListResponse = t.Object({
+	items: t.Array(ZonePageResponse),
+	pageStructure: t.Nullable(
+		t.Object({
+			id: Uuid,
+			latestRevisionId: Uuid,
+		}),
+	),
+});
 export const ZoneNavigationResponse = t.Object({
 	id: Uuid,
 	zoneId: Uuid,

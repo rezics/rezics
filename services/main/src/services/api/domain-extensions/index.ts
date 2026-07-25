@@ -28,6 +28,7 @@ import {
 	type Block,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
+import { ZoneHomePageSlug } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
@@ -77,8 +78,12 @@ import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { replaceZoneSlugAddress } from "../../units/slug-address";
 import {
 	deleteZonePageUnit,
+	deleteZonePagePlacement,
+	getZonePageStructureProjection,
+	getZonePageUnitById,
 	getZonePageUnitBySlug,
 	listZonePageUnits,
+	upsertZonePagePlacement,
 	upsertZonePageUnit,
 	type ZonePageProjection,
 } from "../../zones/pages";
@@ -111,9 +116,10 @@ import {
 	ZoneNavigationRevisionBody,
 	ZoneDetailQuery,
 	ZonePageBody,
-	ZonePageDeleteBody,
+	ZonePageIdParams,
 	ZonePageListResponse,
-	ZonePageParams,
+	ZonePagePlacementBody,
+	ZonePagePlacementDeleteBody,
 	ZonePageResponse,
 	ZoneParams,
 	ZoneResponse,
@@ -344,7 +350,7 @@ async function getReadableRenderLocalizationRows(ids: readonly string[], profile
 function presentRenderUnit(
 	rows: Awaited<ReturnType<typeof getReadableRenderLocalizationRows>>,
 	preferredLanguage?: string | null,
-	zonePageSlugs: ReadonlyMap<string, string> = new Map(),
+	zonePageSlugs: ReadonlyMap<string, string | null> = new Map(),
 ) {
 	const selected =
 		(preferredLanguage
@@ -607,10 +613,18 @@ export default new Elysia()
 						() => new UnitNotFound("Zone"),
 					);
 					const zoneRecord = await getZone(params.zoneId);
+					if (query.page && query.pageId) throw new ZonePageNotFound();
 					const pageRecord = await database.transaction((tx) =>
-						getZonePageUnitBySlug(tx, params.zoneId, query.page, query.language),
+						query.pageId
+							? getZonePageUnitById(tx, params.zoneId, query.pageId, query.language)
+							: getZonePageUnitBySlug(
+									tx,
+									params.zoneId,
+									query.page ?? ZoneHomePageSlug,
+									query.language,
+								),
 					);
-					if (query.page && !pageRecord) throw new ZonePageNotFound();
+					if ((query.page || query.pageId) && !pageRecord) throw new ZonePageNotFound();
 					const [dockRecord] = await database
 						.select()
 						.from(unitDock)
@@ -885,11 +899,10 @@ export default new Elysia()
 						() => new UnitNotFound("Zone"),
 					);
 					await getZone(params.zoneId);
-					return {
-						items: await database.transaction((tx) =>
-							listZonePageUnits(tx, params.zoneId),
-						),
-					};
+					return database.transaction(async (tx) => ({
+						items: await listZonePageUnits(tx, params.zoneId),
+						pageStructure: await getZonePageStructureProjection(tx, params.zoneId),
+					}));
 				},
 				{
 					params: ZoneParams,
@@ -900,8 +913,55 @@ export default new Elysia()
 					detail: { summary: "List Zone pages", tags: ["Zones"] },
 				},
 			)
+			.post(
+				"/:zoneId/pages",
+				async ({ params, profile, authorization, body }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
+						"page",
+					]);
+					await getZone(params.zoneId);
+					ensureZoneBlockDocument(body.localization.document);
+					try {
+						return await upsertZonePageUnit({
+							zoneId: params.zoneId,
+							slug: body.slug,
+							actorProfileId: profile.unitId,
+							localization: body.localization,
+							ensureReferences: (tx, document) =>
+								ensureZoneBlockReferences(tx, document, {
+									zoneId: params.zoneId,
+									profileId: profile.unitId,
+								}),
+						});
+					} catch (cause) {
+						if (cause instanceof ContentStructureInvalid)
+							throw new ZoneDocumentInvalid();
+						throw cause;
+					}
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZoneParams,
+					body: ZonePageBody,
+					response: {
+						[StatusCodes.OK]: ZonePageResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"InvalidSlug",
+							"ZoneDocumentInvalid",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"SlugTaken",
+							"UnitRevisionConflict",
+						]),
+					},
+					detail: { summary: "Create Zone page", tags: ["Zones"] },
+				},
+			)
 			.get(
-				"/:zoneId/pages/:slug",
+				"/:zoneId/pages/:pageId",
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
@@ -909,15 +969,14 @@ export default new Elysia()
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
 					);
-					await getZone(params.zoneId);
 					const page = await database.transaction((tx) =>
-						getZonePageUnitBySlug(tx, params.zoneId, params.slug),
+						getZonePageUnitById(tx, params.zoneId, params.pageId),
 					);
 					if (!page) throw new ZonePageNotFound();
 					return toZonePageResponse(page);
 				},
 				{
-					params: ZonePageParams,
+					params: ZonePageIdParams,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -925,30 +984,25 @@ export default new Elysia()
 							"ZonePageNotFound",
 						]),
 					},
-					detail: { summary: "Get Zone page", tags: ["Zones"] },
+					detail: { summary: "Get Zone page by Unit ID", tags: ["Zones"] },
 				},
 			)
 			.put(
-				"/:zoneId/pages/:slug",
+				"/:zoneId/pages/:pageId",
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page",
-						params.slug,
+						params.pageId,
 					]);
-					await getZone(params.zoneId);
 					ensureZoneBlockDocument(body.localization.document);
 					try {
 						return await upsertZonePageUnit({
 							zoneId: params.zoneId,
-							slug: params.slug,
-							pageId: body.pageId,
+							pageId: params.pageId,
+							slug: body.slug,
 							actorProfileId: profile.unitId,
 							localization: body.localization,
-							parentPageId: body.parentPageId,
-							position: body.position,
-							home: body.home,
-							baseStructureRevisionId: body.baseStructureRevisionId,
 							baseUnitRevisionId: body.baseUnitRevisionId,
 							ensureReferences: (tx, document) =>
 								ensureZoneBlockReferences(tx, document, {
@@ -964,31 +1018,108 @@ export default new Elysia()
 				},
 				{
 					access: "contribute:unit:update",
-					params: ZonePageParams,
+					params: ZonePageIdParams,
 					body: ZonePageBody,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"InvalidSlug",
+							"ZoneDocumentInvalid",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"SlugTaken",
 							"UnitRevisionConflict",
-							"ContentStructureRevisionConflict",
 						]),
 					},
-					detail: { summary: "Create or replace Zone page", tags: ["Zones"] },
+					detail: { summary: "Replace Zone page", tags: ["Zones"] },
+				},
+			)
+			.put(
+				"/:zoneId/pages/:pageId/placement",
+				async ({ params, profile, authorization, body }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
+						"page-structure",
+					]);
+					return upsertZonePagePlacement({
+						zoneId: params.zoneId,
+						pageId: params.pageId,
+						actorProfileId: profile.unitId,
+						parentPageId: body.parentPageId,
+						position: body.position,
+						baseStructureRevisionId: body.baseStructureRevisionId,
+					});
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZonePageIdParams,
+					body: ZonePagePlacementBody,
+					response: {
+						[StatusCodes.OK]: ZonePageResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"ContentStructureRevisionConflict",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"ContentStructureInvalid",
+						]),
+					},
+					detail: { summary: "Index Zone page in page-structure", tags: ["Zones"] },
 				},
 			)
 			.delete(
-				"/:zoneId/pages/:slug",
+				"/:zoneId/pages/:pageId/placement",
 				async ({ params, body, profile, authorization }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
+						"page-structure",
+					]);
+					try {
+						await deleteZonePagePlacement({
+							zoneId: params.zoneId,
+							pageId: params.pageId,
+							actorProfileId: profile.unitId,
+							baseStructureRevisionId: body.baseStructureRevisionId,
+						});
+					} catch (cause) {
+						if (cause instanceof ContentStructureInvalid) throw new ZonePageInUse();
+						throw cause;
+					}
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZonePageIdParams,
+					body: ZonePagePlacementDeleteBody,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"ZonePageInUse",
+							"ContentStructureRevisionConflict",
+						]),
+					},
+					detail: {
+						summary: "Remove Zone page from page-structure",
+						tags: ["Zones"],
+						responses: NoContentResponse,
+					},
+				},
+			)
+			.delete(
+				"/:zoneId/pages/:pageId",
+				async ({ params, profile, authorization }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
 						"page",
-						params.slug,
+						params.pageId,
 					]);
 					const page = await database.transaction((tx) =>
-						getZonePageUnitBySlug(tx, params.zoneId, params.slug),
+						getZonePageUnitById(tx, params.zoneId, params.pageId),
 					);
 					if (!page) throw new ZonePageNotFound();
 					try {
@@ -996,7 +1127,6 @@ export default new Elysia()
 							zoneId: params.zoneId,
 							pageId: page.id,
 							actorProfileId: profile.unitId,
-							baseStructureRevisionId: body.baseStructureRevisionId,
 							ensureNotReferenced: async (tx) => {
 								const pages = await listZonePageUnits(tx, params.zoneId);
 								const navigations = await listNavigationStructures(
@@ -1042,8 +1172,7 @@ export default new Elysia()
 				},
 				{
 					access: "contribute:unit:update",
-					params: ZonePageParams,
-					body: ZonePageDeleteBody,
+					params: ZonePageIdParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
@@ -1051,10 +1180,7 @@ export default new Elysia()
 							"UnitNotFound",
 							"ZonePageNotFound",
 						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"ZonePageInUse",
-							"ContentStructureRevisionConflict",
-						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["ZonePageInUse"]),
 					},
 					detail: {
 						summary: "Delete Zone page",

@@ -190,7 +190,7 @@ export const ContentStructureKindValues = [
 	"realm.taxonomy",
 	"realm.navigation",
 	"zone.navigation",
-	"zone.pages",
+	"page-structure",
 ] as const;
 export type ContentStructureKind = (typeof ContentStructureKindValues)[number];
 

@@ -28,6 +28,7 @@ import {
 	unitSlugAddress,
 	users,
 	zone,
+	zonePage,
 } from "../database/schema";
 import {
 	ApiTokenPolicySchemaVersion,
@@ -909,6 +910,17 @@ async function ensureOfficialZonePage(
 		statusActor: { kind: "system" },
 	});
 	let changed = Boolean(created);
+	const [pageOwnership] = await tx
+		.insert(zonePage)
+		.values({
+			id: value.homePage.id,
+			zoneId: value.id,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ id: zonePage.id });
+	changed = Boolean(pageOwnership) || changed;
 	for (const [index, localization] of value.wikiPost.localizations.entries()) {
 		changed =
 			(await ensureLocalization(tx, {
@@ -946,7 +958,7 @@ async function ensureOfficialZonePage(
 		.where(
 			and(
 				eq(contentStructure.ownerUnitId, value.id),
-				eq(contentStructure.kind, "zone.pages"),
+				eq(contentStructure.kind, "page-structure"),
 				isNull(contentStructure.deletedAt),
 			),
 		)
@@ -957,15 +969,15 @@ async function ensureOfficialZonePage(
 		if (structureId !== value.homePage.structureId)
 			throw new Error(`Bootstrap Zone ${value.id} has an unexpected pages structure`);
 		const currentRevisionId = await getContentStructureRevision(tx, value.id, structureId);
-		if (!currentRevisionId) throw new Error("Official Zone pages tree has no revision");
+		if (!currentRevisionId) throw new Error("Official Zone page structure has no revision");
 		revisionId = currentRevisionId;
 	} else {
 		const createdStructure = await createContentStructure(tx, {
 			structureId: value.homePage.structureId,
 			ownerUnitId: value.id,
-			kind: "zone.pages",
+			kind: "page-structure",
 			actorProfileId: value.ownerProfileId,
-			message: "Bootstrap official Zone pages tree",
+			message: "Bootstrap official Zone page structure",
 		});
 		structureId = createdStructure.structure.id;
 		revisionId = createdStructure.revisionId;
@@ -1615,7 +1627,7 @@ async function isBootstrapReady(): Promise<boolean> {
 				(actual) =>
 					actual.id === expected.homePage.id &&
 					actual.zoneId === expected.id &&
-					actual.structureId === expected.homePage.structureId &&
+					actual.placement?.structureId === expected.homePage.structureId &&
 					actual.home &&
 					valuesEqual(actual.document, expected.homePage.document),
 			),

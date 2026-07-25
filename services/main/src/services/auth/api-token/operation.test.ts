@@ -12,6 +12,11 @@ describe("API token operation identity", () => {
 
 	it("charges explicit expensive operations and defaults other operations to one unit", () => {
 		expect(apiTokenOperationCostUnits("postApiSearchExecute")).toBe(5);
+		expect(
+			apiTokenOperationCostUnits(
+				"postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute",
+			),
+		).toBe(5);
 		expect(apiTokenOperationCostUnits("postApiImage-assets")).toBe(10);
 		expect(apiTokenOperationCostUnits("getApiUnits")).toBe(1);
 	});

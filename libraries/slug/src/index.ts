@@ -1,12 +1,20 @@
 export const SlugLabelPatternSource = "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$";
 export const SlugLabelPattern = new RegExp(SlugLabelPatternSource);
 export const SlugAddressMaximumDepth = 3;
+export const ZoneHomePageSlug = "home";
+export const ZoneReservedPageSlugs = ["manage", "page", "search"] as const;
+
+const ZoneReservedPageSlugSet: ReadonlySet<string> = new Set(ZoneReservedPageSlugs);
 
 declare const slugLabelBrand: unique symbol;
 export type SlugLabel = string & { readonly [slugLabelBrand]: true };
 
 export function isSlugLabel(value: string): value is SlugLabel {
 	return SlugLabelPattern.test(value);
+}
+
+export function isAvailableZonePageSlug(value: string): value is SlugLabel {
+	return isSlugLabel(value) && !ZoneReservedPageSlugSet.has(value);
 }
 
 export const TopLevelSlugNamespaceUnitIds = {

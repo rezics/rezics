@@ -15,7 +15,7 @@ import {
 	useGetApiSearchZonesByZoneIdFeature,
 	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
 	usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
-	usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
+	usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute,
 	type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -52,13 +52,14 @@ import { AppLink } from "@/features/application-shell/components/app-link";
 import { FeedItemCard, type FeedItem } from "@/features/content-feed/components/feed-item-card";
 import { FeedList } from "@/features/content-feed/components/feed-list";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
+import { zonePageHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
 
 type RenderUnit = ZoneRenderProjection["references"]["units"][number];
 type RenderAsset = ZoneRenderProjection["references"]["assets"][number];
 type ZoneBlockSurface =
-	{ readonly kind: "dock" } | { readonly kind: "page"; readonly slug: string };
+	{ readonly kind: "dock" } | { readonly kind: "page"; readonly pageId: string };
 type ZoneNavigationLayout = "horizontal" | "vertical";
 type NavigationLeafItem = Extract<NavigationItem, { target: unknown }>;
 type NavigationGroupItem = Extract<NavigationItem, { children: unknown }>;
@@ -131,15 +132,23 @@ function unitIdHref(kind: string, id: string): string | null {
 function navigationHref(target: NavigationTarget, context: ZoneBlockContextValue): string | null {
 	if (target.kind === "external") return target.url;
 	const targetUnit = context.units.get(target.unitId);
-	if (targetUnit?.kind === "zone_page" && targetUnit.zonePageSlug)
-		return targetUnit.zonePageSlug === "home"
-			? context.baseHref
-			: `${context.baseHref}/${targetUnit.zonePageSlug}`;
+	if (targetUnit?.kind === "zone_page")
+		return zonePageHref(context.projection.zone, {
+			id: targetUnit.id,
+			slug: targetUnit.zonePageSlug,
+		});
 	return targetUnit ? unitHref(targetUnit) : null;
 }
 
 function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: string }) {
-	const href = unitHref(unit);
+	const context = useZoneBlocks();
+	const href =
+		unit.kind === "zone_page"
+			? zonePageHref(context.projection.zone, {
+					id: unit.id,
+					slug: unit.zonePageSlug,
+				})
+			: unitHref(unit);
 	const avatar =
 		appearance === "cover"
 			? unit.cover
@@ -795,13 +804,13 @@ function DockFeedBlock({
 function PageFeedBlock({
 	blockKey,
 	feature,
-	slug,
+	pageId,
 	presentation,
 	defaults,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
-	slug: string;
+	pageId: string;
 	presentation: FeedPresentation;
 	defaults: readonly SearchControlValue[];
 }) {
@@ -814,7 +823,7 @@ function PageFeedBlock({
 			error={mutation.isError}
 			execute={(body) =>
 				mutation.mutateAsync({
-					body: { ...body, surface: { kind: "page", slug } },
+					body: { ...body, surface: { kind: "page", pageId } },
 					path: { blockKey, zoneId: context.projection.zone.id },
 				})
 			}
@@ -927,23 +936,23 @@ function SearchUnitList({
 	feature,
 	layout,
 	limit,
-	slug,
+	pageId,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
 	layout: UnitListLayout;
 	limit: number;
-	slug?: string;
+	pageId?: string;
 }) {
 	const context = useZoneBlocks();
 	const dockMutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
-	const pageMutation = usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute();
+	const pageMutation = usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute();
 	const presentation = {
 		results: layout === "grid" || layout === "carousel" ? "grid" : "list",
 		pagination: "load-more",
 		showResultCount: false,
 	} as const;
-	if (slug === undefined)
+	if (pageId === undefined)
 		return (
 			<ZoneSearchUnitListBlock
 				blockKey={blockKey}
@@ -968,7 +977,7 @@ function SearchUnitList({
 			execute={(body) =>
 				pageMutation.mutateAsync({
 					body,
-					path: { blockKey, slug, zoneId: context.projection.zone.id },
+					path: { blockKey, pageId, zoneId: context.projection.zone.id },
 				})
 			}
 			feature={feature}
@@ -991,7 +1000,7 @@ function ZoneBlock({ block }: { block: Block }) {
 		);
 		if (!wikiPost) return null;
 		return (
-			<article className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+			<article>
 				<header className="mb-8 border-b border-border-weak pb-6">
 					<h1 className="font-serif font-bold text-3xl tracking-tight sm:text-4xl">
 						{wikiPost.title}
@@ -1046,7 +1055,7 @@ function ZoneBlock({ block }: { block: Block }) {
 					feature={block.source.feature}
 					layout={block.layout}
 					limit={block.limit}
-					slug={surface.kind === "page" ? surface.slug : undefined}
+					pageId={surface.kind === "page" ? surface.pageId : undefined}
 				/>
 			);
 		}
@@ -1076,8 +1085,8 @@ function ZoneBlock({ block }: { block: Block }) {
 				blockKey={block._key}
 				defaults={block.defaults}
 				feature={block.feature}
+				pageId={surface.pageId}
 				presentation={block.presentation}
-				slug={surface.slug}
 			/>
 		);
 	}

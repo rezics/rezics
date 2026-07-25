@@ -11,7 +11,7 @@ import {
 	ZonePageBlockHostPolicy,
 } from "@rezics/block";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import { OfficialRealmUnitIds } from "@rezics/slug";
+import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 
 import { PlatformCapabilityValues } from "../database/schema/contract-values";
 import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
@@ -214,7 +214,7 @@ function createOfficialZoneContent(input: {
 		homePage: {
 			id: input.pageId,
 			structureId: input.pagesStructureId,
-			slug: "home",
+			slug: ZoneHomePageSlug,
 			titleUnitId: input.postId,
 			document: createUnitReferencedBlockDocument(
 				[

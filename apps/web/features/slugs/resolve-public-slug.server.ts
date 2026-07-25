@@ -1,4 +1,5 @@
 import {
+	isAvailableZonePageSlug,
 	isSlugLabel,
 	publicSlugHref,
 	SlugAddressMaximumDepth,
@@ -102,6 +103,40 @@ async function resolvePublicSlugUncached(
 }
 
 export const resolvePublicSlug = cache(resolvePublicSlugUncached);
+
+export interface ZonePageAddress {
+	readonly id: string;
+	readonly zoneId: string;
+	readonly slug: string | null;
+}
+
+export async function getZonePageAddressById(
+	zoneId: string,
+	pageId: string,
+): Promise<ZonePageAddress | null> {
+	if (!UuidPattern.test(zoneId) || !UuidPattern.test(pageId)) return null;
+	const response = await fetch(
+		new URL(
+			`/api/zones/${encodeURIComponent(zoneId)}/pages/${encodeURIComponent(pageId)}`,
+			apiOrigin(),
+		),
+		{ cache: "no-store" },
+	);
+	if (response.status === 404) return null;
+	if (!response.ok) throw new Error(`Zone Page API failed with status ${response.status}`);
+	const value = await readJson(response);
+	if (
+		!isObject(value) ||
+		value.id !== pageId ||
+		value.zoneId !== zoneId ||
+		!(
+			value.slug === null ||
+			(typeof value.slug === "string" && isAvailableZonePageSlug(value.slug))
+		)
+	)
+		throw new Error("Zone Page API returned an invalid address");
+	return { id: pageId, zoneId, slug: value.slug };
+}
 
 export async function getPublicSlugHrefByUnitId(
 	kind: PublicSlugTargetKind,

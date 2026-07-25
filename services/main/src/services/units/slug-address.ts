@@ -1,5 +1,9 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
-import type { PublicSlugAddressValue } from "@rezics/slug";
+import {
+	isAvailableZonePageSlug,
+	ZoneHomePageSlug,
+	type PublicSlugAddressValue,
+} from "@rezics/slug";
 
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
@@ -8,6 +12,7 @@ import {
 	profile,
 	unit,
 	unitSlugAddress,
+	zonePage,
 	type GovernanceReasonCodeValues,
 	type UnitKind,
 } from "../database/schema";
@@ -803,21 +808,23 @@ export async function replaceZoneSlugAddress(
 }
 
 /**
- * Assigns or renames a Zone Page Unit inside its owning Zone scope.
+ * Assigns, renames, or removes a Zone Page Unit address inside its owning Zone scope.
  *
- * The caller must already hold the Zone graph lock and prove Zone update
- * authority. Keeping this transaction-bound lets page identity, localization,
- * Content Structure membership, address, and their histories commit together.
+ * `home` is a transferable role address. Assigning it atomically removes it
+ * from the former home Page, which remains reachable by its stable ID route.
+ * Unlike ordinary renames, moving away from `home` does not retain a redirect:
+ * the Zone root always identifies the current home Page.
  */
 export async function replaceZonePageSlugAddress(
 	tx: DatabaseTransaction,
 	input: {
 		readonly zoneId: string;
 		readonly pageUnitId: string;
-		readonly slug: string;
+		readonly slug: string | null;
 	},
-): Promise<CanonicalUnitSlugAddress> {
-	const slug = parseSlugLabel(input.slug);
+): Promise<CanonicalUnitSlugAddress | null> {
+	const slug = input.slug === null ? null : parseSlugLabel(input.slug);
+	if (slug !== null && !isAvailableZonePageSlug(slug)) throw new InvalidSlug();
 	const [target] = await tx
 		.select({ kind: unit.kind, deletedAt: unit.deletedAt })
 		.from(unit)
@@ -837,6 +844,36 @@ export async function replaceZonePageSlugAddress(
 		scope.deletedAt
 	)
 		throw new UnitNotFound();
+
+	await lockSlugTree(tx);
+	const current = await loadCanonicalAddress(tx, input.pageUnitId);
+	if (slug === null) {
+		if (current) await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, current.id));
+		return null;
+	}
+
+	if (slug === ZoneHomePageSlug) {
+		const [occupant] = await tx
+			.select({
+				id: unitSlugAddress.id,
+				targetUnitId: unitSlugAddress.targetUnitId,
+			})
+			.from(unitSlugAddress)
+			.where(
+				and(
+					eq(unitSlugAddress.scopeUnitId, input.zoneId),
+					eq(unitSlugAddress.slug, ZoneHomePageSlug),
+				),
+			)
+			.limit(1);
+		if (occupant && occupant.targetUnitId !== input.pageUnitId)
+			await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, occupant.id));
+	}
+
+	// `home` is a role address, not a durable alias for the former home Page.
+	if (current?.slug === ZoneHomePageSlug && slug !== ZoneHomePageSlug)
+		await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, current.id));
+
 	const mutation = await replaceCanonicalAddress(tx, {
 		unitId: input.pageUnitId,
 		scopeUnitId: input.zoneId,
@@ -878,6 +915,16 @@ export async function replaceUnitSlugAddressAsStaff(
 			.where(eq(unit.id, input.unitId))
 			.limit(1);
 		if (!target) throw new UnitNotFound();
+		if (target.kind === "zone_page") {
+			const [ownership] = await tx
+				.select({ zoneId: zonePage.zoneId })
+				.from(zonePage)
+				.where(eq(zonePage.id, input.unitId))
+				.limit(1);
+			if (!ownership || input.scopeUnitId !== ownership.zoneId)
+				throw new UnitAddressMutationForbidden();
+			if (!isAvailableZonePageSlug(slug)) throw new InvalidSlug();
+		}
 		const fixedScopeUnitId = fixedPublicSlugScope(target.kind);
 		if (fixedScopeUnitId && input.scopeUnitId !== fixedScopeUnitId)
 			throw new UnitAddressMutationForbidden();

@@ -8,6 +8,7 @@ import {
 	type UnitReferencedBlockDocument as UnitReferencedBlockDocumentValue,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
+import { ZoneHomePageSlug } from "@rezics/slug";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -17,6 +18,7 @@ import {
 	unitLocalization,
 	unitRevisionHead,
 	unitSlugAddress,
+	zonePage,
 } from "../database/schema";
 import {
 	createContentStructure,
@@ -24,7 +26,6 @@ import {
 	getContentStructureRevision,
 	insertContentStructureNode,
 	listContentStructures,
-	rerootZonePagesContentStructure,
 	updateContentStructureNode,
 } from "../content-structure/service";
 import {
@@ -44,19 +45,24 @@ export interface ZonePageLocalizationInput {
 
 export interface ZonePageMutationInput {
 	readonly zoneId: string;
-	readonly slug: string;
 	readonly pageId?: string;
+	readonly slug?: string | null;
 	readonly actorProfileId: string;
 	readonly localization: ZonePageLocalizationInput;
-	readonly parentPageId?: string | null;
-	readonly position?: string;
-	readonly home: boolean;
-	readonly baseStructureRevisionId?: string;
 	readonly baseUnitRevisionId?: string;
 	readonly ensureReferences: (
 		tx: DatabaseTransaction,
 		document: UnitReferencedBlockDocumentValue,
 	) => Promise<void>;
+}
+
+export interface ZonePagePlacementMutationInput {
+	readonly zoneId: string;
+	readonly pageId: string;
+	readonly actorProfileId: string;
+	readonly parentPageId?: string | null;
+	readonly position?: string;
+	readonly baseStructureRevisionId?: string;
 }
 
 interface StoredZonePageLocalization {
@@ -67,15 +73,25 @@ interface StoredZonePageLocalization {
 	readonly contentStatus: "draft" | "published" | "archived" | null;
 }
 
-export interface ZonePageProjection {
-	readonly id: string;
-	readonly zoneId: string;
-	readonly slug: string;
+export interface ZonePagePlacementProjection {
 	readonly structureId: string;
 	readonly nodeId: string;
 	readonly parentPageId: string | null;
 	readonly position: string;
+	readonly latestStructureRevisionId: string;
+}
+
+export interface ZonePageStructureProjection {
+	readonly id: string;
+	readonly latestRevisionId: string;
+}
+
+export interface ZonePageProjection {
+	readonly id: string;
+	readonly zoneId: string;
+	readonly slug: string | null;
 	readonly home: boolean;
+	readonly placement: ZonePagePlacementProjection | null;
 	readonly language: ContentLanguage;
 	readonly title: string;
 	readonly document: UnitReferencedBlockDocumentValue;
@@ -86,7 +102,6 @@ export interface ZonePageProjection {
 		readonly contentStatus: "draft" | "published" | "archived";
 	}[];
 	readonly latestUnitRevisionId: string;
-	readonly latestStructureRevisionId: string;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
 }
@@ -102,107 +117,127 @@ function parseLocalization(row: StoredZonePageLocalization) {
 	};
 }
 
+/**
+ * Lists every Page owned by a Zone.
+ *
+ * Ownership comes from `zone_page`; a slug address and page-structure placement
+ * are independent, optional projections.
+ */
 export async function listZonePageUnits(
 	tx: DatabaseTransaction,
 	zoneId: string,
 	preferredLanguage?: ContentLanguage,
 ): Promise<ZonePageProjection[]> {
-	const [structure] = await listContentStructures(tx, zoneId, "zone.pages");
-	if (!structure) return [];
-	const nodes = await tx
-		.select()
-		.from(contentStructureNode)
-		.where(
-			and(
-				eq(contentStructureNode.structureId, structure.id),
-				isNull(contentStructureNode.deletedAt),
+	const pages = await tx
+		.select({
+			id: unit.id,
+			createdAt: unit.createdAt,
+			updatedAt: unit.updatedAt,
+		})
+		.from(zonePage)
+		.innerJoin(unit, eq(unit.id, zonePage.id))
+		.where(and(eq(zonePage.zoneId, zoneId), eq(unit.kind, "zone_page"), isNull(unit.deletedAt)))
+		.orderBy(asc(unit.createdAt), asc(unit.id));
+	if (!pages.length) return [];
+
+	const pageIds = pages.map((page) => page.id);
+	const [addresses, localizationRows, revisionHeads, structures] = await Promise.all([
+		tx
+			.select({ targetUnitId: unitSlugAddress.targetUnitId, slug: unitSlugAddress.slug })
+			.from(unitSlugAddress)
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					eq(unitSlugAddress.scopeUnitId, zoneId),
+					inArray(unitSlugAddress.targetUnitId, pageIds),
+				),
 			),
-		)
-		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
-	if (!nodes.length) return [];
-	const pageIds = nodes.map((node) => node.contentUnitId);
-	const [latestStructureRevisionId, pages, localizationRows, revisionHeads, addresses] =
-		await Promise.all([
-			getContentStructureRevision(tx, zoneId, structure.id),
-			tx
-				.select({ id: unit.id, createdAt: unit.createdAt, updatedAt: unit.updatedAt })
-				.from(unit)
+		tx
+			.select({
+				unitId: unitLocalization.unitId,
+				language: unitLocalization.language,
+				position: unitLocalization.position,
+				title: unitLocalization.title,
+				content: unitLocalization.content,
+				contentStatus: unitLocalization.contentStatus,
+			})
+			.from(unitLocalization)
+			.where(inArray(unitLocalization.unitId, pageIds))
+			.orderBy(
+				asc(unitLocalization.unitId),
+				asc(unitLocalization.position),
+				asc(unitLocalization.language),
+			),
+		tx
+			.select({
+				unitId: unitRevisionHead.unitId,
+				revisionId: unitRevisionHead.revisionId,
+			})
+			.from(unitRevisionHead)
+			.where(inArray(unitRevisionHead.unitId, pageIds)),
+		listContentStructures(tx, zoneId, "page-structure"),
+	]);
+
+	const [structure] = structures;
+	const nodes = structure
+		? await tx
+				.select()
+				.from(contentStructureNode)
 				.where(
 					and(
-						inArray(unit.id, pageIds),
-						eq(unit.kind, "zone_page"),
-						isNull(unit.deletedAt),
+						eq(contentStructureNode.structureId, structure.id),
+						isNull(contentStructureNode.deletedAt),
 					),
-				),
-			tx
-				.select({
-					unitId: unitLocalization.unitId,
-					language: unitLocalization.language,
-					position: unitLocalization.position,
-					title: unitLocalization.title,
-					content: unitLocalization.content,
-					contentStatus: unitLocalization.contentStatus,
-				})
-				.from(unitLocalization)
-				.where(inArray(unitLocalization.unitId, pageIds))
-				.orderBy(
-					asc(unitLocalization.unitId),
-					asc(unitLocalization.position),
-					asc(unitLocalization.language),
-				),
-			tx
-				.select({
-					unitId: unitRevisionHead.unitId,
-					revisionId: unitRevisionHead.revisionId,
-				})
-				.from(unitRevisionHead)
-				.where(inArray(unitRevisionHead.unitId, pageIds)),
-			tx
-				.select({ targetUnitId: unitSlugAddress.targetUnitId, slug: unitSlugAddress.slug })
-				.from(unitSlugAddress)
-				.where(
-					and(
-						eq(unitSlugAddress.kind, "canonical"),
-						eq(unitSlugAddress.scopeUnitId, zoneId),
-						inArray(unitSlugAddress.targetUnitId, pageIds),
-					),
-				),
-		]);
-	if (!latestStructureRevisionId)
-		throw new ContentStructureInvalid("Zone pages tree has no history head");
-	const pageById = new Map(pages.map((page) => [page.id, page]));
+				)
+				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id))
+		: [];
+	const latestStructureRevisionId = structure
+		? await getContentStructureRevision(tx, zoneId, structure.id)
+		: null;
+	if (structure && !latestStructureRevisionId)
+		throw new ContentStructureInvalid("Zone page-structure has no history head");
+
+	const addressById = new Map(addresses.map((address) => [address.targetUnitId, address.slug]));
 	const revisionById = new Map(revisionHeads.map((head) => [head.unitId, head.revisionId]));
-	const slugById = new Map(addresses.map((address) => [address.targetUnitId, address.slug]));
-	return nodes.map((node) => {
-		const page = pageById.get(node.contentUnitId);
-		const slug = slugById.get(node.contentUnitId);
-		const latestUnitRevisionId = revisionById.get(node.contentUnitId);
+	const nodeByPageId = new Map(nodes.map((node) => [node.contentUnitId, node]));
+	const pageIdByNodeId = new Map(nodes.map((node) => [node.id, node.contentUnitId]));
+
+	return pages.map((page) => {
+		const slug = addressById.get(page.id) ?? null;
+		const latestUnitRevisionId = revisionById.get(page.id);
 		const localizations = localizationRows
-			.filter((row) => row.unitId === node.contentUnitId)
+			.filter((row) => row.unitId === page.id)
 			.map(parseLocalization);
 		const selected =
 			(preferredLanguage
 				? localizations.find((localization) => localization.language === preferredLanguage)
 				: undefined) ?? localizations[0];
-		if (!page || !slug || !latestUnitRevisionId || !selected)
-			throw new ContentStructureInvalid("Zone pages tree references an incomplete Page Unit");
+		if (!latestUnitRevisionId || !selected)
+			throw new ContentStructureInvalid("Zone Page Unit is incomplete");
+		const node = nodeByPageId.get(page.id);
+		const placement =
+			node && structure && latestStructureRevisionId
+				? {
+						structureId: structure.id,
+						nodeId: node.id,
+						parentPageId: node.parentId
+							? (pageIdByNodeId.get(node.parentId) ?? null)
+							: null,
+						position: node.position,
+						latestStructureRevisionId,
+					}
+				: null;
 		return {
 			id: page.id,
 			zoneId,
 			slug,
-			structureId: structure.id,
-			nodeId: node.id,
-			parentPageId: node.parentId
-				? (nodes.find((candidate) => candidate.id === node.parentId)?.contentUnitId ?? null)
-				: null,
-			position: node.position,
-			home: node.parentId === null,
+			home: slug === ZoneHomePageSlug,
+			placement,
 			language: selected.language,
 			title: selected.title,
 			document: selected.document,
 			localizations,
 			latestUnitRevisionId,
-			latestStructureRevisionId,
 			createdAt: page.createdAt,
 			updatedAt: page.updatedAt,
 		};
@@ -212,28 +247,49 @@ export async function listZonePageUnits(
 export async function getZonePageUnitBySlug(
 	tx: DatabaseTransaction,
 	zoneId: string,
-	slug: string | undefined,
+	slug: string,
 	preferredLanguage?: ContentLanguage,
 ): Promise<ZonePageProjection | null> {
 	const pages = await listZonePageUnits(tx, zoneId, preferredLanguage);
-	return slug
-		? (pages.find((page) => page.slug === slug) ?? null)
-		: (pages.find((page) => page.home) ?? null);
+	return pages.find((page) => page.slug === slug) ?? null;
 }
 
-async function loadOrCreatePagesStructure(
+export async function getZonePageUnitById(
+	tx: DatabaseTransaction,
+	zoneId: string,
+	pageId: string,
+	preferredLanguage?: ContentLanguage,
+): Promise<ZonePageProjection | null> {
+	const pages = await listZonePageUnits(tx, zoneId, preferredLanguage);
+	return pages.find((page) => page.id === pageId) ?? null;
+}
+
+export async function getZonePageStructureProjection(
+	tx: DatabaseTransaction,
+	zoneId: string,
+): Promise<ZonePageStructureProjection | null> {
+	const [structure] = await listContentStructures(tx, zoneId, "page-structure");
+	if (!structure) return null;
+	const latestRevisionId = await getContentStructureRevision(tx, zoneId, structure.id);
+	if (!latestRevisionId)
+		throw new ContentStructureInvalid("Zone page-structure has no history head");
+	return { id: structure.id, latestRevisionId };
+}
+
+async function loadOrCreatePageStructure(
 	tx: DatabaseTransaction,
 	input: { readonly zoneId: string; readonly actorProfileId: string },
 ) {
-	const [existing] = await listContentStructures(tx, input.zoneId, "zone.pages");
+	const [existing] = await listContentStructures(tx, input.zoneId, "page-structure");
 	if (existing) {
 		const revisionId = await getContentStructureRevision(tx, input.zoneId, existing.id);
-		if (!revisionId) throw new ContentStructureInvalid("Zone pages tree has no history head");
+		if (!revisionId)
+			throw new ContentStructureInvalid("Zone page-structure has no history head");
 		return { structure: existing, revisionId, created: false as const };
 	}
 	const created = await createContentStructure(tx, {
 		ownerUnitId: input.zoneId,
-		kind: "zone.pages",
+		kind: "page-structure",
 		actorProfileId: input.actorProfileId,
 	});
 	return { structure: created.structure, revisionId: created.revisionId, created: true as const };
@@ -261,30 +317,15 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 		await tx.execute(
 			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,
 		);
-		const tree = await loadOrCreatePagesStructure(tx, input);
-		const [address] = await tx
-			.select({ pageId: unitSlugAddress.targetUnitId })
-			.from(unitSlugAddress)
-			.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
-			.where(
-				and(
-					eq(unitSlugAddress.kind, "canonical"),
-					eq(unitSlugAddress.scopeUnitId, input.zoneId),
-					eq(unitSlugAddress.slug, input.slug),
-					eq(unit.kind, "zone_page"),
-					isNull(unit.deletedAt),
-				),
-			)
-			.limit(1);
-		if (input.pageId && address && address.pageId !== input.pageId)
-			throw new ContentStructureInvalid("Zone Page slug is already in use");
 		const [identifiedPage] = input.pageId
 			? await tx
-					.select({ id: unit.id })
-					.from(unit)
+					.select({ id: zonePage.id })
+					.from(zonePage)
+					.innerJoin(unit, eq(unit.id, zonePage.id))
 					.where(
 						and(
-							eq(unit.id, input.pageId),
+							eq(zonePage.id, input.pageId),
+							eq(zonePage.zoneId, input.zoneId),
 							eq(unit.kind, "zone_page"),
 							isNull(unit.deletedAt),
 						),
@@ -292,13 +333,9 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 					.limit(1)
 			: [];
 		if (input.pageId && !identifiedPage)
-			throw new ContentStructureInvalid("Zone Page Unit does not exist");
-		let pageId = input.pageId ?? address?.pageId;
-		let node = pageId ? await nodeForPageId(tx, tree.structure.id, pageId) : undefined;
-		if (input.pageId && !node)
 			throw new ContentStructureInvalid("Zone Page Unit is outside this Zone");
-		let revisionId = tree.revisionId;
 
+		let pageId = identifiedPage?.id;
 		if (!pageId) {
 			const created = await insertUnit(tx, {
 				kind: "zone_page",
@@ -308,11 +345,13 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 				statusActor: { kind: "profile", profileId: input.actorProfileId },
 			});
 			pageId = created.id;
-			await replaceZonePageSlugAddress(tx, {
-				zoneId: input.zoneId,
-				pageUnitId: pageId,
-				slug: input.slug,
-			});
+			await tx.insert(zonePage).values({ id: pageId, zoneId: input.zoneId });
+			if (input.slug !== undefined && input.slug !== null)
+				await replaceZonePageSlugAddress(tx, {
+					zoneId: input.zoneId,
+					pageUnitId: pageId,
+					slug: input.slug,
+				});
 			await input.ensureReferences(tx, input.localization.document);
 			await tx.insert(unitLocalization).values({
 				unitId: pageId,
@@ -362,7 +401,8 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 					)
 					.limit(1),
 			]);
-			const slugChanged = currentAddress?.slug !== input.slug;
+			const slugChanged =
+				input.slug !== undefined && (currentAddress?.slug ?? null) !== input.slug;
 			const localizationChanged =
 				!currentLocalization ||
 				currentLocalization.title !== input.localization.title ||
@@ -377,7 +417,7 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 					await replaceZonePageSlugAddress(tx, {
 						zoneId: input.zoneId,
 						pageUnitId: pageId,
-						slug: input.slug,
+						slug: input.slug ?? null,
 					});
 				if (localizationChanged) {
 					await input.ensureReferences(tx, input.localization.document);
@@ -419,119 +459,102 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 			}
 		}
 
-		const activeNodes = await tx
-			.select()
-			.from(contentStructureNode)
-			.where(
-				and(
-					eq(contentStructureNode.structureId, tree.structure.id),
-					isNull(contentStructureNode.deletedAt),
-				),
-			);
-		const currentRoot = activeNodes.find((candidate) => candidate.parentId === null);
-		if (!currentRoot && activeNodes.length)
-			throw new ContentStructureInvalid("Zone pages tree has no root page");
-		if (!currentRoot && !node && !input.home)
-			throw new ContentStructureInvalid("The first Zone Page must be the home page");
+		const saved = await getZonePageUnitById(
+			tx,
+			input.zoneId,
+			pageId,
+			input.localization.language,
+		);
+		if (!saved) throw new Error("Zone Page Unit upsert did not produce a projection");
+		return saved;
+	});
+}
+
+export async function upsertZonePagePlacement(input: ZonePagePlacementMutationInput) {
+	return database.transaction(async (tx) => {
+		await tx.execute(
+			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,
+		);
+		const page = await getZonePageUnitById(tx, input.zoneId, input.pageId);
+		if (!page) throw new ContentStructureInvalid("Zone Page Unit is outside this Zone");
+		const structure = await loadOrCreatePageStructure(tx, input);
+		let node = await nodeForPageId(tx, structure.structure.id, input.pageId);
 		const requireStructureBase = () => {
 			if (
 				input.baseStructureRevisionId === undefined
-					? activeNodes.length > 0
-					: input.baseStructureRevisionId !== tree.revisionId
+					? !structure.created
+					: input.baseStructureRevisionId !== structure.revisionId
 			)
-				throw new ContentStructureRevisionConflict(tree.revisionId);
-			return tree.revisionId;
+				throw new ContentStructureRevisionConflict(structure.revisionId);
+			return structure.revisionId;
 		};
 		const parentNode =
-			input.parentPageId === undefined || input.parentPageId === null
-				? undefined
-				: activeNodes.find((candidate) => candidate.contentUnitId === input.parentPageId);
+			typeof input.parentPageId === "string"
+				? await nodeForPageId(tx, structure.structure.id, input.parentPageId)
+				: undefined;
 		if (input.parentPageId && !parentNode)
-			throw new ContentStructureInvalid("Zone Page parent does not exist");
+			throw new ContentStructureInvalid("Parent Page is not indexed by page-structure");
+
+		let revisionId = structure.revisionId;
 		if (!node) {
-			revisionId = requireStructureBase();
-			const parentId = currentRoot
-				? input.home
-					? currentRoot.id
-					: (parentNode?.id ?? currentRoot.id)
-				: null;
+			revisionId = structure.created ? structure.revisionId : requireStructureBase();
 			const inserted = await insertContentStructureNode(tx, {
 				ownerUnitId: input.zoneId,
-				structureId: tree.structure.id,
+				structureId: structure.structure.id,
 				baseRevisionId: revisionId,
 				actorProfileId: input.actorProfileId,
-				contentUnitId: pageId,
-				parentId,
+				contentUnitId: input.pageId,
+				parentId: parentNode?.id ?? null,
 				position: input.position,
 			});
 			node = inserted.node;
 			revisionId = inserted.revisionId;
-			if (input.home && currentRoot) {
-				const moved = await rerootZonePagesContentStructure(tx, {
-					ownerUnitId: input.zoneId,
-					structureId: tree.structure.id,
-					nodeId: node.id,
-					baseRevisionId: revisionId,
-					actorProfileId: input.actorProfileId,
-					position: input.position,
-				});
-				revisionId = moved.revisionId;
-			}
-		} else if (input.home && node.parentId !== null) {
-			revisionId = requireStructureBase();
-			const promoted = await rerootZonePagesContentStructure(tx, {
-				ownerUnitId: input.zoneId,
-				structureId: tree.structure.id,
-				nodeId: node.id,
-				baseRevisionId: revisionId,
-				actorProfileId: input.actorProfileId,
-				position: input.position,
-			});
-			revisionId = promoted.revisionId;
 		} else {
-			if (!input.home && node.parentId === null && !parentNode)
-				throw new ContentStructureInvalid("A non-home Zone Page requires a parent");
-			const parentId = input.home ? null : (parentNode?.id ?? node.parentId);
-			const structureChanged =
+			const parentId =
+				input.parentPageId === undefined ? node.parentId : (parentNode?.id ?? null);
+			const changed =
 				parentId !== node.parentId ||
 				(input.position !== undefined && input.position !== node.position);
-			if (structureChanged) {
+			if (changed) {
 				revisionId = requireStructureBase();
 				const updated = await updateContentStructureNode(tx, {
 					ownerUnitId: input.zoneId,
-					structureId: tree.structure.id,
+					structureId: structure.structure.id,
 					nodeId: node.id,
 					baseRevisionId: revisionId,
 					actorProfileId: input.actorProfileId,
 					parentId,
 					position: input.position,
 				});
+				node = updated.node;
 				revisionId = updated.revisionId;
 			}
 		}
 
-		const pages = await listZonePageUnits(tx, input.zoneId, input.localization.language);
-		const saved = pages.find((page) => page.id === pageId);
-		if (!saved) throw new Error("Zone Page Unit upsert did not produce a projection");
-		return { ...saved, latestStructureRevisionId: revisionId };
+		const saved = await getZonePageUnitById(tx, input.zoneId, input.pageId);
+		if (!saved?.placement)
+			throw new Error("Zone Page placement mutation did not produce a placement");
+		return {
+			...saved,
+			placement: { ...saved.placement, latestStructureRevisionId: revisionId },
+		};
 	});
 }
 
-export async function deleteZonePageUnit(input: {
+export async function deleteZonePagePlacement(input: {
 	readonly zoneId: string;
 	readonly pageId: string;
 	readonly actorProfileId: string;
 	readonly baseStructureRevisionId: string;
-	readonly ensureNotReferenced?: (tx: DatabaseTransaction) => Promise<void>;
 }) {
 	return database.transaction(async (tx) => {
 		await tx.execute(
 			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,
 		);
-		const [structure] = await listContentStructures(tx, input.zoneId, "zone.pages");
-		if (!structure) throw new ContentStructureInvalid("Zone pages tree does not exist");
+		const [structure] = await listContentStructures(tx, input.zoneId, "page-structure");
+		if (!structure) return;
 		const node = await nodeForPageId(tx, structure.id, input.pageId);
-		if (!node) throw new ContentStructureInvalid("Zone Page Unit is outside this Zone");
+		if (!node) return;
 		const [child] = await tx
 			.select({ id: contentStructureNode.id })
 			.from(contentStructureNode)
@@ -543,8 +566,7 @@ export async function deleteZonePageUnit(input: {
 				),
 			)
 			.limit(1);
-		if (child) throw new ContentStructureInvalid("Move child pages before deleting this page");
-		await input.ensureNotReferenced?.(tx);
+		if (child) throw new ContentStructureInvalid("Move child Pages before removing this index");
 		await deleteContentStructureNode(tx, {
 			ownerUnitId: input.zoneId,
 			structureId: structure.id,
@@ -552,6 +574,26 @@ export async function deleteZonePageUnit(input: {
 			baseRevisionId: input.baseStructureRevisionId,
 			actorProfileId: input.actorProfileId,
 		});
+	});
+}
+
+export async function deleteZonePageUnit(input: {
+	readonly zoneId: string;
+	readonly pageId: string;
+	readonly actorProfileId: string;
+	readonly ensureNotReferenced?: (tx: DatabaseTransaction) => Promise<void>;
+}) {
+	return database.transaction(async (tx) => {
+		await tx.execute(
+			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,
+		);
+		const page = await getZonePageUnitById(tx, input.zoneId, input.pageId);
+		if (!page) throw new ContentStructureInvalid("Zone Page Unit is outside this Zone");
+		if (page.placement)
+			throw new ContentStructureInvalid(
+				"Remove the Zone Page from page-structure before deleting it",
+			);
+		await input.ensureNotReferenced?.(tx);
 		await tx.update(unit).set({ deletedAt: new Date() }).where(eq(unit.id, input.pageId));
 		await recordUnitRevision(tx, {
 			unitId: input.pageId,

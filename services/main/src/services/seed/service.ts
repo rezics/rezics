@@ -15,7 +15,7 @@ import {
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
-import { OfficialRealmUnitIds } from "@rezics/slug";
+import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 
 import { env } from "../config";
 import { Authorization } from "../authorization";
@@ -114,6 +114,7 @@ import {
 	unitVariant,
 	users,
 	zone,
+	zonePage,
 } from "../database/schema";
 import { createNavigationStructure } from "../content-structure/navigation";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
@@ -1359,6 +1360,12 @@ async function seedToaruWiki(
 		}),
 	]);
 	if (!pageUnit) throw new Error("Toaru Zone Page Unit insertion failed");
+	await tx.insert(zonePage).values({
+		id: pageUnit.id,
+		zoneId: zoneUnit.id,
+		createdAt: pageUnit.createdAt,
+		updatedAt: pageUnit.updatedAt,
+	});
 	await tx.insert(unitLocalization).values(
 		(["zh", "en"] as const).map((language, index) => ({
 			unitId: pageUnit.id,
@@ -1384,17 +1391,17 @@ async function seedToaruWiki(
 	await replaceZonePageSlugAddress(tx, {
 		zoneId: zoneUnit.id,
 		pageUnitId: pageUnit.id,
-		slug: "home",
+		slug: ZoneHomePageSlug,
 	});
-	const pagesTree = await createContentStructure(tx, {
+	const pageStructure = await createContentStructure(tx, {
 		ownerUnitId: zoneUnit.id,
-		kind: "zone.pages",
+		kind: "page-structure",
 		actorProfileId: owner.id,
 	});
 	await insertContentStructureNode(tx, {
 		ownerUnitId: zoneUnit.id,
-		structureId: pagesTree.structure.id,
-		baseRevisionId: pagesTree.revisionId,
+		structureId: pageStructure.structure.id,
+		baseRevisionId: pageStructure.revisionId,
 		actorProfileId: owner.id,
 		contentUnitId: pageUnit.id,
 		parentId: null,

@@ -42,7 +42,7 @@ import {
 import { database } from "../../database";
 import { unitDock } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
-import { getZonePageUnitBySlug } from "../../zones/pages";
+import { getZonePageUnitById } from "../../zones/pages";
 import {
 	getZoneSearchFeature,
 	listZoneSearchFeatureRevisions,
@@ -84,7 +84,7 @@ const ZoneDockSearchParams = t.Object({ zoneId: Uuid, blockKey: BlockKey });
 const ZoneFeedBlockParams = ZoneDockSearchParams;
 const ZonePageSearchParams = t.Object({
 	zoneId: Uuid,
-	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+	pageId: Uuid,
 	blockKey: BlockKey,
 });
 const SearchFeatureTemplateParams = t.Object({ template: SearchTemplateId });
@@ -105,11 +105,7 @@ const ZoneFeedBlockExecutionBody = t.Object(
 			t.Object(
 				{
 					kind: t.Literal("page"),
-					slug: t.String({
-						minLength: 1,
-						maxLength: 100,
-						pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-					}),
+					pageId: Uuid,
 				},
 				{ additionalProperties: false },
 			),
@@ -509,7 +505,7 @@ export default new Elysia({ prefix: "/search" })
 		},
 	)
 	.post(
-		"/zones/:zoneId/pages/:slug/blocks/:blockKey/execute",
+		"/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
@@ -517,7 +513,7 @@ export default new Elysia({ prefix: "/search" })
 				() => new UnitNotFound("Zone"),
 			);
 			const record = await database.transaction((tx) =>
-				getZonePageUnitBySlug(tx, params.zoneId, params.slug),
+				getZonePageUnitById(tx, params.zoneId, params.pageId),
 			);
 			if (!record) throw new ZonePageNotFound();
 			try {
@@ -588,10 +584,10 @@ export default new Elysia({ prefix: "/search" })
 								return parseDocument(DockDocument, record.document);
 							})()
 						: await database.transaction(async (tx) => {
-								const record = await getZonePageUnitBySlug(
+								const record = await getZonePageUnitById(
 									tx,
 									params.zoneId,
-									surface.slug,
+									surface.pageId,
 								);
 								if (!record) throw new ZonePageNotFound();
 								return record.document;

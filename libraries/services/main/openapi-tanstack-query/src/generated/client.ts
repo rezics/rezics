@@ -163,12 +163,18 @@ import type {
 	GetZoneRenderProjectionResponses,
 	GetApiZonesByZoneIdPagesOptions,
 	GetApiZonesByZoneIdPagesResponses,
-	GetApiZonesByZoneIdPagesBySlugOptions,
-	GetApiZonesByZoneIdPagesBySlugResponses,
-	PutApiZonesByZoneIdPagesBySlugOptions,
-	PutApiZonesByZoneIdPagesBySlugResponses,
-	DeleteApiZonesByZoneIdPagesBySlugOptions,
-	DeleteApiZonesByZoneIdPagesBySlugResponses,
+	PostApiZonesByZoneIdPagesOptions,
+	PostApiZonesByZoneIdPagesResponses,
+	GetApiZonesByZoneIdPagesByPageIdOptions,
+	GetApiZonesByZoneIdPagesByPageIdResponses,
+	PutApiZonesByZoneIdPagesByPageIdOptions,
+	PutApiZonesByZoneIdPagesByPageIdResponses,
+	DeleteApiZonesByZoneIdPagesByPageIdOptions,
+	DeleteApiZonesByZoneIdPagesByPageIdResponses,
+	PutApiZonesByZoneIdPagesByPageIdPlacementOptions,
+	PutApiZonesByZoneIdPagesByPageIdPlacementResponses,
+	DeleteApiZonesByZoneIdPagesByPageIdPlacementOptions,
+	DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses,
 	GetApiZonesByZoneIdNavigationOptions,
 	GetApiZonesByZoneIdNavigationResponses,
 	PostApiZonesByZoneIdNavigationOptions,
@@ -571,8 +577,8 @@ import type {
 	PostApiSearchZonesByZoneIdFeatureRestoreResponses,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses,
-	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
-	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses,
 	PostApiSearchOptions,
@@ -2117,59 +2123,121 @@ export function getApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Get Zone page
- * {@link /api/zones/:zoneId/pages/:slug}
+ * @summary Create Zone page
+ * {@link /api/zones/:zoneId/pages}
  */
-export function getApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean = true>(
-	options: Options<GetApiZonesByZoneIdPagesBySlugOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>> {
+export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
+	options: Options<PostApiZonesByZoneIdPagesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/zones/{zoneId}/pages",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Zone page by Unit ID
+ * {@link /api/zones/:zoneId/pages/:pageId}
+ */
+export function getApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/zones/{zoneId}/pages/{slug}",
+		url: "/api/zones/{zoneId}/pages/{pageId}",
 		...config,
-	}) as Promise<RequestResult<GetApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Create or replace Zone page
- * {@link /api/zones/:zoneId/pages/:slug}
+ * @summary Replace Zone page
+ * {@link /api/zones/:zoneId/pages/:pageId}
  */
-export function putApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean = true>(
-	options: Options<PutApiZonesByZoneIdPagesBySlugOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>> {
+export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/zones/{zoneId}/pages/{slug}",
+		url: "/api/zones/{zoneId}/pages/{pageId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Delete Zone page
- * {@link /api/zones/:zoneId/pages/:slug}
+ * {@link /api/zones/:zoneId/pages/:pageId}
  */
-export function deleteApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiZonesByZoneIdPagesBySlugOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>> {
+export function deleteApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/zones/{zoneId}/pages/{slug}",
+		url: "/api/zones/{zoneId}/pages/{pageId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Index Zone page in page-structure
+ * {@link /api/zones/:zoneId/pages/:pageId/placement}
+ */
+export function putApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends boolean = true>(
+	options: Options<PutApiZonesByZoneIdPagesByPageIdPlacementOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/zones/{zoneId}/pages/{pageId}/placement",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove Zone page from page-structure
+ * {@link /api/zones/:zoneId/pages/:pageId/placement}
+ */
+export function deleteApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiZonesByZoneIdPagesByPageIdPlacementOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/zones/{zoneId}/pages/{pageId}/placement",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -6224,18 +6292,18 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<
 
 /**
  * @summary Execute a trusted Zone Page Search Block
- * {@link /api/search/zones/:zoneId/pages/:slug/blocks/:blockKey/execute}
+ * {@link /api/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute}
  */
-export function postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
+export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses,
 		ThrowOnError
 	>
 > {
@@ -6243,11 +6311,11 @@ export function postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
 
 	return request({
 		method: "POST",
-		url: "/api/search/zones/{zoneId}/pages/{slug}/blocks/{blockKey}/execute",
+		url: "/api/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute",
 		...config,
 	}) as Promise<
 		RequestResult<
-			PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
+			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses,
 			ThrowOnError
 		>
 	>;

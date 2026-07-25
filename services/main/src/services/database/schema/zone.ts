@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, uuid } from "drizzle-orm/pg-core";
+import { check, index, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -31,4 +31,25 @@ export const zone = pgTable(
 			sql`${table.endsAt} is null or ${table.startsAt} is null or ${table.endsAt} > ${table.startsAt}`,
 		),
 	],
+);
+
+/**
+ * Proves that a Zone Page Unit belongs to a Zone.
+ *
+ * Slug addresses are optional and page-structure is only a visual index, so
+ * neither can serve as the ownership relation.
+ */
+export const zonePage = pgTable(
+	"zone_page",
+	{
+		id: uuid()
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		zoneId: uuid()
+			.notNull()
+			.references(() => zone.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [index("zone_page_zone_created_idx").on(table.zoneId, table.createdAt, table.id)],
 );

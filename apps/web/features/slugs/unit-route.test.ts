@@ -6,7 +6,7 @@ import {
 } from "@rezics/slug";
 import { describe, expect, it } from "vitest";
 
-import { realmHref, zoneHref } from "./unit-route";
+import { realmHref, zoneHref, zonePageHref } from "./unit-route";
 
 describe("public Unit slug routes", () => {
 	it("keeps every enabled namespace and prefix unique", () => {
@@ -52,6 +52,44 @@ describe("public Unit slug routes", () => {
 		};
 		expect(realmHref(realm)).toBe("/r/art");
 		expect(zoneHref(zone)).toBe("/z/summer");
+	});
+
+	it("renders the home Page at the Zone root", () => {
+		const zone = {
+			id: "zone-id",
+			slugAddress: {
+				slug: "summer",
+				scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+				canonicalPath: ["zones", "summer"],
+			},
+		};
+		expect(zonePageHref(zone, { id: "page-id", slug: "home" })).toBe("/z/summer");
+	});
+
+	it("prefers a Zone-scoped Page slug", () => {
+		expect(
+			zonePageHref({ id: "zone-id", slugAddress: null }, { id: "page-id", slug: "schedule" }),
+		).toBe("/zone/zone-id/schedule");
+	});
+
+	it("falls back to the stable Zone and Page ID route without a Page slug", () => {
+		const zone = {
+			id: "zone-id",
+			slugAddress: {
+				slug: "summer",
+				scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+				canonicalPath: ["zones", "summer"],
+			},
+		};
+		expect(zonePageHref(zone, { id: "page/id", slug: null })).toBe(
+			"/zone/zone-id/page/page%2Fid",
+		);
+	});
+
+	it("does not emit reserved application segments as Page slug routes", () => {
+		expect(
+			zonePageHref({ id: "zone-id", slugAddress: null }, { id: "page-id", slug: "manage" }),
+		).toBe("/zone/zone-id/page/page-id");
 	});
 
 	it("falls back to IDs when the address proof does not match the route", () => {

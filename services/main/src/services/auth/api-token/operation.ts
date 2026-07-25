@@ -18,7 +18,7 @@ const OperationCostUnits = {
 	postApiSearchExecute: 5,
 	"postApiSearchUnitsByUnitIdContent-structuresByStructureIdNodesByNodeIdExecute": 5,
 	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute: 5,
-	postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute: 5,
+	postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute: 5,
 	"postApiImage-assets": 10,
 } as const satisfies Readonly<Record<string, number>>;
 

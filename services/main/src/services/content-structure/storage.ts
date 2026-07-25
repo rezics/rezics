@@ -6,7 +6,7 @@ import {
 	contentStructureNode,
 	post,
 	unit,
-	unitSlugAddress,
+	zonePage,
 	type ContentStructureKind,
 	type ContentStructureTargetKind,
 } from "../database/schema";
@@ -111,26 +111,22 @@ export async function ensureContentStructureNodeAllowed(
 			.limit(1);
 		if (!target) throw new ContentStructureInvalid("Target Unit does not exist");
 	}
-	if (input.kind === "zone.pages") {
-		const [address] = await tx
-			.select({ scopeUnitId: unitSlugAddress.scopeUnitId })
-			.from(unitSlugAddress)
+	if (input.kind === "page-structure") {
+		const [ownedPage] = await tx
+			.select({ zoneId: zonePage.zoneId })
+			.from(zonePage)
 			.where(
-				and(
-					eq(unitSlugAddress.kind, "canonical"),
-					eq(unitSlugAddress.targetUnitId, input.contentUnitId),
-				),
+				and(eq(zonePage.id, input.contentUnitId), eq(zonePage.zoneId, input.ownerUnitId)),
 			)
 			.limit(1);
-		if (!address || address.scopeUnitId !== input.ownerUnitId)
-			throw new ContentStructureInvalid("Zone Page Unit address is outside its owner Zone");
+		if (!ownedPage) throw new ContentStructureInvalid("Zone Page Unit belongs to another Zone");
 		const [membership] = await tx
 			.select({ id: contentStructureNode.id, structureId: contentStructureNode.structureId })
 			.from(contentStructureNode)
 			.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
 			.where(
 				and(
-					eq(contentStructure.kind, "zone.pages"),
+					eq(contentStructure.kind, "page-structure"),
 					eq(contentStructureNode.contentUnitId, input.contentUnitId),
 					isNull(contentStructure.deletedAt),
 					isNull(contentStructureNode.deletedAt),
@@ -139,7 +135,7 @@ export async function ensureContentStructureNodeAllowed(
 			.limit(1);
 		if (membership && membership.id !== input.nodeId)
 			throw new ContentStructureInvalid(
-				"Zone Page Unit already belongs to a Zone pages tree",
+				"Zone Page Unit is already indexed by this Zone page-structure",
 			);
 	}
 }

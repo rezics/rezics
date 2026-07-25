@@ -24235,6 +24235,12 @@ export type GetZoneRenderProjectionQuery = {
 	 * @type string | undefined
 	 */
 	page?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	pageId?: string;
 };
 
 export const GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum = {
@@ -24563,39 +24569,46 @@ export type GetZoneRenderProjectionStatus200 = {
 				 * @type string
 				 */
 				zoneId: string;
-				/**
-				 * @type string
-				 */
-				slug: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				structureId: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				nodeId: string;
-				parentPageId: (string | null) | null;
+				slug: (string | null) | null;
 				/**
 				 * @type unknown
 				 */
 				document: unknown;
 				/**
-				 * @description
-				 * Format: `fractional-position`
-				 * @minLength 2
-				 * @maxLength 512
-				 * @type string
-				 */
-				position: string;
-				/**
 				 * @type boolean
 				 */
 				home: boolean;
+				placement:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							structureId: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							nodeId: string;
+							parentPageId: (string | null) | null;
+							/**
+							 * @description
+							 * Format: `fractional-position`
+							 * @minLength 2
+							 * @maxLength 512
+							 * @type string
+							 */
+							position: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							latestStructureRevisionId: string;
+					  } | null)
+					| null;
 				language: "zh" | "en";
 				/**
 				 * @type string
@@ -24626,12 +24639,6 @@ export type GetZoneRenderProjectionStatus200 = {
 				 * @type string
 				 */
 				latestUnitRevisionId: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				latestStructureRevisionId: string;
 				/**
 				 * @description
 				 * Format: `date-time`
@@ -25083,39 +25090,46 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 		 * @type string
 		 */
 		zoneId: string;
-		/**
-		 * @type string
-		 */
-		slug: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		structureId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		nodeId: string;
-		parentPageId: (string | null) | null;
+		slug: (string | null) | null;
 		/**
 		 * @type unknown
 		 */
 		document: unknown;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
-		 */
-		position: string;
-		/**
 		 * @type boolean
 		 */
 		home: boolean;
+		placement:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					structureId: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					nodeId: string;
+					parentPageId: (string | null) | null;
+					/**
+					 * @description
+					 * Format: `fractional-position`
+					 * @minLength 2
+					 * @maxLength 512
+					 * @type string
+					 */
+					position: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					latestStructureRevisionId: string;
+			  } | null)
+			| null;
 		/**
 		 * @type string
 		 */
@@ -25154,12 +25168,6 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 		latestUnitRevisionId: string;
 		/**
 		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		latestStructureRevisionId: string;
-		/**
-		 * @description
 		 * Format: `date-time`
 		 * @type string
 		 */
@@ -25171,6 +25179,22 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	pageStructure:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				latestRevisionId: string;
+		  } | null)
+		| null;
 };
 
 /**
@@ -25243,51 +25267,44 @@ export type GetApiZonesByZoneIdPagesResponse =
 /**
  * @type object
  */
-export type GetApiZonesByZoneIdPagesBySlugPath = {
+export type PostApiZonesByZoneIdPagesPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
 	zoneId: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 100
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slug: string;
 };
 
-export const GetApiZonesByZoneIdPagesBySlugStatus200LanguageEnum = {
+export const PostApiZonesByZoneIdPagesStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
 } as const;
 
-export type GetApiZonesByZoneIdPagesBySlugStatus200LanguageEnum =
-	(typeof GetApiZonesByZoneIdPagesBySlugStatus200LanguageEnum)[keyof typeof GetApiZonesByZoneIdPagesBySlugStatus200LanguageEnum];
+export type PostApiZonesByZoneIdPagesStatus200LanguageEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus200LanguageEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus200LanguageEnum];
 
-export const GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum = {
+export const PostApiZonesByZoneIdPagesStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
 } as const;
 
-export type GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum =
-	(typeof GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum)[keyof typeof GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum];
+export type PostApiZonesByZoneIdPagesStatus200LocalizationsLanguageEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus200LocalizationsLanguageEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus200LocalizationsLanguageEnum];
 
-export const GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum = {
+export const PostApiZonesByZoneIdPagesStatus200LocalizationsContentStatusEnum = {
 	draft: "draft",
 	published: "published",
 	archived: "archived",
 } as const;
 
-export type GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum =
-	(typeof GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum)[keyof typeof GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum];
+export type PostApiZonesByZoneIdPagesStatus200LocalizationsContentStatusEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus200LocalizationsContentStatusEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus200LocalizationsContentStatusEnum];
 
 /**
  * @type object
  */
-export type GetApiZonesByZoneIdPagesBySlugStatus200 = {
+export type PostApiZonesByZoneIdPagesStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -25300,43 +25317,50 @@ export type GetApiZonesByZoneIdPagesBySlugStatus200 = {
 	 * @type string
 	 */
 	zoneId: string;
-	/**
-	 * @type string
-	 */
-	slug: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	structureId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	nodeId: string;
-	parentPageId: (string | null) | null;
+	slug: (string | null) | null;
 	/**
 	 * @type unknown
 	 */
 	document: unknown;
 	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string
-	 */
-	position: string;
-	/**
 	 * @type boolean
 	 */
 	home: boolean;
+	placement:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				structureId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				parentPageId: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				latestStructureRevisionId: string;
+		  } | null)
+		| null;
 	/**
 	 * @type string
 	 */
-	language: GetApiZonesByZoneIdPagesBySlugStatus200LanguageEnum;
+	language: PostApiZonesByZoneIdPagesStatus200LanguageEnum;
 	/**
 	 * @type string
 	 */
@@ -25348,7 +25372,7 @@ export type GetApiZonesByZoneIdPagesBySlugStatus200 = {
 		/**
 		 * @type string
 		 */
-		language: GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum;
+		language: PostApiZonesByZoneIdPagesStatus200LocalizationsLanguageEnum;
 		/**
 		 * @type string
 		 */
@@ -25361,7 +25385,7 @@ export type GetApiZonesByZoneIdPagesBySlugStatus200 = {
 		 * @default 'draft'
 		 * @type string
 		 */
-		contentStatus: GetApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum;
+		contentStatus: PostApiZonesByZoneIdPagesStatus200LocalizationsContentStatusEnum;
 	}[];
 	/**
 	 * @description
@@ -25369,12 +25393,6 @@ export type GetApiZonesByZoneIdPagesBySlugStatus200 = {
 	 * @type string
 	 */
 	latestUnitRevisionId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	latestStructureRevisionId: string;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -25389,241 +25407,25 @@ export type GetApiZonesByZoneIdPagesBySlugStatus200 = {
 	updatedAt: string;
 };
 
-export const GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZonePageNotFound: "ZonePageNotFound",
+export const PostApiZonesByZoneIdPagesStatus400ErrorCodeEnum = {
+	InvalidSlug: "InvalidSlug",
+	ZoneDocumentInvalid: "ZoneDocumentInvalid",
 } as const;
 
-export type GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum =
-	(typeof GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum)[keyof typeof GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum];
+export type PostApiZonesByZoneIdPagesStatus400ErrorCodeEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus400ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus400ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesBySlugStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesBySlugOptions = {
-	body?: never;
-	path: GetApiZonesByZoneIdPagesBySlugPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesBySlugResponses = {
-	"200": GetApiZonesByZoneIdPagesBySlugStatus200;
-	"404": GetApiZonesByZoneIdPagesBySlugStatus404;
-	"422": GetApiZonesByZoneIdPagesBySlugStatus422;
-	"500": GetApiZonesByZoneIdPagesBySlugStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiZonesByZoneIdPagesBySlugResponse =
-	| GetApiZonesByZoneIdPagesBySlugStatus200
-	| GetApiZonesByZoneIdPagesBySlugStatus404
-	| GetApiZonesByZoneIdPagesBySlugStatus422
-	| GetApiZonesByZoneIdPagesBySlugStatus500;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesBySlugPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 100
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slug: string;
-};
-
-export const PutApiZonesByZoneIdPagesBySlugStatus200LanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PutApiZonesByZoneIdPagesBySlugStatus200LanguageEnum =
-	(typeof PutApiZonesByZoneIdPagesBySlugStatus200LanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesBySlugStatus200LanguageEnum];
-
-export const PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum =
-	(typeof PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum];
-
-export const PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum = {
-	draft: "draft",
-	published: "published",
-	archived: "archived",
-} as const;
-
-export type PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum =
-	(typeof PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum)[keyof typeof PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum];
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesBySlugStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @type string
-	 */
-	slug: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	structureId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	nodeId: string;
-	parentPageId: (string | null) | null;
-	/**
-	 * @type unknown
-	 */
-	document: unknown;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string
-	 */
-	position: string;
-	/**
-	 * @type boolean
-	 */
-	home: boolean;
-	/**
-	 * @type string
-	 */
-	language: PutApiZonesByZoneIdPagesBySlugStatus200LanguageEnum;
-	/**
-	 * @type string
-	 */
-	title: string;
-	/**
-	 * @type array
-	 */
-	localizations: {
-		/**
-		 * @type string
-		 */
-		language: PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsLanguageEnum;
-		/**
-		 * @type string
-		 */
-		title: string;
-		/**
-		 * @type unknown
-		 */
-		document: unknown;
-		/**
-		 * @default 'draft'
-		 * @type string
-		 */
-		contentStatus: PutApiZonesByZoneIdPagesBySlugStatus200LocalizationsContentStatusEnum;
-	}[];
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	latestUnitRevisionId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	latestStructureRevisionId: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export type PutApiZonesByZoneIdPagesBySlugStatus400 =
+export type PostApiZonesByZoneIdPagesStatus400 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'ZoneDocumentInvalid'
+				 * @default 'InvalidSlug'
 				 * @type string
 				 */
-				code: "ZoneDocumentInvalid";
+				code: PostApiZonesByZoneIdPagesStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -25640,18 +25442,18 @@ export type PutApiZonesByZoneIdPagesBySlugStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum = {
+export const PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
 
-export type PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum];
+export type PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugStatus403 = {
+export type PostApiZonesByZoneIdPagesStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -25660,7 +25462,7 @@ export type PutApiZonesByZoneIdPagesBySlugStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum;
+		code: PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -25676,10 +25478,18 @@ export type PutApiZonesByZoneIdPagesBySlugStatus403 = {
 	requestId: string;
 };
 
+export const PostApiZonesByZoneIdPagesStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PostApiZonesByZoneIdPagesStatus404ErrorCodeEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus404ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugStatus404 = {
+export type PostApiZonesByZoneIdPagesStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -25688,7 +25498,7 @@ export type PutApiZonesByZoneIdPagesBySlugStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "UnitNotFound";
+		code: PostApiZonesByZoneIdPagesStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -25704,27 +25514,27 @@ export type PutApiZonesByZoneIdPagesBySlugStatus404 = {
 	requestId: string;
 };
 
-export const PutApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum = {
+export const PostApiZonesByZoneIdPagesStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
 	UnitRevisionConflict: "UnitRevisionConflict",
-	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
 } as const;
 
-export type PutApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum];
+export type PostApiZonesByZoneIdPagesStatus409ErrorCodeEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus409ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugStatus409 = {
+export type PostApiZonesByZoneIdPagesStatus409 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'UnitRevisionConflict'
+		 * @default 'SlugTaken'
 		 * @type string
 		 */
-		code: PutApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum;
+		code: PostApiZonesByZoneIdPagesStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -25743,12 +25553,12 @@ export type PutApiZonesByZoneIdPagesBySlugStatus409 = {
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
+export type PostApiZonesByZoneIdPagesStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugStatus429 = {
+export type PostApiZonesByZoneIdPagesStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -25772,26 +25582,21 @@ export type PutApiZonesByZoneIdPagesBySlugStatus429 = {
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
+export type PostApiZonesByZoneIdPagesStatus500 = InternalError;
 
-export const PutApiZonesByZoneIdPagesBySlugRequestLocalizationLanguageEnum = {
+export const PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
 } as const;
 
-export type PutApiZonesByZoneIdPagesBySlugRequestLocalizationLanguageEnum =
-	(typeof PutApiZonesByZoneIdPagesBySlugRequestLocalizationLanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesBySlugRequestLocalizationLanguageEnum];
+export type PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum =
+	(typeof PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum)[keyof typeof PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum];
 
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	pageId?: string;
+export type PostApiZonesByZoneIdPagesBody = {
+	slug?: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -25799,7 +25604,7 @@ export type PutApiZonesByZoneIdPagesBySlugBody = {
 		/**
 		 * @type string
 		 */
-		language: PutApiZonesByZoneIdPagesBySlugRequestLocalizationLanguageEnum;
+		language: PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum;
 		/**
 		 * @minLength 1
 		 * @maxLength 500
@@ -25813,25 +25618,6 @@ export type PutApiZonesByZoneIdPagesBySlugBody = {
 	};
 	/**
 	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string | undefined
-	 */
-	position?: string;
-	parentPageId?: (string | null) | null;
-	/**
-	 * @type boolean
-	 */
-	home: boolean;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	baseStructureRevisionId?: string;
-	/**
-	 * @description
 	 * Format: `uuid`
 	 * @type string | undefined
 	 */
@@ -25841,9 +25627,9 @@ export type PutApiZonesByZoneIdPagesBySlugBody = {
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugOptions = {
-	body: PutApiZonesByZoneIdPagesBySlugBody;
-	path: PutApiZonesByZoneIdPagesBySlugPath;
+export type PostApiZonesByZoneIdPagesOptions = {
+	body: PostApiZonesByZoneIdPagesBody;
+	path: PostApiZonesByZoneIdPagesPath;
 	query?: never;
 	headers?: never;
 };
@@ -25851,34 +25637,34 @@ export type PutApiZonesByZoneIdPagesBySlugOptions = {
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdPagesBySlugResponses = {
-	"200": PutApiZonesByZoneIdPagesBySlugStatus200;
-	"400": PutApiZonesByZoneIdPagesBySlugStatus400;
-	"403": PutApiZonesByZoneIdPagesBySlugStatus403;
-	"404": PutApiZonesByZoneIdPagesBySlugStatus404;
-	"409": PutApiZonesByZoneIdPagesBySlugStatus409;
-	"422": PutApiZonesByZoneIdPagesBySlugStatus422;
-	"429": PutApiZonesByZoneIdPagesBySlugStatus429;
-	"500": PutApiZonesByZoneIdPagesBySlugStatus500;
+export type PostApiZonesByZoneIdPagesResponses = {
+	"200": PostApiZonesByZoneIdPagesStatus200;
+	"400": PostApiZonesByZoneIdPagesStatus400;
+	"403": PostApiZonesByZoneIdPagesStatus403;
+	"404": PostApiZonesByZoneIdPagesStatus404;
+	"409": PostApiZonesByZoneIdPagesStatus409;
+	"422": PostApiZonesByZoneIdPagesStatus422;
+	"429": PostApiZonesByZoneIdPagesStatus429;
+	"500": PostApiZonesByZoneIdPagesStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiZonesByZoneIdPagesBySlugResponse =
-	| PutApiZonesByZoneIdPagesBySlugStatus200
-	| PutApiZonesByZoneIdPagesBySlugStatus400
-	| PutApiZonesByZoneIdPagesBySlugStatus403
-	| PutApiZonesByZoneIdPagesBySlugStatus404
-	| PutApiZonesByZoneIdPagesBySlugStatus409
-	| PutApiZonesByZoneIdPagesBySlugStatus422
-	| PutApiZonesByZoneIdPagesBySlugStatus429
-	| PutApiZonesByZoneIdPagesBySlugStatus500;
+export type PostApiZonesByZoneIdPagesResponse =
+	| PostApiZonesByZoneIdPagesStatus200
+	| PostApiZonesByZoneIdPagesStatus400
+	| PostApiZonesByZoneIdPagesStatus403
+	| PostApiZonesByZoneIdPagesStatus404
+	| PostApiZonesByZoneIdPagesStatus409
+	| PostApiZonesByZoneIdPagesStatus422
+	| PostApiZonesByZoneIdPagesStatus429
+	| PostApiZonesByZoneIdPagesStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugPath = {
+export type GetApiZonesByZoneIdPagesByPageIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -25886,72 +25672,156 @@ export type DeleteApiZonesByZoneIdPagesBySlugPath = {
 	 */
 	zoneId: string;
 	/**
-	 * @minLength 1
-	 * @maxLength 100
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @description
+	 * Format: `uuid`
 	 * @type string
 	 */
-	slug: string;
+	pageId: string;
 };
 
-/**
- * @type void
- */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus400 = MalformedRequestBody;
-
-export const DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
+export const GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum = {
+	zh: "zh",
+	en: "en",
 } as const;
 
-export type DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum];
+export type GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum =
+	(typeof GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum)[keyof typeof GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum];
+
+export const GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum =
+	(typeof GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum)[keyof typeof GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum];
+
+export const GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum =
+	(typeof GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum)[keyof typeof GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum];
 
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus403 = {
+export type GetApiZonesByZoneIdPagesByPageIdStatus200 = {
 	/**
-	 * @type object
+	 * @description
+	 * Format: `uuid`
+	 * @type string
 	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	slug: (string | null) | null;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @type boolean
+	 */
+	home: boolean;
+	placement:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				structureId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				parentPageId: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				latestStructureRevisionId: string;
+		  } | null)
+		| null;
 	/**
 	 * @type string
 	 */
-	requestId: string;
+	language: GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum;
+	/**
+	 * @type string
+	 */
+	title: string;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @type string
+		 */
+		language: GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum;
+		/**
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @type unknown
+		 */
+		document: unknown;
+		/**
+		 * @default 'draft'
+		 * @type string
+		 */
+		contentStatus: GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestUnitRevisionId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
 };
 
-export const DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum = {
+export const GetApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ZonePageNotFound: "ZonePageNotFound",
 } as const;
 
-export type DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum];
+export type GetApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum =
+	(typeof GetApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum)[keyof typeof GetApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus404 = {
+export type GetApiZonesByZoneIdPagesByPageIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -25960,7 +25830,7 @@ export type DeleteApiZonesByZoneIdPagesBySlugStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum;
+		code: GetApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -25976,27 +25846,322 @@ export type DeleteApiZonesByZoneIdPagesBySlugStatus404 = {
 	requestId: string;
 };
 
-export const DeleteApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum = {
-	ZonePageInUse: "ZonePageInUse",
-	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
-} as const;
-
-export type DeleteApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum];
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesByPageIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus409 = {
+export type GetApiZonesByZoneIdPagesByPageIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesByPageIdOptions = {
+	body?: never;
+	path: GetApiZonesByZoneIdPagesByPageIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesByPageIdResponses = {
+	"200": GetApiZonesByZoneIdPagesByPageIdStatus200;
+	"404": GetApiZonesByZoneIdPagesByPageIdStatus404;
+	"422": GetApiZonesByZoneIdPagesByPageIdStatus422;
+	"500": GetApiZonesByZoneIdPagesByPageIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiZonesByZoneIdPagesByPageIdResponse =
+	| GetApiZonesByZoneIdPagesByPageIdStatus200
+	| GetApiZonesByZoneIdPagesByPageIdStatus404
+	| GetApiZonesByZoneIdPagesByPageIdStatus422
+	| GetApiZonesByZoneIdPagesByPageIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pageId: string;
+};
+
+export const PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum];
+
+export const PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum];
+
+export const PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	slug: (string | null) | null;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @type boolean
+	 */
+	home: boolean;
+	placement:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				structureId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				parentPageId: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				latestStructureRevisionId: string;
+		  } | null)
+		| null;
+	/**
+	 * @type string
+	 */
+	language: PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum;
+	/**
+	 * @type string
+	 */
+	title: string;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @type string
+		 */
+		language: PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum;
+		/**
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @type unknown
+		 */
+		document: unknown;
+		/**
+		 * @default 'draft'
+		 * @type string
+		 */
+		contentStatus: PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsContentStatusEnum;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestUnitRevisionId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PutApiZonesByZoneIdPagesByPageIdStatus400ErrorCodeEnum = {
+	InvalidSlug: "InvalidSlug",
+	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus400ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus400ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus400ErrorCodeEnum];
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSlug'
+				 * @type string
+				 */
+				code: PutApiZonesByZoneIdPagesByPageIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdStatus403 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'ZonePageInUse'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiZonesByZoneIdPagesBySlugStatus409ErrorCodeEnum;
+		code: PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiZonesByZoneIdPagesByPageIdStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
+	UnitRevisionConflict: "UnitRevisionConflict",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus409ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus409ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugTaken'
+		 * @type string
+		 */
+		code: PutApiZonesByZoneIdPagesByPageIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -26015,12 +26180,12 @@ export type DeleteApiZonesByZoneIdPagesBySlugStatus409 = {
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
+export type PutApiZonesByZoneIdPagesByPageIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus429 = {
+export type PutApiZonesByZoneIdPagesByPageIdStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -26044,12 +26209,819 @@ export type DeleteApiZonesByZoneIdPagesBySlugStatus429 = {
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
+export type PutApiZonesByZoneIdPagesByPageIdStatus500 = InternalError;
+
+export const PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum];
 
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugBody = {
+export type PutApiZonesByZoneIdPagesByPageIdBody = {
+	slug?: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	localization: {
+		/**
+		 * @type string
+		 */
+		language: PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum;
+		/**
+		 * @minLength 1
+		 * @maxLength 500
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @type unknown
+		 */
+		document: unknown;
+	};
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	baseUnitRevisionId?: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdOptions = {
+	body: PutApiZonesByZoneIdPagesByPageIdBody;
+	path: PutApiZonesByZoneIdPagesByPageIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdResponses = {
+	"200": PutApiZonesByZoneIdPagesByPageIdStatus200;
+	"400": PutApiZonesByZoneIdPagesByPageIdStatus400;
+	"403": PutApiZonesByZoneIdPagesByPageIdStatus403;
+	"404": PutApiZonesByZoneIdPagesByPageIdStatus404;
+	"409": PutApiZonesByZoneIdPagesByPageIdStatus409;
+	"422": PutApiZonesByZoneIdPagesByPageIdStatus422;
+	"429": PutApiZonesByZoneIdPagesByPageIdStatus429;
+	"500": PutApiZonesByZoneIdPagesByPageIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiZonesByZoneIdPagesByPageIdResponse =
+	| PutApiZonesByZoneIdPagesByPageIdStatus200
+	| PutApiZonesByZoneIdPagesByPageIdStatus400
+	| PutApiZonesByZoneIdPagesByPageIdStatus403
+	| PutApiZonesByZoneIdPagesByPageIdStatus404
+	| PutApiZonesByZoneIdPagesByPageIdStatus409
+	| PutApiZonesByZoneIdPagesByPageIdStatus422
+	| PutApiZonesByZoneIdPagesByPageIdStatus429
+	| PutApiZonesByZoneIdPagesByPageIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pageId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus204 = void;
+
+export const DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ZonePageInUse'
+		 * @type string
+		 */
+		code: "ZonePageInUse";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdOptions = {
+	body?: never;
+	path: DeleteApiZonesByZoneIdPagesByPageIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdResponses = {
+	"204": DeleteApiZonesByZoneIdPagesByPageIdStatus204;
+	"403": DeleteApiZonesByZoneIdPagesByPageIdStatus403;
+	"404": DeleteApiZonesByZoneIdPagesByPageIdStatus404;
+	"409": DeleteApiZonesByZoneIdPagesByPageIdStatus409;
+	"422": DeleteApiZonesByZoneIdPagesByPageIdStatus422;
+	"429": DeleteApiZonesByZoneIdPagesByPageIdStatus429;
+	"500": DeleteApiZonesByZoneIdPagesByPageIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdResponse =
+	| DeleteApiZonesByZoneIdPagesByPageIdStatus204
+	| DeleteApiZonesByZoneIdPagesByPageIdStatus403
+	| DeleteApiZonesByZoneIdPagesByPageIdStatus404
+	| DeleteApiZonesByZoneIdPagesByPageIdStatus409
+	| DeleteApiZonesByZoneIdPagesByPageIdStatus422
+	| DeleteApiZonesByZoneIdPagesByPageIdStatus429
+	| DeleteApiZonesByZoneIdPagesByPageIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pageId: string;
+};
+
+export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum];
+
+export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsLanguageEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsLanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsLanguageEnum];
+
+export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsContentStatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsContentStatusEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsContentStatusEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsContentStatusEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	slug: (string | null) | null;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @type boolean
+	 */
+	home: boolean;
+	placement:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				structureId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				parentPageId: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				latestStructureRevisionId: string;
+		  } | null)
+		| null;
+	/**
+	 * @type string
+	 */
+	language: PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum;
+	/**
+	 * @type string
+	 */
+	title: string;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @type string
+		 */
+		language: PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsLanguageEnum;
+		/**
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @type unknown
+		 */
+		document: unknown;
+		/**
+		 * @default 'draft'
+		 * @type string
+		 */
+		contentStatus: PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsContentStatusEnum;
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestUnitRevisionId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus400 = MalformedRequestBody;
+
+export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ContentStructureRevisionConflict'
+		 * @type string
+		 */
+		code: "ContentStructureRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ContentStructureInvalid'
+				 * @type string
+				 */
+				code: "ContentStructureInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementBody = {
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	position?: string;
+	parentPageId?: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	baseStructureRevisionId?: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementOptions = {
+	body: PutApiZonesByZoneIdPagesByPageIdPlacementBody;
+	path: PutApiZonesByZoneIdPagesByPageIdPlacementPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementResponses = {
+	"200": PutApiZonesByZoneIdPagesByPageIdPlacementStatus200;
+	"400": PutApiZonesByZoneIdPagesByPageIdPlacementStatus400;
+	"403": PutApiZonesByZoneIdPagesByPageIdPlacementStatus403;
+	"404": PutApiZonesByZoneIdPagesByPageIdPlacementStatus404;
+	"409": PutApiZonesByZoneIdPagesByPageIdPlacementStatus409;
+	"422": PutApiZonesByZoneIdPagesByPageIdPlacementStatus422;
+	"429": PutApiZonesByZoneIdPagesByPageIdPlacementStatus429;
+	"500": PutApiZonesByZoneIdPagesByPageIdPlacementStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiZonesByZoneIdPagesByPageIdPlacementResponse =
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus200
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus400
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus403
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus404
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus409
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus422
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus429
+	| PutApiZonesByZoneIdPagesByPageIdPlacementStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pageId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus204 = void;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400 = MalformedRequestBody;
+
+export const DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409ErrorCodeEnum = {
+	ZonePageInUse: "ZonePageInUse",
+	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ZonePageInUse'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementBody = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -26061,9 +27033,9 @@ export type DeleteApiZonesByZoneIdPagesBySlugBody = {
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugOptions = {
-	body: DeleteApiZonesByZoneIdPagesBySlugBody;
-	path: DeleteApiZonesByZoneIdPagesBySlugPath;
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementOptions = {
+	body: DeleteApiZonesByZoneIdPagesByPageIdPlacementBody;
+	path: DeleteApiZonesByZoneIdPagesByPageIdPlacementPath;
 	query?: never;
 	headers?: never;
 };
@@ -26071,29 +27043,29 @@ export type DeleteApiZonesByZoneIdPagesBySlugOptions = {
 /**
  * @type object
  */
-export type DeleteApiZonesByZoneIdPagesBySlugResponses = {
-	"204": DeleteApiZonesByZoneIdPagesBySlugStatus204;
-	"400": DeleteApiZonesByZoneIdPagesBySlugStatus400;
-	"403": DeleteApiZonesByZoneIdPagesBySlugStatus403;
-	"404": DeleteApiZonesByZoneIdPagesBySlugStatus404;
-	"409": DeleteApiZonesByZoneIdPagesBySlugStatus409;
-	"422": DeleteApiZonesByZoneIdPagesBySlugStatus422;
-	"429": DeleteApiZonesByZoneIdPagesBySlugStatus429;
-	"500": DeleteApiZonesByZoneIdPagesBySlugStatus500;
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses = {
+	"204": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus204;
+	"400": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400;
+	"403": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403;
+	"404": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404;
+	"409": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409;
+	"422": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus422;
+	"429": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429;
+	"500": DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiZonesByZoneIdPagesBySlugResponse =
-	| DeleteApiZonesByZoneIdPagesBySlugStatus204
-	| DeleteApiZonesByZoneIdPagesBySlugStatus400
-	| DeleteApiZonesByZoneIdPagesBySlugStatus403
-	| DeleteApiZonesByZoneIdPagesBySlugStatus404
-	| DeleteApiZonesByZoneIdPagesBySlugStatus409
-	| DeleteApiZonesByZoneIdPagesBySlugStatus422
-	| DeleteApiZonesByZoneIdPagesBySlugStatus429
-	| DeleteApiZonesByZoneIdPagesBySlugStatus500;
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementResponse =
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus204
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus404
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus409
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus422
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus429
+	| DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus500;
 
 /**
  * @type object
@@ -54074,7 +55046,7 @@ export const GetApiUnitsByIdByUnitIdContentStructuresStatus200ItemsKindEnum = {
 	"realm.taxonomy": "realm.taxonomy",
 	"realm.navigation": "realm.navigation",
 	"zone.navigation": "zone.navigation",
-	"zone.pages": "zone.pages",
+	"page-structure": "page-structure",
 } as const;
 
 export type GetApiUnitsByIdByUnitIdContentStructuresStatus200ItemsKindEnum =
@@ -54207,7 +55179,7 @@ export const PostApiUnitsByIdByUnitIdContentStructuresStatus200StructureKindEnum
 	"realm.taxonomy": "realm.taxonomy",
 	"realm.navigation": "realm.navigation",
 	"zone.navigation": "zone.navigation",
-	"zone.pages": "zone.pages",
+	"page-structure": "page-structure",
 } as const;
 
 export type PostApiUnitsByIdByUnitIdContentStructuresStatus200StructureKindEnum =
@@ -54462,7 +55434,7 @@ export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200KindE
 	"realm.taxonomy": "realm.taxonomy",
 	"realm.navigation": "realm.navigation",
 	"zone.navigation": "zone.navigation",
-	"zone.pages": "zone.pages",
+	"page-structure": "page-structure",
 } as const;
 
 export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200KindEnum =
@@ -91856,7 +92828,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponse =
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath = {
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecutePath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -91864,12 +92836,11 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath = {
 	 */
 	zoneId: string;
 	/**
-	 * @minLength 1
-	 * @maxLength 100
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @description
+	 * Format: `uuid`
 	 * @type string
 	 */
-	slug: string;
+	pageId: string;
 	/**
 	 * @pattern ^[0-9a-f]{12}$
 	 * @type string
@@ -91877,57 +92848,57 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath = {
 	blockKey: string;
 };
 
-export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
 	{
 		exact: "exact",
 		"lower-bound": "lower-bound",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
 
-export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
 	{
 		fas: "fas",
 		fab: "fab",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum];
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum];
 
-export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
 	{
 		standalone: "standalone",
 		main: "main",
 		variant: "variant",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum];
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum];
 
-export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
 	{
 		book: "book",
 		software: "software",
 		media: "media",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
 
-export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
 	{
 		exact: "exact",
 		"lower-bound": "lower-bound",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum];
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200 = {
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200 = {
 	/**
 	 * @type string
 	 */
@@ -91967,7 +92938,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 				 * @default 'exact'
 				 * @type string
 				 */
-				relation: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
+				relation: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
 			};
 		}[];
 	}[];
@@ -92077,7 +93048,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 											/**
 											 * @type string
 											 */
-											prefix: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum;
+											prefix: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsAvatarIconPrefixEnum;
 											/**
 											 * @maxLength 128
 											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -92094,7 +93065,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 			 * @default 'standalone'
 			 * @type string | undefined
 			 */
-			variantRole?: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum;
+			variantRole?: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum;
 			variantMain?:
 				| {
 						/**
@@ -92121,7 +93092,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 							 * @default 'book'
 							 * @type string
 							 */
-							type: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
+							type: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
 							title: (string | null) | null;
 							cover:
 								| ({
@@ -92151,7 +93122,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 			 * @default 'exact'
 			 * @type string
 			 */
-			relation: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum;
+			relation: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum;
 		};
 		limit: string | number;
 		/**
@@ -92164,22 +93135,23 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400 =
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400 =
 	MalformedRequestBody;
 
-export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZonePageNotFound: "ZonePageNotFound",
-	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
-} as const;
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
+	{
+		UnitNotFound: "UnitNotFound",
+		ZonePageNotFound: "ZonePageNotFound",
+		ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
+	} as const;
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum];
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404 = {
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -92188,7 +93160,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus40
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum;
+		code: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -92204,7 +93176,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus40
 	requestId: string;
 };
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422 =
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422 =
 	| {
 			/**
 			 * @type object
@@ -92234,12 +93206,12 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus42
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500 = InternalError;
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503 = {
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503 = {
 	/**
 	 * @type object
 	 */
@@ -92264,20 +93236,20 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus50
 	requestId: string;
 };
 
-export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteRequestInjectionsSourceEnum =
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestInjectionsSourceEnum =
 	{
 		tag: "tag",
 		realm: "realm",
 		link: "link",
 	} as const;
 
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteRequestInjectionsSourceEnum =
-	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteRequestInjectionsSourceEnum];
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestInjectionsSourceEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestInjectionsSourceEnum];
 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody = {
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody = {
 	/**
 	 * @type array
 	 */
@@ -92285,7 +93257,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody = {
 		/**
 		 * @type string
 		 */
-		source: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteRequestInjectionsSourceEnum;
+		source: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestInjectionsSourceEnum;
 		/**
 		 * @type object
 		 */
@@ -93491,9 +94463,9 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody = {
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions = {
-	body: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody;
-	path: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath;
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions = {
+	body: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody;
+	path: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecutePath;
 	query?: never;
 	headers?: never;
 };
@@ -93501,25 +94473,25 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions 
 /**
  * @type object
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses = {
-	"200": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200;
-	"400": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400;
-	"404": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404;
-	"422": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422;
-	"500": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500;
-	"503": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503;
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses = {
+	"200": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200;
+	"400": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400;
+	"404": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404;
+	"422": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422;
+	"500": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500;
+	"503": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponse =
-	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200
-	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus400
-	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
-	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
-	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
-	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503;
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponse =
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503;
 
 /**
  * @type object
@@ -96063,12 +97035,11 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 				 */
 				kind: "page";
 				/**
-				 * @minLength 1
-				 * @maxLength 100
-				 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+				 * @description
+				 * Format: `uuid`
 				 * @type string
 				 */
-				slug: string;
+				pageId: string;
 		  };
 };
 

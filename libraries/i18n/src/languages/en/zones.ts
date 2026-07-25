@@ -51,7 +51,8 @@ export default {
 			},
 			pages: {
 				label: "Pages",
-				description: "Manage localized page content and the page tree.",
+				description:
+					"Manage localized pages and optionally organize them in the page structure.",
 			},
 			search: {
 				label: "Search",
@@ -86,11 +87,14 @@ export default {
 			editPage: "Edit page",
 			pageTree: `${zoneTerms.label} page tree`,
 			slug: unitSlugTerms.label,
+			slugOptional: `Optional ${unitSlugTerms.inline}`,
 			title: "Page title",
 			language: "Content language",
 			parent: "Parent page",
 			noParent: "No parent page",
 			home: "Make home page",
+			indexed: "Include in page structure",
+			notIndexed: "Not in page structure",
 			save: "Save page",
 			remove: "Delete page",
 			confirmRemove: "Confirm deletion",

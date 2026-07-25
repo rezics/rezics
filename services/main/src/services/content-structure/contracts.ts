@@ -276,7 +276,11 @@ export const ContentStructureKindPolicies = {
 		progress: "none",
 		acceptsContent: anyContent,
 	},
-	"zone.pages": {
+	/**
+	 * Optional visual index for Zone Page Units. A Page remains valid and
+	 * addressable when it is not present in this structure.
+	 */
+	"page-structure": {
 		ownerKinds: ["zone"],
 		targets: ["content"],
 		progress: "none",

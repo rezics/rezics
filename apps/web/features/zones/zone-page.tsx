@@ -2,7 +2,7 @@
 
 import { toContentLanguage } from "@rezics/i18n";
 import { useGetZoneRenderProjection } from "@rezics/openapi-tanstack-query";
-import { QueryFailure, QueryPending } from "@rezics/ui";
+import { QueryFailure, QueryPending, cn } from "@rezics/ui";
 import { useMemo } from "react";
 
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
@@ -10,13 +10,31 @@ import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 import { ZoneBlockProvider, ZoneDocument } from "./components/block-renderer";
 import { ZoneHeader } from "./components/zone-header";
+import { ZoneSurfaceContainerClassName } from "./components/zone-surface-layout";
 import { parseZoneRenderProjection } from "./model/zone-render";
 
-export function ZonePage({ id, baseHref, page }: { id: string; baseHref: string; page?: string }) {
+export type ZonePageSelection =
+	| { readonly by: "home" }
+	| { readonly by: "slug"; readonly slug: string }
+	| { readonly by: "id"; readonly pageId: string };
+
+export function ZonePage({
+	id,
+	baseHref,
+	selection = { by: "home" },
+}: {
+	id: string;
+	baseHref: string;
+	selection?: ZonePageSelection;
+}) {
 	const { t, locale } = useTranslation(["search", "ui", "zones"]);
 	const query = useGetZoneRenderProjection({
 		path: { zoneId: id },
-		query: { language: toContentLanguage(locale.target), ...(page ? { page } : {}) },
+		query: {
+			language: toContentLanguage(locale.target),
+			...(selection.by === "slug" ? { page: selection.slug } : {}),
+			...(selection.by === "id" ? { pageId: selection.pageId } : {}),
+		},
 	});
 	const projection = useMemo(
 		() => (query.data ? parseZoneRenderProjection(query.data) : null),
@@ -56,14 +74,14 @@ export function ZonePage({ id, baseHref, page }: { id: string; baseHref: string;
 	return (
 		<ZoneBlockProvider baseHref={baseHref} projection={projection}>
 			<ZoneHeader avatar={avatar} projection={projection} title={title} />
-			<main>
+			<main className={cn(ZoneSurfaceContainerClassName, "py-8 sm:py-12")}>
 				{projection.page ? (
 					<ZoneDocument
 						blocks={projection.page.document.blocks}
-						surface={{ kind: "page", slug: projection.page.slug }}
+						surface={{ kind: "page", pageId: projection.page.id }}
 					/>
 				) : (
-					<section className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
+					<section className="mx-auto max-w-3xl py-8 text-center">
 						<h1 className="font-serif font-bold text-3xl">{t.zones.emptyTitle}</h1>
 						<p className="mt-3 text-muted-foreground leading-7">{t.zones.emptyBody}</p>
 					</section>
