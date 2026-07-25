@@ -11,24 +11,6 @@ export const urlStateOptions = {
 	scroll: false,
 } as const;
 
-export const FeedSorts = ["best", "hot", "new", "top", "rising"] as const;
-export type FeedSort = (typeof FeedSorts)[number];
-export function isFeedSort(value: string): value is FeedSort {
-	return FeedSorts.some((candidate) => candidate === value);
-}
-export const feedSortParser = parseAsStringLiteral(FeedSorts)
-	.withDefault("best")
-	.withOptions({ ...urlStateOptions, history: "push" });
-export const feedLanguagesParser = parseAsArrayOf(parseAsStringLiteral(ContentLanguageValues))
-	.withDefault([])
-	.withOptions({ ...urlStateOptions, history: "push" });
-export const feedRealmIdsParser = parseAsArrayOf(parseAsString)
-	.withDefault([])
-	.withOptions({ ...urlStateOptions, history: "push" });
-export const feedTagIdsParser = parseAsArrayOf(parseAsString)
-	.withDefault([])
-	.withOptions({ ...urlStateOptions, history: "push" });
-
 export const SearchScopes = Object.values(PostApiSearchByIndexIndex);
 export const searchParamsParsers = {
 	q: parseAsString.withDefault("").withOptions({ ...urlStateOptions, history: "push" }),

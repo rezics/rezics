@@ -46,6 +46,74 @@ export const FilterPostKindValues = [
 export type FilterPostKind = (typeof FilterPostKindValues)[number];
 export const FilterPostKind = stringEnum(FilterPostKindValues);
 
+const SimpleFeedContentDefinitions = {
+	"unit:profile": { group: "unit", kind: "profile" },
+	"unit:book": { group: "unit", kind: "book" },
+	"unit:software": { group: "unit", kind: "software" },
+	"unit:media": { group: "unit", kind: "media" },
+	"unit:release": { group: "unit", kind: "release" },
+	"unit:entity": { group: "unit", kind: "entity" },
+	"unit:tag": { group: "unit", kind: "tag" },
+	"unit:series": { group: "unit", kind: "series" },
+	"unit:zone": { group: "unit", kind: "zone" },
+	"unit:collection": { group: "unit", kind: "collection" },
+	"unit:poll": { group: "unit", kind: "poll" },
+	"unit:realm": { group: "unit", kind: "realm" },
+	"post:post": { group: "post", kind: "post" },
+	"post:excerpt": { group: "post", kind: "excerpt" },
+	"post:review": { group: "post", kind: "review" },
+	"post:chapter": { group: "post", kind: "chapter" },
+	"post:chapter_group": { group: "post", kind: "chapter_group" },
+	"post:wiki": { group: "post", kind: "wiki" },
+	"post:picture": { group: "post", kind: "picture" },
+} as const satisfies Record<
+	string,
+	| { readonly group: "unit"; readonly kind: FilterUnitKind }
+	| { readonly group: "post"; readonly kind: FilterPostKind }
+>;
+
+export const SimpleFeedContentKindValues = [
+	"unit:profile",
+	"unit:book",
+	"unit:software",
+	"unit:media",
+	"unit:release",
+	"unit:entity",
+	"unit:tag",
+	"unit:series",
+	"unit:zone",
+	"unit:collection",
+	"unit:poll",
+	"unit:realm",
+	"post:post",
+	"post:excerpt",
+	"post:review",
+	"post:chapter",
+	"post:chapter_group",
+	"post:wiki",
+	"post:picture",
+] as const satisfies readonly (keyof typeof SimpleFeedContentDefinitions)[];
+export type SimpleFeedContentKind = (typeof SimpleFeedContentKindValues)[number];
+export type SimpleFeedContentGroup =
+	(typeof SimpleFeedContentDefinitions)[SimpleFeedContentKind]["group"];
+
+const SimpleFeedContentKinds: ReadonlySet<string> = new Set(SimpleFeedContentKindValues);
+
+export function isSimpleFeedContentKind(value: string): value is SimpleFeedContentKind {
+	return SimpleFeedContentKinds.has(value);
+}
+
+export function simpleFeedContentKindGroup(value: SimpleFeedContentKind): SimpleFeedContentGroup {
+	return SimpleFeedContentDefinitions[value].group;
+}
+
+export function normalizeSimpleFeedContentKinds(
+	values: readonly SimpleFeedContentKind[],
+): SimpleFeedContentKind[] {
+	const requested = new Set(values);
+	return SimpleFeedContentKindValues.filter((value) => requested.has(value));
+}
+
 export const FilterRealmUnitStatusValues = ["pending", "visible", "hidden", "removed"] as const;
 export type FilterRealmUnitStatus = (typeof FilterRealmUnitStatusValues)[number];
 export const FilterRealmUnitStatus = stringEnum(FilterRealmUnitStatusValues);
@@ -412,21 +480,53 @@ export function parseUnitFilter(
 	return value;
 }
 
+function uniqueSortedStrings(values: readonly string[]): string[] {
+	return [...new Set(values)].sort();
+}
+
+function createSimpleFeedContentFilter(
+	values: readonly SimpleFeedContentKind[],
+): UnitFilter | undefined {
+	const unitKinds: FilterUnitKind[] = [];
+	const postKinds: FilterPostKind[] = [];
+	for (const contentKind of normalizeSimpleFeedContentKinds(values)) {
+		const definition = SimpleFeedContentDefinitions[contentKind];
+		if (definition.group === "unit") unitKinds.push(definition.kind);
+		else postKinds.push(definition.kind);
+	}
+	const branches: UnitFilter[] = [];
+	if (unitKinds.length) branches.push({ kind: { in: unitKinds } });
+	if (postKinds.length) branches.push({ post: { is: { kind: { in: postKinds } } } });
+	if (!branches.length) return undefined;
+	return branches.length === 1 ? branches[0] : { any: branches };
+}
+
 export function createSimpleFeedFilter(input: {
+	readonly contentKinds?: readonly SimpleFeedContentKind[];
 	readonly languages?: readonly FilterContentLanguage[];
 	readonly realmIds?: readonly string[];
 	readonly tagIds?: readonly string[];
 }): UnitFilter | undefined {
 	const all: UnitFilter[] = [];
+	const content = createSimpleFeedContentFilter(input.contentKinds ?? []);
+	if (content) all.push(content);
 	if (input.languages?.length)
 		all.push({
-			localizations: { some: { language: { in: [...input.languages] } } },
+			localizations: {
+				some: {
+					language: {
+						in: FilterContentLanguageValues.filter((language) =>
+							input.languages?.includes(language),
+						),
+					},
+				},
+			},
 		});
 	if (input.realmIds?.length)
 		all.push({
 			realms: {
 				some: {
-					realm: { id: { in: [...input.realmIds] } },
+					realm: { id: { in: uniqueSortedStrings(input.realmIds) } },
 					status: { in: ["visible"] },
 				},
 			},
@@ -435,7 +535,7 @@ export function createSimpleFeedFilter(input: {
 		all.push({
 			tags: {
 				some: {
-					tag: { id: { in: [...input.tagIds] } },
+					tag: { id: { in: uniqueSortedStrings(input.tagIds) } },
 					authority: { kind: "global", view: { kind: "effective" } },
 				},
 			},
@@ -445,9 +545,73 @@ export function createSimpleFeedFilter(input: {
 }
 
 export interface SimpleFeedFilterSelection {
+	readonly contentKinds: readonly SimpleFeedContentKind[];
 	readonly languages: readonly FilterContentLanguage[];
 	readonly realmIds: readonly string[];
 	readonly tagIds: readonly string[];
+}
+
+type SimpleFeedContentBranch =
+	| Readonly<{
+			group: "unit";
+			contentKinds: readonly SimpleFeedContentKind[];
+	  }>
+	| Readonly<{
+			group: "post";
+			contentKinds: readonly SimpleFeedContentKind[];
+	  }>;
+
+const SimpleFeedUnitContentKinds = new Map<FilterUnitKind, SimpleFeedContentKind>(
+	SimpleFeedContentKindValues.flatMap((contentKind) => {
+		const definition = SimpleFeedContentDefinitions[contentKind];
+		return definition.group === "unit" ? [[definition.kind, contentKind]] : [];
+	}),
+);
+const SimpleFeedPostContentKinds = new Map<FilterPostKind, SimpleFeedContentKind>(
+	SimpleFeedContentKindValues.flatMap((contentKind) => {
+		const definition = SimpleFeedContentDefinitions[contentKind];
+		return definition.group === "post" ? [[definition.kind, contentKind]] : [];
+	}),
+);
+
+function readSimpleFeedContentBranch(value: UnitFilter): SimpleFeedContentBranch | undefined {
+	if (value.kind && Object.keys(value).length === 1) {
+		const contentKinds = value.kind.in.flatMap((kind) => {
+			const contentKind = SimpleFeedUnitContentKinds.get(kind);
+			return contentKind ? [contentKind] : [];
+		});
+		return contentKinds.length === value.kind.in.length
+			? { group: "unit", contentKinds }
+			: undefined;
+	}
+	if (
+		value.post &&
+		Object.keys(value).length === 1 &&
+		"is" in value.post &&
+		value.post.is.kind &&
+		Object.keys(value.post.is).length === 1
+	) {
+		const contentKinds = value.post.is.kind.in.flatMap((kind) => {
+			const contentKind = SimpleFeedPostContentKinds.get(kind);
+			return contentKind ? [contentKind] : [];
+		});
+		return contentKinds.length === value.post.is.kind.in.length
+			? { group: "post", contentKinds }
+			: undefined;
+	}
+	return undefined;
+}
+
+function readSimpleFeedContentFilter(value: UnitFilter): SimpleFeedContentKind[] | undefined {
+	const direct = readSimpleFeedContentBranch(value);
+	if (direct) return [...direct.contentKinds];
+	if (!value.any || Object.keys(value).length !== 1 || value.any.length !== 2) return undefined;
+	const branches = value.any.map(readSimpleFeedContentBranch);
+	const unit = branches.find((branch) => branch?.group === "unit");
+	const post = branches.find((branch) => branch?.group === "post");
+	if (!unit || !post) return undefined;
+	const requested = new Set([...unit.contentKinds, ...post.contentKinds]);
+	return SimpleFeedContentKindValues.filter((contentKind) => requested.has(contentKind));
 }
 
 /**
@@ -463,7 +627,14 @@ export function readSimpleFeedFilter(value: unknown): SimpleFeedFilterSelection 
 	const languages: FilterContentLanguage[] = [];
 	const realmIds: string[] = [];
 	const tagIds: string[] = [];
+	let contentKinds: SimpleFeedContentKind[] = [];
 	for (const clause of clauses) {
+		const content = readSimpleFeedContentFilter(clause);
+		if (content) {
+			if (contentKinds.length) return undefined;
+			contentKinds = content;
+			continue;
+		}
 		if (
 			clause.localizations &&
 			Object.keys(clause).length === 1 &&
@@ -503,7 +674,7 @@ export function readSimpleFeedFilter(value: unknown): SimpleFeedFilterSelection 
 		}
 		return undefined;
 	}
-	return { languages, realmIds, tagIds };
+	return { contentKinds, languages, realmIds, tagIds };
 }
 
 /** Stable JSON for hashing a validated Filter into an opaque cursor identity. */

@@ -1,47 +1,40 @@
 "use client";
 
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
-import { createSimpleFeedFilter } from "@rezics/filter";
-import {
-	postApiFeedQuery,
-	type PostApiFeedQueryRequestSortEnum,
-	useGetApiRealms,
-	useGetApiTags,
-} from "@rezics/openapi-tanstack-query";
+import { createSimpleFeedFilter, type SimpleFeedContentKind } from "@rezics/filter";
+import { postApiFeedQuery, useGetApiRealms, useGetApiTags } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 import { Alert, AlertAction, AlertDescription, Button, ChoiceSelect } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { FeedContentSelector } from "../components/feed-content-selector";
 import { FeedFilterSelector, type FeedFilterOption } from "../components/feed-filter-selector";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
+import { FeedSortValues, type FeedSort } from "../model/feed-sort";
 import { FeedQueryKey } from "../query";
 
-const FeedSorts = [
-	"best",
-	"hot",
-	"new",
-	"top",
-	"rising",
-] as const satisfies readonly PostApiFeedQueryRequestSortEnum[];
-
 export interface ApiFeedListProps {
+	contentKinds?: readonly SimpleFeedContentKind[];
 	infinite?: boolean;
 	languages?: readonly ContentLanguage[];
+	onContentKindsChange?: (contentKinds: readonly SimpleFeedContentKind[]) => void;
 	onLanguagesChange?: (languages: readonly ContentLanguage[]) => void;
 	onRealmIdsChange?: (realmIds: readonly string[]) => void;
-	onSortChange?: (sort: PostApiFeedQueryRequestSortEnum) => void;
+	onSortChange?: (sort: FeedSort) => void;
 	onTagIdsChange?: (tagIds: readonly string[]) => void;
 	realmIds?: readonly string[];
-	sort?: PostApiFeedQueryRequestSortEnum;
+	sort?: FeedSort;
 	tagIds?: readonly string[];
 }
 
 export function ApiFeedList({
+	contentKinds = [],
 	infinite = false,
 	languages = [],
+	onContentKindsChange,
 	onLanguagesChange,
 	onRealmIdsChange,
 	onSortChange,
@@ -57,7 +50,12 @@ export function ApiFeedList({
 		limit: 20,
 		sort,
 		...(() => {
-			const filter = createSimpleFeedFilter({ languages, realmIds, tagIds });
+			const filter = createSimpleFeedFilter({
+				contentKinds,
+				languages,
+				realmIds,
+				tagIds,
+			});
 			return filter ? { filter } : {};
 		})(),
 	};
@@ -111,13 +109,18 @@ export function ApiFeedList({
 			return next;
 		});
 	const showControls = Boolean(
-		onSortChange || onLanguagesChange || onRealmIdsChange || onTagIdsChange,
+		onSortChange ||
+		onContentKindsChange ||
+		onLanguagesChange ||
+		onRealmIdsChange ||
+		onTagIdsChange,
 	);
 	const requestedRealmId = realmIds.length === 1 ? realmIds[0] : undefined;
 
 	return (
 		<div
 			className="min-w-0"
+			data-content={contentKinds.join(",")}
 			data-languages={languages.join(",")}
 			data-realms={realmIds.join(",")}
 			data-sort={sort}
@@ -125,7 +128,9 @@ export function ApiFeedList({
 		>
 			{showControls ? (
 				<FeedListControls
+					contentKinds={contentKinds}
 					languages={languages}
+					onContentKindsChange={onContentKindsChange}
 					onLanguagesChange={onLanguagesChange}
 					onRealmIdsChange={onRealmIdsChange}
 					onSortChange={onSortChange}
@@ -205,7 +210,9 @@ export function ApiFeedList({
 }
 
 export function FeedListControls({
+	contentKinds = [],
 	languages = [],
+	onContentKindsChange,
 	onLanguagesChange,
 	onRealmIdsChange,
 	onSortChange,
@@ -215,7 +222,9 @@ export function FeedListControls({
 	tagIds = [],
 }: Pick<
 	ApiFeedListProps,
+	| "contentKinds"
 	| "languages"
+	| "onContentKindsChange"
 	| "onLanguagesChange"
 	| "onRealmIdsChange"
 	| "onSortChange"
@@ -233,10 +242,10 @@ export function FeedListControls({
 		{ query: { limit: 50 } },
 		{ query: { enabled: Boolean(onTagIdsChange) } },
 	);
-	const sortOptions = FeedSorts.map((value) => ({
+	const sortOptions = FeedSortValues.map((value) => ({
 		value,
 		label: t.feed.sort[value],
-	})) satisfies readonly FeedFilterOption<PostApiFeedQueryRequestSortEnum>[];
+	})) satisfies readonly FeedFilterOption<FeedSort>[];
 	const languageOptions = ContentLanguageValues.map((value) => ({
 		value,
 		label: t.feed.filters.languages.options[value],
@@ -270,6 +279,9 @@ export function FeedListControls({
 					size="lg"
 					value={[sort ?? "best"]}
 				/>
+			) : null}
+			{onContentKindsChange ? (
+				<FeedContentSelector onValueChange={onContentKindsChange} value={contentKinds} />
 			) : null}
 			{onLanguagesChange ? (
 				<FeedFilterSelector

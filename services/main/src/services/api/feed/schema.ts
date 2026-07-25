@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import type { UnitFilter } from "@rezics/filter";
+import { SimpleFeedContentKindValues, type UnitFilter } from "@rezics/filter";
 import { Type } from "@sinclair/typebox";
 import {
 	FeedSortValues,
@@ -71,9 +71,8 @@ export const FeedContentKindValues = [
 ] as const;
 export type FeedContentKind = (typeof FeedContentKindValues)[number];
 
-export const DefaultFeedContentKindValues = FeedContentKindValues.filter(
-	(kind): kind is Exclude<FeedContentKind, "post:reply"> => kind !== "post:reply",
-);
+export const DefaultFeedContentKindValues =
+	SimpleFeedContentKindValues satisfies readonly FeedContentKind[];
 
 export const FeedRequest = t.Object(
 	{

@@ -14,11 +14,14 @@ and Posts. It does not expose database table names, search-index field names,
 or an engine query language.
 
 Feed accepts this Filter through `POST /feed/query`. The standard Feed UI emits
-only language, Realm, and Tag predicates, but the backend contract retains the
-complete domain capability, including Score predicates. Product-specific flows
-such as Review lists may compose stricter Filters without introducing a
-Review-only filtering language. Feed sorts are recommendation objectives
-(`best`, `hot`, `new`, `top`, and `rising`); Feed never exposes relevance.
+only content-kind, language, Realm, and Tag predicates. Content-kind selection
+is a Feed-owned projection over supported Unit and Post kinds; an empty
+selection omits that predicate and means the default Feed universe. The backend
+contract retains the complete domain capability, including Score predicates.
+Product-specific flows such as Review lists may compose stricter Filters without
+introducing a Review-only filtering language. Feed sorts are recommendation
+objectives (`best`, `hot`, `new`, `top`, and `rising`); Feed never exposes
+relevance.
 
 Search is a feature that combines:
 

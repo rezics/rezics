@@ -34,12 +34,9 @@ export default {
 		},
 	},
 	contentFilterLabel: "Content filter",
-	contentFilterPlaceholder: "Content",
 	content: {
-		all: "All",
-		clear: "Clear",
+		clear: "Clear all",
 		allSelected: "All content",
-		noneSelected: "No content selected",
 		selectedCount: insert("{{count}} selected", { count: Number }),
 		unitGroup: "Units",
 		postGroup: postTerms.pluralLabel,

@@ -7,6 +7,7 @@ import {
 	FilterRealmUnitStatusValues,
 	FilterUnitKindValues,
 	readSimpleFeedFilter,
+	SimpleFeedContentKindValues,
 } from "@rezics/filter";
 import { describe, expect, it } from "vitest";
 import {
@@ -29,6 +30,7 @@ describe("domain Filter contract", () => {
 
 	it("round-trips the standard Feed selection without widening it", () => {
 		const filter = createSimpleFeedFilter({
+			contentKinds: ["unit:book", "post:review"],
 			languages: ["zh", "en"],
 			realmIds: [RealmId],
 			tagIds: [TagId],
@@ -36,10 +38,29 @@ describe("domain Filter contract", () => {
 
 		expect(filter).toBeDefined();
 		expect(readSimpleFeedFilter(filter)).toEqual({
+			contentKinds: ["unit:book", "post:review"],
 			languages: ["zh", "en"],
 			realmIds: [RealmId],
 			tagIds: [TagId],
 		});
+	});
+
+	it("builds the standard content selection as Unit-or-Post eligibility", () => {
+		expect(
+			createSimpleFeedFilter({
+				contentKinds: ["post:review", "unit:media", "unit:book", "unit:book"],
+			}),
+		).toEqual({
+			any: [
+				{ kind: { in: ["book", "media"] } },
+				{ post: { is: { kind: { in: ["review"] } } } },
+			],
+		});
+	});
+
+	it("omits content eligibility after clearing the selection", () => {
+		expect(createSimpleFeedFilter({ contentKinds: [] })).toBeUndefined();
+		expect(SimpleFeedContentKindValues).not.toContain("post:reply");
 	});
 
 	it("canonicalizes object key order for cursor identity", () => {

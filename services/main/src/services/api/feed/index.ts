@@ -1123,6 +1123,9 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const simpleSelection = body.filter ? readSimpleFeedFilter(body.filter) : undefined;
 		const scope: FeedEligibilityScope = {
 			...(body.filter ? { filter: body.filter } : {}),
+			...(simpleSelection?.contentKinds.length
+				? { content: simpleSelection.contentKinds }
+				: {}),
 			...(simpleSelection?.languages.length ? { languages: simpleSelection.languages } : {}),
 			...(simpleSelection?.realmIds.length ? { realmIds: simpleSelection.realmIds } : {}),
 		};

@@ -73,6 +73,16 @@ describe("feed eligibility SQL", () => {
 		expect(query.params).not.toContain("reply");
 	});
 
+	it("uses simple domain content filters to narrow the feed universe", () => {
+		const selection = resolveFeedContentSelection(["unit:book", "post:review"]);
+
+		expect(selection).toEqual({
+			selected: ["unit:book", "post:review"],
+			unitKinds: ["book"],
+			postKinds: ["review"],
+		});
+	});
+
 	it("applies every requested language and Realm as array membership filters", () => {
 		const realmIds = [
 			"00000000-0000-4000-8000-000000000001",

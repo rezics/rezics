@@ -13,7 +13,6 @@ import {
 	MenuTrigger,
 	cn,
 } from "@rezics/ui";
-import { filterSelectionFromValues, filterSelectionValues } from "../model/filter-selection";
 
 export interface FeedFilterOption<Value extends string> {
 	readonly value: Value;
@@ -44,22 +43,18 @@ export function FeedFilterSelector<Value extends string>({
 }) {
 	const availableValues = new Set(options.map((option) => option.value));
 	const explicitValues = value.filter((candidate) => availableValues.has(candidate));
-	const selectedValues = filterSelectionValues(
-		filterSelectionFromValues(explicitValues),
-		options.map((option) => option.value),
-	);
-	const selected = new Set(selectedValues);
+	const selected = new Set(explicitValues);
 	const selectedLabels = options.flatMap((option) =>
 		selected.has(option.value) ? [option.label] : [],
 	);
 	const summary =
-		selectedLabels.length === 0 || selectedLabels.length === options.length
+		selectedLabels.length === 0
 			? unfilteredLabel
 			: selectedLabels.length <= 2
 				? selectedLabels.join(", ")
 				: selectedCountLabel(selectedLabels.length);
 	const setChecked = (option: FeedFilterOption<Value>, checked: boolean) => {
-		const next = new Set(selectedValues);
+		const next = new Set(explicitValues);
 		if (checked) next.add(option.value);
 		else next.delete(option.value);
 		onValueChange(

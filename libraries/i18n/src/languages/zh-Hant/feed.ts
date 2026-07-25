@@ -34,12 +34,9 @@ export default {
 		},
 	},
 	contentFilterLabel: "內容篩選",
-	contentFilterPlaceholder: "內容",
 	content: {
-		all: "全部",
-		clear: "清除",
+		clear: "全部清除",
 		allSelected: "全部內容",
-		noneSelected: "未選擇內容",
 		selectedCount: insert("已選 {{count}} 種", { count: Number }),
 		unitGroup: "單元",
 		postGroup: postTerms.pluralLabel,

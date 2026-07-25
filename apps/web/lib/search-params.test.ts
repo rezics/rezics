@@ -1,30 +1,9 @@
 import { createSerializer } from "nuqs/server";
 import { describe, expect, it } from "vitest";
 
-import {
-	authSearchParamsParsers,
-	feedLanguagesParser,
-	feedRealmIdsParser,
-	feedSortParser,
-	feedTagIdsParser,
-	searchParamsParsers,
-	SearchScopes,
-} from "./search-params";
+import { authSearchParamsParsers, searchParamsParsers, SearchScopes } from "./search-params";
 
 describe("URL state parsers", () => {
-	it("uses compact, deterministic feed defaults", () => {
-		expect(feedSortParser.parseServerSide(undefined)).toBe("best");
-		expect(feedSortParser.parseServerSide("hot")).toBe("hot");
-		expect(feedSortParser.parseServerSide("unknown")).toBe("best");
-		expect(feedLanguagesParser.parseServerSide(undefined)).toEqual([]);
-		expect(feedLanguagesParser.parseServerSide("zh,en")).toEqual(["zh", "en"]);
-		expect(feedRealmIdsParser.parseServerSide("realm-a,realm-b")).toEqual([
-			"realm-a",
-			"realm-b",
-		]);
-		expect(feedTagIdsParser.parseServerSide("tag-a,tag-b")).toEqual(["tag-a", "tag-b"]);
-	});
-
 	it("parses search state through its declared vocabulary", () => {
 		expect(searchParamsParsers.q.parseServerSide(undefined)).toBe("");
 		expect(searchParamsParsers.scope.parseServerSide("posts,units")).toEqual([

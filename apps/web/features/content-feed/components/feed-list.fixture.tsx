@@ -1,7 +1,6 @@
 "use client";
 
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
-import type { PostApiFeedQueryRequestSortEnum } from "@rezics/openapi-tanstack-query";
 import { useState, type ReactNode } from "react";
 
 import {
@@ -12,10 +11,11 @@ import {
 } from "@/features/content-feed/components/feed-card.fixture";
 import { FeedListItems } from "@/features/content-feed/components/feed-list";
 import { FeedListControls } from "@/features/content-feed/data/api-feed-list";
+import type { FeedSort } from "@/features/content-feed/model/feed-sort";
 import { useTranslation } from "@/i18n/client";
 
 function FullFeedListFixture() {
-	const [sort, setSort] = useState<PostApiFeedQueryRequestSortEnum>("best");
+	const [sort, setSort] = useState<FeedSort>("best");
 	const [languages, setLanguages] = useState<readonly ContentLanguage[]>([
 		ContentLanguageValues[0],
 	]);
@@ -23,7 +23,9 @@ function FullFeedListFixture() {
 	return (
 		<div className="grid gap-3 sm:gap-4">
 			<FeedListControls
+				contentKinds={["unit:book", "post:review"]}
 				languages={languages}
+				onContentKindsChange={() => undefined}
 				onLanguagesChange={setLanguages}
 				onRealmIdsChange={setRealmIds}
 				onSortChange={setSort}

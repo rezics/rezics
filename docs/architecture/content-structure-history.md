@@ -171,14 +171,15 @@ A Feed Block adds presentation settings only and does not persist Feed-owned fil
 Search owns query, product-specific filtering, facets, and relevance; a Search Feature may then be
 presented through the Feed item renderer without widening the general Feed API.
 
-The general Feed endpoint accepts only ordered language and Realm ID arrays as eligibility filters.
-Its recommendation sorts use `best` as the default and never expose Search relevance. Specialized
-surfaces retain domain-specific selection without widening that endpoint. Review lists accept
-language and Realm ID arrays plus one context-addressed Score filter: Score values and their context
-Unit ID are supplied together, and selected values are ORed within that context. Review lists
-default to non-personalized `best` ranking, use snapshot-bound cursors, and return every Score
-attached to each selected Review. Only Review Feed items carry `scores`; other Post item variants do
-not expose an always-empty Score field.
+The general Feed endpoint accepts the bounded domain Filter through `POST /feed/query`; its standard
+UI projects content-kind, language, Realm, and Tag selection into that Filter. Its recommendation
+sorts use `best` as the default and never expose Search relevance. Specialized surfaces retain
+domain-specific selection without introducing another public filtering language. Review lists use
+one context-addressed Score filter: Score values and their context Unit ID are supplied together,
+and selected values are ORed within that context. Review lists default to non-personalized `best`
+ranking, use snapshot-bound cursors, and return every Score attached to each selected Review. Only
+Review Feed items carry `scores`; other Post item variants do not expose an always-empty Score
+field.
 
 ## Meilisearch plus PostgreSQL
 
