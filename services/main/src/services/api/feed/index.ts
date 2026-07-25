@@ -161,6 +161,7 @@ const FeedContentDefinitions = {
 	"unit:realm": { itemType: "unit", unitKind: "realm" },
 	"post:post": { itemType: "post", postKind: "post" },
 	"post:reply": { itemType: "post", postKind: "reply" },
+	"post:excerpt": { itemType: "post", postKind: "excerpt" },
 	"post:review": { itemType: "post", postKind: "review" },
 	"post:chapter": { itemType: "post", postKind: "chapter" },
 	"post:chapter_group": { itemType: "post", postKind: "chapter_group" },
@@ -926,6 +927,8 @@ export async function hydrateFeedItems(
 				},
 			];
 		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];
+		const subject = row.subjectId ? subjects.get(row.subjectId) : undefined;
+		if (row.postKind === "excerpt" && !subject) return [];
 		return [
 			{
 				...common,
@@ -945,18 +948,15 @@ export async function hydrateFeedItems(
 				title: row.title,
 				latestRevisionId: row.latestRevisionId,
 				replyContext: row.rootPostId ? (rootContext.get(row.rootPostId) ?? null) : null,
-				subject: row.subjectId
-					? (() => {
-							const subject = subjects.get(row.subjectId);
-							if (!subject) return null;
-							return {
-								...subject,
-								score: ranked.realmId
+				subject: subject
+					? {
+							...subject,
+							score:
+								ranked.realmId && row.subjectId
 									? (subjectScore.get(`${row.subjectId}:${ranked.realmId}`) ??
 										null)
 									: null,
-							};
-						})()
+						}
 					: null,
 			},
 		];

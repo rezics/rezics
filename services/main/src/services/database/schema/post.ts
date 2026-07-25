@@ -39,6 +39,10 @@ export const post = pgTable(
 			"post_review_subject_check",
 			sql`${table.kind} <> 'review'::post_kind or ${table.subjectUnitId} is not null`,
 		),
+		check(
+			"post_excerpt_subject_check",
+			sql`${table.kind} <> 'excerpt'::post_kind or ${table.subjectUnitId} is not null`,
+		),
 	],
 );
 

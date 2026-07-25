@@ -173,6 +173,7 @@ export const ImageAssetAccessValues = ["private", "public"] as const;
 export const PostKindValues = [
 	"post",
 	"reply",
+	"excerpt",
 	"review",
 	"chapter",
 	"chapter_group",

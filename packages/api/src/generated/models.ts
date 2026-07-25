@@ -5407,6 +5407,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum 
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum = {
 	post: "post",
 	reply: "reply",
+	excerpt: "excerpt",
 	review: "review",
 	chapter: "chapter",
 	chapter_group: "chapter_group",
@@ -10237,6 +10238,7 @@ export const GetApiFeedContentEnum = {
 	"unit:realm": "unit:realm",
 	"post:post": "post:post",
 	"post:reply": "post:reply",
+	"post:excerpt": "post:excerpt",
 	"post:review": "post:review",
 	"post:chapter": "post:chapter",
 	"post:chapter_group": "post:chapter_group",
@@ -10396,6 +10398,7 @@ export type GetApiFeedStatus200ItemsUnitKindEnum =
 export const GetApiFeedStatus200ItemsPostKindEnum = {
 	post: "post",
 	reply: "reply",
+	excerpt: "excerpt",
 	review: "review",
 	chapter: "chapter",
 	chapter_group: "chapter_group",

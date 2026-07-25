@@ -75,6 +75,13 @@ export function FeedPostCard({
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
 	const href = feedPostHref(post, realmId);
 	const subjectHref = post.subject ? unitHref(post.subject.type, post.subject.id) : undefined;
+	const excerptSource =
+		post.postKind === "excerpt" && post.subject && subjectHref
+			? {
+					href: subjectHref,
+					title: post.subject.title ?? t.actions.view,
+				}
+			: undefined;
 	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
 	const attributions = toFeedAttributionContexts(post.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
@@ -126,8 +133,24 @@ export function FeedPostCard({
 						</p>
 					) : null}
 				</FeedItemMain>
+				{excerptSource ? (
+					<p
+						aria-label={t.feed.excerptSource}
+						className="mt-2 text-muted-foreground text-sm leading-6"
+					>
+						<span aria-hidden>{t.feed.excerptSourceMark} </span>
+						<cite className="not-italic">
+							<Link
+								className="font-bold text-foreground underline-offset-4 hover:underline"
+								href={excerptSource.href}
+							>
+								{excerptSource.title}
+							</Link>
+						</cite>
+					</p>
+				) : null}
 			</FeedCardContent>
-			{post.subject && subjectHref ? (
+			{post.postKind !== "excerpt" && post.subject && subjectHref ? (
 				<FeedCardTarget
 					{...(post.subject.summary ? { description: post.subject.summary } : {})}
 					{...(post.subject.cover ? { imageUrl: post.subject.cover.url } : {})}

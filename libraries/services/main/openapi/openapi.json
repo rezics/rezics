@@ -6835,6 +6835,7 @@
 														"enum": [
 															"post",
 															"reply",
+															"excerpt",
 															"review",
 															"chapter",
 															"chapter_group",
@@ -13108,6 +13109,7 @@
 									"unit:realm",
 									"post:post",
 									"post:reply",
+									"post:excerpt",
 									"post:review",
 									"post:chapter",
 									"post:chapter_group",
@@ -14439,6 +14441,7 @@
 																"enum": [
 																	"post",
 																	"reply",
+																	"excerpt",
 																	"review",
 																	"chapter",
 																	"chapter_group",

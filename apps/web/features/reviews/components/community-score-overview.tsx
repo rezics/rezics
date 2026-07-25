@@ -9,7 +9,7 @@ import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import type { UnitScore } from "../model/score-value";
 
 const ScoreDistributionValues = [
-	10, 9, 8, 7, 6, 5, 4, 3, 2, 1,
+	1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 ] as const satisfies readonly UnitScore[];
 
 export function CommunityScoreOverview({
@@ -109,6 +109,10 @@ function CommunityScoreOverviewContent({
 }) {
 	const { locale, t } = useTranslation(["engagement"]);
 	const numberFormat = new Intl.NumberFormat(locale.current);
+	const maximumCount = ScoreDistributionValues.reduce(
+		(maximum, score) => Math.max(maximum, counts[score]),
+		0,
+	);
 
 	return (
 		<div className="grid gap-6">
@@ -130,35 +134,40 @@ function CommunityScoreOverviewContent({
 				</span>
 			</div>
 
-			<div className="grid max-w-3xl gap-3">
+			<div className="grid max-w-3xl grid-cols-10 gap-2 sm:gap-3" role="list">
 				{ScoreDistributionValues.map((score) => {
 					const count = counts[score];
 					const percent = ratingCount ? Math.round((count / ratingCount) * 100) : 0;
+					const heightPercent = maximumCount
+						? Math.round((count / maximumCount) * 100)
+						: 0;
 					return (
 						<div
-							className="grid grid-cols-[3.25rem_minmax(0,1fr)_7rem] items-center gap-3 text-sm"
+							className="grid min-w-0 grid-rows-[7rem_auto] gap-2 text-center text-xs"
 							key={score}
+							role="listitem"
 						>
-							<span className="font-semibold tabular-nums">
+							<span className="flex h-28 items-end border-b border-border px-0.5 sm:px-1">
 								<span className="sr-only">
-									{t.engagement.scoreDistributionLabel({ score })}
+									{t.engagement.scoreDistributionLabel({ score })}{" "}
+									{t.engagement.scoreDistribution({
+										count: numberFormat.format(count),
+										percent: numberFormat.format(percent),
+									})}
 								</span>
-								<span aria-hidden>{score}</span>
+								<span
+									aria-hidden
+									className="block w-full rounded-t-sm bg-warning"
+									style={{
+										height: count ? `${Math.max(heightPercent, 2)}%` : "0%",
+									}}
+								/>
 							</span>
 							<span
 								aria-hidden
-								className="h-3 overflow-hidden rounded-full bg-surface-muted"
+								className="font-semibold tabular-nums text-muted-foreground"
 							>
-								<span
-									className="block h-full rounded-full bg-warning"
-									style={{ width: `${percent}%` }}
-								/>
-							</span>
-							<span className="text-end tabular-nums text-muted-foreground">
-								{t.engagement.scoreDistribution({
-									count: numberFormat.format(count),
-									percent: numberFormat.format(percent),
-								})}
+								{score}
 							</span>
 						</div>
 					);

@@ -27,6 +27,7 @@ export type FeedUnitKind = (typeof FeedUnitKindValues)[number];
 export const FeedPostKindValues = [
 	"post",
 	"reply",
+	"excerpt",
 	"review",
 	"chapter",
 	"chapter_group",
@@ -50,6 +51,7 @@ export const FeedContentKindValues = [
 	"unit:realm",
 	"post:post",
 	"post:reply",
+	"post:excerpt",
 	"post:review",
 	"post:chapter",
 	"post:chapter_group",

@@ -43,6 +43,7 @@ import {
 	RealmUnitMutationCommandValues,
 	scoreStat,
 	score,
+	post,
 	postScore,
 	profilePreference,
 	unitAccessBinding,
@@ -379,6 +380,13 @@ describe("database schema contracts", () => {
 		);
 		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain(
 			"reason",
+		);
+	});
+
+	it("requires Excerpt Posts to identify their source Unit", () => {
+		expect(PostKindValues).toContain("excerpt");
+		expect(getTableConfig(post).checks.map(({ name }) => name)).toContain(
+			"post_excerpt_subject_check",
 		);
 	});
 

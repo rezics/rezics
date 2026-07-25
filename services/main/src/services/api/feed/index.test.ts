@@ -16,6 +16,7 @@ describe("feed eligibility SQL", () => {
 
 		expect(selection.unitKinds).toContain("book");
 		expect(selection.postKinds).toContain("post");
+		expect(selection.postKinds).toContain("excerpt");
 		expect(selection.postKinds).not.toContain("reply");
 		expect(selection.selected).not.toContain("post:reply");
 	});

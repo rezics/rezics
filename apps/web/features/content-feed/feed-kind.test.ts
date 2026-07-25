@@ -14,6 +14,7 @@ describe("feed content kinds", () => {
 		expect(FeedContentKinds).toContain("post:reply");
 		expect(DefaultFeedContentKinds).not.toContain("post:reply");
 		expect(DefaultFeedContentKinds).toContain("post:post");
+		expect(DefaultFeedContentKinds).toContain("post:excerpt");
 	});
 
 	it("keeps PostList narrow and post-first", () => {
