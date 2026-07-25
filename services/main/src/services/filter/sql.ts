@@ -1,4 +1,5 @@
 import type {
+	CollectionFilter,
 	IntegerFilter,
 	LocalizationFilter,
 	PostFilter,
@@ -299,6 +300,28 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 	return conjunction(conditions);
 }
 
+function collectionCondition(filter: CollectionFilter): SQL {
+	const conditions = logicConditions(filter, collectionCondition);
+	if (filter.items) {
+		const relation = filter.items;
+		const itemFilter = "some" in relation ? relation.some : relation.none;
+		const exists = sql`exists (
+			select 1
+			from collection_item filter_collection_item
+			join unit filter_collection_item_unit
+				on filter_collection_item_unit.id = filter_collection_item.unit_id
+			where filter_collection_item.collection_id = filter_collection.id
+				and ${unitReferenceCondition(
+					itemFilter,
+					sql`filter_collection_item_unit.id`,
+					sql`filter_collection_item_unit.kind`,
+				)}
+		)`;
+		conditions.push("some" in relation ? exists : sql`not (${exists})`);
+	}
+	return conjunction(conditions);
+}
+
 export interface CompileUnitFilterSqlInput {
 	readonly unitId: SQL<unknown>;
 	readonly unitKind: SQL<unknown>;
@@ -373,6 +396,19 @@ export function compileUnitFilterSql(filter: UnitFilter, input: CompileUnitFilte
 						and ${postCondition(filter.post.is, input.viewerProfileId)}
 				)`
 				: sql`not exists (select 1 from post filter_post where filter_post.id = ${input.unitId})`,
+		);
+	if (filter.collection)
+		conditions.push(
+			"is" in filter.collection
+				? sql`exists (
+					select 1 from collection filter_collection
+					where filter_collection.id = ${input.unitId}
+						and ${collectionCondition(filter.collection.is)}
+				)`
+				: sql`not exists (
+					select 1 from collection filter_collection
+					where filter_collection.id = ${input.unitId}
+				)`,
 		);
 	return conjunction(conditions);
 }

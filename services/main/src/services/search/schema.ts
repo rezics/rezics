@@ -5,6 +5,7 @@ import {
 	type SearchExpression,
 	type SearchSort,
 } from "@rezics/search";
+import type { UnitFilter } from "@rezics/filter";
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 import type { PublicationLicenseId } from "@rezics/license";
@@ -64,7 +65,8 @@ export interface DomainSearchRequest {
 	sort?: SearchSort;
 	scopeUnitId?: string;
 	includeScopeDescendants?: boolean;
-	expression?: SearchExpression;
+	searchExpression?: SearchExpression;
+	domainFilter?: UnitFilter;
 }
 
 const CommonSortableAttributes = ["createdAt", "updatedAt"];

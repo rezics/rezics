@@ -32,6 +32,8 @@ import {
 	updatePortableTextDocument,
 } from "@rezics/block";
 import {
+	assertSearchExpression,
+	combineSearchExpressions,
 	compileSearchRequest,
 	createSearchCursor,
 	parseSearchCursor,
@@ -476,7 +478,42 @@ describe("Search configuration semantics", () => {
 			},
 		});
 
-		expect(compiled.expression).toMatchObject({ operator: "any" });
+		expect(compiled.searchExpression).toMatchObject({ operator: "any" });
+	});
+
+	test("validates composed searchExpression values at their runtime boundary", () => {
+		expect(() =>
+			assertSearchExpression({
+				operator: "all",
+				clauses: [{ field: "kind", operator: "equals", value: "book" }],
+			}),
+		).not.toThrow();
+		expect(() =>
+			assertSearchExpression({
+				operator: "all",
+				clauses: [],
+			}),
+		).toThrow("Invalid Search expression");
+	});
+
+	test("groups server-composed searchExpression clauses within the schema bound", () => {
+		const expression = combineSearchExpressions(
+			"all",
+			Array.from(
+				{ length: 45 },
+				(_, index) =>
+					({
+						field: "kind",
+						operator: "equals",
+						value: `kind-${index}`,
+					}) as const,
+			),
+		);
+
+		expect(expression).toMatchObject({ operator: "all" });
+		expect(() =>
+			assertSearchExpression(expression, { maxDepth: 6, maxNodes: 100 }),
+		).not.toThrow();
 	});
 
 	test("round-trips opaque cursors through the trusted request compiler", () => {

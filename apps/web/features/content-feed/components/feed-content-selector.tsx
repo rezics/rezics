@@ -22,15 +22,23 @@ import { useTranslation } from "@/i18n/client";
 
 export function FeedContentSelector({
 	onValueChange,
+	options: optionValues,
 	value,
 }: {
 	onValueChange: (value: readonly SimpleFeedContentKind[]) => void;
+	options?: readonly SimpleFeedContentKind[];
 	value: readonly SimpleFeedContentKind[];
 }) {
 	const { t } = useTranslation(["feed"]);
-	const selectedKinds = normalizeSimpleFeedContentKinds(value);
+	const availableKinds = normalizeSimpleFeedContentKinds(
+		optionValues ?? SimpleFeedContentKindValues,
+	);
+	const available = new Set(availableKinds);
+	const selectedKinds = normalizeSimpleFeedContentKinds(value).filter((contentKind) =>
+		available.has(contentKind),
+	);
 	const selected = new Set(selectedKinds);
-	const options = SimpleFeedContentKindValues.map((contentKind) => ({
+	const options = availableKinds.map((contentKind) => ({
 		value: contentKind,
 		label: t.feed.content.kinds[contentKind],
 		...(contentKind === "post:post" ? { description: t.feed.content.postDescription } : {}),
@@ -54,7 +62,7 @@ export function FeedContentSelector({
 		const next = new Set(selectedKinds);
 		if (checked) next.add(contentKind);
 		else next.delete(contentKind);
-		onValueChange(SimpleFeedContentKindValues.filter((candidate) => next.has(candidate)));
+		onValueChange(availableKinds.filter((candidate) => next.has(candidate)));
 	};
 
 	return (

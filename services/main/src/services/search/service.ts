@@ -10,6 +10,7 @@ import {
 	type SearchScalarField,
 	type SearchScalar,
 } from "@rezics/search";
+import { canonicalUnitFilter } from "@rezics/filter";
 import { FontAwesomeProvider } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
@@ -60,6 +61,7 @@ import {
 	type SearchSort,
 } from "./schema";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
+import { compileUnitFilterSql } from "../filter/sql";
 
 const subjectUnit = alias(unit, "subject_unit");
 const searchVariantRelationship = alias(unitVariant, "search_variant_relationship");
@@ -598,8 +600,7 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 		readCondition,
 		sql`${unit.kind}::text = ANY(${toTextArray(categoryKinds[category])})`,
 	];
-	if (category === "posts")
-		conditions.push(sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`);
+	if (category === "posts") conditions.push(sql`${post.kind} <> 'review'::post_kind`);
 	if (category === "reviews") conditions.push(sql`${post.kind} = 'review'`);
 	if (category === "tag-structures")
 		conditions.push(sql`exists (
@@ -726,7 +727,16 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 				: direct,
 		);
 	}
-	if (request.expression) conditions.push(compileExpression(category, request.expression));
+	if (request.searchExpression)
+		conditions.push(compileExpression(category, request.searchExpression));
+	if (request.domainFilter)
+		conditions.push(
+			compileUnitFilterSql(request.domainFilter, {
+				unitId: sql`${unit.id}`,
+				unitKind: sql`${unit.kind}`,
+				viewerProfileId: request.profileId,
+			}),
+		);
 	if (request.multiple !== undefined) {
 		conditions.push(sql`(${poll.mode} = 'multiple') = ${request.multiple}`);
 	}
@@ -774,9 +784,9 @@ function buildCandidateExpression(request: DomainSearchRequest): SearchExpressio
 			: filters.length === 1
 				? filters[0]
 				: ({ operator: "all", clauses: filters } satisfies SearchExpression);
-	if (!simple) return request.expression;
-	if (!request.expression) return simple;
-	return { operator: "all", clauses: [simple, request.expression] };
+	if (!simple) return request.searchExpression;
+	if (!request.searchExpression) return simple;
+	return { operator: "all", clauses: [simple, request.searchExpression] };
 }
 
 export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
@@ -812,6 +822,9 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				closed: request.closed,
 				sort,
 				expression: candidateExpression,
+				domainFilter: request.domainFilter
+					? canonicalUnitFilter(request.domainFilter)
+					: undefined,
 				scopeUnitId: request.scopeUnitId,
 				includeScopeDescendants: request.includeScopeDescendants,
 			}),

@@ -1019,6 +1019,113 @@ export type PostFilter = {
 	};
 };
 
+/**
+ * @type object
+ */
+export type CollectionFilter = {
+	/**
+	 * @type array | undefined
+	 */
+	all?: CollectionFilter[];
+	/**
+	 * @type array | undefined
+	 */
+	any?: CollectionFilter[];
+	/**
+	 * @type object | undefined
+	 */
+	not?: CollectionFilter;
+	items?:
+		| {
+				/**
+				 * @type object
+				 */
+				some: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				none: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+		  };
+};
+
 export const UnitFilterKindInEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -2601,6 +2708,121 @@ export type UnitFilter = {
 									};
 							  };
 					};
+				};
+		  }
+		| {
+				/**
+				 * @type boolean
+				 */
+				absent: true;
+		  };
+	collection?:
+		| {
+				/**
+				 * @type object
+				 */
+				is: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: CollectionFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: CollectionFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: CollectionFilter;
+					items?:
+						| {
+								/**
+								 * @type object
+								 */
+								some: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+						  }
+						| {
+								/**
+								 * @type object
+								 */
+								none: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+						  };
 				};
 		  }
 		| {
@@ -97395,6 +97617,31 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjecti
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum];
 
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum = {
+	"unit:profile": "unit:profile",
+	"unit:book": "unit:book",
+	"unit:software": "unit:software",
+	"unit:media": "unit:media",
+	"unit:release": "unit:release",
+	"unit:entity": "unit:entity",
+	"unit:tag": "unit:tag",
+	"unit:series": "unit:series",
+	"unit:zone": "unit:zone",
+	"unit:collection": "unit:collection",
+	"unit:poll": "unit:poll",
+	"unit:realm": "unit:realm",
+	"post:post": "post:post",
+	"post:excerpt": "post:excerpt",
+	"post:review": "post:review",
+	"post:chapter": "post:chapter",
+	"post:chapter_group": "post:chapter_group",
+	"post:wiki": "post:wiki",
+	"post:picture": "post:picture",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum];
+
 /**
  * @type object
  */
@@ -98607,6 +98854,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							clause: unknown;
 					  };
 		  };
+	/**
+	 * @type array | undefined
+	 */
+	contentKinds?: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum[];
 	surface:
 		| {
 				/**

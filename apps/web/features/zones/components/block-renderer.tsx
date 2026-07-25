@@ -8,6 +8,7 @@ import {
 	type NavigationTarget,
 	type SearchFeatureSource,
 } from "@rezics/block";
+import type { SimpleFeedContentKind } from "@rezics/filter";
 import { parseSearchFeatureDefinition, type SearchControlValue } from "@rezics/search";
 import {
 	useGetApiCollectionsByCollectionId,
@@ -50,10 +51,12 @@ import {
 
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { FeedItemCard, type FeedItem } from "@/features/content-feed/components/feed-item-card";
+import { FeedContentSelector } from "@/features/content-feed/components/feed-content-selector";
 import { FeedList } from "@/features/content-feed/components/feed-list";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 import { zonePageHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
+import { catalogZoneFeedContentKinds } from "../model/catalog-zone-feed";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
 
 type RenderUnit = ZoneRenderProjection["references"]["units"][number];
@@ -88,6 +91,9 @@ type SearchPage = {
 	readonly total: number;
 };
 type ZoneFeedExecutionResponse = PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200;
+type ZoneFeedRequest = SearchFeatureRequest & {
+	readonly contentKinds?: readonly SimpleFeedContentKind[];
+};
 type ZoneFeedPage = {
 	readonly facets?: readonly SearchFacet[];
 	readonly items: readonly FeedItem[];
@@ -630,8 +636,13 @@ function appendZoneFeedPage(current: ZoneFeedPage | undefined, next: ZoneFeedPag
 	};
 }
 
-function requestWithCursor(request: SearchFeatureRequest, cursor: string): SearchFeatureRequest {
+function requestWithCursor(request: ZoneFeedRequest, cursor: string): ZoneFeedRequest {
 	return { ...request, state: { ...request.state, cursor } };
+}
+
+function requestWithoutCursor(request: ZoneFeedRequest): ZoneFeedRequest {
+	const { cursor: _cursor, ...state } = request.state;
+	return { ...request, state };
 }
 
 function FeedPagination({
@@ -677,20 +688,23 @@ function ZoneFeedBlock({
 	error,
 	presentation,
 	maxResults,
+	contentOptions,
 }: {
 	blockKey: string;
-	execute: (request: SearchFeatureRequest) => Promise<ZoneFeedExecutionResponse>;
+	execute: (request: ZoneFeedRequest) => Promise<ZoneFeedExecutionResponse>;
 	feature: SearchFeatureSource;
 	pending: boolean;
 	error: boolean;
 	presentation: FeedPresentation;
 	maxResults?: number;
+	contentOptions?: readonly SimpleFeedContentKind[];
 }) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
-	const [request, setRequest] = useState<SearchFeatureRequest>();
+	const [request, setRequest] = useState<ZoneFeedRequest>();
+	const [contentKinds, setContentKinds] = useState<readonly SimpleFeedContentKind[]>([]);
 	const [page, setPage] = useState<ZoneFeedPage>();
 	const executionSequence = useRef(0);
-	const run = (nextRequest: SearchFeatureRequest, append: boolean) => {
+	const run = (nextRequest: ZoneFeedRequest, append: boolean) => {
 		const sequence = ++executionSequence.current;
 		if (!append) {
 			setRequest(nextRequest);
@@ -712,8 +726,26 @@ function ZoneFeedBlock({
 		if (!request || !page?.nextCursor || pending) return;
 		run(requestWithCursor(request, page.nextCursor), true);
 	};
+	const selectContentKinds = (nextContentKinds: readonly SimpleFeedContentKind[]) => {
+		setContentKinds(nextContentKinds);
+		if (!request) return;
+		const nextRequest = requestWithoutCursor({
+			...request,
+			contentKinds: nextContentKinds.length ? nextContentKinds : undefined,
+		});
+		run(nextRequest, false);
+	};
 	return (
 		<>
+			{contentOptions ? (
+				<div className="mb-4">
+					<FeedContentSelector
+						onValueChange={selectContentKinds}
+						options={contentOptions}
+						value={contentKinds}
+					/>
+				</div>
+			) : null}
 			<ZoneSearchFeature
 				appearance="feed"
 				autoExecute
@@ -722,7 +754,15 @@ function ZoneFeedBlock({
 				facets={page?.facets}
 				feature={feature}
 				initialPageSize={maxResults && maxResults <= 20 ? maxResults : undefined}
-				onExecute={(nextRequest) => run(nextRequest, false)}
+				onExecute={(nextRequest) =>
+					run(
+						{
+							...nextRequest,
+							contentKinds: contentKinds.length ? contentKinds : undefined,
+						},
+						false,
+					)
+				}
 				pending={pending}
 				presentation={{ results: "list", showResultCount: presentation.showResultCount }}
 				total={page?.total}
@@ -778,17 +818,23 @@ function DockFeedBlock({
 }) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
+	const contentOptions = catalogZoneFeedContentKinds(context.projection.zone.slugAddress?.slug);
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
 			error={mutation.isError}
 			execute={(body) =>
 				mutation.mutateAsync({
-					body: { ...body, surface: { kind: "dock" } },
+					body: {
+						...body,
+						contentKinds: body.contentKinds ? [...body.contentKinds] : undefined,
+						surface: { kind: "dock" },
+					},
 					path: { blockKey, zoneId: context.projection.zone.id },
 				})
 			}
 			feature={feature}
+			contentOptions={contentOptions}
 			pending={mutation.isPending}
 			presentation={presentation}
 		/>
@@ -808,17 +854,23 @@ function PageFeedBlock({
 }) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
+	const contentOptions = catalogZoneFeedContentKinds(context.projection.zone.slugAddress?.slug);
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
 			error={mutation.isError}
 			execute={(body) =>
 				mutation.mutateAsync({
-					body: { ...body, surface: { kind: "page", pageId } },
+					body: {
+						...body,
+						contentKinds: body.contentKinds ? [...body.contentKinds] : undefined,
+						surface: { kind: "page", pageId },
+					},
 					path: { blockKey, zoneId: context.projection.zone.id },
 				})
 			}
 			feature={feature}
+			contentOptions={contentOptions}
 			pending={mutation.isPending}
 			presentation={presentation}
 		/>

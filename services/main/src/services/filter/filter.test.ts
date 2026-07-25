@@ -89,6 +89,21 @@ describe("domain Filter contract", () => {
 		).toThrow("minimum exceeds maximum");
 	});
 
+	it("accepts Post subjects and Collection items as typed Unit references", () => {
+		expect(() =>
+			assertUnitFilter({
+				any: [
+					{ post: { is: { subject: { is: { kind: { in: ["book"] } } } } } },
+					{
+						collection: {
+							is: { items: { some: { kind: { in: ["book"] } } } },
+						},
+					},
+				],
+			}),
+		).not.toThrow();
+	});
+
 	it("does not reinterpret an advanced Filter as standard Feed UI state", () => {
 		expect(
 			readSimpleFeedFilter({

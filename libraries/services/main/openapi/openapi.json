@@ -1862,6 +1862,271 @@
 					}
 				}
 			},
+			"CollectionFilter": {
+				"$id": "CollectionFilter",
+				"minProperties": 1,
+				"additionalProperties": false,
+				"type": "object",
+				"properties": {
+					"all": {
+						"minItems": 1,
+						"maxItems": 20,
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/CollectionFilter" }
+					},
+					"any": {
+						"minItems": 1,
+						"maxItems": 20,
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/CollectionFilter" }
+					},
+					"not": { "$ref": "#/components/schemas/CollectionFilter" },
+					"items": {
+						"anyOf": [
+							{
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["some"],
+								"properties": {
+									"some": {
+										"minProperties": 1,
+										"additionalProperties": false,
+										"type": "object",
+										"properties": {
+											"id": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["in"],
+												"properties": {
+													"in": {
+														"minItems": 1,
+														"maxItems": 50,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+															"type": "string"
+														}
+													}
+												}
+											},
+											"kind": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["in"],
+												"properties": {
+													"in": {
+														"minItems": 1,
+														"maxItems": 18,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"anyOf": [
+																{
+																	"const": "slug_namespace",
+																	"type": "string"
+																},
+																{
+																	"const": "profile",
+																	"type": "string"
+																},
+																{
+																	"const": "book",
+																	"type": "string"
+																},
+																{
+																	"const": "software",
+																	"type": "string"
+																},
+																{
+																	"const": "media",
+																	"type": "string"
+																},
+																{
+																	"const": "release",
+																	"type": "string"
+																},
+																{
+																	"const": "entity",
+																	"type": "string"
+																},
+																{
+																	"const": "label",
+																	"type": "string"
+																},
+																{
+																	"const": "tag",
+																	"type": "string"
+																},
+																{
+																	"const": "structure",
+																	"type": "string"
+																},
+																{
+																	"const": "series",
+																	"type": "string"
+																},
+																{
+																	"const": "zone",
+																	"type": "string"
+																},
+																{
+																	"const": "zone_page",
+																	"type": "string"
+																},
+																{
+																	"const": "collection",
+																	"type": "string"
+																},
+																{
+																	"const": "post",
+																	"type": "string"
+																},
+																{
+																	"const": "poll",
+																	"type": "string"
+																},
+																{
+																	"const": "realm",
+																	"type": "string"
+																},
+																{
+																	"const": "realm_rule",
+																	"type": "string"
+																}
+															]
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							},
+							{
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["none"],
+								"properties": {
+									"none": {
+										"minProperties": 1,
+										"additionalProperties": false,
+										"type": "object",
+										"properties": {
+											"id": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["in"],
+												"properties": {
+													"in": {
+														"minItems": 1,
+														"maxItems": 50,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+															"type": "string"
+														}
+													}
+												}
+											},
+											"kind": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["in"],
+												"properties": {
+													"in": {
+														"minItems": 1,
+														"maxItems": 18,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"anyOf": [
+																{
+																	"const": "slug_namespace",
+																	"type": "string"
+																},
+																{
+																	"const": "profile",
+																	"type": "string"
+																},
+																{
+																	"const": "book",
+																	"type": "string"
+																},
+																{
+																	"const": "software",
+																	"type": "string"
+																},
+																{
+																	"const": "media",
+																	"type": "string"
+																},
+																{
+																	"const": "release",
+																	"type": "string"
+																},
+																{
+																	"const": "entity",
+																	"type": "string"
+																},
+																{
+																	"const": "label",
+																	"type": "string"
+																},
+																{
+																	"const": "tag",
+																	"type": "string"
+																},
+																{
+																	"const": "structure",
+																	"type": "string"
+																},
+																{
+																	"const": "series",
+																	"type": "string"
+																},
+																{
+																	"const": "zone",
+																	"type": "string"
+																},
+																{
+																	"const": "zone_page",
+																	"type": "string"
+																},
+																{
+																	"const": "collection",
+																	"type": "string"
+																},
+																{
+																	"const": "post",
+																	"type": "string"
+																},
+																{
+																	"const": "poll",
+																	"type": "string"
+																},
+																{
+																	"const": "realm",
+																	"type": "string"
+																},
+																{
+																	"const": "realm_rule",
+																	"type": "string"
+																}
+															]
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						]
+					}
+				}
+			},
 			"UnitFilter": {
 				"$id": "UnitFilter",
 				"minProperties": 1,
@@ -5453,6 +5718,294 @@
 														]
 													}
 												}
+											}
+										}
+									}
+								}
+							},
+							{
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["absent"],
+								"properties": { "absent": { "const": true, "type": "boolean" } }
+							}
+						]
+					},
+					"collection": {
+						"anyOf": [
+							{
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["is"],
+								"properties": {
+									"is": {
+										"$id": "CollectionFilter",
+										"minProperties": 1,
+										"additionalProperties": false,
+										"type": "object",
+										"properties": {
+											"all": {
+												"minItems": 1,
+												"maxItems": 20,
+												"type": "array",
+												"items": {
+													"$ref": "#/components/schemas/CollectionFilter"
+												}
+											},
+											"any": {
+												"minItems": 1,
+												"maxItems": 20,
+												"type": "array",
+												"items": {
+													"$ref": "#/components/schemas/CollectionFilter"
+												}
+											},
+											"not": {
+												"$ref": "#/components/schemas/CollectionFilter"
+											},
+											"items": {
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["some"],
+														"properties": {
+															"some": {
+																"minProperties": 1,
+																"additionalProperties": false,
+																"type": "object",
+																"properties": {
+																	"id": {
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["in"],
+																		"properties": {
+																			"in": {
+																				"minItems": 1,
+																				"maxItems": 50,
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				}
+																			}
+																		}
+																	},
+																	"kind": {
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["in"],
+																		"properties": {
+																			"in": {
+																				"minItems": 1,
+																				"maxItems": 18,
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"anyOf": [
+																						{
+																							"const": "slug_namespace",
+																							"type": "string"
+																						},
+																						{
+																							"const": "profile",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media",
+																							"type": "string"
+																						},
+																						{
+																							"const": "release",
+																							"type": "string"
+																						},
+																						{
+																							"const": "entity",
+																							"type": "string"
+																						},
+																						{
+																							"const": "label",
+																							"type": "string"
+																						},
+																						{
+																							"const": "tag",
+																							"type": "string"
+																						},
+																						{
+																							"const": "structure",
+																							"type": "string"
+																						},
+																						{
+																							"const": "series",
+																							"type": "string"
+																						},
+																						{
+																							"const": "zone",
+																							"type": "string"
+																						},
+																						{
+																							"const": "zone_page",
+																							"type": "string"
+																						},
+																						{
+																							"const": "collection",
+																							"type": "string"
+																						},
+																						{
+																							"const": "post",
+																							"type": "string"
+																						},
+																						{
+																							"const": "poll",
+																							"type": "string"
+																						},
+																						{
+																							"const": "realm",
+																							"type": "string"
+																						},
+																						{
+																							"const": "realm_rule",
+																							"type": "string"
+																						}
+																					]
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["none"],
+														"properties": {
+															"none": {
+																"minProperties": 1,
+																"additionalProperties": false,
+																"type": "object",
+																"properties": {
+																	"id": {
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["in"],
+																		"properties": {
+																			"in": {
+																				"minItems": 1,
+																				"maxItems": 50,
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				}
+																			}
+																		}
+																	},
+																	"kind": {
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["in"],
+																		"properties": {
+																			"in": {
+																				"minItems": 1,
+																				"maxItems": 18,
+																				"uniqueItems": true,
+																				"type": "array",
+																				"items": {
+																					"anyOf": [
+																						{
+																							"const": "slug_namespace",
+																							"type": "string"
+																						},
+																						{
+																							"const": "profile",
+																							"type": "string"
+																						},
+																						{
+																							"const": "book",
+																							"type": "string"
+																						},
+																						{
+																							"const": "software",
+																							"type": "string"
+																						},
+																						{
+																							"const": "media",
+																							"type": "string"
+																						},
+																						{
+																							"const": "release",
+																							"type": "string"
+																						},
+																						{
+																							"const": "entity",
+																							"type": "string"
+																						},
+																						{
+																							"const": "label",
+																							"type": "string"
+																						},
+																						{
+																							"const": "tag",
+																							"type": "string"
+																						},
+																						{
+																							"const": "structure",
+																							"type": "string"
+																						},
+																						{
+																							"const": "series",
+																							"type": "string"
+																						},
+																						{
+																							"const": "zone",
+																							"type": "string"
+																						},
+																						{
+																							"const": "zone_page",
+																							"type": "string"
+																						},
+																						{
+																							"const": "collection",
+																							"type": "string"
+																						},
+																						{
+																							"const": "post",
+																							"type": "string"
+																						},
+																						{
+																							"const": "poll",
+																							"type": "string"
+																						},
+																						{
+																							"const": "realm",
+																							"type": "string"
+																						},
+																						{
+																							"const": "realm_rule",
+																							"type": "string"
+																						}
+																					]
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												]
 											}
 										}
 									}
@@ -145154,6 +145707,36 @@
 												}
 											}
 										]
+									},
+									"contentKinds": {
+										"maxItems": 19,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"default": "unit:profile",
+											"type": "string",
+											"enum": [
+												"unit:profile",
+												"unit:book",
+												"unit:software",
+												"unit:media",
+												"unit:release",
+												"unit:entity",
+												"unit:tag",
+												"unit:series",
+												"unit:zone",
+												"unit:collection",
+												"unit:poll",
+												"unit:realm",
+												"post:post",
+												"post:excerpt",
+												"post:review",
+												"post:chapter",
+												"post:chapter_group",
+												"post:wiki",
+												"post:picture"
+											]
+										}
 									},
 									"surface": {
 										"anyOf": [

@@ -1,16 +1,18 @@
 import { createHash } from "node:crypto";
 
 import {
+	assertSearchExpression,
+	combineSearchExpressions,
 	compileSearchRequest,
 	createSearchCursor,
 	parseSearchCursor,
 	type CompiledSearchRequest,
 	type SearchConfiguration,
 	type SearchControl,
-	type SearchExpression,
 	type SearchFilter,
 } from "@rezics/search";
 import { ZoneBoundaryDocument, parseDocument } from "@rezics/block";
+import { assertUnitFilter, canonicalUnitFilter, type UnitFilter } from "@rezics/filter";
 import { eq } from "drizzle-orm";
 
 import { database } from "../database";
@@ -19,7 +21,6 @@ import { InvalidSearch } from "./errors";
 import { getActiveSearchGeneration } from "./generation";
 import { SearchCategories, type SearchCategory } from "./schema";
 import { searchDomain, searchDomainFacets } from "./service";
-import { compileUnitFilterSearch } from "../filter/search";
 
 const modes = ["basic", "advanced"] as const;
 
@@ -184,24 +185,20 @@ export const GlobalSearchConfiguration = {
 	},
 } satisfies SearchConfiguration;
 
-function combineFilters(filters: readonly SearchFilter[]): SearchExpression | undefined {
-	if (!filters.length) return undefined;
-	return filters.length === 1 ? filters[0] : { operator: "all", clauses: [...filters] };
-}
-
-function combineExpressions(
-	left: SearchExpression | undefined,
-	right: SearchExpression | undefined,
-): SearchExpression | undefined {
-	if (!left) return right;
-	if (!right) return left;
-	return { operator: "all", clauses: [left, right] };
+export function combineUnitFilters(
+	filters: readonly (UnitFilter | undefined)[],
+): UnitFilter | undefined {
+	const present = filters.filter((filter): filter is UnitFilter => filter !== undefined);
+	if (!present.length) return undefined;
+	const combined: UnitFilter = present.length === 1 ? present[0]! : { all: present };
+	assertUnitFilter(combined);
+	return combined;
 }
 
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	categories: SearchCategory[];
 	filters: SearchFilter[];
-	expression?: SearchExpression;
+	domainFilter?: UnitFilter;
 	scopeUnitId?: string;
 	includeScopeDescendants?: boolean;
 }> {
@@ -232,7 +229,7 @@ async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 			boundary.categories.includes(category),
 		),
 		filters: [],
-		...(boundary.filter ? { expression: compileUnitFilterSearch(boundary.filter) } : {}),
+		...(boundary.filter ? { domainFilter: boundary.filter } : {}),
 	};
 }
 
@@ -257,6 +254,7 @@ export async function executeCompiledSearch(
 	profileId?: string,
 	enforcedZoneId?: string,
 	inputIdentity?: string,
+	additionalDomainFilter?: UnitFilter,
 ) {
 	const configuredScope = await resolveScope(compiled);
 	const hostScope = enforcedZoneId
@@ -275,14 +273,18 @@ export async function executeCompiledSearch(
 		scopeUnitId: configuredScope.scopeUnitId,
 		includeScopeDescendants: configuredScope.includeScopeDescendants,
 	};
-	const fixedExpression = combineFilters([...compiled.constraints, ...scope.filters]);
-	const expression = combineExpressions(
-		combineExpressions(
-			fixedExpression,
-			combineExpressions(configuredScope.expression, hostScope?.expression),
-		),
-		compiled.expression,
-	);
+	const searchExpression = combineSearchExpressions("all", [
+		...compiled.constraints,
+		...scope.filters,
+		...(compiled.searchExpression ? [compiled.searchExpression] : []),
+	]);
+	if (searchExpression) assertSearchExpression(searchExpression, { maxDepth: 6, maxNodes: 100 });
+	const domainFilter = combineUnitFilters([
+		compiled.domainFilter,
+		configuredScope.domainFilter,
+		hostScope?.domainFilter,
+		additionalDomainFilter,
+	]);
 	const generation = await getActiveSearchGeneration("current");
 	const requestHash = createHash("sha256")
 		.update(
@@ -292,7 +294,8 @@ export async function executeCompiledSearch(
 				query: compiled.query.trim(),
 				sort: compiled.sort,
 				maxResultWindow: compiled.maxResultWindow,
-				expression,
+				searchExpression,
+				domainFilter: domainFilter ? canonicalUnitFilter(domainFilter) : undefined,
 				facets: compiled.facets,
 				inputIdentity,
 			}),
@@ -331,7 +334,8 @@ export async function executeCompiledSearch(
 						offset: cursor?.categories[category]?.offset ?? 0,
 						limit: compiled.pageSize,
 						sort: compiled.sort,
-						expression,
+						searchExpression,
+						domainFilter,
 						scopeUnitId: scope.scopeUnitId,
 						includeScopeDescendants: scope.includeScopeDescendants,
 					};

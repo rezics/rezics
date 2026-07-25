@@ -61,4 +61,21 @@ describe("FeedContentSelector", () => {
 		const clearAll = await screen.findByRole("menuitem", { name: "全部清除" });
 		expect(clearAll.hasAttribute("data-disabled")).toBe(false);
 	});
+
+	it("shows only the content kinds allowed by its host", async () => {
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedContentSelector
+					onValueChange={vi.fn()}
+					options={["unit:book", "unit:collection", "post:review"]}
+					value={[]}
+				/>
+			</TranslationProvider>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "內容篩選" }));
+
+		expect(await screen.findAllByRole("menuitemcheckbox")).toHaveLength(3);
+		expect(screen.queryByRole("menuitemcheckbox", { name: "媒體" })).toBeNull();
+	});
 });

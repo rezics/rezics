@@ -19,6 +19,21 @@ describe("Search Feature v1", () => {
 		expect(resolved.controls.length).toBeGreaterThan(0);
 	});
 
+	it.each(["book", "media", "software"] as const)(
+		"lets the %s catalog template search direct Units and related content",
+		(template) => {
+			const document = createDefaultSearchDocument(template);
+			expect(document.categories).toEqual(["units", "posts", "reviews", "collections"]);
+			const compiled = compileSearchFeatureInput({
+				document,
+				contexts: [],
+				injections: [],
+				state: { mode: "basic", values: [] },
+			});
+			expect(compiled.request.constraints).toEqual([]);
+		},
+	);
+
 	it("uses the dedicated Realms category without a redundant kind constraint", () => {
 		const compiled = compileSearchFeatureInput({
 			document: createDefaultSearchDocument("realm"),
@@ -86,7 +101,7 @@ describe("Search Feature v1", () => {
 			operator: "equals",
 			value: RealmId,
 		});
-		expect(compiled.request.expression).toMatchObject({ operator: "all" });
+		expect(compiled.request.searchExpression).toMatchObject({ operator: "all" });
 	});
 
 	it("scopes Profile search to credited content and owned catalog Units", () => {
@@ -97,7 +112,7 @@ describe("Search Feature v1", () => {
 			state: { mode: "basic", values: [] },
 		});
 
-		expect(compiled.request.expression).toEqual({
+		expect(compiled.request.searchExpression).toEqual({
 			operator: "any",
 			clauses: [
 				{
@@ -164,7 +179,7 @@ describe("Search Feature v1", () => {
 			},
 		});
 
-		expect(compiled.request.expression).toMatchObject({
+		expect(compiled.request.searchExpression).toMatchObject({
 			operator: "all",
 			clauses: [
 				{ field: "tag", value: TagId },
@@ -209,7 +224,7 @@ describe("Search Feature v1", () => {
 			},
 		});
 
-		expect(compiled.request.expression).toEqual({
+		expect(compiled.request.searchExpression).toEqual({
 			operator: "all",
 			clauses: [
 				{ field: "realm", operator: "equals", value: RealmId },
@@ -257,7 +272,7 @@ describe("Search Feature v1", () => {
 			},
 		});
 
-		expect(compiled.request.expression).toEqual({
+		expect(compiled.request.searchExpression).toEqual({
 			operator: "all",
 			clauses: [
 				{ field: "realm", operator: "equals", value: RealmId },
@@ -290,18 +305,29 @@ describe("Search Feature v1", () => {
 		).toThrow("invalid integer value");
 	});
 
-	it("does not let a Zone document widen template operators, sorts, or result limits", () => {
+	it("keeps a Search document domain Filter separate from searchExpression", () => {
 		const original = createDefaultSearchDocument("global");
-		expect(() =>
-			resolveSearchDocument({
-				...original,
-				filter: {
-					scores: {
-						received: { some: { value: { range: { minimum: 5 } } } },
-					},
+		const document = {
+			...original,
+			filter: {
+				collection: {
+					is: { items: { some: { kind: { in: ["book"] } } } },
 				},
-			}),
-		).toThrow("Score predicates are not indexed by Search");
+			},
+		} as const;
+		expect(resolveSearchDocument(document).document.filter).toEqual(document.filter);
+		const compiled = compileSearchFeatureInput({
+			document,
+			contexts: [],
+			injections: [],
+			state: { mode: "basic", values: [] },
+		});
+		expect(compiled.request.domainFilter).toEqual(document.filter);
+		expect(compiled.request.searchExpression).toBeUndefined();
+	});
+
+	it("does not let a Zone document widen template sorts or result limits", () => {
+		const original = createDefaultSearchDocument("global");
 		expect(() =>
 			resolveSearchDocument({
 				...original,
@@ -370,7 +396,7 @@ describe("Search Feature v1", () => {
 				contexts: [],
 				injections: [],
 				state: document.state,
-			}).request.expression,
+			}).request.searchExpression,
 		).toMatchObject({ field: "tag", operator: "equals", value: TagId });
 	});
 });

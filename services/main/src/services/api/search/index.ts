@@ -14,7 +14,12 @@ import {
 	SharedSearchQueryDocument,
 	SearchTemplateId,
 } from "@rezics/search";
-import { FilterSchemaModels } from "@rezics/filter";
+import {
+	createSimpleFeedFilter,
+	FilterSchemaModels,
+	SimpleFeedContentKindValues,
+	type UnitFilter,
+} from "@rezics/filter";
 import { getActiveObservability } from "@rezics/observability";
 import { type Static, Type } from "@sinclair/typebox";
 import { and, eq, isNull } from "drizzle-orm";
@@ -103,6 +108,12 @@ const ZoneSearchFeatureExecutionBody = t.Pick(SearchFeatureInput, ["injections",
 const ZoneFeedBlockExecutionBody = t.Object(
 	{
 		...ZoneSearchFeatureExecutionBody.properties,
+		contentKinds: t.Optional(
+			t.Array(t.UnionEnum(SimpleFeedContentKindValues), {
+				maxItems: SimpleFeedContentKindValues.length,
+				uniqueItems: true,
+			}),
+		),
 		surface: t.Union([
 			t.Object({ kind: t.Literal("dock") }, { additionalProperties: false }),
 			t.Object(
@@ -200,6 +211,7 @@ async function executeZoneBlock(input: {
 	body: unknown;
 	profileId?: string;
 	source?: SearchFeatureSource;
+	additionalDomainFilter?: UnitFilter;
 }) {
 	const source = input.source ?? findSearchFeatureSource(input.document, input.blockKey);
 	const baseDocument =
@@ -219,6 +231,7 @@ async function executeZoneBlock(input: {
 			state: request.state,
 		},
 		input.profileId,
+		input.additionalDomainFilter,
 	);
 }
 
@@ -230,9 +243,13 @@ async function executeZoneFeedBlock(input: {
 	profileId?: string;
 }) {
 	const block = findFeedBlock(input.document, input.blockKey);
+	const request = input.body as typeof ZoneFeedBlockExecutionBody.static;
 	const result = await executeZoneBlock({
 		...input,
 		source: block.feature,
+		additionalDomainFilter: createSimpleFeedFilter({
+			contentKinds: request.contentKinds,
+		}),
 	});
 	return presentSearchResultAsFeed(result, input.profileId);
 }

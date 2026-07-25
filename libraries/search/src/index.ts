@@ -1,5 +1,6 @@
 import { type Static, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
+import type { UnitFilter } from "@rezics/filter";
 import {
 	SearchCategory as SearchCategorySchema,
 	SearchCategoryValues,
@@ -49,6 +50,37 @@ export const SearchExpression = Type.Recursive(
 	{ $id: "SearchExpression" },
 );
 export type SearchExpression = Static<typeof SearchExpression>;
+
+export interface SearchExpressionValidationLimits {
+	readonly maxDepth: number;
+	readonly maxNodes: number;
+}
+
+export const DefaultSearchExpressionValidationLimits: SearchExpressionValidationLimits = {
+	maxDepth: 3,
+	maxNodes: 100,
+};
+
+export function combineSearchExpressions(
+	operator: "all" | "any",
+	expressions: readonly SearchExpression[],
+): SearchExpression | undefined {
+	const clauses = expressions.flatMap((expression) =>
+		!("field" in expression) && expression.operator === operator
+			? expression.clauses
+			: [expression],
+	);
+	if (!clauses.length) return undefined;
+	const build = (items: readonly SearchExpression[]): SearchExpression => {
+		if (items.length === 1) return items[0]!;
+		if (items.length <= 20) return { operator, clauses: [...items] };
+		const groups: SearchExpression[] = [];
+		for (let index = 0; index < items.length; index += 20)
+			groups.push({ operator, clauses: items.slice(index, index + 20) });
+		return build(groups);
+	};
+	return build(clauses);
+}
 
 export const SearchConfiguration = Type.Object(
 	{
@@ -131,7 +163,8 @@ export interface CompiledSearchRequest {
 	readonly mode: SearchMode;
 	readonly query: string;
 	readonly constraints: readonly SearchFilter[];
-	readonly expression?: SearchExpression;
+	readonly searchExpression?: SearchExpression;
+	readonly domainFilter?: UnitFilter;
 	readonly sort: SearchSort;
 	readonly pageSize: number;
 	readonly maxResultWindow: number;
@@ -316,20 +349,23 @@ function visitExpression(
 	path = "expression",
 	depth = 0,
 	budget = { nodes: 0 },
+	limits: SearchExpressionValidationLimits = DefaultSearchExpressionValidationLimits,
 ): void {
 	budget.nodes += 1;
-	if (budget.nodes > 100) throw new TypeError("Search expression exceeds maximum 100 nodes");
-	if (depth > 3) throw new TypeError("Search expression exceeds maximum depth 3");
+	if (budget.nodes > limits.maxNodes)
+		throw new TypeError(`Search expression exceeds maximum ${limits.maxNodes} nodes`);
+	if (depth > limits.maxDepth)
+		throw new TypeError(`Search expression exceeds maximum depth ${limits.maxDepth}`);
 	if ("field" in expression) {
 		visitor(expression, path);
 		return;
 	}
 	if (expression.operator === "not") {
-		visitExpression(expression.clause, visitor, `${path}.clause`, depth + 1, budget);
+		visitExpression(expression.clause, visitor, `${path}.clause`, depth + 1, budget, limits);
 		return;
 	}
 	expression.clauses.forEach((clause, index) =>
-		visitExpression(clause, visitor, `${path}.clauses[${index}]`, depth + 1, budget),
+		visitExpression(clause, visitor, `${path}.clauses[${index}]`, depth + 1, budget, limits),
 	);
 }
 
@@ -340,6 +376,22 @@ function expressionFields(expression: SearchExpression | undefined): Set<SearchF
 			fields.add(filter.field);
 		});
 	return fields;
+}
+
+export function assertSearchExpression(
+	value: unknown,
+	limits: SearchExpressionValidationLimits = DefaultSearchExpressionValidationLimits,
+): asserts value is SearchExpression {
+	if (!Check(SearchExpression, value)) throw new TypeError("Invalid Search expression");
+	visitExpression(value, assertFilterShape, "searchExpression", 0, { nodes: 0 }, limits);
+}
+
+export function parseSearchExpression(
+	value: unknown,
+	limits: SearchExpressionValidationLimits = DefaultSearchExpressionValidationLimits,
+): SearchExpression {
+	assertSearchExpression(value, limits);
+	return value;
 }
 
 export function assertSearchConfiguration(value: unknown): asserts value is SearchConfiguration {
@@ -472,7 +524,7 @@ export function compileSearchRequest(
 			request.mode === "basic"
 				? [...configuration.constraints, ...effectiveDefaults, ...request.filters]
 				: [...configuration.constraints, ...effectiveDefaults],
-		expression: request.mode === "advanced" ? request.expression : undefined,
+		searchExpression: request.mode === "advanced" ? request.expression : undefined,
 		sort: request.sort ?? configuration.sort.default,
 		pageSize: request.pageSize ?? configuration.results.pageSize,
 		maxResultWindow: configuration.results.maxResultWindow,

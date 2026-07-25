@@ -153,6 +153,7 @@ function compilePost(filter: PostFilter): SearchExpression | undefined {
 export function compileUnitFilterSearch(filter: UnitFilter): SearchExpression {
 	if (filter.id) throw new TypeError("Unit id predicates are not indexed by Search");
 	if (filter.scores) throw new TypeError("Score predicates are not indexed by Search");
+	if (filter.collection) throw new TypeError("Collection predicates are not indexed by Search");
 	const expression = all([
 		...logic(filter, compileUnitFilterSearch),
 		filter.kind ? scalarAnyOf("kind", filter.kind.in) : undefined,

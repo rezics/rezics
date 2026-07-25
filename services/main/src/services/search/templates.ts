@@ -1,5 +1,7 @@
 import {
+	assertSearchExpression,
 	canonicalSearchFeatureInput,
+	combineSearchExpressions,
 	parseSearchFeatureInput,
 	parseSearchDocument,
 	type CompiledSearchRequest,
@@ -19,7 +21,6 @@ import {
 } from "@rezics/search";
 
 import { InvalidSearch } from "./errors";
-import { compileUnitFilterSearch } from "../filter/search";
 import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
 import { SearchCategories } from "./schema";
 
@@ -58,6 +59,7 @@ const CommonFields = [
 ] as const satisfies readonly SearchField[];
 
 const CatalogFields = ["catalog-licensed"] as const satisfies readonly SearchField[];
+const CatalogZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 
 const TemplateDefinitions = {
 	global: {
@@ -82,7 +84,7 @@ const TemplateDefinitions = {
 	},
 	book: {
 		id: "book",
-		categories: ["units"],
+		categories: CatalogZoneCategories,
 		fields: [
 			...CommonFields,
 			...CatalogFields,
@@ -92,7 +94,7 @@ const TemplateDefinitions = {
 			"book-word-count",
 			"book-format",
 		],
-		constraints: [{ field: "kind", operator: "equals", value: "book" }],
+		constraints: [],
 		visible: new Set<SearchField>(["language", "tag", "book-word-count", "book-format"]),
 		defaultFacets: ["language", "tag", "book-format"],
 		sorts: CommonSorts,
@@ -101,7 +103,7 @@ const TemplateDefinitions = {
 	},
 	media: {
 		id: "media",
-		categories: ["units"],
+		categories: CatalogZoneCategories,
 		fields: [
 			...CommonFields,
 			...CatalogFields,
@@ -112,7 +114,7 @@ const TemplateDefinitions = {
 			"media-episode-count",
 			"media-season-count",
 		],
-		constraints: [{ field: "kind", operator: "equals", value: "media" }],
+		constraints: [],
 		visible: new Set<SearchField>([
 			"language",
 			"tag",
@@ -127,7 +129,7 @@ const TemplateDefinitions = {
 	},
 	software: {
 		id: "software",
-		categories: ["units"],
+		categories: CatalogZoneCategories,
 		fields: [
 			...CommonFields,
 			...CatalogFields,
@@ -137,7 +139,7 @@ const TemplateDefinitions = {
 			"software-platform",
 			"software-requirement-tier",
 		],
-		constraints: [{ field: "kind", operator: "equals", value: "software" }],
+		constraints: [],
 		visible: new Set<SearchField>([
 			"language",
 			"tag",
@@ -217,14 +219,6 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 	if (!document.categories.every((category) => template.categories.includes(category)))
 		throw new InvalidSearch("Search document category is outside its template");
 	const allowedFields = new Set<SearchField>(template.fields);
-	if (document.filter)
-		try {
-			compileUnitFilterSearch(document.filter);
-		} catch (cause) {
-			throw new InvalidSearch(
-				cause instanceof Error ? cause.message : "Search document Filter is unsupported",
-			);
-		}
 	const fieldCounts = new Map<SearchField, number>();
 	for (const control of document.controls) {
 		if (!allowedFields.has(control.field))
@@ -461,10 +455,7 @@ function normalizeFilterExpression(filter: SearchFilter): SearchExpression {
 		return { field: filter.field, operator: "equals", value };
 	});
 	if (clauses.length === 1) return clauses[0]!;
-	return {
-		operator: filter.operator === "any-of" ? "any" : "all",
-		clauses,
-	};
+	return combineSearchExpressions(filter.operator === "any-of" ? "any" : "all", clauses)!;
 }
 
 function unwrapExpression(
@@ -490,7 +481,7 @@ function unwrapExpression(
 				? clause.clauses
 				: [clause],
 		);
-	return { operator: expression.operator, clauses };
+	return combineSearchExpressions(expression.operator, clauses)!;
 }
 
 function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
@@ -598,7 +589,7 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 	// repeated tag injections to mean an intersection.
 	const injected = input.injections.map((injection) => injection.value);
 	const used = new Set<string>();
-	let expression: SearchExpression | undefined;
+	let searchExpression: SearchExpression | undefined;
 	if (mode === "basic") {
 		for (const value of input.state.values) baseline.set(value.controlKey, value);
 		const values = [...injected, ...baseline.values()];
@@ -606,14 +597,12 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			validateControlValue(value, controls.get(value.controlKey), mode);
 			used.add(value.controlKey);
 		}
-		expression = values.length
-			? {
-					operator: "all",
-					clauses: values.map((value) => normalizeFilterExpression(value.filter)),
-				}
-			: undefined;
+		searchExpression = combineSearchExpressions(
+			"all",
+			values.map((value) => normalizeFilterExpression(value.filter)),
+		);
 	} else {
-		expression = input.state.expression
+		searchExpression = input.state.expression
 			? unwrapExpression(input.state.expression, controls, mode, used)
 			: undefined;
 		const defaults = [
@@ -625,42 +614,22 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			used.add(value.controlKey);
 		}
 		if (defaults.length)
-			expression = expression
-				? {
-						operator: "all",
-						clauses: [
-							...defaults.map((value) => normalizeFilterExpression(value.filter)),
-							expression,
-						],
-					}
-				: {
-						operator: "all",
-						clauses: defaults.map((value) => normalizeFilterExpression(value.filter)),
-					};
+			searchExpression = combineSearchExpressions("all", [
+				...defaults.map((value) => normalizeFilterExpression(value.filter)),
+				...(searchExpression ? [searchExpression] : []),
+			]);
 	}
 	for (const control of resolved.controls)
 		if (control.required && control.modes.includes(mode) && !used.has(control.key))
 			throw new InvalidSearch(`Required Search control ${control.key} is missing`);
 
-	if (input.document.filter) {
-		let documentExpression: SearchExpression;
-		try {
-			documentExpression = compileUnitFilterSearch(input.document.filter);
-		} catch (cause) {
-			throw new InvalidSearch(
-				cause instanceof Error ? cause.message : "Search document Filter is unsupported",
-			);
-		}
-		expression = expression
-			? { operator: "all", clauses: [documentExpression, expression] }
-			: documentExpression;
-	}
-
 	const context = scopeForContexts(input.contexts);
 	if (context.contextExpression)
-		expression = expression
-			? { operator: "all", clauses: [context.contextExpression, expression] }
-			: context.contextExpression;
+		searchExpression = combineSearchExpressions("all", [
+			context.contextExpression,
+			...(searchExpression ? [searchExpression] : []),
+		]);
+	if (searchExpression) assertSearchExpression(searchExpression, { maxDepth: 6, maxNodes: 100 });
 	const facets = input.document.results.facets.map((controlKey) => {
 		const control = controls.get(controlKey);
 		if (!control) throw new InvalidSearch(`Facet control ${controlKey} is unavailable`);
@@ -679,7 +648,8 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			mode,
 			query,
 			constraints: [...template.constraints, ...context.contextFilters],
-			expression,
+			searchExpression,
+			...(input.document.filter ? { domainFilter: input.document.filter } : {}),
 			sort,
 			pageSize,
 			maxResultWindow: input.document.results.maxResultWindow,
@@ -716,7 +686,11 @@ export function mapSearchFeatureFacets(
 	});
 }
 
-export async function executeSearchFeatureInput(input: unknown, profileId?: string) {
+export async function executeSearchFeatureInput(
+	input: unknown,
+	profileId?: string,
+	additionalDomainFilter?: CompiledSearchRequest["domainFilter"],
+) {
 	const compiled = compileSearchFeatureInput(input);
 	const { executeCompiledSearch } = await import("./configuration");
 	const result = await executeCompiledSearch(
@@ -724,6 +698,7 @@ export async function executeSearchFeatureInput(input: unknown, profileId?: stri
 		profileId,
 		compiled.enforcedZoneId,
 		compiled.inputIdentity,
+		additionalDomainFilter,
 	);
 	return {
 		...result,

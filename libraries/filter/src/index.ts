@@ -375,6 +375,19 @@ export const PostFilter = Type.Recursive(
 );
 export type PostFilter = Static<typeof PostFilter>;
 
+export const CollectionFilter = Type.Recursive(
+	(This) =>
+		Type.Object(
+			{
+				...logicFields(This),
+				items: Type.Optional(toMany(UnitReferenceFilter)),
+			},
+			{ minProperties: 1, additionalProperties: false },
+		),
+	{ $id: "CollectionFilter" },
+);
+export type CollectionFilter = Static<typeof CollectionFilter>;
+
 export const UnitFilter = Type.Recursive(
 	(This) =>
 		Type.Object(
@@ -400,6 +413,15 @@ export const UnitFilter = Type.Recursive(
 						),
 					]),
 				),
+				collection: Type.Optional(
+					Type.Union([
+						Type.Object({ is: CollectionFilter }, { additionalProperties: false }),
+						Type.Object(
+							{ absent: Type.Literal(true) },
+							{ additionalProperties: false },
+						),
+					]),
+				),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
@@ -418,6 +440,7 @@ export const FilterSchemaModels = {
 	TagAssertionFilter,
 	ScoreFilter,
 	PostFilter,
+	CollectionFilter,
 	UnitFilter,
 } as const;
 

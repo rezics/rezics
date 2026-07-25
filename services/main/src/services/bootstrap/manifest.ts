@@ -11,6 +11,7 @@ import {
 	ZonePageBlockHostPolicy,
 } from "@rezics/block";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import type { UnitFilter } from "@rezics/filter";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 
 import { PlatformCapabilityValues } from "../database/schema/contract-values";
@@ -261,6 +262,19 @@ function createOfficialZoneContent(input: {
 	};
 }
 
+const CatalogZoneCategories = ["units", "posts", "reviews", "collections"] as const;
+
+function createCatalogZoneBoundaryDocument(kind: "book" | "media" | "software", key: string) {
+	const filter = {
+		any: [
+			{ kind: { in: [kind] } },
+			{ post: { is: { subject: { is: { kind: { in: [kind] } } } } } },
+			{ collection: { is: { items: { some: { kind: { in: [kind] } } } } } },
+		],
+	} satisfies UnitFilter;
+	return createZoneBoundaryDocument([...CatalogZoneCategories], filter, key);
+}
+
 export const OfficialZoneManifest = [
 	{
 		id: "019b76da-a800-7400-8000-000000000001",
@@ -279,11 +293,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "book",
-		boundaryDocument: createZoneBoundaryDocument(
-			["units"],
-			{ kind: { in: ["book"] } },
-			"b00757a70001",
-		),
+		boundaryDocument: createCatalogZoneBoundaryDocument("book", "b00757a70001"),
 		themeDocument: createZoneThemeDocument({ accent: "#a16207" }, "b00757a70002"),
 		avatarAssetId: OfficialZoneAvatarAsset.id,
 		...createOfficialZoneContent({
@@ -326,11 +336,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "media",
-		boundaryDocument: createZoneBoundaryDocument(
-			["units"],
-			{ kind: { in: ["media"] } },
-			"b00757a70004",
-		),
+		boundaryDocument: createCatalogZoneBoundaryDocument("media", "b00757a70004"),
 		themeDocument: createZoneThemeDocument({ accent: "#db2777" }, "b00757a70005"),
 		avatarAssetId: OfficialZoneAvatarAsset.id,
 		...createOfficialZoneContent({
@@ -373,11 +379,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "software",
-		boundaryDocument: createZoneBoundaryDocument(
-			["units"],
-			{ kind: { in: ["software"] } },
-			"b00757a70007",
-		),
+		boundaryDocument: createCatalogZoneBoundaryDocument("software", "b00757a70007"),
 		themeDocument: createZoneThemeDocument({ accent: "#0d9488" }, "b00757a70008"),
 		avatarAssetId: OfficialZoneAvatarAsset.id,
 		...createOfficialZoneContent({
@@ -420,11 +422,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		searchTemplate: "realm",
-		boundaryDocument: createZoneBoundaryDocument(
-			["realms"],
-			undefined,
-			"b00757a7000a",
-		),
+		boundaryDocument: createZoneBoundaryDocument(["realms"], undefined, "b00757a7000a"),
 		themeDocument: createZoneThemeDocument({ accent: "#7c3aed" }, "b00757a7000b"),
 		avatarAssetId: OfficialZoneAvatarAsset.id,
 		...createOfficialZoneContent({

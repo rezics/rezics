@@ -104,16 +104,30 @@ describe("database bootstrap manifest", () => {
 		]);
 		expect(OfficialZoneManifest.map((value) => value.boundaryDocument)).toEqual([
 			expect.objectContaining({
-				categories: ["units"],
-				filter: { kind: { in: ["book"] } },
+				categories: ["units", "posts", "reviews", "collections"],
+				filter: {
+					any: [
+						{ kind: { in: ["book"] } },
+						{ post: { is: { subject: { is: { kind: { in: ["book"] } } } } } },
+						{
+							collection: {
+								is: { items: { some: { kind: { in: ["book"] } } } },
+							},
+						},
+					],
+				},
 			}),
 			expect.objectContaining({
-				categories: ["units"],
-				filter: { kind: { in: ["media"] } },
+				categories: ["units", "posts", "reviews", "collections"],
+				filter: expect.objectContaining({
+					any: expect.arrayContaining([{ kind: { in: ["media"] } }]),
+				}),
 			}),
 			expect.objectContaining({
-				categories: ["units"],
-				filter: { kind: { in: ["software"] } },
+				categories: ["units", "posts", "reviews", "collections"],
+				filter: expect.objectContaining({
+					any: expect.arrayContaining([{ kind: { in: ["software"] } }]),
+				}),
 			}),
 			expect.objectContaining({
 				categories: ["realms"],

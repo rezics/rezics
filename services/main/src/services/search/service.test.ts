@@ -138,6 +138,7 @@ describe("domain search SQL", () => {
 		});
 		const postsQuery = lastQuery();
 		expect(postsQuery).toContain('"credit_attribution"');
+		expect(postsQuery).toContain('"post"."kind" <> \'review\'::post_kind');
 		expect(postsQuery).toContain('AND ("post"."kind")::text = ANY');
 		expect(postsQuery).not.toContain('AND ("unit"."kind")::text = ANY');
 		expect(postsQuery).toContain('FROM "realm_unit"');
@@ -204,7 +205,7 @@ describe("domain search SQL", () => {
 		expect(lastQuery()).toContain("not (exists");
 
 		await searchDomain("units", {
-			expression: {
+			searchExpression: {
 				operator: "all",
 				clauses: [
 					{ field: "book-page-count", operator: "range", lower: 200 },
@@ -222,7 +223,7 @@ describe("domain search SQL", () => {
 		expect(bookQuery).toContain('"book"."publication_date"');
 
 		await searchDomain("units", {
-			expression: {
+			searchExpression: {
 				operator: "all",
 				clauses: [
 					{
@@ -243,9 +244,26 @@ describe("domain search SQL", () => {
 		expect(softwareQuery).toContain('"software_requirement"."software_id" = "unit"."id"');
 	});
 
+	it("keeps relational domain filters authoritative in PostgreSQL", async () => {
+		await searchDomain("collections", {
+			domainFilter: {
+				collection: {
+					is: { items: { some: { kind: { in: ["book"] } } } },
+				},
+			},
+		});
+
+		const query = lastQuery();
+		expect(query).toContain("from collection_item filter_collection_item");
+		expect(query).toContain("filter_collection_item_unit.kind");
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({ expression: undefined }),
+		]);
+	});
+
 	it("keeps Realm membership and Realm Tag voting predicates independent", async () => {
 		await searchDomain("units", {
-			expression: {
+			searchExpression: {
 				operator: "all",
 				clauses: [
 					{
