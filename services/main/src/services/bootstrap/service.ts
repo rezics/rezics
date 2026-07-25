@@ -742,7 +742,7 @@ async function ensureBootstrapRealm(
 		});
 }
 
-async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise<void> {
+async function ensureScoreContextProfileDefaults(tx: DatabaseTransaction): Promise<void> {
 	const profiles = await tx.select({ id: profile.id }).from(profile);
 	if (profiles.length) {
 		await tx
@@ -761,15 +761,15 @@ async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise
 			.values(
 				profiles.map(({ id }) => ({
 					profileId: id,
-					defaultScoreRealmId: RezicsScoreRealmManifest.id,
+					defaultScoreContextUnitId: RezicsScoreRealmManifest.id,
 				})),
 			)
 			.onConflictDoNothing();
 	}
 	await tx
 		.update(profilePreference)
-		.set({ defaultScoreRealmId: RezicsScoreRealmManifest.id })
-		.where(isNull(profilePreference.defaultScoreRealmId));
+		.set({ defaultScoreContextUnitId: RezicsScoreRealmManifest.id })
+		.where(isNull(profilePreference.defaultScoreContextUnitId));
 }
 
 async function ensureOfficialZoneAvatar(tx: DatabaseTransaction): Promise<void> {
@@ -1492,7 +1492,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		database
 			.select({
 				profileId: profilePreference.profileId,
-				defaultScoreRealmId: profilePreference.defaultScoreRealmId,
+				defaultScoreContextUnitId: profilePreference.defaultScoreContextUnitId,
 			})
 			.from(profilePreference),
 		database
@@ -1641,7 +1641,7 @@ async function isBootstrapReady(): Promise<boolean> {
 			profilePreferences.some(
 				(preference) =>
 					preference.profileId === targetProfile.id &&
-					preference.defaultScoreRealmId !== null,
+					preference.defaultScoreContextUnitId !== null,
 			),
 		) &&
 		allProfiles.every((targetProfile) => {
@@ -1719,7 +1719,7 @@ async function bootstrapDatabase(
 		await ensureBootstrapSuperAdminGrants(tx);
 		await ensureDefaultApiTokenPolicies(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
-		await ensureScoreRealmProfileDefaults(tx);
+		await ensureScoreContextProfileDefaults(tx);
 		await ensureOfficialZoneAvatar(tx);
 		await ensureOfficialZones(tx);
 		await ensureOfficialZoneFollows(tx);

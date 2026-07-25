@@ -25,9 +25,9 @@ export const ViewerScoreListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			scoreId: Uuid,
-			realmId: Uuid,
+			contextUnitId: Uuid,
 			value: t.Integer({ minimum: 1, maximum: 10 }),
-			realmTitle: t.Nullable(t.String()),
+			contextUnitTitle: t.Nullable(t.String()),
 			updatedAt: DateTime,
 		}),
 	),

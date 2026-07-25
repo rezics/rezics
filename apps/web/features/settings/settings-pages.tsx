@@ -198,10 +198,10 @@ export function PreferenceSettings() {
 	]);
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences();
-	const storedDefaultScoreRealmId =
-		preferences.data?.defaultScoreRealmId ?? OfficialRealmUnitIds.score;
-	const storedDefaultScoreRealm = useGetApiRealmsByRealmId(
-		{ path: { realmId: storedDefaultScoreRealmId } },
+	const storedDefaultScoreContextUnitId =
+		preferences.data?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score;
+	const storedDefaultScoreContext = useGetApiRealmsByRealmId(
+		{ path: { realmId: storedDefaultScoreContextUnitId } },
 		{ query: { enabled: Boolean(preferences.data) } },
 	);
 	const update = usePutApiUsersMePreferences({
@@ -213,26 +213,26 @@ export function PreferenceSettings() {
 	const { setLocale } = useSetLocale();
 	const [saved, setSaved] = useState(false);
 	const [invalid, setInvalid] = useState(false);
-	const [selectedDefaultScoreRealm, setSelectedDefaultScoreRealm] = useState<PickedRealm>();
+	const [selectedDefaultScoreContext, setSelectedDefaultScoreContext] = useState<PickedRealm>();
 	if (preferences.isPending) return <QueryPending />;
 	if (preferences.isError || !preferences.data)
 		return <QueryFailure error={preferences.error} retry={() => void preferences.refetch()} />;
-	if (storedDefaultScoreRealm.isPending) return <QueryPending />;
-	if (storedDefaultScoreRealm.isError || !storedDefaultScoreRealm.data)
+	if (storedDefaultScoreContext.isPending) return <QueryPending />;
+	if (storedDefaultScoreContext.isError || !storedDefaultScoreContext.data)
 		return (
 			<QueryFailure
-				error={storedDefaultScoreRealm.error}
-				retry={() => void storedDefaultScoreRealm.refetch()}
+				error={storedDefaultScoreContext.error}
+				retry={() => void storedDefaultScoreContext.refetch()}
 			/>
 		);
-	const storedDefaultScoreRealmLocalization = selectLocalization(
-		storedDefaultScoreRealm.data.localizations,
+	const storedDefaultScoreContextLocalization = selectLocalization(
+		storedDefaultScoreContext.data.localizations,
 		toContentLanguage(locale.target),
-		storedDefaultScoreRealm.data.language,
+		storedDefaultScoreContext.data.language,
 	);
-	const defaultScoreRealm = selectedDefaultScoreRealm ?? {
-		id: storedDefaultScoreRealm.data.id,
-		label: storedDefaultScoreRealmLocalization?.title ?? storedDefaultScoreRealm.data.id,
+	const defaultScoreContext = selectedDefaultScoreContext ?? {
+		id: storedDefaultScoreContext.data.id,
+		label: storedDefaultScoreContextLocalization?.title ?? storedDefaultScoreContext.data.id,
 	};
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -264,7 +264,7 @@ export function PreferenceSettings() {
 						? submittedDefaultLicense
 						: null,
 					defaultRealmManageMode: data.get("defaultRealmManageMode") === "true",
-					defaultScoreRealmId: defaultScoreRealm.id,
+					defaultScoreContextUnitId: defaultScoreContext.id,
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
 					contentRatings: selectedRatings,
@@ -323,14 +323,14 @@ export function PreferenceSettings() {
 						</NativeSelect>
 					</Field>
 					<Field>
-						<FieldLabel>{t.settings.defaultScoreRealm}</FieldLabel>
+						<FieldLabel>{t.settings.defaultScoreContext}</FieldLabel>
 						<EntityPicker
 							index="realms"
-							onChange={setSelectedDefaultScoreRealm}
-							value={defaultScoreRealm}
+							onChange={setSelectedDefaultScoreContext}
+							value={defaultScoreContext}
 						/>
 						<p className="text-sm text-muted-foreground">
-							{t.settings.defaultScoreRealmHint}
+							{t.settings.defaultScoreContextHint}
 						</p>
 					</Field>
 					<FieldSet>

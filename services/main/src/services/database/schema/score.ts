@@ -13,7 +13,9 @@ import { post } from "./post";
 import { realm, realmUnit } from "./realm";
 
 /**
- * Current Score state for a Profile, Unit, and Realm.
+ * Current Score state for a Profile, target Unit, and context Unit.
+ *
+ * The backend currently permits only Realm Units as Score contexts.
  * @todo Add immutable Score history and point-in-time Post rendering when required.
  */
 export const score = pgTable(
@@ -26,17 +28,25 @@ export const score = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		realmId: uuid()
+		contextUnitId: uuid()
 			.notNull()
-			.references(() => realm.id, { onDelete: "cascade" }),
+			.references(() => unit.id, { onDelete: "cascade" }),
 		value: integer().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("score_profile_unit_realm_key").on(table.profileId, table.unitId, table.realmId),
-		index("score_unit_realm_value_idx").on(table.unitId, table.realmId, table.value),
-		index("score_realm_idx").on(table.realmId),
+		unique("score_profile_unit_context_unit_key").on(
+			table.profileId,
+			table.unitId,
+			table.contextUnitId,
+		),
+		index("score_unit_context_unit_value_idx").on(
+			table.unitId,
+			table.contextUnitId,
+			table.value,
+		),
+		index("score_context_unit_idx").on(table.contextUnitId),
 		check("score_value_check", sql`${table.value} between 1 and 10`),
 	],
 );

@@ -10,7 +10,7 @@ export const ListReviewsQuery = t.Object({
 		t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true }),
 	),
 	search: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
-	scoreRealmId: t.Optional(Uuid),
+	scoreContextUnitId: t.Optional(Uuid),
 	scores: t.Optional(
 		t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
 			minItems: 1,
@@ -28,7 +28,7 @@ export const CreateReviewBody = t.Object({
 	score: t.Optional(
 		t.Object(
 			{
-				realmId: Uuid,
+				contextUnitId: Uuid,
 				value: t.Integer({ minimum: 1, maximum: 10 }),
 			},
 			{ additionalProperties: false },
@@ -58,12 +58,12 @@ export const ScoreTargetParams = t.Object({ targetId: Uuid });
 export type ScoreTargetParams = Static<typeof ScoreTargetParams>;
 
 export const SetScoreBody = t.Object({
-	realmId: Uuid,
+	contextUnitId: Uuid,
 	score: t.Integer({ minimum: 1, maximum: 10 }),
 });
 export type SetScoreBody = Static<typeof SetScoreBody>;
 
-export const ScoreAggregateQuery = t.Object({ realmId: Uuid });
+export const ScoreAggregateQuery = t.Object({ contextUnitId: Uuid });
 export type ScoreAggregateQuery = Static<typeof ScoreAggregateQuery>;
 
 export const ListViewerScoresQuery = t.Object({

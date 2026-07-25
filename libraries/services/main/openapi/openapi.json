@@ -2357,6 +2357,7 @@
 					"SearchDocumentRevisionConflict",
 					"ZoneSearchFeatureNotFound",
 					"SharedSearchQueryNotFound",
+					"ScoreContextUnitUnsupported",
 					"InvalidPaginationCursor",
 					"ProfileNotFound",
 					"ProfileChanged",
@@ -38542,7 +38543,7 @@
 										"interfaceLocale",
 										"defaultLicense",
 										"defaultRealmManageMode",
-										"defaultScoreRealmId",
+										"defaultScoreContextUnitId",
 										"collectionConfig",
 										"personalizedFeed",
 										"contentRatings",
@@ -38572,7 +38573,7 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
-										"defaultScoreRealmId": {
+										"defaultScoreContextUnitId": {
 											"format": "uuid",
 											"type": "string"
 										},
@@ -38720,7 +38721,7 @@
 										"interfaceLocale",
 										"defaultLicense",
 										"defaultRealmManageMode",
-										"defaultScoreRealmId",
+										"defaultScoreContextUnitId",
 										"collectionConfig",
 										"personalizedFeed",
 										"contentRatings",
@@ -38750,7 +38751,7 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
-										"defaultScoreRealmId": {
+										"defaultScoreContextUnitId": {
 											"format": "uuid",
 											"type": "string"
 										},
@@ -38893,7 +38894,7 @@
 									"interfaceLocale",
 									"defaultLicense",
 									"defaultRealmManageMode",
-									"defaultScoreRealmId",
+									"defaultScoreContextUnitId",
 									"collectionConfig",
 									"personalizedFeed",
 									"contentRatings",
@@ -38925,7 +38926,10 @@
 										"default": false,
 										"type": "boolean"
 									},
-									"defaultScoreRealmId": { "format": "uuid", "type": "string" },
+									"defaultScoreContextUnitId": {
+										"format": "uuid",
+										"type": "string"
+									},
 									"collectionConfig": {
 										"nullable": true,
 										"anyOf": [
@@ -38982,7 +38986,7 @@
 										"interfaceLocale",
 										"defaultLicense",
 										"defaultRealmManageMode",
-										"defaultScoreRealmId",
+										"defaultScoreContextUnitId",
 										"collectionConfig",
 										"personalizedFeed",
 										"contentRatings",
@@ -39012,7 +39016,7 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
-										"defaultScoreRealmId": {
+										"defaultScoreContextUnitId": {
 											"format": "uuid",
 											"type": "string"
 										},
@@ -39119,10 +39123,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ScoreContextUnitUnsupported",
+															"type": "string",
+															"enum": ["ScoreContextUnitUnsupported"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -85086,7 +85114,7 @@
 						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
 					},
 					{
-						"name": "scoreRealmId",
+						"name": "scoreContextUnitId",
 						"in": "query",
 						"required": false,
 						"schema": { "format": "uuid", "type": "string" }
@@ -85413,7 +85441,7 @@
 															"type": "object",
 															"required": [
 																"scoreId",
-																"realmId",
+																"contextUnitId",
 																"value"
 															],
 															"properties": {
@@ -85421,7 +85449,7 @@
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"realmId": {
+																"contextUnitId": {
 																	"format": "uuid",
 																	"type": "string"
 																},
@@ -85539,9 +85567,9 @@
 									"score": {
 										"additionalProperties": false,
 										"type": "object",
-										"required": ["realmId", "value"],
+										"required": ["contextUnitId", "value"],
 										"properties": {
-											"realmId": { "format": "uuid", "type": "string" },
+											"contextUnitId": { "format": "uuid", "type": "string" },
 											"value": {
 												"minimum": 1,
 												"maximum": 10,
@@ -85934,10 +85962,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ScoreContextUnitUnsupported",
+															"type": "string",
+															"enum": ["ScoreContextUnitUnsupported"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -87200,9 +87252,9 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["realmId", "score"],
+								"required": ["contextUnitId", "score"],
 								"properties": {
-									"realmId": { "format": "uuid", "type": "string" },
+									"contextUnitId": { "format": "uuid", "type": "string" },
 									"score": {
 										"minimum": 1,
 										"maximum": 10,
@@ -87332,10 +87384,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ScoreContextUnitUnsupported",
+															"type": "string",
+															"enum": ["ScoreContextUnitUnsupported"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -87396,7 +87472,7 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "realmId",
+						"name": "contextUnitId",
 						"in": "query",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
@@ -87479,10 +87555,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ScoreContextUnitUnsupported",
+															"type": "string",
+															"enum": ["ScoreContextUnitUnsupported"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -87533,9 +87633,9 @@
 												"type": "object",
 												"required": [
 													"scoreId",
-													"realmId",
+													"contextUnitId",
 													"value",
-													"realmTitle",
+													"contextUnitTitle",
 													"updatedAt"
 												],
 												"properties": {
@@ -87543,7 +87643,7 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"realmId": {
+													"contextUnitId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -87563,7 +87663,7 @@
 															}
 														]
 													},
-													"realmTitle": {
+													"contextUnitTitle": {
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
@@ -89190,7 +89290,7 @@
 													"scoreId",
 													"profileId",
 													"unitId",
-													"realmId",
+													"contextUnitId",
 													"value",
 													"position",
 													"updatedAt"
@@ -89208,7 +89308,7 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"realmId": {
+													"contextUnitId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -89341,7 +89441,7 @@
 													"scoreId",
 													"profileId",
 													"unitId",
-													"realmId",
+													"contextUnitId",
 													"value",
 													"position",
 													"updatedAt"
@@ -89359,7 +89459,7 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"realmId": {
+													"contextUnitId": {
 														"format": "uuid",
 														"type": "string"
 													},

@@ -23,7 +23,7 @@ export interface UnitReviewListProps {
 	readonly limit?: number;
 	readonly realmId?: string;
 	readonly scores?: readonly UnitScore[];
-	readonly scoreRealmId?: string;
+	readonly scoreContextUnitId?: string;
 	readonly search?: string;
 	readonly targetId: string;
 }
@@ -33,7 +33,7 @@ export function UnitReviewList({
 	limit = 50,
 	realmId,
 	scores,
-	scoreRealmId,
+	scoreContextUnitId,
 	search,
 	targetId,
 }: UnitReviewListProps) {
@@ -44,7 +44,7 @@ export function UnitReviewList({
 			...(languages?.length ? { languages: [...languages] } : {}),
 			...(search ? { search } : {}),
 			...(scores?.length ? { scores: [...scores] } : {}),
-			...(scores?.length && scoreRealmId ? { scoreRealmId } : {}),
+			...(scores?.length && scoreContextUnitId ? { scoreContextUnitId } : {}),
 			limit,
 		},
 	});

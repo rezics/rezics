@@ -12,7 +12,7 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { writePortableText } from "@/lib/block";
 import { invalidateReviews } from "../data/review-cache";
-import { useDefaultScoreRealm } from "../data/default-score-realm";
+import { useDefaultScoreContext } from "../data/default-score-context";
 import { ScoreInput } from "./score-input";
 
 export interface ReviewComposerTarget {
@@ -35,14 +35,14 @@ export function ReviewComposer({
 	const [score, setScore] = useState<number>();
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [invalid, setInvalid] = useState(false);
-	const defaultScoreRealm = useDefaultScoreRealm();
+	const defaultScoreContext = useDefaultScoreContext();
 	const selectedTarget = fixedTarget ?? target;
-	const scoreRealm = realm ?? defaultScoreRealm.realm;
+	const scoreContext = realm ?? defaultScoreContext.context;
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const formElement = event.currentTarget;
-		if (!selectedTarget || !body.length || (score !== undefined && !scoreRealm)) {
+		if (!selectedTarget || !body.length || (score !== undefined && !scoreContext)) {
 			setInvalid(true);
 			return;
 		}
@@ -58,8 +58,8 @@ export function ReviewComposer({
 				body: {
 					targetId: selectedTarget.id,
 					...(realm ? { realmId: realm.id } : {}),
-					...(score !== undefined && scoreRealm
-						? { score: { realmId: scoreRealm.id, value: score } }
+					...(score !== undefined && scoreContext
+						? { score: { contextUnitId: scoreContext.id, value: score } }
 						: {}),
 					language: toContentLanguage(locale.target),
 					title,
@@ -73,7 +73,7 @@ export function ReviewComposer({
 				queryClient,
 				result.id,
 				selectedTarget.id,
-				score !== undefined ? scoreRealm?.id : undefined,
+				score !== undefined ? scoreContext?.id : undefined,
 			);
 			await onCreated(result.id);
 			formElement.reset();
@@ -99,7 +99,7 @@ export function ReviewComposer({
 					<FieldLabel>{t.engagement.reviewRealm}</FieldLabel>
 					<EntityPicker index="realms" onChange={setRealm} value={realm} />
 					<p className="text-sm text-muted-foreground">
-						{t.engagement.reviewScoreRealmHint}
+						{t.engagement.reviewScoreContextHint}
 					</p>
 				</Field>
 				<Field required>
@@ -110,7 +110,7 @@ export function ReviewComposer({
 					<FieldLabel>{t.ui.summary}</FieldLabel>
 					<Input maxLength={2000} name="summary" />
 				</Field>
-				<ScoreInput disabled={!scoreRealm} onChange={setScore} value={score} />
+				<ScoreInput disabled={!scoreContext} onChange={setScore} value={score} />
 				<PortableTextEditor label={t.ui.body} onChange={setBody} required value={body} />
 			</FieldGroup>
 			{invalid ? (
@@ -118,11 +118,11 @@ export function ReviewComposer({
 					{t.errors.invalid}
 				</p>
 			) : null}
-			<RequestFailure error={defaultScoreRealm.error} fallback={t.ui.retryLater} />
+			<RequestFailure error={defaultScoreContext.error} fallback={t.ui.retryLater} />
 			<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 			<Button
 				className="w-fit"
-				disabled={!selectedTarget || !body.length || (score !== undefined && !scoreRealm)}
+				disabled={!selectedTarget || !body.length || (score !== undefined && !scoreContext)}
 				isLoading={create.isPending}
 				type="submit"
 				variant="solid"

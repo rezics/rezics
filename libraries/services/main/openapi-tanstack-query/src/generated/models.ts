@@ -1456,6 +1456,7 @@ export const ApiErrorCode = {
 	SearchDocumentRevisionConflict: "SearchDocumentRevisionConflict",
 	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
 	SharedSearchQueryNotFound: "SharedSearchQueryNotFound",
+	ScoreContextUnitUnsupported: "ScoreContextUnitUnsupported",
 	InvalidPaginationCursor: "InvalidPaginationCursor",
 	ProfileNotFound: "ProfileNotFound",
 	ProfileChanged: "ProfileChanged",
@@ -30415,7 +30416,7 @@ export type GetApiUsersMePreferencesStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	defaultScoreRealmId: string;
+	defaultScoreContextUnitId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -30593,7 +30594,7 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	defaultScoreRealmId: string;
+	defaultScoreContextUnitId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -30803,7 +30804,7 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	defaultScoreRealmId: string;
+	defaultScoreContextUnitId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -30904,10 +30905,32 @@ export type PutApiUsersMePreferencesStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiUsersMePreferencesStatus422 = ValidationError;
+export type PutApiUsersMePreferencesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ScoreContextUnitUnsupported'
+				 * @type string
+				 */
+				code: "ScoreContextUnitUnsupported";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -31003,7 +31026,7 @@ export type PutApiUsersMePreferencesBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	defaultScoreRealmId: string;
+	defaultScoreContextUnitId: string;
 	collectionConfig:
 		| ({
 				/**
@@ -64136,7 +64159,7 @@ export type GetApiReviewsQuery = {
 	 * Format: `uuid`
 	 * @type string | undefined
 	 */
-	scoreRealmId?: string;
+	scoreContextUnitId?: string;
 	/**
 	 * @type array | undefined
 	 */
@@ -64360,7 +64383,7 @@ export type GetApiReviewsStatus200 = {
 			 * Format: `uuid`
 			 * @type string
 			 */
-			realmId: string;
+			contextUnitId: string;
 			value: string | number;
 		}[];
 		/**
@@ -64548,10 +64571,32 @@ export type PostApiReviewsStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiReviewsStatus422 = ValidationError;
+export type PostApiReviewsStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ScoreContextUnitUnsupported'
+				 * @type string
+				 */
+				code: "ScoreContextUnitUnsupported";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -64615,7 +64660,7 @@ export type PostApiReviewsBody = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		realmId: string;
+		contextUnitId: string;
 		value: string | number;
 	};
 	/**
@@ -65822,10 +65867,32 @@ export type PutApiScoresByTargetIdStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiScoresByTargetIdStatus422 = ValidationError;
+export type PutApiScoresByTargetIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ScoreContextUnitUnsupported'
+				 * @type string
+				 */
+				code: "ScoreContextUnitUnsupported";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -65865,7 +65932,7 @@ export type PutApiScoresByTargetIdBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	realmId: string;
+	contextUnitId: string;
 	score: string | number;
 };
 
@@ -65927,7 +65994,7 @@ export type GetApiScoresByTargetIdQuery = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	realmId: string;
+	contextUnitId: string;
 };
 
 /**
@@ -65972,10 +66039,32 @@ export type GetApiScoresByTargetIdStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type GetApiScoresByTargetIdStatus422 = ValidationError;
+export type GetApiScoresByTargetIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ScoreContextUnitUnsupported'
+				 * @type string
+				 */
+				code: "ScoreContextUnitUnsupported";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -66060,9 +66149,9 @@ export type GetApiScoresByTargetIdViewerStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		realmId: string;
+		contextUnitId: string;
 		value: string | number;
-		realmTitle: (string | null) | null;
+		contextUnitTitle: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -67762,7 +67851,7 @@ export type GetApiPostsByPostIdScoresStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		realmId: string;
+		contextUnitId: string;
 		value: string | number;
 		/**
 		 * @description
@@ -67891,7 +67980,7 @@ export type PutApiPostsByPostIdScoresStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		realmId: string;
+		contextUnitId: string;
 		value: string | number;
 		/**
 		 * @description

@@ -485,7 +485,7 @@ async function seedProfiles(
 				profileId: value.id,
 				interfaceLocale,
 				defaultLicense: index % 3 === 0 ? ("cc-by-4.0" as const) : null,
-				defaultScoreRealmId: OfficialRealmUnitIds.score,
+				defaultScoreContextUnitId: OfficialRealmUnitIds.score,
 				personalizedFeed: index % 10 !== 0 || index === 0,
 				contentRatings:
 					index % 7 === 0 ? ["general" as const, "r15" as const] : ["general" as const],
@@ -2155,7 +2155,7 @@ async function seedInteractions(
 				return {
 					profileId: seedProfile.id,
 					unitId: target.id,
-					realmId: realmUnit.id,
+					contextUnitId: realmUnit.id,
 					value: 1 + ((profileIndex + index * 3) % 10),
 					createdAt,
 					updatedAt: createdAt,

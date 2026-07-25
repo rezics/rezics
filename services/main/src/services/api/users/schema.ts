@@ -51,7 +51,7 @@ export const ReplacePreferencesBody = t.Object({
 	interfaceLocale: StoredUiLocale,
 	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean({ default: false }),
-	defaultScoreRealmId: Uuid,
+	defaultScoreContextUnitId: Uuid,
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean({ default: true }),
 	contentRatings: t.Array(t.Union(ContentRatingValues.map((value) => t.Literal(value))), {

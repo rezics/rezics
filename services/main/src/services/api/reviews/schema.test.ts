@@ -18,12 +18,12 @@ describe("review creation schema", () => {
 		expect(Check(CreateReviewBody, review)).toBe(true);
 	});
 
-	it("accepts a Realm-scoped Score", () => {
+	it("accepts a context-addressed Score", () => {
 		expect(
 			Check(CreateReviewBody, {
 				...review,
 				realmId,
-				score: { realmId, value: 8 },
+				score: { contextUnitId: realmId, value: 8 },
 			}),
 		).toBe(true);
 	});
@@ -32,13 +32,13 @@ describe("review creation schema", () => {
 		expect(
 			Check(CreateReviewBody, {
 				...review,
-				score: { realmId, value: 11 },
+				score: { contextUnitId: realmId, value: 11 },
 			}),
 		).toBe(false);
 		expect(
 			Check(CreateReviewBody, {
 				...review,
-				score: { realmId, value: 8, copied: true },
+				score: { contextUnitId: realmId, value: 8, copied: true },
 			}),
 		).toBe(false);
 	});
@@ -59,7 +59,7 @@ describe("review list schema", () => {
 				targetId,
 				languages: ["zh", "en"],
 				search: "好看",
-				scoreRealmId: realmId,
+				scoreContextUnitId: realmId,
 				scores: [8, 9, 10],
 				limit: 3,
 			}),

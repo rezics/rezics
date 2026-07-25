@@ -777,7 +777,7 @@ export async function hydrateFeedItems(
 			? database
 					.select({
 						unitId: scoreStat.unitId,
-						realmId: scoreStat.realmId,
+						realmId: scoreStat.contextUnitId,
 						totalScore: scoreStat.totalScore,
 						totalCount: scoreStat.totalCount,
 					})
@@ -785,7 +785,7 @@ export async function hydrateFeedItems(
 					.where(
 						and(
 							inArray(scoreStat.unitId, subjectIds),
-							inArray(scoreStat.realmId, subjectRealmIds),
+							inArray(scoreStat.contextUnitId, subjectRealmIds),
 						),
 					)
 			: [],

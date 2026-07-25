@@ -5,14 +5,14 @@ export async function upsertScore(
 	tx: DatabaseTransaction,
 	userId: string,
 	targetId: string,
-	realmId: string,
+	contextUnitId: string,
 	value: number,
 ) {
 	const [entry] = await tx
 		.insert(score)
-		.values({ profileId: userId, unitId: targetId, realmId, value })
+		.values({ profileId: userId, unitId: targetId, contextUnitId, value })
 		.onConflictDoUpdate({
-			target: [score.profileId, score.unitId, score.realmId],
+			target: [score.profileId, score.unitId, score.contextUnitId],
 			set: { value, updatedAt: new Date() },
 		})
 		.returning({ id: score.id });

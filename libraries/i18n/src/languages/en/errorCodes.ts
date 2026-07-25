@@ -39,6 +39,7 @@ export default {
 	InvalidSearch: "The search request is invalid.",
 	SearchUnavailable: "Search is temporarily unavailable. Try again later.",
 	RealmCapabilityRequired: `You do not have the required ${realmTerms.label} permission.`,
+	ScoreContextUnitUnsupported: `This Unit cannot currently be used as a scoring context. Choose a ${realmTerms.label}.`,
 	RealmRulesAcceptanceRequired: `Accept the current ${realmTerms.label} rules to continue.`,
 	RealmRoleManagementForbidden: `You cannot manage that ${realmTerms.label} role.`,
 	PlatformCapabilityRequired: "A platform permission is required for this action.",

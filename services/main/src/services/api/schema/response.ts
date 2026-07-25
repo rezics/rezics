@@ -560,7 +560,7 @@ export const ReviewListResponse = t.Object({
 			scores: t.Array(
 				t.Object({
 					scoreId: Uuid,
-					realmId: Uuid,
+					contextUnitId: Uuid,
 					value: t.Integer({ minimum: 1, maximum: 10 }),
 				}),
 			),
@@ -606,7 +606,7 @@ export const PreferencesResponse = t.Object({
 	interfaceLocale: StoredUiLocale,
 	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean(),
-	defaultScoreRealmId: Uuid,
+	defaultScoreContextUnitId: Uuid,
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
 	contentRatings: t.Array(t.String()),

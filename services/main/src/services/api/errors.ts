@@ -6,6 +6,7 @@ import { AuthErrors } from "../auth/errors";
 import { AuthorizationErrors } from "../authorization/errors";
 import { PaginationErrors } from "../pagination/errors";
 import { SearchErrors } from "../search/errors";
+import { ScoreErrors } from "../scores/errors";
 import { UnitErrors } from "../units/errors";
 import { EntityErrors } from "../entities/errors";
 import { FollowingErrors } from "../following/errors";
@@ -69,6 +70,7 @@ export const ApiErrors = [
 	...TokenErrors,
 	...TagErrors,
 	...SearchErrors,
+	...ScoreErrors,
 	...PaginationErrors,
 	...UserErrors,
 	...DomainExtensionErrors,

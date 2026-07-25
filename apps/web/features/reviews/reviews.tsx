@@ -201,7 +201,9 @@ export function ReviewDetail({ id }: { id: string }) {
 				</Card>
 			)}
 			<BoundScores postId={review.id} />
-			{review.realmId && <ScorePanel realmId={review.realmId} targetId={review.targetId} />}
+			{review.realmId && (
+				<ScorePanel contextUnitId={review.realmId} targetId={review.targetId} />
+			)}
 			<ReactionControls targetId={review.id} />
 			<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
 		</main>
@@ -328,10 +330,10 @@ function ReviewEditForm({
 	);
 }
 
-function ScorePanel({ targetId, realmId }: { targetId: string; realmId: string }) {
+function ScorePanel({ contextUnitId, targetId }: { contextUnitId: string; targetId: string }) {
 	const aggregate = useGetApiScoresByTargetId({
 		path: { targetId },
-		query: { realmId },
+		query: { contextUnitId },
 	});
 	const setScore = usePutApiScoresByTargetId();
 	const queryClient = useQueryClient();
@@ -345,12 +347,12 @@ function ScorePanel({ targetId, realmId }: { targetId: string; realmId: string }
 		try {
 			await setScore.mutateAsync({
 				path: { targetId },
-				body: { realmId, score: Number(score) },
+				body: { contextUnitId, score: Number(score) },
 			});
 			await queryClient.invalidateQueries({
 				queryKey: getApiScoresByTargetIdQueryKey({
 					path: { targetId },
-					query: { realmId },
+					query: { contextUnitId },
 				}),
 			});
 		} catch {

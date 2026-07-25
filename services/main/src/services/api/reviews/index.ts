@@ -24,6 +24,7 @@ import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import { fractionalPositionAt } from "../../ordering/position";
+import { ensureScoreContextParticipation, resolveScoreContext } from "../../scores/context";
 import {
 	ensurePostMountTargetingAllowed,
 	ensureSubjectPostTargetingAllowed,
@@ -108,7 +109,7 @@ export default new Elysia()
 										query.scores.map((value) => sql`${value}`),
 										sql`, `,
 									)})
-									${query.scoreRealmId ? sql`and review_score.realm_id = ${query.scoreRealmId}` : sql``}
+									${query.scoreContextUnitId ? sql`and review_score.context_unit_id = ${query.scoreContextUnitId}` : sql``}
 							)`
 							: undefined,
 					);
@@ -156,7 +157,7 @@ export default new Elysia()
 								.select({
 									postId: postScore.postId,
 									scoreId: score.id,
-									realmId: score.realmId,
+									contextUnitId: score.contextUnitId,
 									value: score.value,
 									position: postScore.position,
 								})
@@ -176,7 +177,7 @@ export default new Elysia()
 						: [];
 					const scoresByPostId = new Map<
 						string,
-						{ scoreId: string; realmId: string; value: number }[]
+						{ scoreId: string; contextUnitId: string; value: number }[]
 					>();
 					for (const { postId, position: _position, ...scoreRow } of scoreRows) {
 						const current = scoresByPostId.get(postId) ?? [];
@@ -210,10 +211,16 @@ export default new Elysia()
 				"",
 				async ({ profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(body.targetId);
-					await Promise.all([
-						authorization.realm.ensureParticipation(body.realmId),
-						authorization.realm.ensureParticipation(body.score?.realmId),
-					]);
+					await authorization.realm.ensureParticipation(body.realmId);
+					const validatedScore = body.score
+						? {
+								value: body.score.value,
+								context: await ensureScoreContextParticipation(
+									authorization,
+									body.score.contextUnitId,
+								),
+							}
+						: undefined;
 					const id = await database.transaction(async (tx) => {
 						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
 							tx,
@@ -256,13 +263,13 @@ export default new Elysia()
 							sourceUnitId: created.id,
 							profileId: profile.unitId,
 						});
-						if (body.score) {
+						if (validatedScore) {
 							const scoreId = await upsertScore(
 								tx,
 								profile.unitId,
 								body.targetId,
-								body.score.realmId,
-								body.score.value,
+								validatedScore.context.contextUnitId,
+								validatedScore.value,
 							);
 							await tx.insert(postScore).values({
 								postId: created.id,
@@ -304,6 +311,9 @@ export default new Elysia()
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"ScoreContextUnitUnsupported",
 						]),
 					},
 					detail: { summary: "Create review", tags: ["Reviews"] },
@@ -459,9 +469,18 @@ export default new Elysia()
 				"/:targetId",
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(params.targetId);
-					await authorization.realm.ensureParticipation(body.realmId);
+					const context = await ensureScoreContextParticipation(
+						authorization,
+						body.contextUnitId,
+					);
 					const scoreId = await database.transaction((tx) =>
-						upsertScore(tx, profile.unitId, params.targetId, body.realmId, body.score),
+						upsertScore(
+							tx,
+							profile.unitId,
+							params.targetId,
+							context.contextUnitId,
+							body.score,
+						),
 					);
 					return { scoreId, score: body.score };
 				},
@@ -476,6 +495,9 @@ export default new Elysia()
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
 						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"ScoreContextUnitUnsupported",
+						]),
 					},
 					detail: { summary: "Score unit", tags: ["Reviews"] },
 				},
@@ -487,10 +509,10 @@ export default new Elysia()
 					const items = await database
 						.select({
 							scoreId: score.id,
-							realmId: score.realmId,
+							contextUnitId: score.contextUnitId,
 							value: score.value,
-							realmTitle: resolvedUnitLocalizationTitle(
-								score.realmId,
+							contextUnitTitle: resolvedUnitLocalizationTitle(
+								score.contextUnitId,
 								query.language,
 							),
 							updatedAt: score.updatedAt,
@@ -502,7 +524,7 @@ export default new Elysia()
 								eq(score.unitId, params.targetId),
 							),
 						)
-						.orderBy(desc(score.updatedAt), asc(score.realmId));
+						.orderBy(desc(score.updatedAt), asc(score.contextUnitId));
 					return { items };
 				},
 				{
@@ -525,14 +547,14 @@ export default new Elysia()
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(params.targetId);
-					await authorization.unit.ensureCanRead(query.realmId);
+					const context = await resolveScoreContext(authorization, query.contextUnitId);
 					const [stat] = await database
 						.select()
 						.from(scoreStat)
 						.where(
 							and(
 								eq(scoreStat.unitId, params.targetId),
-								eq(scoreStat.realmId, query.realmId),
+								eq(scoreStat.contextUnitId, context.contextUnitId),
 							),
 						)
 						.limit(1);
@@ -563,6 +585,9 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: ScoreAggregateResponse,
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"ScoreContextUnitUnsupported",
+						]),
 					},
 					detail: { summary: "Get score aggregate", tags: ["Reviews"] },
 				},

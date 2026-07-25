@@ -70,7 +70,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			});
 			await tx.insert(profilePreference).values({
 				profileId: profileUnit.id,
-				defaultScoreRealmId: OfficialRealmUnitIds.score,
+				defaultScoreContextUnitId: OfficialRealmUnitIds.score,
 			});
 			await tx.insert(realmMember).values({
 				realmId: OfficialRealmUnitIds.score,

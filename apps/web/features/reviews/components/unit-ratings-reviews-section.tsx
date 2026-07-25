@@ -9,7 +9,7 @@ import { useDeferredValue, useState } from "react";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
-import { useDefaultScoreRealm } from "../data/default-score-realm";
+import { useDefaultScoreContext } from "../data/default-score-context";
 import {
 	EmptyReviewFilters,
 	hasReviewFilters,
@@ -34,12 +34,12 @@ export function UnitRatingsReviewsSection({
 	readonly writeReviewHref: string;
 }) {
 	const { t } = useTranslation(["engagement"]);
-	const defaultScoreRealm = useDefaultScoreRealm();
+	const defaultScoreContext = useDefaultScoreContext();
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search);
 	const [filters, setFilters] = useState<ReviewFilterModel>(EmptyReviewFilters);
 	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-	const scoreRealm = filters.realm ?? defaultScoreRealm.realm;
+	const scoreContext = filters.realm ?? defaultScoreContext.context;
 	const trimmedSearch = deferredSearch.trim();
 	const baseReviewQuery = { targetId, limit: 3 } as const;
 	const summaryQuery = useGetApiReviews({ query: baseReviewQuery });
@@ -49,9 +49,9 @@ export function UnitRatingsReviewsSection({
 			...(filters.realm ? { realmId: filters.realm.id } : {}),
 			...(filters.languages.length ? { languages: [...filters.languages] } : {}),
 			...(trimmedSearch ? { search: trimmedSearch } : {}),
-			...(filters.scores.length && scoreRealm
+			...(filters.scores.length && scoreContext
 				? {
-						scoreRealmId: scoreRealm.id,
+						scoreContextUnitId: scoreContext.id,
 						scores: [...filters.scores],
 					}
 				: {}),
@@ -86,10 +86,10 @@ export function UnitRatingsReviewsSection({
 					{t.engagement.communityReviews}
 				</h3>
 				<CommunityScoreOverview
+					contextUnitId={scoreContext?.id}
 					onScoreFilterToggle={(score) =>
 						setFilters((current) => toggleReviewScore(current, score))
 					}
-					realmId={scoreRealm?.id}
 					reviewCount={toNonNegativeApiInteger(summaryQuery.data?.totalCount)}
 					selectedScores={filters.scores}
 					targetId={targetId}

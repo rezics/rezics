@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { ScoreOverview } from "@/features/reviews/components/score-overview";
 import { UnitReviewList } from "@/features/reviews/components/unit-review-list";
-import { useDefaultScoreRealm } from "@/features/reviews/data/default-score-realm";
+import { useDefaultScoreContext } from "@/features/reviews/data/default-score-context";
 import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
 import { useTranslation } from "@/i18n/client";
 import { CatalogDetailSectionFrame } from "../components/catalog-detail-section-frame";
@@ -21,8 +21,8 @@ export function CatalogReviewsPage() {
 	const detail = useCatalogDetail();
 	const { t } = useTranslation(["engagement", "units"]);
 	const [realm, setRealm] = useState<PickedRealm>();
-	const defaultScoreRealm = useDefaultScoreRealm();
-	const scoreRealm = realm ?? defaultScoreRealm.realm;
+	const defaultScoreContext = useDefaultScoreContext();
+	const scoreContext = realm ?? defaultScoreContext.context;
 	const labels =
 		detail.type === "book"
 			? {
@@ -54,8 +54,8 @@ export function CatalogReviewsPage() {
 				<FieldLabel>{t.engagement.filterReviewRealm}</FieldLabel>
 				<EntityPicker index="realms" onChange={setRealm} value={realm} />
 			</Field>
-			{scoreRealm ? (
-				<ScoreOverview realmId={scoreRealm.id} targetId={detail.unit.id} />
+			{scoreContext ? (
+				<ScoreOverview contextUnitId={scoreContext.id} targetId={detail.unit.id} />
 			) : null}
 			<UnitReviewList realmId={realm?.id} targetId={detail.unit.id} />
 		</CatalogDetailSectionFrame>

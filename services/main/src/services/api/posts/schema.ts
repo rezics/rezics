@@ -32,7 +32,7 @@ export const PostScoreResponse = t.Object({
 	scoreId: Uuid,
 	profileId: Uuid,
 	unitId: Uuid,
-	realmId: Uuid,
+	contextUnitId: Uuid,
 	value: t.Integer({ minimum: 1, maximum: 10 }),
 	position: FractionalPosition,
 	updatedAt: DateTime,

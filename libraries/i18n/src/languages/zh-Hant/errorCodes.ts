@@ -38,6 +38,7 @@ export default {
 	InvalidSearch: "搜尋條件不符合要求。",
 	SearchUnavailable: "搜尋服務暫時無法使用，請稍後再試。",
 	RealmCapabilityRequired: `你沒有所需的${realmTerms.inline}權限。`,
+	ScoreContextUnitUnsupported: `目前無法使用這個單元作為評分語境；請選擇${realmTerms.inline}。`,
 	RealmRulesAcceptanceRequired: `請先同意目前的${realmTerms.inline}規則。`,
 	RealmRoleManagementForbidden: `你不能管理該${realmTerms.inline}角色。`,
 	PlatformCapabilityRequired: "此操作需要平台權限。",

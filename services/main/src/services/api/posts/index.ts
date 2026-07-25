@@ -129,7 +129,7 @@ async function selectPostScores(postId: string) {
 			scoreId: score.id,
 			profileId: score.profileId,
 			unitId: score.unitId,
-			realmId: score.realmId,
+			contextUnitId: score.contextUnitId,
 			value: score.value,
 			position: postScore.position,
 			updatedAt: score.updatedAt,

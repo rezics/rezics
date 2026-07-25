@@ -11,19 +11,19 @@ import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
-export interface ScoreRealmSelection {
+export interface ScoreContextSelection {
 	readonly id: string;
 	readonly label: string;
 }
 
-export function useDefaultScoreRealm() {
+export function useDefaultScoreContext() {
 	const session = useHydratedSession();
 	const preferences = useGetApiUsersMePreferences({
 		query: { enabled: !session.isPending && Boolean(session.data) },
 	});
-	const realmId = preferences.data?.defaultScoreRealmId ?? OfficialRealmUnitIds.score;
+	const contextUnitId = preferences.data?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score;
 	const realm = useGetApiRealmsByRealmId(
-		{ path: { realmId } },
+		{ path: { realmId: contextUnitId } },
 		{
 			query: {
 				enabled: !session.isPending && (!session.data || !preferences.isPending),
@@ -46,7 +46,7 @@ export function useDefaultScoreRealm() {
 		: undefined;
 
 	return {
-		realm: selection,
+		context: selection,
 		error: realm.error,
 		isPending:
 			session.isPending ||

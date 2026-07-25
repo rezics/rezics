@@ -34,17 +34,14 @@ export default {
 	reviewScore: "評分",
 	reviewScoreOptional: "評分（選填）",
 	reviewWithoutScore: "不評分",
-	reviewScoreRealmHint: `評論未指定${realmTerms.label}時，評分會使用你的預設評分${realmTerms.label}。`,
-	scoreRealmHint: insert(
-		`此評分會記錄在「{{realm}}」。可在偏好設定變更預設評分${realmTerms.label}。`,
-		{
-			realm: String,
-		},
-	),
-	scoreRealm: `評分${realmTerms.label}`,
+	reviewScoreContextHint: `評論未指定${realmTerms.label}時，評分會使用你的預設評分語境。`,
+	scoreContextHint: insert("此評分使用「{{context}}」作為語境。可在偏好設定變更預設評分語境。", {
+		context: String,
+	}),
+	scoreContext: "評分語境",
 	scoreEditorHint: `選擇${realmTerms.label}以修改既有評分，或在其他${realmTerms.label}新增評分。`,
 	editScores: "管理評分",
-	noScoredRealms: `尚未在任何${realmTerms.label}評分。`,
+	noScoredContexts: "尚未在任何語境評分。",
 	allReviewRealms: `所有${realmTerms.pluralLabel}`,
 	filterReviewRealm: `依${realmTerms.label}篩選`,
 	searchReviews: "搜尋評論內容",

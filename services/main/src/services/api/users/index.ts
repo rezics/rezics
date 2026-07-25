@@ -21,6 +21,7 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
+import { ensureScoreContextParticipation } from "../../scores/context";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import {
@@ -77,7 +78,8 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 		interfaceLocale: preference.interfaceLocale,
 		defaultLicense: parseNullablePublicationLicenseId(preference.defaultLicense),
 		defaultRealmManageMode: preference.defaultRealmManageMode,
-		defaultScoreRealmId: preference.defaultScoreRealmId ?? OfficialRealmUnitIds.score,
+		defaultScoreContextUnitId:
+			preference.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score,
 		collectionConfig: parseCollectionConfig(preference.collectionConfig),
 		personalizedFeed: preference.personalizedFeed,
 		contentRatings: preference.contentRatings,
@@ -231,7 +233,10 @@ export default new Elysia({ prefix: "/users" })
 		"/me/preferences",
 		async ({ profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(profile.unitId, [["preferences"]]);
-			await authorization.realm.ensureParticipation(body.defaultScoreRealmId);
+			const defaultScoreContext = await ensureScoreContextParticipation(
+				authorization,
+				body.defaultScoreContextUnitId,
+			);
 			await database.transaction(async (tx) => {
 				const [preference] = await tx
 					.update(profilePreference)
@@ -239,7 +244,7 @@ export default new Elysia({ prefix: "/users" })
 						interfaceLocale: body.interfaceLocale,
 						defaultLicense: body.defaultLicense,
 						defaultRealmManageMode: body.defaultRealmManageMode,
-						defaultScoreRealmId: body.defaultScoreRealmId,
+						defaultScoreContextUnitId: defaultScoreContext.contextUnitId,
 						collectionConfig: body.collectionConfig,
 						personalizedFeed: body.personalizedFeed,
 						contentRatings: body.contentRatings,
@@ -264,6 +269,9 @@ export default new Elysia({ prefix: "/users" })
 					"RealmCapabilityRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"ScoreContextUnitUnsupported",
+				]),
 			},
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
 		},

@@ -9,22 +9,22 @@ import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { UnitScoreValues, type UnitScore } from "../model/score-value";
 
 export function CommunityScoreOverview({
+	contextUnitId,
 	onScoreFilterToggle,
-	realmId,
 	reviewCount,
 	selectedScores,
 	targetId,
 }: {
 	readonly onScoreFilterToggle: (score: UnitScore) => void;
-	readonly realmId?: string;
+	readonly contextUnitId?: string;
 	readonly reviewCount: number;
 	readonly selectedScores: readonly UnitScore[];
 	readonly targetId: string;
 }) {
-	return realmId ? (
+	return contextUnitId ? (
 		<LoadedCommunityScoreOverview
+			contextUnitId={contextUnitId}
 			onScoreFilterToggle={onScoreFilterToggle}
-			realmId={realmId}
 			reviewCount={reviewCount}
 			selectedScores={selectedScores}
 			targetId={targetId}
@@ -54,21 +54,21 @@ const EmptyDistribution: Readonly<Record<UnitScore, number>> = {
 };
 
 function LoadedCommunityScoreOverview({
+	contextUnitId,
 	onScoreFilterToggle,
-	realmId,
 	reviewCount,
 	selectedScores,
 	targetId,
 }: {
 	readonly onScoreFilterToggle: (score: UnitScore) => void;
-	readonly realmId: string;
+	readonly contextUnitId: string;
 	readonly reviewCount: number;
 	readonly selectedScores: readonly UnitScore[];
 	readonly targetId: string;
 }) {
 	const query = useGetApiScoresByTargetId({
 		path: { targetId },
-		query: { realmId },
+		query: { contextUnitId },
 	});
 	const { t } = useTranslation(["ui"]);
 	const ratingCount = toNonNegativeApiInteger(query.data?.totalCount);
