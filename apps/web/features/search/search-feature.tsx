@@ -1,6 +1,7 @@
 "use client";
 
 import { ContentLanguageValues } from "@rezics/i18n";
+import { useGetApiUsersMePreferences } from "@rezics/openapi-tanstack-query";
 import {
 	SearchCategoryValues,
 	type ResolvedSearchControl,
@@ -12,14 +13,28 @@ import {
 	type SearchInjection,
 	type SearchOperator,
 	type SearchScalar,
+	type SearchSort,
 	type SharedSearchQuerySelection,
 	type SharedSearchQueryState,
 } from "@rezics/search";
-import { Badge, Button, ChoiceSelect, Field, FieldLabel, Input } from "@rezics/ui";
+import {
+	Badge,
+	Button,
+	ChoiceSelect,
+	Dialog,
+	DialogBody,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	Field,
+	FieldLabel,
+	Input,
+} from "@rezics/ui";
 import { Filter, Search, Share2, X } from "lucide-react";
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AdvancedSearchBuilder } from "./advanced-search-builder";
 import { SearchEntityMultiSelect, type SearchEntityOption } from "./search-entity-multi-select";
 
@@ -238,6 +253,7 @@ export function SearchFeature({
 	children,
 	resolveLabel,
 	resolveOptionLabel,
+	appearance = "page",
 }: {
 	readonly id: string;
 	readonly definition: SearchFeatureDefinition;
@@ -257,8 +273,13 @@ export function SearchFeature({
 		control: ResolvedSearchControl,
 		value: SearchScalar,
 	) => string | undefined;
+	readonly appearance?: "feed" | "page";
 }) {
 	const { t } = useTranslation("search");
+	const { data: session } = useHydratedSession();
+	const preferences = useGetApiUsersMePreferences({
+		query: { enabled: Boolean(session) },
+	});
 	const { t: nav } = useTranslation("nav");
 	const { t: units } = useTranslation("units");
 	const { document, controls } = definition;
@@ -331,6 +352,8 @@ export function SearchFeature({
 	const [advancedSelections, setAdvancedSelections] =
 		useState<readonly SharedSearchQuerySelection[]>(initialSelections);
 	const [builderOpen, setBuilderOpen] = useState(false);
+	const [filterOpen, setFilterOpen] = useState(false);
+	const [sort, setSort] = useState<SearchSort>(initialState?.sort ?? document.sort.default);
 	const [shareState, setShareState] = useState<"idle" | "copied" | "failed">("idle");
 
 	const controlByField = (field: SearchField) =>
@@ -458,16 +481,65 @@ export function SearchFeature({
 			mode: "advanced",
 			query,
 			expression: expressionFromClauses(clauses),
+			sort,
 		};
 	}
 
-	function execute(nextAdvanced: SearchControlExpression | undefined) {
-		onExecute({ injections: [...injections], state: currentState(nextAdvanced) });
+	function execute(nextAdvanced: SearchControlExpression | undefined, nextSort = sort) {
+		onExecute({
+			injections: [...injections],
+			state: { ...currentState(nextAdvanced), sort: nextSort },
+		});
 	}
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		execute(advanced);
+		if (appearance === "feed") setFilterOpen(false);
+	}
+
+	function resetFilters() {
+		const defaultQuery = document.query.initial ?? "";
+		const preferredLanguages = languageControl
+			? (preferences.data?.preferredLanguages ?? [])
+			: [];
+		const languageDefault: SearchControlValue | undefined =
+			languageControl && preferredLanguages.length
+				? {
+						controlKey: languageControl.key,
+						filter: {
+							field: "language",
+							operator: "any-of",
+							values: [...preferredLanguages],
+						},
+					}
+				: undefined;
+		setQuery(defaultQuery);
+		setCategory([]);
+		setLanguage(preferredLanguages);
+		setIncludedTags([]);
+		setExcludedTags([]);
+		setRealms([]);
+		setAdvanced(undefined);
+		setAdvancedSelections([]);
+		setSort(document.sort.default);
+		onExecute({
+			injections: [...injections],
+			state:
+				document.modes.default === "basic"
+					? {
+							mode: "basic",
+							query: defaultQuery,
+							sort: document.sort.default,
+							values: languageDefault ? [languageDefault] : [],
+						}
+					: {
+							mode: "advanced",
+							query: defaultQuery,
+							sort: document.sort.default,
+							...(languageDefault ? { expression: languageDefault } : {}),
+						},
+		});
 	}
 
 	const advancedSummary = advanced
@@ -484,240 +556,317 @@ export function SearchFeature({
 				t.advancedCombinations.any,
 			)
 		: "";
-
-	return (
+	const sortOptions = document.sort.options.map((value) => ({
+		value,
+		label: t.sortOptions[value],
+	}));
+	const editor = (
 		<>
-			<form className="grid gap-5" onSubmit={submit}>
-				{injections.length ? (
-					<div aria-label={t.appliedContext} className="flex flex-wrap gap-2">
-						{injections.map((injection, index) => {
-							const control = controls.find(
-								(candidate) => candidate.key === injection.value.controlKey,
-							);
-							return (
-								<Badge
-									key={`${injection.source}:${injection.value.controlKey}:${index}`}
-									variant="secondary"
-								>
-									{t.injectionSources[injection.source]}:{" "}
-									{valuesOf(injection.value)
-										.map((value) =>
-											control ? valueLabel(control, value) : String(value),
-										)
-										.join(", ")}
-									{injection.removable && onInjectionsChange ? (
-										<button
-											aria-label={t.removeAppliedContext}
-											onClick={() =>
-												onInjectionsChange(
-													injections.filter(
-														(_, candidate) => candidate !== index,
-													),
-												)
-											}
-											type="button"
-										>
-											<X aria-hidden className="size-3" />
-										</button>
-									) : null}
-								</Badge>
-							);
-						})}
-					</div>
-				) : null}
+			{injections.length ? (
+				<div aria-label={t.appliedContext} className="flex flex-wrap gap-2">
+					{injections.map((injection, index) => {
+						const control = controls.find(
+							(candidate) => candidate.key === injection.value.controlKey,
+						);
+						return (
+							<Badge
+								key={`${injection.source}:${injection.value.controlKey}:${index}`}
+								variant="secondary"
+							>
+								{t.injectionSources[injection.source]}:{" "}
+								{valuesOf(injection.value)
+									.map((value) =>
+										control ? valueLabel(control, value) : String(value),
+									)
+									.join(", ")}
+								{injection.removable && onInjectionsChange ? (
+									<button
+										aria-label={t.removeAppliedContext}
+										onClick={() =>
+											onInjectionsChange(
+												injections.filter(
+													(_, candidate) => candidate !== index,
+												),
+											)
+										}
+										type="button"
+									>
+										<X aria-hidden className="size-3" />
+									</button>
+								) : null}
+							</Badge>
+						);
+					})}
+				</div>
+			) : null}
 
-				{document.query.enabled ? (
-					<div className="flex items-stretch gap-2">
-						<div className="relative min-w-0 flex-1">
-							<Search
-								aria-hidden
-								className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-							/>
-							<Input
-								aria-label={t.query}
-								className="h-12 ps-10 text-base"
-								id={`${id}-query`}
-								maxLength={500}
-								onChange={(event) => setQuery(event.currentTarget.value)}
-								placeholder={t.placeholder}
-								required={document.query.required}
-								type="search"
-								value={query}
-							/>
-						</div>
-						<Button
-							className="h-12 shrink-0 px-5"
-							isLoading={pending}
-							type="submit"
-							variant="solid"
-						>
-							<Search aria-hidden />
-							<span className="max-sm:sr-only">{t.submit}</span>
-						</Button>
+			{document.query.enabled ? (
+				<div className="flex items-stretch gap-2">
+					<div className="relative min-w-0 flex-1">
+						<Search
+							aria-hidden
+							className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+						/>
+						<Input
+							aria-label={t.query}
+							className="h-12 ps-10 text-base"
+							id={`${id}-query`}
+							maxLength={500}
+							onChange={(event) => setQuery(event.currentTarget.value)}
+							placeholder={t.placeholder}
+							required={document.query.required}
+							type="search"
+							value={query}
+						/>
 					</div>
-				) : null}
+					<Button
+						className="h-12 shrink-0 px-5"
+						isLoading={pending}
+						type="submit"
+						variant="solid"
+					>
+						<Search aria-hidden />
+						<span className="max-sm:sr-only">{t.submit}</span>
+					</Button>
+				</div>
+			) : null}
 
-				<div
-					aria-label={t.commonFilters}
-					className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
-				>
-					{categoryControl ? (
+			<div aria-label={t.commonFilters} className="grid gap-4 sm:grid-cols-2">
+				{categoryControl ? (
+					<Field>
+						<FieldLabel>{t.contentCategory}</FieldLabel>
+						<ChoiceSelect
+							appearance="field"
+							ariaLabel={t.contentCategory}
+							className="h-10 w-full"
+							multiple
+							onValueChange={(values) => setCategory([...values])}
+							options={SearchCategoryValues.map((value) => ({
+								value,
+								label: t.categoryOptions[value],
+							}))}
+							placeholder={t.allCategories}
+							value={category}
+						/>
+					</Field>
+				) : null}
+				{tagControl ? (
+					<>
 						<Field>
-							<FieldLabel>{t.contentCategory}</FieldLabel>
-							<ChoiceSelect
-								appearance="field"
-								ariaLabel={t.contentCategory}
-								className="h-10 w-full"
-								multiple
-								onValueChange={(values) => setCategory([...values])}
-								options={SearchCategoryValues.map((value) => ({
-									value,
-									label: t.categoryOptions[value],
-								}))}
-								placeholder={t.allCategories}
-								value={category}
-							/>
-						</Field>
-					) : null}
-					{tagControl ? (
-						<>
-							<Field>
-								<FieldLabel>{t.includeTags}</FieldLabel>
-								<SearchEntityMultiSelect
-									emptyLabel={t.entitySearchEmpty}
-									errorLabel={t.entitySearchError}
-									index="tags"
-									loadingLabel={t.entitySearchLoading}
-									onChange={setIncludedTags}
-									placeholder={t.tagSearchPlaceholder}
-									removeLabel={t.removeSelection}
-									selected={includedTags}
-								/>
-							</Field>
-							<Field>
-								<FieldLabel>{t.excludeTags}</FieldLabel>
-								<SearchEntityMultiSelect
-									emptyLabel={t.entitySearchEmpty}
-									errorLabel={t.entitySearchError}
-									index="tags"
-									loadingLabel={t.entitySearchLoading}
-									onChange={setExcludedTags}
-									placeholder={t.tagSearchPlaceholder}
-									removeLabel={t.removeSelection}
-									selected={excludedTags}
-								/>
-							</Field>
-						</>
-					) : null}
-					{realmControl ? (
-						<Field>
-							<FieldLabel>{t.realms}</FieldLabel>
+							<FieldLabel>{t.includeTags}</FieldLabel>
 							<SearchEntityMultiSelect
 								emptyLabel={t.entitySearchEmpty}
 								errorLabel={t.entitySearchError}
-								index="realms"
+								index="tags"
 								loadingLabel={t.entitySearchLoading}
-								onChange={setRealms}
-								placeholder={t.realmSearchPlaceholder}
+								onChange={setIncludedTags}
+								placeholder={t.tagSearchPlaceholder}
 								removeLabel={t.removeSelection}
-								selected={realms}
+								selected={includedTags}
 							/>
 						</Field>
-					) : null}
-					{languageControl ? (
 						<Field>
-							<FieldLabel>{t.language}</FieldLabel>
-							<ChoiceSelect
-								appearance="field"
-								ariaLabel={t.language}
-								className="h-10 w-full"
-								multiple
-								onValueChange={(values) => setLanguage([...values])}
-								options={ContentLanguageValues.map((value) => ({
-									value,
-									label: t.languageOptions[value],
-								}))}
-								placeholder={t.allLanguages}
-								value={language}
+							<FieldLabel>{t.excludeTags}</FieldLabel>
+							<SearchEntityMultiSelect
+								emptyLabel={t.entitySearchEmpty}
+								errorLabel={t.entitySearchError}
+								index="tags"
+								loadingLabel={t.entitySearchLoading}
+								onChange={setExcludedTags}
+								placeholder={t.tagSearchPlaceholder}
+								removeLabel={t.removeSelection}
+								selected={excludedTags}
 							/>
 						</Field>
-					) : null}
-				</div>
+					</>
+				) : null}
+				{realmControl ? (
+					<Field>
+						<FieldLabel>{t.realms}</FieldLabel>
+						<SearchEntityMultiSelect
+							emptyLabel={t.entitySearchEmpty}
+							errorLabel={t.entitySearchError}
+							index="realms"
+							loadingLabel={t.entitySearchLoading}
+							onChange={setRealms}
+							placeholder={t.realmSearchPlaceholder}
+							removeLabel={t.removeSelection}
+							selected={realms}
+						/>
+					</Field>
+				) : null}
+				{languageControl ? (
+					<Field>
+						<FieldLabel>{t.language}</FieldLabel>
+						<ChoiceSelect
+							appearance="field"
+							ariaLabel={t.language}
+							className="h-10 w-full"
+							multiple
+							onValueChange={(values) => setLanguage([...values])}
+							options={ContentLanguageValues.map((value) => ({
+								value,
+								label: t.languageOptions[value],
+							}))}
+							placeholder={t.allLanguages}
+							value={language}
+						/>
+					</Field>
+				) : null}
+			</div>
 
-				<div className="flex flex-wrap items-center gap-3">
+			<div className="flex flex-wrap items-center gap-3">
+				<Button
+					onClick={() => {
+						setFilterOpen(false);
+						setBuilderOpen(true);
+					}}
+					size="sm"
+					type="button"
+					variant="quiet"
+				>
+					<Filter aria-hidden />
+					{t.advancedFilters}
+				</Button>
+				{onShare ? (
 					<Button
-						onClick={() => setBuilderOpen(true)}
+						onClick={() => {
+							setShareState("idle");
+							const state = currentState(advanced);
+							void onShare({
+								state,
+								selections: allSelections.filter((selection) =>
+									stateContainsSelection(state, selection),
+								),
+							}).then(
+								() => setShareState("copied"),
+								() => setShareState("failed"),
+							);
+						}}
 						size="sm"
 						type="button"
 						variant="quiet"
 					>
-						<Filter aria-hidden />
-						{t.advancedFilters}
+						<Share2 aria-hidden />
+						{shareState === "copied" ? t.shareCopied : t.shareQuery}
 					</Button>
-					{onShare ? (
-						<Button
-							onClick={() => {
-								setShareState("idle");
-								const state = currentState(advanced);
-								void onShare({
-									state,
-									selections: allSelections.filter((selection) =>
-										stateContainsSelection(state, selection),
-									),
-								}).then(
-									() => setShareState("copied"),
-									() => setShareState("failed"),
-								);
+				) : null}
+			</div>
+
+			{shareState === "failed" ? (
+				<p className="text-destructive text-sm" role="alert">
+					{t.shareFailed}
+				</p>
+			) : null}
+
+			{advanced ? (
+				<section className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-3">
+					<span className="font-medium text-sm">{t.appliedAdvancedFilters}</span>
+					<Badge
+						className="max-w-full whitespace-normal text-start leading-5"
+						variant="secondary"
+					>
+						{advancedSummary}
+					</Badge>
+					<Button
+						className="ms-auto"
+						onClick={() => {
+							setFilterOpen(false);
+							setBuilderOpen(true);
+						}}
+						size="sm"
+						type="button"
+						variant="quiet"
+					>
+						{t.editAdvancedFilters}
+					</Button>
+					<Button
+						onClick={() => {
+							setAdvanced(undefined);
+							setAdvancedSelections([]);
+							execute(undefined);
+						}}
+						size="sm"
+						type="button"
+						variant="quiet"
+					>
+						{t.clearAdvancedFilters}
+					</Button>
+				</section>
+			) : null}
+		</>
+	);
+
+	return (
+		<>
+			{appearance === "feed" ? (
+				<div className="border-b border-border-weak pb-4">
+					<div
+						aria-label={t.filters}
+						className="flex flex-wrap items-center gap-2"
+						role="group"
+					>
+						<ChoiceSelect
+							ariaLabel={t.sort}
+							onValueChange={([nextSort]) => {
+								if (!nextSort) return;
+								setSort(nextSort);
+								execute(advanced, nextSort);
 							}}
-							size="sm"
-							type="button"
-							variant="quiet"
-						>
-							<Share2 aria-hidden />
-							{shareState === "copied" ? t.shareCopied : t.shareQuery}
+							options={sortOptions}
+							placeholder={t.sort}
+							value={[sort]}
+						/>
+						<Button onClick={() => setFilterOpen(true)} type="button" variant="outline">
+							<Filter aria-hidden />
+							{t.filters}
 						</Button>
-					) : null}
+					</div>
+					<Dialog onOpenChange={({ open }) => setFilterOpen(open)} open={filterOpen}>
+						<DialogContent size="3xl">
+							<DialogHeader title={t.filters} />
+							<DialogBody>
+								<form
+									className="grid gap-5"
+									id={`${id}-feed-filters`}
+									onSubmit={submit}
+								>
+									{editor}
+								</form>
+							</DialogBody>
+							<DialogFooter className="border-t">
+								<Button onClick={resetFilters} type="button" variant="outline">
+									{t.resetFilters}
+								</Button>
+								<Button
+									form={`${id}-feed-filters`}
+									isLoading={pending}
+									type="submit"
+									variant="solid"
+								>
+									{t.builder.apply}
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				</div>
-
-				{shareState === "failed" ? (
-					<p className="text-destructive text-sm" role="alert">
-						{t.shareFailed}
-					</p>
-				) : null}
-
-				{advanced ? (
-					<section className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-3">
-						<span className="font-medium text-sm">{t.appliedAdvancedFilters}</span>
-						<Badge
-							className="max-w-full whitespace-normal text-start leading-5"
-							variant="secondary"
-						>
-							{advancedSummary}
-						</Badge>
-						<Button
-							className="ms-auto"
-							onClick={() => setBuilderOpen(true)}
-							size="sm"
-							type="button"
-							variant="quiet"
-						>
-							{t.editAdvancedFilters}
-						</Button>
-						<Button
-							onClick={() => {
-								setAdvanced(undefined);
-								setAdvancedSelections([]);
-								execute(undefined);
+			) : (
+				<form className="grid gap-5" onSubmit={submit}>
+					<div className="flex justify-end">
+						<ChoiceSelect
+							ariaLabel={t.sort}
+							onValueChange={([nextSort]) => {
+								if (!nextSort) return;
+								setSort(nextSort);
 							}}
-							size="sm"
-							type="button"
-							variant="quiet"
-						>
-							{t.clearAdvancedFilters}
-						</Button>
-					</section>
-				) : null}
-			</form>
+							options={sortOptions}
+							placeholder={t.sort}
+							value={[sort]}
+						/>
+					</div>
+					{editor}
+				</form>
+			)}
 
 			{error ? <p className="sr-only">{t.failed}</p> : null}
 			{children}

@@ -8,13 +8,15 @@ import {
 	type NavigationTarget,
 	type SearchFeatureSource,
 } from "@rezics/block";
-import { parseSearchFeatureDefinition } from "@rezics/search";
+import { parseSearchFeatureDefinition, type SearchControlValue } from "@rezics/search";
 import {
 	useGetApiCollectionsByCollectionId,
 	useGetApiSearchFeaturesByTemplate,
 	useGetApiSearchZonesByZoneIdFeature,
 	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
+	usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
 	usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
+	type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
@@ -47,6 +49,8 @@ import {
 } from "react";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
+import { FeedItemCard, type FeedItem } from "@/features/content-feed/components/feed-item-card";
+import { FeedList } from "@/features/content-feed/components/feed-list";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 import { useTranslation } from "@/i18n/client";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
@@ -66,7 +70,10 @@ type SearchResult = {
 	readonly name?: string | null;
 	readonly summary?: string | null;
 };
-type SearchPresentation = Extract<Block, { readonly _type: "search" }>["presentation"];
+type SearchPresentation = {
+	readonly results: "list" | "grid" | "compact";
+	readonly showResultCount: boolean;
+};
 type FeedPresentation = Extract<Block, { readonly _type: "feed" }>["presentation"];
 type SearchFacet = {
 	readonly controlKey?: string;
@@ -76,6 +83,13 @@ type SearchFacet = {
 type SearchPage = {
 	readonly facets?: readonly SearchFacet[];
 	readonly results: readonly SearchResult[];
+	readonly nextCursor?: string;
+	readonly total: number;
+};
+type ZoneFeedExecutionResponse = PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200;
+type ZoneFeedPage = {
+	readonly facets?: readonly SearchFacet[];
+	readonly items: readonly FeedItem[];
 	readonly nextCursor?: string;
 	readonly total: number;
 };
@@ -475,6 +489,8 @@ function ZoneSearchFeature({
 	autoExecute = false,
 	unitListLayout,
 	initialPageSize,
+	appearance = "page",
+	initialValues = [],
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
@@ -488,6 +504,8 @@ function ZoneSearchFeature({
 	autoExecute?: boolean;
 	unitListLayout?: UnitListLayout;
 	initialPageSize?: number;
+	appearance?: "feed" | "page";
+	initialValues?: readonly SearchControlValue[];
 }) {
 	const { t } = useTranslation("zones");
 	const context = useZoneBlocks();
@@ -500,26 +518,36 @@ function ZoneSearchFeature({
 		{ query: { enabled: feature.kind === "zone" } },
 	);
 	const rawDefinition = feature.kind === "template" ? template.data : zone.data?.definition;
+	const initialState = useMemo<SearchFeatureRequest["state"] | undefined>(() => {
+		if (!rawDefinition) return undefined;
+		const definition = parseSearchFeatureDefinition(rawDefinition);
+		const expression =
+			initialValues.length === 0
+				? undefined
+				: initialValues.length === 1
+					? initialValues[0]
+					: { operator: "all" as const, clauses: [...initialValues] };
+		return definition.document.modes.default === "basic"
+			? {
+					mode: "basic",
+					values: [...initialValues],
+					...(initialPageSize ? { pageSize: initialPageSize } : {}),
+				}
+			: {
+					mode: "advanced",
+					...(expression ? { expression } : {}),
+					...(initialPageSize ? { pageSize: initialPageSize } : {}),
+				};
+	}, [initialPageSize, initialValues, rawDefinition]);
 	const autoExecuted = useRef(false);
 	useEffect(() => {
-		if (!autoExecute || !rawDefinition || autoExecuted.current) return;
-		const definition = parseSearchFeatureDefinition(rawDefinition);
+		if (!autoExecute || !initialState || autoExecuted.current) return;
 		autoExecuted.current = true;
 		onExecute({
 			injections: [],
-			state:
-				definition.document.modes.default === "basic"
-					? {
-							mode: "basic",
-							values: [],
-							...(initialPageSize ? { pageSize: initialPageSize } : {}),
-						}
-					: {
-							mode: "advanced",
-							...(initialPageSize ? { pageSize: initialPageSize } : {}),
-						},
+			state: initialState,
 		});
-	}, [autoExecute, initialPageSize, onExecute, rawDefinition]);
+	}, [autoExecute, initialState, onExecute]);
 	if (feature.kind === "template" ? template.isError : zone.isError)
 		return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
 	if ((feature.kind === "template" ? template.isPending : zone.isPending) || !rawDefinition)
@@ -527,10 +555,12 @@ function ZoneSearchFeature({
 	const definition = parseSearchFeatureDefinition(rawDefinition);
 	return (
 		<SearchFeature
+			appearance={appearance}
 			definition={definition}
 			error={error}
 			facets={facets}
 			id={`zone-search-${blockKey}`}
+			initialState={initialState}
 			onExecute={onExecute}
 			pending={pending}
 			resolveLabel={(unitId) => context.units.get(unitId)?.title ?? undefined}
@@ -552,76 +582,6 @@ function ZoneSearchFeature({
 	);
 }
 
-function DockSearchBlock({
-	blockKey,
-	feature,
-	presentation,
-}: {
-	blockKey: string;
-	feature: SearchFeatureSource;
-	presentation: SearchPresentation;
-}) {
-	const context = useZoneBlocks();
-	const mutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
-	return (
-		<ZoneSearchFeature
-			blockKey={blockKey}
-			feature={feature}
-			error={mutation.isError}
-			facets={mutation.data?.facets}
-			onExecute={(body) =>
-				mutation.mutate({
-					body,
-					path: { blockKey, zoneId: context.projection.zone.id },
-				})
-			}
-			pending={mutation.isPending}
-			presentation={presentation}
-			results={mutation.data?.groups.flatMap((group) => group.hits)}
-			total={mutation.data?.groups.reduce(
-				(total, group) => total + Number(group.total.value),
-				0,
-			)}
-		/>
-	);
-}
-
-function PageSearchBlock({
-	blockKey,
-	feature,
-	slug,
-	presentation,
-}: {
-	blockKey: string;
-	feature: SearchFeatureSource;
-	slug: string;
-	presentation: SearchPresentation;
-}) {
-	const context = useZoneBlocks();
-	const mutation = usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute();
-	return (
-		<ZoneSearchFeature
-			blockKey={blockKey}
-			feature={feature}
-			error={mutation.isError}
-			facets={mutation.data?.facets}
-			onExecute={(body) =>
-				mutation.mutate({
-					body,
-					path: { blockKey, slug, zoneId: context.projection.zone.id },
-				})
-			}
-			pending={mutation.isPending}
-			presentation={presentation}
-			results={mutation.data?.groups.flatMap((group) => group.hits)}
-			total={mutation.data?.groups.reduce(
-				(total, group) => total + Number(group.total.value),
-				0,
-			)}
-		/>
-	);
-}
-
 interface SearchExecutionResponse {
 	readonly nextCursor?: string;
 	readonly facets?: readonly SearchFacet[];
@@ -640,13 +600,22 @@ function toSearchPage(value: SearchExecutionResponse): SearchPage {
 	};
 }
 
-function appendSearchPage(current: SearchPage | undefined, next: SearchPage): SearchPage {
+function toZoneFeedPage(value: ZoneFeedExecutionResponse): ZoneFeedPage {
+	return {
+		facets: value.facets,
+		items: value.items,
+		nextCursor: value.nextCursor,
+		total: Number(value.total),
+	};
+}
+
+function appendZoneFeedPage(current: ZoneFeedPage | undefined, next: ZoneFeedPage): ZoneFeedPage {
 	if (!current) return next;
-	const results = new Map(current.results.map((result) => [result.id, result]));
-	for (const result of next.results) results.set(result.id, result);
+	const items = new Map(current.items.map((item) => [item.id, item]));
+	for (const item of next.items) items.set(item.id, item);
 	return {
 		facets: next.facets ?? current.facets,
-		results: [...results.values()],
+		items: [...items.values()],
 		nextCursor: next.nextCursor,
 		total: Math.max(current.total, next.total),
 	};
@@ -699,19 +668,20 @@ function ZoneFeedBlock({
 	error,
 	presentation,
 	maxResults,
-	unitListLayout,
+	defaults,
 }: {
 	blockKey: string;
-	execute: (request: SearchFeatureRequest) => Promise<SearchExecutionResponse>;
+	execute: (request: SearchFeatureRequest) => Promise<ZoneFeedExecutionResponse>;
 	feature: SearchFeatureSource;
 	pending: boolean;
 	error: boolean;
 	presentation: FeedPresentation;
 	maxResults?: number;
-	unitListLayout?: UnitListLayout;
+	defaults: readonly SearchControlValue[];
 }) {
+	const { t } = useTranslation(["actions", "feed", "state"]);
 	const [request, setRequest] = useState<SearchFeatureRequest>();
-	const [page, setPage] = useState<SearchPage>();
+	const [page, setPage] = useState<ZoneFeedPage>();
 	const executionSequence = useRef(0);
 	const run = (nextRequest: SearchFeatureRequest, append: boolean) => {
 		const sequence = ++executionSequence.current;
@@ -723,7 +693,9 @@ function ZoneFeedBlock({
 			(result) => {
 				if (sequence !== executionSequence.current) return;
 				setPage((current) =>
-					append ? appendSearchPage(current, toSearchPage(result)) : toSearchPage(result),
+					append
+						? appendZoneFeedPage(current, toZoneFeedPage(result))
+						: toZoneFeedPage(result),
 				);
 			},
 			() => undefined,
@@ -736,26 +708,55 @@ function ZoneFeedBlock({
 	return (
 		<>
 			<ZoneSearchFeature
+				appearance="feed"
 				autoExecute
 				blockKey={blockKey}
 				error={error}
 				facets={page?.facets}
 				feature={feature}
 				initialPageSize={maxResults && maxResults <= 20 ? maxResults : undefined}
+				initialValues={defaults}
 				onExecute={(nextRequest) => run(nextRequest, false)}
 				pending={pending}
-				presentation={presentation}
-				results={maxResults ? page?.results.slice(0, maxResults) : page?.results}
+				presentation={{ results: "list", showResultCount: presentation.showResultCount }}
 				total={page?.total}
-				unitListLayout={unitListLayout}
 			/>
-			{page?.nextCursor && (!maxResults || page.results.length < maxResults) ? (
-				<FeedPagination
-					infinite={presentation.pagination === "infinite"}
-					onLoad={loadMore}
-					pending={pending}
-				/>
-			) : null}
+			<FeedList
+				aria-label={t.feed.title}
+				emptyBody={t.feed.emptyBody}
+				emptyTitle={t.feed.emptyTitle}
+				errorLabel={t.state.error}
+				footer={
+					page?.nextCursor && (!maxResults || page.items.length < maxResults) ? (
+						<FeedPagination
+							infinite={presentation.pagination === "infinite"}
+							onLoad={loadMore}
+							pending={pending}
+						/>
+					) : null
+				}
+				getItemKey={(item) => item.id}
+				renderItem={(item, metadata) => (
+					<FeedItemCard
+						item={item}
+						position={metadata.position}
+						setSize={metadata.setSize}
+					/>
+				)}
+				retryLabel={t.actions.retry}
+				state={
+					!page && pending
+						? { status: "pending" }
+						: !page && error
+							? { status: "error", retry: () => request && run(request, false) }
+							: {
+									status: "ready",
+									items: maxResults
+										? (page?.items.slice(0, maxResults) ?? [])
+										: (page?.items ?? []),
+								}
+				}
+			/>
 		</>
 	);
 }
@@ -764,20 +765,23 @@ function DockFeedBlock({
 	blockKey,
 	feature,
 	presentation,
+	defaults,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
 	presentation: FeedPresentation;
+	defaults: readonly SearchControlValue[];
 }) {
 	const context = useZoneBlocks();
-	const mutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
+	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
+			defaults={defaults}
 			error={mutation.isError}
 			execute={(body) =>
 				mutation.mutateAsync({
-					body,
+					body: { ...body, surface: { kind: "dock" } },
 					path: { blockKey, zoneId: context.projection.zone.id },
 				})
 			}
@@ -793,22 +797,25 @@ function PageFeedBlock({
 	feature,
 	slug,
 	presentation,
+	defaults,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
 	slug: string;
 	presentation: FeedPresentation;
+	defaults: readonly SearchControlValue[];
 }) {
 	const context = useZoneBlocks();
-	const mutation = usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute();
+	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
+			defaults={defaults}
 			error={mutation.isError}
 			execute={(body) =>
 				mutation.mutateAsync({
-					body,
-					path: { blockKey, slug, zoneId: context.projection.zone.id },
+					body: { ...body, surface: { kind: "page", slug } },
+					path: { blockKey, zoneId: context.projection.zone.id },
 				})
 			}
 			feature={feature}
@@ -872,6 +879,49 @@ function CollectionUnitList({
 	);
 }
 
+function ZoneSearchUnitListBlock({
+	blockKey,
+	error,
+	execute,
+	feature,
+	layout,
+	limit,
+	pending,
+	presentation,
+}: {
+	readonly blockKey: string;
+	readonly error: boolean;
+	readonly execute: (request: SearchFeatureRequest) => Promise<SearchExecutionResponse>;
+	readonly feature: SearchFeatureSource;
+	readonly layout: UnitListLayout;
+	readonly limit: number;
+	readonly pending: boolean;
+	readonly presentation: SearchPresentation;
+}) {
+	const [page, setPage] = useState<SearchPage>();
+	return (
+		<ZoneSearchFeature
+			autoExecute
+			blockKey={blockKey}
+			error={error}
+			facets={page?.facets}
+			feature={feature}
+			initialPageSize={Math.min(limit, 50)}
+			onExecute={(request) => {
+				void execute(request).then(
+					(response) => setPage(toSearchPage(response)),
+					() => undefined,
+				);
+			}}
+			pending={pending}
+			presentation={presentation}
+			results={page?.results.slice(0, limit)}
+			total={page?.total}
+			unitListLayout={layout}
+		/>
+	);
+}
+
 function SearchUnitList({
 	blockKey,
 	feature,
@@ -895,7 +945,7 @@ function SearchUnitList({
 	} as const;
 	if (slug === undefined)
 		return (
-			<ZoneFeedBlock
+			<ZoneSearchUnitListBlock
 				blockKey={blockKey}
 				error={dockMutation.isError}
 				execute={(body) =>
@@ -905,14 +955,14 @@ function SearchUnitList({
 					})
 				}
 				feature={feature}
-				maxResults={limit}
+				layout={layout}
+				limit={limit}
 				pending={dockMutation.isPending}
 				presentation={presentation}
-				unitListLayout={layout}
 			/>
 		);
 	return (
-		<ZoneFeedBlock
+		<ZoneSearchUnitListBlock
 			blockKey={blockKey}
 			error={pageMutation.isError}
 			execute={(body) =>
@@ -922,10 +972,10 @@ function SearchUnitList({
 				})
 			}
 			feature={feature}
-			maxResults={limit}
+			layout={layout}
+			limit={limit}
 			pending={pageMutation.isPending}
 			presentation={presentation}
-			unitListLayout={layout}
 		/>
 	);
 }
@@ -1012,34 +1062,19 @@ function ZoneBlock({ block }: { block: Block }) {
 			</div>
 		);
 	}
-	if (block._type === "search") {
-		if (!surface) return null;
-		return surface.kind === "dock" ? (
-			<DockSearchBlock
-				blockKey={block._key}
-				feature={block.feature}
-				presentation={block.presentation}
-			/>
-		) : (
-			<PageSearchBlock
-				blockKey={block._key}
-				feature={block.feature}
-				presentation={block.presentation}
-				slug={surface.slug}
-			/>
-		);
-	}
 	if (block._type === "feed") {
 		if (!surface) return null;
 		return surface.kind === "dock" ? (
 			<DockFeedBlock
 				blockKey={block._key}
+				defaults={block.defaults}
 				feature={block.feature}
 				presentation={block.presentation}
 			/>
 		) : (
 			<PageFeedBlock
 				blockKey={block._key}
+				defaults={block.defaults}
 				feature={block.feature}
 				presentation={block.presentation}
 				slug={surface.slug}

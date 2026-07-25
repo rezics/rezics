@@ -127,41 +127,6 @@ export type DockDocument = {
 				/**
 				 * @type string
 				 */
-				_type: "search";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				feature:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "template";
-							template: "global" | "book" | "media" | "software";
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "zone";
-					  };
-				/**
-				 * @type object
-				 */
-				presentation: {
-					results: "list" | "grid" | "compact";
-					/**
-					 * @type boolean
-					 */
-					showResultCount: boolean;
-				};
-		  }
-		| {
-				/**
-				 * @type string
-				 */
 				_type: "feed";
 				/**
 				 * @pattern ^[0-9a-f]{12}$
@@ -183,10 +148,377 @@ export type DockDocument = {
 							kind: "zone";
 					  };
 				/**
+				 * @type array
+				 */
+				defaults: {
+					/**
+					 * @minLength 1
+					 * @maxLength 64
+					 * @pattern ^[a-z][a-z0-9-]*$
+					 * @type string
+					 */
+					controlKey: string;
+					filter:
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
+						  };
+				}[];
+				/**
 				 * @type object
 				 */
 				presentation: {
-					results: "list" | "grid" | "compact";
 					pagination: "load-more" | "infinite";
 					/**
 					 * @type boolean
@@ -693,41 +1025,6 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type string
 				 */
-				_type: "search";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				feature:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "template";
-							template: "global" | "book" | "media" | "software";
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "zone";
-					  };
-				/**
-				 * @type object
-				 */
-				presentation: {
-					results: "list" | "grid" | "compact";
-					/**
-					 * @type boolean
-					 */
-					showResultCount: boolean;
-				};
-		  }
-		| {
-				/**
-				 * @type string
-				 */
 				_type: "feed";
 				/**
 				 * @pattern ^[0-9a-f]{12}$
@@ -749,10 +1046,377 @@ export type UnitReferencedBlockDocument = {
 							kind: "zone";
 					  };
 				/**
+				 * @type array
+				 */
+				defaults: {
+					/**
+					 * @minLength 1
+					 * @maxLength 64
+					 * @pattern ^[a-z][a-z0-9-]*$
+					 * @type string
+					 */
+					controlKey: string;
+					filter:
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
+						  };
+				}[];
+				/**
 				 * @type object
 				 */
 				presentation: {
-					results: "list" | "grid" | "compact";
 					pagination: "load-more" | "infinite";
 					/**
 					 * @type boolean
@@ -5740,37 +6404,36 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 		viewerReaction: (string | null) | null;
 		recommendationReason:
 			(GetApiRecommendationsPostsByPostIdStatus200ItemsRecommendationReason | null) | null;
-		/**
-		 * @type object
-		 */
-		tracking: {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			requestId: string;
-			/**
-			 * @default 'home_feed'
-			 * @type string
-			 */
-			surface: GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum;
-			position: string | number;
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern \S
-			 * @type string
-			 */
-			policyVersion: string;
-			/**
-			 * @minLength 43
-			 * @maxLength 43
-			 * @pattern ^[A-Za-z0-9_-]{43}$
-			 * @type string
-			 */
-			signature: string;
-		};
+		tracking:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					requestId: string;
+					/**
+					 * @default 'home_feed'
+					 * @type string
+					 */
+					surface: GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum;
+					position: string | number;
+					/**
+					 * @minLength 1
+					 * @maxLength 64
+					 * @pattern \S
+					 * @type string
+					 */
+					policyVersion: string;
+					/**
+					 * @minLength 43
+					 * @maxLength 43
+					 * @pattern ^[A-Za-z0-9_-]{43}$
+					 * @type string
+					 */
+					signature: string;
+			  } | null)
+			| null;
 		/**
 		 * @type string
 		 */
@@ -10729,37 +11392,36 @@ export type GetApiFeedStatus200 = {
 				};
 				viewerReaction: (string | null) | null;
 				recommendationReason: (GetApiFeedStatus200ItemsRecommendationReason | null) | null;
-				/**
-				 * @type object
-				 */
-				tracking: {
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					requestId: string;
-					/**
-					 * @default 'home_feed'
-					 * @type string
-					 */
-					surface: GetApiFeedStatus200ItemsTrackingSurfaceEnum;
-					position: string | number;
-					/**
-					 * @minLength 1
-					 * @maxLength 64
-					 * @pattern \S
-					 * @type string
-					 */
-					policyVersion: string;
-					/**
-					 * @minLength 43
-					 * @maxLength 43
-					 * @pattern ^[A-Za-z0-9_-]{43}$
-					 * @type string
-					 */
-					signature: string;
-				};
+				tracking:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							requestId: string;
+							/**
+							 * @default 'home_feed'
+							 * @type string
+							 */
+							surface: GetApiFeedStatus200ItemsTrackingSurfaceEnum;
+							position: string | number;
+							/**
+							 * @minLength 1
+							 * @maxLength 64
+							 * @pattern \S
+							 * @type string
+							 */
+							policyVersion: string;
+							/**
+							 * @minLength 43
+							 * @maxLength 43
+							 * @pattern ^[A-Za-z0-9_-]{43}$
+							 * @type string
+							 */
+							signature: string;
+					  } | null)
+					| null;
 				/**
 				 * @type string
 				 */
@@ -11049,37 +11711,36 @@ export type GetApiFeedStatus200 = {
 				};
 				viewerReaction: (string | null) | null;
 				recommendationReason: (GetApiFeedStatus200ItemsRecommendationReason | null) | null;
-				/**
-				 * @type object
-				 */
-				tracking: {
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					requestId: string;
-					/**
-					 * @default 'home_feed'
-					 * @type string
-					 */
-					surface: GetApiFeedStatus200ItemsTrackingSurfaceEnum;
-					position: string | number;
-					/**
-					 * @minLength 1
-					 * @maxLength 64
-					 * @pattern \S
-					 * @type string
-					 */
-					policyVersion: string;
-					/**
-					 * @minLength 43
-					 * @maxLength 43
-					 * @pattern ^[A-Za-z0-9_-]{43}$
-					 * @type string
-					 */
-					signature: string;
-				};
+				tracking:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							requestId: string;
+							/**
+							 * @default 'home_feed'
+							 * @type string
+							 */
+							surface: GetApiFeedStatus200ItemsTrackingSurfaceEnum;
+							position: string | number;
+							/**
+							 * @minLength 1
+							 * @maxLength 64
+							 * @pattern \S
+							 * @type string
+							 */
+							policyVersion: string;
+							/**
+							 * @minLength 43
+							 * @maxLength 43
+							 * @pattern ^[A-Za-z0-9_-]{43}$
+							 * @type string
+							 */
+							signature: string;
+					  } | null)
+					| null;
 				/**
 				 * @type string
 				 */
@@ -64226,6 +64887,108 @@ export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefix
 export type GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
 
+export const GetApiReviewsStatus200ItemsRealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiReviewsStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof GetApiReviewsStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof GetApiReviewsStatus200ItemsRealmsAvatarIconPrefixEnum];
+
+export const GetApiReviewsStatus200ItemsRecommendationReason = {
+	followed_unit: "followed_unit",
+	followed_realm: "followed_realm",
+	based_on_activity: "based_on_activity",
+	related_subject: "related_subject",
+	popular_now: "popular_now",
+	new_and_relevant: "new_and_relevant",
+} as const;
+
+export type GetApiReviewsStatus200ItemsRecommendationReason =
+	(typeof GetApiReviewsStatus200ItemsRecommendationReason)[keyof typeof GetApiReviewsStatus200ItemsRecommendationReason];
+
+export const GetApiReviewsStatus200ItemsTrackingSurfaceEnum = {
+	home_feed: "home_feed",
+	home_book: "home_book",
+	home_software: "home_software",
+	home_media: "home_media",
+	unit_related: "unit_related",
+	post_related: "post_related",
+} as const;
+
+export type GetApiReviewsStatus200ItemsTrackingSurfaceEnum =
+	(typeof GetApiReviewsStatus200ItemsTrackingSurfaceEnum)[keyof typeof GetApiReviewsStatus200ItemsTrackingSurfaceEnum];
+
+export const GetApiReviewsStatus200ItemsPostKindEnum = {
+	post: "post",
+	reply: "reply",
+	excerpt: "excerpt",
+	review: "review",
+	chapter: "chapter",
+	chapter_group: "chapter_group",
+	wiki: "wiki",
+	picture: "picture",
+} as const;
+
+export type GetApiReviewsStatus200ItemsPostKindEnum =
+	(typeof GetApiReviewsStatus200ItemsPostKindEnum)[keyof typeof GetApiReviewsStatus200ItemsPostKindEnum];
+
+export const GetApiReviewsStatus200ItemsReplyContextAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiReviewsStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof GetApiReviewsStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof GetApiReviewsStatus200ItemsReplyContextAttributionsRoleEnum];
+
+export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
+
+export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -64368,6 +65131,498 @@ export type GetApiReviewsStatus200 = {
 					| null;
 			};
 		}[];
+		realmId: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		realms: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiReviewsStatus200ItemsRealmsAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		}[];
+		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		reactions: {
+			upvote: string | number;
+			downvote: string | number;
+		};
+		viewerReaction: (string | null) | null;
+		recommendationReason: (GetApiReviewsStatus200ItemsRecommendationReason | null) | null;
+		tracking:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					requestId: string;
+					/**
+					 * @default 'home_feed'
+					 * @type string
+					 */
+					surface: GetApiReviewsStatus200ItemsTrackingSurfaceEnum;
+					position: string | number;
+					/**
+					 * @minLength 1
+					 * @maxLength 64
+					 * @pattern \S
+					 * @type string
+					 */
+					policyVersion: string;
+					/**
+					 * @minLength 43
+					 * @maxLength 43
+					 * @pattern ^[A-Za-z0-9_-]{43}$
+					 * @type string
+					 */
+					signature: string;
+			  } | null)
+			| null;
+		/**
+		 * @type string
+		 */
+		itemType: "post";
+		/**
+		 * @type string
+		 */
+		unitKind: "post";
+		/**
+		 * @default 'post'
+		 * @type string
+		 */
+		postKind: GetApiReviewsStatus200ItemsPostKindEnum;
+		summary: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		subjectId: (string | null) | null;
+		rootPostId: (string | null) | null;
+		parentPostId: (string | null) | null;
+		body:
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
+			| null;
+		replyCount: string | number;
+		latestRevisionId: (string | null) | null;
+		replyContext:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					rootPostId: string;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					attributions: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @default 'author'
+						 * @type string
+						 */
+						role: GetApiReviewsStatus200ItemsReplyContextAttributionsRoleEnum;
+						/**
+						 * @description
+						 * Format: `fractional-position`
+						 * @minLength 2
+						 * @maxLength 512
+						 * @type string
+						 */
+						position: string;
+						/**
+						 * @type object
+						 */
+						creditedUnit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'slug_namespace'
+							 * @type string
+							 */
+							kind: GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+							title: (string | null) | null;
+							summary: (string | null) | null;
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+						};
+					}[];
+					subjectId: (string | null) | null;
+			  } | null)
+			| null;
+		subject:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					type: string;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+					score:
+						| ({
+								totalScore: string | number;
+								totalCount: string | number;
+						  } | null)
+						| null;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		targetId: string;
+		language: (("zh" | "en") | null) | null;
 		/**
 		 * @type array
 		 */
@@ -64386,28 +65641,6 @@ export type GetApiReviewsStatus200 = {
 			contextUnitId: string;
 			value: string | number;
 		}[];
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		targetId: string;
-		realmId: (string | null) | null;
-		language: (("zh" | "en") | null) | null;
-		title: (string | null) | null;
-		summary: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
 	}[];
 };
 
@@ -80373,6 +81606,17 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 				/**
 				 * @type string
 				 */
+				kind: "profile";
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				profileId: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
 				kind: "zone";
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -92276,6 +93520,2590 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponse
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecutePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	blockKey: string;
+};
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsRoleEnum =
+	{
+		author: "author",
+		"co-author": "co-author",
+		translator: "translator",
+		illustrator: "illustrator",
+		editor: "editor",
+		publisher: "publisher",
+		letterer: "letterer",
+		colorist: "colorist",
+		developer: "developer",
+		composer: "composer",
+		designer: "designer",
+		director: "director",
+		producer: "producer",
+		writer: "writer",
+		actor: "actor",
+		narrator: "narrator",
+		studio: "studio",
+		distributor: "distributor",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRecommendationReason =
+	{
+		followed_unit: "followed_unit",
+		followed_realm: "followed_realm",
+		based_on_activity: "based_on_activity",
+		related_subject: "related_subject",
+		popular_now: "popular_now",
+		new_and_relevant: "new_and_relevant",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRecommendationReason =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRecommendationReason)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRecommendationReason];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsTrackingSurfaceEnum =
+	{
+		home_feed: "home_feed",
+		home_book: "home_book",
+		home_software: "home_software",
+		home_media: "home_media",
+		unit_related: "unit_related",
+		post_related: "post_related",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsTrackingSurfaceEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsTrackingSurfaceEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum = {
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	poll: "poll",
+	realm: "realm",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPostKindEnum = {
+	post: "post",
+	reply: "reply",
+	excerpt: "excerpt",
+	review: "review",
+	chapter: "chapter",
+	chapter_group: "chapter_group",
+	wiki: "wiki",
+	picture: "picture",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPostKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPostKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPostKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsRoleEnum =
+	{
+		author: "author",
+		"co-author": "co-author",
+		translator: "translator",
+		illustrator: "illustrator",
+		editor: "editor",
+		publisher: "publisher",
+		letterer: "letterer",
+		colorist: "colorist",
+		developer: "developer",
+		composer: "composer",
+		designer: "designer",
+		director: "director",
+		producer: "producer",
+		writer: "writer",
+		actor: "actor",
+		narrator: "narrator",
+		studio: "studio",
+		distributor: "distributor",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+	{
+		exact: "exact",
+		"lower-bound": "lower-bound",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: (
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type array
+				 */
+				attributions: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'author'
+					 * @type string
+					 */
+					role: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsRoleEnum;
+					/**
+					 * @description
+					 * Format: `fractional-position`
+					 * @minLength 2
+					 * @maxLength 512
+					 * @type string
+					 */
+					position: string;
+					/**
+					 * @type object
+					 */
+					creditedUnit: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @default 'slug_namespace'
+						 * @type string
+						 */
+						kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						avatar:
+							| (
+									| (
+											| {
+													/**
+													 * @type string
+													 */
+													type: "image";
+													/**
+													 * @type object
+													 */
+													image: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														id: string;
+														/**
+														 * @type string
+														 */
+														url: string;
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "emoji";
+													/**
+													 * @maxLength 64
+													 * @type string
+													 */
+													emoji: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "icon";
+													/**
+													 * @type object
+													 */
+													icon: {
+														/**
+														 * @type string
+														 */
+														provider: "font-awesome";
+														/**
+														 * @type string
+														 */
+														prefix: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+														/**
+														 * @maxLength 128
+														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+														 * @type string
+														 */
+														name: string;
+													};
+											  }
+									  )
+									| null
+							  )
+							| null;
+					};
+				}[];
+				realmId: (string | null) | null;
+				/**
+				 * @type array
+				 */
+				realms: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				title: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				updatedAt: string;
+				/**
+				 * @type object
+				 */
+				reactions: {
+					upvote: string | number;
+					downvote: string | number;
+				};
+				viewerReaction: (string | null) | null;
+				recommendationReason:
+					| (PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRecommendationReason | null)
+					| null;
+				tracking:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							requestId: string;
+							/**
+							 * @default 'home_feed'
+							 * @type string
+							 */
+							surface: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsTrackingSurfaceEnum;
+							position: string | number;
+							/**
+							 * @minLength 1
+							 * @maxLength 64
+							 * @pattern \S
+							 * @type string
+							 */
+							policyVersion: string;
+							/**
+							 * @minLength 43
+							 * @maxLength 43
+							 * @pattern ^[A-Za-z0-9_-]{43}$
+							 * @type string
+							 */
+							signature: string;
+					  } | null)
+					| null;
+				/**
+				 * @type string
+				 */
+				itemType: "unit";
+				/**
+				 * @default 'profile'
+				 * @type string
+				 */
+				unitKind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum;
+				/**
+				 * @type null
+				 */
+				postKind: null;
+				summary: (string | null) | null;
+				cover:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				collection:
+					| ({
+							directItemCount: string | number;
+					  } | null)
+					| null;
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type array
+				 */
+				attributions: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'author'
+					 * @type string
+					 */
+					role: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsRoleEnum;
+					/**
+					 * @description
+					 * Format: `fractional-position`
+					 * @minLength 2
+					 * @maxLength 512
+					 * @type string
+					 */
+					position: string;
+					/**
+					 * @type object
+					 */
+					creditedUnit: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @default 'slug_namespace'
+						 * @type string
+						 */
+						kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						avatar:
+							| (
+									| (
+											| {
+													/**
+													 * @type string
+													 */
+													type: "image";
+													/**
+													 * @type object
+													 */
+													image: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														id: string;
+														/**
+														 * @type string
+														 */
+														url: string;
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "emoji";
+													/**
+													 * @maxLength 64
+													 * @type string
+													 */
+													emoji: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "icon";
+													/**
+													 * @type object
+													 */
+													icon: {
+														/**
+														 * @type string
+														 */
+														provider: "font-awesome";
+														/**
+														 * @type string
+														 */
+														prefix: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+														/**
+														 * @maxLength 128
+														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+														 * @type string
+														 */
+														name: string;
+													};
+											  }
+									  )
+									| null
+							  )
+							| null;
+					};
+				}[];
+				realmId: (string | null) | null;
+				/**
+				 * @type array
+				 */
+				realms: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				title: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				updatedAt: string;
+				/**
+				 * @type object
+				 */
+				reactions: {
+					upvote: string | number;
+					downvote: string | number;
+				};
+				viewerReaction: (string | null) | null;
+				recommendationReason:
+					| (PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRecommendationReason | null)
+					| null;
+				tracking:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							requestId: string;
+							/**
+							 * @default 'home_feed'
+							 * @type string
+							 */
+							surface: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsTrackingSurfaceEnum;
+							position: string | number;
+							/**
+							 * @minLength 1
+							 * @maxLength 64
+							 * @pattern \S
+							 * @type string
+							 */
+							policyVersion: string;
+							/**
+							 * @minLength 43
+							 * @maxLength 43
+							 * @pattern ^[A-Za-z0-9_-]{43}$
+							 * @type string
+							 */
+							signature: string;
+					  } | null)
+					| null;
+				/**
+				 * @type string
+				 */
+				itemType: "post";
+				/**
+				 * @type string
+				 */
+				unitKind: "post";
+				/**
+				 * @default 'post'
+				 * @type string
+				 */
+				postKind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPostKindEnum;
+				summary: (string | null) | null;
+				cover:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				subjectId: (string | null) | null;
+				rootPostId: (string | null) | null;
+				parentPostId: (string | null) | null;
+				body:
+					| ({
+							/**
+							 * @type string
+							 */
+							_type: "portable-text";
+							/**
+							 * @pattern ^[0-9a-f]{12}$
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type array
+							 */
+							content: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "block";
+										/**
+										 * @type array
+										 */
+										children: (
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: "span";
+													/**
+													 * @type string
+													 */
+													text: string;
+													/**
+													 * @type array | undefined
+													 */
+													marks?: string[];
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @pattern ^(?!span$).+
+													 * @type string
+													 */
+													_type: string;
+													[key: string]: unknown;
+											  }
+										)[];
+										/**
+										 * @type array | undefined
+										 */
+										markDefs?: {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+										}[];
+										/**
+										 * @type string | undefined
+										 */
+										listItem?: string;
+										/**
+										 * @type string | undefined
+										 */
+										style?: string;
+										/**
+										 * @minLength 1
+										 * @type integer | undefined
+										 */
+										level?: number;
+										[key: string]: unknown;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "image";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										assetId: string;
+										/**
+										 * @type string | undefined
+										 */
+										alt?: string;
+										/**
+										 * @type string | undefined
+										 */
+										caption?: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!(?:block|image)$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+					  } | null)
+					| null;
+				replyCount: string | number;
+				latestRevisionId: (string | null) | null;
+				replyContext:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							rootPostId: string;
+							title: (string | null) | null;
+							/**
+							 * @type array
+							 */
+							attributions: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'author'
+								 * @type string
+								 */
+								role: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsRoleEnum;
+								/**
+								 * @description
+								 * Format: `fractional-position`
+								 * @minLength 2
+								 * @maxLength 512
+								 * @type string
+								 */
+								position: string;
+								/**
+								 * @type object
+								 */
+								creditedUnit: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @default 'slug_namespace'
+									 * @type string
+									 */
+									kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+									slugAddress:
+										| ({
+												/**
+												 * @minLength 1
+												 * @maxLength 63
+												 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+												 * @type string
+												 */
+												slug: string;
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												scopeUnitId: string;
+												/**
+												 * @type array
+												 */
+												canonicalPath: string[];
+										  } | null)
+										| null;
+									title: (string | null) | null;
+									summary: (string | null) | null;
+									avatar:
+										| (
+												| (
+														| {
+																/**
+																 * @type string
+																 */
+																type: "image";
+																/**
+																 * @type object
+																 */
+																image: {
+																	/**
+																	 * @description
+																	 * Format: `uuid`
+																	 * @type string
+																	 */
+																	id: string;
+																	/**
+																	 * @type string
+																	 */
+																	url: string;
+																};
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																type: "emoji";
+																/**
+																 * @maxLength 64
+																 * @type string
+																 */
+																emoji: string;
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																type: "icon";
+																/**
+																 * @type object
+																 */
+																icon: {
+																	/**
+																	 * @type string
+																	 */
+																	provider: "font-awesome";
+																	/**
+																	 * @type string
+																	 */
+																	prefix: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																	/**
+																	 * @maxLength 128
+																	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																	 * @type string
+																	 */
+																	name: string;
+																};
+														  }
+												  )
+												| null
+										  )
+										| null;
+								};
+							}[];
+							subjectId: (string | null) | null;
+					  } | null)
+					| null;
+				subject:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							type: string;
+							title: (string | null) | null;
+							summary: (string | null) | null;
+							cover:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+							score:
+								| ({
+										totalScore: string | number;
+										totalCount: string | number;
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+		  }
+	)[];
+	/**
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
+	/**
+	 * @type array | undefined
+	 */
+	facets?: {
+		/**
+		 * @type string | undefined
+		 */
+		controlKey?: string;
+		/**
+		 * @type string
+		 */
+		field: string;
+		/**
+		 * @type array
+		 */
+		options: {
+			/**
+			 * @type string
+			 */
+			value: string;
+			/**
+			 * @type object
+			 */
+			count: {
+				value: string | number;
+				/**
+				 * @default 'exact'
+				 * @type string
+				 */
+				relation: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
+			};
+		}[];
+	}[];
+	total: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400 = MalformedRequestBody;
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	DockNotFound: "DockNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SearchUnavailable'
+		 * @type string
+		 */
+		code: "SearchUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum = {
+	tag: "tag",
+	realm: "realm",
+	link: "link",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
+	/**
+	 * @type array
+	 */
+	injections: {
+		/**
+		 * @type string
+		 */
+		source: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum;
+		/**
+		 * @type object
+		 */
+		value: {
+			/**
+			 * @minLength 1
+			 * @maxLength 64
+			 * @pattern ^[a-z][a-z0-9-]*$
+			 * @type string
+			 */
+			controlKey: string;
+			filter:
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "not-equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						operator: "any-of" | "all-of" | "none-of";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| (
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower: string | number | boolean;
+								upper?: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower?: string | number | boolean;
+								upper: string | number | boolean;
+						  }
+				  )
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "exists";
+						/**
+						 * @type boolean
+						 */
+						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
+				  };
+		};
+		/**
+		 * @default true
+		 * @type boolean
+		 */
+		removable: boolean;
+	}[];
+	state:
+		| {
+				/**
+				 * @maxLength 500
+				 * @type string | undefined
+				 */
+				query?: string;
+				sort?:
+					| "relevance"
+					| "createdAt:asc"
+					| "createdAt:desc"
+					| "updatedAt:asc"
+					| "updatedAt:desc"
+					| "publishedAt:asc"
+					| "publishedAt:desc"
+					| "followerCount:asc"
+					| "followerCount:desc"
+					| "replyCount:asc"
+					| "replyCount:desc"
+					| "closesAt:asc"
+					| "closesAt:desc";
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type integer | undefined
+				 */
+				pageSize?: number;
+				/**
+				 * @maxLength 4096
+				 * @pattern ^s2_[A-Za-z0-9_-]+$
+				 * @type string | undefined
+				 */
+				cursor?: string;
+				/**
+				 * @type string
+				 */
+				mode: "basic";
+				/**
+				 * @type array
+				 */
+				values: {
+					/**
+					 * @minLength 1
+					 * @maxLength 64
+					 * @pattern ^[a-z][a-z0-9-]*$
+					 * @type string
+					 */
+					controlKey: string;
+					filter:
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
+						  };
+				}[];
+		  }
+		| {
+				/**
+				 * @maxLength 500
+				 * @type string | undefined
+				 */
+				query?: string;
+				sort?:
+					| "relevance"
+					| "createdAt:asc"
+					| "createdAt:desc"
+					| "updatedAt:asc"
+					| "updatedAt:desc"
+					| "publishedAt:asc"
+					| "publishedAt:desc"
+					| "followerCount:asc"
+					| "followerCount:desc"
+					| "replyCount:asc"
+					| "replyCount:desc"
+					| "closesAt:asc"
+					| "closesAt:desc";
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type integer | undefined
+				 */
+				pageSize?: number;
+				/**
+				 * @maxLength 4096
+				 * @pattern ^s2_[A-Za-z0-9_-]+$
+				 * @type string | undefined
+				 */
+				cursor?: string;
+				/**
+				 * @type string
+				 */
+				mode: "advanced";
+				expression?:
+					| {
+							/**
+							 * @minLength 1
+							 * @maxLength 64
+							 * @pattern ^[a-z][a-z0-9-]*$
+							 * @type string
+							 */
+							controlKey: string;
+							filter:
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "equals";
+										value: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "not-equals";
+										value: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										operator: "any-of" | "all-of" | "none-of";
+										/**
+										 * @type array
+										 */
+										values: (string | number | boolean)[];
+								  }
+								| (
+										| {
+												field:
+													| "category"
+													| "kind"
+													| "language"
+													| "content-rating"
+													| "ai-disclosure"
+													| "license"
+													| "tag"
+													| "credit"
+													| "realm"
+													| "zone"
+													| "subject"
+													| "target"
+													| "root"
+													| "parent"
+													| "owner"
+													| "join-policy"
+													| "multiple"
+													| "results-visibility"
+													| "closed"
+													| "created-at"
+													| "updated-at"
+													| "published-at"
+													| "closes-at"
+													| "catalog-licensed"
+													| "catalog-release-date"
+													| "book-isbn13"
+													| "book-publication-date"
+													| "book-page-count"
+													| "book-word-count"
+													| "book-format"
+													| "media-kind"
+													| "media-release-date"
+													| "media-runtime-minutes"
+													| "media-episode-count"
+													| "media-season-count"
+													| "software-release-date"
+													| "software-version-label"
+													| "software-platform"
+													| "software-requirement-tier";
+												/**
+												 * @type string
+												 */
+												operator: "range";
+												lower: string | number | boolean;
+												upper?: string | number | boolean;
+										  }
+										| {
+												field:
+													| "category"
+													| "kind"
+													| "language"
+													| "content-rating"
+													| "ai-disclosure"
+													| "license"
+													| "tag"
+													| "credit"
+													| "realm"
+													| "zone"
+													| "subject"
+													| "target"
+													| "root"
+													| "parent"
+													| "owner"
+													| "join-policy"
+													| "multiple"
+													| "results-visibility"
+													| "closed"
+													| "created-at"
+													| "updated-at"
+													| "published-at"
+													| "closes-at"
+													| "catalog-licensed"
+													| "catalog-release-date"
+													| "book-isbn13"
+													| "book-publication-date"
+													| "book-page-count"
+													| "book-word-count"
+													| "book-format"
+													| "media-kind"
+													| "media-release-date"
+													| "media-runtime-minutes"
+													| "media-episode-count"
+													| "media-season-count"
+													| "software-release-date"
+													| "software-version-label"
+													| "software-platform"
+													| "software-requirement-tier";
+												/**
+												 * @type string
+												 */
+												operator: "range";
+												lower?: string | number | boolean;
+												upper: string | number | boolean;
+										  }
+								  )
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "exists";
+										/**
+										 * @type boolean
+										 */
+										value: boolean;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										field: "realm-tag-vote";
+										/**
+										 * @type string
+										 */
+										operator: "matches";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										realmId: string;
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										tagId: string;
+										score?:
+											| {
+													/**
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @type integer
+													 */
+													upper: number;
+											  };
+										voteCount?:
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													upper: number;
+											  };
+								  };
+					  }
+					| {
+							operator: "all" | "any";
+							/**
+							 * @type array
+							 */
+							clauses: unknown[];
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							operator: "not";
+							/**
+							 * @type unknown
+							 */
+							clause: unknown;
+					  };
+		  };
+	surface:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "dock";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "page";
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+				 * @type string
+				 */
+				slug: string;
+		  };
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions = {
+	body: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody;
+	path: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecutePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses = {
+	"200": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200;
+	"400": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400;
+	"404": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404;
+	"422": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422;
+	"500": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500;
+	"503": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponse =
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503;
 
 export const PostApiSearchStatus200FacetsOptionsCountRelationEnum = {
 	exact: "exact",

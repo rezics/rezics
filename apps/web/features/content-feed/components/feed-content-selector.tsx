@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCheckIcon, ChevronsUpDownIcon, ListFilterIcon, XIcon } from "lucide-react";
+import { ChevronsUpDownIcon, ListFilterIcon, XIcon } from "lucide-react";
 
 import {
 	Button,
@@ -14,6 +14,7 @@ import {
 	cn,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { filterSelectionFromValues, filterSelectionValues } from "../model/filter-selection";
 
 export interface FeedContentOption<Value extends string> {
 	readonly value: Value;
@@ -36,7 +37,11 @@ export function FeedContentSelector<Value extends string>({
 }) {
 	const { t } = useTranslation(["feed"]);
 	const availableValues = new Set(options.map((option) => option.value));
-	const selectedValues = value.filter((candidate) => availableValues.has(candidate));
+	const explicitValues = value.filter((candidate) => availableValues.has(candidate));
+	const selectedValues = filterSelectionValues(
+		filterSelectionFromValues(explicitValues),
+		options.map((option) => option.value),
+	);
 	const selected = new Set(selectedValues);
 	const selectedLabels = options.flatMap((option) =>
 		selected.has(option.value) ? [option.label] : [],
@@ -46,11 +51,9 @@ export function FeedContentSelector<Value extends string>({
 	const summary =
 		selectedLabels.length === options.length
 			? t.feed.content.allSelected
-			: selectedLabels.length === 0
-				? t.feed.content.noneSelected
-				: selectedLabels.length <= 2
-					? selectedLabels.join(", ")
-					: t.feed.content.selectedCount({ count: selectedLabels.length });
+			: selectedLabels.length <= 2
+				? selectedLabels.join(", ")
+				: t.feed.content.selectedCount({ count: selectedLabels.length });
 	const setChecked = (option: FeedContentOption<Value>, checked: boolean) => {
 		const next = new Set(selectedValues);
 		if (checked) next.add(option.value);
@@ -80,20 +83,12 @@ export function FeedContentSelector<Value extends string>({
 				{showBulkActions ? (
 					<>
 						<MenuItem
-							disabled={selectedValues.length === 0}
+							disabled={explicitValues.length === 0}
 							onSelect={() => onValueChange([])}
 							value="clear-feed-content"
 						>
 							<XIcon aria-hidden />
 							{t.feed.content.clear}
-						</MenuItem>
-						<MenuItem
-							disabled={selectedValues.length === options.length}
-							onSelect={() => onValueChange(options.map((option) => option.value))}
-							value="select-all-feed-content"
-						>
-							<CheckCheckIcon aria-hidden />
-							{t.feed.content.all}
 						</MenuItem>
 						<MenuSeparator />
 					</>

@@ -6,24 +6,16 @@ import {
 	type GetApiFeedSort,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import {
-	Alert,
-	AlertAction,
-	AlertDescription,
-	Button,
-	CardContent,
-	ChoiceSelect,
-	Skeleton,
-	cn,
-} from "@rezics/ui";
+import { Alert, AlertAction, AlertDescription, Button, ChoiceSelect } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { FeedContentSelector, type FeedContentOption } from "./feed-content-selector";
-import { FeedCard } from "./feed-card";
-import { FeedItemCard } from "./feed-item-card";
-import type { FeedContentKind } from "./feed-kind";
+import { FeedContentSelector, type FeedContentOption } from "../components/feed-content-selector";
+import { FeedItemCard } from "../components/feed-item-card";
+import { FeedList } from "../components/feed-list";
+import type { FeedContentKind } from "../model/feed-kind";
+import { filterSelectionFromValues, filterSelectionValues } from "../model/filter-selection";
 
 const FeedSorts = [
 	"best",
@@ -33,7 +25,7 @@ const FeedSorts = [
 	"rising",
 ] as const satisfies readonly GetApiFeedSort[];
 
-export interface FeedListProps<ContentKind extends FeedContentKind = FeedContentKind> {
+export interface ApiFeedListProps<ContentKind extends FeedContentKind = FeedContentKind> {
 	contentKinds: readonly ContentKind[];
 	contentOptions: readonly ContentKind[];
 	infinite?: boolean;
@@ -46,7 +38,7 @@ export interface FeedListProps<ContentKind extends FeedContentKind = FeedContent
 	subjectId?: string;
 }
 
-export function FeedList<ContentKind extends FeedContentKind>({
+export function ApiFeedList<ContentKind extends FeedContentKind>({
 	contentKinds,
 	contentOptions,
 	infinite = false,
@@ -57,13 +49,16 @@ export function FeedList<ContentKind extends FeedContentKind>({
 	showBulkActions = false,
 	sort = "new",
 	subjectId,
-}: FeedListProps<ContentKind>) {
+}: ApiFeedListProps<ContentKind>) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-	const selectedContent = [...contentKinds];
+	const selectedContent = filterSelectionValues(
+		filterSelectionFromValues(contentKinds),
+		contentOptions,
+	);
 	const baseQuery = {
-		content: selectedContent,
+		content: [...selectedContent],
 		limit: 20,
 		sort,
 		...(realmId ? { realmId } : {}),
@@ -79,7 +74,6 @@ export function FeedList<ContentKind extends FeedContentKind>({
 			});
 			return data;
 		},
-		enabled: selectedContent.length > 0,
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
@@ -134,40 +128,14 @@ export function FeedList<ContentKind extends FeedContentKind>({
 					sort={sort}
 				/>
 			) : null}
-			{selectedContent.length === 0 ? (
-				<FeedEmptyState />
-			) : query.isPending ? (
-				<div className="grid gap-2 p-3 sm:p-4">
-					{Array.from({ length: 4 }, (_, index) => (
-						<FeedSkeleton key={index} />
-					))}
-				</div>
-			) : query.isError && !query.data ? (
-				<Alert className="m-3 sm:m-4" variant="destructive">
-					<AlertDescription>{t.state.error}</AlertDescription>
-					<AlertAction>
-						<Button size="sm" variant="quiet" onClick={() => void query.refetch()}>
-							{t.actions.retry}
-						</Button>
-					</AlertAction>
-				</Alert>
-			) : !items?.length ? (
-				<FeedEmptyState />
-			) : (
-				<FeedListItems
-					aria-label={t.feed.title}
-					className={showControls ? "mt-3 sm:mt-4" : undefined}
-				>
-					{items.map((item) => (
-						<FeedItemCard
-							canExclude={Boolean(session)}
-							item={item}
-							key={item.id}
-							onHiddenChange={(value) => setItemHidden(item.id, value)}
-							requestedRealmId={realmId}
-						/>
-					))}
-					{query.isFetchNextPageError ? (
+			<FeedList
+				aria-label={t.feed.title}
+				className={showControls ? "mt-3 sm:mt-4" : undefined}
+				emptyBody={t.feed.emptyBody}
+				emptyTitle={t.feed.emptyTitle}
+				errorLabel={t.state.error}
+				footer={
+					query.isFetchNextPageError ? (
 						<Alert variant="destructive">
 							<AlertDescription>{t.state.error}</AlertDescription>
 							<AlertAction>
@@ -203,9 +171,28 @@ export function FeedList<ContentKind extends FeedContentKind>({
 								{t.actions.loadMore}
 							</Button>
 						)
-					) : null}
-				</FeedListItems>
-			)}
+					) : null
+				}
+				getItemKey={(item) => item.id}
+				renderItem={(item, metadata) => (
+					<FeedItemCard
+						canExclude={Boolean(session)}
+						item={item}
+						onHiddenChange={(value) => setItemHidden(item.id, value)}
+						position={metadata.position}
+						requestedRealmId={realmId}
+						setSize={metadata.setSize}
+					/>
+				)}
+				retryLabel={t.actions.retry}
+				state={
+					query.isPending
+						? { status: "pending" }
+						: query.isError && !query.data
+							? { status: "error", retry: () => void query.refetch() }
+							: { status: "ready", items: items ?? [] }
+				}
+			/>
 		</div>
 	);
 }
@@ -218,7 +205,7 @@ export function FeedListControls<ContentKind extends FeedContentKind>({
 	showBulkActions = false,
 	sort,
 }: Pick<
-	FeedListProps<ContentKind>,
+	ApiFeedListProps<ContentKind>,
 	| "contentKinds"
 	| "contentOptions"
 	| "onContentKindsChange"
@@ -269,45 +256,5 @@ export function FeedListControls<ContentKind extends FeedContentKind>({
 				/>
 			) : null}
 		</div>
-	);
-}
-
-export function FeedListItems({ children, className, ...props }: ComponentProps<"div">) {
-	return (
-		<div
-			className={cn("grid w-full gap-3 bg-transparent sm:gap-4", className)}
-			data-slot="feed-list-items"
-			role="feed"
-			{...props}
-		>
-			{children}
-		</div>
-	);
-}
-
-function FeedEmptyState() {
-	const { t } = useTranslation(["feed"]);
-	return (
-		<div className="grid min-h-56 place-items-center p-8 text-center">
-			<div>
-				<p className="font-heading font-bold">{t.feed.emptyTitle}</p>
-				<p className="mt-1 text-muted-foreground text-sm">{t.feed.emptyBody}</p>
-			</div>
-		</div>
-	);
-}
-
-function FeedSkeleton() {
-	return (
-		<FeedCard aria-hidden>
-			<CardContent className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 px-4 py-5 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:px-5">
-				<Skeleton className="aspect-[3/4] w-full rounded-xl" />
-				<div className="grid content-start gap-3">
-					<Skeleton className="h-4 w-1/3" />
-					<Skeleton className="h-5 w-2/3" />
-					<Skeleton className="h-16 w-full" />
-				</div>
-			</CardContent>
-		</FeedCard>
 	);
 }

@@ -11,8 +11,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDaysIcon, PencilIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 
+import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -32,12 +33,24 @@ export function useProfileContext(): ProfileContextValue {
 }
 
 export function ProfileLayout({ children, profileId }: { children: ReactNode; profileId: string }) {
-	const { t, locale } = useTranslation(["profiles", "ui"]);
+	const { t, locale } = useTranslation(["profiles", "search", "ui"]);
 	const pathname = usePathname();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const profile = useGetApiUsersById({ path: { id: profileId } });
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
+	const headerSearch = useMemo(() => {
+		if (!profile.data) return undefined;
+		const name = profile.data.name ?? t.ui.unnamed;
+		return {
+			href: `${profileHref(profile.data)}/search`,
+			label: t.search.withinLabel({ name }),
+			placeholder: t.search.withinPlaceholder({ name }),
+			avatar: profile.data.avatar,
+			avatarFallback: name.slice(0, 1).toUpperCase(),
+		};
+	}, [profile.data, t.search, t.ui.unnamed]);
+	useHeaderSearchOverride(headerSearch);
 
 	if (profile.isPending || (session && me.isPending)) return <QueryPending />;
 	if (profile.isError || !profile.data)

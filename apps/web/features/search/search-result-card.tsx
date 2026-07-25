@@ -4,7 +4,11 @@ import type { PresentedAvatar } from "@rezics/avatar";
 import { IdentityAvatar, LinkBox, LinkOverlay } from "@rezics/ui";
 import { useId } from "react";
 
-import { FeedCard, FeedCardBody, FeedCardContent } from "@/features/content-feed/feed-card";
+import {
+	FeedCard,
+	FeedCardBody,
+	FeedCardContent,
+} from "@/features/content-feed/components/feed-card";
 import { useTranslation } from "@/i18n/client";
 
 export interface SearchResultCardData {

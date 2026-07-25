@@ -638,18 +638,28 @@ export async function getFeedRankingCandidates(input: {
 	});
 }
 
-type RankedFeedCandidate = ReturnType<typeof rankRecommendations<FeedRankingCandidate>>[number];
+export interface FeedHydrationCandidate {
+	readonly id: string;
+	readonly realmId: string | null;
+}
+
+export type FeedHydrationOrigin =
+	| Readonly<{
+			kind: "recommendation";
+			reasons: ReadonlyMap<string, RecommendationReason>;
+			surface: RecommendationSurface;
+			requestId: string;
+			positionOffset: number;
+			policyVersion: string;
+	  }>
+	| Readonly<{ kind: "contextual" }>;
 
 export async function hydrateFeedItems(
-	page: readonly RankedFeedCandidate[],
+	page: readonly FeedHydrationCandidate[],
 	viewer: RecommendationViewer,
 	query: Pick<FeedQueryType, "content" | "realmId" | "subjectId">,
 	asOf: Date,
-	reasons: CandidateSources["reason"],
-	surface: RecommendationSurface,
-	requestId: string,
-	positionOffset: number,
-	policyVersion: string,
+	origin: FeedHydrationOrigin,
 ): Promise<FeedItemResponseValue[]> {
 	const pageIds = page.map(({ id }) => id);
 	if (!pageIds.length) return [];
@@ -888,6 +898,15 @@ export async function hydrateFeedItems(
 		const row = rowMap.get(id);
 		const ranked = pageMap.get(id);
 		if (!row || !ranked) return [];
+		const tracking =
+			origin.kind === "recommendation"
+				? createRecommendationTracking(row.id, {
+						requestId: origin.requestId,
+						surface: origin.surface,
+						position: origin.positionOffset + index,
+						policyVersion: origin.policyVersion,
+					})
+				: null;
 		const common = {
 			id: row.id,
 			attributions: attributions.get(row.id) ?? [],
@@ -901,13 +920,9 @@ export async function hydrateFeedItems(
 				downvote: reactionCount.get(`${row.id}:downvote`) ?? 0,
 			},
 			viewerReaction: ownReaction.get(`${row.id}:${ranked.realmId ?? ""}`) ?? null,
-			recommendationReason: reasons.get(row.id) ?? null,
-			tracking: createRecommendationTracking(row.id, {
-				requestId,
-				surface,
-				position: positionOffset + index,
-				policyVersion,
-			}),
+			recommendationReason:
+				origin.kind === "recommendation" ? (origin.reasons.get(row.id) ?? null) : null,
+			tracking,
 		};
 		if (isFeedUnitKind(row.unitKind))
 			return [
@@ -1014,17 +1029,14 @@ export default new Elysia({ prefix: "/feed" }).get(
 		const content = resolveFeedContentSelection(query.content).selected;
 		const page = ranked.slice(start, start + limit);
 		const requestId = crypto.randomUUID();
-		const items = await hydrateFeedItems(
-			page,
-			viewer,
-			query,
-			asOf,
-			sources.reason,
-			"home_feed",
+		const items = await hydrateFeedItems(page, viewer, query, asOf, {
+			kind: "recommendation",
+			reasons: sources.reason,
+			surface: "home_feed",
 			requestId,
-			start,
-			snapshotContext.policyVersion,
-		);
+			positionOffset: start,
+			policyVersion: snapshotContext.policyVersion,
+		});
 		const last = page.at(-1);
 		return {
 			items,

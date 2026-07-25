@@ -171,7 +171,6 @@ function createOfficialZoneContent(input: {
 		string,
 		string,
 		string,
-		string,
 	];
 	readonly zh: { readonly title: string; readonly body: string };
 	readonly en: { readonly title: string; readonly body: string };
@@ -185,7 +184,6 @@ function createOfficialZoneContent(input: {
 		pageKey,
 		fullViewKey,
 		menuKey,
-		searchKey,
 		feedKey,
 	] = input.keys;
 	const body = (language: "zh" | "en") => {
@@ -225,8 +223,8 @@ function createOfficialZoneContent(input: {
 						_type: "feed",
 						_key: feedKey,
 						feature: { kind: "zone" },
+						defaults: [],
 						presentation: {
-							results: "grid",
 							pagination: "load-more",
 							showResultCount: true,
 						},
@@ -257,12 +255,6 @@ function createOfficialZoneContent(input: {
 					navigationId: input.navigationId,
 					orientation: "horizontal",
 					appearance: "links",
-				},
-				{
-					_type: "search",
-					_key: searchKey,
-					feature: { kind: "zone" },
-					presentation: { results: "compact", showResultCount: true },
 				},
 			],
 			`2${menuKey.slice(1)}`,
@@ -309,7 +301,6 @@ export const OfficialZoneManifest = [
 				"b00757010006",
 				"b00757010007",
 				"b00757010008",
-				"b00757010009",
 				"b0075701000a",
 			],
 			zh: { title: "書庫首頁", body: "從書庫探索作品、版本與相關內容。" },
@@ -357,7 +348,6 @@ export const OfficialZoneManifest = [
 				"b00757020006",
 				"b00757020007",
 				"b00757020008",
-				"b00757020009",
 				"b0075702000a",
 			],
 			zh: { title: "媒體庫首頁", body: "從媒體庫探索電影、電視、動畫與相關內容。" },
@@ -405,7 +395,6 @@ export const OfficialZoneManifest = [
 				"b00757030006",
 				"b00757030007",
 				"b00757030008",
-				"b00757030009",
 				"b0075703000a",
 			],
 			zh: { title: "軟體庫首頁", body: "從軟體庫探索應用程式、工具、遊戲與相關內容。" },

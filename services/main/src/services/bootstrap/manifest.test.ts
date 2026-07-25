@@ -121,10 +121,6 @@ describe("database bootstrap manifest", () => {
 					_type: "menu",
 					navigationId: value.navigation.id,
 				}),
-				expect.objectContaining({
-					_type: "search",
-					feature: { kind: "zone" },
-				}),
 			]);
 		}
 		expect(OfficialZoneManifest.map((value) => value.searchTemplate)).toEqual([

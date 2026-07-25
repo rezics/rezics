@@ -181,17 +181,14 @@ export async function recommendRelatedPosts(input: {
 	const start = input.afterId ? ranked.findIndex(({ id }) => id === input.afterId) + 1 : 0;
 	if (input.afterId && start === 0) return null;
 	const page = ranked.slice(start, start + input.pageSize);
-	const items = await hydrateFeedItems(
-		page,
-		input.viewer,
-		RelatedPostFeedQuery,
-		input.asOf,
-		reason,
-		"post_related",
-		input.requestId,
-		start,
-		input.snapshot?.policyVersion ?? RecommendationPolicyVersion,
-	);
+	const items = await hydrateFeedItems(page, input.viewer, RelatedPostFeedQuery, input.asOf, {
+		kind: "recommendation",
+		reasons: reason,
+		surface: "post_related",
+		requestId: input.requestId,
+		positionOffset: start,
+		policyVersion: input.snapshot?.policyVersion ?? RecommendationPolicyVersion,
+	});
 	return {
 		items: items.filter((item) => item.itemType === "post"),
 		nextId: start + page.length < ranked.length ? page.at(-1)?.id : undefined,

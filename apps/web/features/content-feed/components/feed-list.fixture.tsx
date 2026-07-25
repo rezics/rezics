@@ -8,8 +8,9 @@ import {
 	CollectionFeedCard,
 	PostFeedCard,
 	ReviewFeedCard,
-} from "@/features/content-feed/feed-card.fixture";
-import { FeedListControls, FeedListItems } from "@/features/content-feed/feed-list";
+} from "@/features/content-feed/components/feed-card.fixture";
+import { FeedListItems } from "@/features/content-feed/components/feed-list";
+import { FeedListControls } from "@/features/content-feed/data/api-feed-list";
 import {
 	DefaultFeedContentKinds,
 	DefaultPostListContentKinds,
@@ -17,7 +18,7 @@ import {
 	PostListContentKinds,
 	type FeedContentKind,
 	type PostListContentKind,
-} from "@/features/content-feed/feed-kind";
+} from "@/features/content-feed/model/feed-kind";
 import { useTranslation } from "@/i18n/client";
 
 function FullFeedListFixture() {

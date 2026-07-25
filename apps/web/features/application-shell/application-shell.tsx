@@ -20,6 +20,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AppLink } from "./components/app-link";
 import { SignedInHeaderActions, SignedOutHeaderActions } from "./components/header-actions";
+import { HeaderSearchProvider, useCurrentHeaderSearch } from "./header-search";
 import { useThemePreference } from "./hooks/use-theme-preference";
 import { sidebarFollowingHref } from "./routing/sidebar-following";
 
@@ -31,8 +32,17 @@ const Links = [
 ] as const;
 
 export function ApplicationShell({ children }: { children: ReactNode }) {
+	return (
+		<HeaderSearchProvider>
+			<ApplicationShellContent>{children}</ApplicationShellContent>
+		</HeaderSearchProvider>
+	);
+}
+
+function ApplicationShellContent({ children }: { readonly children: ReactNode }) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
+	const headerSearch = useCurrentHeaderSearch();
 	const { data: session } = useHydratedSession();
 	const { t, locale } = useTranslation([
 		"actions",
@@ -177,9 +187,12 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 					collapse: t.nav.sidebar.collapse,
 				}}
 				search={{
-					href: "/search",
-					label: t.actions.search,
-					placeholder: t.search.placeholder,
+					href: headerSearch?.href ?? "/search",
+					label: headerSearch?.label ?? t.actions.search,
+					placeholder: headerSearch?.placeholder ?? t.search.placeholder,
+					avatar: headerSearch?.avatar,
+					avatarFallback: headerSearch?.avatarFallback,
+					defaultValue: searchParams.get("q") ?? "",
 				}}
 				skipToContentLabel={t.nav.skipToContent}
 				navigation={Links.map(({ href, key, icon }) => ({

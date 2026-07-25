@@ -661,8 +661,7 @@ export default new Elysia()
 						for (const id of references.assetIds) assetIds.add(id);
 						walkBlockTree(document, (block) => {
 							if (
-								((block._type === "search" || block._type === "feed") &&
-									block.feature.kind === "zone") ||
+								(block._type === "feed" && block.feature.kind === "zone") ||
 								(block._type === "unit-list" &&
 									block.source.kind === "search" &&
 									block.source.feature.kind === "zone")

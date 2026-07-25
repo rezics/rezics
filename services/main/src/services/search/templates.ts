@@ -474,6 +474,7 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 	const zone = contexts.find((context) => context.kind === "zone");
 	const unit = contexts.find((context) => context.kind === "unit");
 	const realm = contexts.find((context) => context.kind === "realm");
+	const profile = contexts.find((context) => context.kind === "profile");
 	return {
 		scope: unit
 			? {
@@ -486,6 +487,43 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 		contextFilters: realm
 			? ([{ field: "realm", operator: "equals", value: realm.realmId }] as const)
 			: [],
+		contextExpression: profile
+			? ({
+					operator: "any",
+					clauses: [
+						{
+							operator: "all",
+							clauses: [
+								{
+									field: "category",
+									operator: "any-of",
+									values: ["posts", "reviews"],
+								},
+								{
+									field: "credit",
+									operator: "equals",
+									value: profile.profileId,
+								},
+							],
+						},
+						{
+							operator: "all",
+							clauses: [
+								{
+									field: "category",
+									operator: "any-of",
+									values: ["entity", "collections"],
+								},
+								{
+									field: "owner",
+									operator: "equals",
+									value: profile.profileId,
+								},
+							],
+						},
+					],
+				} satisfies SearchExpression)
+			: undefined,
 	};
 }
 
@@ -582,6 +620,10 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			throw new InvalidSearch(`Required Search control ${control.key} is missing`);
 
 	const context = scopeForContexts(input.contexts);
+	if (context.contextExpression)
+		expression = expression
+			? { operator: "all", clauses: [context.contextExpression, expression] }
+			: context.contextExpression;
 	const facets = input.document.results.facets.map((controlKey) => {
 		const control = controls.get(controlKey);
 		if (!control) throw new InvalidSearch(`Facet control ${controlKey} is unavailable`);

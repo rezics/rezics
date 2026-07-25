@@ -573,6 +573,8 @@ import type {
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses,
 	PostApiSearchOptions,
 	PostApiSearchResponses,
 	PostApiSearchSharedQueriesOptions,
@@ -6248,6 +6250,28 @@ export function postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
 			PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
 			ThrowOnError
 		>
+	>;
+}
+
+/**
+ * @summary Execute a trusted Zone Feed Block
+ * {@link /api/search/zones/:zoneId/feed-blocks/:blockKey/execute}
+ */
+export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/zones/{zoneId}/feed-blocks/{blockKey}/execute",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses, ThrowOnError>
 	>;
 }
 

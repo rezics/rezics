@@ -18,7 +18,7 @@ import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
-import { getFeedActionPolicy } from "./feed-action-policy";
+import { getFeedActionPolicy } from "../model/feed-action-policy";
 import {
 	FeedCard,
 	FeedCardContent,
@@ -28,33 +28,56 @@ import {
 	type FeedRealmContext,
 } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
-import { parseFeedReaction } from "./feed-reaction";
-import { formatRelativeTime } from "./format-relative-time";
+import { parseFeedReaction } from "../model/feed-reaction";
+import { formatRelativeTime } from "../model/format-relative-time";
 
 export type FeedItem = GetApiFeedStatus200["items"][number];
 export type FeedPost = Extract<FeedItem, { itemType: "post" }>;
 export type FeedUnit = Extract<FeedItem, { itemType: "unit" }>;
+type FeedReviewScore = {
+	readonly scoreId: string;
+	readonly contextUnitId: string;
+	readonly value: string | number;
+};
+type PresentableFeedItem = FeedItem & {
+	readonly scores?: readonly FeedReviewScore[];
+};
+type PresentableFeedPost = FeedPost & {
+	readonly scores?: readonly FeedReviewScore[];
+};
 
 export function FeedItemCard({
 	canExclude = false,
 	item,
 	onHiddenChange,
+	position,
 	requestedRealmId,
+	setSize,
 }: {
 	canExclude?: boolean;
-	item: FeedItem;
+	item: PresentableFeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
+	position?: number;
 	requestedRealmId?: string;
+	setSize?: number;
 }) {
 	return item.itemType === "post" ? (
 		<FeedPostCard
 			canExclude={canExclude}
 			onHiddenChange={onHiddenChange}
 			post={item}
+			position={position}
 			requestedRealmId={requestedRealmId}
+			setSize={setSize}
 		/>
 	) : (
-		<FeedUnitCard canExclude={canExclude} onHiddenChange={onHiddenChange} unit={item} />
+		<FeedUnitCard
+			canExclude={canExclude}
+			onHiddenChange={onHiddenChange}
+			position={position}
+			setSize={setSize}
+			unit={item}
+		/>
 	);
 }
 
@@ -63,13 +86,17 @@ export function FeedPostCard({
 	requestedRealmId,
 	canExclude = false,
 	onHiddenChange,
+	position,
+	setSize,
 }: {
-	post: FeedPost;
+	post: PresentableFeedPost;
 	requestedRealmId?: string;
 	canExclude?: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
+	position?: number;
+	setSize?: number;
 }) {
-	const { t, locale } = useTranslation(["actions", "feed", "posts", "state", "ui"]);
+	const { t, locale } = useTranslation(["actions", "engagement", "feed", "posts", "state", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
@@ -87,7 +114,12 @@ export function FeedPostCard({
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
 
 	return (
-		<FeedCard aria-labelledby={`feed-item-${post.id}`} ref={elementRef}>
+		<FeedCard
+			aria-labelledby={`feed-item-${post.id}`}
+			aria-posinset={position}
+			aria-setsize={setSize}
+			ref={elementRef}
+		>
 			<FeedCardHeader
 				menu={
 					<FeedItemOverflowMenu
@@ -105,6 +137,15 @@ export function FeedPostCard({
 				<Badge className="w-fit" size="sm" variant="outline">
 					{t.feed.content.kinds[`post:${post.postKind}`]}
 				</Badge>
+				{post.postKind === "review" && post.scores?.length ? (
+					<p className="font-medium text-sm">
+						{post.scores
+							.map(({ value }) =>
+								t.engagement.scoreOutOfTen({ score: String(value) }),
+							)
+							.join(" · ")}
+					</p>
+				) : null}
 				{post.replyContext ? (
 					<Link
 						className="flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
@@ -179,10 +220,14 @@ function FeedUnitCard({
 	unit,
 	canExclude,
 	onHiddenChange,
+	position,
+	setSize,
 }: {
 	unit: FeedUnit;
 	canExclude: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
+	position?: number;
+	setSize?: number;
 }) {
 	const { t, locale } = useTranslation(["feed", "posts", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(unit.id, unit.tracking);
@@ -193,7 +238,12 @@ function FeedUnitCard({
 	const realms = toFeedRealmContexts(unit.realms, t.ui.unnamed);
 
 	return (
-		<FeedCard aria-labelledby={`feed-item-${unit.id}`} ref={elementRef}>
+		<FeedCard
+			aria-labelledby={`feed-item-${unit.id}`}
+			aria-posinset={position}
+			aria-setsize={setSize}
+			ref={elementRef}
+		>
 			<FeedCardHeader
 				menu={
 					<FeedItemOverflowMenu
@@ -272,6 +322,7 @@ function FeedItemOverflowMenu({
 		},
 	});
 	const markNotInterested = () => {
+		if (!item.tracking) return;
 		onHiddenChange?.(true);
 		exclude.mutate({
 			path: { unitId: item.id },
@@ -289,7 +340,7 @@ function FeedItemOverflowMenu({
 
 	return (
 		<FeedOverflowMenu
-			canExclude={canExclude && !exclude.isPending}
+			canExclude={canExclude && Boolean(item.tracking) && !exclude.isPending}
 			itemId={item.id}
 			onNotInterested={markNotInterested}
 		/>

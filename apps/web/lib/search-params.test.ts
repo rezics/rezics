@@ -1,7 +1,10 @@
 import { createSerializer } from "nuqs/server";
 import { describe, expect, it } from "vitest";
 
-import { DefaultFeedContentKinds, feedContentParser } from "@/features/content-feed/feed-kind";
+import {
+	DefaultFeedContentKinds,
+	feedContentParser,
+} from "@/features/content-feed/model/feed-kind";
 import {
 	authSearchParamsParsers,
 	feedSortParser,

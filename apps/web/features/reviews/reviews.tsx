@@ -52,8 +52,8 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { AttributionLinks } from "@/features/posts/attribution-list";
 import { ReviewComposer } from "./components/review-composer";
+import { ReviewCards } from "./components/unit-review-list";
 
 async function invalidateReviews(
 	queryClient: ReturnType<typeof useQueryClient>,
@@ -88,24 +88,7 @@ export function ReviewsPage() {
 				}
 			/>
 			{query.data?.items.length ? (
-				<div className="grid gap-3">
-					{query.data.items.map((review) => (
-						<Link key={review.id} href={`/reviews/${review.id}`}>
-							<Card className="transition-colors hover:bg-surface-hover">
-								<CardHeader
-									description={review.summary ?? undefined}
-									title={review.title ?? t.ui.unnamed}
-								/>
-								<CardContent className="text-muted-foreground text-sm">
-									<AttributionLinks
-										attributions={review.attributions}
-										emptyLabel={t.posts.unknownAttribution}
-									/>
-								</CardContent>
-							</Card>
-						</Link>
-					))}
-				</div>
+				<ReviewCards items={query.data.items} />
 			) : (
 				<p className="text-muted-foreground text-sm">{t.engagement.emptyReviews}</p>
 			)}

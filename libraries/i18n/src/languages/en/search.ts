@@ -6,10 +6,13 @@ const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: zoneTerms } = enTerminology.zone;
 const { forms: tagStructureTerms } = enTerminology.tagStructure;
+const { forms: followTerms } = enTerminology.follow;
 
 export default {
 	title: "Search",
 	placeholder: `Search units, entities, tags, ${postTerms.plural}, ${realmTerms.plural}, or users`,
+	withinLabel: insert("Search within {{name}}", { name: String }),
+	withinPlaceholder: insert("Search {{name}}", { name: String }),
 	advancedFilters: "Advanced filters",
 	shareQuery: "Share query",
 	shareCopied: "Share link copied",
@@ -78,6 +81,22 @@ export default {
 		group: "Condition group",
 	},
 	scope: "Search scope",
+	sort: "Sort",
+	sortOptions: {
+		relevance: "Relevance",
+		"createdAt:asc": "Oldest created",
+		"createdAt:desc": "Newest created",
+		"updatedAt:asc": "Least recently updated",
+		"updatedAt:desc": "Recently updated",
+		"publishedAt:asc": "Oldest published",
+		"publishedAt:desc": "Newest published",
+		"followerCount:asc": `Fewest ${followTerms.follower}s`,
+		"followerCount:desc": `Most ${followTerms.follower}s`,
+		"replyCount:asc": "Fewest replies",
+		"replyCount:desc": "Most replies",
+		"closesAt:asc": "Closing soonest",
+		"closesAt:desc": "Closing latest",
+	},
 	language: "Content language",
 	allLanguages: "All languages",
 	resetFilters: "Reset filters",

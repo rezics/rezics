@@ -6,10 +6,13 @@ const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
+const { forms: followTerms } = zhHantTerminology.follow;
 
 export default {
 	title: "搜尋",
 	placeholder: `搜尋作品、目錄、標籤、${postTerms.plural}、${realmTerms.plural}或使用者`,
+	withinLabel: insert("在「{{name}}」中搜尋", { name: String }),
+	withinPlaceholder: insert("搜尋「{{name}}」", { name: String }),
 	advancedFilters: "進階篩選",
 	shareQuery: "分享查詢",
 	shareCopied: "已複製分享連結",
@@ -78,6 +81,22 @@ export default {
 		group: "條件群組",
 	},
 	scope: "搜尋範圍",
+	sort: "排序",
+	sortOptions: {
+		relevance: "相關性",
+		"createdAt:asc": "建立時間最早",
+		"createdAt:desc": "建立時間最新",
+		"updatedAt:asc": "最久未更新",
+		"updatedAt:desc": "最近更新",
+		"publishedAt:asc": "發布時間最早",
+		"publishedAt:desc": "發布時間最新",
+		"followerCount:asc": `${followTerms.follower}最少`,
+		"followerCount:desc": `${followTerms.follower}最多`,
+		"replyCount:asc": "回覆最少",
+		"replyCount:desc": "回覆最多",
+		"closesAt:asc": "即將截止",
+		"closesAt:desc": "最晚截止",
+	},
 	language: "內容語言",
 	allLanguages: "全部語言",
 	resetFilters: "重設篩選",

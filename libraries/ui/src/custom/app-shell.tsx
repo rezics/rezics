@@ -428,7 +428,14 @@ export function AppShell({
 	currentPath: string;
 	currentSearch?: string;
 	link: ElementType;
-	search: { href: string; label: string; placeholder: string };
+	search: {
+		href: string;
+		label: string;
+		placeholder: string;
+		avatar?: PresentedAvatar | null;
+		avatarFallback?: string;
+		defaultValue?: string;
+	};
 	sidebar: AppShellSidebarLabels;
 	skipToContentLabel: string;
 	headerActions: ReactNode;
@@ -496,16 +503,27 @@ export function AppShell({
 						<form
 							action={search.href}
 							className="col-span-2 row-start-2 mx-3 block min-w-0 self-center sm:mx-0 sm:min-w-40 sm:max-w-2xl sm:flex-1 xl:absolute xl:start-1/2 xl:top-1/2 xl:w-[38vw] xl:-translate-x-1/2 xl:-translate-y-1/2 2xl:w-[46vw]"
+							key={`${search.href}:${search.defaultValue ?? ""}`}
+							role="search"
 						>
 							<InputGroup
 								className="border-border-weak bg-surface-container shadow-none"
 								size="lg"
 							>
 								<InputGroupAddon align="inline-start">
-									<Logo alt="" aria-hidden="true" className="size-6" />
+									{search.avatarFallback !== undefined ? (
+										<IdentityAvatar
+											avatar={search.avatar}
+											className="size-6"
+											fallback={search.avatarFallback}
+										/>
+									) : (
+										<Logo alt="" aria-hidden="true" className="size-6" />
+									)}
 								</InputGroupAddon>
 								<InputGroupInput
 									aria-label={search.label}
+									defaultValue={search.defaultValue}
 									name="q"
 									placeholder={search.placeholder}
 									type="search"

@@ -168,6 +168,10 @@ export const SearchFeatureContext = Type.Union(
 			{ kind: Type.Literal("realm"), realmId: Uuid },
 			{ additionalProperties: false },
 		),
+		Type.Object(
+			{ kind: Type.Literal("profile"), profileId: Uuid },
+			{ additionalProperties: false },
+		),
 		Type.Object({ kind: Type.Literal("zone"), zoneId: Uuid }, { additionalProperties: false }),
 		Type.Object(
 			{

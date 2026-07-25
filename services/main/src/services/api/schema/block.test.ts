@@ -283,16 +283,17 @@ describe("Block document contracts", () => {
 		).toThrow("Duplicate Block key");
 	});
 
-	test("stores a stable Search Feature source instead of an embedded query schema", () => {
+	test("stores a stable Feed Search Feature source instead of an embedded query schema", () => {
 		const document = {
 			_type: "block-document",
 			_key: "000000000010",
 			blocks: [
 				{
-					_type: "search",
+					_type: "feed",
 					_key: "000000000011",
 					feature: { kind: "template", template: "global" },
-					presentation: { results: "list", showResultCount: true },
+					defaults: [],
+					presentation: { pagination: "load-more", showResultCount: true },
 				},
 			],
 		} satisfies BlockDocumentValue;

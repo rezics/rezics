@@ -47,10 +47,10 @@ import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import type { FeedActionPolicy } from "./feed-action-policy";
-import { getFeedReactionScore, type FeedReaction } from "./feed-reaction";
+import type { FeedActionPolicy } from "../model/feed-action-policy";
+import { getFeedReactionScore, type FeedReaction } from "../model/feed-reaction";
 
-export type { FeedReaction } from "./feed-reaction";
+export type { FeedReaction } from "../model/feed-reaction";
 
 export function FeedVoteControl({
 	disabled = false,

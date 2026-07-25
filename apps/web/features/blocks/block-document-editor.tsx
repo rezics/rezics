@@ -47,11 +47,11 @@ export interface BlockEditorLabels {
 }
 
 type EditableDocument = UnitReferencedBlockDocument | DockDocument;
-type AddableBlockType = "post-full-view" | "unit-ref" | "search" | "menu" | "divider";
+type AddableBlockType = "post-full-view" | "unit-ref" | "feed" | "menu" | "divider";
 const AddableBlockTypes: readonly AddableBlockType[] = [
 	"post-full-view",
 	"unit-ref",
-	"search",
+	"feed",
 	"menu",
 	"divider",
 ];
@@ -63,12 +63,13 @@ function createBlock(type: AddableBlockType): UnitReferencedBlock {
 			return { _type: type, _key, postId: "" };
 		case "unit-ref":
 			return { _type: type, _key, unitId: "", appearance: "card" };
-		case "search":
+		case "feed":
 			return {
 				_type: type,
 				_key,
 				feature: { kind: "zone" },
-				presentation: { results: "list", showResultCount: true },
+				defaults: [],
+				presentation: { pagination: "load-more", showResultCount: true },
 			};
 		case "menu":
 			return {
@@ -241,9 +242,9 @@ function BlockFields({
 			</FieldGroup>
 		);
 	}
-	if (block._type === "search")
+	if (block._type === "feed")
 		return (
-			<FieldGroup className="grid gap-4 sm:grid-cols-2">
+			<FieldGroup className="grid gap-4">
 				<Field>
 					<FieldLabel>{labels.searchSource}</FieldLabel>
 					<NativeSelect
@@ -266,28 +267,6 @@ function BlockFields({
 						{(["global", "book", "media", "software"] as const).map((value) => (
 							<NativeSelectOption key={value} value={value}>
 								{labels.sources[value]}
-							</NativeSelectOption>
-						))}
-					</NativeSelect>
-				</Field>
-				<Field>
-					<FieldLabel>{labels.results}</FieldLabel>
-					<NativeSelect
-						onChange={(event) =>
-							onChange({
-								...block,
-								presentation: {
-									...block.presentation,
-									results: event.currentTarget
-										.value as typeof block.presentation.results,
-								},
-							})
-						}
-						value={block.presentation.results}
-					>
-						{(["list", "grid", "compact"] as const).map((value) => (
-							<NativeSelectOption key={value} value={value}>
-								{labels.resultsLayouts[value]}
 							</NativeSelectOption>
 						))}
 					</NativeSelect>

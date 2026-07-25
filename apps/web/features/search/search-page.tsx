@@ -17,12 +17,14 @@ import {
 import {
 	type PostApiSearchFeaturesByTemplateExecuteStatus200,
 	useGetApiSearchFeaturesByTemplate,
+	useGetApiSearchZonesByZoneIdFeature,
 	useGetApiSearchSharedQueriesById,
 	usePostApiSearchFeaturesByTemplateExecute,
+	usePostApiSearchZonesByZoneIdFeatureExecute,
 	usePostApiSearchSharedQueries,
 } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import { useQueryStates } from "nuqs";
+import { useQueryState, useQueryStates } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
 import { profileHref } from "@/features/profiles/profile-route";
@@ -40,6 +42,11 @@ import { SearchResultCard } from "./search-result-card";
 type SearchResponse = PostApiSearchFeaturesByTemplateExecuteStatus200;
 type SearchGroup = SearchResponse["groups"][number];
 type SearchHit = SearchGroup["hits"][number];
+const DisabledZoneId = "00000000-0000-7000-8000-000000000000";
+
+export type SearchSurfaceSource =
+	| Readonly<{ kind: "template"; template: SearchTemplateId }>
+	| Readonly<{ kind: "zone"; zoneId: string }>;
 
 function isSearchCategory(value: string): value is SearchCategory {
 	return SearchCategoryValues.some((category) => category === value);
@@ -99,7 +106,7 @@ function appendGroups(
 
 export function SearchSurface({
 	id,
-	template,
+	source,
 	contexts = [],
 	injections = [],
 	initialQuery,
@@ -110,7 +117,7 @@ export function SearchSurface({
 	resolveOptionLabel,
 }: {
 	readonly id: string;
-	readonly template: SearchTemplateId;
+	readonly source: SearchSurfaceSource;
 	readonly contexts?: readonly SearchFeatureContext[];
 	readonly injections?: readonly SearchInjection[];
 	readonly initialQuery?: string;
@@ -124,14 +131,25 @@ export function SearchSurface({
 	) => string | undefined;
 }) {
 	const { t } = useTranslation(["actions", "search", "state"]);
-	const definitionQuery = useGetApiSearchFeaturesByTemplate({ path: { template } });
-	const executeMutation = usePostApiSearchFeaturesByTemplateExecute();
+	const template = source.kind === "template" ? source.template : "global";
+	const templateDefinition = useGetApiSearchFeaturesByTemplate(
+		{ path: { template } },
+		{ query: { enabled: source.kind === "template" } },
+	);
+	const zoneDefinition = useGetApiSearchZonesByZoneIdFeature(
+		{ path: { zoneId: source.kind === "zone" ? source.zoneId : DisabledZoneId } },
+		{ query: { enabled: source.kind === "zone" } },
+	);
+	const executeTemplate = usePostApiSearchFeaturesByTemplateExecute();
+	const executeZone = usePostApiSearchZonesByZoneIdFeatureExecute();
 	const shareMutation = usePostApiSearchSharedQueries();
 	const [groups, setGroups] = useState<readonly SearchGroup[]>([]);
 	const [facets, setFacets] = useState<SearchResponse["facets"]>();
 	const [nextCursor, setNextCursor] = useState<string>();
 	const [lastRequest, setLastRequest] = useState<SearchFeatureRequest>();
 	const initialExecuted = useRef(false);
+	const rawDefinition =
+		source.kind === "template" ? templateDefinition.data : zoneDefinition.data?.definition;
 
 	async function run(request: SearchFeatureRequest, append = false) {
 		if (!append) {
@@ -139,14 +157,23 @@ export function SearchSurface({
 			onQueryChange?.(request.state.query?.trim() ?? "");
 		}
 		try {
-			const response = await executeMutation.mutateAsync({
-				path: { template },
-				body: {
-					contexts: [...contexts],
-					injections: request.injections,
-					state: request.state,
-				},
-			});
+			const response =
+				source.kind === "template"
+					? await executeTemplate.mutateAsync({
+							path: { template: source.template },
+							body: {
+								contexts: [...contexts],
+								injections: request.injections,
+								state: request.state,
+							},
+						})
+					: await executeZone.mutateAsync({
+							path: { zoneId: source.zoneId },
+							body: {
+								injections: request.injections,
+								state: request.state,
+							},
+						});
 			setGroups((current) =>
 				append ? appendGroups(current, response.groups) : response.groups,
 			);
@@ -158,20 +185,39 @@ export function SearchSurface({
 	}
 
 	useEffect(() => {
-		if (!initialState || initialExecuted.current) return;
+		if ((!initialState && !initialQuery?.trim()) || !rawDefinition || initialExecuted.current)
+			return;
+		const definition = parseSearchFeatureDefinition(rawDefinition);
+		const state =
+			initialState ??
+			(definition.document.modes.default === "basic"
+				? { mode: "basic" as const, query: initialQuery, values: [] }
+				: { mode: "advanced" as const, query: initialQuery });
 		initialExecuted.current = true;
-		void run({ injections: [...injections], state: initialState });
-	}, [initialState, injections]);
+		void run({ injections: [...injections], state });
+	}, [initialQuery, initialState, injections, rawDefinition]);
 
-	if (definitionQuery.isPending) return <QueryPending />;
-	if (definitionQuery.isError)
+	const definitionPending =
+		source.kind === "template" ? templateDefinition.isPending : zoneDefinition.isPending;
+	const definitionError =
+		source.kind === "template" ? templateDefinition.error : zoneDefinition.error;
+	const executionPending = executeTemplate.isPending || executeZone.isPending;
+	const executionError = executeTemplate.error ?? executeZone.error;
+	const executionIsError = executeTemplate.isError || executeZone.isError;
+	const executionIsSuccess = executeTemplate.isSuccess || executeZone.isSuccess;
+	if (definitionPending) return <QueryPending />;
+	if (definitionError || !rawDefinition)
 		return (
 			<QueryFailure
-				error={definitionQuery.error}
-				retry={() => void definitionQuery.refetch()}
+				error={definitionError}
+				retry={() =>
+					void (source.kind === "template"
+						? templateDefinition.refetch()
+						: zoneDefinition.refetch())
+				}
 			/>
 		);
-	const definition = parseSearchFeatureDefinition(definitionQuery.data);
+	const definition = parseSearchFeatureDefinition(rawDefinition);
 	const hasHits = groups.some((group) => group.hits.length > 0);
 
 	async function share(request: SearchFeatureShareRequest) {
@@ -191,7 +237,7 @@ export function SearchSurface({
 		<>
 			<SearchFeature
 				definition={definition}
-				error={executeMutation.isError}
+				error={executionIsError}
 				facets={facets}
 				id={id}
 				initialQuery={initialQuery}
@@ -200,11 +246,11 @@ export function SearchSurface({
 				injections={injections}
 				onExecute={(request) => void run(request)}
 				onInjectionsChange={onInjectionsChange}
-				onShare={share}
-				pending={executeMutation.isPending}
+				onShare={source.kind === "template" ? share : undefined}
+				pending={executionPending}
 				resolveOptionLabel={resolveOptionLabel}
 			/>
-			{executeMutation.isError ? <RequestFailure error={executeMutation.error} /> : null}
+			{executionError ? <RequestFailure error={executionError} /> : null}
 			{hasHits ? (
 				<section aria-label={t.search.results} className="grid gap-8">
 					<h2 className="font-heading font-semibold text-xl">{t.search.results}</h2>
@@ -247,13 +293,13 @@ export function SearchSurface({
 						];
 					})}
 				</section>
-			) : executeMutation.isSuccess ? (
+			) : executionIsSuccess ? (
 				<p className="text-sm text-muted-foreground">{t.search.empty}</p>
 			) : null}
 			{nextCursor && lastRequest ? (
 				<div className="flex justify-center">
 					<Button
-						isLoading={executeMutation.isPending}
+						isLoading={executionPending}
 						onClick={() => {
 							const state: SearchFeatureState = {
 								...lastRequest.state,
@@ -284,7 +330,8 @@ function injectedTagIds(injections: readonly SearchInjection[]): string[] {
 
 function SearchLayout({
 	id,
-	template,
+	source,
+	contexts = [],
 	initialQuery,
 	initialState,
 	initialSelections,
@@ -292,9 +339,11 @@ function SearchLayout({
 	onInjectionsChange,
 	onQueryChange,
 	resolveOptionLabel,
+	embedded = false,
 }: {
 	readonly id: string;
-	readonly template: SearchTemplateId;
+	readonly source: SearchSurfaceSource;
+	readonly contexts?: readonly SearchFeatureContext[];
 	readonly initialQuery?: string;
 	readonly initialState?: SharedSearchQueryState;
 	readonly initialSelections?: readonly SharedSearchQuerySelection[];
@@ -305,13 +354,18 @@ function SearchLayout({
 		control: ResolvedSearchControl,
 		value: SearchScalar,
 	) => string | undefined;
+	readonly embedded?: boolean;
 }) {
 	const { t } = useTranslation("search");
-	return (
-		<main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading title={t.title} />
+	const content = (
+		<>
+			{embedded ? (
+				<h2 className="font-heading font-semibold text-2xl tracking-tight">{t.title}</h2>
+			) : (
+				<PageHeading title={t.title} />
+			)}
 			<SearchSurface
-				contexts={[]}
+				contexts={contexts}
 				id={id}
 				initialQuery={initialQuery}
 				initialSelections={initialSelections}
@@ -320,8 +374,14 @@ function SearchLayout({
 				onInjectionsChange={onInjectionsChange}
 				onQueryChange={onQueryChange}
 				resolveOptionLabel={resolveOptionLabel}
-				template={template}
+				source={source}
 			/>
+		</>
+	);
+	if (embedded) return <section className="flex flex-col gap-8">{content}</section>;
+	return (
+		<main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6">
+			{content}
 		</main>
 	);
 }
@@ -344,7 +404,7 @@ function RouteSearchPage() {
 			id={`${route.template}-search`}
 			initialQuery={route.q}
 			injections={injections}
-			key={`${route.template}:${route.tag.join(",")}`}
+			key={`${route.template}:${route.q}:${route.tag.join(",")}`}
 			onInjectionsChange={(next) => {
 				const tag = injectedTagIds(next);
 				void setRoute({
@@ -356,7 +416,7 @@ function RouteSearchPage() {
 			resolveOptionLabel={(control, value) =>
 				control.field === "tag" && typeof value === "string" ? labels.get(value) : undefined
 			}
-			template={route.template}
+			source={{ kind: "template", template: route.template }}
 		/>
 	);
 }
@@ -374,11 +434,36 @@ function SharedSearchPage({ id }: { readonly id: string }) {
 			initialSelections={document.selections}
 			initialState={document.state}
 			key={id}
-			template={document.template}
+			source={{ kind: "template", template: document.template }}
 		/>
 	);
 }
 
 export function SearchPage({ sharedQueryId }: { readonly sharedQueryId?: string } = {}) {
 	return sharedQueryId ? <SharedSearchPage id={sharedQueryId} /> : <RouteSearchPage />;
+}
+
+export function ScopedSearchPage({
+	contexts = [],
+	embedded = false,
+	id,
+	source,
+}: {
+	readonly contexts?: readonly SearchFeatureContext[];
+	readonly embedded?: boolean;
+	readonly id: string;
+	readonly source: SearchSurfaceSource;
+}) {
+	const [query, setQuery] = useQueryState("q", searchParamsParsers.q);
+	return (
+		<SearchLayout
+			contexts={contexts}
+			embedded={embedded}
+			id={id}
+			initialQuery={query}
+			key={`${id}:${query}`}
+			onQueryChange={(next) => void setQuery(next || null, { history: "push" })}
+			source={source}
+		/>
+	);
 }

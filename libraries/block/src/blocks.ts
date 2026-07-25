@@ -1,5 +1,5 @@
 import { PortableText, type PortableTextValue } from "@rezics/portable-text";
-import { SearchTemplateId } from "@rezics/search";
+import { SearchControlValue, SearchTemplateId } from "@rezics/search";
 import { type Static, type TSchema, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
@@ -84,41 +84,16 @@ export const UnitListBlock = Type.Object(
 );
 export type UnitListBlock = Static<typeof UnitListBlock>;
 
-export const SearchBlock = Type.Object(
-	{
-		_type: Type.Literal("search"),
-		_key: BlockKey,
-		/** A system template or the owning Zone's versioned SearchDocument. */
-		feature: SearchFeatureSource,
-		presentation: Type.Object(
-			{
-				results: Type.Union([
-					Type.Literal("list"),
-					Type.Literal("grid"),
-					Type.Literal("compact"),
-				]),
-				showResultCount: Type.Boolean(),
-			},
-			{ additionalProperties: false },
-		),
-	},
-	{ additionalProperties: false, $id: "SearchBlock" },
-);
-export type SearchBlock = Static<typeof SearchBlock>;
-
 /** A continuously paged result stream driven by the same trusted Search schema. */
 export const FeedBlock = Type.Object(
 	{
 		_type: Type.Literal("feed"),
 		_key: BlockKey,
 		feature: SearchFeatureSource,
+		/** Initial, user-changeable predicates owned by this Feed rather than Zone Search. */
+		defaults: Type.Array(SearchControlValue, { maxItems: 50 }),
 		presentation: Type.Object(
 			{
-				results: Type.Union([
-					Type.Literal("list"),
-					Type.Literal("grid"),
-					Type.Literal("compact"),
-				]),
 				pagination: Type.Union([Type.Literal("load-more"), Type.Literal("infinite")]),
 				showResultCount: Type.Boolean(),
 			},
@@ -193,7 +168,6 @@ const ReferencedAtomicBlocks = [
 	PostFullViewBlock,
 	UnitRefBlock,
 	UnitListBlock,
-	SearchBlock,
 	FeedBlock,
 	MenuBlock,
 	MediaBlock,

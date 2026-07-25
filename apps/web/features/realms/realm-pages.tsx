@@ -16,7 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PinIcon, ShieldCheckIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 
 import { Banner, PageHeading } from "@rezics/ui";
 import { PortableTextContent } from "@rezics/ui";
@@ -44,10 +44,10 @@ import {
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
 import { PostList } from "@/features/posts/post-list";
-import { SearchSurface } from "@/features/search/search-page";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
 import { useTranslation } from "@/i18n/client";
+import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { readPortableText } from "@/lib/block";
 import { RequestFailure } from "@/i18n/request-failure";
 import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
@@ -236,6 +236,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 		"media",
 		"posts",
 		"realms",
+		"search",
 		"state",
 		"ui",
 	]);
@@ -243,6 +244,23 @@ export function RealmDetailPage({ id }: { id: string }) {
 		path: { realmId: id },
 		query: { language: toContentLanguage(locale.target) },
 	});
+	const headerSearch = useMemo(() => {
+		if (!query.data) return undefined;
+		const localization = selectLocalization(
+			query.data.localizations,
+			toContentLanguage(locale.target),
+			query.data.language,
+		);
+		const title = localization?.title ?? t.realms.untitled;
+		return {
+			href: `${realmHref(query.data)}/search`,
+			label: t.search.withinLabel({ name: title }),
+			placeholder: t.search.withinPlaceholder({ name: title }),
+			avatar: query.data.avatar,
+			avatarFallback: title.slice(0, 1).toUpperCase(),
+		};
+	}, [locale.target, query.data, t.realms.untitled, t.search]);
+	useHeaderSearchOverride(headerSearch);
 	const rules = useGetApiRealmsByRealmIdRules(
 		{ path: { realmId: id } },
 		{
@@ -318,20 +336,6 @@ export function RealmDetailPage({ id }: { id: string }) {
 					ruleRevisionId={rules.data?.revisionId ?? undefined}
 				/>
 			</header>
-
-			<section className="grid gap-4">
-				<div>
-					<h2 className="font-serif font-semibold text-2xl">{t.realms.searchTitle}</h2>
-					<p className="mt-1 text-muted-foreground text-sm">
-						{t.realms.searchDescription}
-					</p>
-				</div>
-				<SearchSurface
-					contexts={[{ kind: "realm", realmId: realm.id }]}
-					id={`realm-${realm.id}-search`}
-					template="global"
-				/>
-			</section>
 
 			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
 				<Card className="min-w-0 gap-0 overflow-hidden py-0">

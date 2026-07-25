@@ -2,19 +2,9 @@
 
 import type { ContentLanguage } from "@rezics/i18n";
 import { type GetApiReviewsStatus200, useGetApiReviews } from "@rezics/openapi-tanstack-query";
-import {
-	Badge,
-	Button,
-	Card,
-	CardAction,
-	CardContent,
-	CardHeader,
-	QueryFailure,
-	QueryPending,
-} from "@rezics/ui";
-import Link from "next/link";
 
-import { AttributionLinks } from "@/features/posts/attribution-list";
+import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
+import { FeedList, type FeedListState } from "@/features/content-feed/components/feed-list";
 import { useTranslation } from "@/i18n/client";
 import type { UnitScore } from "../model/score-value";
 
@@ -48,59 +38,38 @@ export function UnitReviewList({
 			limit,
 		},
 	});
-	const { t } = useTranslation(["engagement", "posts", "ui"]);
-	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data?.items.length)
-		return <p className="text-sm text-muted-foreground">{t.engagement.emptyReviews}</p>;
-	return <ReviewCards items={query.data.items} />;
+	const state: FeedListState<ReviewListItem> = query.isPending
+		? { status: "pending" }
+		: query.isError
+			? { status: "error", retry: () => void query.refetch() }
+			: { status: "ready", items: query.data?.items ?? [] };
+	return <ReviewFeedList state={state} />;
 }
 
 type ReviewListItem = GetApiReviewsStatus200["items"][number];
 
 export function ReviewCards({ items }: { readonly items: readonly ReviewListItem[] }) {
-	const { t } = useTranslation(["engagement", "posts", "search", "ui"]);
+	return <ReviewFeedList state={{ status: "ready", items }} />;
+}
+
+function ReviewFeedList({ state }: { readonly state: FeedListState<ReviewListItem> }) {
+	const { t } = useTranslation(["actions", "engagement", "feed", "state"]);
 	return (
-		<div className="grid gap-4">
-			{items.map((review) => (
-				<Card className="transition-colors hover:bg-surface-hover" key={review.id}>
-					<CardHeader
-						description={review.summary ?? undefined}
-						title={review.title ?? t.ui.unnamed}
-					>
-						<CardAction>
-							<Button asChild size="sm" variant="outline">
-								<Link href={`/reviews/${review.id}`}>{t.engagement.select}</Link>
-							</Button>
-						</CardAction>
-					</CardHeader>
-					<CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-						<div className="flex min-w-0 flex-wrap items-center gap-2">
-							<AttributionLinks
-								attributions={review.attributions}
-								emptyLabel={t.posts.unknownAttribution}
-							/>
-							{review.language ? (
-								<Badge variant="secondary">
-									{t.search.languageOptions[review.language]}
-								</Badge>
-							) : null}
-						</div>
-						{review.scores.length ? (
-							<span className="font-medium text-foreground">
-								{review.scores
-									.map(({ value }) =>
-										t.engagement.scoreOutOfTen({
-											score: String(value),
-										}),
-									)
-									.join(" · ")}
-							</span>
-						) : null}
-					</CardContent>
-				</Card>
-			))}
-		</div>
+		<FeedList
+			aria-label={t.engagement.reviews}
+			emptyBody={t.engagement.emptyReviews}
+			emptyTitle={t.engagement.emptyReviews}
+			errorLabel={t.state.error}
+			getItemKey={(review) => review.id}
+			renderItem={(review, metadata) => (
+				<FeedItemCard
+					item={review}
+					position={metadata.position}
+					setSize={metadata.setSize}
+				/>
+			)}
+			retryLabel={t.actions.retry}
+			state={state}
+		/>
 	);
 }

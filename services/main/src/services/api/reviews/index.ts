@@ -33,6 +33,7 @@ import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
 } from "../../units/attribution";
+import { resolveRecommendationViewer } from "../../recommendations/context";
 import {
 	IdResponse,
 	NoContentResponse,
@@ -59,6 +60,7 @@ import {
 } from "./schema";
 import { upsertScore } from "./service";
 import { ReviewNotFound } from "./errors";
+import { hydrateFeedItems } from "../feed";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
@@ -72,7 +74,9 @@ export default new Elysia()
 		app
 			.get(
 				"",
-				async ({ query }) => {
+				async ({ query, request }) => {
+					const identity = await resolveIdentity(request.headers, "unit:read");
+					const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
 					const search = query.search?.trim();
 					const searchPattern = search
 						? `%${search
@@ -149,9 +153,6 @@ export default new Elysia()
 							)
 							.where(reviewFilter),
 					]);
-					const attributions = await getAttributionSummariesByUnitIds(
-						items.map(({ id }) => id),
-					);
 					const scoreRows = items.length
 						? await database
 								.select({
@@ -184,21 +185,46 @@ export default new Elysia()
 						current.push(scoreRow);
 						scoresByPostId.set(postId, current);
 					}
-					return {
-						totalCount: toSafeInteger(total?.value ?? 0, "review count"),
-						items: items.flatMap((item) =>
+					const hydrated = await hydrateFeedItems(
+						items.map(({ id }) => ({ id, realmId: query.realmId ?? null })),
+						viewer,
+						{
+							content: ["post:review"],
+							...(query.realmId ? { realmId: query.realmId } : {}),
+							...(query.targetId ? { subjectId: query.targetId } : {}),
+						},
+						new Date(),
+						{ kind: "contextual" },
+					);
+					const reviewMetadata = new Map(
+						items.flatMap((item) =>
 							item.targetId
 								? [
-										{
-											...item,
-											scores: scoresByPostId.get(item.id) ?? [],
-											realmId: query.realmId ?? null,
-											targetId: item.targetId,
-											attributions: attributions.get(item.id) ?? [],
-										},
+										[
+											item.id,
+											{
+												targetId: item.targetId,
+												language: item.language,
+											},
+										] as const,
 									]
 								: [],
 						),
+					);
+					return {
+						totalCount: toSafeInteger(total?.value ?? 0, "review count"),
+						items: hydrated.flatMap((item) => {
+							if (item.itemType !== "post") return [];
+							const metadata = reviewMetadata.get(item.id);
+							if (!metadata) return [];
+							return [
+								{
+									...item,
+									...metadata,
+									scores: scoresByPostId.get(item.id) ?? [],
+								},
+							];
+						}),
 					};
 				},
 				{

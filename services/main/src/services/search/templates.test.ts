@@ -10,6 +10,7 @@ import {
 const TagId = "019b0000-0000-7000-8000-000000000001";
 const RealmId = "019b0000-0000-7000-8000-000000000002";
 const SecondTagId = "019b0000-0000-7000-8000-000000000003";
+const ProfileId = "019b0000-0000-7000-8000-000000000004";
 
 describe("Search Feature v1", () => {
 	it.each(["global", "book", "media", "software"] as const)(
@@ -77,6 +78,43 @@ describe("Search Feature v1", () => {
 			value: RealmId,
 		});
 		expect(compiled.request.expression).toMatchObject({ operator: "all" });
+	});
+
+	it("scopes Profile search to credited content and owned catalog Units", () => {
+		const compiled = compileSearchFeatureInput({
+			document: createDefaultSearchDocument("global"),
+			contexts: [{ kind: "profile", profileId: ProfileId }],
+			injections: [],
+			state: { mode: "basic", values: [] },
+		});
+
+		expect(compiled.request.expression).toEqual({
+			operator: "any",
+			clauses: [
+				{
+					operator: "all",
+					clauses: [
+						{
+							field: "category",
+							operator: "any-of",
+							values: ["posts", "reviews"],
+						},
+						{ field: "credit", operator: "equals", value: ProfileId },
+					],
+				},
+				{
+					operator: "all",
+					clauses: [
+						{
+							field: "category",
+							operator: "any-of",
+							values: ["entity", "collections"],
+						},
+						{ field: "owner", operator: "equals", value: ProfileId },
+					],
+				},
+			],
+		});
 	});
 
 	it("keeps cursor pagination out of stable input identity", () => {

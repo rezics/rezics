@@ -1,7 +1,7 @@
 import type { Block } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
-import { findSearchFeatureSource } from "./block-source";
+import { findFeedBlock, findSearchFeatureSource } from "./block-source";
 
 const BlockKey = "seed-search-block";
 
@@ -10,34 +10,8 @@ function document(block: Block) {
 }
 
 describe("Zone Block Search source resolution", () => {
-	it("resolves Search, Feed, and search-backed UnitList through one trusted path", () => {
+	it("resolves search-backed UnitList through one trusted path", () => {
 		const feature = { kind: "template", template: "book" } as const;
-		expect(
-			findSearchFeatureSource(
-				document({
-					_type: "search",
-					_key: BlockKey,
-					feature,
-					presentation: { results: "grid", showResultCount: true },
-				}),
-				BlockKey,
-			),
-		).toEqual(feature);
-		expect(
-			findSearchFeatureSource(
-				document({
-					_type: "feed",
-					_key: BlockKey,
-					feature,
-					presentation: {
-						results: "grid",
-						pagination: "load-more",
-						showResultCount: false,
-					},
-				}),
-				BlockKey,
-			),
-		).toEqual(feature);
 		expect(
 			findSearchFeatureSource(
 				document({
@@ -50,6 +24,25 @@ describe("Zone Block Search source resolution", () => {
 				BlockKey,
 			),
 		).toEqual(feature);
+	});
+
+	it("resolves only a Feed block through the Feed execution path", () => {
+		const feature = { kind: "template", template: "book" } as const;
+		expect(
+			findFeedBlock(
+				document({
+					_type: "feed",
+					_key: BlockKey,
+					feature,
+					defaults: [],
+					presentation: {
+						pagination: "load-more",
+						showResultCount: false,
+					},
+				}),
+				BlockKey,
+			),
+		).toMatchObject({ _type: "feed", feature });
 	});
 
 	it("rejects static and collection-backed UnitLists", () => {

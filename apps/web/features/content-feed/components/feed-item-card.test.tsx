@@ -49,7 +49,7 @@ vi.stubGlobal("matchMedia", (query: string) => ({
 }));
 
 const translation = await create(resources).getTranslation(
-	["actions", "feed", "posts", "state", "ui", "units"],
+	["actions", "engagement", "feed", "posts", "state", "ui", "units"],
 	["zh-Hant"],
 );
 

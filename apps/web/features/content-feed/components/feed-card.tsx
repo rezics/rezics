@@ -27,7 +27,7 @@ import {
 } from "@/features/realms/components/realm-info-card";
 import { isKnownAttributionRole } from "@/features/units/attribution-role";
 import { useTranslation } from "@/i18n/client";
-import { useFineHover } from "./use-fine-hover";
+import { useFineHover } from "../hooks/use-fine-hover";
 
 interface FeedContextItem {
 	readonly id: string;

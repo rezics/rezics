@@ -96,13 +96,29 @@ export function recordRecommendationEvent(
 	}).catch(() => sentEvents.delete(key));
 }
 
-export function useRecommendationTracking(targetUnitId: string, tracking: RecommendationTracking) {
+export function useRecommendationTracking(
+	targetUnitId: string,
+	tracking?: RecommendationTracking | null,
+) {
 	const elementRef = useRef<HTMLElement>(null);
-	const { requestId, surface, position, policyVersion, signature } = tracking;
+	const requestId = tracking?.requestId;
+	const surface = tracking?.surface;
+	const position = tracking?.position;
+	const policyVersion = tracking?.policyVersion;
+	const signature = tracking?.signature;
 
 	useEffect(() => {
 		const element = elementRef.current;
-		if (!element || typeof IntersectionObserver === "undefined") return;
+		if (
+			!element ||
+			!requestId ||
+			!surface ||
+			position === undefined ||
+			!policyVersion ||
+			!signature ||
+			typeof IntersectionObserver === "undefined"
+		)
+			return;
 		let impressionTimer: ReturnType<typeof setTimeout> | undefined;
 		let dwellTimer: ReturnType<typeof setTimeout> | undefined;
 		const eventTracking = { requestId, surface, position, policyVersion, signature };
@@ -132,14 +148,14 @@ export function useRecommendationTracking(targetUnitId: string, tracking: Recomm
 		};
 	}, [policyVersion, position, requestId, signature, surface, targetUnitId]);
 
-	const trackOpen = useCallback(
-		() =>
-			recordRecommendationEvent(
-				targetUnitId,
-				{ requestId, surface, position, policyVersion, signature },
-				"open",
-			),
-		[policyVersion, position, requestId, signature, surface, targetUnitId],
-	);
+	const trackOpen = useCallback(() => {
+		if (!requestId || !surface || position === undefined || !policyVersion || !signature)
+			return;
+		recordRecommendationEvent(
+			targetUnitId,
+			{ requestId, surface, position, policyVersion, signature },
+			"open",
+		);
+	}, [policyVersion, position, requestId, signature, surface, targetUnitId]);
 	return { elementRef, trackOpen };
 }

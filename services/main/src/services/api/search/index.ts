@@ -1,6 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
-import { BlockKey, DockDocument, parseDocument, type Block } from "@rezics/block";
+import {
+	BlockKey,
+	DockDocument,
+	parseDocument,
+	type Block,
+	type SearchFeatureSource,
+} from "@rezics/block";
 import {
 	SearchFeatureDefinition,
 	SearchFeatureInput,
@@ -13,6 +19,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
+import { resolveRecommendationViewer } from "../../recommendations/context";
 import { AuthenticationRequired } from "../../auth/errors";
 import {
 	InvalidSearch,
@@ -45,10 +52,16 @@ import {
 } from "../../search/documents";
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
+import { hydrateFeedItems } from "../feed";
 import { DateTime, Uuid } from "../schema";
-import { findSearchFeatureSource } from "./block-source";
+import { findFeedBlock, findSearchFeatureSource } from "./block-source";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
-import { toApiErrorResponse, DomainSearchResponse, SearchResponse } from "../schema/response";
+import {
+	toApiErrorResponse,
+	DomainSearchResponse,
+	SearchResponse,
+	ZoneFeedResponse,
+} from "../schema/response";
 
 const { logger } = getActiveObservability();
 
@@ -68,6 +81,7 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 ]);
 
 const ZoneDockSearchParams = t.Object({ zoneId: Uuid, blockKey: BlockKey });
+const ZoneFeedBlockParams = ZoneDockSearchParams;
 const ZonePageSearchParams = t.Object({
 	zoneId: Uuid,
 	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
@@ -83,6 +97,26 @@ const SharedSearchQueryResponse = t.Object({
 const SearchFeatureExecutionBody = t.Omit(SearchFeatureInput, ["document"]);
 const ZoneSearchFeatureParams = t.Object({ zoneId: Uuid });
 const ZoneSearchFeatureExecutionBody = t.Pick(SearchFeatureInput, ["injections", "state"]);
+const ZoneFeedBlockExecutionBody = t.Object(
+	{
+		...ZoneSearchFeatureExecutionBody.properties,
+		surface: t.Union([
+			t.Object({ kind: t.Literal("dock") }, { additionalProperties: false }),
+			t.Object(
+				{
+					kind: t.Literal("page"),
+					slug: t.String({
+						minLength: 1,
+						maxLength: 100,
+						pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+					}),
+				},
+				{ additionalProperties: false },
+			),
+		]),
+	},
+	{ additionalProperties: false },
+);
 const ZoneSearchFeatureResponse = t.Object({
 	zoneId: Uuid,
 	searchDocumentId: Uuid,
@@ -149,9 +183,11 @@ async function executeZoneBlock(input: {
 	document: { readonly blocks: readonly Block[] };
 	body: unknown;
 	profileId?: string;
+	source?: SearchFeatureSource;
+	defaults?: typeof SearchFeatureInput.static.document.defaults;
 }) {
-	const source = findSearchFeatureSource(input.document, input.blockKey);
-	const document =
+	const source = input.source ?? findSearchFeatureSource(input.document, input.blockKey);
+	const baseDocument =
 		source.kind === "template"
 			? createDefaultSearchDocument(source.template)
 			: await database.transaction(async (tx) => {
@@ -159,6 +195,19 @@ async function executeZoneBlock(input: {
 					if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
 					return feature.document;
 				});
+	const document = input.defaults?.length
+		? {
+				...baseDocument,
+				defaults: [
+					...new Map(
+						[...baseDocument.defaults, ...input.defaults].map((value) => [
+							value.controlKey,
+							value,
+						]),
+					).values(),
+				],
+			}
+		: baseDocument;
 	const request = input.body as typeof ZoneSearchFeatureExecutionBody.static;
 	return executeSearchFeatureInput(
 		{
@@ -169,6 +218,39 @@ async function executeZoneBlock(input: {
 		},
 		input.profileId,
 	);
+}
+
+async function executeZoneFeedBlock(input: {
+	zoneId: string;
+	blockKey: string;
+	document: { readonly blocks: readonly Block[] };
+	body: unknown;
+	profileId?: string;
+}) {
+	const block = findFeedBlock(input.document, input.blockKey);
+	const result = await executeZoneBlock({
+		...input,
+		source: block.feature,
+		defaults: block.defaults,
+	});
+	const seen = new Set<string>();
+	const candidates = result.groups.flatMap((group) =>
+		group.hits.flatMap((hit) => {
+			if (seen.has(hit.id)) return [];
+			seen.add(hit.id);
+			return [{ id: hit.id, realmId: null }];
+		}),
+	);
+	const viewer = await resolveRecommendationViewer(input.profileId, false);
+	const items = await hydrateFeedItems(candidates, viewer, {}, new Date(), {
+		kind: "contextual",
+	});
+	return {
+		items,
+		nextCursor: result.nextCursor,
+		facets: result.facets,
+		total: result.groups.reduce((total, group) => total + Number(group.total.value), 0),
+	};
 }
 
 export default new Elysia({ prefix: "/search" })
@@ -476,6 +558,83 @@ export default new Elysia({ prefix: "/search" })
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
 			detail: { summary: "Execute a trusted Zone Page Search Block", tags: ["Search"] },
+		},
+	)
+	.post(
+		"/zones/:zoneId/feed-blocks/:blockKey/execute",
+		async ({ params, body, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			await identity.authorization.unit.ensureCanRead(
+				params.zoneId,
+				() => new UnitNotFound("Zone"),
+			);
+			try {
+				const surface = body.surface;
+				const document =
+					surface.kind === "dock"
+						? await (async () => {
+								const [record] = await database
+									.select({ document: unitDock.document })
+									.from(unitDock)
+									.where(
+										and(
+											eq(unitDock.unitId, params.zoneId),
+											eq(unitDock.kind, "main"),
+											isNull(unitDock.deletedAt),
+										),
+									)
+									.limit(1);
+								if (!record) throw new DockNotFound();
+								return parseDocument(DockDocument, record.document);
+							})()
+						: await database.transaction(async (tx) => {
+								const record = await getZonePageUnitBySlug(
+									tx,
+									params.zoneId,
+									surface.slug,
+								);
+								if (!record) throw new ZonePageNotFound();
+								return record.document;
+							});
+				return await executeZoneFeedBlock({
+					...params,
+					document,
+					body,
+					profileId: identity.authorization.profileId,
+				});
+			} catch (cause) {
+				if (
+					cause instanceof InvalidSearch ||
+					cause instanceof SearchUnavailable ||
+					cause instanceof UnitNotFound ||
+					cause instanceof DockNotFound ||
+					cause instanceof ZonePageNotFound ||
+					cause instanceof ZoneSearchFeatureNotFound
+				)
+					throw cause;
+				logSearchFailure(
+					"Zone Feed Block execution failed",
+					"search.zone_feed.failed",
+					cause,
+				);
+				throw new SearchUnavailable(cause);
+			}
+		},
+		{
+			params: ZoneFeedBlockParams,
+			body: ZoneFeedBlockExecutionBody,
+			response: {
+				[StatusCodes.OK]: ZoneFeedResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"DockNotFound",
+					"ZonePageNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a trusted Zone Feed Block", tags: ["Feed"] },
 		},
 	)
 	.post(

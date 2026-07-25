@@ -1884,6 +1884,13 @@ import type {
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503,
 	PostApiSearchOptions,
 	PostApiSearchStatus200,
 	PostApiSearchStatus400,
@@ -2233,6 +2240,7 @@ import {
 	postApiSearchZonesByZoneIdFeatureRestore,
 	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
 	postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
+	postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
 	postApiSearch,
 	postApiSearchSharedQueries,
 	getApiSearchSharedQueriesById,
@@ -31217,6 +31225,112 @@ export function usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
 			| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503
 		>,
 		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
+		TContext
+	>;
+}
+
+export const postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationKey = () =>
+	[{ url: "/api/search/zones/:zoneId/feed-blocks/:blockKey/execute" }] as const;
+
+export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationKey();
+	return mutationOptions<
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Execute a trusted Zone Feed Block
+ * {@link /api/search/zones/:zoneId/feed-blocks/:blockKey/execute}
+ */
+export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
+				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
+				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+			>,
+			PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationKey();
+
+	const baseOptions = postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
 		TContext
 	>;
 }

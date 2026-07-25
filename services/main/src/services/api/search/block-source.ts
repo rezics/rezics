@@ -9,10 +9,6 @@ export function findSearchFeatureSource(
 	let found: SearchFeatureSource | undefined;
 	walkBlockTree(document, (block) => {
 		if (block._key !== blockKey) return;
-		if (block._type === "search" || block._type === "feed") {
-			found = block.feature;
-			return;
-		}
 		if (block._type === "unit-list" && block.source.kind === "search") {
 			found = block.source.feature;
 			return;
@@ -20,5 +16,20 @@ export function findSearchFeatureSource(
 		throw new InvalidSearch("The selected Block does not use Search Feature");
 	});
 	if (!found) throw new InvalidSearch("Search-backed Block does not exist in this surface");
+	return found;
+}
+
+export function findFeedBlock(
+	document: { readonly blocks: readonly Block[] },
+	blockKey: string,
+): Extract<Block, { readonly _type: "feed" }> {
+	let found: Extract<Block, { readonly _type: "feed" }> | undefined;
+	walkBlockTree(document, (block) => {
+		if (block._key !== blockKey) return;
+		if (block._type !== "feed")
+			throw new InvalidSearch("The selected Block is not a Feed block");
+		found = block;
+	});
+	if (!found) throw new InvalidSearch("Feed block does not exist in this surface");
 	return found;
 }

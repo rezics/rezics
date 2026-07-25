@@ -7,14 +7,15 @@ import {
 import { useState } from "react";
 
 import { CardContent, Skeleton } from "@rezics/ui";
-import { FeedCard } from "@/features/content-feed/feed-card";
-import { FeedPostCard } from "@/features/content-feed/feed-item-card";
-import { FeedList, FeedListItems } from "@/features/content-feed/feed-list";
+import { FeedCard } from "@/features/content-feed/components/feed-card";
+import { FeedPostCard } from "@/features/content-feed/components/feed-item-card";
+import { FeedListItems } from "@/features/content-feed/components/feed-list";
+import { ApiFeedList } from "@/features/content-feed/data/api-feed-list";
 import {
 	DefaultPostListContentKinds,
 	PostListContentKinds,
 	type PostListContentKind,
-} from "@/features/content-feed/feed-kind";
+} from "@/features/content-feed/model/feed-kind";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
@@ -45,7 +46,7 @@ export function PostList({
 	const selectedSort = controlledSort ?? sort;
 
 	return (
-		<FeedList
+		<ApiFeedList
 			contentKinds={selectedPostKinds}
 			contentOptions={PostListContentKinds}
 			infinite={infinite}

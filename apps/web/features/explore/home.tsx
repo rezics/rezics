@@ -2,8 +2,8 @@
 
 import { useQueryState } from "nuqs";
 
-import { FeedList } from "@/features/content-feed/feed-list";
-import { feedContentParser, FeedContentKinds } from "@/features/content-feed/feed-kind";
+import { ApiFeedList } from "@/features/content-feed/data/api-feed-list";
+import { feedContentParser, FeedContentKinds } from "@/features/content-feed/model/feed-kind";
 import { useTranslation } from "@/i18n/client";
 import { feedSortParser } from "@/lib/search-params";
 
@@ -16,7 +16,7 @@ export function Home() {
 		<main className="w-full px-4 py-6 sm:px-7 sm:py-8 lg:px-12">
 			<div className="mx-auto w-full max-w-[58rem]">
 				<h1 className="sr-only">{t.feed.title}</h1>
-				<FeedList
+				<ApiFeedList
 					contentKinds={contentKinds}
 					contentOptions={FeedContentKinds}
 					infinite

@@ -484,7 +484,7 @@ const FeedItemBaseResponse = {
 	reactions: t.Object({ upvote: t.Integer(), downvote: t.Integer() }),
 	viewerReaction: NullableText,
 	recommendationReason: t.Nullable(RecommendationReasonSchema),
-	tracking: RecommendationTrackingSchema,
+	tracking: t.Nullable(RecommendationTrackingSchema),
 };
 
 export const FeedUnitItemResponse = t.Object({
@@ -547,6 +547,13 @@ export const FeedResponse = t.Object({
 	nextCursor: NullableText,
 });
 
+export const ZoneFeedResponse = t.Object({
+	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
+	nextCursor: SearchResponse.properties.nextCursor,
+	facets: SearchResponse.properties.facets,
+	total: t.Integer({ minimum: 0 }),
+});
+
 export const PostFeedResponse = t.Object({
 	items: t.Array(FeedPostItemResponse),
 	nextCursor: NullableText,
@@ -555,8 +562,9 @@ export const ReviewListResponse = t.Object({
 	totalCount: t.Integer({ minimum: 0 }),
 	items: t.Array(
 		t.Object({
-			id: Uuid,
-			attributions: t.Array(UnitAttributionSummaryResponse),
+			...FeedPostItemResponse.properties,
+			targetId: Uuid,
+			language: t.Nullable(ContentLanguage),
 			scores: t.Array(
 				t.Object({
 					scoreId: Uuid,
@@ -564,13 +572,6 @@ export const ReviewListResponse = t.Object({
 					value: t.Integer({ minimum: 1, maximum: 10 }),
 				}),
 			),
-			targetId: Uuid,
-			realmId: t.Nullable(Uuid),
-			language: t.Nullable(ContentLanguage),
-			title: NullableText,
-			summary: NullableText,
-			createdAt: DateTime,
-			updatedAt: DateTime,
 		}),
 	),
 });

@@ -15,14 +15,14 @@ import {
 	FeedCardMedia,
 	FeedCardTarget,
 	FeedCardTitle,
-} from "@/features/content-feed/feed-card";
+} from "@/features/content-feed/components/feed-card";
 import {
 	FeedOverflowMenuView,
 	FeedShareSurfaceView,
 	FeedVoteControl,
 	type FeedReaction,
-} from "@/features/content-feed/feed-card-actions";
-import { formatRelativeTime } from "@/features/content-feed/format-relative-time";
+} from "@/features/content-feed/components/feed-card-actions";
+import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useTranslation } from "@/i18n/client";
 
