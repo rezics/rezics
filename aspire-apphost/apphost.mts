@@ -6,6 +6,7 @@ import {
 } from "../services/main/src/health-contract.ts";
 
 type AppHostMode = "development" | "search" | "smoke";
+type EmailMode = "cloudflare" | "log";
 
 function resolveAppHostMode(value: string | undefined): AppHostMode {
 	switch (value) {
@@ -19,6 +20,16 @@ function resolveAppHostMode(value: string | undefined): AppHostMode {
 			throw new Error(
 				`REZICS_ASPIRE_MODE must be development, search, or smoke; received ${value}`,
 			);
+	}
+}
+
+function resolveEmailMode(value: string): EmailMode {
+	switch (value) {
+		case "cloudflare":
+		case "log":
+			return value;
+		default:
+			throw new Error(`EMAIL_MODE must be cloudflare or log; received ${value}`);
 	}
 }
 
@@ -98,6 +109,21 @@ const betterAuthSecret = await builder.addParameter("better-auth-secret", {
 	value: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
 	secret: true,
 });
+const emailMode = resolveEmailMode(requireEnvironmentVariable("EMAIL_MODE"));
+const emailFrom = requireEnvironmentVariable("EMAIL_FROM");
+const emailFromName = process.env.EMAIL_FROM_NAME?.trim() || "Rezics";
+let cloudflareAccountId: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
+let cloudflareEmailApiToken: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
+
+if (emailMode === "cloudflare") {
+	cloudflareAccountId = await builder.addParameter("cloudflare-account-id", {
+		value: requireEnvironmentVariable("CLOUDFLARE_ACCOUNT_ID"),
+	});
+	cloudflareEmailApiToken = await builder.addParameter("cloudflare-email-api-token", {
+		value: requireEnvironmentVariable("CLOUDFLARE_EMAIL_API_TOKEN"),
+		secret: true,
+	});
+}
 
 let meilisearch: Awaited<ReturnType<typeof builder.addExternalService>> | undefined;
 let meilisearchQueryKey: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
@@ -154,8 +180,9 @@ let api = builder
 	.withEnvironment("OTEL_METRIC_EXPORT_TIMEOUT", "1000")
 	.withEnvironment("DATABASE_URL", database)
 	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
-	.withEnvironment("EMAIL_MODE", requireEnvironmentVariable("EMAIL_MODE"))
-	.withEnvironment("EMAIL_FROM", requireEnvironmentVariable("EMAIL_FROM"))
+	.withEnvironment("EMAIL_MODE", emailMode)
+	.withEnvironment("EMAIL_FROM", emailFrom)
+	.withEnvironment("EMAIL_FROM_NAME", emailFromName)
 	.withEnvironment("S3_ENDPOINT", rustfs)
 	.withEnvironment("S3_REGION", requireEnvironmentVariable("S3_REGION"))
 	.withEnvironment("S3_ACCESS_KEY_ID", s3AccessKey)
@@ -165,6 +192,11 @@ let api = builder
 	.withEnvironment("S3_PRESIGN_EXPIRES_IN", requireEnvironmentVariable("S3_PRESIGN_EXPIRES_IN"))
 	.withReference(database)
 	.withReference(rustfs);
+
+if (cloudflareAccountId && cloudflareEmailApiToken)
+	api = api
+		.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+		.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
 
 if (meilisearch && meilisearchQueryKey) {
 	api = api
@@ -215,8 +247,9 @@ let worker = builder
 	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
 	.withEnvironment("BETTER_AUTH_URL", apiEndpoint)
 	.withEnvironment("BETTER_AUTH_TRUSTED_ORIGINS", apiEndpoint)
-	.withEnvironment("EMAIL_MODE", requireEnvironmentVariable("EMAIL_MODE"))
-	.withEnvironment("EMAIL_FROM", requireEnvironmentVariable("EMAIL_FROM"))
+	.withEnvironment("EMAIL_MODE", emailMode)
+	.withEnvironment("EMAIL_FROM", emailFrom)
+	.withEnvironment("EMAIL_FROM_NAME", emailFromName)
 	.withEnvironment("S3_ENDPOINT", rustfs)
 	.withEnvironment("S3_REGION", requireEnvironmentVariable("S3_REGION"))
 	.withEnvironment("S3_ACCESS_KEY_ID", s3AccessKey)
@@ -230,6 +263,11 @@ let worker = builder
 	)
 	.withReference(database)
 	.withReference(rustfs);
+
+if (cloudflareAccountId && cloudflareEmailApiToken)
+	worker = worker
+		.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+		.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
 
 await worker;
 

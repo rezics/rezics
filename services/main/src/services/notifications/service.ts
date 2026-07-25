@@ -4,6 +4,7 @@ import { notification, notificationPreference } from "../database/schema";
 import type { GovernanceReasonCodeValues, ModerationActionKindValues } from "../database/schema";
 import type { DatabaseTransaction } from "../database";
 import { enqueueNotificationEmail } from "../email/outbox";
+import { emailIntentDeliveryEnabled } from "../email/policy";
 
 type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 type ModerationActionKind = (typeof ModerationActionKindValues)[number];
@@ -89,7 +90,7 @@ export async function createNotification(tx: DatabaseTransaction, input: Notific
 		)
 		.limit(1);
 	const inAppVisible = preferences?.inApp ?? true;
-	const emailEnabled = preferences?.email ?? true;
+	const emailEnabled = emailIntentDeliveryEnabled("notification") && (preferences?.email ?? true);
 	if (!inAppVisible && !emailEnabled) return;
 	const [created] = await tx
 		.insert(notification)

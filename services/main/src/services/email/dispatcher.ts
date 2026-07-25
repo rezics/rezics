@@ -3,6 +3,7 @@ import { getActiveObservability } from "@rezics/observability";
 import { env } from "../config";
 import { renderClaimedEmail, InvalidEmailIntent } from "./content";
 import { claimEmailBatch, type ClaimedEmail, markEmailAccepted, markEmailFailed } from "./outbox";
+import { emailIntentDeliveryEnabled } from "./policy";
 import { MailTransportError, sendMail } from "./transport";
 
 const { logger } = getActiveObservability();
@@ -37,6 +38,15 @@ async function recordFailure(
 }
 
 async function processClaimedEmail(item: ClaimedEmail): Promise<void> {
+	if (!emailIntentDeliveryEnabled(item.kind)) {
+		await recordFailure(item, {
+			code: "EmailIntentDisabled",
+			error: new Error(`Delivery is disabled for ${item.kind} email intents`),
+			retryable: false,
+		});
+		return;
+	}
+
 	let message: Awaited<ReturnType<typeof renderClaimedEmail>>;
 	try {
 		message = await renderClaimedEmail(item);

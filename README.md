@@ -90,6 +90,12 @@ it is not a public service endpoint. Aspire and CI consume the paths and timing 
 `services/main/src/health-contract.ts`. Production Nomad jobs consume that
 machine-checkable contract when Plan 6 introduces the deployment artifacts.
 
+Local email defaults to non-delivering `log` mode. Account verification and
+password recovery are the only enabled outbound email purposes; activity and
+notification email remains product-gated off. See
+[Email delivery and local testing](./docs/email-delivery.md) before enabling
+real Cloudflare delivery from a development machine.
+
 Infrastructure lifecycle commands are `task infra:start`, `task infra:up`,
 `task infra:stop`, `task infra:down`, and `task infra:logs`. `infra:start` only
 starts persistent services; `infra:up` additionally performs the idempotent

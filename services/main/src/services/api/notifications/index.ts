@@ -14,6 +14,7 @@ import {
 	notificationPreference,
 	profilePreference,
 } from "../../database/schema";
+import { emailIntentDeliveryEnabled } from "../../email/policy";
 import i18n from "../../i18n";
 import { DefaultStoredUiLocale } from "../../database/schema/contract-values";
 import { parseJsonCursor } from "../../pagination";
@@ -53,6 +54,7 @@ const preferenceKinds = [
 	"realm",
 	"system",
 ] as const;
+const notificationEmailDeliveryEnabled = emailIntentDeliveryEnabled("notification");
 
 function encodeCursor(cursor: NotificationCursor) {
 	return Buffer.from(JSON.stringify(cursor)).toString("base64url");
@@ -322,7 +324,9 @@ export default new Elysia({ prefix: "/notifications" })
 				items: preferenceKinds.map((kind) => ({
 					kind,
 					inApp: rows.find((row) => row.kind === kind)?.inApp ?? true,
-					email: rows.find((row) => row.kind === kind)?.email ?? true,
+					email:
+						notificationEmailDeliveryEnabled &&
+						(rows.find((row) => row.kind === kind)?.email ?? true),
 				})),
 			};
 		},
@@ -339,14 +343,27 @@ export default new Elysia({ prefix: "/notifications" })
 				for (const item of body.items)
 					await tx
 						.insert(notificationPreference)
-						.values({ profileId: profile.unitId, ...item })
+						.values({
+							profileId: profile.unitId,
+							...item,
+							email: notificationEmailDeliveryEnabled && item.email,
+						})
 						.onConflictDoUpdate({
 							target: [notificationPreference.profileId, notificationPreference.kind],
-							set: { inApp: item.inApp, email: item.email },
+							set: {
+								inApp: item.inApp,
+								email: notificationEmailDeliveryEnabled && item.email,
+							},
 						});
 			});
 			const rows = new Map<string, (typeof body.items)[number]>(
-				body.items.map((item) => [item.kind, item]),
+				body.items.map((item) => [
+					item.kind,
+					{
+						...item,
+						email: notificationEmailDeliveryEnabled && item.email,
+					},
+				]),
 			);
 			return {
 				items: preferenceKinds.map(
