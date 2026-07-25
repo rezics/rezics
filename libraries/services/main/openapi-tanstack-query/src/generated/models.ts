@@ -9184,6 +9184,13 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 								| null;
 							score:
 								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										contextUnitId: string;
+										contextTitle: (string | null) | null;
 										totalScore: string | number;
 										totalCount: string | number;
 								  } | null)
@@ -9807,6 +9814,13 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 								| null;
 							score:
 								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										contextUnitId: string;
+										contextTitle: (string | null) | null;
 										totalScore: string | number;
 										totalCount: string | number;
 								  } | null)
@@ -15061,6 +15075,13 @@ export type PostApiFeedQueryStatus200 = {
 										| null;
 									score:
 										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
 												totalScore: string | number;
 												totalCount: string | number;
 										  } | null)
@@ -15683,6 +15704,13 @@ export type PostApiFeedQueryStatus200 = {
 										| null;
 									score:
 										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
 												totalScore: string | number;
 												totalCount: string | number;
 										  } | null)
@@ -70272,6 +70300,13 @@ export type GetApiReviewsStatus200 = {
 						| null;
 					score:
 						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								contextUnitId: string;
+								contextTitle: (string | null) | null;
 								totalScore: string | number;
 								totalCount: string | number;
 						  } | null)
@@ -87500,6 +87535,13 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										| null;
 									score:
 										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
 												totalScore: string | number;
 												totalCount: string | number;
 										  } | null)
@@ -88123,6 +88165,13 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										| null;
 									score:
 										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
 												totalScore: string | number;
 												totalCount: string | number;
 										  } | null)
@@ -96524,6 +96573,13 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 										| null;
 									score:
 										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
 												totalScore: string | number;
 												totalCount: string | number;
 										  } | null)
@@ -97147,6 +97203,13 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 										| null;
 									score:
 										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
 												totalScore: string | number;
 												totalCount: string | number;
 										  } | null)

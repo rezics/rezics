@@ -145,7 +145,12 @@ describe("FeedCardTarget", () => {
 					imageAlt="書籍封面"
 					imageUrl="/cover.jpg"
 					label="討論關聯作品"
-					score={{ totalScore: 184, totalCount: 40 }}
+					score={{
+						contextLabel: "讀書會",
+						contextUnitId: "realm-1",
+						totalScore: 184,
+						totalCount: 40,
+					}}
 					title="測試書籍"
 				/>
 			</TranslationProvider>,
@@ -154,6 +159,15 @@ describe("FeedCardTarget", () => {
 		expect(container.querySelector('[data-slot="cover"]')).toBeTruthy();
 		expect(container.querySelector('[data-slot="item-media"]')).toBeNull();
 		expect(screen.getByText("一行作品摘要")).toBeTruthy();
-		expect(screen.getByText("4.6／10 · 40 人評分")).toBeTruthy();
+		const scoreSummary = screen.getByText("4.6／10 · 40 人評分");
+		const contextLabel = screen.getByText("讀書會", { exact: true });
+		const scoreRow = scoreSummary.closest("p");
+		const scoreIcon = scoreRow?.querySelector("svg");
+		expect(contextLabel.compareDocumentPosition(scoreIcon ?? scoreSummary)).toBe(
+			Node.DOCUMENT_POSITION_FOLLOWING,
+		);
+		expect(scoreIcon?.compareDocumentPosition(scoreSummary)).toBe(
+			Node.DOCUMENT_POSITION_FOLLOWING,
+		);
 	});
 });

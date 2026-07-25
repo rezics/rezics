@@ -5,6 +5,8 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
 
+import { FeedQueryKey } from "@/features/content-feed/query";
+
 export async function invalidateReviews(
 	queryClient: QueryClient,
 	reviewId?: string,
@@ -12,6 +14,7 @@ export async function invalidateReviews(
 	scoreContextUnitId?: string,
 ): Promise<void> {
 	const invalidations: Promise<unknown>[] = [
+		queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
 		queryClient.invalidateQueries({ queryKey: getApiReviewsQueryKey() }),
 	];
 	if (targetId)

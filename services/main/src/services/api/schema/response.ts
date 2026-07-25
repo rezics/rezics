@@ -531,6 +531,8 @@ const FeedPostItemFields = {
 			cover: ImageAssetResponse,
 			score: t.Nullable(
 				t.Object({
+					contextUnitId: Uuid,
+					contextTitle: NullableText,
 					totalScore: t.Integer({ minimum: 1 }),
 					totalCount: t.Integer({ minimum: 1 }),
 				}),

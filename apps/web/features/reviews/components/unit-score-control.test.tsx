@@ -21,6 +21,7 @@ const state = vi.hoisted(() => ({
 	mutateAsync: vi.fn(() => Promise.resolve({ scoreId: "score-id", score: 8 })),
 	resetMutation: vi.fn(),
 	invalidateQueries: vi.fn(() => Promise.resolve()),
+	invalidateReviews: vi.fn(() => Promise.resolve()),
 	openAuthPortal: vi.fn(),
 }));
 
@@ -76,6 +77,10 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 
 vi.mock("@tanstack/react-query", () => ({
 	useQueryClient: () => ({ invalidateQueries: state.invalidateQueries }),
+}));
+
+vi.mock("../data/review-cache", () => ({
+	invalidateReviews: state.invalidateReviews,
 }));
 
 vi.mock("@/features/auth/auth-portal", () => ({
@@ -134,13 +139,14 @@ beforeEach(() => {
 	state.mutateAsync.mockClear();
 	state.resetMutation.mockClear();
 	state.invalidateQueries.mockClear();
+	state.invalidateReviews.mockClear();
 	state.openAuthPortal.mockClear();
 });
 
 afterEach(cleanup);
 
 describe("UnitScoreControl", () => {
-	it("submits the first Hero rating without opening the editor", () => {
+	it("submits the first Hero rating and invalidates dependent review projections", async () => {
 		renderControl();
 
 		fireEvent.click(screen.getByTestId("interactive-rating"));
@@ -154,6 +160,13 @@ describe("UnitScoreControl", () => {
 			path: { targetId: "019f92b9-cb0d-7cb6-a55a-1d5ecedc0949" },
 		});
 		expect(screen.queryByRole("dialog")).toBeNull();
+		await vi.waitFor(() => expect(state.invalidateReviews).toHaveBeenCalledOnce());
+		expect(state.invalidateReviews).toHaveBeenCalledWith(
+			expect.anything(),
+			undefined,
+			"019f92b9-cb0d-7cb6-a55a-1d5ecedc0949",
+			"019b76da-a800-7300-8000-000000000002",
+		);
 	});
 
 	it("opens the context-aware editor when the viewer already has a Score", async () => {

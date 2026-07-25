@@ -46,6 +46,8 @@ export type FeedAttributionContext = FeedContextItem & {
 export type FeedRealmContext = FeedContextItem & RealmInfoCardData;
 
 export interface FeedTargetScore {
+	readonly contextLabel: string;
+	readonly contextUnitId: string;
 	readonly totalScore: number;
 	readonly totalCount: number;
 }
@@ -225,14 +227,17 @@ export function FeedCardTarget({
 						) : null}
 						{score && averageScore !== null ? (
 							<p className="mt-0.5 flex items-center gap-1 text-muted-foreground text-xs">
+								<span>{score.contextLabel}</span>
 								<StarIcon aria-hidden className="size-3 fill-current" />
-								{t.feed.targetScore({
-									score: new Intl.NumberFormat(locale.target, {
-										maximumFractionDigits: 1,
-										minimumFractionDigits: 1,
-									}).format(averageScore),
-									count: score.totalCount,
-								})}
+								<span>
+									{t.feed.targetScore({
+										score: new Intl.NumberFormat(locale.target, {
+											maximumFractionDigits: 1,
+											minimumFractionDigits: 1,
+										}).format(averageScore),
+										count: score.totalCount,
+									})}
+								</span>
 							</p>
 						) : null}
 					</ItemContent>

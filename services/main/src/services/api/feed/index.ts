@@ -984,6 +984,7 @@ export async function hydrateFeedItems(
 						[
 							`${row.unitId}:${row.realmId}`,
 							{
+								contextUnitId: row.realmId,
 								totalScore: toSafeInteger(row.totalScore, "subject total score"),
 								totalCount,
 							},
@@ -1052,6 +1053,14 @@ export async function hydrateFeedItems(
 		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];
 		const subject = row.subjectId ? subjects.get(row.subjectId) : undefined;
 		if (row.postKind === "excerpt" && !subject) return [];
+		const scoreContext =
+			ranked.realmId === null
+				? undefined
+				: realmContexts.get(row.id)?.find((realm) => realm.id === ranked.realmId);
+		const scoreAggregate =
+			ranked.realmId && row.subjectId
+				? (subjectScore.get(`${row.subjectId}:${ranked.realmId}`) ?? null)
+				: null;
 		const postItem = {
 			...common,
 			itemType: "post" as const,
@@ -1072,10 +1081,12 @@ export async function hydrateFeedItems(
 			subject: subject
 				? {
 						...subject,
-						score:
-							ranked.realmId && row.subjectId
-								? (subjectScore.get(`${row.subjectId}:${ranked.realmId}`) ?? null)
-								: null,
+						score: scoreAggregate
+							? {
+									...scoreAggregate,
+									contextTitle: scoreContext?.title ?? null,
+								}
+							: null,
 					}
 				: null,
 		};

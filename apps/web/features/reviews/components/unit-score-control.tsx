@@ -2,7 +2,6 @@
 
 import { toContentLanguage } from "@rezics/i18n";
 import {
-	getApiScoresByTargetIdQueryKey,
 	getApiScoresByTargetIdViewerQueryKey,
 	useGetApiScoresByTargetIdViewer,
 	usePutApiScoresByTargetId,
@@ -27,6 +26,7 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useDefaultScoreContext } from "../data/default-score-context";
+import { invalidateReviews } from "../data/review-cache";
 import { apiValueToUnitScore, starValueToUnitScore, type UnitScore } from "../model/score-value";
 import { ScoreContextPicker, type ScoreContextOption } from "./score-context-picker";
 
@@ -110,12 +110,7 @@ export function UnitScoreControl({
 						path: { targetId },
 					}),
 				}),
-				queryClient.invalidateQueries({
-					queryKey: getApiScoresByTargetIdQueryKey({
-						path: { targetId },
-						query: { contextUnitId: context.id },
-					}),
-				}),
+				invalidateReviews(queryClient, undefined, targetId, context.id),
 			]);
 			if (closeAfterSave) setDialogOpen(false);
 		} catch {

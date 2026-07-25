@@ -53,6 +53,8 @@ export interface FeedFixtureData {
 		readonly coverAsset: "book-cover";
 		readonly href: string;
 		readonly score: {
+			readonly contextLabel: string;
+			readonly contextUnitId: string;
 			readonly totalScore: number;
 			readonly totalCount: number;
 		};
@@ -95,7 +97,12 @@ function createFeedFixtureData(content: FeedFixtureLocalizedContent): FeedFixtur
 			...content.collection,
 			coverAsset: "book-cover",
 			href: "#fixture-related-work",
-			score: { totalScore: 184, totalCount: 40 },
+			score: {
+				contextLabel: content.realms[0].name,
+				contextUnitId: "fixture-realm-1",
+				totalScore: 184,
+				totalCount: 40,
+			},
 		},
 		metrics: {
 			post: { replies: 36, score: 2_100 },

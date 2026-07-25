@@ -13791,10 +13791,27 @@
 																					{
 																						"type": "object",
 																						"required": [
+																							"contextUnitId",
+																							"contextTitle",
 																							"totalScore",
 																							"totalCount"
 																						],
 																						"properties": {
+																							"contextUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"contextTitle": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
+																							},
 																							"totalScore": {
 																								"minimum": 1,
 																								"anyOf": [
@@ -15225,10 +15242,27 @@
 																					{
 																						"type": "object",
 																						"required": [
+																							"contextUnitId",
+																							"contextTitle",
 																							"totalScore",
 																							"totalCount"
 																						],
 																						"properties": {
+																							"contextUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"contextTitle": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
+																							},
 																							"totalScore": {
 																								"minimum": 1,
 																								"anyOf": [
@@ -22912,10 +22946,27 @@
 																							{
 																								"type": "object",
 																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
 																									"totalScore": {
 																										"minimum": 1,
 																										"anyOf": [
@@ -24364,10 +24415,27 @@
 																							{
 																								"type": "object",
 																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
 																									"totalScore": {
 																										"minimum": 1,
 																										"anyOf": [
@@ -96727,10 +96795,27 @@
 																			{
 																				"type": "object",
 																				"required": [
+																					"contextUnitId",
+																					"contextTitle",
 																					"totalScore",
 																					"totalCount"
 																				],
 																				"properties": {
+																					"contextUnitId": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"contextTitle": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "string"
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					},
 																					"totalScore": {
 																						"minimum": 1,
 																						"anyOf": [
@@ -124484,10 +124569,27 @@
 																							{
 																								"type": "object",
 																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
 																									"totalScore": {
 																										"minimum": 1,
 																										"anyOf": [
@@ -125936,10 +126038,27 @@
 																							{
 																								"type": "object",
 																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
 																									"totalScore": {
 																										"minimum": 1,
 																										"anyOf": [
@@ -147159,10 +147278,27 @@
 																							{
 																								"type": "object",
 																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
 																									"totalScore": {
 																										"minimum": 1,
 																										"anyOf": [
@@ -148611,10 +148747,27 @@
 																							{
 																								"type": "object",
 																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
 																									"totalScore": {
 																										"minimum": 1,
 																										"anyOf": [

@@ -265,7 +265,6 @@ function tagBadgeVariant(
 ): "default" | "secondary" | "outline" | "success" | "destructive" {
 	if (item.vote.kind === "available" && item.vote.viewerVote === 1) return "success";
 	if (item.vote.kind === "available" && item.vote.viewerVote === -1) return "destructive";
-	if (item.context.kind === "global" && item.context.pinned) return "secondary";
 	if (item.context.kind === "realm" && item.context.policy) return "secondary";
 	return "outline";
 }

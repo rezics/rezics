@@ -187,6 +187,8 @@ export function FeedPostCard({
 					{...(post.subject.score
 						? {
 								score: {
+									contextLabel: post.subject.score.contextTitle ?? t.ui.unnamed,
+									contextUnitId: post.subject.score.contextUnitId,
 									totalCount: Number(post.subject.score.totalCount),
 									totalScore: Number(post.subject.score.totalScore),
 								},
