@@ -14,6 +14,20 @@ export default {
 	sortLabel: "動態排序",
 	sort: { best: "最佳", hot: "熱門", new: "最新", top: "高評價", rising: "熱度上升" },
 	filtersLabel: "動態篩選",
+	filters: {
+		clear: "清除篩選",
+		selectedCount: insert("已選 {{count}} 項", { count: Number }),
+		languages: {
+			label: "語言",
+			all: "所有語言",
+			options: { zh: "中文", en: "英文" },
+		},
+		realms: {
+			label: realmTerms.label,
+			all: `所有${realmTerms.pluralLabel}`,
+			unnamed: `未命名${realmTerms.label}`,
+		},
+	},
 	contentFilterLabel: "內容篩選",
 	contentFilterPlaceholder: "內容",
 	content: {

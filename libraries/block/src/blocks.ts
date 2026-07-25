@@ -1,5 +1,5 @@
 import { PortableText, type PortableTextValue } from "@rezics/portable-text";
-import { SearchControlValue, SearchTemplateId } from "@rezics/search";
+import { SearchTemplateId } from "@rezics/search";
 import { type Static, type TSchema, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
@@ -90,8 +90,6 @@ export const FeedBlock = Type.Object(
 		_type: Type.Literal("feed"),
 		_key: BlockKey,
 		feature: SearchFeatureSource,
-		/** Initial, user-changeable predicates owned by this Feed rather than Zone Search. */
-		defaults: Type.Array(SearchControlValue, { maxItems: 50 }),
 		presentation: Type.Object(
 			{
 				pagination: Type.Union([Type.Literal("load-more"), Type.Literal("infinite")]),

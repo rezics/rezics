@@ -5,6 +5,8 @@ import { DateTime } from ".";
 import {
 	toPortableTextResponse,
 	ContentMetricResponse,
+	FeedNonReviewPostItemResponse,
+	FeedReviewItemResponse,
 	LocalizedContentMetricResponse,
 	UnitDetailAttributionSummaryResponse,
 	UnitProgressStatisticsResponse,
@@ -105,6 +107,12 @@ describe("API response values", () => {
 				characterCount: 400,
 			}),
 		).toBe(false);
+	});
+
+	it("requires Scores only for Review Feed items", () => {
+		expect(FeedReviewItemResponse.required).toContain("scores");
+		expect(FeedReviewItemResponse.properties.postKind.const).toBe("review");
+		expect("scores" in FeedNonReviewPostItemResponse.properties).toBe(false);
 	});
 
 	it("requires non-negative attribution statistics in Unit summaries", () => {

@@ -8,7 +8,10 @@ import { getFeedActionPolicy } from "./feed-action-policy";
 
 describe("getFeedActionPolicy", () => {
 	it("covers every generated post kind with discussion actions", () => {
-		for (const postKind of Object.values(GetApiFeedStatus200ItemsPostKindEnum)) {
+		for (const postKind of [
+			...Object.values(GetApiFeedStatus200ItemsPostKindEnum),
+			"review" as const,
+		]) {
 			expect(getFeedActionPolicy({ itemType: "post", postKind })).toEqual({
 				comments: true,
 				primary: "none",

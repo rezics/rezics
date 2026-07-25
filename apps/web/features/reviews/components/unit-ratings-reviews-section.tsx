@@ -1,10 +1,10 @@
 "use client";
 
 import { useGetApiReviews } from "@rezics/openapi-tanstack-query";
-import { Button, Input, QueryFailure, QueryPending } from "@rezics/ui";
-import { BookOpen, ChevronRight, Search, SlidersHorizontal } from "lucide-react";
+import { Button, QueryFailure, QueryPending } from "@rezics/ui";
+import { BookOpen, ChevronRight, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
-import { useDeferredValue, useState } from "react";
+import { useState } from "react";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
@@ -35,20 +35,16 @@ export function UnitRatingsReviewsSection({
 }) {
 	const { t } = useTranslation(["engagement"]);
 	const defaultScoreContext = useDefaultScoreContext();
-	const [search, setSearch] = useState("");
-	const deferredSearch = useDeferredValue(search);
 	const [filters, setFilters] = useState<ReviewFilterModel>(EmptyReviewFilters);
 	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
 	const scoreContext = filters.realm ?? defaultScoreContext.context;
-	const trimmedSearch = deferredSearch.trim();
-	const baseReviewQuery = { targetId, limit: 3 } as const;
+	const baseReviewQuery = { targetId, limit: 3, sort: "best" } as const;
 	const summaryQuery = useGetApiReviews({ query: baseReviewQuery });
 	const reviewsQuery = useGetApiReviews({
 		query: {
 			...baseReviewQuery,
-			...(filters.realm ? { realmId: filters.realm.id } : {}),
+			...(filters.realm ? { realmIds: [filters.realm.id] } : {}),
 			...(filters.languages.length ? { languages: [...filters.languages] } : {}),
-			...(trimmedSearch ? { search: trimmedSearch } : {}),
 			...(filters.scores.length && scoreContext
 				? {
 						scoreContextUnitId: scoreContext.id,
@@ -58,7 +54,7 @@ export function UnitRatingsReviewsSection({
 		},
 	});
 	const appliedFilterCount = reviewFilterCount(filters);
-	const hasFilters = Boolean(search.trim()) || hasReviewFilters(filters);
+	const hasFilters = hasReviewFilters(filters);
 
 	return (
 		<section className="grid gap-8 border-t border-border-weak pt-8">
@@ -102,21 +98,7 @@ export function UnitRatingsReviewsSection({
 				) : null}
 			</div>
 
-			<div className="flex flex-col gap-3 sm:flex-row">
-				<label className="relative min-w-0 flex-1">
-					<span className="sr-only">{t.engagement.searchReviews}</span>
-					<Search
-						aria-hidden
-						className="pointer-events-none absolute start-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-					/>
-					<Input
-						className="h-11 ps-11"
-						onChange={(event) => setSearch(event.currentTarget.value)}
-						placeholder={t.engagement.searchReviews}
-						type="search"
-						value={search}
-					/>
-				</label>
+			<div className="flex justify-end">
 				<Button
 					className="h-11 px-4"
 					onClick={() => setFilterDialogOpen(true)}

@@ -27,7 +27,7 @@ export function recommendationNegativeExpression() {
 export function recommendationObjectiveExpression(sort: RecommendationSort, asOf: Date) {
 	const positive = recommendationPositiveExpression();
 	const negative = recommendationNegativeExpression();
-	if (sort === "new") return sql<number>`extract(epoch from ${unit.createdAt})`;
+	if (sort === "new") return sql<number>`extract(epoch from ${unit.createdAt})::double precision`;
 	if (sort === "top") return sql<number>`ln(1 + greatest(0, ${positive} - ${negative}))`;
 	if (sort === "hot")
 		return sql<number>`(

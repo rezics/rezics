@@ -1,5 +1,6 @@
 "use client";
 
+import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import type { GetApiFeedSort } from "@rezics/openapi-tanstack-query";
 import { useState, type ReactNode } from "react";
 
@@ -11,28 +12,22 @@ import {
 } from "@/features/content-feed/components/feed-card.fixture";
 import { FeedListItems } from "@/features/content-feed/components/feed-list";
 import { FeedListControls } from "@/features/content-feed/data/api-feed-list";
-import {
-	DefaultFeedContentKinds,
-	DefaultPostListContentKinds,
-	FeedContentKinds,
-	PostListContentKinds,
-	type FeedContentKind,
-	type PostListContentKind,
-} from "@/features/content-feed/model/feed-kind";
 import { useTranslation } from "@/i18n/client";
 
 function FullFeedListFixture() {
 	const [sort, setSort] = useState<GetApiFeedSort>("best");
-	const [contentKinds, setContentKinds] =
-		useState<readonly FeedContentKind[]>(DefaultFeedContentKinds);
+	const [languages, setLanguages] = useState<readonly ContentLanguage[]>([
+		ContentLanguageValues[0],
+	]);
+	const [realmIds, setRealmIds] = useState<readonly string[]>([]);
 	return (
 		<div className="grid gap-3 sm:gap-4">
 			<FeedListControls
-				contentKinds={contentKinds}
-				contentOptions={FeedContentKinds}
-				onContentKindsChange={setContentKinds}
+				languages={languages}
+				onLanguagesChange={setLanguages}
+				onRealmIdsChange={setRealmIds}
 				onSortChange={setSort}
-				showBulkActions
+				realmIds={realmIds}
 				sort={sort}
 			/>
 			<FixtureFeedItems />
@@ -41,23 +36,7 @@ function FullFeedListFixture() {
 }
 
 function PostListFixture() {
-	const [sort, setSort] = useState<GetApiFeedSort>("new");
-	const [contentKinds, setContentKinds] = useState<readonly PostListContentKind[]>(
-		DefaultPostListContentKinds,
-	);
-	return (
-		<div className="grid gap-3 sm:gap-4">
-			<FeedListControls
-				contentKinds={contentKinds}
-				contentOptions={PostListContentKinds}
-				onContentKindsChange={setContentKinds}
-				onSortChange={setSort}
-				showBulkActions={false}
-				sort={sort}
-			/>
-			<FixtureFeedItems />
-		</div>
-	);
+	return <FixtureFeedItems />;
 }
 
 function FixtureFeedItems() {

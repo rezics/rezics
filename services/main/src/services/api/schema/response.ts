@@ -30,7 +30,7 @@ import {
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
-import { FeedPostKindValues, FeedUnitKindValues } from "../feed/schema";
+import { FeedNonReviewPostKindValues, FeedUnitKindValues } from "../feed/schema";
 import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
@@ -467,6 +467,7 @@ export const PostListResponse = t.Object({
 });
 const FeedItemBaseResponse = {
 	id: Uuid,
+	language: t.Nullable(ContentLanguage),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	realmId: t.Nullable(Uuid),
 	realms: t.Array(
@@ -501,11 +502,10 @@ export const FeedUnitItemResponse = t.Object({
 	),
 });
 
-export const FeedPostItemResponse = t.Object({
+const FeedPostItemFields = {
 	...FeedItemBaseResponse,
 	itemType: t.Literal("post"),
 	unitKind: t.Literal("post"),
-	postKind: t.UnionEnum(FeedPostKindValues),
 	summary: NullableText,
 	cover: ImageAssetResponse,
 	subjectId: t.Nullable(Uuid),
@@ -537,17 +537,41 @@ export const FeedPostItemResponse = t.Object({
 			),
 		}),
 	),
+} as const;
+
+export const FeedNonReviewPostItemResponse = t.Object({
+	...FeedPostItemFields,
+	postKind: t.UnionEnum(FeedNonReviewPostKindValues),
 });
 
+export const FeedReviewItemResponse = t.Object({
+	...FeedPostItemFields,
+	postKind: t.Literal("review"),
+	scores: t.Array(
+		t.Object({
+			scoreId: Uuid,
+			contextUnitId: Uuid,
+			value: t.Integer({ minimum: 1, maximum: 10 }),
+		}),
+	),
+});
+
+export const FeedPostItemResponse = t.Union([
+	FeedNonReviewPostItemResponse,
+	FeedReviewItemResponse,
+]);
+
 export type FeedItemResponseValue =
-	Static<typeof FeedUnitItemResponse> | Static<typeof FeedPostItemResponse>;
+	| Static<typeof FeedUnitItemResponse>
+	| Static<typeof FeedNonReviewPostItemResponse>
+	| Static<typeof FeedReviewItemResponse>;
 
 export const FeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
 	nextCursor: NullableText,
 });
 
-export const ZoneFeedResponse = t.Object({
+export const SearchFeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
 	nextCursor: SearchResponse.properties.nextCursor,
 	facets: SearchResponse.properties.facets,
@@ -560,18 +584,11 @@ export const PostFeedResponse = t.Object({
 });
 export const ReviewListResponse = t.Object({
 	totalCount: t.Integer({ minimum: 0 }),
+	nextCursor: NullableText,
 	items: t.Array(
 		t.Object({
-			...FeedPostItemResponse.properties,
+			...FeedReviewItemResponse.properties,
 			targetId: Uuid,
-			language: t.Nullable(ContentLanguage),
-			scores: t.Array(
-				t.Object({
-					scoreId: Uuid,
-					contextUnitId: Uuid,
-					value: t.Integer({ minimum: 1, maximum: 10 }),
-				}),
-			),
 		}),
 	),
 });

@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, lte, or, sql, type SQL } from "dri
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
@@ -14,11 +15,14 @@ import {
 	primaryUnitTitle,
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
 import {
 	post,
+	postScore,
 	postReply,
 	postReplyStat,
+	score,
 	scoreStat,
 	collectionItem,
 	unitFollow,
@@ -66,12 +70,12 @@ import {
 	toPortableTextResponse,
 	type FeedItemResponseValue,
 } from "../schema/response";
+import { ContentLanguage as ContentLanguageSchema, Uuid } from "../schema";
 import { InvalidFeedCursor } from "./errors";
 import {
 	DefaultFeedContentKindValues,
 	type FeedContentKind,
 	FeedContentKindValues,
-	FeedContentKindSchema,
 	type FeedPostKind,
 	FeedPostKindValues,
 	FeedQuery,
@@ -193,13 +197,37 @@ export function resolveFeedContentSelection(content?: readonly FeedContentKind[]
 	return { selected: [...selected], unitKinds, postKinds } as const;
 }
 
+interface FeedEligibilityBaseScope {
+	readonly content?: readonly FeedContentKind[];
+	readonly languages?: readonly ContentLanguage[];
+	readonly realmIds?: readonly string[];
+	readonly subjectId?: string;
+	readonly reviewScore?: never;
+}
+
+interface FeedReviewEligibilityScope extends Omit<
+	FeedEligibilityBaseScope,
+	"content" | "reviewScore"
+> {
+	readonly content: readonly ["post:review"];
+	readonly reviewScore: Readonly<{
+		contextUnitId: string;
+		values: readonly number[];
+	}>;
+}
+
+/**
+ * Internal product flows may narrow Feed eligibility beyond the deliberately
+ * small public Feed query.
+ */
+export type FeedEligibilityScope = FeedEligibilityBaseScope | FeedReviewEligibilityScope;
+
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(3),
+		v: t.Literal(4),
 		sort: FeedSortSchema,
-		content: t.Array(FeedContentKindSchema, { minItems: 1, uniqueItems: true }),
-		realmId: t.Nullable(t.String({ format: "uuid" })),
-		subjectId: t.Nullable(t.String({ format: "uuid" })),
+		languages: t.Array(ContentLanguageSchema, { maxItems: 50, uniqueItems: true }),
+		realmIds: t.Array(Uuid, { maxItems: 50, uniqueItems: true }),
 		personalized: t.Boolean(),
 		snapshotId: t.Nullable(t.String({ format: "uuid" })),
 		policyVersion: RecommendationPolicyVersionSchema,
@@ -226,13 +254,14 @@ function validateCursor(
 	personalized: boolean,
 ) {
 	if (!cursor) return;
-	const content = resolveFeedContentSelection(query.content).selected;
+	const languages = query.languages ?? [];
+	const realmIds = query.realmIds ?? [];
 	if (
 		cursor.sort !== (query.sort ?? "best") ||
-		cursor.content.length !== content.length ||
-		cursor.content.some((kind, index) => kind !== content[index]) ||
-		cursor.realmId !== (query.realmId ?? null) ||
-		cursor.subjectId !== (query.subjectId ?? null) ||
+		cursor.languages.length !== languages.length ||
+		cursor.languages.some((language, index) => language !== languages[index]) ||
+		cursor.realmIds.length !== realmIds.length ||
+		cursor.realmIds.some((realmId, index) => realmId !== realmIds[index]) ||
 		cursor.personalized !== personalized ||
 		cursor.limit !== (query.limit ?? 20) ||
 		Number.isNaN(Date.parse(cursor.asOf))
@@ -242,11 +271,11 @@ function validateCursor(
 
 export function getFeedEligibilityCondition(
 	viewer: RecommendationViewer,
-	query: Pick<FeedQueryType, "content" | "realmId" | "subjectId">,
+	scope: FeedEligibilityScope,
 	asOf: Date,
 	anchorId?: string,
 ): SQL {
-	const { unitKinds, postKinds } = resolveFeedContentSelection(query.content);
+	const { unitKinds, postKinds } = resolveFeedContentSelection(scope.content);
 	const contentCondition = or(
 		unitKinds.length ? inArray(unit.kind, unitKinds) : undefined,
 		postKinds.length ? and(eq(unit.kind, "post"), inArray(post.kind, postKinds)) : undefined,
@@ -267,15 +296,41 @@ export function getFeedEligibilityCondition(
 				and readable_root.moderation_status = 'approved'
 				and readable_root.deleted_at is null
 		))`,
-		query.realmId
+		scope.languages?.length
+			? sql`exists (
+				select 1 from unit_localization scoped_localization
+				where scoped_localization.unit_id = ${unit.id}
+					and scoped_localization.language in (${sql.join(
+						scope.languages.map((language) => sql`${language}`),
+						sql`, `,
+					)})
+			)`
+			: undefined,
+		scope.realmIds?.length
 			? sql`exists (
 				select 1 from realm_unit scoped_content
 				where scoped_content.unit_id = ${unit.id}
-					and scoped_content.realm_id = ${query.realmId}::uuid
+					and scoped_content.realm_id in (${sql.join(
+						scope.realmIds.map((realmId) => sql`${realmId}::uuid`),
+						sql`, `,
+					)})
 					and scoped_content.status = 'visible'
 			)`
 			: undefined,
-		query.subjectId ? eq(post.subjectUnitId, query.subjectId) : undefined,
+		scope.subjectId ? eq(post.subjectUnitId, scope.subjectId) : undefined,
+		scope.reviewScore
+			? sql`exists (
+				select 1
+				from post_score scoped_post_score
+				inner join score scoped_score on scoped_score.id = scoped_post_score.score_id
+				where scoped_post_score.post_id = ${post.id}
+					and scoped_score.context_unit_id = ${scope.reviewScore.contextUnitId}
+					and scoped_score.value in (${sql.join(
+						scope.reviewScore.values.map((value) => sql`${value}`),
+						sql`, `,
+					)})
+			)`
+			: undefined,
 		viewer.contentRatings.length
 			? inArray(unit.contentRating, viewer.contentRatings)
 			: undefined,
@@ -308,7 +363,7 @@ type CandidateReason =
 
 async function getCandidateSources(input: {
 	viewer: RecommendationViewer;
-	query: FeedQueryType;
+	query: FeedEligibilityScope;
 	sort: FeedSort;
 	snapshotId: string | null;
 	asOf: Date;
@@ -503,9 +558,8 @@ function toCount(value: bigint | null | undefined, name: string) {
 
 export function getFeedCandidateRealmIdExpression(
 	viewer: Pick<RecommendationViewer, "personalized" | "profileId">,
-	realmId?: string,
+	realmIds?: readonly string[],
 ): SQL<string | null> {
-	if (realmId) return sql<string>`${realmId}::uuid`;
 	const followedRealmOrder =
 		viewer.personalized && viewer.profileId
 			? sql`case when exists (
@@ -518,6 +572,14 @@ export function getFeedCandidateRealmIdExpression(
 		select candidate_realm.realm_id from realm_unit candidate_realm
 		where candidate_realm.unit_id = ${unit.id}
 			and candidate_realm.status = 'visible'
+			${
+				realmIds?.length
+					? sql`and candidate_realm.realm_id in (${sql.join(
+							realmIds.map((realmId) => sql`${realmId}::uuid`),
+							sql`, `,
+						)})`
+					: sql``
+			}
 		order by
 			${followedRealmOrder}
 			candidate_realm.created_at desc, candidate_realm.realm_id
@@ -529,13 +591,13 @@ export async function getFeedRankingCandidates(input: {
 	ids: string[];
 	sources: CandidateSources;
 	viewer: RecommendationViewer;
-	query: FeedQueryType;
+	query: FeedEligibilityScope;
 	snapshotId: string | null;
 	asOf: Date;
 	anchorId?: string;
 }): Promise<FeedRankingCandidate[]> {
 	if (!input.ids.length) return [];
-	const selectedRealmId = getFeedCandidateRealmIdExpression(input.viewer, input.query.realmId);
+	const selectedRealmId = getFeedCandidateRealmIdExpression(input.viewer, input.query.realmIds);
 	const snapshotJoin = input.snapshotId
 		? and(
 				eq(recommendationUnitStat.snapshotId, input.snapshotId),
@@ -657,12 +719,15 @@ export type FeedHydrationOrigin =
 export async function hydrateFeedItems(
 	page: readonly FeedHydrationCandidate[],
 	viewer: RecommendationViewer,
-	query: Pick<FeedQueryType, "content" | "realmId" | "subjectId">,
+	scope: FeedEligibilityScope,
 	asOf: Date,
 	origin: FeedHydrationOrigin,
 ): Promise<FeedItemResponseValue[]> {
 	const pageIds = page.map(({ id }) => id);
 	if (!pageIds.length) return [];
+	const displayLanguages = scope.languages?.length
+		? [...scope.languages]
+		: viewer.preferredLanguages;
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -671,10 +736,11 @@ export async function hydrateFeedItems(
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
+			language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
 			body: unitLocalization.content,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
-			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover"),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", displayLanguages),
 			latestRevisionId: unitRevisionHead.revisionId,
 			createdAt: unit.createdAt,
 			updatedAt: unit.updatedAt,
@@ -687,14 +753,18 @@ export async function hydrateFeedItems(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, unit.id),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
+				eq(
+					unitLocalization.language,
+					resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
+				),
 			),
 		)
-		.where(and(inArray(unit.id, pageIds), getFeedEligibilityCondition(viewer, query, asOf)));
+		.where(and(inArray(unit.id, pageIds), getFeedEligibilityCondition(viewer, scope, asOf)));
 	if (!rows.length) return [];
 	const validIds = rows.map(({ id }) => id);
 	const postIds = rows.filter(({ postKind }) => postKind === "post").map(({ id }) => id);
 	const replyIds = rows.filter(({ postKind }) => postKind === "reply").map(({ id }) => id);
+	const reviewIds = rows.filter(({ postKind }) => postKind === "review").map(({ id }) => id);
 	const collectionIds = rows
 		.filter(({ unitKind }) => unitKind === "collection")
 		.map(({ id }) => id);
@@ -714,6 +784,7 @@ export async function hydrateFeedItems(
 		subjectScores,
 		rootRows,
 		collectionCounts,
+		reviewScores,
 	] = await Promise.all([
 		postIds.length
 			? database
@@ -832,6 +903,20 @@ export async function hydrateFeedItems(
 					.where(inArray(collectionItem.collectionId, collectionIds))
 					.groupBy(collectionItem.collectionId)
 			: [],
+		reviewIds.length
+			? database
+					.select({
+						postId: postScore.postId,
+						scoreId: score.id,
+						contextUnitId: score.contextUnitId,
+						value: score.value,
+						position: postScore.position,
+					})
+					.from(postScore)
+					.innerJoin(score, eq(score.id, postScore.scoreId))
+					.where(inArray(postScore.postId, reviewIds))
+					.orderBy(asc(postScore.postId), asc(postScore.position), asc(score.id))
+			: [],
 	]);
 	const [attributions, rootAttributions, realmContexts] = await Promise.all([
 		getAttributionSummariesByUnitIds(validIds),
@@ -894,6 +979,15 @@ export async function hydrateFeedItems(
 				: [];
 		}),
 	);
+	const scoresByPostId = new Map<
+		string,
+		{ scoreId: string; contextUnitId: string; value: number }[]
+	>();
+	for (const { postId, position: _position, ...reviewScore } of reviewScores) {
+		const current = scoresByPostId.get(postId) ?? [];
+		current.push(reviewScore);
+		scoresByPostId.set(postId, current);
+	}
 	return pageIds.flatMap((id, index): FeedItemResponseValue[] => {
 		const row = rowMap.get(id);
 		const ranked = pageMap.get(id);
@@ -909,6 +1003,7 @@ export async function hydrateFeedItems(
 				: null;
 		const common = {
 			id: row.id,
+			language: row.language,
 			attributions: attributions.get(row.id) ?? [],
 			realmId: ranked.realmId,
 			realms: prioritizeFeedRealmContexts(realmContexts.get(row.id) ?? [], ranked.realmId),
@@ -944,37 +1039,47 @@ export async function hydrateFeedItems(
 		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];
 		const subject = row.subjectId ? subjects.get(row.subjectId) : undefined;
 		if (row.postKind === "excerpt" && !subject) return [];
-		return [
-			{
-				...common,
-				itemType: "post" as const,
-				unitKind: "post" as const,
-				postKind: row.postKind,
-				summary: row.summary,
-				cover: presentImageAsset(row.coverAssetId),
-				subjectId: row.subjectId,
-				rootPostId: row.rootPostId,
-				parentPostId: row.parentPostId,
-				body: row.body === null ? null : toPortableTextResponse(row.body),
-				replyCount:
-					row.postKind === "reply"
-						? (childCount.get(row.id) ?? 0)
-						: (rootCount.get(row.id) ?? 0),
-				title: row.title,
-				latestRevisionId: row.latestRevisionId,
-				replyContext: row.rootPostId ? (rootContext.get(row.rootPostId) ?? null) : null,
-				subject: subject
-					? {
-							...subject,
-							score:
-								ranked.realmId && row.subjectId
-									? (subjectScore.get(`${row.subjectId}:${ranked.realmId}`) ??
-										null)
-									: null,
-						}
-					: null,
-			},
-		];
+		const postItem = {
+			...common,
+			itemType: "post" as const,
+			unitKind: "post" as const,
+			summary: row.summary,
+			cover: presentImageAsset(row.coverAssetId),
+			subjectId: row.subjectId,
+			rootPostId: row.rootPostId,
+			parentPostId: row.parentPostId,
+			body: row.body === null ? null : toPortableTextResponse(row.body),
+			replyCount:
+				row.postKind === "reply"
+					? (childCount.get(row.id) ?? 0)
+					: (rootCount.get(row.id) ?? 0),
+			title: row.title,
+			latestRevisionId: row.latestRevisionId,
+			replyContext: row.rootPostId ? (rootContext.get(row.rootPostId) ?? null) : null,
+			subject: subject
+				? {
+						...subject,
+						score:
+							ranked.realmId && row.subjectId
+								? (subjectScore.get(`${row.subjectId}:${ranked.realmId}`) ?? null)
+								: null,
+					}
+				: null,
+		};
+		return row.postKind === "review"
+			? [
+					{
+						...postItem,
+						postKind: row.postKind,
+						scores: scoresByPostId.get(row.id) ?? [],
+					},
+				]
+			: [
+					{
+						...postItem,
+						postKind: row.postKind,
+					},
+				];
 	});
 }
 
@@ -982,10 +1087,7 @@ export default new Elysia({ prefix: "/feed" }).get(
 	"",
 	async ({ query, request }) => {
 		const identity = await resolveIdentity(request.headers, "unit:read");
-		const viewer = await resolveRecommendationViewer(
-			identity.profile?.unitId,
-			query.personalized,
-		);
+		const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
 		const cursor = decodeCursor(query.cursor);
 		validateCursor(cursor, query, viewer.personalized);
 		const snapshot = cursor?.snapshotId
@@ -1021,12 +1123,11 @@ export default new Elysia({ prefix: "/feed" }).get(
 			personalized: viewer.personalized,
 			asOf,
 			pageSize: query.limit ?? 20,
-			...(query.realmId ? { scopedRealmId: query.realmId } : {}),
+			...(query.realmIds?.length === 1 ? { scopedRealmId: query.realmIds[0] } : {}),
 		});
 		const start = cursor ? ranked.findIndex(({ id }) => id === cursor.lastId) + 1 : 0;
 		if (cursor && start === 0) throw new InvalidFeedCursor();
 		const limit = query.limit ?? 20;
-		const content = resolveFeedContentSelection(query.content).selected;
 		const page = ranked.slice(start, start + limit);
 		const requestId = crypto.randomUUID();
 		const items = await hydrateFeedItems(page, viewer, query, asOf, {
@@ -1044,11 +1145,10 @@ export default new Elysia({ prefix: "/feed" }).get(
 				start + page.length < ranked.length && last
 					? Buffer.from(
 							JSON.stringify({
-								v: 3,
+								v: 4,
 								sort,
-								content,
-								realmId: query.realmId ?? null,
-								subjectId: query.subjectId ?? null,
+								languages: query.languages ?? [],
+								realmIds: query.realmIds ?? [],
 								personalized: viewer.personalized,
 								snapshotId: snapshotContext.id,
 								policyVersion: snapshotContext.policyVersion,

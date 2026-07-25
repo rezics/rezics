@@ -2,7 +2,12 @@ import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CreateReviewBody, ListReviewsQuery, ListViewerScoresQuery } from "./schema";
+import {
+	CreateReviewBody,
+	ListReviewsQuery,
+	ListViewerScoresQuery,
+	resolveReviewScoreFilter,
+} from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
 const realmId = "019b76da-a800-7300-8000-000000000002";
@@ -57,21 +62,42 @@ describe("review list schema", () => {
 		expect(
 			Check(ListReviewsQuery, {
 				targetId,
+				realmIds: [realmId],
 				languages: ["zh", "en"],
-				search: "好看",
 				scoreContextUnitId: realmId,
 				scores: [8, 9, 10],
+				sort: "best",
+				cursor: "opaque",
 				limit: 3,
 			}),
 		).toBe(true);
 	});
 
-	it("rejects unsupported languages and out-of-range Scores", () => {
+	it("requires Score values and their context together", () => {
+		expect(resolveReviewScoreFilter({ scoreContextUnitId: realmId, scores: [8] })).toEqual({
+			status: "present",
+			contextUnitId: realmId,
+			values: [8],
+		});
+		expect(resolveReviewScoreFilter({ scores: [8] })).toEqual({ status: "invalid" });
+		expect(resolveReviewScoreFilter({ scoreContextUnitId: realmId })).toEqual({
+			status: "invalid",
+		});
+		expect(resolveReviewScoreFilter({})).toEqual({ status: "absent" });
+	});
+
+	it("rejects unsupported filters, sorting, and out-of-range Scores", () => {
 		expect(Check(ListReviewsQuery, { languages: ["zh-Hant"] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scores: [0] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scores: [11] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [0] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [11] })).toBe(false);
 		expect(Check(ListReviewsQuery, { languages: [] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scores: [] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scores: [10, 10] })).toBe(false);
+		expect(Check(ListReviewsQuery, { realmIds: [] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [10, 10] })).toBe(
+			false,
+		);
+		expect(Check(ListReviewsQuery, { realmId })).toBe(false);
+		expect(Check(ListReviewsQuery, { sort: "relevance" })).toBe(false);
+		expect(Check(ListReviewsQuery, { search: "review text" })).toBe(false);
 	});
 });

@@ -19,6 +19,12 @@ export function isFeedSort(value: string): value is FeedSort {
 export const feedSortParser = parseAsStringLiteral(FeedSorts)
 	.withDefault("best")
 	.withOptions({ ...urlStateOptions, history: "push" });
+export const feedLanguagesParser = parseAsArrayOf(parseAsStringLiteral(ContentLanguageValues))
+	.withDefault([])
+	.withOptions({ ...urlStateOptions, history: "push" });
+export const feedRealmIdsParser = parseAsArrayOf(parseAsString)
+	.withDefault([])
+	.withOptions({ ...urlStateOptions, history: "push" });
 
 export const SearchScopes = Object.values(PostApiSearchByIndexIndex);
 export const searchParamsParsers = {

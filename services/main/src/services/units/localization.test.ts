@@ -8,6 +8,7 @@ import {
 	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
 	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationTitle,
 	toUnitLocalizationStorage,
 } from "./localization";
 
@@ -62,6 +63,15 @@ describe("resolvedUnitLocalizationAvatar", () => {
 
 		expect(query.sql).toContain("'provider', $1::text");
 		expect(query.params[0]).toBe(FontAwesomeProvider);
+	});
+
+	it("preserves the caller's language preference order for array filters", () => {
+		const query = new PgDialect().sqlToQuery(
+			resolvedUnitLocalizationTitle(unit.id, ["zh", "en"]),
+		);
+
+		expect(query.sql).toContain("case");
+		expect(query.params.slice(0, 4)).toEqual(["zh", 0, "en", 1]);
 	});
 });
 

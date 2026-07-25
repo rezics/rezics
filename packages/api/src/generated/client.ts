@@ -565,6 +565,8 @@ import type {
 	GetApiSearchFeaturesByTemplateResponses,
 	PostApiSearchFeaturesByTemplateExecuteOptions,
 	PostApiSearchFeaturesByTemplateExecuteResponses,
+	PostApiSearchFeaturesByTemplateFeedOptions,
+	PostApiSearchFeaturesByTemplateFeedResponses,
 	GetApiSearchZonesByZoneIdFeatureOptions,
 	GetApiSearchZonesByZoneIdFeatureResponses,
 	PutApiSearchZonesByZoneIdFeatureOptions,
@@ -6186,6 +6188,22 @@ export function postApiSearchFeaturesByTemplateExecute<ThrowOnError extends bool
 		url: "/api/search/features/{template}/execute",
 		...config,
 	}) as Promise<RequestResult<PostApiSearchFeaturesByTemplateExecuteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Present a system Search Feature as a Feed
+ * {@link /api/search/features/:template/feed}
+ */
+export function postApiSearchFeaturesByTemplateFeed<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchFeaturesByTemplateFeedOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchFeaturesByTemplateFeedResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/features/{template}/feed",
+		...config,
+	}) as Promise<RequestResult<PostApiSearchFeaturesByTemplateFeedResponses, ThrowOnError>>;
 }
 
 /**

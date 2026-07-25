@@ -223,7 +223,6 @@ function createOfficialZoneContent(input: {
 						_type: "feed",
 						_key: feedKey,
 						feature: { kind: "zone" },
-						defaults: [],
 						presentation: {
 							pagination: "load-more",
 							showResultCount: true,

@@ -292,7 +292,6 @@ describe("Block document contracts", () => {
 					_type: "feed",
 					_key: "000000000011",
 					feature: { kind: "template", template: "global" },
-					defaults: [],
 					presentation: { pagination: "load-more", showResultCount: true },
 				},
 			],
@@ -300,6 +299,24 @@ describe("Block document contracts", () => {
 
 		expect(() => assertBlockDocument(document)).not.toThrow();
 		expect(document.blocks[0]!.feature).toEqual({ kind: "template", template: "global" });
+	});
+
+	test("rejects Feed-owned filter defaults", () => {
+		expect(() =>
+			assertBlockDocument({
+				_type: "block-document",
+				_key: "000000000012",
+				blocks: [
+					{
+						_type: "feed",
+						_key: "000000000013",
+						feature: { kind: "template", template: "global" },
+						defaults: [],
+						presentation: { pagination: "load-more", showResultCount: true },
+					},
+				],
+			}),
+		).toThrow();
 	});
 
 	test("separates reusable navigation content from Menu presentation", () => {

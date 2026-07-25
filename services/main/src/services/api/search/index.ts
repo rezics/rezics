@@ -53,14 +53,15 @@ import {
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
 import { hydrateFeedItems } from "../feed";
+import { FeedContentKindValues } from "../feed/schema";
 import { DateTime, Uuid } from "../schema";
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import {
 	toApiErrorResponse,
 	DomainSearchResponse,
+	SearchFeedResponse,
 	SearchResponse,
-	ZoneFeedResponse,
 } from "../schema/response";
 
 const { logger } = getActiveObservability();
@@ -180,7 +181,6 @@ async function executeZoneBlock(input: {
 	body: unknown;
 	profileId?: string;
 	source?: SearchFeatureSource;
-	defaults?: typeof SearchFeatureInput.static.document.defaults;
 }) {
 	const source = input.source ?? findSearchFeatureSource(input.document, input.blockKey);
 	const baseDocument =
@@ -191,23 +191,10 @@ async function executeZoneBlock(input: {
 					if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
 					return feature.document;
 				});
-	const document = input.defaults?.length
-		? {
-				...baseDocument,
-				defaults: [
-					...new Map(
-						[...baseDocument.defaults, ...input.defaults].map((value) => [
-							value.controlKey,
-							value,
-						]),
-					).values(),
-				],
-			}
-		: baseDocument;
 	const request = input.body as typeof ZoneSearchFeatureExecutionBody.static;
 	return executeSearchFeatureInput(
 		{
-			document,
+			document: baseDocument,
 			contexts: [{ kind: "zone", zoneId: input.zoneId }],
 			injections: request.injections,
 			state: request.state,
@@ -227,8 +214,14 @@ async function executeZoneFeedBlock(input: {
 	const result = await executeZoneBlock({
 		...input,
 		source: block.feature,
-		defaults: block.defaults,
 	});
+	return presentSearchResultAsFeed(result, input.profileId);
+}
+
+async function presentSearchResultAsFeed(
+	result: Awaited<ReturnType<typeof executeSearchFeatureInput>>,
+	profileId?: string,
+) {
 	const seen = new Set<string>();
 	const candidates = result.groups.flatMap((group) =>
 		group.hits.flatMap((hit) => {
@@ -237,10 +230,14 @@ async function executeZoneFeedBlock(input: {
 			return [{ id: hit.id, realmId: null }];
 		}),
 	);
-	const viewer = await resolveRecommendationViewer(input.profileId, false);
-	const items = await hydrateFeedItems(candidates, viewer, {}, new Date(), {
-		kind: "contextual",
-	});
+	const viewer = await resolveRecommendationViewer(profileId, false);
+	const items = await hydrateFeedItems(
+		candidates,
+		viewer,
+		{ content: FeedContentKindValues },
+		new Date(),
+		{ kind: "contextual" },
+	);
 	return {
 		items,
 		nextCursor: result.nextCursor,
@@ -287,6 +284,41 @@ export default new Elysia({ prefix: "/search" })
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
 			detail: { summary: "Execute a system Search Feature template", tags: ["Search"] },
+		},
+	)
+	.post(
+		"/features/:template/feed",
+		async ({ params, body, request }) => {
+			try {
+				const identity = await resolveIdentity(request.headers, "unit:read");
+				const result = await executeSearchFeatureInput(
+					{
+						document: createDefaultSearchDocument(params.template),
+						...body,
+					},
+					identity.authorization.profileId,
+				);
+				return presentSearchResultAsFeed(result, identity.authorization.profileId);
+			} catch (cause) {
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
+					throw cause;
+				logSearchFailure(
+					"Search Feature Feed presentation failed",
+					"search.feature_feed.failed",
+					cause,
+				);
+				throw new SearchUnavailable(cause);
+			}
+		},
+		{
+			params: SearchFeatureTemplateParams,
+			body: SearchFeatureExecutionBody,
+			response: {
+				[StatusCodes.OK]: SearchFeedResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Present a system Search Feature as a Feed", tags: ["Search"] },
 		},
 	)
 	.get(
@@ -620,7 +652,7 @@ export default new Elysia({ prefix: "/search" })
 			params: ZoneFeedBlockParams,
 			body: ZoneFeedBlockExecutionBody,
 			response: {
-				[StatusCodes.OK]: ZoneFeedResponse,
+				[StatusCodes.OK]: SearchFeedResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"DockNotFound",

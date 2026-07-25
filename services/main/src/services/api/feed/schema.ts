@@ -4,7 +4,7 @@ import {
 	type PostKind,
 	type UnitKind,
 } from "../../database/schema/contract-values";
-import { Uuid } from "../schema";
+import { ContentLanguage, Uuid } from "../schema";
 
 export const FeedSortSchema = t.UnionEnum(FeedSortValues, { default: "best" });
 
@@ -36,6 +36,16 @@ export const FeedPostKindValues = [
 ] as const satisfies readonly PostKind[];
 export type FeedPostKind = (typeof FeedPostKindValues)[number];
 
+export const FeedNonReviewPostKindValues = [
+	"post",
+	"reply",
+	"excerpt",
+	"chapter",
+	"chapter_group",
+	"wiki",
+	"picture",
+] as const satisfies readonly Exclude<FeedPostKind, "review">[];
+
 export const FeedContentKindValues = [
 	"unit:profile",
 	"unit:book",
@@ -64,16 +74,17 @@ export const DefaultFeedContentKindValues = FeedContentKindValues.filter(
 	(kind): kind is Exclude<FeedContentKind, "post:reply"> => kind !== "post:reply",
 );
 
-export const FeedContentKindSchema = t.UnionEnum(FeedContentKindValues);
-
-export const FeedQuery = t.Object({
-	sort: t.Optional(FeedSortSchema),
-	content: t.Optional(t.Array(FeedContentKindSchema, { minItems: 1, uniqueItems: true })),
-	personalized: t.Optional(t.Boolean()),
-	realmId: t.Optional(Uuid),
-	subjectId: t.Optional(Uuid),
-	cursor: t.Optional(t.String({ maxLength: 1024 })),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
+export const FeedQuery = t.Object(
+	{
+		languages: t.Optional(
+			t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true }),
+		),
+		realmIds: t.Optional(t.Array(Uuid, { minItems: 1, maxItems: 50, uniqueItems: true })),
+		sort: t.Optional(FeedSortSchema),
+		cursor: t.Optional(t.String({ maxLength: 1024 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
 export type FeedQuery = Static<typeof FeedQuery>;
 export type FeedSort = Static<typeof FeedSortSchema>;

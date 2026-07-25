@@ -13,29 +13,35 @@ import {
 	MenuTrigger,
 	cn,
 } from "@rezics/ui";
-import { useTranslation } from "@/i18n/client";
 import { filterSelectionFromValues, filterSelectionValues } from "../model/filter-selection";
 
-export interface FeedContentOption<Value extends string> {
+export interface FeedFilterOption<Value extends string> {
 	readonly value: Value;
 	readonly label: string;
 	readonly description?: string;
 }
 
-export function FeedContentSelector<Value extends string>({
+export function FeedFilterSelector<Value extends string>({
+	ariaLabel,
 	className,
+	clearLabel,
+	groupLabel,
 	onValueChange,
 	options,
-	showBulkActions = false,
+	selectedCountLabel,
+	unfilteredLabel,
 	value,
 }: {
+	ariaLabel: string;
 	className?: string;
+	clearLabel: string;
+	groupLabel?: string;
 	onValueChange: (value: readonly Value[]) => void;
-	options: readonly FeedContentOption<Value>[];
-	showBulkActions?: boolean;
+	options: readonly FeedFilterOption<Value>[];
+	selectedCountLabel: (count: number) => string;
+	unfilteredLabel: string;
 	value: readonly Value[];
 }) {
-	const { t } = useTranslation(["feed"]);
 	const availableValues = new Set(options.map((option) => option.value));
 	const explicitValues = value.filter((candidate) => availableValues.has(candidate));
 	const selectedValues = filterSelectionValues(
@@ -46,15 +52,13 @@ export function FeedContentSelector<Value extends string>({
 	const selectedLabels = options.flatMap((option) =>
 		selected.has(option.value) ? [option.label] : [],
 	);
-	const unitOptions = options.filter(({ value: optionValue }) => optionValue.startsWith("unit:"));
-	const postOptions = options.filter(({ value: optionValue }) => optionValue.startsWith("post:"));
 	const summary =
-		selectedLabels.length === options.length
-			? t.feed.content.allSelected
+		selectedLabels.length === 0 || selectedLabels.length === options.length
+			? unfilteredLabel
 			: selectedLabels.length <= 2
 				? selectedLabels.join(", ")
-				: t.feed.content.selectedCount({ count: selectedLabels.length });
-	const setChecked = (option: FeedContentOption<Value>, checked: boolean) => {
+				: selectedCountLabel(selectedLabels.length);
+	const setChecked = (option: FeedFilterOption<Value>, checked: boolean) => {
 		const next = new Set(selectedValues);
 		if (checked) next.add(option.value);
 		else next.delete(option.value);
@@ -67,7 +71,7 @@ export function FeedContentSelector<Value extends string>({
 		<Menu closeOnSelect={false} positioning={{ placement: "bottom-start" }}>
 			<MenuTrigger asChild>
 				<Button
-					aria-label={t.feed.contentFilterLabel}
+					aria-label={ariaLabel}
 					className={cn(
 						"max-w-[min(18rem,calc(100vw-2rem))] min-w-44 justify-start",
 						className,
@@ -80,57 +84,38 @@ export function FeedContentSelector<Value extends string>({
 				</Button>
 			</MenuTrigger>
 			<MenuContent className="max-h-96 w-[min(18rem,calc(100vw-2rem))] p-1.5">
-				{showBulkActions ? (
-					<>
-						<MenuItem
-							disabled={explicitValues.length === 0}
-							onSelect={() => onValueChange([])}
-							value="clear-feed-content"
-						>
-							<XIcon aria-hidden />
-							{t.feed.content.clear}
-						</MenuItem>
-						<MenuSeparator />
-					</>
-				) : null}
-				{unitOptions.length > 0 ? (
-					<MenuGroup heading={t.feed.content.unitGroup}>
-						{unitOptions.map((option) => (
-							<FeedContentMenuItem
-								checked={selected.has(option.value)}
-								key={option.value}
-								onCheckedChange={(checked) => setChecked(option, checked)}
-								option={option}
-							/>
-						))}
-					</MenuGroup>
-				) : null}
-				{unitOptions.length > 0 && postOptions.length > 0 ? <MenuSeparator /> : null}
-				{postOptions.length > 0 ? (
-					<MenuGroup heading={t.feed.content.postGroup}>
-						{postOptions.map((option) => (
-							<FeedContentMenuItem
-								checked={selected.has(option.value)}
-								key={option.value}
-								onCheckedChange={(checked) => setChecked(option, checked)}
-								option={option}
-							/>
-						))}
-					</MenuGroup>
-				) : null}
+				<MenuItem
+					disabled={explicitValues.length === 0}
+					onSelect={() => onValueChange([])}
+					value="clear-feed-filter"
+				>
+					<XIcon aria-hidden />
+					{clearLabel}
+				</MenuItem>
+				<MenuSeparator />
+				<MenuGroup heading={groupLabel}>
+					{options.map((option) => (
+						<FeedFilterMenuItem
+							checked={selected.has(option.value)}
+							key={option.value}
+							onCheckedChange={(checked) => setChecked(option, checked)}
+							option={option}
+						/>
+					))}
+				</MenuGroup>
 			</MenuContent>
 		</Menu>
 	);
 }
 
-function FeedContentMenuItem<Value extends string>({
+function FeedFilterMenuItem<Value extends string>({
 	checked,
 	onCheckedChange,
 	option,
 }: {
 	checked: boolean;
 	onCheckedChange: (checked: boolean) => void;
-	option: FeedContentOption<Value>;
+	option: FeedFilterOption<Value>;
 }) {
 	return (
 		<MenuCheckboxItem

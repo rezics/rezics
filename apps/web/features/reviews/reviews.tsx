@@ -72,7 +72,7 @@ async function invalidateReviews(
 }
 
 export function ReviewsPage() {
-	const query = useGetApiReviews({ query: { limit: 50 } });
+	const query = useGetApiReviews({ query: { limit: 50, sort: "best" } });
 	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)

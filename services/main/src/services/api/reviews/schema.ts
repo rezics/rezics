@@ -3,24 +3,58 @@ import { PortableTextDocument } from "@rezics/block";
 
 import { ContentLanguage, Uuid } from "../schema";
 
-export const ListReviewsQuery = t.Object({
+export const ReviewSortValues = ["best", "new"] as const;
+export const ReviewSortSchema = t.UnionEnum(ReviewSortValues, { default: "best" });
+export type ReviewSort = Static<typeof ReviewSortSchema>;
+
+const ListReviewsCommonQuery = {
 	targetId: t.Optional(Uuid),
-	realmId: t.Optional(Uuid),
+	realmIds: t.Optional(t.Array(Uuid, { minItems: 1, maxItems: 50, uniqueItems: true })),
 	languages: t.Optional(
 		t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true }),
 	),
-	search: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
-	scoreContextUnitId: t.Optional(Uuid),
-	scores: t.Optional(
-		t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
-			minItems: 1,
-			maxItems: 10,
-			uniqueItems: true,
-		}),
-	),
+	sort: t.Optional(ReviewSortSchema),
+	cursor: t.Optional(t.String({ maxLength: 1024 })),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+} as const;
+
+const ReviewScores = t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
+	minItems: 1,
+	maxItems: 10,
+	uniqueItems: true,
 });
+
+export const ListReviewsQuery = t.Object(
+	{
+		...ListReviewsCommonQuery,
+		scoreContextUnitId: t.Optional(Uuid),
+		scores: t.Optional(ReviewScores),
+	},
+	{ additionalProperties: false },
+);
 export type ListReviewsQuery = Static<typeof ListReviewsQuery>;
+
+export type ReviewScoreFilterResolution =
+	| Readonly<{ status: "absent" }>
+	| Readonly<{
+			status: "present";
+			contextUnitId: string;
+			values: readonly number[];
+	  }>
+	| Readonly<{ status: "invalid" }>;
+
+export function resolveReviewScoreFilter(
+	query: Pick<ListReviewsQuery, "scoreContextUnitId" | "scores">,
+): ReviewScoreFilterResolution {
+	if (query.scoreContextUnitId && query.scores)
+		return {
+			status: "present",
+			contextUnitId: query.scoreContextUnitId,
+			values: query.scores,
+		};
+	if (query.scoreContextUnitId || query.scores) return { status: "invalid" };
+	return { status: "absent" };
+}
 
 export const CreateReviewBody = t.Object({
 	targetId: Uuid,

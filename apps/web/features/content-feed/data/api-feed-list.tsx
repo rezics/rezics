@@ -1,9 +1,11 @@
 "use client";
 
+import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import {
 	getApiFeed,
 	getApiFeedQueryKey,
 	type GetApiFeedSort,
+	useGetApiRealms,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -11,11 +13,9 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, AlertAction, AlertDescription, Button, ChoiceSelect } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { FeedContentSelector, type FeedContentOption } from "../components/feed-content-selector";
+import { FeedFilterSelector, type FeedFilterOption } from "../components/feed-filter-selector";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
-import type { FeedContentKind } from "../model/feed-kind";
-import { filterSelectionFromValues, filterSelectionValues } from "../model/filter-selection";
 
 const FeedSorts = [
 	"best",
@@ -25,45 +25,33 @@ const FeedSorts = [
 	"rising",
 ] as const satisfies readonly GetApiFeedSort[];
 
-export interface ApiFeedListProps<ContentKind extends FeedContentKind = FeedContentKind> {
-	contentKinds: readonly ContentKind[];
-	contentOptions: readonly ContentKind[];
+export interface ApiFeedListProps {
 	infinite?: boolean;
-	onContentKindsChange?: (contentKinds: readonly ContentKind[]) => void;
+	languages?: readonly ContentLanguage[];
+	onLanguagesChange?: (languages: readonly ContentLanguage[]) => void;
+	onRealmIdsChange?: (realmIds: readonly string[]) => void;
 	onSortChange?: (sort: GetApiFeedSort) => void;
-	personalized?: boolean;
-	realmId?: string;
-	showBulkActions?: boolean;
+	realmIds?: readonly string[];
 	sort?: GetApiFeedSort;
-	subjectId?: string;
 }
 
-export function ApiFeedList<ContentKind extends FeedContentKind>({
-	contentKinds,
-	contentOptions,
+export function ApiFeedList({
 	infinite = false,
-	onContentKindsChange,
+	languages = [],
+	onLanguagesChange,
+	onRealmIdsChange,
 	onSortChange,
-	personalized,
-	realmId,
-	showBulkActions = false,
-	sort = "new",
-	subjectId,
-}: ApiFeedListProps<ContentKind>) {
+	realmIds = [],
+	sort = "best",
+}: ApiFeedListProps) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-	const selectedContent = filterSelectionValues(
-		filterSelectionFromValues(contentKinds),
-		contentOptions,
-	);
 	const baseQuery = {
-		content: [...selectedContent],
 		limit: 20,
 		sort,
-		...(realmId ? { realmId } : {}),
-		...(subjectId ? { subjectId } : {}),
-		...(personalized === undefined ? {} : { personalized }),
+		...(languages.length ? { languages: [...languages] } : {}),
+		...(realmIds.length ? { realmIds: [...realmIds] } : {}),
 	};
 	const query = useInfiniteQuery({
 		queryKey: getApiFeedQueryKey({ query: baseQuery }),
@@ -114,17 +102,23 @@ export function ApiFeedList<ContentKind extends FeedContentKind>({
 			else next.delete(id);
 			return next;
 		});
-	const showControls = Boolean(onSortChange || onContentKindsChange);
+	const showControls = Boolean(onSortChange || onLanguagesChange || onRealmIdsChange);
+	const requestedRealmId = realmIds.length === 1 ? realmIds[0] : undefined;
 
 	return (
-		<div className="min-w-0" data-content={contentKinds.join(",")} data-sort={sort}>
+		<div
+			className="min-w-0"
+			data-languages={languages.join(",")}
+			data-realms={realmIds.join(",")}
+			data-sort={sort}
+		>
 			{showControls ? (
 				<FeedListControls
-					contentKinds={contentKinds}
-					contentOptions={contentOptions}
-					onContentKindsChange={onContentKindsChange}
+					languages={languages}
+					onLanguagesChange={onLanguagesChange}
+					onRealmIdsChange={onRealmIdsChange}
 					onSortChange={onSortChange}
-					showBulkActions={showBulkActions}
+					realmIds={realmIds}
 					sort={sort}
 				/>
 			) : null}
@@ -180,7 +174,7 @@ export function ApiFeedList<ContentKind extends FeedContentKind>({
 						item={item}
 						onHiddenChange={(value) => setItemHidden(item.id, value)}
 						position={metadata.position}
-						requestedRealmId={realmId}
+						requestedRealmId={requestedRealmId}
 						setSize={metadata.setSize}
 					/>
 				)}
@@ -197,36 +191,35 @@ export function ApiFeedList<ContentKind extends FeedContentKind>({
 	);
 }
 
-export function FeedListControls<ContentKind extends FeedContentKind>({
-	contentKinds,
-	contentOptions,
-	onContentKindsChange,
+export function FeedListControls({
+	languages = [],
+	onLanguagesChange,
+	onRealmIdsChange,
 	onSortChange,
-	showBulkActions = false,
+	realmIds = [],
 	sort,
 }: Pick<
-	ApiFeedListProps<ContentKind>,
-	| "contentKinds"
-	| "contentOptions"
-	| "onContentKindsChange"
-	| "onSortChange"
-	| "showBulkActions"
-	| "sort"
+	ApiFeedListProps,
+	"languages" | "onLanguagesChange" | "onRealmIdsChange" | "onSortChange" | "realmIds" | "sort"
 >) {
 	const { t } = useTranslation(["feed"]);
+	const realms = useGetApiRealms(
+		{ query: { limit: 50 } },
+		{ query: { enabled: Boolean(onRealmIdsChange) } },
+	);
 	const sortOptions = FeedSorts.map((value) => ({
 		value,
 		label: t.feed.sort[value],
-	})) satisfies readonly FeedContentOption<GetApiFeedSort>[];
-	const localizedContentOptions = contentOptions.map((value): FeedContentOption<ContentKind> => ({
+	})) satisfies readonly FeedFilterOption<GetApiFeedSort>[];
+	const languageOptions = ContentLanguageValues.map((value) => ({
 		value,
-		label: t.feed.content.kinds[value],
-		...(value === "post:post"
-			? { description: t.feed.content.postDescription }
-			: value === "post:reply"
-				? { description: t.feed.content.replyDescription }
-				: {}),
-	}));
+		label: t.feed.filters.languages.options[value],
+	})) satisfies readonly FeedFilterOption<ContentLanguage>[];
+	const realmOptions =
+		realms.data?.items.map((realm) => ({
+			value: realm.id,
+			label: realm.title ?? t.feed.filters.realms.unnamed,
+		})) ?? [];
 
 	return (
 		<div
@@ -244,15 +237,31 @@ export function FeedListControls<ContentKind extends FeedContentKind>({
 					options={sortOptions}
 					placeholder={t.feed.sortLabel}
 					size="lg"
-					value={[sort ?? "new"]}
+					value={[sort ?? "best"]}
 				/>
 			) : null}
-			{onContentKindsChange && contentOptions.length > 1 ? (
-				<FeedContentSelector
-					onValueChange={onContentKindsChange}
-					options={localizedContentOptions}
-					showBulkActions={showBulkActions}
-					value={contentKinds}
+			{onLanguagesChange ? (
+				<FeedFilterSelector
+					ariaLabel={t.feed.filters.languages.label}
+					clearLabel={t.feed.filters.clear}
+					groupLabel={t.feed.filters.languages.label}
+					onValueChange={onLanguagesChange}
+					options={languageOptions}
+					selectedCountLabel={(count) => t.feed.filters.selectedCount({ count })}
+					unfilteredLabel={t.feed.filters.languages.all}
+					value={languages}
+				/>
+			) : null}
+			{onRealmIdsChange && realmOptions.length ? (
+				<FeedFilterSelector
+					ariaLabel={t.feed.filters.realms.label}
+					clearLabel={t.feed.filters.clear}
+					groupLabel={t.feed.filters.realms.label}
+					onValueChange={onRealmIdsChange}
+					options={realmOptions}
+					selectedCountLabel={(count) => t.feed.filters.selectedCount({ count })}
+					unfilteredLabel={t.feed.filters.realms.all}
+					value={realmIds}
 				/>
 			) : null}
 		</div>

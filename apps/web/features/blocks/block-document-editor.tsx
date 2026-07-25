@@ -68,7 +68,6 @@ function createBlock(type: AddableBlockType): UnitReferencedBlock {
 				_type: type,
 				_key,
 				feature: { kind: "zone" },
-				defaults: [],
 				presentation: { pagination: "load-more", showResultCount: true },
 			};
 		case "menu":

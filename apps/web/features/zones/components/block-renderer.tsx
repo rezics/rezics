@@ -677,7 +677,6 @@ function ZoneFeedBlock({
 	error,
 	presentation,
 	maxResults,
-	defaults,
 }: {
 	blockKey: string;
 	execute: (request: SearchFeatureRequest) => Promise<ZoneFeedExecutionResponse>;
@@ -686,7 +685,6 @@ function ZoneFeedBlock({
 	error: boolean;
 	presentation: FeedPresentation;
 	maxResults?: number;
-	defaults: readonly SearchControlValue[];
 }) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const [request, setRequest] = useState<SearchFeatureRequest>();
@@ -724,7 +722,6 @@ function ZoneFeedBlock({
 				facets={page?.facets}
 				feature={feature}
 				initialPageSize={maxResults && maxResults <= 20 ? maxResults : undefined}
-				initialValues={defaults}
 				onExecute={(nextRequest) => run(nextRequest, false)}
 				pending={pending}
 				presentation={{ results: "list", showResultCount: presentation.showResultCount }}
@@ -774,19 +771,16 @@ function DockFeedBlock({
 	blockKey,
 	feature,
 	presentation,
-	defaults,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
 	presentation: FeedPresentation;
-	defaults: readonly SearchControlValue[];
 }) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
-			defaults={defaults}
 			error={mutation.isError}
 			execute={(body) =>
 				mutation.mutateAsync({
@@ -806,20 +800,17 @@ function PageFeedBlock({
 	feature,
 	pageId,
 	presentation,
-	defaults,
 }: {
 	blockKey: string;
 	feature: SearchFeatureSource;
 	pageId: string;
 	presentation: FeedPresentation;
-	defaults: readonly SearchControlValue[];
 }) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute();
 	return (
 		<ZoneFeedBlock
 			blockKey={blockKey}
-			defaults={defaults}
 			error={mutation.isError}
 			execute={(body) =>
 				mutation.mutateAsync({
@@ -1076,14 +1067,12 @@ function ZoneBlock({ block }: { block: Block }) {
 		return surface.kind === "dock" ? (
 			<DockFeedBlock
 				blockKey={block._key}
-				defaults={block.defaults}
 				feature={block.feature}
 				presentation={block.presentation}
 			/>
 		) : (
 			<PageFeedBlock
 				blockKey={block._key}
-				defaults={block.defaults}
 				feature={block.feature}
 				pageId={surface.pageId}
 				presentation={block.presentation}

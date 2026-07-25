@@ -1,68 +1,95 @@
 "use client";
 
-import {
-	type GetApiFeedSort,
-	useGetApiRecommendationsPostsByPostId,
-} from "@rezics/openapi-tanstack-query";
-import { useState } from "react";
+import { useGetApiRecommendationsPostsByPostId } from "@rezics/openapi-tanstack-query";
+import type { SearchInjection } from "@rezics/search";
+import { useMemo, useState } from "react";
 
 import { CardContent, Skeleton } from "@rezics/ui";
 import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { FeedPostCard } from "@/features/content-feed/components/feed-item-card";
 import { FeedListItems } from "@/features/content-feed/components/feed-list";
-import { ApiFeedList } from "@/features/content-feed/data/api-feed-list";
-import {
-	DefaultPostListContentKinds,
-	PostListContentKinds,
-	type PostListContentKind,
-} from "@/features/content-feed/model/feed-kind";
+import { SearchFeedList } from "@/features/content-feed/data/search-feed-list";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 export function PostList({
 	infinite = false,
-	onPostKindsChange,
-	onSortChange,
-	personalized,
-	postKinds: controlledPostKinds,
 	realmId,
-	sort: controlledSort,
 	subjectId,
 }: {
 	infinite?: boolean;
-	onPostKindsChange?: (postKinds: readonly PostListContentKind[]) => void;
-	onSortChange?: (sort: GetApiFeedSort) => void;
-	personalized?: boolean;
-	postKinds?: readonly PostListContentKind[];
 	realmId?: string;
-	sort?: GetApiFeedSort;
 	subjectId?: string;
 }) {
-	const [postKinds, setPostKinds] = useState<readonly PostListContentKind[]>(
-		DefaultPostListContentKinds,
+	const injections = useMemo<SearchInjection[]>(
+		() => [
+			{
+				source: "link",
+				removable: false,
+				value: {
+					controlKey: "category",
+					filter: { field: "category", operator: "equals", value: "posts" },
+				},
+			},
+			{
+				source: "link",
+				removable: false,
+				value: {
+					controlKey: "kind",
+					filter: { field: "kind", operator: "equals", value: "post" },
+				},
+			},
+			...(realmId
+				? [
+						{
+							source: "realm" as const,
+							removable: false,
+							value: {
+								controlKey: "realm",
+								filter: {
+									field: "realm" as const,
+									operator: "equals" as const,
+									value: realmId,
+								},
+							},
+						},
+					]
+				: []),
+			...(subjectId
+				? [
+						{
+							source: "link" as const,
+							removable: false,
+							value: {
+								controlKey: "subject",
+								filter: {
+									field: "subject" as const,
+									operator: "equals" as const,
+									value: subjectId,
+								},
+							},
+						},
+					]
+				: []),
+		],
+		[realmId, subjectId],
 	);
-	const [sort, setSort] = useState<GetApiFeedSort>("new");
-	const selectedPostKinds = controlledPostKinds ?? postKinds;
-	const selectedSort = controlledSort ?? sort;
 
 	return (
-		<ApiFeedList
-			contentKinds={selectedPostKinds}
-			contentOptions={PostListContentKinds}
+		<SearchFeedList
 			infinite={infinite}
-			onContentKindsChange={(nextPostKinds) => {
-				if (controlledPostKinds === undefined) setPostKinds(nextPostKinds);
-				onPostKindsChange?.(nextPostKinds);
+			request={{
+				contexts: [],
+				injections,
+				state: {
+					mode: "basic",
+					pageSize: 20,
+					sort: "createdAt:desc",
+					values: [],
+				},
 			}}
-			onSortChange={(nextSort) => {
-				if (controlledSort === undefined) setSort(nextSort);
-				onSortChange?.(nextSort);
-			}}
-			personalized={personalized}
-			realmId={realmId}
-			showBulkActions={false}
-			sort={selectedSort}
-			subjectId={subjectId}
+			requestedRealmId={realmId}
+			template="global"
 		/>
 	);
 }

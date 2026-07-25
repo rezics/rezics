@@ -1448,6 +1448,7 @@ import type {
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus500,
 	GetApiReviewsOptions,
 	GetApiReviewsStatus200,
+	GetApiReviewsStatus400,
 	GetApiReviewsStatus422,
 	GetApiReviewsStatus500,
 	PostApiReviewsOptions,
@@ -1861,6 +1862,12 @@ import type {
 	PostApiSearchFeaturesByTemplateExecuteStatus422,
 	PostApiSearchFeaturesByTemplateExecuteStatus500,
 	PostApiSearchFeaturesByTemplateExecuteStatus503,
+	PostApiSearchFeaturesByTemplateFeedOptions,
+	PostApiSearchFeaturesByTemplateFeedStatus200,
+	PostApiSearchFeaturesByTemplateFeedStatus400,
+	PostApiSearchFeaturesByTemplateFeedStatus422,
+	PostApiSearchFeaturesByTemplateFeedStatus500,
+	PostApiSearchFeaturesByTemplateFeedStatus503,
 	GetApiSearchZonesByZoneIdFeatureOptions,
 	GetApiSearchZonesByZoneIdFeatureStatus200,
 	GetApiSearchZonesByZoneIdFeatureStatus403,
@@ -2262,6 +2269,7 @@ import {
 	deleteApiRealmsByRealmIdNavigationByNavigationId,
 	getApiSearchFeaturesByTemplate,
 	postApiSearchFeaturesByTemplateExecute,
+	postApiSearchFeaturesByTemplateFeed,
 	getApiSearchZonesByZoneIdFeature,
 	putApiSearchZonesByZoneIdFeature,
 	postApiSearchZonesByZoneIdFeatureExecute,
@@ -24513,7 +24521,9 @@ export function getApiReviewsQueryOptions(
 	const queryKey = getApiReviewsQueryKey({ query });
 	return queryOptions<
 		GetApiReviewsStatus200,
-		ResponseErrorConfig<GetApiReviewsStatus422 | GetApiReviewsStatus500>,
+		ResponseErrorConfig<
+			GetApiReviewsStatus400 | GetApiReviewsStatus422 | GetApiReviewsStatus500
+		>,
 		GetApiReviewsStatus200,
 		typeof queryKey
 	>({
@@ -24546,7 +24556,9 @@ export function useGetApiReviews<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiReviewsStatus200,
-				ResponseErrorConfig<GetApiReviewsStatus422 | GetApiReviewsStatus500>,
+				ResponseErrorConfig<
+					GetApiReviewsStatus400 | GetApiReviewsStatus422 | GetApiReviewsStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -24569,7 +24581,9 @@ export function useGetApiReviews<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiReviewsStatus422 | GetApiReviewsStatus500>
+		ResponseErrorConfig<
+			GetApiReviewsStatus400 | GetApiReviewsStatus422 | GetApiReviewsStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -30855,6 +30869,106 @@ export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
 		PostApiSearchFeaturesByTemplateExecuteOptions,
+		TContext
+	>;
+}
+
+export const postApiSearchFeaturesByTemplateFeedMutationKey = () =>
+	[{ url: "/api/search/features/:template/feed" }] as const;
+
+export function postApiSearchFeaturesByTemplateFeedMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiSearchFeaturesByTemplateFeedMutationKey();
+	return mutationOptions<
+		PostApiSearchFeaturesByTemplateFeedStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateFeedStatus400
+			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus500
+			| PostApiSearchFeaturesByTemplateFeedStatus503
+		>,
+		PostApiSearchFeaturesByTemplateFeedOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiSearchFeaturesByTemplateFeed({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Present a system Search Feature as a Feed
+ * {@link /api/search/features/:template/feed}
+ */
+export function usePostApiSearchFeaturesByTemplateFeed<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiSearchFeaturesByTemplateFeedStatus200,
+			ResponseErrorConfig<
+				| PostApiSearchFeaturesByTemplateFeedStatus400
+				| PostApiSearchFeaturesByTemplateFeedStatus422
+				| PostApiSearchFeaturesByTemplateFeedStatus500
+				| PostApiSearchFeaturesByTemplateFeedStatus503
+			>,
+			PostApiSearchFeaturesByTemplateFeedOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiSearchFeaturesByTemplateFeedMutationKey();
+
+	const baseOptions = postApiSearchFeaturesByTemplateFeedMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchFeaturesByTemplateFeedStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateFeedStatus400
+			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus500
+			| PostApiSearchFeaturesByTemplateFeedStatus503
+		>,
+		PostApiSearchFeaturesByTemplateFeedOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiSearchFeaturesByTemplateFeedStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateFeedStatus400
+			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus500
+			| PostApiSearchFeaturesByTemplateFeedStatus503
+		>,
+		PostApiSearchFeaturesByTemplateFeedOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiSearchFeaturesByTemplateFeedStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateFeedStatus400
+			| PostApiSearchFeaturesByTemplateFeedStatus422
+			| PostApiSearchFeaturesByTemplateFeedStatus500
+			| PostApiSearchFeaturesByTemplateFeedStatus503
+		>,
+		PostApiSearchFeaturesByTemplateFeedOptions,
 		TContext
 	>;
 }

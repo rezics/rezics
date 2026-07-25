@@ -124,6 +124,24 @@ const mediaAssetKeys = {
 	cover: "coverAssetId",
 } as const satisfies Record<UnitLocalizationImageRole, keyof UnitLocalizationImageAssetInput>;
 
+type LocalizationLanguagePreference = string | readonly string[] | null | undefined;
+
+function preferredLanguageOrder(
+	languageColumn: SQLWrapper,
+	preference: LocalizationLanguagePreference,
+): SQL {
+	const languages =
+		typeof preference === "string" ? [preference] : preference ? [...preference] : [];
+	if (!languages.length) return sql`0`;
+	return sql`case ${languageColumn}
+		${sql.join(
+			languages.map((language, index) => sql`when ${language}::text then ${index}`),
+			sql` `,
+		)}
+		else ${languages.length}
+	end`;
+}
+
 /** Resolve from rows already ordered by position and language. */
 export function resolveUnitLocalizationImageAssetIdFromOrdered(
 	localizations: readonly (UnitLocalizationImageAssetInput & { language: string })[],
@@ -178,7 +196,7 @@ export function isPrimaryUnitLocalization(unitId: SQLWrapper): SQL {
 export function resolvedUnitLocalizationImageAssetId(
 	unitId: SQLWrapper,
 	role: UnitLocalizationImageRole,
-	preferredLanguage?: string | null,
+	preferredLanguage?: LocalizationLanguagePreference,
 ): SQL<string | null> {
 	const assetColumn = mediaAssetColumns[role];
 	return sql<string | null>`(
@@ -187,9 +205,7 @@ export function resolvedUnitLocalizationImageAssetId(
 		where ${mediaLocalization.unitId} = ${unitId}
 			and ${assetColumn} is not null
 		order by
-			case when ${preferredLanguage ?? null}::text is not null
-				and ${mediaLocalization.language} = ${preferredLanguage ?? null}::text
-				then 0 else 1 end,
+			${preferredLanguageOrder(mediaLocalization.language, preferredLanguage)},
 			${mediaLocalization.position},
 			${mediaLocalization.language}
 		limit 1
@@ -199,7 +215,7 @@ export function resolvedUnitLocalizationImageAssetId(
 /** Resolve a locale override, then the first complete avatar in localization order. */
 export function resolvedUnitLocalizationAvatar(
 	unitId: SQLWrapper,
-	preferredLanguage?: string | null,
+	preferredLanguage?: LocalizationLanguagePreference,
 ): SQL<AvatarReference | null> {
 	return sql<AvatarReference | null>`(
 		select case ${mediaLocalization.avatarType}
@@ -224,9 +240,7 @@ export function resolvedUnitLocalizationAvatar(
 		where ${mediaLocalization.unitId} = ${unitId}
 			and ${mediaLocalization.avatarType} is not null
 		order by
-			case when ${preferredLanguage ?? null}::text is not null
-				and ${mediaLocalization.language} = ${preferredLanguage ?? null}::text
-				then 0 else 1 end,
+			${preferredLanguageOrder(mediaLocalization.language, preferredLanguage)},
 			${mediaLocalization.position},
 			${mediaLocalization.language}
 		limit 1
@@ -294,16 +308,14 @@ export function primaryUnitSummary(unitId: SQLWrapper): SQL<string | null> {
 /** Resolve the requested localization, then fall back to the primary localization. */
 export function resolvedUnitLocalizationLanguage(
 	unitId: SQLWrapper,
-	preferredLanguage?: string | null,
+	preferredLanguage?: LocalizationLanguagePreference,
 ): SQL<ContentLanguage | null> {
 	return sql<ContentLanguage | null>`(
 		select ${unitLocalization.language}
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 		order by
-			case when ${preferredLanguage ?? null}::text is not null
-				and ${unitLocalization.language} = ${preferredLanguage ?? null}::text
-				then 0 else 1 end,
+			${preferredLanguageOrder(unitLocalization.language, preferredLanguage)},
 			${unitLocalization.position},
 			${unitLocalization.language}
 		limit 1
@@ -313,16 +325,14 @@ export function resolvedUnitLocalizationLanguage(
 /** Resolve the requested localization's title, then fall back to the primary localization. */
 export function resolvedUnitLocalizationTitle(
 	unitId: SQLWrapper,
-	preferredLanguage?: string | null,
+	preferredLanguage?: LocalizationLanguagePreference,
 ): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.title}
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 		order by
-			case when ${preferredLanguage ?? null}::text is not null
-				and ${unitLocalization.language} = ${preferredLanguage ?? null}::text
-				then 0 else 1 end,
+			${preferredLanguageOrder(unitLocalization.language, preferredLanguage)},
 			${unitLocalization.position},
 			${unitLocalization.language}
 		limit 1
@@ -332,16 +342,14 @@ export function resolvedUnitLocalizationTitle(
 /** Resolve the requested localization's summary, then fall back to the primary localization. */
 export function resolvedUnitLocalizationSummary(
 	unitId: SQLWrapper,
-	preferredLanguage?: string | null,
+	preferredLanguage?: LocalizationLanguagePreference,
 ): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.summary}
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 		order by
-			case when ${preferredLanguage ?? null}::text is not null
-				and ${unitLocalization.language} = ${preferredLanguage ?? null}::text
-				then 0 else 1 end,
+			${preferredLanguageOrder(unitLocalization.language, preferredLanguage)},
 			${unitLocalization.position},
 			${unitLocalization.language}
 		limit 1

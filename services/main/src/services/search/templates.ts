@@ -62,7 +62,16 @@ const TemplateDefinitions = {
 	global: {
 		id: "global",
 		categories: SearchCategories,
-		fields: ["category", "kind", ...CommonFields],
+		fields: [
+			"category",
+			"kind",
+			...CommonFields,
+			"subject",
+			"target",
+			"root",
+			"parent",
+			"owner",
+		],
 		constraints: [],
 		visible: new Set<SearchField>(["category", "kind", "language", "content-rating", "tag"]),
 		defaultFacets: ["category", "kind", "language", "content-rating", "tag"],

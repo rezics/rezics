@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, count, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -14,6 +14,7 @@ import {
 	post,
 	postScore,
 	realmUnit,
+	recommendationUnitStat,
 	score,
 	scoreStat,
 	unit,
@@ -24,6 +25,8 @@ import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import { fractionalPositionAt } from "../../ordering/position";
+import { parseJsonCursor } from "../../pagination";
+import { InvalidPaginationCursor } from "../../pagination/errors";
 import { ensureScoreContextParticipation, resolveScoreContext } from "../../scores/context";
 import {
 	ensurePostMountTargetingAllowed,
@@ -33,7 +36,12 @@ import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
 } from "../../units/attribution";
-import { resolveRecommendationViewer } from "../../recommendations/context";
+import {
+	fallbackRecommendationSnapshot,
+	resolveRecommendationSnapshot,
+	resolveRecommendationViewer,
+} from "../../recommendations/context";
+import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
 import {
 	IdResponse,
 	NoContentResponse,
@@ -52,7 +60,9 @@ import {
 	GetReviewQuery,
 	ListReviewsQuery,
 	ListViewerScoresQuery,
+	ReviewSortSchema,
 	ReviewParams,
+	resolveReviewScoreFilter,
 	ScoreAggregateQuery,
 	ScoreTargetParams,
 	SetScoreBody,
@@ -60,13 +70,86 @@ import {
 } from "./schema";
 import { upsertScore } from "./service";
 import { ReviewNotFound } from "./errors";
-import { hydrateFeedItems } from "../feed";
+import {
+	getFeedCandidateRealmIdExpression,
+	getFeedEligibilityCondition,
+	hydrateFeedItems,
+	type FeedEligibilityScope,
+} from "../feed";
+import { ContentLanguage, Uuid } from "../schema";
+import { RecommendationPolicyVersionSchema } from "../recommendations/schema";
+import { ValidationError } from "../errors";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitProtected",
 ]);
+
+const ReviewListCursor = t.Object(
+	{
+		v: t.Literal(1),
+		targetId: t.Nullable(Uuid),
+		languages: t.Array(ContentLanguage, { maxItems: 50, uniqueItems: true }),
+		realmIds: t.Array(Uuid, { maxItems: 50, uniqueItems: true }),
+		scoreContextUnitId: t.Nullable(Uuid),
+		scores: t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
+			maxItems: 10,
+			uniqueItems: true,
+		}),
+		sort: ReviewSortSchema,
+		snapshotId: t.Nullable(Uuid),
+		policyVersion: RecommendationPolicyVersionSchema,
+		limit: t.Integer({ minimum: 1, maximum: 50 }),
+		asOf: t.String({ format: "date-time" }),
+		lastRankValue: t.Number(),
+		lastCreatedAt: t.String({ format: "date-time" }),
+		lastId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+type ReviewListCursor = typeof ReviewListCursor.static;
+
+function decodeReviewListCursor(value?: string) {
+	if (!value) return undefined;
+	try {
+		return parseJsonCursor(value, ReviewListCursor);
+	} catch {
+		throw new InvalidPaginationCursor();
+	}
+}
+
+function equalOrderedValues(
+	left: readonly (number | string)[],
+	right: readonly (number | string)[],
+) {
+	return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function validateReviewListCursor(
+	cursor: ReviewListCursor | undefined,
+	query: ListReviewsQuery,
+	scoreFilter: ReturnType<typeof resolveReviewScoreFilter>,
+) {
+	if (!cursor) return;
+	const scoreContextUnitId = scoreFilter.status === "present" ? scoreFilter.contextUnitId : null;
+	const scores = scoreFilter.status === "present" ? scoreFilter.values : [];
+	if (
+		cursor.targetId !== (query.targetId ?? null) ||
+		!equalOrderedValues(cursor.languages, query.languages ?? []) ||
+		!equalOrderedValues(cursor.realmIds, query.realmIds ?? []) ||
+		cursor.scoreContextUnitId !== scoreContextUnitId ||
+		!equalOrderedValues(cursor.scores, scores) ||
+		cursor.sort !== (query.sort ?? "best") ||
+		cursor.limit !== (query.limit ?? 20) ||
+		Number.isNaN(Date.parse(cursor.asOf))
+	)
+		throw new InvalidPaginationCursor();
+}
+
+function encodeReviewListCursor(value: ReviewListCursor) {
+	return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
 
 export default new Elysia()
 	.use(session)
@@ -77,151 +160,146 @@ export default new Elysia()
 				async ({ query, request }) => {
 					const identity = await resolveIdentity(request.headers, "unit:read");
 					const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
-					const search = query.search?.trim();
-					const searchPattern = search
-						? `%${search
-								.replaceAll("\\", "\\\\")
-								.replaceAll("%", "\\%")
-								.replaceAll("_", "\\_")}%`
-						: undefined;
-					const reviewFilter = and(
-						eq(post.kind, "review"),
-						eq(unit.status, "published"),
-						eq(unit.visibility, "public"),
-						isNull(unit.deletedAt),
-						query.targetId ? eq(post.subjectUnitId, query.targetId) : undefined,
-						query.realmId
-							? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
-							: undefined,
-						query.languages?.length
-							? inArray(unitLocalization.language, query.languages)
-							: undefined,
-						searchPattern
+					const rankingViewer = { ...viewer, personalized: false };
+					const scoreFilter = resolveReviewScoreFilter(query);
+					if (scoreFilter.status === "invalid")
+						throw new ValidationError({
+							scores: "scores and scoreContextUnitId must be provided together",
+						});
+					const cursor = decodeReviewListCursor(query.cursor);
+					validateReviewListCursor(cursor, query, scoreFilter);
+					const snapshot = cursor?.snapshotId
+						? await resolveRecommendationSnapshot(cursor.snapshotId)
+						: cursor
+							? null
+							: await resolveRecommendationSnapshot();
+					if (cursor?.snapshotId && !snapshot) throw new InvalidPaginationCursor();
+					const snapshotContext = snapshot ?? fallbackRecommendationSnapshot;
+					if (cursor && cursor.policyVersion !== snapshotContext.policyVersion)
+						throw new InvalidPaginationCursor();
+					const scopeBase = {
+						content: ["post:review"] as const,
+						...(query.realmIds?.length ? { realmIds: query.realmIds } : {}),
+						...(query.languages?.length ? { languages: query.languages } : {}),
+						...(query.targetId ? { subjectId: query.targetId } : {}),
+					};
+					const scope: FeedEligibilityScope =
+						scoreFilter.status === "present"
+							? {
+									...scopeBase,
+									reviewScore: {
+										contextUnitId: scoreFilter.contextUnitId,
+										values: scoreFilter.values,
+									},
+								}
+							: scopeBase;
+					const sort = query.sort ?? "best";
+					const limit = query.limit ?? 20;
+					const asOf = cursor ? new Date(cursor.asOf) : new Date();
+					const snapshotJoin = snapshotContext.id
+						? and(
+								eq(recommendationUnitStat.snapshotId, snapshotContext.id),
+								eq(recommendationUnitStat.unitId, unit.id),
+								isNull(recommendationUnitStat.contextRealmId),
+							)
+						: sql`false`;
+					const rankValue = recommendationObjectiveExpression(sort, asOf);
+					const cursorCreatedAt = cursor ? new Date(cursor.lastCreatedAt) : undefined;
+					const cursorCondition =
+						cursor && cursorCreatedAt
 							? or(
-									sql`${unitLocalization.title} ilike ${searchPattern} escape '\\'`,
-									sql`${unitLocalization.summary} ilike ${searchPattern} escape '\\'`,
-									sql`${unitLocalization.content}::text ilike ${searchPattern} escape '\\'`,
-								)
-							: undefined,
-						query.scores?.length
-							? sql`exists(
-								select 1
-								from post_score review_post_score
-								inner join score review_score on review_score.id = review_post_score.score_id
-								where review_post_score.post_id = ${post.id}
-									and review_score.value in (${sql.join(
-										query.scores.map((value) => sql`${value}`),
-										sql`, `,
-									)})
-									${query.scoreContextUnitId ? sql`and review_score.context_unit_id = ${query.scoreContextUnitId}` : sql``}
-							)`
-							: undefined,
-					);
-					const [items, [total]] = await Promise.all([
-						database
-							.select({
-								id: post.id,
-								targetId: post.subjectUnitId,
-								language: unitLocalization.language,
-								title: unitLocalization.title,
-								summary: unitLocalization.summary,
-								createdAt: unit.createdAt,
-								updatedAt: unit.updatedAt,
-							})
-							.from(post)
-							.innerJoin(unit, eq(unit.id, post.id))
-							.leftJoin(
-								unitLocalization,
-								and(
-									eq(unitLocalization.unitId, post.id),
-									isPrimaryUnitLocalization(unitLocalization.unitId),
-								),
-							)
-							.where(reviewFilter)
-							.orderBy(desc(unit.createdAt), desc(unit.id))
-							.limit(query.limit ?? 20),
-						database
-							.select({ value: count() })
-							.from(post)
-							.innerJoin(unit, eq(unit.id, post.id))
-							.leftJoin(
-								unitLocalization,
-								and(
-									eq(unitLocalization.unitId, post.id),
-									isPrimaryUnitLocalization(unitLocalization.unitId),
-								),
-							)
-							.where(reviewFilter),
-					]);
-					const scoreRows = items.length
-						? await database
-								.select({
-									postId: postScore.postId,
-									scoreId: score.id,
-									contextUnitId: score.contextUnitId,
-									value: score.value,
-									position: postScore.position,
-								})
-								.from(postScore)
-								.innerJoin(score, eq(score.id, postScore.scoreId))
-								.where(
-									inArray(
-										postScore.postId,
-										items.map(({ id }) => id),
+									lt(rankValue, cursor.lastRankValue),
+									and(
+										eq(rankValue, cursor.lastRankValue),
+										lt(unit.createdAt, cursorCreatedAt),
+									),
+									and(
+										eq(rankValue, cursor.lastRankValue),
+										eq(unit.createdAt, cursorCreatedAt),
+										lt(unit.id, cursor.lastId),
 									),
 								)
-								.orderBy(
-									asc(postScore.postId),
-									asc(postScore.position),
-									asc(score.id),
-								)
-						: [];
-					const scoresByPostId = new Map<
-						string,
-						{ scoreId: string; contextUnitId: string; value: number }[]
-					>();
-					for (const { postId, position: _position, ...scoreRow } of scoreRows) {
-						const current = scoresByPostId.get(postId) ?? [];
-						current.push(scoreRow);
-						scoresByPostId.set(postId, current);
-					}
-					const hydrated = await hydrateFeedItems(
-						items.map(({ id }) => ({ id, realmId: query.realmId ?? null })),
-						viewer,
-						{
-							content: ["post:review"],
-							...(query.realmId ? { realmId: query.realmId } : {}),
-							...(query.targetId ? { subjectId: query.targetId } : {}),
-						},
-						new Date(),
-						{ kind: "contextual" },
-					);
+							: undefined;
+					const [ranked, [total]] = await Promise.all([
+						database
+							.select({
+								id: unit.id,
+								subjectId: post.subjectUnitId,
+								realmId: getFeedCandidateRealmIdExpression(
+									rankingViewer,
+									scope.realmIds,
+								),
+								rankValue,
+								createdAt: unit.createdAt,
+							})
+							.from(unit)
+							.leftJoin(post, eq(post.id, unit.id))
+							.leftJoin(recommendationUnitStat, snapshotJoin)
+							.where(
+								and(
+									getFeedEligibilityCondition(rankingViewer, scope, asOf),
+									cursorCondition,
+								),
+							)
+							.orderBy(desc(rankValue), desc(unit.createdAt), desc(unit.id))
+							.limit(limit + 1),
+						database
+							.select({ value: count() })
+							.from(unit)
+							.leftJoin(post, eq(post.id, unit.id))
+							.where(getFeedEligibilityCondition(rankingViewer, scope, asOf)),
+					]);
+					const page = ranked.slice(0, limit);
+					const hydrated = await hydrateFeedItems(page, rankingViewer, scope, asOf, {
+						kind: "contextual",
+					});
 					const reviewMetadata = new Map(
-						items.flatMap((item) =>
-							item.targetId
+						page.flatMap((item) =>
+							item.subjectId
 								? [
 										[
 											item.id,
 											{
-												targetId: item.targetId,
-												language: item.language,
+												targetId: item.subjectId,
 											},
 										] as const,
 									]
 								: [],
 						),
 					);
+					const last = page.at(-1);
+					const scoreContextUnitId =
+						scoreFilter.status === "present" ? scoreFilter.contextUnitId : null;
+					const scores = scoreFilter.status === "present" ? scoreFilter.values : [];
 					return {
 						totalCount: toSafeInteger(total?.value ?? 0, "review count"),
+						nextCursor:
+							ranked.length > limit && last
+								? encodeReviewListCursor({
+										v: 1,
+										targetId: query.targetId ?? null,
+										languages: query.languages ?? [],
+										realmIds: query.realmIds ?? [],
+										scoreContextUnitId,
+										scores: [...scores],
+										sort,
+										snapshotId: snapshotContext.id,
+										policyVersion: snapshotContext.policyVersion,
+										limit,
+										asOf: asOf.toISOString(),
+										lastRankValue: last.rankValue,
+										lastCreatedAt: last.createdAt.toISOString(),
+										lastId: last.id,
+									})
+								: null,
 						items: hydrated.flatMap((item) => {
-							if (item.itemType !== "post") return [];
+							if (item.itemType !== "post" || item.postKind !== "review") return [];
 							const metadata = reviewMetadata.get(item.id);
 							if (!metadata) return [];
 							return [
 								{
 									...item,
 									...metadata,
-									scores: scoresByPostId.get(item.id) ?? [],
 								},
 							];
 						}),
@@ -229,7 +307,11 @@ export default new Elysia()
 				},
 				{
 					query: ListReviewsQuery,
-					response: { [StatusCodes.OK]: ReviewListResponse },
+					response: {
+						[StatusCodes.OK]: ReviewListResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+					},
 					detail: { summary: "List reviews", tags: ["Reviews"] },
 				},
 			)

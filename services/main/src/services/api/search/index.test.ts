@@ -34,7 +34,6 @@ describe("Zone Block Search source resolution", () => {
 					_type: "feed",
 					_key: BlockKey,
 					feature,
-					defaults: [],
 					presentation: {
 						pagination: "load-more",
 						showResultCount: false,

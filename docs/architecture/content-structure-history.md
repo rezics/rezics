@@ -173,8 +173,12 @@ presented through the Feed item renderer without widening the general Feed API.
 
 The general Feed endpoint accepts only ordered language and Realm ID arrays as eligibility filters.
 Its recommendation sorts use `best` as the default and never expose Search relevance. Specialized
-surfaces such as review feeds retain their domain payload, including the score values required to
-render those items.
+surfaces retain domain-specific selection without widening that endpoint. Review lists accept
+language and Realm ID arrays plus one context-addressed Score filter: Score values and their context
+Unit ID are supplied together, and selected values are ORed within that context. Review lists
+default to non-personalized `best` ranking, use snapshot-bound cursors, and return every Score
+attached to each selected Review. Only Review Feed items carry `scores`; other Post item variants do
+not expose an always-empty Score field.
 
 ## Meilisearch plus PostgreSQL
 

@@ -5,6 +5,7 @@ import {
 	getFeedRankingCandidates,
 	hydrateFeedItems,
 	type CandidateSources,
+	type FeedEligibilityScope,
 } from "../api/feed";
 import { database } from "../database";
 import {
@@ -15,14 +16,13 @@ import {
 	creditAttribution,
 } from "../database/schema";
 import type { RecommendationReason } from "../api/recommendations/schema";
-import type { FeedQuery } from "../api/feed/schema";
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 import { rankRecommendations } from "./ranking";
 
 const RelatedPostFeedQuery = {
 	content: ["post:post", "post:reply"],
-} satisfies Pick<FeedQuery, "content">;
+} as const satisfies FeedEligibilityScope;
 
 export async function recommendRelatedPosts(input: {
 	viewer: RecommendationViewer;

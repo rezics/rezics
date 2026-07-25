@@ -34,17 +34,6 @@ import { formatRelativeTime } from "../model/format-relative-time";
 export type FeedItem = GetApiFeedStatus200["items"][number];
 export type FeedPost = Extract<FeedItem, { itemType: "post" }>;
 export type FeedUnit = Extract<FeedItem, { itemType: "unit" }>;
-type FeedReviewScore = {
-	readonly scoreId: string;
-	readonly contextUnitId: string;
-	readonly value: string | number;
-};
-type PresentableFeedItem = FeedItem & {
-	readonly scores?: readonly FeedReviewScore[];
-};
-type PresentableFeedPost = FeedPost & {
-	readonly scores?: readonly FeedReviewScore[];
-};
 
 export function FeedItemCard({
 	canExclude = false,
@@ -55,7 +44,7 @@ export function FeedItemCard({
 	setSize,
 }: {
 	canExclude?: boolean;
-	item: PresentableFeedItem;
+	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
 	position?: number;
 	requestedRealmId?: string;
@@ -89,7 +78,7 @@ export function FeedPostCard({
 	position,
 	setSize,
 }: {
-	post: PresentableFeedPost;
+	post: FeedPost;
 	requestedRealmId?: string;
 	canExclude?: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
@@ -137,7 +126,7 @@ export function FeedPostCard({
 				<Badge className="w-fit" size="sm" variant="outline">
 					{t.feed.content.kinds[`post:${post.postKind}`]}
 				</Badge>
-				{post.postKind === "review" && post.scores?.length ? (
+				{post.postKind === "review" && post.scores.length ? (
 					<p className="font-medium text-sm">
 						{post.scores
 							.map(({ value }) =>

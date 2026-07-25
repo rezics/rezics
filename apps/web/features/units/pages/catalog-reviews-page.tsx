@@ -57,7 +57,7 @@ export function CatalogReviewsPage() {
 			{scoreContext ? (
 				<ScoreOverview contextUnitId={scoreContext.id} targetId={detail.unit.id} />
 			) : null}
-			<UnitReviewList realmId={realm?.id} targetId={detail.unit.id} />
+			<UnitReviewList realmIds={realm ? [realm.id] : undefined} targetId={detail.unit.id} />
 		</CatalogDetailSectionFrame>
 	);
 }

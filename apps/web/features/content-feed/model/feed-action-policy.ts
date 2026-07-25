@@ -1,9 +1,10 @@
 import type {
-	GetApiFeedStatus200ItemsPostKindEnum,
+	GetApiFeedStatus200,
 	GetApiFeedStatus200ItemsUnitKindEnum,
 } from "@rezics/openapi-tanstack-query";
 
 export type FeedPrimaryAction = "collect" | "follow" | "none";
+type FeedPostKind = Extract<GetApiFeedStatus200["items"][number], { itemType: "post" }>["postKind"];
 
 export type FeedActionPolicy = Readonly<{
 	comments: boolean;
@@ -13,7 +14,7 @@ export type FeedActionPolicy = Readonly<{
 export type FeedActionPolicyInput =
 	| Readonly<{
 			itemType: "post";
-			postKind: GetApiFeedStatus200ItemsPostKindEnum;
+			postKind: FeedPostKind;
 	  }>
 	| Readonly<{
 			itemType: "unit";

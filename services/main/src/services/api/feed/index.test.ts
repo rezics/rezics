@@ -72,6 +72,53 @@ describe("feed eligibility SQL", () => {
 		expect(query.params).toEqual(expect.arrayContaining(["post", "general"]));
 		expect(query.params).not.toContain("reply");
 	});
+
+	it("applies every requested language and Realm as array membership filters", () => {
+		const realmIds = [
+			"00000000-0000-4000-8000-000000000001",
+			"00000000-0000-4000-8000-000000000002",
+		];
+		const query = dialect.sqlToQuery(
+			getFeedEligibilityCondition(
+				{
+					personalized: false,
+					contentRatings: ["general"],
+					preferredLanguages: [],
+				},
+				{ languages: ["zh", "en"], realmIds },
+				new Date("2026-07-16T00:00:00.000Z"),
+			),
+		);
+
+		expect(query.sql).toContain("scoped_localization.language in");
+		expect(query.sql).toContain("scoped_content.realm_id in");
+		expect(query.params).toEqual(expect.arrayContaining(["zh", "en", ...realmIds]));
+	});
+
+	it("keeps Review Score filtering context-addressed inside the internal scope", () => {
+		const contextUnitId = "00000000-0000-4000-8000-000000000003";
+		const query = dialect.sqlToQuery(
+			getFeedEligibilityCondition(
+				{
+					personalized: false,
+					contentRatings: ["general"],
+					preferredLanguages: [],
+				},
+				{
+					content: ["post:review"],
+					reviewScore: { contextUnitId, values: [8, 9, 10] },
+				},
+				new Date("2026-07-16T00:00:00.000Z"),
+			),
+		);
+
+		expect(query.sql).toContain("scoped_post_score");
+		expect(query.sql).toContain("scoped_score.context_unit_id");
+		expect(query.sql).toContain("scoped_score.value in");
+		expect(query.params).toEqual(
+			expect.arrayContaining(["review", contextUnitId, 8, 9, 10, "general"]),
+		);
+	});
 });
 
 describe("feed candidate realm SQL", () => {
@@ -112,7 +159,7 @@ describe("feed candidate realm SQL", () => {
 		expect(query.params).toEqual([]);
 	});
 
-	it("uses an explicitly scoped realm without consulting follow state", () => {
+	it("limits Realm selection to the explicitly requested Realms", () => {
 		const realmId = "00000000-0000-4000-8000-000000000002";
 		const query = dialect.sqlToQuery(
 			getFeedCandidateRealmIdExpression(
@@ -120,12 +167,12 @@ describe("feed candidate realm SQL", () => {
 					profileId: "00000000-0000-4000-8000-000000000001",
 					personalized: true,
 				},
-				realmId,
+				[realmId],
 			),
 		);
 
-		expect(query.sql).toBe("$1::uuid");
-		expect(query.params).toEqual([realmId]);
+		expect(query.sql).toContain("candidate_realm.realm_id in ($1::uuid)");
+		expect(query.params).toContain(realmId);
 	});
 });
 

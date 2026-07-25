@@ -1,40 +1,49 @@
 "use client";
 
 import type { ContentLanguage } from "@rezics/i18n";
-import { type GetApiReviewsStatus200, useGetApiReviews } from "@rezics/openapi-tanstack-query";
+import {
+	type GetApiReviewsSort,
+	type GetApiReviewsStatus200,
+	useGetApiReviews,
+} from "@rezics/openapi-tanstack-query";
 
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
 import { FeedList, type FeedListState } from "@/features/content-feed/components/feed-list";
 import { useTranslation } from "@/i18n/client";
 import type { UnitScore } from "../model/score-value";
 
-export interface UnitReviewListProps {
+interface UnitReviewListBaseProps {
 	readonly languages?: readonly ContentLanguage[];
 	readonly limit?: number;
-	readonly realmId?: string;
-	readonly scores?: readonly UnitScore[];
-	readonly scoreContextUnitId?: string;
-	readonly search?: string;
+	readonly realmIds?: readonly string[];
+	readonly sort?: GetApiReviewsSort;
 	readonly targetId: string;
 }
+
+export type UnitReviewListProps = UnitReviewListBaseProps &
+	(
+		| Readonly<{ scores?: undefined; scoreContextUnitId?: undefined }>
+		| Readonly<{ scores: readonly UnitScore[]; scoreContextUnitId: string }>
+	);
 
 export function UnitReviewList({
 	languages,
 	limit = 50,
-	realmId,
+	realmIds,
 	scores,
 	scoreContextUnitId,
-	search,
+	sort = "best",
 	targetId,
 }: UnitReviewListProps) {
 	const query = useGetApiReviews({
 		query: {
 			targetId,
-			...(realmId ? { realmId } : {}),
+			...(realmIds?.length ? { realmIds: [...realmIds] } : {}),
 			...(languages?.length ? { languages: [...languages] } : {}),
-			...(search ? { search } : {}),
-			...(scores?.length ? { scores: [...scores] } : {}),
-			...(scores?.length && scoreContextUnitId ? { scoreContextUnitId } : {}),
+			...(scores?.length && scoreContextUnitId
+				? { scoreContextUnitId, scores: [...scores] }
+				: {}),
+			sort,
 			limit,
 		},
 	});

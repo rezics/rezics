@@ -14,6 +14,20 @@ export default {
 	sortLabel: "Feed sorting",
 	sort: { best: "Best", hot: "Hot", new: "New", top: "Top", rising: "Rising" },
 	filtersLabel: "Feed filters",
+	filters: {
+		clear: "Clear filter",
+		selectedCount: insert("{{count}} selected", { count: Number }),
+		languages: {
+			label: "Languages",
+			all: "All languages",
+			options: { zh: "Chinese", en: "English" },
+		},
+		realms: {
+			label: realmTerms.label,
+			all: `All ${realmTerms.pluralLabel}`,
+			unnamed: `Unnamed ${realmTerms.label}`,
+		},
+	},
 	contentFilterLabel: "Content filter",
 	contentFilterPlaceholder: "Content",
 	content: {
