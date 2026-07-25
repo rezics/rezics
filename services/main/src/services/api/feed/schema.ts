@@ -1,10 +1,11 @@
 import { type Static, t } from "elysia";
+import type { UnitFilter } from "@rezics/filter";
+import { Type } from "@sinclair/typebox";
 import {
 	FeedSortValues,
 	type PostKind,
 	type UnitKind,
 } from "../../database/schema/contract-values";
-import { ContentLanguage, Uuid } from "../schema";
 
 export const FeedSortSchema = t.UnionEnum(FeedSortValues, { default: "best" });
 
@@ -74,17 +75,14 @@ export const DefaultFeedContentKindValues = FeedContentKindValues.filter(
 	(kind): kind is Exclude<FeedContentKind, "post:reply"> => kind !== "post:reply",
 );
 
-export const FeedQuery = t.Object(
+export const FeedRequest = t.Object(
 	{
-		languages: t.Optional(
-			t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true }),
-		),
-		realmIds: t.Optional(t.Array(Uuid, { minItems: 1, maxItems: 50, uniqueItems: true })),
+		filter: t.Optional(Type.Unsafe<UnitFilter>(Type.Ref("UnitFilter"))),
 		sort: t.Optional(FeedSortSchema),
 		cursor: t.Optional(t.String({ maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	},
 	{ additionalProperties: false },
 );
-export type FeedQuery = Static<typeof FeedQuery>;
+export type FeedRequest = Static<typeof FeedRequest>;
 export type FeedSort = Static<typeof FeedSortSchema>;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSharedSearchQueryDocument } from "@rezics/search";
+import { SearchTemplateIdValues, parseSharedSearchQueryDocument } from "@rezics/search";
 
 import {
 	compileSearchFeatureInput,
@@ -13,14 +13,11 @@ const SecondTagId = "019b0000-0000-7000-8000-000000000003";
 const ProfileId = "019b0000-0000-7000-8000-000000000004";
 
 describe("Search Feature v1", () => {
-	it.each(["global", "book", "media", "software"] as const)(
-		"resolves the %s server template",
-		(template) => {
-			const resolved = resolveSearchDocument(createDefaultSearchDocument(template));
-			expect(resolved.document.template.id).toBe(template);
-			expect(resolved.controls.length).toBeGreaterThan(0);
-		},
-	);
+	it.each(SearchTemplateIdValues)("resolves the %s server template", (template) => {
+		const resolved = resolveSearchDocument(createDefaultSearchDocument(template));
+		expect(resolved.document.template.id).toBe(template);
+		expect(resolved.controls.length).toBeGreaterThan(0);
+	});
 
 	it("lets a Zone selectively disable fields without widening its template", () => {
 		const original = createDefaultSearchDocument("book");
@@ -286,9 +283,13 @@ describe("Search Feature v1", () => {
 		expect(() =>
 			resolveSearchDocument({
 				...original,
-				constraints: [{ field: "tag", operator: "range", lower: TagId }],
+				filter: {
+					scores: {
+						received: { some: { value: { range: { minimum: 5 } } } },
+					},
+				},
 			}),
-		).toThrow("unsupported operator");
+		).toThrow("Score predicates are not indexed by Search");
 		expect(() =>
 			resolveSearchDocument({
 				...original,

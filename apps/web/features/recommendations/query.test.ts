@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
+import { FeedQueryKey } from "@/features/content-feed/query";
 import { invalidateRecommendationQueries } from "./query";
 
 describe("recommendation cache invalidation", () => {
@@ -13,7 +14,7 @@ describe("recommendation cache invalidation", () => {
 		await invalidateRecommendationQueries(queryClient);
 
 		expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
-			queryKey: [{ url: "/api/feed" }],
+			queryKey: FeedQueryKey,
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
 			queryKey: [{ url: "/api/recommendations/units" }],

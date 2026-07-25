@@ -7,4 +7,10 @@ export class InvalidFeedCursor extends Data.TaggedError("InvalidFeedCursor") {
 	readonly message = "Invalid feed cursor";
 }
 
-export const FeedErrors = [InvalidFeedCursor] as const;
+export class InvalidFeedFilter extends Data.TaggedError("InvalidFeedFilter") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = InvalidFeedFilter.status;
+	readonly message = "Invalid feed filter";
+}
+
+export const FeedErrors = [InvalidFeedCursor, InvalidFeedFilter] as const;

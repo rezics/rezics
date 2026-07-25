@@ -167,6 +167,7 @@ export default {
 	FavoritesEditForbidden: "The Favorites collection cannot be edited.",
 	FavoritesDeleteForbidden: "The Favorites collection cannot be deleted.",
 	InvalidFeedCursor: "This feed page link is invalid or expired.",
+	InvalidFeedFilter: "This feed filter is invalid.",
 	InvalidHistoryCursor: "This history page link is invalid or expired.",
 	UnitRevisionNotFound: "This Unit revision could not be found.",
 	CurrentRevisionContentVisibilityForbidden:

@@ -65,7 +65,6 @@ export const SearchConfiguration = Type.Object(
 			{
 				enabled: Type.Boolean({ default: true }),
 				required: Type.Optional(Type.Boolean({ default: false })),
-				initial: Type.Optional(Type.String({ maxLength: 500 })),
 			},
 			{ additionalProperties: false },
 		),
@@ -364,8 +363,8 @@ export function assertSearchConfiguration(value: unknown): asserts value is Sear
 	if (value.results.maxPageSize > value.results.maxResultWindow)
 		throw new TypeError("Search page size maximum exceeds its result window");
 	if (!unique(value.results.facets)) throw new TypeError("Search facets must be unique");
-	if (!value.query.enabled && (value.query.required || value.query.initial))
-		throw new TypeError("Disabled Search query cannot be required or initialized");
+	if (!value.query.enabled && value.query.required)
+		throw new TypeError("Disabled Search query cannot be required");
 	if (!unique(value.defaults.map((filter) => filter.field)))
 		throw new TypeError("Search defaults must target unique fields");
 	for (const [index, control] of value.controls.entries()) {
@@ -429,7 +428,7 @@ export function compileSearchRequest(
 		throw new TypeError(`Search mode ${request.mode} is unavailable`);
 	if (!configuration.query.enabled && request.query)
 		throw new TypeError("This Search configuration does not accept a query");
-	const query = request.query ?? configuration.query.initial ?? "";
+	const query = request.query ?? "";
 	if (configuration.query.required && !query.trim())
 		throw new TypeError("Search query is required");
 	if (request.sort && !configuration.sort.options.includes(request.sort))

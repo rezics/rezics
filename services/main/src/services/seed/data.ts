@@ -24,6 +24,14 @@ export const SeedFixtureTitles = {
 		zh: "情境資料工作臺",
 		en: "Scenario Data Workbench",
 	},
+	realm: {
+		zh: "REZICS 評分",
+		en: "REZICS Score",
+	},
+	zone: {
+		zh: "書庫",
+		en: "Book Library",
+	},
 } as const;
 
 export const SeedPlan = {

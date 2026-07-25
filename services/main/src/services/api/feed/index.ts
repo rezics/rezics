@@ -1,8 +1,16 @@
+import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
 import { and, asc, desc, eq, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
+import {
+	assertUnitFilter,
+	canonicalUnitFilter,
+	FilterSchemaModels,
+	readSimpleFeedFilter,
+	type UnitFilter,
+} from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import { resolveIdentity } from "../../auth/session";
@@ -54,6 +62,7 @@ import { recommendationObjectiveExpression } from "../../recommendations/sql-ran
 import { createRecommendationTracking } from "../../recommendations/tracking";
 import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
+import { compileUnitFilterSql } from "../../filter/sql";
 import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
@@ -70,19 +79,18 @@ import {
 	toPortableTextResponse,
 	type FeedItemResponseValue,
 } from "../schema/response";
-import { ContentLanguage as ContentLanguageSchema, Uuid } from "../schema";
-import { InvalidFeedCursor } from "./errors";
+import { InvalidFeedCursor, InvalidFeedFilter } from "./errors";
 import {
 	DefaultFeedContentKindValues,
 	type FeedContentKind,
 	FeedContentKindValues,
 	type FeedPostKind,
 	FeedPostKindValues,
-	FeedQuery,
+	FeedRequest,
 	FeedSortSchema,
 	type FeedUnitKind,
 	FeedUnitKindValues,
-	type FeedQuery as FeedQueryType,
+	type FeedRequest as FeedRequestType,
 	type FeedSort,
 } from "./schema";
 
@@ -202,6 +210,7 @@ interface FeedEligibilityBaseScope {
 	readonly languages?: readonly ContentLanguage[];
 	readonly realmIds?: readonly string[];
 	readonly subjectId?: string;
+	readonly filter?: UnitFilter;
 	readonly reviewScore?: never;
 }
 
@@ -224,10 +233,9 @@ export type FeedEligibilityScope = FeedEligibilityBaseScope | FeedReviewEligibil
 
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(4),
+		v: t.Literal(5),
 		sort: FeedSortSchema,
-		languages: t.Array(ContentLanguageSchema, { maxItems: 50, uniqueItems: true }),
-		realmIds: t.Array(Uuid, { maxItems: 50, uniqueItems: true }),
+		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
 		personalized: t.Boolean(),
 		snapshotId: t.Nullable(t.String({ format: "uuid" })),
 		policyVersion: RecommendationPolicyVersionSchema,
@@ -250,18 +258,16 @@ function decodeCursor(value: string | undefined) {
 
 function validateCursor(
 	cursor: FeedCursor | undefined,
-	query: FeedQueryType,
+	query: FeedRequestType,
 	personalized: boolean,
 ) {
 	if (!cursor) return;
-	const languages = query.languages ?? [];
-	const realmIds = query.realmIds ?? [];
+	const filterHash = query.filter
+		? createHash("sha256").update(canonicalUnitFilter(query.filter)).digest("hex")
+		: null;
 	if (
 		cursor.sort !== (query.sort ?? "best") ||
-		cursor.languages.length !== languages.length ||
-		cursor.languages.some((language, index) => language !== languages[index]) ||
-		cursor.realmIds.length !== realmIds.length ||
-		cursor.realmIds.some((realmId, index) => realmId !== realmIds[index]) ||
+		cursor.filterHash !== filterHash ||
 		cursor.personalized !== personalized ||
 		cursor.limit !== (query.limit ?? 20) ||
 		Number.isNaN(Date.parse(cursor.asOf))
@@ -330,6 +336,13 @@ export function getFeedEligibilityCondition(
 						sql`, `,
 					)})
 			)`
+			: undefined,
+		scope.filter
+			? compileUnitFilterSql(scope.filter, {
+					unitId: sql`${unit.id}`,
+					unitKind: sql`${unit.kind}`,
+					...(viewer.profileId ? { viewerProfileId: viewer.profileId } : {}),
+				})
 			: undefined,
 		viewer.contentRatings.length
 			? inArray(unit.contentRating, viewer.contentRatings)
@@ -1083,13 +1096,25 @@ export async function hydrateFeedItems(
 	});
 }
 
-export default new Elysia({ prefix: "/feed" }).get(
-	"",
-	async ({ query, request }) => {
+export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
+	"/query",
+	async ({ body, request }) => {
+		if (body.filter)
+			try {
+				assertUnitFilter(body.filter);
+			} catch {
+				throw new InvalidFeedFilter();
+			}
 		const identity = await resolveIdentity(request.headers, "unit:read");
 		const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
-		const cursor = decodeCursor(query.cursor);
-		validateCursor(cursor, query, viewer.personalized);
+		const cursor = decodeCursor(body.cursor);
+		validateCursor(cursor, body, viewer.personalized);
+		const simpleSelection = body.filter ? readSimpleFeedFilter(body.filter) : undefined;
+		const scope: FeedEligibilityScope = {
+			...(body.filter ? { filter: body.filter } : {}),
+			...(simpleSelection?.languages.length ? { languages: simpleSelection.languages } : {}),
+			...(simpleSelection?.realmIds.length ? { realmIds: simpleSelection.realmIds } : {}),
+		};
 		const snapshot = cursor?.snapshotId
 			? await resolveRecommendationSnapshot(cursor.snapshotId)
 			: cursor
@@ -1099,11 +1124,11 @@ export default new Elysia({ prefix: "/feed" }).get(
 		const snapshotContext = snapshot ?? fallbackRecommendationSnapshot;
 		if (cursor && cursor.policyVersion !== snapshotContext.policyVersion)
 			throw new InvalidFeedCursor();
-		const sort = query.sort ?? "best";
+		const sort = body.sort ?? "best";
 		const asOf = cursor ? new Date(cursor.asOf) : new Date();
 		const sources = await getCandidateSources({
 			viewer,
-			query,
+			query: scope,
 			sort,
 			snapshotId: snapshotContext.id,
 			asOf,
@@ -1113,7 +1138,7 @@ export default new Elysia({ prefix: "/feed" }).get(
 			ids: sources.ids,
 			sources,
 			viewer,
-			query,
+			query: scope,
 			snapshotId: snapshotContext.id,
 			asOf,
 			...(cursor ? { anchorId: cursor.lastId } : {}),
@@ -1122,15 +1147,17 @@ export default new Elysia({ prefix: "/feed" }).get(
 			sort,
 			personalized: viewer.personalized,
 			asOf,
-			pageSize: query.limit ?? 20,
-			...(query.realmIds?.length === 1 ? { scopedRealmId: query.realmIds[0] } : {}),
+			pageSize: body.limit ?? 20,
+			...(simpleSelection?.realmIds.length === 1
+				? { scopedRealmId: simpleSelection.realmIds[0] }
+				: {}),
 		});
 		const start = cursor ? ranked.findIndex(({ id }) => id === cursor.lastId) + 1 : 0;
 		if (cursor && start === 0) throw new InvalidFeedCursor();
-		const limit = query.limit ?? 20;
+		const limit = body.limit ?? 20;
 		const page = ranked.slice(start, start + limit);
 		const requestId = crypto.randomUUID();
-		const items = await hydrateFeedItems(page, viewer, query, asOf, {
+		const items = await hydrateFeedItems(page, viewer, scope, asOf, {
 			kind: "recommendation",
 			reasons: sources.reason,
 			surface: "home_feed",
@@ -1145,10 +1172,13 @@ export default new Elysia({ prefix: "/feed" }).get(
 				start + page.length < ranked.length && last
 					? Buffer.from(
 							JSON.stringify({
-								v: 4,
+								v: 5,
 								sort,
-								languages: query.languages ?? [],
-								realmIds: query.realmIds ?? [],
+								filterHash: body.filter
+									? createHash("sha256")
+											.update(canonicalUnitFilter(body.filter))
+											.digest("hex")
+									: null,
 								personalized: viewer.personalized,
 								snapshotId: snapshotContext.id,
 								policyVersion: snapshotContext.policyVersion,
@@ -1161,10 +1191,13 @@ export default new Elysia({ prefix: "/feed" }).get(
 		};
 	},
 	{
-		query: FeedQuery,
+		body: FeedRequest,
 		response: {
 			[StatusCodes.OK]: FeedResponse,
-			[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidFeedCursor"]),
+			[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+				"InvalidFeedCursor",
+				"InvalidFeedFilter",
+			]),
 		},
 		detail: { summary: "Ranked realm feed", tags: ["Feed"] },
 	},

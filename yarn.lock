@@ -3992,6 +3992,7 @@ __metadata:
     "@rezics/block": "workspace:*"
     "@rezics/brand": "workspace:*"
     "@rezics/email": "workspace:*"
+    "@rezics/filter": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/license": "workspace:*"
     "@rezics/observability": "workspace:*"
@@ -4030,6 +4031,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@rezics/block@workspace:libraries/block"
   dependencies:
+    "@rezics/filter": "workspace:*"
     "@rezics/portable-text": "workspace:*"
     "@rezics/search": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
@@ -4057,6 +4059,15 @@ __metadata:
     react-dom: "npm:19.2"
     typescript: "npm:7"
     vitest: "npm:4.1.10"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/filter@workspace:*, @rezics/filter@workspace:libraries/filter":
+  version: 0.0.0-use.local
+  resolution: "@rezics/filter@workspace:libraries/filter"
+  dependencies:
+    "@sinclair/typebox": "npm:^0.34.41"
+    typescript: "npm:7"
   languageName: unknown
   linkType: soft
 
@@ -4090,12 +4101,14 @@ __metadata:
     "@babel/parser": "npm:^7.29.7"
     "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
+    "@rezics/filter": "workspace:*"
     "@rezics/fixture-client": "workspace:*"
     "@rezics/fixture-data": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/license": "workspace:*"
     "@rezics/openapi-tanstack-query": "workspace:*"
     "@rezics/portable-text": "workspace:*"
+    "@rezics/search": "workspace:*"
     "@rezics/slug": "workspace:*"
     "@rezics/ui": "workspace:*"
     "@tailwindcss/vite": "npm:^4.3.2"
@@ -4231,6 +4244,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@rezics/search@workspace:libraries/search"
   dependencies:
+    "@rezics/filter": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
     typescript: "npm:7"
   languageName: unknown

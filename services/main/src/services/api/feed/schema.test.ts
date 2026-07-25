@@ -1,34 +1,48 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
+import { UnitFilter } from "@rezics/filter";
 
-import { FeedQuery } from "./schema";
+import { FeedRequest } from "./schema";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";
+const checkFeedRequest = (value: unknown) => Check(FeedRequest, [UnitFilter], value);
 
 describe("Feed API contract", () => {
-	it("accepts only language and Realm arrays as public Feed filters", () => {
+	it("accepts the canonical domain Filter tree", () => {
 		expect(
-			Check(FeedQuery, {
-				languages: ["zh", "en"],
-				realmIds: [RealmId],
+			checkFeedRequest({
+				filter: {
+					all: [
+						{ localizations: { some: { language: { in: ["zh", "en"] } } } },
+						{
+							realms: {
+								some: {
+									realm: { id: { in: [RealmId] } },
+									status: { in: ["visible"] },
+								},
+							},
+						},
+					],
+				},
 				sort: "best",
 				limit: 20,
 			}),
 		).toBe(true);
 	});
 
-	it("rejects empty, duplicate, and unsupported filter arrays", () => {
-		expect(Check(FeedQuery, { languages: [] })).toBe(false);
-		expect(Check(FeedQuery, { languages: ["zh", "zh"] })).toBe(false);
-		expect(Check(FeedQuery, { languages: ["zh-Hant"] })).toBe(false);
-		expect(Check(FeedQuery, { realmIds: [] })).toBe(false);
-		expect(Check(FeedQuery, { realmIds: [RealmId, RealmId] })).toBe(false);
+	it("rejects malformed and duplicate Filter sets", () => {
+		expect(checkFeedRequest({ filter: { kind: { in: [] } } })).toBe(false);
+		expect(checkFeedRequest({ filter: { kind: { in: ["book", "book"] } } })).toBe(false);
+		expect(
+			checkFeedRequest({
+				filter: { localizations: { some: { language: { in: ["zh-Hant"] } } } },
+			}),
+		).toBe(false);
 	});
 
-	it("does not expose Search or product-specific selection as Feed filters", () => {
-		expect(Check(FeedQuery, { content: ["post:post"] })).toBe(false);
-		expect(Check(FeedQuery, { subjectId: RealmId })).toBe(false);
-		expect(Check(FeedQuery, { personalized: false })).toBe(false);
-		expect(Check(FeedQuery, { sort: "relevance" })).toBe(false);
+	it("keeps full-text and relevance outside Feed", () => {
+		expect(Check(FeedRequest, { query: "book" })).toBe(false);
+		expect(Check(FeedRequest, { personalized: false })).toBe(false);
+		expect(Check(FeedRequest, { sort: "relevance" })).toBe(false);
 	});
 });

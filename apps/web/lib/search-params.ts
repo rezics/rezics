@@ -25,6 +25,9 @@ export const feedLanguagesParser = parseAsArrayOf(parseAsStringLiteral(ContentLa
 export const feedRealmIdsParser = parseAsArrayOf(parseAsString)
 	.withDefault([])
 	.withOptions({ ...urlStateOptions, history: "push" });
+export const feedTagIdsParser = parseAsArrayOf(parseAsString)
+	.withDefault([])
+	.withOptions({ ...urlStateOptions, history: "push" });
 
 export const SearchScopes = Object.values(PostApiSearchByIndexIndex);
 export const searchParamsParsers = {

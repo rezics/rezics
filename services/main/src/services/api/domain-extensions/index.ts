@@ -28,6 +28,7 @@ import {
 	type Block,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
+import { assertUnitFilter, FilterSchemaModels } from "@rezics/filter";
 import { ZoneHomePageSlug } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -88,6 +89,7 @@ import {
 	type ZonePageProjection,
 } from "../../zones/pages";
 import { getZoneSearchFeature } from "../../search/documents";
+import { provisionZoneDefaultExperienceInTransaction } from "../../zones/default-experience";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -434,13 +436,22 @@ async function ensureZoneNavigationReferences(
 	}
 }
 
+const ZoneBoundaryDocumentModel = t.Object(
+	{
+		...ZoneBoundaryDocument.properties,
+		filter: t.Optional(t.Ref("UnitFilter")),
+	},
+	{ additionalProperties: false, $id: "ZoneBoundaryDocument" },
+);
+
 export default new Elysia()
 	.model({
 		DockDocument,
+		...FilterSchemaModels,
 		NavigationDocument,
 		PortableTextDocument,
 		UnitReferencedBlockDocument,
-		ZoneBoundaryDocument,
+		ZoneBoundaryDocument: ZoneBoundaryDocumentModel,
 		ZoneThemeDocument,
 	})
 	.use(session)
@@ -794,6 +805,12 @@ export default new Elysia()
 			.patch(
 				"/:zoneId",
 				async ({ params, profile, authorization, body }) => {
+					if (body.boundaryDocument?.filter)
+						try {
+							assertUnitFilter(body.boundaryDocument.filter);
+						} catch {
+							throw new ZoneDocumentInvalid();
+						}
 					const scopes: string[][] = [];
 					if (body.localization)
 						scopes.push(["localizations", body.localization.language]);
@@ -882,7 +899,10 @@ export default new Elysia()
 					body: UpdateZoneBody,
 					response: {
 						[StatusCodes.OK]: ZoneResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"ZoneDocumentInvalid",
+							"ZoneTimeRangeInvalid",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 					},
@@ -1559,6 +1579,12 @@ export default new Elysia()
 		app.post(
 			"",
 			async ({ profile, body }) => {
+				if (body.boundaryDocument.filter)
+					try {
+						assertUnitFilter(body.boundaryDocument.filter);
+					} catch {
+						throw new ZoneDocumentInvalid();
+					}
 				const startsAt = body.startsAt ? new Date(body.startsAt) : null;
 				const endsAt = body.endsAt ? new Date(body.endsAt) : null;
 				if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
@@ -1580,6 +1606,12 @@ export default new Elysia()
 						actorProfileId: profile.unitId,
 						event: "create",
 					});
+					await provisionZoneDefaultExperienceInTransaction(tx, {
+						zoneId: unitId,
+						actorProfileId: profile.unitId,
+						language: body.localization.language,
+						title: body.localization.title,
+					});
 					return unitId;
 				});
 				return { id };
@@ -1589,7 +1621,10 @@ export default new Elysia()
 				body: CreateZoneBody,
 				response: {
 					[StatusCodes.OK]: IdResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+						"ZoneDocumentInvalid",
+						"ZoneTimeRangeInvalid",
+					]),
 					[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 				},
 				detail: { summary: "Create Zone", tags: ["Zones"] },

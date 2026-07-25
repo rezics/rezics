@@ -32,6 +32,7 @@ vi.mock("../units/history", () => ({ recordUnitRevision }));
 import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
 import { profilePreference, realmMember, unitAccessBinding, unitFollow } from "../database/schema";
 import { OfficialRealmUnitIds } from "@rezics/slug";
+import { fractionalPositionBetween } from "../ordering/position";
 import { ensureProfile } from "./profile";
 
 const ProfileId = "019f82aa-db8f-7962-9924-7369b17f5502";
@@ -65,12 +66,18 @@ describe("Profile registration defaults", () => {
 		});
 
 		const followValues = valuesByTable.get(unitFollow);
+		const positions = new Array<string>(OfficialZoneManifest.length);
+		let right: string | null = null;
+		for (let index = positions.length - 1; index >= 0; index -= 1) {
+			positions[index] = fractionalPositionBetween(null, right);
+			right = positions[index]!;
+		}
 		expect(followValues).toBeDefined();
 		expect(followValues).toEqual(
 			OfficialZoneManifest.map((officialZone, index) => ({
 				followerProfileId: ProfileId,
 				unitId: officialZone.id,
-				position: ["Zy", "Zz", "a0"][index],
+				position: positions[index],
 			})),
 		);
 		expect(followValues).not.toEqual(

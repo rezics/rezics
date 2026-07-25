@@ -159,6 +159,7 @@ export default {
 	FavoritesEditForbidden: "不能編輯預設收藏集。",
 	FavoritesDeleteForbidden: "不能刪除預設收藏集。",
 	InvalidFeedCursor: "該動態分頁連結無效或已過期。",
+	InvalidFeedFilter: "這組動態篩選條件無效。",
 	InvalidHistoryCursor: "該歷史分頁連結無效或已過期。",
 	UnitRevisionNotFound: "找不到這個條目修訂。",
 	CurrentRevisionContentVisibilityForbidden: "請先恢復其他修訂，再隱藏目前修訂內容。",

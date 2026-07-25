@@ -1,10 +1,13 @@
 import type {
-	GetApiFeedStatus200,
-	GetApiFeedStatus200ItemsUnitKindEnum,
+	PostApiFeedQueryStatus200,
+	PostApiFeedQueryStatus200ItemsUnitKindEnum,
 } from "@rezics/openapi-tanstack-query";
 
 export type FeedPrimaryAction = "collect" | "follow" | "none";
-type FeedPostKind = Extract<GetApiFeedStatus200["items"][number], { itemType: "post" }>["postKind"];
+type FeedPostKind = Extract<
+	PostApiFeedQueryStatus200["items"][number],
+	{ itemType: "post" }
+>["postKind"];
 
 export type FeedActionPolicy = Readonly<{
 	comments: boolean;
@@ -18,7 +21,7 @@ export type FeedActionPolicyInput =
 	  }>
 	| Readonly<{
 			itemType: "unit";
-			unitKind: GetApiFeedStatus200ItemsUnitKindEnum;
+			unitKind: PostApiFeedQueryStatus200ItemsUnitKindEnum;
 	  }>;
 
 export function getFeedActionPolicy(input: FeedActionPolicyInput): FeedActionPolicy {
@@ -30,7 +33,7 @@ export function getFeedActionPolicy(input: FeedActionPolicyInput): FeedActionPol
 	}
 }
 
-function getUnitActionPolicy(kind: GetApiFeedStatus200ItemsUnitKindEnum): FeedActionPolicy {
+function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): FeedActionPolicy {
 	switch (kind) {
 		case "collection":
 			return { comments: false, primary: "follow" };

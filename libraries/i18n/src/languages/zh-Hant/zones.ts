@@ -4,6 +4,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
+const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
@@ -91,7 +92,14 @@ export default {
 		},
 		search: {
 			template: "搜尋模板",
-			templates: { global: "全域", book: "書籍", media: "媒體", software: "軟體" },
+			templates: {
+				global: "全域",
+				book: "書籍",
+				media: "媒體",
+				software: "軟體",
+				realm: realmTerms.label,
+				zone: zoneTerms.label,
+			},
 			enabled: `啟用${zoneTerms.label}搜尋`,
 			controls: "搜尋欄位",
 			controlEnabled: "啟用欄位",
@@ -163,6 +171,8 @@ export default {
 				book: "書籍模板",
 				media: "媒體模板",
 				software: "軟體模板",
+				realm: `${realmTerms.label}模板`,
+				zone: `${zoneTerms.label}模板`,
 			},
 			appearances: {
 				inline: "行內",

@@ -27,6 +27,11 @@ export default {
 			all: `All ${realmTerms.pluralLabel}`,
 			unnamed: `Unnamed ${realmTerms.label}`,
 		},
+		tags: {
+			label: "Tags",
+			all: "All tags",
+			unnamed: "Unnamed tag",
+		},
 	},
 	contentFilterLabel: "Content filter",
 	contentFilterPlaceholder: "Content",

@@ -1,4 +1,5 @@
 import { hashPassword } from "better-auth/crypto";
+import { walkBlockTree } from "@rezics/block";
 import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
 import { readFile } from "node:fs/promises";
@@ -59,6 +60,7 @@ import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { listZonePageUnits } from "../zones/pages";
+import { ensureZoneDefaultExperienceInTransaction } from "../zones/default-experience";
 import {
 	getZoneSearchFeature,
 	putZoneSearchFeatureInTransaction,
@@ -1220,6 +1222,80 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	}
 }
 
+async function getZoneDefaultExperienceInput(tx: DatabaseTransaction, zoneId: string) {
+	const [[owner], [localization]] = await Promise.all([
+		tx
+			.select({ profileId: unitAccessBinding.profileId })
+			.from(unitAccessBinding)
+			.where(
+				and(
+					eq(unitAccessBinding.unitId, zoneId),
+					eq(unitAccessBinding.subjectKind, "profile"),
+					eq(unitAccessBinding.role, "owner"),
+					isNull(unitAccessBinding.revokedAt),
+				),
+			)
+			.limit(1),
+		tx
+			.select({
+				language: unitLocalization.language,
+				title: unitLocalization.title,
+			})
+			.from(unitLocalization)
+			.where(eq(unitLocalization.unitId, zoneId))
+			.orderBy(unitLocalization.position, unitLocalization.language)
+			.limit(1),
+	]);
+	if (!owner?.profileId || !localization?.title)
+		throw new Error(`Zone ${zoneId} cannot be provisioned without an owner and localization`);
+	return {
+		zoneId,
+		actorProfileId: owner.profileId,
+		language: localization.language,
+		title: localization.title,
+	};
+}
+
+async function ensureAllZoneExperiences(tx: DatabaseTransaction): Promise<void> {
+	const zones = await tx
+		.select({ id: zone.id })
+		.from(zone)
+		.innerJoin(unit, eq(unit.id, zone.id))
+		.where(and(eq(unit.kind, "zone"), isNull(unit.deletedAt)));
+	for (const { id } of zones)
+		await ensureZoneDefaultExperienceInTransaction(
+			tx,
+			await getZoneDefaultExperienceInput(tx, id),
+		);
+}
+
+async function areAllZoneExperiencesReady(): Promise<boolean> {
+	return database.transaction(async (tx) => {
+		const zones = await tx
+			.select({ id: zone.id })
+			.from(zone)
+			.innerJoin(unit, eq(unit.id, zone.id))
+			.where(and(eq(unit.kind, "zone"), isNull(unit.deletedAt)));
+		for (const { id } of zones) {
+			const feature = await getZoneSearchFeature(tx, id);
+			if (!feature?.enabled) return false;
+			const pages = await listZonePageUnits(tx, id);
+			if (
+				!pages.some((page) => {
+					if (!page.placement) return false;
+					let found = false;
+					walkBlockTree(page.document, (block) => {
+						if (block._type === "feed") found = true;
+					});
+					return found;
+				})
+			)
+				return false;
+		}
+		return true;
+	});
+}
+
 async function ensureDefaultApiTokenPolicies(tx: DatabaseTransaction): Promise<void> {
 	for (const definition of Object.values(DefaultApiTokenPolicies))
 		await tx
@@ -1346,6 +1422,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		profileFollows,
 		localizations,
 		defaultApiTokenPolicies,
+		allZoneExperiencesReady,
 	] = await Promise.all([
 		database
 			.select({ value: count() })
@@ -1553,10 +1630,12 @@ async function isBootstrapReady(): Promise<boolean> {
 					Object.values(DefaultApiTokenPolicies).map((value) => value.key),
 				),
 			),
+		areAllZoneExperiencesReady(),
 	]);
 	return (
 		unitCount[0]?.value === BootstrapUnitIds.length &&
 		defaultApiTokenPolicies.length === Object.keys(DefaultApiTokenPolicies).length &&
+		allZoneExperiencesReady &&
 		Object.values(DefaultApiTokenPolicies).every((expected) =>
 			defaultApiTokenPolicies.some(
 				(actual) =>
@@ -1734,6 +1813,7 @@ async function bootstrapDatabase(
 		await ensureScoreContextProfileDefaults(tx);
 		await ensureOfficialZoneAvatar(tx);
 		await ensureOfficialZones(tx);
+		await ensureAllZoneExperiences(tx);
 		await ensureOfficialZoneFollows(tx);
 		return credentials;
 	});

@@ -155,6 +155,27 @@ document.components.schemas.InternalError = {
 	},
 };
 
+function normalizeComponentReferences(value: unknown, componentNames: ReadonlySet<string>): void {
+	if (Array.isArray(value)) {
+		for (const item of value) normalizeComponentReferences(item, componentNames);
+		return;
+	}
+	if (typeof value !== "object" || value === null) return;
+	const record = value as Record<string, unknown>;
+	if (
+		typeof record.$ref === "string" &&
+		!record.$ref.startsWith("#/") &&
+		componentNames.has(record.$ref)
+	)
+		record.$ref = `#/components/schemas/${record.$ref}`;
+	for (const child of Object.values(record)) normalizeComponentReferences(child, componentNames);
+}
+
+// TypeBox references models by their local $id. OpenAPI references must use a
+// component URI so downstream generators preserve recursive types instead of
+// degrading them to `unknown`.
+normalizeComponentReferences(document, new Set(Object.keys(document.components.schemas)));
+
 for (const [pathTemplate, path] of Object.entries(document.paths)) {
 	if (!path) continue;
 	for (const method of methods) {

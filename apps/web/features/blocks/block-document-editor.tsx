@@ -6,6 +6,7 @@ import {
 	type UnitReferencedBlock,
 	type UnitReferencedBlockDocument,
 } from "@rezics/block";
+import { SearchTemplateIdValues, type SearchTemplateId } from "@rezics/search";
 import {
 	Button,
 	Card,
@@ -35,7 +36,7 @@ export interface BlockEditorLabels {
 	readonly showResultCount: string;
 	readonly orientation: string;
 	readonly style: string;
-	readonly sources: Record<"global" | "book" | "media" | "software", string>;
+	readonly sources: Record<SearchTemplateId, string>;
 	readonly appearances: Record<
 		"inline" | "card" | "cover" | "links" | "buttons" | "tabs" | "drawer",
 		string
@@ -251,19 +252,23 @@ function BlockFields({
 							onChange({
 								...block,
 								feature:
-									event.currentTarget.value === "zone"
+									event.currentTarget.value === "zone-feature"
 										? { kind: "zone" }
 										: {
 												kind: "template",
-												template: event.currentTarget.value as
-													"global" | "book" | "media" | "software",
+												template: event.currentTarget
+													.value as SearchTemplateId,
 											},
 							})
 						}
-						value={block.feature.kind === "zone" ? "zone" : block.feature.template}
+						value={
+							block.feature.kind === "zone" ? "zone-feature" : block.feature.template
+						}
 					>
-						<NativeSelectOption value="zone">{labels.zoneSearch}</NativeSelectOption>
-						{(["global", "book", "media", "software"] as const).map((value) => (
+						<NativeSelectOption value="zone-feature">
+							{labels.zoneSearch}
+						</NativeSelectOption>
+						{SearchTemplateIdValues.map((value) => (
 							<NativeSelectOption key={value} value={value}>
 								{labels.sources[value]}
 							</NativeSelectOption>

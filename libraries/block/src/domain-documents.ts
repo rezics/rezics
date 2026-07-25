@@ -1,3 +1,4 @@
+import { UnitFilter as UnitFilterSchema, type UnitFilter } from "@rezics/filter";
 import type { SearchCategory as SearchCategoryValue, SearchFilter } from "@rezics/search";
 import { SearchCategory, SearchFilter as SearchFilterSchema } from "@rezics/search";
 import { type Static, Type } from "@sinclair/typebox";
@@ -85,7 +86,7 @@ export const ZoneBoundaryDocument = Type.Object(
 		_type: Type.Literal("zone-boundary"),
 		_key: BlockKey,
 		categories: Type.Array(SearchCategory, { minItems: 1, maxItems: 9 }),
-		filters: Type.Array(SearchFilterSchema, { maxItems: 50 }),
+		filter: Type.Optional(Type.Unsafe<UnitFilter>(UnitFilterSchema)),
 	},
 	{ additionalProperties: false, $id: "ZoneBoundaryDocument" },
 );
@@ -182,10 +183,15 @@ export function createCollectionPresentationDocument(
 
 export function createZoneBoundaryDocument(
 	categories: Static<typeof SearchCategory>[],
-	filters: SearchFilter[] = [],
+	filter?: UnitFilter,
 	key: BlockKey = createBlockKey(),
 ): ZoneBoundaryDocument {
-	return { _type: "zone-boundary", _key: key, categories, filters };
+	return {
+		_type: "zone-boundary",
+		_key: key,
+		categories,
+		...(filter ? { filter } : {}),
+	};
 }
 
 export function createZoneThemeDocument(

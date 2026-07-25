@@ -13,6 +13,2604 @@ export type JsonValue =
 			[key: string]: JsonValue;
 	  };
 
+export const LocalizationFilterLanguageInEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type LocalizationFilterLanguageInEnum =
+	(typeof LocalizationFilterLanguageInEnum)[keyof typeof LocalizationFilterLanguageInEnum];
+
+/**
+ * @type object
+ */
+export type LocalizationFilter = {
+	/**
+	 * @type array | undefined
+	 */
+	all?: LocalizationFilter[];
+	/**
+	 * @type array | undefined
+	 */
+	any?: LocalizationFilter[];
+	/**
+	 * @type object | undefined
+	 */
+	not?: LocalizationFilter;
+	/**
+	 * @type object | undefined
+	 */
+	language?: {
+		/**
+		 * @type array
+		 */
+		in: LocalizationFilterLanguageInEnum[];
+	};
+};
+
+export const RealmPlacementFilterRealmKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type RealmPlacementFilterRealmKindInEnum =
+	(typeof RealmPlacementFilterRealmKindInEnum)[keyof typeof RealmPlacementFilterRealmKindInEnum];
+
+export const RealmPlacementFilterStatusInEnum = {
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+} as const;
+
+export type RealmPlacementFilterStatusInEnum =
+	(typeof RealmPlacementFilterStatusInEnum)[keyof typeof RealmPlacementFilterStatusInEnum];
+
+/**
+ * @type object
+ */
+export type RealmPlacementFilter = {
+	/**
+	 * @type array | undefined
+	 */
+	all?: RealmPlacementFilter[];
+	/**
+	 * @type array | undefined
+	 */
+	any?: RealmPlacementFilter[];
+	/**
+	 * @type object | undefined
+	 */
+	not?: RealmPlacementFilter;
+	/**
+	 * @type object | undefined
+	 */
+	realm?: {
+		/**
+		 * @type object | undefined
+		 */
+		id?: {
+			/**
+			 * @type array
+			 */
+			in: string[];
+		};
+		/**
+		 * @type object | undefined
+		 */
+		kind?: {
+			/**
+			 * @type array
+			 */
+			in: RealmPlacementFilterRealmKindInEnum[];
+		};
+	};
+	/**
+	 * @type object | undefined
+	 */
+	status?: {
+		/**
+		 * @type array
+		 */
+		in: RealmPlacementFilterStatusInEnum[];
+	};
+};
+
+export const TagAssertionFilterTagKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type TagAssertionFilterTagKindInEnum =
+	(typeof TagAssertionFilterTagKindInEnum)[keyof typeof TagAssertionFilterTagKindInEnum];
+
+/**
+ * @type object
+ */
+export type TagAssertionFilter = {
+	/**
+	 * @type array | undefined
+	 */
+	all?: TagAssertionFilter[];
+	/**
+	 * @type array | undefined
+	 */
+	any?: TagAssertionFilter[];
+	/**
+	 * @type object | undefined
+	 */
+	not?: TagAssertionFilter;
+	/**
+	 * @type object | undefined
+	 */
+	tag?: {
+		/**
+		 * @type object | undefined
+		 */
+		id?: {
+			/**
+			 * @type array
+			 */
+			in: string[];
+		};
+		/**
+		 * @type object | undefined
+		 */
+		kind?: {
+			/**
+			 * @type array
+			 */
+			in: TagAssertionFilterTagKindInEnum[];
+		};
+	};
+	authority?:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "global";
+				view:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "effective";
+							/**
+							 * @type object | undefined
+							 */
+							consensus?: {
+								score?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "direct";
+					  };
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				/**
+				 * @type object
+				 */
+				realm: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+				view:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "policy";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "community";
+							/**
+							 * @type object | undefined
+							 */
+							consensus?: {
+								score?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @type array
+											 */
+											in: number[];
+									  }
+									| {
+											range:
+												| {
+														/**
+														 * @type integer
+														 */
+														minimum: number;
+														/**
+														 * @type integer | undefined
+														 */
+														maximum?: number;
+												  }
+												| {
+														/**
+														 * @type integer | undefined
+														 */
+														minimum?: number;
+														/**
+														 * @type integer
+														 */
+														maximum: number;
+												  };
+									  };
+							};
+					  };
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "profile";
+				/**
+				 * @type object
+				 */
+				profile: {
+					/**
+					 * @type string
+					 */
+					kind: "viewer";
+				};
+		  };
+};
+
+export const ScoreFilterContextKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type ScoreFilterContextKindInEnum =
+	(typeof ScoreFilterContextKindInEnum)[keyof typeof ScoreFilterContextKindInEnum];
+
+export const ScoreFilterTargetKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type ScoreFilterTargetKindInEnum =
+	(typeof ScoreFilterTargetKindInEnum)[keyof typeof ScoreFilterTargetKindInEnum];
+
+/**
+ * @type object
+ */
+export type ScoreFilter = {
+	/**
+	 * @type array | undefined
+	 */
+	all?: ScoreFilter[];
+	/**
+	 * @type array | undefined
+	 */
+	any?: ScoreFilter[];
+	/**
+	 * @type object | undefined
+	 */
+	not?: ScoreFilter;
+	value?:
+		| {
+				/**
+				 * @type array
+				 */
+				in: number[];
+		  }
+		| {
+				range:
+					| {
+							/**
+							 * @minLength 1
+							 * @maxLength 10
+							 * @type integer
+							 */
+							minimum: number;
+							/**
+							 * @minLength 1
+							 * @maxLength 10
+							 * @type integer | undefined
+							 */
+							maximum?: number;
+					  }
+					| {
+							/**
+							 * @minLength 1
+							 * @maxLength 10
+							 * @type integer | undefined
+							 */
+							minimum?: number;
+							/**
+							 * @minLength 1
+							 * @maxLength 10
+							 * @type integer
+							 */
+							maximum: number;
+					  };
+		  };
+	/**
+	 * @type object | undefined
+	 */
+	context?: {
+		/**
+		 * @type object | undefined
+		 */
+		id?: {
+			/**
+			 * @type array
+			 */
+			in: string[];
+		};
+		/**
+		 * @type object | undefined
+		 */
+		kind?: {
+			/**
+			 * @type array
+			 */
+			in: ScoreFilterContextKindInEnum[];
+		};
+	};
+	/**
+	 * @type object | undefined
+	 */
+	target?: {
+		/**
+		 * @type object | undefined
+		 */
+		id?: {
+			/**
+			 * @type array
+			 */
+			in: string[];
+		};
+		/**
+		 * @type object | undefined
+		 */
+		kind?: {
+			/**
+			 * @type array
+			 */
+			in: ScoreFilterTargetKindInEnum[];
+		};
+	};
+	author?:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "viewer";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "profile";
+				/**
+				 * @type object
+				 */
+				id: {
+					/**
+					 * @type array
+					 */
+					in: string[];
+				};
+		  };
+};
+
+export const PostFilterKindInEnum = {
+	post: "post",
+	reply: "reply",
+	excerpt: "excerpt",
+	review: "review",
+	chapter: "chapter",
+	chapter_group: "chapter_group",
+	wiki: "wiki",
+	picture: "picture",
+	governance_note: "governance_note",
+} as const;
+
+export type PostFilterKindInEnum = (typeof PostFilterKindInEnum)[keyof typeof PostFilterKindInEnum];
+
+/**
+ * @type object
+ */
+export type PostFilter = {
+	/**
+	 * @type array | undefined
+	 */
+	all?: PostFilter[];
+	/**
+	 * @type array | undefined
+	 */
+	any?: PostFilter[];
+	/**
+	 * @type object | undefined
+	 */
+	not?: PostFilter;
+	/**
+	 * @type object | undefined
+	 */
+	kind?: {
+		/**
+		 * @type array
+		 */
+		in: PostFilterKindInEnum[];
+	};
+	subject?:
+		| {
+				/**
+				 * @type object
+				 */
+				is: {
+					/**
+					 * @type object | undefined
+					 */
+					id?: {
+						/**
+						 * @type array
+						 */
+						in: string[];
+					};
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "slug_namespace"
+							| "profile"
+							| "book"
+							| "software"
+							| "media"
+							| "release"
+							| "entity"
+							| "label"
+							| "tag"
+							| "structure"
+							| "series"
+							| "zone"
+							| "zone_page"
+							| "collection"
+							| "post"
+							| "poll"
+							| "realm"
+							| "realm_rule"
+						)[];
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type boolean
+				 */
+				absent: true;
+		  };
+	/**
+	 * @type object | undefined
+	 */
+	scores?: {
+		displayed?:
+			| {
+					/**
+					 * @type object
+					 */
+					some: {
+						/**
+						 * @type array | undefined
+						 */
+						all?: ScoreFilter[];
+						/**
+						 * @type array | undefined
+						 */
+						any?: ScoreFilter[];
+						/**
+						 * @type object | undefined
+						 */
+						not?: ScoreFilter;
+						value?:
+							| {
+									/**
+									 * @type array
+									 */
+									in: number[];
+							  }
+							| {
+									range:
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												minimum: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												maximum?: number;
+										  }
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												minimum?: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												maximum: number;
+										  };
+							  };
+						/**
+						 * @type object | undefined
+						 */
+						context?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						/**
+						 * @type object | undefined
+						 */
+						target?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						author?:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+					};
+			  }
+			| {
+					/**
+					 * @type object
+					 */
+					none: {
+						/**
+						 * @type array | undefined
+						 */
+						all?: ScoreFilter[];
+						/**
+						 * @type array | undefined
+						 */
+						any?: ScoreFilter[];
+						/**
+						 * @type object | undefined
+						 */
+						not?: ScoreFilter;
+						value?:
+							| {
+									/**
+									 * @type array
+									 */
+									in: number[];
+							  }
+							| {
+									range:
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												minimum: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												maximum?: number;
+										  }
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												minimum?: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												maximum: number;
+										  };
+							  };
+						/**
+						 * @type object | undefined
+						 */
+						context?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						/**
+						 * @type object | undefined
+						 */
+						target?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						author?:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+					};
+			  };
+	};
+};
+
+export const UnitFilterKindInEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type UnitFilterKindInEnum = (typeof UnitFilterKindInEnum)[keyof typeof UnitFilterKindInEnum];
+
+/**
+ * @type object
+ */
+export type UnitFilter = {
+	/**
+	 * @type array | undefined
+	 */
+	all?: UnitFilter[];
+	/**
+	 * @type array | undefined
+	 */
+	any?: UnitFilter[];
+	/**
+	 * @type object | undefined
+	 */
+	not?: UnitFilter;
+	/**
+	 * @type object | undefined
+	 */
+	id?: {
+		/**
+		 * @type array
+		 */
+		in: string[];
+	};
+	/**
+	 * @type object | undefined
+	 */
+	kind?: {
+		/**
+		 * @type array
+		 */
+		in: UnitFilterKindInEnum[];
+	};
+	localizations?:
+		| {
+				/**
+				 * @type object
+				 */
+				some: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: LocalizationFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: LocalizationFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: LocalizationFilter;
+					/**
+					 * @type object | undefined
+					 */
+					language?: {
+						/**
+						 * @type array
+						 */
+						in: ("zh" | "en")[];
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				none: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: LocalizationFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: LocalizationFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: LocalizationFilter;
+					/**
+					 * @type object | undefined
+					 */
+					language?: {
+						/**
+						 * @type array
+						 */
+						in: ("zh" | "en")[];
+					};
+				};
+		  };
+	realms?:
+		| {
+				/**
+				 * @type object
+				 */
+				some: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: RealmPlacementFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: RealmPlacementFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: RealmPlacementFilter;
+					/**
+					 * @type object | undefined
+					 */
+					realm?: {
+						/**
+						 * @type object | undefined
+						 */
+						id?: {
+							/**
+							 * @type array
+							 */
+							in: string[];
+						};
+						/**
+						 * @type object | undefined
+						 */
+						kind?: {
+							/**
+							 * @type array
+							 */
+							in: (
+								| "slug_namespace"
+								| "profile"
+								| "book"
+								| "software"
+								| "media"
+								| "release"
+								| "entity"
+								| "label"
+								| "tag"
+								| "structure"
+								| "series"
+								| "zone"
+								| "zone_page"
+								| "collection"
+								| "post"
+								| "poll"
+								| "realm"
+								| "realm_rule"
+							)[];
+						};
+					};
+					/**
+					 * @type object | undefined
+					 */
+					status?: {
+						/**
+						 * @type array
+						 */
+						in: ("pending" | "visible" | "hidden" | "removed")[];
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				none: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: RealmPlacementFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: RealmPlacementFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: RealmPlacementFilter;
+					/**
+					 * @type object | undefined
+					 */
+					realm?: {
+						/**
+						 * @type object | undefined
+						 */
+						id?: {
+							/**
+							 * @type array
+							 */
+							in: string[];
+						};
+						/**
+						 * @type object | undefined
+						 */
+						kind?: {
+							/**
+							 * @type array
+							 */
+							in: (
+								| "slug_namespace"
+								| "profile"
+								| "book"
+								| "software"
+								| "media"
+								| "release"
+								| "entity"
+								| "label"
+								| "tag"
+								| "structure"
+								| "series"
+								| "zone"
+								| "zone_page"
+								| "collection"
+								| "post"
+								| "poll"
+								| "realm"
+								| "realm_rule"
+							)[];
+						};
+					};
+					/**
+					 * @type object | undefined
+					 */
+					status?: {
+						/**
+						 * @type array
+						 */
+						in: ("pending" | "visible" | "hidden" | "removed")[];
+					};
+				};
+		  };
+	tags?:
+		| {
+				/**
+				 * @type object
+				 */
+				some: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: TagAssertionFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: TagAssertionFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: TagAssertionFilter;
+					/**
+					 * @type object | undefined
+					 */
+					tag?: {
+						/**
+						 * @type object | undefined
+						 */
+						id?: {
+							/**
+							 * @type array
+							 */
+							in: string[];
+						};
+						/**
+						 * @type object | undefined
+						 */
+						kind?: {
+							/**
+							 * @type array
+							 */
+							in: (
+								| "slug_namespace"
+								| "profile"
+								| "book"
+								| "software"
+								| "media"
+								| "release"
+								| "entity"
+								| "label"
+								| "tag"
+								| "structure"
+								| "series"
+								| "zone"
+								| "zone_page"
+								| "collection"
+								| "post"
+								| "poll"
+								| "realm"
+								| "realm_rule"
+							)[];
+						};
+					};
+					authority?:
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "global";
+								view:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "effective";
+											/**
+											 * @type object | undefined
+											 */
+											consensus?: {
+												score?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												voteCount?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "direct";
+									  };
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "realm";
+								/**
+								 * @type object
+								 */
+								realm: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								view:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "policy";
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "community";
+											/**
+											 * @type object | undefined
+											 */
+											consensus?: {
+												score?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												voteCount?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+											};
+									  };
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "profile";
+								/**
+								 * @type object
+								 */
+								profile: {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+								};
+						  };
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				none: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: TagAssertionFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: TagAssertionFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: TagAssertionFilter;
+					/**
+					 * @type object | undefined
+					 */
+					tag?: {
+						/**
+						 * @type object | undefined
+						 */
+						id?: {
+							/**
+							 * @type array
+							 */
+							in: string[];
+						};
+						/**
+						 * @type object | undefined
+						 */
+						kind?: {
+							/**
+							 * @type array
+							 */
+							in: (
+								| "slug_namespace"
+								| "profile"
+								| "book"
+								| "software"
+								| "media"
+								| "release"
+								| "entity"
+								| "label"
+								| "tag"
+								| "structure"
+								| "series"
+								| "zone"
+								| "zone_page"
+								| "collection"
+								| "post"
+								| "poll"
+								| "realm"
+								| "realm_rule"
+							)[];
+						};
+					};
+					authority?:
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "global";
+								view:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "effective";
+											/**
+											 * @type object | undefined
+											 */
+											consensus?: {
+												score?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												voteCount?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "direct";
+									  };
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "realm";
+								/**
+								 * @type object
+								 */
+								realm: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+								view:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "policy";
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "community";
+											/**
+											 * @type object | undefined
+											 */
+											consensus?: {
+												score?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+												voteCount?:
+													| {
+															/**
+															 * @type array
+															 */
+															in: number[];
+													  }
+													| {
+															range:
+																| {
+																		/**
+																		 * @type integer
+																		 */
+																		minimum: number;
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		maximum?: number;
+																  }
+																| {
+																		/**
+																		 * @type integer | undefined
+																		 */
+																		minimum?: number;
+																		/**
+																		 * @type integer
+																		 */
+																		maximum: number;
+																  };
+													  };
+											};
+									  };
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "profile";
+								/**
+								 * @type object
+								 */
+								profile: {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+								};
+						  };
+				};
+		  };
+	/**
+	 * @type object | undefined
+	 */
+	scores?: {
+		received?:
+			| {
+					/**
+					 * @type object
+					 */
+					some: {
+						/**
+						 * @type array | undefined
+						 */
+						all?: ScoreFilter[];
+						/**
+						 * @type array | undefined
+						 */
+						any?: ScoreFilter[];
+						/**
+						 * @type object | undefined
+						 */
+						not?: ScoreFilter;
+						value?:
+							| {
+									/**
+									 * @type array
+									 */
+									in: number[];
+							  }
+							| {
+									range:
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												minimum: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												maximum?: number;
+										  }
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												minimum?: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												maximum: number;
+										  };
+							  };
+						/**
+						 * @type object | undefined
+						 */
+						context?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						/**
+						 * @type object | undefined
+						 */
+						target?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						author?:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+					};
+			  }
+			| {
+					/**
+					 * @type object
+					 */
+					none: {
+						/**
+						 * @type array | undefined
+						 */
+						all?: ScoreFilter[];
+						/**
+						 * @type array | undefined
+						 */
+						any?: ScoreFilter[];
+						/**
+						 * @type object | undefined
+						 */
+						not?: ScoreFilter;
+						value?:
+							| {
+									/**
+									 * @type array
+									 */
+									in: number[];
+							  }
+							| {
+									range:
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												minimum: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												maximum?: number;
+										  }
+										| {
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer | undefined
+												 */
+												minimum?: number;
+												/**
+												 * @minLength 1
+												 * @maxLength 10
+												 * @type integer
+												 */
+												maximum: number;
+										  };
+							  };
+						/**
+						 * @type object | undefined
+						 */
+						context?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						/**
+						 * @type object | undefined
+						 */
+						target?: {
+							/**
+							 * @type object | undefined
+							 */
+							id?: {
+								/**
+								 * @type array
+								 */
+								in: string[];
+							};
+							/**
+							 * @type object | undefined
+							 */
+							kind?: {
+								/**
+								 * @type array
+								 */
+								in: (
+									| "slug_namespace"
+									| "profile"
+									| "book"
+									| "software"
+									| "media"
+									| "release"
+									| "entity"
+									| "label"
+									| "tag"
+									| "structure"
+									| "series"
+									| "zone"
+									| "zone_page"
+									| "collection"
+									| "post"
+									| "poll"
+									| "realm"
+									| "realm_rule"
+								)[];
+							};
+						};
+						author?:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "viewer";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "profile";
+									/**
+									 * @type object
+									 */
+									id: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+							  };
+					};
+			  };
+	};
+	post?:
+		| {
+				/**
+				 * @type object
+				 */
+				is: {
+					/**
+					 * @type array | undefined
+					 */
+					all?: PostFilter[];
+					/**
+					 * @type array | undefined
+					 */
+					any?: PostFilter[];
+					/**
+					 * @type object | undefined
+					 */
+					not?: PostFilter;
+					/**
+					 * @type object | undefined
+					 */
+					kind?: {
+						/**
+						 * @type array
+						 */
+						in: (
+							| "post"
+							| "reply"
+							| "excerpt"
+							| "review"
+							| "chapter"
+							| "chapter_group"
+							| "wiki"
+							| "picture"
+							| "governance_note"
+						)[];
+					};
+					subject?:
+						| {
+								/**
+								 * @type object
+								 */
+								is: {
+									/**
+									 * @type object | undefined
+									 */
+									id?: {
+										/**
+										 * @type array
+										 */
+										in: string[];
+									};
+									/**
+									 * @type object | undefined
+									 */
+									kind?: {
+										/**
+										 * @type array
+										 */
+										in: (
+											| "slug_namespace"
+											| "profile"
+											| "book"
+											| "software"
+											| "media"
+											| "release"
+											| "entity"
+											| "label"
+											| "tag"
+											| "structure"
+											| "series"
+											| "zone"
+											| "zone_page"
+											| "collection"
+											| "post"
+											| "poll"
+											| "realm"
+											| "realm_rule"
+										)[];
+									};
+								};
+						  }
+						| {
+								/**
+								 * @type boolean
+								 */
+								absent: true;
+						  };
+					/**
+					 * @type object | undefined
+					 */
+					scores?: {
+						displayed?:
+							| {
+									/**
+									 * @type object
+									 */
+									some: {
+										/**
+										 * @type array | undefined
+										 */
+										all?: ScoreFilter[];
+										/**
+										 * @type array | undefined
+										 */
+										any?: ScoreFilter[];
+										/**
+										 * @type object | undefined
+										 */
+										not?: ScoreFilter;
+										value?:
+											| {
+													/**
+													 * @type array
+													 */
+													in: number[];
+											  }
+											| {
+													range:
+														| {
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer
+																 */
+																minimum: number;
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer | undefined
+																 */
+																maximum?: number;
+														  }
+														| {
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer | undefined
+																 */
+																minimum?: number;
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer
+																 */
+																maximum: number;
+														  };
+											  };
+										/**
+										 * @type object | undefined
+										 */
+										context?: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										/**
+										 * @type object | undefined
+										 */
+										target?: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										author?:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "viewer";
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "profile";
+													/**
+													 * @type object
+													 */
+													id: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+											  };
+									};
+							  }
+							| {
+									/**
+									 * @type object
+									 */
+									none: {
+										/**
+										 * @type array | undefined
+										 */
+										all?: ScoreFilter[];
+										/**
+										 * @type array | undefined
+										 */
+										any?: ScoreFilter[];
+										/**
+										 * @type object | undefined
+										 */
+										not?: ScoreFilter;
+										value?:
+											| {
+													/**
+													 * @type array
+													 */
+													in: number[];
+											  }
+											| {
+													range:
+														| {
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer
+																 */
+																minimum: number;
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer | undefined
+																 */
+																maximum?: number;
+														  }
+														| {
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer | undefined
+																 */
+																minimum?: number;
+																/**
+																 * @minLength 1
+																 * @maxLength 10
+																 * @type integer
+																 */
+																maximum: number;
+														  };
+											  };
+										/**
+										 * @type object | undefined
+										 */
+										context?: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										/**
+										 * @type object | undefined
+										 */
+										target?: {
+											/**
+											 * @type object | undefined
+											 */
+											id?: {
+												/**
+												 * @type array
+												 */
+												in: string[];
+											};
+											/**
+											 * @type object | undefined
+											 */
+											kind?: {
+												/**
+												 * @type array
+												 */
+												in: (
+													| "slug_namespace"
+													| "profile"
+													| "book"
+													| "software"
+													| "media"
+													| "release"
+													| "entity"
+													| "label"
+													| "tag"
+													| "structure"
+													| "series"
+													| "zone"
+													| "zone_page"
+													| "collection"
+													| "post"
+													| "poll"
+													| "realm"
+													| "realm_rule"
+												)[];
+											};
+										};
+										author?:
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "viewer";
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													kind: "profile";
+													/**
+													 * @type object
+													 */
+													id: {
+														/**
+														 * @type array
+														 */
+														in: string[];
+													};
+											  };
+									};
+							  };
+					};
+				};
+		  }
+		| {
+				/**
+				 * @type boolean
+				 */
+				absent: true;
+		  };
+};
+
 /**
  * @type object
  */
@@ -106,7 +2704,13 @@ export type DockDocument = {
 										 * @type string
 										 */
 										kind: "template";
-										template: "global" | "book" | "media" | "software";
+										template:
+											| "global"
+											| "book"
+											| "media"
+											| "software"
+											| "realm"
+											| "zone";
 								  }
 								| {
 										/**
@@ -139,7 +2743,7 @@ export type DockDocument = {
 							 * @type string
 							 */
 							kind: "template";
-							template: "global" | "book" | "media" | "software";
+							template: "global" | "book" | "media" | "software" | "realm" | "zone";
 					  }
 					| {
 							/**
@@ -636,7 +3240,13 @@ export type UnitReferencedBlockDocument = {
 										 * @type string
 										 */
 										kind: "template";
-										template: "global" | "book" | "media" | "software";
+										template:
+											| "global"
+											| "book"
+											| "media"
+											| "software"
+											| "realm"
+											| "zone";
 								  }
 								| {
 										/**
@@ -669,7 +3279,7 @@ export type UnitReferencedBlockDocument = {
 							 * @type string
 							 */
 							kind: "template";
-							template: "global" | "book" | "media" | "software";
+							template: "global" | "book" | "media" | "software" | "realm" | "zone";
 					  }
 					| {
 							/**
@@ -906,365 +3516,9 @@ export type ZoneBoundaryDocument = {
 	 */
 	categories: ZoneBoundaryDocumentCategoriesEnum[];
 	/**
-	 * @type array
+	 * @type object | undefined
 	 */
-	filters: (
-		| {
-				field:
-					| "category"
-					| "kind"
-					| "language"
-					| "content-rating"
-					| "ai-disclosure"
-					| "license"
-					| "tag"
-					| "credit"
-					| "realm"
-					| "zone"
-					| "subject"
-					| "target"
-					| "root"
-					| "parent"
-					| "owner"
-					| "join-policy"
-					| "multiple"
-					| "results-visibility"
-					| "closed"
-					| "created-at"
-					| "updated-at"
-					| "published-at"
-					| "closes-at"
-					| "catalog-licensed"
-					| "catalog-release-date"
-					| "book-isbn13"
-					| "book-publication-date"
-					| "book-page-count"
-					| "book-word-count"
-					| "book-format"
-					| "media-kind"
-					| "media-release-date"
-					| "media-runtime-minutes"
-					| "media-episode-count"
-					| "media-season-count"
-					| "software-release-date"
-					| "software-version-label"
-					| "software-platform"
-					| "software-requirement-tier";
-				/**
-				 * @type string
-				 */
-				operator: "equals";
-				value: string | number | boolean;
-		  }
-		| {
-				field:
-					| "category"
-					| "kind"
-					| "language"
-					| "content-rating"
-					| "ai-disclosure"
-					| "license"
-					| "tag"
-					| "credit"
-					| "realm"
-					| "zone"
-					| "subject"
-					| "target"
-					| "root"
-					| "parent"
-					| "owner"
-					| "join-policy"
-					| "multiple"
-					| "results-visibility"
-					| "closed"
-					| "created-at"
-					| "updated-at"
-					| "published-at"
-					| "closes-at"
-					| "catalog-licensed"
-					| "catalog-release-date"
-					| "book-isbn13"
-					| "book-publication-date"
-					| "book-page-count"
-					| "book-word-count"
-					| "book-format"
-					| "media-kind"
-					| "media-release-date"
-					| "media-runtime-minutes"
-					| "media-episode-count"
-					| "media-season-count"
-					| "software-release-date"
-					| "software-version-label"
-					| "software-platform"
-					| "software-requirement-tier";
-				/**
-				 * @type string
-				 */
-				operator: "not-equals";
-				value: string | number | boolean;
-		  }
-		| {
-				field:
-					| "category"
-					| "kind"
-					| "language"
-					| "content-rating"
-					| "ai-disclosure"
-					| "license"
-					| "tag"
-					| "credit"
-					| "realm"
-					| "zone"
-					| "subject"
-					| "target"
-					| "root"
-					| "parent"
-					| "owner"
-					| "join-policy"
-					| "multiple"
-					| "results-visibility"
-					| "closed"
-					| "created-at"
-					| "updated-at"
-					| "published-at"
-					| "closes-at"
-					| "catalog-licensed"
-					| "catalog-release-date"
-					| "book-isbn13"
-					| "book-publication-date"
-					| "book-page-count"
-					| "book-word-count"
-					| "book-format"
-					| "media-kind"
-					| "media-release-date"
-					| "media-runtime-minutes"
-					| "media-episode-count"
-					| "media-season-count"
-					| "software-release-date"
-					| "software-version-label"
-					| "software-platform"
-					| "software-requirement-tier";
-				operator: "any-of" | "all-of" | "none-of";
-				/**
-				 * @type array
-				 */
-				values: (string | number | boolean)[];
-		  }
-		| (
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "range";
-						lower: string | number | boolean;
-						upper?: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "range";
-						lower?: string | number | boolean;
-						upper: string | number | boolean;
-				  }
-		  )
-		| {
-				field:
-					| "category"
-					| "kind"
-					| "language"
-					| "content-rating"
-					| "ai-disclosure"
-					| "license"
-					| "tag"
-					| "credit"
-					| "realm"
-					| "zone"
-					| "subject"
-					| "target"
-					| "root"
-					| "parent"
-					| "owner"
-					| "join-policy"
-					| "multiple"
-					| "results-visibility"
-					| "closed"
-					| "created-at"
-					| "updated-at"
-					| "published-at"
-					| "closes-at"
-					| "catalog-licensed"
-					| "catalog-release-date"
-					| "book-isbn13"
-					| "book-publication-date"
-					| "book-page-count"
-					| "book-word-count"
-					| "book-format"
-					| "media-kind"
-					| "media-release-date"
-					| "media-runtime-minutes"
-					| "media-episode-count"
-					| "media-season-count"
-					| "software-release-date"
-					| "software-version-label"
-					| "software-platform"
-					| "software-requirement-tier";
-				/**
-				 * @type string
-				 */
-				operator: "exists";
-				/**
-				 * @type boolean
-				 */
-				value: boolean;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				field: "realm-tag-vote";
-				/**
-				 * @type string
-				 */
-				operator: "matches";
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string
-				 */
-				realmId: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string
-				 */
-				tagId: string;
-				score?:
-					| {
-							/**
-							 * @type integer
-							 */
-							lower: number;
-							/**
-							 * @type integer | undefined
-							 */
-							upper?: number;
-					  }
-					| {
-							/**
-							 * @type integer | undefined
-							 */
-							lower?: number;
-							/**
-							 * @type integer
-							 */
-							upper: number;
-					  };
-				voteCount?:
-					| {
-							/**
-							 * @minLength 0
-							 * @type integer
-							 */
-							lower: number;
-							/**
-							 * @minLength 0
-							 * @type integer | undefined
-							 */
-							upper?: number;
-					  }
-					| {
-							/**
-							 * @minLength 0
-							 * @type integer | undefined
-							 */
-							lower?: number;
-							/**
-							 * @minLength 0
-							 * @type integer
-							 */
-							upper: number;
-					  };
-		  }
-	)[];
+	filter?: UnitFilter;
 };
 
 export const ZoneThemeDocumentColorSchemeEnum = {
@@ -1310,6 +3564,912 @@ export type ZoneThemeDocument = {
 	 * @type string
 	 */
 	density: ZoneThemeDocumentDensityEnum;
+};
+
+export const SearchDocumentV1TemplateIdEnum = {
+	global: "global",
+	book: "book",
+	media: "media",
+	software: "software",
+	realm: "realm",
+	zone: "zone",
+} as const;
+
+export type SearchDocumentV1TemplateIdEnum =
+	(typeof SearchDocumentV1TemplateIdEnum)[keyof typeof SearchDocumentV1TemplateIdEnum];
+
+export const SearchDocumentV1CategoriesEnum = {
+	units: "units",
+	users: "users",
+	entity: "entity",
+	tags: "tags",
+	"tag-structures": "tag-structures",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
+} as const;
+
+export type SearchDocumentV1CategoriesEnum =
+	(typeof SearchDocumentV1CategoriesEnum)[keyof typeof SearchDocumentV1CategoriesEnum];
+
+export const SearchDocumentV1ModesAvailableEnum = {
+	basic: "basic",
+	advanced: "advanced",
+} as const;
+
+export type SearchDocumentV1ModesAvailableEnum =
+	(typeof SearchDocumentV1ModesAvailableEnum)[keyof typeof SearchDocumentV1ModesAvailableEnum];
+
+export const SearchDocumentV1ModesDefaultEnum = {
+	basic: "basic",
+	advanced: "advanced",
+} as const;
+
+export type SearchDocumentV1ModesDefaultEnum =
+	(typeof SearchDocumentV1ModesDefaultEnum)[keyof typeof SearchDocumentV1ModesDefaultEnum];
+
+export const SearchDocumentV1ControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	realm: "realm",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"catalog-licensed": "catalog-licensed",
+	"catalog-release-date": "catalog-release-date",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type SearchDocumentV1ControlsFieldEnum =
+	(typeof SearchDocumentV1ControlsFieldEnum)[keyof typeof SearchDocumentV1ControlsFieldEnum];
+
+export const SearchDocumentV1ControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type SearchDocumentV1ControlsDisclosureEnum =
+	(typeof SearchDocumentV1ControlsDisclosureEnum)[keyof typeof SearchDocumentV1ControlsDisclosureEnum];
+
+export const SearchDocumentV1ControlsModesEnum = {
+	basic: "basic",
+	advanced: "advanced",
+} as const;
+
+export type SearchDocumentV1ControlsModesEnum =
+	(typeof SearchDocumentV1ControlsModesEnum)[keyof typeof SearchDocumentV1ControlsModesEnum];
+
+export const SearchDocumentV1SectionsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type SearchDocumentV1SectionsDisclosureEnum =
+	(typeof SearchDocumentV1SectionsDisclosureEnum)[keyof typeof SearchDocumentV1SectionsDisclosureEnum];
+
+export const SearchDocumentV1SortDefaultEnum = {
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type SearchDocumentV1SortDefaultEnum =
+	(typeof SearchDocumentV1SortDefaultEnum)[keyof typeof SearchDocumentV1SortDefaultEnum];
+
+export const SearchDocumentV1SortOptionsEnum = {
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type SearchDocumentV1SortOptionsEnum =
+	(typeof SearchDocumentV1SortOptionsEnum)[keyof typeof SearchDocumentV1SortOptionsEnum];
+
+/**
+ * @type object
+ */
+export type SearchDocumentV1 = {
+	/**
+	 * @type number
+	 */
+	version: 1;
+	/**
+	 * @type object
+	 */
+	template: {
+		/**
+		 * @type string
+		 */
+		id: SearchDocumentV1TemplateIdEnum;
+		/**
+		 * @type number
+		 */
+		version: 1;
+	};
+	/**
+	 * @type array
+	 */
+	categories: SearchDocumentV1CategoriesEnum[];
+	/**
+	 * @type object
+	 */
+	modes: {
+		/**
+		 * @type array
+		 */
+		available: SearchDocumentV1ModesAvailableEnum[];
+		/**
+		 * @type string
+		 */
+		default: SearchDocumentV1ModesDefaultEnum;
+	};
+	/**
+	 * @type object
+	 */
+	query: {
+		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
+		/**
+		 * @default false
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+	};
+	/**
+	 * @type object | undefined
+	 */
+	filter?: UnitFilter;
+	/**
+	 * @type array
+	 */
+	defaults: {
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string
+		 */
+		controlKey: string;
+		filter:
+			| {
+					field:
+						| "category"
+						| "kind"
+						| "language"
+						| "content-rating"
+						| "ai-disclosure"
+						| "license"
+						| "tag"
+						| "credit"
+						| "realm"
+						| "zone"
+						| "subject"
+						| "target"
+						| "root"
+						| "parent"
+						| "owner"
+						| "join-policy"
+						| "multiple"
+						| "results-visibility"
+						| "closed"
+						| "created-at"
+						| "updated-at"
+						| "published-at"
+						| "closes-at"
+						| "catalog-licensed"
+						| "catalog-release-date"
+						| "book-isbn13"
+						| "book-publication-date"
+						| "book-page-count"
+						| "book-word-count"
+						| "book-format"
+						| "media-kind"
+						| "media-release-date"
+						| "media-runtime-minutes"
+						| "media-episode-count"
+						| "media-season-count"
+						| "software-release-date"
+						| "software-version-label"
+						| "software-platform"
+						| "software-requirement-tier";
+					/**
+					 * @type string
+					 */
+					operator: "equals";
+					value: string | number | boolean;
+			  }
+			| {
+					field:
+						| "category"
+						| "kind"
+						| "language"
+						| "content-rating"
+						| "ai-disclosure"
+						| "license"
+						| "tag"
+						| "credit"
+						| "realm"
+						| "zone"
+						| "subject"
+						| "target"
+						| "root"
+						| "parent"
+						| "owner"
+						| "join-policy"
+						| "multiple"
+						| "results-visibility"
+						| "closed"
+						| "created-at"
+						| "updated-at"
+						| "published-at"
+						| "closes-at"
+						| "catalog-licensed"
+						| "catalog-release-date"
+						| "book-isbn13"
+						| "book-publication-date"
+						| "book-page-count"
+						| "book-word-count"
+						| "book-format"
+						| "media-kind"
+						| "media-release-date"
+						| "media-runtime-minutes"
+						| "media-episode-count"
+						| "media-season-count"
+						| "software-release-date"
+						| "software-version-label"
+						| "software-platform"
+						| "software-requirement-tier";
+					/**
+					 * @type string
+					 */
+					operator: "not-equals";
+					value: string | number | boolean;
+			  }
+			| {
+					field:
+						| "category"
+						| "kind"
+						| "language"
+						| "content-rating"
+						| "ai-disclosure"
+						| "license"
+						| "tag"
+						| "credit"
+						| "realm"
+						| "zone"
+						| "subject"
+						| "target"
+						| "root"
+						| "parent"
+						| "owner"
+						| "join-policy"
+						| "multiple"
+						| "results-visibility"
+						| "closed"
+						| "created-at"
+						| "updated-at"
+						| "published-at"
+						| "closes-at"
+						| "catalog-licensed"
+						| "catalog-release-date"
+						| "book-isbn13"
+						| "book-publication-date"
+						| "book-page-count"
+						| "book-word-count"
+						| "book-format"
+						| "media-kind"
+						| "media-release-date"
+						| "media-runtime-minutes"
+						| "media-episode-count"
+						| "media-season-count"
+						| "software-release-date"
+						| "software-version-label"
+						| "software-platform"
+						| "software-requirement-tier";
+					operator: "any-of" | "all-of" | "none-of";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  }
+			| (
+					| {
+							field:
+								| "category"
+								| "kind"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "credit"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-word-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
+							/**
+							 * @type string
+							 */
+							operator: "range";
+							lower: string | number | boolean;
+							upper?: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "kind"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "credit"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-word-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
+							/**
+							 * @type string
+							 */
+							operator: "range";
+							lower?: string | number | boolean;
+							upper: string | number | boolean;
+					  }
+			  )
+			| {
+					field:
+						| "category"
+						| "kind"
+						| "language"
+						| "content-rating"
+						| "ai-disclosure"
+						| "license"
+						| "tag"
+						| "credit"
+						| "realm"
+						| "zone"
+						| "subject"
+						| "target"
+						| "root"
+						| "parent"
+						| "owner"
+						| "join-policy"
+						| "multiple"
+						| "results-visibility"
+						| "closed"
+						| "created-at"
+						| "updated-at"
+						| "published-at"
+						| "closes-at"
+						| "catalog-licensed"
+						| "catalog-release-date"
+						| "book-isbn13"
+						| "book-publication-date"
+						| "book-page-count"
+						| "book-word-count"
+						| "book-format"
+						| "media-kind"
+						| "media-release-date"
+						| "media-runtime-minutes"
+						| "media-episode-count"
+						| "media-season-count"
+						| "software-release-date"
+						| "software-version-label"
+						| "software-platform"
+						| "software-requirement-tier";
+					/**
+					 * @type string
+					 */
+					operator: "exists";
+					/**
+					 * @type boolean
+					 */
+					value: boolean;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					field: "realm-tag-vote";
+					/**
+					 * @type string
+					 */
+					operator: "matches";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					realmId: string;
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					tagId: string;
+					score?:
+						| {
+								/**
+								 * @type integer
+								 */
+								lower: number;
+								/**
+								 * @type integer | undefined
+								 */
+								upper?: number;
+						  }
+						| {
+								/**
+								 * @type integer | undefined
+								 */
+								lower?: number;
+								/**
+								 * @type integer
+								 */
+								upper: number;
+						  };
+					voteCount?:
+						| {
+								/**
+								 * @minLength 0
+								 * @type integer
+								 */
+								lower: number;
+								/**
+								 * @minLength 0
+								 * @type integer | undefined
+								 */
+								upper?: number;
+						  }
+						| {
+								/**
+								 * @minLength 0
+								 * @type integer | undefined
+								 */
+								lower?: number;
+								/**
+								 * @minLength 0
+								 * @type integer
+								 */
+								upper: number;
+						  };
+			  };
+	}[];
+	/**
+	 * @type array
+	 */
+	controls: {
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @type string
+		 */
+		field: SearchDocumentV1ControlsFieldEnum;
+		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
+		/**
+		 * @type string
+		 */
+		disclosure: SearchDocumentV1ControlsDisclosureEnum;
+		/**
+		 * @type array
+		 */
+		modes: SearchDocumentV1ControlsModesEnum[];
+		/**
+		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+		 * @type string | undefined
+		 */
+		labelUnitId?: string;
+		optionPolicy?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "all";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "include";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exclude";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  };
+		/**
+		 * @default false
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+	}[];
+	/**
+	 * @type array
+	 */
+	sections: {
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+		 * @type string | undefined
+		 */
+		labelUnitId?: string;
+		/**
+		 * @type string
+		 */
+		disclosure: SearchDocumentV1SectionsDisclosureEnum;
+		/**
+		 * @type array
+		 */
+		controls: string[];
+	}[];
+	/**
+	 * @type object
+	 */
+	sort: {
+		/**
+		 * @type string
+		 */
+		default: SearchDocumentV1SortDefaultEnum;
+		/**
+		 * @type array
+		 */
+		options: SearchDocumentV1SortOptionsEnum[];
+	};
+	/**
+	 * @type object
+	 */
+	results: {
+		/**
+		 * @minLength 1
+		 * @maxLength 50
+		 * @type integer
+		 */
+		pageSize: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 100
+		 * @type integer
+		 */
+		maxPageSize: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 100000
+		 * @type integer
+		 */
+		maxResultWindow: number;
+		/**
+		 * @type array
+		 */
+		facets: string[];
+	};
+};
+
+export const SearchFeatureDefinitionV1ControlsFieldEnum = {
+	category: "category",
+	kind: "kind",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	credit: "credit",
+	realm: "realm",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+	"catalog-licensed": "catalog-licensed",
+	"catalog-release-date": "catalog-release-date",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-word-count": "book-word-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type SearchFeatureDefinitionV1ControlsFieldEnum =
+	(typeof SearchFeatureDefinitionV1ControlsFieldEnum)[keyof typeof SearchFeatureDefinitionV1ControlsFieldEnum];
+
+export const SearchFeatureDefinitionV1ControlsComponentEnum = {
+	select: "select",
+	"multi-select": "multi-select",
+	toggle: "toggle",
+	"date-range": "date-range",
+	"value-range": "value-range",
+	"realm-tag-vote": "realm-tag-vote",
+} as const;
+
+export type SearchFeatureDefinitionV1ControlsComponentEnum =
+	(typeof SearchFeatureDefinitionV1ControlsComponentEnum)[keyof typeof SearchFeatureDefinitionV1ControlsComponentEnum];
+
+export const SearchFeatureDefinitionV1ControlsModesEnum = {
+	basic: "basic",
+	advanced: "advanced",
+} as const;
+
+export type SearchFeatureDefinitionV1ControlsModesEnum =
+	(typeof SearchFeatureDefinitionV1ControlsModesEnum)[keyof typeof SearchFeatureDefinitionV1ControlsModesEnum];
+
+export const SearchFeatureDefinitionV1ControlsOperatorsEnum = {
+	equals: "equals",
+	"not-equals": "not-equals",
+	"any-of": "any-of",
+	"all-of": "all-of",
+	"none-of": "none-of",
+	range: "range",
+	exists: "exists",
+	matches: "matches",
+} as const;
+
+export type SearchFeatureDefinitionV1ControlsOperatorsEnum =
+	(typeof SearchFeatureDefinitionV1ControlsOperatorsEnum)[keyof typeof SearchFeatureDefinitionV1ControlsOperatorsEnum];
+
+export const SearchFeatureDefinitionV1ControlsDisclosureEnum = {
+	visible: "visible",
+	hidden: "hidden",
+} as const;
+
+export type SearchFeatureDefinitionV1ControlsDisclosureEnum =
+	(typeof SearchFeatureDefinitionV1ControlsDisclosureEnum)[keyof typeof SearchFeatureDefinitionV1ControlsDisclosureEnum];
+
+/**
+ * @type object
+ */
+export type SearchFeatureDefinitionV1 = {
+	/**
+	 * @type object
+	 */
+	document: SearchDocumentV1;
+	/**
+	 * @type array
+	 */
+	controls: {
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @type string
+		 */
+		field: SearchFeatureDefinitionV1ControlsFieldEnum;
+		/**
+		 * @type string
+		 */
+		component: SearchFeatureDefinitionV1ControlsComponentEnum;
+		/**
+		 * @type array
+		 */
+		modes: SearchFeatureDefinitionV1ControlsModesEnum[];
+		/**
+		 * @type array
+		 */
+		operators: SearchFeatureDefinitionV1ControlsOperatorsEnum[];
+		optionSource?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "facet";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "static";
+					/**
+					 * @type array
+					 */
+					options: {
+						value: string | number | boolean;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string | undefined
+						 */
+						labelUnitId?: string;
+					}[];
+			  };
+		optionPolicy?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "all";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "include";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exclude";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  };
+		/**
+		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+		 * @type string | undefined
+		 */
+		labelUnitId?: string;
+		/**
+		 * @default false
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+		/**
+		 * @type string
+		 */
+		disclosure: SearchFeatureDefinitionV1ControlsDisclosureEnum;
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string | undefined
+		 */
+		sectionKey?: string;
+	}[];
 };
 
 export const ApiErrorCode = {
@@ -1493,6 +4653,7 @@ export const ApiErrorCode = {
 	RealmNavigationInUse: "RealmNavigationInUse",
 	RealmNavigationDocumentInvalid: "RealmNavigationDocumentInvalid",
 	InvalidFeedCursor: "InvalidFeedCursor",
+	InvalidFeedFilter: "InvalidFeedFilter",
 	InvalidHistoryCursor: "InvalidHistoryCursor",
 	UnitRevisionNotFound: "UnitRevisionNotFound",
 	CurrentRevisionContentVisibilityForbidden: "CurrentRevisionContentVisibilityForbidden",
@@ -10784,53 +13945,7 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdResponse =
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus500;
 
-export const GetApiFeedLanguagesEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type GetApiFeedLanguagesEnum =
-	(typeof GetApiFeedLanguagesEnum)[keyof typeof GetApiFeedLanguagesEnum];
-
-export const GetApiFeedSort = {
-	best: "best",
-	hot: "hot",
-	new: "new",
-	top: "top",
-	rising: "rising",
-} as const;
-
-export type GetApiFeedSort = (typeof GetApiFeedSort)[keyof typeof GetApiFeedSort];
-
-/**
- * @type object
- */
-export type GetApiFeedQuery = {
-	/**
-	 * @type array | undefined
-	 */
-	languages?: GetApiFeedLanguagesEnum[];
-	/**
-	 * @type array | undefined
-	 */
-	realmIds?: string[];
-	/**
-	 * @default 'best'
-	 * @type string | undefined
-	 */
-	sort?: GetApiFeedSort;
-	/**
-	 * @maxLength 1024
-	 * @type string | undefined
-	 */
-	cursor?: string;
-	/**
-	 * @default 20
-	 */
-	limit?: string | number;
-};
-
-export const GetApiFeedStatus200ItemsAttributionsRoleEnum = {
+export const PostApiFeedQueryStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
 	translator: "translator",
@@ -10851,10 +13966,10 @@ export const GetApiFeedStatus200ItemsAttributionsRoleEnum = {
 	distributor: "distributor",
 } as const;
 
-export type GetApiFeedStatus200ItemsAttributionsRoleEnum =
-	(typeof GetApiFeedStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiFeedStatus200ItemsAttributionsRoleEnum];
+export type PostApiFeedQueryStatus200ItemsAttributionsRoleEnum =
+	(typeof PostApiFeedQueryStatus200ItemsAttributionsRoleEnum)[keyof typeof PostApiFeedQueryStatus200ItemsAttributionsRoleEnum];
 
-export const GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
+export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -10875,26 +13990,26 @@ export const GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
-	(typeof GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
+export type PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum =
+	(typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum];
 
-export const GetApiFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum = {
+export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type GetApiFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
-	(typeof GetApiFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+export type PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
 
-export const GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
+export const PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum =
-	(typeof GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum];
+export type PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum];
 
-export const GetApiFeedStatus200ItemsRecommendationReason = {
+export const PostApiFeedQueryStatus200ItemsRecommendationReason = {
 	followed_unit: "followed_unit",
 	followed_realm: "followed_realm",
 	based_on_activity: "based_on_activity",
@@ -10903,10 +14018,10 @@ export const GetApiFeedStatus200ItemsRecommendationReason = {
 	new_and_relevant: "new_and_relevant",
 } as const;
 
-export type GetApiFeedStatus200ItemsRecommendationReason =
-	(typeof GetApiFeedStatus200ItemsRecommendationReason)[keyof typeof GetApiFeedStatus200ItemsRecommendationReason];
+export type PostApiFeedQueryStatus200ItemsRecommendationReason =
+	(typeof PostApiFeedQueryStatus200ItemsRecommendationReason)[keyof typeof PostApiFeedQueryStatus200ItemsRecommendationReason];
 
-export const GetApiFeedStatus200ItemsTrackingSurfaceEnum = {
+export const PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
 	home_software: "home_software",
@@ -10915,10 +14030,10 @@ export const GetApiFeedStatus200ItemsTrackingSurfaceEnum = {
 	post_related: "post_related",
 } as const;
 
-export type GetApiFeedStatus200ItemsTrackingSurfaceEnum =
-	(typeof GetApiFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof GetApiFeedStatus200ItemsTrackingSurfaceEnum];
+export type PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum =
+	(typeof PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum];
 
-export const GetApiFeedStatus200ItemsUnitKindEnum = {
+export const PostApiFeedQueryStatus200ItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -10933,10 +14048,10 @@ export const GetApiFeedStatus200ItemsUnitKindEnum = {
 	realm: "realm",
 } as const;
 
-export type GetApiFeedStatus200ItemsUnitKindEnum =
-	(typeof GetApiFeedStatus200ItemsUnitKindEnum)[keyof typeof GetApiFeedStatus200ItemsUnitKindEnum];
+export type PostApiFeedQueryStatus200ItemsUnitKindEnum =
+	(typeof PostApiFeedQueryStatus200ItemsUnitKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsUnitKindEnum];
 
-export const GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
+export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
 	translator: "translator",
@@ -10957,10 +14072,10 @@ export const GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
 	distributor: "distributor",
 } as const;
 
-export type GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum =
-	(typeof GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum];
+export type PostApiFeedQueryStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsRoleEnum];
 
-export const GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum = {
+export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -10981,18 +14096,19 @@ export const GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnu
 	realm_rule: "realm_rule",
 } as const;
 
-export type GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
-	(typeof GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
+export type PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
-export const GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
-} as const;
+export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
 
-export type GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
-	(typeof GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+export type PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
 
-export const GetApiFeedStatus200ItemsPostKindEnum = {
+export const PostApiFeedQueryStatus200ItemsPostKindEnum = {
 	post: "post",
 	reply: "reply",
 	excerpt: "excerpt",
@@ -11002,13 +14118,13 @@ export const GetApiFeedStatus200ItemsPostKindEnum = {
 	picture: "picture",
 } as const;
 
-export type GetApiFeedStatus200ItemsPostKindEnum =
-	(typeof GetApiFeedStatus200ItemsPostKindEnum)[keyof typeof GetApiFeedStatus200ItemsPostKindEnum];
+export type PostApiFeedQueryStatus200ItemsPostKindEnum =
+	(typeof PostApiFeedQueryStatus200ItemsPostKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsPostKindEnum];
 
 /**
  * @type object
  */
-export type GetApiFeedStatus200 = {
+export type PostApiFeedQueryStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -11035,7 +14151,7 @@ export type GetApiFeedStatus200 = {
 					 * @default 'author'
 					 * @type string
 					 */
-					role: GetApiFeedStatus200ItemsAttributionsRoleEnum;
+					role: PostApiFeedQueryStatus200ItemsAttributionsRoleEnum;
 					/**
 					 * @description
 					 * Format: `fractional-position`
@@ -11058,7 +14174,7 @@ export type GetApiFeedStatus200 = {
 						 * @default 'slug_namespace'
 						 * @type string
 						 */
-						kind: GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+						kind: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum;
 						slugAddress:
 							| ({
 									/**
@@ -11133,7 +14249,7 @@ export type GetApiFeedStatus200 = {
 														/**
 														 * @type string
 														 */
-														prefix: GetApiFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+														prefix: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 														/**
 														 * @maxLength 128
 														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -11233,7 +14349,7 @@ export type GetApiFeedStatus200 = {
 													/**
 													 * @type string
 													 */
-													prefix: GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+													prefix: PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum;
 													/**
 													 * @maxLength 128
 													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -11268,7 +14384,8 @@ export type GetApiFeedStatus200 = {
 					downvote: string | number;
 				};
 				viewerReaction: (string | null) | null;
-				recommendationReason: (GetApiFeedStatus200ItemsRecommendationReason | null) | null;
+				recommendationReason:
+					(PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
 				tracking:
 					| ({
 							/**
@@ -11281,7 +14398,7 @@ export type GetApiFeedStatus200 = {
 							 * @default 'home_feed'
 							 * @type string
 							 */
-							surface: GetApiFeedStatus200ItemsTrackingSurfaceEnum;
+							surface: PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum;
 							position: string | number;
 							/**
 							 * @minLength 1
@@ -11307,7 +14424,7 @@ export type GetApiFeedStatus200 = {
 				 * @default 'profile'
 				 * @type string
 				 */
-				unitKind: GetApiFeedStatus200ItemsUnitKindEnum;
+				unitKind: PostApiFeedQueryStatus200ItemsUnitKindEnum;
 				/**
 				 * @type null
 				 */
@@ -11356,7 +14473,7 @@ export type GetApiFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: GetApiFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiFeedQueryStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -11379,7 +14496,7 @@ export type GetApiFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum;
 								slugAddress:
 									| ({
 											/**
@@ -11454,7 +14571,7 @@ export type GetApiFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: GetApiFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -11554,7 +14671,7 @@ export type GetApiFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -11590,7 +14707,7 @@ export type GetApiFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							(GetApiFeedStatus200ItemsRecommendationReason | null) | null;
+							(PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
 						tracking:
 							| ({
 									/**
@@ -11603,7 +14720,7 @@ export type GetApiFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: GetApiFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -11798,7 +14915,7 @@ export type GetApiFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiFeedQueryStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -11821,7 +14938,7 @@ export type GetApiFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											slugAddress:
 												| ({
 														/**
@@ -11896,7 +15013,7 @@ export type GetApiFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -11954,7 +15071,7 @@ export type GetApiFeedStatus200 = {
 						 * @default 'post'
 						 * @type string
 						 */
-						postKind: GetApiFeedStatus200ItemsPostKindEnum;
+						postKind: PostApiFeedQueryStatus200ItemsPostKindEnum;
 				  }
 				| {
 						/**
@@ -11978,7 +15095,7 @@ export type GetApiFeedStatus200 = {
 							 * @default 'author'
 							 * @type string
 							 */
-							role: GetApiFeedStatus200ItemsAttributionsRoleEnum;
+							role: PostApiFeedQueryStatus200ItemsAttributionsRoleEnum;
 							/**
 							 * @description
 							 * Format: `fractional-position`
@@ -12001,7 +15118,7 @@ export type GetApiFeedStatus200 = {
 								 * @default 'slug_namespace'
 								 * @type string
 								 */
-								kind: GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								kind: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum;
 								slugAddress:
 									| ({
 											/**
@@ -12076,7 +15193,7 @@ export type GetApiFeedStatus200 = {
 																/**
 																 * @type string
 																 */
-																prefix: GetApiFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																prefix: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
 																/**
 																 * @maxLength 128
 																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -12176,7 +15293,7 @@ export type GetApiFeedStatus200 = {
 															/**
 															 * @type string
 															 */
-															prefix: GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															prefix: PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum;
 															/**
 															 * @maxLength 128
 															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -12212,7 +15329,7 @@ export type GetApiFeedStatus200 = {
 						};
 						viewerReaction: (string | null) | null;
 						recommendationReason:
-							(GetApiFeedStatus200ItemsRecommendationReason | null) | null;
+							(PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
 						tracking:
 							| ({
 									/**
@@ -12225,7 +15342,7 @@ export type GetApiFeedStatus200 = {
 									 * @default 'home_feed'
 									 * @type string
 									 */
-									surface: GetApiFeedStatus200ItemsTrackingSurfaceEnum;
+									surface: PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum;
 									position: string | number;
 									/**
 									 * @minLength 1
@@ -12420,7 +15537,7 @@ export type GetApiFeedStatus200 = {
 										 * @default 'author'
 										 * @type string
 										 */
-										role: GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										role: PostApiFeedQueryStatus200ItemsReplyContextAttributionsRoleEnum;
 										/**
 										 * @description
 										 * Format: `fractional-position`
@@ -12443,7 +15560,7 @@ export type GetApiFeedStatus200 = {
 											 * @default 'slug_namespace'
 											 * @type string
 											 */
-											kind: GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											kind: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
 											slugAddress:
 												| ({
 														/**
@@ -12518,7 +15635,7 @@ export type GetApiFeedStatus200 = {
 																			/**
 																			 * @type string
 																			 */
-																			prefix: GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			prefix: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
 																			/**
 																			 * @maxLength 128
 																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -12600,69 +15717,114 @@ export type GetApiFeedStatus200 = {
 	nextCursor: (string | null) | null;
 };
 
+export const PostApiFeedQueryStatus400ErrorCodeEnum = {
+	InvalidFeedCursor: "InvalidFeedCursor",
+	InvalidFeedFilter: "InvalidFeedFilter",
+} as const;
+
+export type PostApiFeedQueryStatus400ErrorCodeEnum =
+	(typeof PostApiFeedQueryStatus400ErrorCodeEnum)[keyof typeof PostApiFeedQueryStatus400ErrorCodeEnum];
+
+export type PostApiFeedQueryStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidFeedCursor'
+				 * @type string
+				 */
+				code: PostApiFeedQueryStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
 /**
  * @type object
  */
-export type GetApiFeedStatus400 = {
+export type PostApiFeedQueryStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiFeedQueryStatus500 = InternalError;
+
+export const PostApiFeedQueryRequestSortEnum = {
+	best: "best",
+	hot: "hot",
+	new: "new",
+	top: "top",
+	rising: "rising",
+} as const;
+
+export type PostApiFeedQueryRequestSortEnum =
+	(typeof PostApiFeedQueryRequestSortEnum)[keyof typeof PostApiFeedQueryRequestSortEnum];
+
+/**
+ * @type object
+ */
+export type PostApiFeedQueryBody = {
 	/**
-	 * @type object
+	 * @type object | undefined
 	 */
-	error: {
-		/**
-		 * @default 'InvalidFeedCursor'
-		 * @type string
-		 */
-		code: "InvalidFeedCursor";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
+	filter?: UnitFilter;
 	/**
-	 * @type string
+	 * @default 'best'
+	 * @type string | undefined
 	 */
-	requestId: string;
+	sort?: PostApiFeedQueryRequestSortEnum;
+	/**
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 20
+	 */
+	limit?: string | number;
 };
 
 /**
  * @type object
  */
-export type GetApiFeedStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiFeedStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiFeedOptions = {
-	body?: never;
+export type PostApiFeedQueryOptions = {
+	body: PostApiFeedQueryBody;
 	path?: never;
-	query?: GetApiFeedQuery;
+	query?: never;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiFeedResponses = {
-	"200": GetApiFeedStatus200;
-	"400": GetApiFeedStatus400;
-	"422": GetApiFeedStatus422;
-	"500": GetApiFeedStatus500;
+export type PostApiFeedQueryResponses = {
+	"200": PostApiFeedQueryStatus200;
+	"400": PostApiFeedQueryStatus400;
+	"422": PostApiFeedQueryStatus422;
+	"500": PostApiFeedQueryStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiFeedResponse =
-	GetApiFeedStatus200 | GetApiFeedStatus400 | GetApiFeedStatus422 | GetApiFeedStatus500;
+export type PostApiFeedQueryResponse =
+	| PostApiFeedQueryStatus200
+	| PostApiFeedQueryStatus400
+	| PostApiFeedQueryStatus422
+	| PostApiFeedQueryStatus500;
 
 /**
  * @type object
@@ -23914,13 +27076,13 @@ export type GetApiZonesByZoneIdStatus200 = {
 			| null;
 	}[];
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	boundaryDocument: unknown;
+	boundaryDocument: ZoneBoundaryDocument;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	themeDocument: unknown;
+	themeDocument: ZoneThemeDocument;
 	startsAt: (string | null) | null;
 	endsAt: (string | null) | null;
 	/**
@@ -24277,13 +27439,13 @@ export type PatchApiZonesByZoneIdStatus200 = {
 			| null;
 	}[];
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	boundaryDocument: unknown;
+	boundaryDocument: ZoneBoundaryDocument;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	themeDocument: unknown;
+	themeDocument: ZoneThemeDocument;
 	startsAt: (string | null) | null;
 	endsAt: (string | null) | null;
 	/**
@@ -24309,6 +27471,14 @@ export type PatchApiZonesByZoneIdStatus200 = {
 	updatedAt: string;
 };
 
+export const PatchApiZonesByZoneIdStatus400ErrorCodeEnum = {
+	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus400ErrorCodeEnum =
+	(typeof PatchApiZonesByZoneIdStatus400ErrorCodeEnum)[keyof typeof PatchApiZonesByZoneIdStatus400ErrorCodeEnum];
+
 export type PatchApiZonesByZoneIdStatus400 =
 	| {
 			/**
@@ -24316,10 +27486,10 @@ export type PatchApiZonesByZoneIdStatus400 =
 			 */
 			error: {
 				/**
-				 * @default 'ZoneTimeRangeInvalid'
+				 * @default 'ZoneDocumentInvalid'
 				 * @type string
 				 */
-				code: "ZoneTimeRangeInvalid";
+				code: PatchApiZonesByZoneIdStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -24674,13 +27844,13 @@ export type PatchApiZonesByZoneIdBody = {
 		coverAssetId?: (string | null) | null;
 	};
 	/**
-	 * @type unknown | undefined
+	 * @type object | undefined
 	 */
-	boundaryDocument?: unknown;
+	boundaryDocument?: ZoneBoundaryDocument;
 	/**
-	 * @type unknown | undefined
+	 * @type object | undefined
 	 */
-	themeDocument?: unknown;
+	themeDocument?: ZoneThemeDocument;
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
 };
@@ -25044,13 +28214,13 @@ export type GetZoneRenderProjectionStatus200 = {
 				| null;
 		}[];
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		boundaryDocument: unknown;
+		boundaryDocument: ZoneBoundaryDocument;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		themeDocument: unknown;
+		themeDocument: ZoneThemeDocument;
 		startsAt: (string | null) | null;
 		endsAt: (string | null) | null;
 		/**
@@ -25091,9 +28261,9 @@ export type GetZoneRenderProjectionStatus200 = {
 				zoneId: string;
 				slug: (string | null) | null;
 				/**
-				 * @type unknown
+				 * @type object
 				 */
-				document: unknown;
+				document: UnitReferencedBlockDocument;
 				/**
 				 * @type boolean
 				 */
@@ -25144,9 +28314,9 @@ export type GetZoneRenderProjectionStatus200 = {
 					 */
 					title: string;
 					/**
-					 * @type unknown
+					 * @type object
 					 */
-					document: unknown;
+					document: UnitReferencedBlockDocument;
 					/**
 					 * @default 'draft'
 					 * @type string
@@ -25186,9 +28356,9 @@ export type GetZoneRenderProjectionStatus200 = {
 				 */
 				surface: "main";
 				/**
-				 * @type unknown
+				 * @type object
 				 */
-				document: unknown;
+				document: DockDocument;
 		  } | null)
 		| null;
 	/**
@@ -25208,9 +28378,9 @@ export type GetZoneRenderProjectionStatus200 = {
 		 */
 		zoneId: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: NavigationDocument;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -25456,9 +28626,9 @@ export type GetZoneRenderProjectionStatus200 = {
 				  } | null)
 				| null;
 			/**
-			 * @type unknown
+			 * @type object
 			 */
-			body: unknown;
+			body: PortableTextDocument;
 		}[];
 		/**
 		 * @type array
@@ -25612,9 +28782,9 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 		zoneId: string;
 		slug: (string | null) | null;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: UnitReferencedBlockDocument;
 		/**
 		 * @type boolean
 		 */
@@ -25671,9 +28841,9 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 			 */
 			title: string;
 			/**
-			 * @type unknown
+			 * @type object
 			 */
-			document: unknown;
+			document: UnitReferencedBlockDocument;
 			/**
 			 * @default 'draft'
 			 * @type string
@@ -25839,9 +29009,9 @@ export type PostApiZonesByZoneIdPagesStatus200 = {
 	zoneId: string;
 	slug: (string | null) | null;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: UnitReferencedBlockDocument;
 	/**
 	 * @type boolean
 	 */
@@ -25898,9 +29068,9 @@ export type PostApiZonesByZoneIdPagesStatus200 = {
 		 */
 		title: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: UnitReferencedBlockDocument;
 		/**
 		 * @default 'draft'
 		 * @type string
@@ -26132,9 +29302,9 @@ export type PostApiZonesByZoneIdPagesBody = {
 		 */
 		title: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: UnitReferencedBlockDocument;
 	};
 	/**
 	 * @description
@@ -26242,9 +29412,9 @@ export type GetApiZonesByZoneIdPagesByPageIdStatus200 = {
 	zoneId: string;
 	slug: (string | null) | null;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: UnitReferencedBlockDocument;
 	/**
 	 * @type boolean
 	 */
@@ -26301,9 +29471,9 @@ export type GetApiZonesByZoneIdPagesByPageIdStatus200 = {
 		 */
 		title: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: UnitReferencedBlockDocument;
 		/**
 		 * @default 'draft'
 		 * @type string
@@ -26466,9 +29636,9 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus200 = {
 	zoneId: string;
 	slug: (string | null) | null;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: UnitReferencedBlockDocument;
 	/**
 	 * @type boolean
 	 */
@@ -26525,9 +29695,9 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus200 = {
 		 */
 		title: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: UnitReferencedBlockDocument;
 		/**
 		 * @default 'draft'
 		 * @type string
@@ -26759,9 +29929,9 @@ export type PutApiZonesByZoneIdPagesByPageIdBody = {
 		 */
 		title: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: UnitReferencedBlockDocument;
 	};
 	/**
 	 * @description
@@ -27061,9 +30231,9 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200 = {
 	zoneId: string;
 	slug: (string | null) | null;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: UnitReferencedBlockDocument;
 	/**
 	 * @type boolean
 	 */
@@ -27120,9 +30290,9 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200 = {
 		 */
 		title: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: UnitReferencedBlockDocument;
 		/**
 		 * @default 'draft'
 		 * @type string
@@ -27620,9 +30790,9 @@ export type GetApiZonesByZoneIdNavigationStatus200 = {
 		 */
 		zoneId: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: NavigationDocument;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -27740,9 +30910,9 @@ export type PostApiZonesByZoneIdNavigationStatus200 = {
 	 */
 	zoneId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -27893,9 +31063,9 @@ export type PostApiZonesByZoneIdNavigationStatus500 = InternalError;
  */
 export type PostApiZonesByZoneIdNavigationBody = {
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 };
 
 /**
@@ -27968,9 +31138,9 @@ export type GetApiZonesByZoneIdNavigationByNavigationIdStatus200 = {
 	 */
 	zoneId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -28101,9 +31271,9 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus200 = {
 	 */
 	zoneId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -28290,9 +31460,9 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus500 = InternalError
  */
 export type PutApiZonesByZoneIdNavigationByNavigationIdBody = {
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -28941,6 +32111,14 @@ export type PostApiZonesStatus200 = {
 	id: string;
 };
 
+export const PostApiZonesStatus400ErrorCodeEnum = {
+	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+} as const;
+
+export type PostApiZonesStatus400ErrorCodeEnum =
+	(typeof PostApiZonesStatus400ErrorCodeEnum)[keyof typeof PostApiZonesStatus400ErrorCodeEnum];
+
 export type PostApiZonesStatus400 =
 	| {
 			/**
@@ -28948,10 +32126,10 @@ export type PostApiZonesStatus400 =
 			 */
 			error: {
 				/**
-				 * @default 'ZoneTimeRangeInvalid'
+				 * @default 'ZoneDocumentInvalid'
 				 * @type string
 				 */
-				code: "ZoneTimeRangeInvalid";
+				code: PostApiZonesStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -29262,13 +32440,13 @@ export type PostApiZonesBody = {
 		coverAssetId?: (string | null) | null;
 	};
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	boundaryDocument: unknown;
+	boundaryDocument: ZoneBoundaryDocument;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	themeDocument: unknown;
+	themeDocument: ZoneThemeDocument;
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
 };
@@ -30178,9 +33356,9 @@ export type GetApiUnitsByIdByUnitIdDocksStatus200 = {
 		 */
 		latestRevisionId: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: DockDocument;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -30352,9 +33530,9 @@ export type GetApiUnitsByIdByUnitIdDocksByKindStatus200 = {
 	 */
 	latestRevisionId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: DockDocument;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -30533,9 +33711,9 @@ export type PutApiUnitsByIdByUnitIdDocksByKindStatus200 = {
 	 */
 	latestRevisionId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: DockDocument;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -30716,9 +33894,9 @@ export type PutApiUnitsByIdByUnitIdDocksByKindStatus500 = InternalError;
  */
 export type PutApiUnitsByIdByUnitIdDocksByKindBody = {
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: DockDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -80497,9 +83675,9 @@ export type GetApiRealmsByRealmIdNavigationStatus200 = {
 		 */
 		realmId: string;
 		/**
-		 * @type unknown
+		 * @type object
 		 */
-		document: unknown;
+		document: NavigationDocument;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -80617,9 +83795,9 @@ export type PostApiRealmsByRealmIdNavigationStatus200 = {
 	 */
 	realmId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -80770,9 +83948,9 @@ export type PostApiRealmsByRealmIdNavigationStatus500 = InternalError;
  */
 export type PostApiRealmsByRealmIdNavigationBody = {
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 };
 
 /**
@@ -80845,9 +84023,9 @@ export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus200 = {
 	 */
 	realmId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -80978,9 +84156,9 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus200 = {
 	 */
 	realmId: string;
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -81167,9 +84345,9 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus500 = InternalErr
  */
 export type PutApiRealmsByRealmIdNavigationByNavigationIdBody = {
 	/**
-	 * @type unknown
+	 * @type object
 	 */
-	document: unknown;
+	document: NavigationDocument;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -81439,6 +84617,8 @@ export const GetApiSearchFeaturesByTemplateTemplate = {
 	book: "book",
 	media: "media",
 	software: "software",
+	realm: "realm",
+	zone: "zone",
 } as const;
 
 export type GetApiSearchFeaturesByTemplateTemplate =
@@ -81454,1265 +84634,10 @@ export type GetApiSearchFeaturesByTemplatePath = {
 	template: GetApiSearchFeaturesByTemplateTemplate;
 };
 
-export const GetApiSearchFeaturesByTemplateStatus200DocumentTemplateIdEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentTemplateIdEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentTemplateIdEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentTemplateIdEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentCategoriesEnum = {
-	units: "units",
-	users: "users",
-	entity: "entity",
-	tags: "tags",
-	"tag-structures": "tag-structures",
-	posts: "posts",
-	realms: "realms",
-	collections: "collections",
-	reviews: "reviews",
-	polls: "polls",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentCategoriesEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentCategoriesEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentCategoriesEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentModesAvailableEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentModesAvailableEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentModesAvailableEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentModesAvailableEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentModesDefaultEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentModesDefaultEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentModesDefaultEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentModesDefaultEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentControlsFieldEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentControlsFieldEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentControlsFieldEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentControlsDisclosureEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentControlsDisclosureEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentControlsDisclosureEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentControlsModesEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentControlsModesEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentControlsModesEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentSectionsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentSectionsDisclosureEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentSectionsDisclosureEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentSectionsDisclosureEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentSortDefaultEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentSortDefaultEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentSortDefaultEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentSortDefaultEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200DocumentSortOptionsEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200DocumentSortOptionsEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200DocumentSortOptionsEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200DocumentSortOptionsEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200ControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200ControlsFieldEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200ControlsFieldEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200ControlsFieldEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200ControlsComponentEnum = {
-	select: "select",
-	"multi-select": "multi-select",
-	toggle: "toggle",
-	"date-range": "date-range",
-	"value-range": "value-range",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200ControlsComponentEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200ControlsComponentEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200ControlsComponentEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200ControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200ControlsModesEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200ControlsModesEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200ControlsModesEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200ControlsOperatorsEnum = {
-	equals: "equals",
-	"not-equals": "not-equals",
-	"any-of": "any-of",
-	"all-of": "all-of",
-	"none-of": "none-of",
-	range: "range",
-	exists: "exists",
-	matches: "matches",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200ControlsOperatorsEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200ControlsOperatorsEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200ControlsOperatorsEnum];
-
-export const GetApiSearchFeaturesByTemplateStatus200ControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type GetApiSearchFeaturesByTemplateStatus200ControlsDisclosureEnum =
-	(typeof GetApiSearchFeaturesByTemplateStatus200ControlsDisclosureEnum)[keyof typeof GetApiSearchFeaturesByTemplateStatus200ControlsDisclosureEnum];
-
 /**
  * @type object
  */
-export type GetApiSearchFeaturesByTemplateStatus200 = {
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type number
-		 */
-		version: 1;
-		/**
-		 * @type object
-		 */
-		template: {
-			/**
-			 * @type string
-			 */
-			id: GetApiSearchFeaturesByTemplateStatus200DocumentTemplateIdEnum;
-			/**
-			 * @type number
-			 */
-			version: 1;
-		};
-		/**
-		 * @type array
-		 */
-		categories: GetApiSearchFeaturesByTemplateStatus200DocumentCategoriesEnum[];
-		/**
-		 * @type object
-		 */
-		modes: {
-			/**
-			 * @type array
-			 */
-			available: GetApiSearchFeaturesByTemplateStatus200DocumentModesAvailableEnum[];
-			/**
-			 * @type string
-			 */
-			default: GetApiSearchFeaturesByTemplateStatus200DocumentModesDefaultEnum;
-		};
-		/**
-		 * @type object
-		 */
-		query: {
-			/**
-			 * @type boolean
-			 */
-			enabled: boolean;
-			/**
-			 * @default false
-			 * @type boolean | undefined
-			 */
-			required?: boolean;
-			/**
-			 * @maxLength 500
-			 * @type string | undefined
-			 */
-			initial?: string;
-		};
-		/**
-		 * @type array
-		 */
-		constraints: (
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "equals";
-					value: string | number | boolean;
-			  }
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "not-equals";
-					value: string | number | boolean;
-			  }
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					operator: "any-of" | "all-of" | "none-of";
-					/**
-					 * @type array
-					 */
-					values: (string | number | boolean)[];
-			  }
-			| (
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "range";
-							lower: string | number | boolean;
-							upper?: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "range";
-							lower?: string | number | boolean;
-							upper: string | number | boolean;
-					  }
-			  )
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "exists";
-					/**
-					 * @type boolean
-					 */
-					value: boolean;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					field: "realm-tag-vote";
-					/**
-					 * @type string
-					 */
-					operator: "matches";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					realmId: string;
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					tagId: string;
-					score?:
-						| {
-								/**
-								 * @type integer
-								 */
-								lower: number;
-								/**
-								 * @type integer | undefined
-								 */
-								upper?: number;
-						  }
-						| {
-								/**
-								 * @type integer | undefined
-								 */
-								lower?: number;
-								/**
-								 * @type integer
-								 */
-								upper: number;
-						  };
-					voteCount?:
-						| {
-								/**
-								 * @minLength 0
-								 * @type integer
-								 */
-								lower: number;
-								/**
-								 * @minLength 0
-								 * @type integer | undefined
-								 */
-								upper?: number;
-						  }
-						| {
-								/**
-								 * @minLength 0
-								 * @type integer | undefined
-								 */
-								lower?: number;
-								/**
-								 * @minLength 0
-								 * @type integer
-								 */
-								upper: number;
-						  };
-			  }
-		)[];
-		/**
-		 * @type array
-		 */
-		defaults: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			controlKey: string;
-			filter:
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "not-equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						operator: "any-of" | "all-of" | "none-of";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| (
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower: string | number | boolean;
-								upper?: string | number | boolean;
-						  }
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower?: string | number | boolean;
-								upper: string | number | boolean;
-						  }
-				  )
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "exists";
-						/**
-						 * @type boolean
-						 */
-						value: boolean;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						field: "realm-tag-vote";
-						/**
-						 * @type string
-						 */
-						operator: "matches";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						realmId: string;
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						tagId: string;
-						score?:
-							| {
-									/**
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @type integer
-									 */
-									upper: number;
-							  };
-						voteCount?:
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									upper: number;
-							  };
-				  };
-		}[];
-		/**
-		 * @type array
-		 */
-		controls: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @type string
-			 */
-			field: GetApiSearchFeaturesByTemplateStatus200DocumentControlsFieldEnum;
-			/**
-			 * @type boolean
-			 */
-			enabled: boolean;
-			/**
-			 * @type string
-			 */
-			disclosure: GetApiSearchFeaturesByTemplateStatus200DocumentControlsDisclosureEnum;
-			/**
-			 * @type array
-			 */
-			modes: GetApiSearchFeaturesByTemplateStatus200DocumentControlsModesEnum[];
-			/**
-			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-			 * @type string | undefined
-			 */
-			labelUnitId?: string;
-			optionPolicy?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "all";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "include";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "exclude";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  };
-			/**
-			 * @default false
-			 * @type boolean | undefined
-			 */
-			required?: boolean;
-		}[];
-		/**
-		 * @type array
-		 */
-		sections: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-			 * @type string | undefined
-			 */
-			labelUnitId?: string;
-			/**
-			 * @type string
-			 */
-			disclosure: GetApiSearchFeaturesByTemplateStatus200DocumentSectionsDisclosureEnum;
-			/**
-			 * @type array
-			 */
-			controls: string[];
-		}[];
-		/**
-		 * @type object
-		 */
-		sort: {
-			/**
-			 * @type string
-			 */
-			default: GetApiSearchFeaturesByTemplateStatus200DocumentSortDefaultEnum;
-			/**
-			 * @type array
-			 */
-			options: GetApiSearchFeaturesByTemplateStatus200DocumentSortOptionsEnum[];
-		};
-		/**
-		 * @type object
-		 */
-		results: {
-			/**
-			 * @minLength 1
-			 * @maxLength 50
-			 * @type integer
-			 */
-			pageSize: number;
-			/**
-			 * @minLength 1
-			 * @maxLength 100
-			 * @type integer
-			 */
-			maxPageSize: number;
-			/**
-			 * @minLength 1
-			 * @maxLength 100000
-			 * @type integer
-			 */
-			maxResultWindow: number;
-			/**
-			 * @type array
-			 */
-			facets: string[];
-		};
-	};
-	/**
-	 * @type array
-	 */
-	controls: {
-		/**
-		 * @minLength 1
-		 * @maxLength 64
-		 * @pattern ^[a-z][a-z0-9-]*$
-		 * @type string
-		 */
-		key: string;
-		/**
-		 * @type string
-		 */
-		field: GetApiSearchFeaturesByTemplateStatus200ControlsFieldEnum;
-		/**
-		 * @type string
-		 */
-		component: GetApiSearchFeaturesByTemplateStatus200ControlsComponentEnum;
-		/**
-		 * @type array
-		 */
-		modes: GetApiSearchFeaturesByTemplateStatus200ControlsModesEnum[];
-		/**
-		 * @type array
-		 */
-		operators: GetApiSearchFeaturesByTemplateStatus200ControlsOperatorsEnum[];
-		optionSource?:
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "facet";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "static";
-					/**
-					 * @type array
-					 */
-					options: {
-						value: string | number | boolean;
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string | undefined
-						 */
-						labelUnitId?: string;
-					}[];
-			  };
-		optionPolicy?:
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "all";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "include";
-					/**
-					 * @type array
-					 */
-					values: (string | number | boolean)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "exclude";
-					/**
-					 * @type array
-					 */
-					values: (string | number | boolean)[];
-			  };
-		/**
-		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-		 * @type string | undefined
-		 */
-		labelUnitId?: string;
-		/**
-		 * @default false
-		 * @type boolean | undefined
-		 */
-		required?: boolean;
-		/**
-		 * @type string
-		 */
-		disclosure: GetApiSearchFeaturesByTemplateStatus200ControlsDisclosureEnum;
-		/**
-		 * @minLength 1
-		 * @maxLength 64
-		 * @pattern ^[a-z][a-z0-9-]*$
-		 * @type string | undefined
-		 */
-		sectionKey?: string;
-	}[];
-};
+export type GetApiSearchFeaturesByTemplateStatus200 = SearchFeatureDefinitionV1;
 
 /**
  * @type object
@@ -82756,6 +84681,8 @@ export const PostApiSearchFeaturesByTemplateExecuteTemplate = {
 	book: "book",
 	media: "media",
 	software: "software",
+	realm: "realm",
+	zone: "zone",
 } as const;
 
 export type PostApiSearchFeaturesByTemplateExecuteTemplate =
@@ -84428,6 +86355,8 @@ export const PostApiSearchFeaturesByTemplateFeedTemplate = {
 	book: "book",
 	media: "media",
 	software: "software",
+	realm: "realm",
+	zone: "zone",
 } as const;
 
 export type PostApiSearchFeaturesByTemplateFeedTemplate =
@@ -87652,244 +89581,6 @@ export type GetApiSearchZonesByZoneIdFeaturePath = {
 	zoneId: string;
 };
 
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum = {
-	units: "units",
-	users: "users",
-	entity: "entity",
-	tags: "tags",
-	"tag-structures": "tag-structures",
-	posts: "posts",
-	realms: "realms",
-	collections: "collections",
-	reviews: "reviews",
-	polls: "polls",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum = {
-	select: "select",
-	"multi-select": "multi-select",
-	toggle: "toggle",
-	"date-range": "date-range",
-	"value-range": "value-range",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum = {
-	equals: "equals",
-	"not-equals": "not-equals",
-	"any-of": "any-of",
-	"all-of": "all-of",
-	"none-of": "none-of",
-	range: "range",
-	exists: "exists",
-	matches: "matches",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum];
-
-export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum];
-
 /**
  * @type object
  */
@@ -87913,1024 +89604,7 @@ export type GetApiSearchZonesByZoneIdFeatureStatus200 = {
 	/**
 	 * @type object
 	 */
-	definition: {
-		/**
-		 * @type object
-		 */
-		document: {
-			/**
-			 * @type number
-			 */
-			version: 1;
-			/**
-			 * @type object
-			 */
-			template: {
-				/**
-				 * @type string
-				 */
-				id: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum;
-				/**
-				 * @type number
-				 */
-				version: 1;
-			};
-			/**
-			 * @type array
-			 */
-			categories: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum[];
-			/**
-			 * @type object
-			 */
-			modes: {
-				/**
-				 * @type array
-				 */
-				available: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum[];
-				/**
-				 * @type string
-				 */
-				default: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum;
-			};
-			/**
-			 * @type object
-			 */
-			query: {
-				/**
-				 * @type boolean
-				 */
-				enabled: boolean;
-				/**
-				 * @default false
-				 * @type boolean | undefined
-				 */
-				required?: boolean;
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				initial?: string;
-			};
-			/**
-			 * @type array
-			 */
-			constraints: (
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "not-equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						operator: "any-of" | "all-of" | "none-of";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| (
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower: string | number | boolean;
-								upper?: string | number | boolean;
-						  }
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower?: string | number | boolean;
-								upper: string | number | boolean;
-						  }
-				  )
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "exists";
-						/**
-						 * @type boolean
-						 */
-						value: boolean;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						field: "realm-tag-vote";
-						/**
-						 * @type string
-						 */
-						operator: "matches";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						realmId: string;
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						tagId: string;
-						score?:
-							| {
-									/**
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @type integer
-									 */
-									upper: number;
-							  };
-						voteCount?:
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									upper: number;
-							  };
-				  }
-			)[];
-			/**
-			 * @type array
-			 */
-			defaults: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				controlKey: string;
-				filter:
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "equals";
-							value: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "not-equals";
-							value: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							operator: "any-of" | "all-of" | "none-of";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  }
-					| (
-							| {
-									field:
-										| "category"
-										| "kind"
-										| "language"
-										| "content-rating"
-										| "ai-disclosure"
-										| "license"
-										| "tag"
-										| "credit"
-										| "realm"
-										| "zone"
-										| "subject"
-										| "target"
-										| "root"
-										| "parent"
-										| "owner"
-										| "join-policy"
-										| "multiple"
-										| "results-visibility"
-										| "closed"
-										| "created-at"
-										| "updated-at"
-										| "published-at"
-										| "closes-at"
-										| "catalog-licensed"
-										| "catalog-release-date"
-										| "book-isbn13"
-										| "book-publication-date"
-										| "book-page-count"
-										| "book-word-count"
-										| "book-format"
-										| "media-kind"
-										| "media-release-date"
-										| "media-runtime-minutes"
-										| "media-episode-count"
-										| "media-season-count"
-										| "software-release-date"
-										| "software-version-label"
-										| "software-platform"
-										| "software-requirement-tier";
-									/**
-									 * @type string
-									 */
-									operator: "range";
-									lower: string | number | boolean;
-									upper?: string | number | boolean;
-							  }
-							| {
-									field:
-										| "category"
-										| "kind"
-										| "language"
-										| "content-rating"
-										| "ai-disclosure"
-										| "license"
-										| "tag"
-										| "credit"
-										| "realm"
-										| "zone"
-										| "subject"
-										| "target"
-										| "root"
-										| "parent"
-										| "owner"
-										| "join-policy"
-										| "multiple"
-										| "results-visibility"
-										| "closed"
-										| "created-at"
-										| "updated-at"
-										| "published-at"
-										| "closes-at"
-										| "catalog-licensed"
-										| "catalog-release-date"
-										| "book-isbn13"
-										| "book-publication-date"
-										| "book-page-count"
-										| "book-word-count"
-										| "book-format"
-										| "media-kind"
-										| "media-release-date"
-										| "media-runtime-minutes"
-										| "media-episode-count"
-										| "media-season-count"
-										| "software-release-date"
-										| "software-version-label"
-										| "software-platform"
-										| "software-requirement-tier";
-									/**
-									 * @type string
-									 */
-									operator: "range";
-									lower?: string | number | boolean;
-									upper: string | number | boolean;
-							  }
-					  )
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "exists";
-							/**
-							 * @type boolean
-							 */
-							value: boolean;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							field: "realm-tag-vote";
-							/**
-							 * @type string
-							 */
-							operator: "matches";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							realmId: string;
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							tagId: string;
-							score?:
-								| {
-										/**
-										 * @type integer
-										 */
-										lower: number;
-										/**
-										 * @type integer | undefined
-										 */
-										upper?: number;
-								  }
-								| {
-										/**
-										 * @type integer | undefined
-										 */
-										lower?: number;
-										/**
-										 * @type integer
-										 */
-										upper: number;
-								  };
-							voteCount?:
-								| {
-										/**
-										 * @minLength 0
-										 * @type integer
-										 */
-										lower: number;
-										/**
-										 * @minLength 0
-										 * @type integer | undefined
-										 */
-										upper?: number;
-								  }
-								| {
-										/**
-										 * @minLength 0
-										 * @type integer | undefined
-										 */
-										lower?: number;
-										/**
-										 * @minLength 0
-										 * @type integer
-										 */
-										upper: number;
-								  };
-					  };
-			}[];
-			/**
-			 * @type array
-			 */
-			controls: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				key: string;
-				/**
-				 * @type string
-				 */
-				field: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum;
-				/**
-				 * @type boolean
-				 */
-				enabled: boolean;
-				/**
-				 * @type string
-				 */
-				disclosure: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum;
-				/**
-				 * @type array
-				 */
-				modes: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum[];
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string | undefined
-				 */
-				labelUnitId?: string;
-				optionPolicy?:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "all";
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "include";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "exclude";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  };
-				/**
-				 * @default false
-				 * @type boolean | undefined
-				 */
-				required?: boolean;
-			}[];
-			/**
-			 * @type array
-			 */
-			sections: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				key: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string | undefined
-				 */
-				labelUnitId?: string;
-				/**
-				 * @type string
-				 */
-				disclosure: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum;
-				/**
-				 * @type array
-				 */
-				controls: string[];
-			}[];
-			/**
-			 * @type object
-			 */
-			sort: {
-				/**
-				 * @type string
-				 */
-				default: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum;
-				/**
-				 * @type array
-				 */
-				options: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum[];
-			};
-			/**
-			 * @type object
-			 */
-			results: {
-				/**
-				 * @minLength 1
-				 * @maxLength 50
-				 * @type integer
-				 */
-				pageSize: number;
-				/**
-				 * @minLength 1
-				 * @maxLength 100
-				 * @type integer
-				 */
-				maxPageSize: number;
-				/**
-				 * @minLength 1
-				 * @maxLength 100000
-				 * @type integer
-				 */
-				maxResultWindow: number;
-				/**
-				 * @type array
-				 */
-				facets: string[];
-			};
-		};
-		/**
-		 * @type array
-		 */
-		controls: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @type string
-			 */
-			field: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum;
-			/**
-			 * @type string
-			 */
-			component: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum;
-			/**
-			 * @type array
-			 */
-			modes: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum[];
-			/**
-			 * @type array
-			 */
-			operators: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum[];
-			optionSource?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "facet";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "static";
-						/**
-						 * @type array
-						 */
-						options: {
-							value: string | number | boolean;
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string | undefined
-							 */
-							labelUnitId?: string;
-						}[];
-				  };
-			optionPolicy?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "all";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "include";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "exclude";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  };
-			/**
-			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-			 * @type string | undefined
-			 */
-			labelUnitId?: string;
-			/**
-			 * @default false
-			 * @type boolean | undefined
-			 */
-			required?: boolean;
-			/**
-			 * @type string
-			 */
-			disclosure: GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum;
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string | undefined
-			 */
-			sectionKey?: string;
-		}[];
-	};
+	definition: SearchFeatureDefinitionV1;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -89076,244 +89750,6 @@ export type PutApiSearchZonesByZoneIdFeaturePath = {
 	zoneId: string;
 };
 
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum = {
-	units: "units",
-	users: "users",
-	entity: "entity",
-	tags: "tags",
-	"tag-structures": "tag-structures",
-	posts: "posts",
-	realms: "realms",
-	collections: "collections",
-	reviews: "reviews",
-	polls: "polls",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum = {
-	select: "select",
-	"multi-select": "multi-select",
-	toggle: "toggle",
-	"date-range": "date-range",
-	"value-range": "value-range",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum = {
-	equals: "equals",
-	"not-equals": "not-equals",
-	"any-of": "any-of",
-	"all-of": "all-of",
-	"none-of": "none-of",
-	range: "range",
-	exists: "exists",
-	matches: "matches",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum];
-
 /**
  * @type object
  */
@@ -89337,1024 +89773,7 @@ export type PutApiSearchZonesByZoneIdFeatureStatus200 = {
 	/**
 	 * @type object
 	 */
-	definition: {
-		/**
-		 * @type object
-		 */
-		document: {
-			/**
-			 * @type number
-			 */
-			version: 1;
-			/**
-			 * @type object
-			 */
-			template: {
-				/**
-				 * @type string
-				 */
-				id: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentTemplateIdEnum;
-				/**
-				 * @type number
-				 */
-				version: 1;
-			};
-			/**
-			 * @type array
-			 */
-			categories: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentCategoriesEnum[];
-			/**
-			 * @type object
-			 */
-			modes: {
-				/**
-				 * @type array
-				 */
-				available: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesAvailableEnum[];
-				/**
-				 * @type string
-				 */
-				default: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentModesDefaultEnum;
-			};
-			/**
-			 * @type object
-			 */
-			query: {
-				/**
-				 * @type boolean
-				 */
-				enabled: boolean;
-				/**
-				 * @default false
-				 * @type boolean | undefined
-				 */
-				required?: boolean;
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				initial?: string;
-			};
-			/**
-			 * @type array
-			 */
-			constraints: (
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "not-equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						operator: "any-of" | "all-of" | "none-of";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| (
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower: string | number | boolean;
-								upper?: string | number | boolean;
-						  }
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower?: string | number | boolean;
-								upper: string | number | boolean;
-						  }
-				  )
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "exists";
-						/**
-						 * @type boolean
-						 */
-						value: boolean;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						field: "realm-tag-vote";
-						/**
-						 * @type string
-						 */
-						operator: "matches";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						realmId: string;
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						tagId: string;
-						score?:
-							| {
-									/**
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @type integer
-									 */
-									upper: number;
-							  };
-						voteCount?:
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									upper: number;
-							  };
-				  }
-			)[];
-			/**
-			 * @type array
-			 */
-			defaults: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				controlKey: string;
-				filter:
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "equals";
-							value: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "not-equals";
-							value: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							operator: "any-of" | "all-of" | "none-of";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  }
-					| (
-							| {
-									field:
-										| "category"
-										| "kind"
-										| "language"
-										| "content-rating"
-										| "ai-disclosure"
-										| "license"
-										| "tag"
-										| "credit"
-										| "realm"
-										| "zone"
-										| "subject"
-										| "target"
-										| "root"
-										| "parent"
-										| "owner"
-										| "join-policy"
-										| "multiple"
-										| "results-visibility"
-										| "closed"
-										| "created-at"
-										| "updated-at"
-										| "published-at"
-										| "closes-at"
-										| "catalog-licensed"
-										| "catalog-release-date"
-										| "book-isbn13"
-										| "book-publication-date"
-										| "book-page-count"
-										| "book-word-count"
-										| "book-format"
-										| "media-kind"
-										| "media-release-date"
-										| "media-runtime-minutes"
-										| "media-episode-count"
-										| "media-season-count"
-										| "software-release-date"
-										| "software-version-label"
-										| "software-platform"
-										| "software-requirement-tier";
-									/**
-									 * @type string
-									 */
-									operator: "range";
-									lower: string | number | boolean;
-									upper?: string | number | boolean;
-							  }
-							| {
-									field:
-										| "category"
-										| "kind"
-										| "language"
-										| "content-rating"
-										| "ai-disclosure"
-										| "license"
-										| "tag"
-										| "credit"
-										| "realm"
-										| "zone"
-										| "subject"
-										| "target"
-										| "root"
-										| "parent"
-										| "owner"
-										| "join-policy"
-										| "multiple"
-										| "results-visibility"
-										| "closed"
-										| "created-at"
-										| "updated-at"
-										| "published-at"
-										| "closes-at"
-										| "catalog-licensed"
-										| "catalog-release-date"
-										| "book-isbn13"
-										| "book-publication-date"
-										| "book-page-count"
-										| "book-word-count"
-										| "book-format"
-										| "media-kind"
-										| "media-release-date"
-										| "media-runtime-minutes"
-										| "media-episode-count"
-										| "media-season-count"
-										| "software-release-date"
-										| "software-version-label"
-										| "software-platform"
-										| "software-requirement-tier";
-									/**
-									 * @type string
-									 */
-									operator: "range";
-									lower?: string | number | boolean;
-									upper: string | number | boolean;
-							  }
-					  )
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "exists";
-							/**
-							 * @type boolean
-							 */
-							value: boolean;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							field: "realm-tag-vote";
-							/**
-							 * @type string
-							 */
-							operator: "matches";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							realmId: string;
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							tagId: string;
-							score?:
-								| {
-										/**
-										 * @type integer
-										 */
-										lower: number;
-										/**
-										 * @type integer | undefined
-										 */
-										upper?: number;
-								  }
-								| {
-										/**
-										 * @type integer | undefined
-										 */
-										lower?: number;
-										/**
-										 * @type integer
-										 */
-										upper: number;
-								  };
-							voteCount?:
-								| {
-										/**
-										 * @minLength 0
-										 * @type integer
-										 */
-										lower: number;
-										/**
-										 * @minLength 0
-										 * @type integer | undefined
-										 */
-										upper?: number;
-								  }
-								| {
-										/**
-										 * @minLength 0
-										 * @type integer | undefined
-										 */
-										lower?: number;
-										/**
-										 * @minLength 0
-										 * @type integer
-										 */
-										upper: number;
-								  };
-					  };
-			}[];
-			/**
-			 * @type array
-			 */
-			controls: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				key: string;
-				/**
-				 * @type string
-				 */
-				field: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum;
-				/**
-				 * @type boolean
-				 */
-				enabled: boolean;
-				/**
-				 * @type string
-				 */
-				disclosure: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsDisclosureEnum;
-				/**
-				 * @type array
-				 */
-				modes: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsModesEnum[];
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string | undefined
-				 */
-				labelUnitId?: string;
-				optionPolicy?:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "all";
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "include";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "exclude";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  };
-				/**
-				 * @default false
-				 * @type boolean | undefined
-				 */
-				required?: boolean;
-			}[];
-			/**
-			 * @type array
-			 */
-			sections: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				key: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string | undefined
-				 */
-				labelUnitId?: string;
-				/**
-				 * @type string
-				 */
-				disclosure: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSectionsDisclosureEnum;
-				/**
-				 * @type array
-				 */
-				controls: string[];
-			}[];
-			/**
-			 * @type object
-			 */
-			sort: {
-				/**
-				 * @type string
-				 */
-				default: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortDefaultEnum;
-				/**
-				 * @type array
-				 */
-				options: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentSortOptionsEnum[];
-			};
-			/**
-			 * @type object
-			 */
-			results: {
-				/**
-				 * @minLength 1
-				 * @maxLength 50
-				 * @type integer
-				 */
-				pageSize: number;
-				/**
-				 * @minLength 1
-				 * @maxLength 100
-				 * @type integer
-				 */
-				maxPageSize: number;
-				/**
-				 * @minLength 1
-				 * @maxLength 100000
-				 * @type integer
-				 */
-				maxResultWindow: number;
-				/**
-				 * @type array
-				 */
-				facets: string[];
-			};
-		};
-		/**
-		 * @type array
-		 */
-		controls: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @type string
-			 */
-			field: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum;
-			/**
-			 * @type string
-			 */
-			component: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum;
-			/**
-			 * @type array
-			 */
-			modes: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsModesEnum[];
-			/**
-			 * @type array
-			 */
-			operators: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum[];
-			optionSource?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "facet";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "static";
-						/**
-						 * @type array
-						 */
-						options: {
-							value: string | number | boolean;
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string | undefined
-							 */
-							labelUnitId?: string;
-						}[];
-				  };
-			optionPolicy?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "all";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "include";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "exclude";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  };
-			/**
-			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-			 * @type string | undefined
-			 */
-			labelUnitId?: string;
-			/**
-			 * @default false
-			 * @type boolean | undefined
-			 */
-			required?: boolean;
-			/**
-			 * @type string
-			 */
-			disclosure: PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsDisclosureEnum;
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string | undefined
-			 */
-			sectionKey?: string;
-		}[];
-	};
+	definition: SearchFeatureDefinitionV1;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -90504,1080 +89923,14 @@ export type PutApiSearchZonesByZoneIdFeatureStatus422 =
  */
 export type PutApiSearchZonesByZoneIdFeatureStatus500 = InternalError;
 
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentTemplateIdEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentTemplateIdEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentTemplateIdEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentTemplateIdEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentCategoriesEnum = {
-	units: "units",
-	users: "users",
-	entity: "entity",
-	tags: "tags",
-	"tag-structures": "tag-structures",
-	posts: "posts",
-	realms: "realms",
-	collections: "collections",
-	reviews: "reviews",
-	polls: "polls",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentCategoriesEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentCategoriesEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentCategoriesEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentModesAvailableEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentModesAvailableEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentModesAvailableEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentModesAvailableEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentModesDefaultEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentModesDefaultEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentModesDefaultEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentModesDefaultEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsFieldEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsFieldEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsFieldEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsDisclosureEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsDisclosureEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsDisclosureEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsModesEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsModesEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsModesEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentSectionsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentSectionsDisclosureEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentSectionsDisclosureEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentSectionsDisclosureEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentSortDefaultEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentSortDefaultEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentSortDefaultEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentSortDefaultEnum];
-
-export const PutApiSearchZonesByZoneIdFeatureRequestDocumentSortOptionsEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureRequestDocumentSortOptionsEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentSortOptionsEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureRequestDocumentSortOptionsEnum];
-
 /**
  * @type object
  */
 export type PutApiSearchZonesByZoneIdFeatureBody = {
 	/**
-	 * @type boolean
-	 */
-	enabled: boolean;
-	/**
 	 * @type object
 	 */
-	document: {
-		/**
-		 * @type number
-		 */
-		version: 1;
-		/**
-		 * @type object
-		 */
-		template: {
-			/**
-			 * @type string
-			 */
-			id: PutApiSearchZonesByZoneIdFeatureRequestDocumentTemplateIdEnum;
-			/**
-			 * @type number
-			 */
-			version: 1;
-		};
-		/**
-		 * @type array
-		 */
-		categories: PutApiSearchZonesByZoneIdFeatureRequestDocumentCategoriesEnum[];
-		/**
-		 * @type object
-		 */
-		modes: {
-			/**
-			 * @type array
-			 */
-			available: PutApiSearchZonesByZoneIdFeatureRequestDocumentModesAvailableEnum[];
-			/**
-			 * @type string
-			 */
-			default: PutApiSearchZonesByZoneIdFeatureRequestDocumentModesDefaultEnum;
-		};
-		/**
-		 * @type object
-		 */
-		query: {
-			/**
-			 * @type boolean
-			 */
-			enabled: boolean;
-			/**
-			 * @default false
-			 * @type boolean | undefined
-			 */
-			required?: boolean;
-			/**
-			 * @maxLength 500
-			 * @type string | undefined
-			 */
-			initial?: string;
-		};
-		/**
-		 * @type array
-		 */
-		constraints: (
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "equals";
-					value: string | number | boolean;
-			  }
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "not-equals";
-					value: string | number | boolean;
-			  }
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					operator: "any-of" | "all-of" | "none-of";
-					/**
-					 * @type array
-					 */
-					values: (string | number | boolean)[];
-			  }
-			| (
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "range";
-							lower: string | number | boolean;
-							upper?: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "range";
-							lower?: string | number | boolean;
-							upper: string | number | boolean;
-					  }
-			  )
-			| {
-					field:
-						| "category"
-						| "kind"
-						| "language"
-						| "content-rating"
-						| "ai-disclosure"
-						| "license"
-						| "tag"
-						| "credit"
-						| "realm"
-						| "zone"
-						| "subject"
-						| "target"
-						| "root"
-						| "parent"
-						| "owner"
-						| "join-policy"
-						| "multiple"
-						| "results-visibility"
-						| "closed"
-						| "created-at"
-						| "updated-at"
-						| "published-at"
-						| "closes-at"
-						| "catalog-licensed"
-						| "catalog-release-date"
-						| "book-isbn13"
-						| "book-publication-date"
-						| "book-page-count"
-						| "book-word-count"
-						| "book-format"
-						| "media-kind"
-						| "media-release-date"
-						| "media-runtime-minutes"
-						| "media-episode-count"
-						| "media-season-count"
-						| "software-release-date"
-						| "software-version-label"
-						| "software-platform"
-						| "software-requirement-tier";
-					/**
-					 * @type string
-					 */
-					operator: "exists";
-					/**
-					 * @type boolean
-					 */
-					value: boolean;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					field: "realm-tag-vote";
-					/**
-					 * @type string
-					 */
-					operator: "matches";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					realmId: string;
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					tagId: string;
-					score?:
-						| {
-								/**
-								 * @type integer
-								 */
-								lower: number;
-								/**
-								 * @type integer | undefined
-								 */
-								upper?: number;
-						  }
-						| {
-								/**
-								 * @type integer | undefined
-								 */
-								lower?: number;
-								/**
-								 * @type integer
-								 */
-								upper: number;
-						  };
-					voteCount?:
-						| {
-								/**
-								 * @minLength 0
-								 * @type integer
-								 */
-								lower: number;
-								/**
-								 * @minLength 0
-								 * @type integer | undefined
-								 */
-								upper?: number;
-						  }
-						| {
-								/**
-								 * @minLength 0
-								 * @type integer | undefined
-								 */
-								lower?: number;
-								/**
-								 * @minLength 0
-								 * @type integer
-								 */
-								upper: number;
-						  };
-			  }
-		)[];
-		/**
-		 * @type array
-		 */
-		defaults: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			controlKey: string;
-			filter:
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "not-equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						operator: "any-of" | "all-of" | "none-of";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| (
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower: string | number | boolean;
-								upper?: string | number | boolean;
-						  }
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower?: string | number | boolean;
-								upper: string | number | boolean;
-						  }
-				  )
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "exists";
-						/**
-						 * @type boolean
-						 */
-						value: boolean;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						field: "realm-tag-vote";
-						/**
-						 * @type string
-						 */
-						operator: "matches";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						realmId: string;
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						tagId: string;
-						score?:
-							| {
-									/**
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @type integer
-									 */
-									upper: number;
-							  };
-						voteCount?:
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									upper: number;
-							  };
-				  };
-		}[];
-		/**
-		 * @type array
-		 */
-		controls: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @type string
-			 */
-			field: PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsFieldEnum;
-			/**
-			 * @type boolean
-			 */
-			enabled: boolean;
-			/**
-			 * @type string
-			 */
-			disclosure: PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsDisclosureEnum;
-			/**
-			 * @type array
-			 */
-			modes: PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsModesEnum[];
-			/**
-			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-			 * @type string | undefined
-			 */
-			labelUnitId?: string;
-			optionPolicy?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "all";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "include";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "exclude";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  };
-			/**
-			 * @default false
-			 * @type boolean | undefined
-			 */
-			required?: boolean;
-		}[];
-		/**
-		 * @type array
-		 */
-		sections: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-			 * @type string | undefined
-			 */
-			labelUnitId?: string;
-			/**
-			 * @type string
-			 */
-			disclosure: PutApiSearchZonesByZoneIdFeatureRequestDocumentSectionsDisclosureEnum;
-			/**
-			 * @type array
-			 */
-			controls: string[];
-		}[];
-		/**
-		 * @type object
-		 */
-		sort: {
-			/**
-			 * @type string
-			 */
-			default: PutApiSearchZonesByZoneIdFeatureRequestDocumentSortDefaultEnum;
-			/**
-			 * @type array
-			 */
-			options: PutApiSearchZonesByZoneIdFeatureRequestDocumentSortOptionsEnum[];
-		};
-		/**
-		 * @type object
-		 */
-		results: {
-			/**
-			 * @minLength 1
-			 * @maxLength 50
-			 * @type integer
-			 */
-			pageSize: number;
-			/**
-			 * @minLength 1
-			 * @maxLength 100
-			 * @type integer
-			 */
-			maxPageSize: number;
-			/**
-			 * @minLength 1
-			 * @maxLength 100000
-			 * @type integer
-			 */
-			maxResultWindow: number;
-			/**
-			 * @type array
-			 */
-			facets: string[];
-		};
-	};
+	document: SearchDocumentV1;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -93453,249 +91806,6 @@ export type PostApiSearchZonesByZoneIdFeatureRestorePath = {
 	zoneId: string;
 };
 
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentTemplateIdEnum = {
-	global: "global",
-	book: "book",
-	media: "media",
-	software: "software",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentTemplateIdEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentTemplateIdEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentTemplateIdEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentCategoriesEnum = {
-	units: "units",
-	users: "users",
-	entity: "entity",
-	tags: "tags",
-	"tag-structures": "tag-structures",
-	posts: "posts",
-	realms: "realms",
-	collections: "collections",
-	reviews: "reviews",
-	polls: "polls",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentCategoriesEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentCategoriesEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentCategoriesEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesAvailableEnum =
-	{
-		basic: "basic",
-		advanced: "advanced",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesAvailableEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesAvailableEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesAvailableEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesDefaultEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesDefaultEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesDefaultEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesDefaultEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsFieldEnum =
-	{
-		category: "category",
-		kind: "kind",
-		language: "language",
-		"content-rating": "content-rating",
-		"ai-disclosure": "ai-disclosure",
-		license: "license",
-		tag: "tag",
-		credit: "credit",
-		realm: "realm",
-		zone: "zone",
-		subject: "subject",
-		target: "target",
-		root: "root",
-		parent: "parent",
-		owner: "owner",
-		"join-policy": "join-policy",
-		multiple: "multiple",
-		"results-visibility": "results-visibility",
-		closed: "closed",
-		"created-at": "created-at",
-		"updated-at": "updated-at",
-		"published-at": "published-at",
-		"closes-at": "closes-at",
-		"catalog-licensed": "catalog-licensed",
-		"catalog-release-date": "catalog-release-date",
-		"book-isbn13": "book-isbn13",
-		"book-publication-date": "book-publication-date",
-		"book-page-count": "book-page-count",
-		"book-word-count": "book-word-count",
-		"book-format": "book-format",
-		"media-kind": "media-kind",
-		"media-release-date": "media-release-date",
-		"media-runtime-minutes": "media-runtime-minutes",
-		"media-episode-count": "media-episode-count",
-		"media-season-count": "media-season-count",
-		"software-release-date": "software-release-date",
-		"software-version-label": "software-version-label",
-		"software-platform": "software-platform",
-		"software-requirement-tier": "software-requirement-tier",
-		"realm-tag-vote": "realm-tag-vote",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsFieldEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsFieldEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsFieldEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsDisclosureEnum =
-	{
-		visible: "visible",
-		hidden: "hidden",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsDisclosureEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsDisclosureEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsDisclosureEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsModesEnum =
-	{
-		basic: "basic",
-		advanced: "advanced",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsModesEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsModesEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsModesEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSectionsDisclosureEnum =
-	{
-		visible: "visible",
-		hidden: "hidden",
-	} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSectionsDisclosureEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSectionsDisclosureEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSectionsDisclosureEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortDefaultEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortDefaultEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortDefaultEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortDefaultEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortOptionsEnum = {
-	relevance: "relevance",
-	"createdAt:asc": "createdAt:asc",
-	"createdAt:desc": "createdAt:desc",
-	"updatedAt:asc": "updatedAt:asc",
-	"updatedAt:desc": "updatedAt:desc",
-	"publishedAt:asc": "publishedAt:asc",
-	"publishedAt:desc": "publishedAt:desc",
-	"followerCount:asc": "followerCount:asc",
-	"followerCount:desc": "followerCount:desc",
-	"replyCount:asc": "replyCount:asc",
-	"replyCount:desc": "replyCount:desc",
-	"closesAt:asc": "closesAt:asc",
-	"closesAt:desc": "closesAt:desc",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortOptionsEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortOptionsEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortOptionsEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsFieldEnum = {
-	category: "category",
-	kind: "kind",
-	language: "language",
-	"content-rating": "content-rating",
-	"ai-disclosure": "ai-disclosure",
-	license: "license",
-	tag: "tag",
-	credit: "credit",
-	realm: "realm",
-	zone: "zone",
-	subject: "subject",
-	target: "target",
-	root: "root",
-	parent: "parent",
-	owner: "owner",
-	"join-policy": "join-policy",
-	multiple: "multiple",
-	"results-visibility": "results-visibility",
-	closed: "closed",
-	"created-at": "created-at",
-	"updated-at": "updated-at",
-	"published-at": "published-at",
-	"closes-at": "closes-at",
-	"catalog-licensed": "catalog-licensed",
-	"catalog-release-date": "catalog-release-date",
-	"book-isbn13": "book-isbn13",
-	"book-publication-date": "book-publication-date",
-	"book-page-count": "book-page-count",
-	"book-word-count": "book-word-count",
-	"book-format": "book-format",
-	"media-kind": "media-kind",
-	"media-release-date": "media-release-date",
-	"media-runtime-minutes": "media-runtime-minutes",
-	"media-episode-count": "media-episode-count",
-	"media-season-count": "media-season-count",
-	"software-release-date": "software-release-date",
-	"software-version-label": "software-version-label",
-	"software-platform": "software-platform",
-	"software-requirement-tier": "software-requirement-tier",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsFieldEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsFieldEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsFieldEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsComponentEnum = {
-	select: "select",
-	"multi-select": "multi-select",
-	toggle: "toggle",
-	"date-range": "date-range",
-	"value-range": "value-range",
-	"realm-tag-vote": "realm-tag-vote",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsComponentEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsComponentEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsComponentEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsModesEnum = {
-	basic: "basic",
-	advanced: "advanced",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsModesEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsModesEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsModesEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsOperatorsEnum = {
-	equals: "equals",
-	"not-equals": "not-equals",
-	"any-of": "any-of",
-	"all-of": "all-of",
-	"none-of": "none-of",
-	range: "range",
-	exists: "exists",
-	matches: "matches",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsOperatorsEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsOperatorsEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsOperatorsEnum];
-
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsDisclosureEnum = {
-	visible: "visible",
-	hidden: "hidden",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsDisclosureEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsDisclosureEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsDisclosureEnum];
-
 /**
  * @type object
  */
@@ -93719,1024 +91829,7 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200 = {
 	/**
 	 * @type object
 	 */
-	definition: {
-		/**
-		 * @type object
-		 */
-		document: {
-			/**
-			 * @type number
-			 */
-			version: 1;
-			/**
-			 * @type object
-			 */
-			template: {
-				/**
-				 * @type string
-				 */
-				id: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentTemplateIdEnum;
-				/**
-				 * @type number
-				 */
-				version: 1;
-			};
-			/**
-			 * @type array
-			 */
-			categories: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentCategoriesEnum[];
-			/**
-			 * @type object
-			 */
-			modes: {
-				/**
-				 * @type array
-				 */
-				available: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesAvailableEnum[];
-				/**
-				 * @type string
-				 */
-				default: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentModesDefaultEnum;
-			};
-			/**
-			 * @type object
-			 */
-			query: {
-				/**
-				 * @type boolean
-				 */
-				enabled: boolean;
-				/**
-				 * @default false
-				 * @type boolean | undefined
-				 */
-				required?: boolean;
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				initial?: string;
-			};
-			/**
-			 * @type array
-			 */
-			constraints: (
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "not-equals";
-						value: string | number | boolean;
-				  }
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						operator: "any-of" | "all-of" | "none-of";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| (
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower: string | number | boolean;
-								upper?: string | number | boolean;
-						  }
-						| {
-								field:
-									| "category"
-									| "kind"
-									| "language"
-									| "content-rating"
-									| "ai-disclosure"
-									| "license"
-									| "tag"
-									| "credit"
-									| "realm"
-									| "zone"
-									| "subject"
-									| "target"
-									| "root"
-									| "parent"
-									| "owner"
-									| "join-policy"
-									| "multiple"
-									| "results-visibility"
-									| "closed"
-									| "created-at"
-									| "updated-at"
-									| "published-at"
-									| "closes-at"
-									| "catalog-licensed"
-									| "catalog-release-date"
-									| "book-isbn13"
-									| "book-publication-date"
-									| "book-page-count"
-									| "book-word-count"
-									| "book-format"
-									| "media-kind"
-									| "media-release-date"
-									| "media-runtime-minutes"
-									| "media-episode-count"
-									| "media-season-count"
-									| "software-release-date"
-									| "software-version-label"
-									| "software-platform"
-									| "software-requirement-tier";
-								/**
-								 * @type string
-								 */
-								operator: "range";
-								lower?: string | number | boolean;
-								upper: string | number | boolean;
-						  }
-				  )
-				| {
-						field:
-							| "category"
-							| "kind"
-							| "language"
-							| "content-rating"
-							| "ai-disclosure"
-							| "license"
-							| "tag"
-							| "credit"
-							| "realm"
-							| "zone"
-							| "subject"
-							| "target"
-							| "root"
-							| "parent"
-							| "owner"
-							| "join-policy"
-							| "multiple"
-							| "results-visibility"
-							| "closed"
-							| "created-at"
-							| "updated-at"
-							| "published-at"
-							| "closes-at"
-							| "catalog-licensed"
-							| "catalog-release-date"
-							| "book-isbn13"
-							| "book-publication-date"
-							| "book-page-count"
-							| "book-word-count"
-							| "book-format"
-							| "media-kind"
-							| "media-release-date"
-							| "media-runtime-minutes"
-							| "media-episode-count"
-							| "media-season-count"
-							| "software-release-date"
-							| "software-version-label"
-							| "software-platform"
-							| "software-requirement-tier";
-						/**
-						 * @type string
-						 */
-						operator: "exists";
-						/**
-						 * @type boolean
-						 */
-						value: boolean;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						field: "realm-tag-vote";
-						/**
-						 * @type string
-						 */
-						operator: "matches";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						realmId: string;
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						tagId: string;
-						score?:
-							| {
-									/**
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @type integer
-									 */
-									upper: number;
-							  };
-						voteCount?:
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									lower: number;
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									upper?: number;
-							  }
-							| {
-									/**
-									 * @minLength 0
-									 * @type integer | undefined
-									 */
-									lower?: number;
-									/**
-									 * @minLength 0
-									 * @type integer
-									 */
-									upper: number;
-							  };
-				  }
-			)[];
-			/**
-			 * @type array
-			 */
-			defaults: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				controlKey: string;
-				filter:
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "equals";
-							value: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "not-equals";
-							value: string | number | boolean;
-					  }
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							operator: "any-of" | "all-of" | "none-of";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  }
-					| (
-							| {
-									field:
-										| "category"
-										| "kind"
-										| "language"
-										| "content-rating"
-										| "ai-disclosure"
-										| "license"
-										| "tag"
-										| "credit"
-										| "realm"
-										| "zone"
-										| "subject"
-										| "target"
-										| "root"
-										| "parent"
-										| "owner"
-										| "join-policy"
-										| "multiple"
-										| "results-visibility"
-										| "closed"
-										| "created-at"
-										| "updated-at"
-										| "published-at"
-										| "closes-at"
-										| "catalog-licensed"
-										| "catalog-release-date"
-										| "book-isbn13"
-										| "book-publication-date"
-										| "book-page-count"
-										| "book-word-count"
-										| "book-format"
-										| "media-kind"
-										| "media-release-date"
-										| "media-runtime-minutes"
-										| "media-episode-count"
-										| "media-season-count"
-										| "software-release-date"
-										| "software-version-label"
-										| "software-platform"
-										| "software-requirement-tier";
-									/**
-									 * @type string
-									 */
-									operator: "range";
-									lower: string | number | boolean;
-									upper?: string | number | boolean;
-							  }
-							| {
-									field:
-										| "category"
-										| "kind"
-										| "language"
-										| "content-rating"
-										| "ai-disclosure"
-										| "license"
-										| "tag"
-										| "credit"
-										| "realm"
-										| "zone"
-										| "subject"
-										| "target"
-										| "root"
-										| "parent"
-										| "owner"
-										| "join-policy"
-										| "multiple"
-										| "results-visibility"
-										| "closed"
-										| "created-at"
-										| "updated-at"
-										| "published-at"
-										| "closes-at"
-										| "catalog-licensed"
-										| "catalog-release-date"
-										| "book-isbn13"
-										| "book-publication-date"
-										| "book-page-count"
-										| "book-word-count"
-										| "book-format"
-										| "media-kind"
-										| "media-release-date"
-										| "media-runtime-minutes"
-										| "media-episode-count"
-										| "media-season-count"
-										| "software-release-date"
-										| "software-version-label"
-										| "software-platform"
-										| "software-requirement-tier";
-									/**
-									 * @type string
-									 */
-									operator: "range";
-									lower?: string | number | boolean;
-									upper: string | number | boolean;
-							  }
-					  )
-					| {
-							field:
-								| "category"
-								| "kind"
-								| "language"
-								| "content-rating"
-								| "ai-disclosure"
-								| "license"
-								| "tag"
-								| "credit"
-								| "realm"
-								| "zone"
-								| "subject"
-								| "target"
-								| "root"
-								| "parent"
-								| "owner"
-								| "join-policy"
-								| "multiple"
-								| "results-visibility"
-								| "closed"
-								| "created-at"
-								| "updated-at"
-								| "published-at"
-								| "closes-at"
-								| "catalog-licensed"
-								| "catalog-release-date"
-								| "book-isbn13"
-								| "book-publication-date"
-								| "book-page-count"
-								| "book-word-count"
-								| "book-format"
-								| "media-kind"
-								| "media-release-date"
-								| "media-runtime-minutes"
-								| "media-episode-count"
-								| "media-season-count"
-								| "software-release-date"
-								| "software-version-label"
-								| "software-platform"
-								| "software-requirement-tier";
-							/**
-							 * @type string
-							 */
-							operator: "exists";
-							/**
-							 * @type boolean
-							 */
-							value: boolean;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							field: "realm-tag-vote";
-							/**
-							 * @type string
-							 */
-							operator: "matches";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							realmId: string;
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							tagId: string;
-							score?:
-								| {
-										/**
-										 * @type integer
-										 */
-										lower: number;
-										/**
-										 * @type integer | undefined
-										 */
-										upper?: number;
-								  }
-								| {
-										/**
-										 * @type integer | undefined
-										 */
-										lower?: number;
-										/**
-										 * @type integer
-										 */
-										upper: number;
-								  };
-							voteCount?:
-								| {
-										/**
-										 * @minLength 0
-										 * @type integer
-										 */
-										lower: number;
-										/**
-										 * @minLength 0
-										 * @type integer | undefined
-										 */
-										upper?: number;
-								  }
-								| {
-										/**
-										 * @minLength 0
-										 * @type integer | undefined
-										 */
-										lower?: number;
-										/**
-										 * @minLength 0
-										 * @type integer
-										 */
-										upper: number;
-								  };
-					  };
-			}[];
-			/**
-			 * @type array
-			 */
-			controls: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				key: string;
-				/**
-				 * @type string
-				 */
-				field: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsFieldEnum;
-				/**
-				 * @type boolean
-				 */
-				enabled: boolean;
-				/**
-				 * @type string
-				 */
-				disclosure: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsDisclosureEnum;
-				/**
-				 * @type array
-				 */
-				modes: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsModesEnum[];
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string | undefined
-				 */
-				labelUnitId?: string;
-				optionPolicy?:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "all";
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "include";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "exclude";
-							/**
-							 * @type array
-							 */
-							values: (string | number | boolean)[];
-					  };
-				/**
-				 * @default false
-				 * @type boolean | undefined
-				 */
-				required?: boolean;
-			}[];
-			/**
-			 * @type array
-			 */
-			sections: {
-				/**
-				 * @minLength 1
-				 * @maxLength 64
-				 * @pattern ^[a-z][a-z0-9-]*$
-				 * @type string
-				 */
-				key: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string | undefined
-				 */
-				labelUnitId?: string;
-				/**
-				 * @type string
-				 */
-				disclosure: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSectionsDisclosureEnum;
-				/**
-				 * @type array
-				 */
-				controls: string[];
-			}[];
-			/**
-			 * @type object
-			 */
-			sort: {
-				/**
-				 * @type string
-				 */
-				default: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortDefaultEnum;
-				/**
-				 * @type array
-				 */
-				options: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentSortOptionsEnum[];
-			};
-			/**
-			 * @type object
-			 */
-			results: {
-				/**
-				 * @minLength 1
-				 * @maxLength 50
-				 * @type integer
-				 */
-				pageSize: number;
-				/**
-				 * @minLength 1
-				 * @maxLength 100
-				 * @type integer
-				 */
-				maxPageSize: number;
-				/**
-				 * @minLength 1
-				 * @maxLength 100000
-				 * @type integer
-				 */
-				maxResultWindow: number;
-				/**
-				 * @type array
-				 */
-				facets: string[];
-			};
-		};
-		/**
-		 * @type array
-		 */
-		controls: {
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string
-			 */
-			key: string;
-			/**
-			 * @type string
-			 */
-			field: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsFieldEnum;
-			/**
-			 * @type string
-			 */
-			component: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsComponentEnum;
-			/**
-			 * @type array
-			 */
-			modes: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsModesEnum[];
-			/**
-			 * @type array
-			 */
-			operators: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsOperatorsEnum[];
-			optionSource?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "facet";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "static";
-						/**
-						 * @type array
-						 */
-						options: {
-							value: string | number | boolean;
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string | undefined
-							 */
-							labelUnitId?: string;
-						}[];
-				  };
-			optionPolicy?:
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "all";
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "include";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						kind: "exclude";
-						/**
-						 * @type array
-						 */
-						values: (string | number | boolean)[];
-				  };
-			/**
-			 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-			 * @type string | undefined
-			 */
-			labelUnitId?: string;
-			/**
-			 * @default false
-			 * @type boolean | undefined
-			 */
-			required?: boolean;
-			/**
-			 * @type string
-			 */
-			disclosure: PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsDisclosureEnum;
-			/**
-			 * @minLength 1
-			 * @maxLength 64
-			 * @pattern ^[a-z][a-z0-9-]*$
-			 * @type string | undefined
-			 */
-			sectionKey?: string;
-		}[];
-	};
+	definition: SearchFeatureDefinitionV1;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101933,6 +99026,8 @@ export const PostApiSearchSharedQueriesStatus201DocumentTemplateEnum = {
 	book: "book",
 	media: "media",
 	software: "software",
+	realm: "realm",
+	zone: "zone",
 } as const;
 
 export type PostApiSearchSharedQueriesStatus201DocumentTemplateEnum =
@@ -102950,6 +100045,8 @@ export const PostApiSearchSharedQueriesRequestTemplateEnum = {
 	book: "book",
 	media: "media",
 	software: "software",
+	realm: "realm",
+	zone: "zone",
 } as const;
 
 export type PostApiSearchSharedQueriesRequestTemplateEnum =
@@ -103906,6 +101003,8 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum = {
 	book: "book",
 	media: "media",
 	software: "software",
+	realm: "realm",
+	zone: "zone",
 } as const;
 
 export type GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum =

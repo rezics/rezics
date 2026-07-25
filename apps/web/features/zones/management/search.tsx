@@ -42,7 +42,14 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { zoneManagementHref } from "./model";
 import { useZoneManagement } from "./workspace";
 
-const Templates: readonly SearchTemplateId[] = ["global", "book", "media", "software"];
+const Templates: readonly SearchTemplateId[] = [
+	"global",
+	"book",
+	"media",
+	"software",
+	"realm",
+	"zone",
+];
 
 function hasStatus(error: unknown, status: number): boolean {
 	return (
@@ -190,7 +197,6 @@ function SearchDocumentEditor({
 		existing?.definition.document.template.id ?? "global",
 	);
 	const [draft, setDraft] = useState<SearchDocument | undefined>(existing?.definition.document);
-	const [enabled, setEnabled] = useState(existing?.enabled ?? true);
 	const [message, setMessage] = useState("");
 	const template = useGetApiSearchFeaturesByTemplate({ path: { template: templateId } });
 	const history = useGetApiSearchZonesByZoneIdFeatureRevisions(
@@ -226,7 +232,7 @@ function SearchDocumentEditor({
 		<div className="grid gap-6">
 			<Card appearance="outlined">
 				<CardContent className="grid gap-6 p-6">
-					<FieldGroup className="grid gap-4 sm:grid-cols-2">
+					<FieldGroup className="grid gap-4">
 						<Field>
 							<FieldLabel>{t.zones.management.search.template}</FieldLabel>
 							<NativeSelect
@@ -248,13 +254,6 @@ function SearchDocumentEditor({
 								))}
 							</NativeSelect>
 						</Field>
-						<label className="flex items-center gap-2 self-end pb-2 text-sm">
-							<Checkbox
-								checked={enabled}
-								onCheckedChange={(details) => setEnabled(details.checked === true)}
-							/>
-							{t.zones.management.search.enabled}
-						</label>
 					</FieldGroup>
 					<div>
 						<div className="flex flex-wrap items-center justify-between gap-3">
@@ -453,7 +452,6 @@ function SearchDocumentEditor({
 								const saved = await save.mutateAsync({
 									path: { zoneId },
 									body: {
-										enabled,
 										document,
 										...(existing
 											? { baseRevisionId: existing.latestRevisionId }

@@ -249,11 +249,11 @@ import type {
 	PutApiApiTokenPoliciesBindingsByTokenIdStatus404,
 	PutApiApiTokenPoliciesBindingsByTokenIdStatus422,
 	PutApiApiTokenPoliciesBindingsByTokenIdStatus500,
-	GetApiFeedOptions,
-	GetApiFeedStatus200,
-	GetApiFeedStatus400,
-	GetApiFeedStatus422,
-	GetApiFeedStatus500,
+	PostApiFeedQueryOptions,
+	PostApiFeedQueryStatus200,
+	PostApiFeedQueryStatus400,
+	PostApiFeedQueryStatus422,
+	PostApiFeedQueryStatus500,
 	GetApiFeedbackMeOptions,
 	GetApiFeedbackMeStatus200,
 	GetApiFeedbackMeStatus422,
@@ -2028,7 +2028,7 @@ import {
 	getApiApiTokenPolicies,
 	patchApiApiTokenPoliciesByPolicyKey,
 	putApiApiTokenPoliciesBindingsByTokenId,
-	getApiFeed,
+	postApiFeedQuery,
 	getApiFeedbackMe,
 	postApiFeedback,
 	getApiGovernanceUnitByUnitIdAccessEffective,
@@ -6011,30 +6011,23 @@ export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
 	>;
 }
 
-export const getApiFeedQueryKey = ({ query }: Omit<GetApiFeedOptions, "headers"> = {}) =>
-	[{ url: "/api/feed" }, ...(query ? [query] : [])] as const;
+export const postApiFeedQueryMutationKey = () => [{ url: "/api/feed/query" }] as const;
 
-type GetApiFeedQueryKey = ReturnType<typeof getApiFeedQueryKey>;
-
-export function getApiFeedQueryOptions(
-	{ query }: GetApiFeedOptions = {},
+export function postApiFeedQueryMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiFeedQueryKey({ query });
-	return queryOptions<
-		GetApiFeedStatus200,
-		ResponseErrorConfig<GetApiFeedStatus400 | GetApiFeedStatus422 | GetApiFeedStatus500>,
-		GetApiFeedStatus200,
-		typeof queryKey
+	const mutationKey = postApiFeedQueryMutationKey();
+	return mutationOptions<
+		PostApiFeedQueryStatus200,
+		ResponseErrorConfig<
+			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+		>,
+		PostApiFeedQueryOptions,
+		TContext
 	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiFeed({
-				...config,
-				query,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiFeedQuery({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -6042,49 +6035,56 @@ export function getApiFeedQueryOptions(
 
 /**
  * @summary Ranked realm feed
- * {@link /api/feed}
+ * {@link /api/feed/query}
  */
-export function useGetApiFeed<
-	TData = GetApiFeedStatus200,
-	TQueryData = GetApiFeedStatus200,
-	TQueryKey extends QueryKey = GetApiFeedQueryKey,
->(
-	{ query }: { query?: GetApiFeedOptions["query"] | (() => GetApiFeedOptions["query"]) } = {},
+export function usePostApiFeedQuery<TContext>(
 	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiFeedStatus200,
-				ResponseErrorConfig<
-					GetApiFeedStatus400 | GetApiFeedStatus422 | GetApiFeedStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
+		mutation?: UseMutationOptions<
+			PostApiFeedQueryStatus200,
+			ResponseErrorConfig<
+				PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+			>,
+			PostApiFeedQueryOptions,
+			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
 	} = {},
 ) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiFeedQueryKey(resolvedParams);
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiFeedQueryMutationKey();
 
-	const queryResult = useQuery(
+	const baseOptions = postApiFeedQueryMutationOptions(config) as UseMutationOptions<
+		PostApiFeedQueryStatus200,
+		ResponseErrorConfig<
+			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+		>,
+		PostApiFeedQueryOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiFeedQueryStatus200,
+		ResponseErrorConfig<
+			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+		>,
+		PostApiFeedQueryOptions,
+		TContext
+	>(
 		{
-			...getApiFeedQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
 		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<GetApiFeedStatus400 | GetApiFeedStatus422 | GetApiFeedStatus500>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
+	) as UseMutationResult<
+		PostApiFeedQueryStatus200,
+		ResponseErrorConfig<
+			PostApiFeedQueryStatus400 | PostApiFeedQueryStatus422 | PostApiFeedQueryStatus500
+		>,
+		PostApiFeedQueryOptions,
+		TContext
+	>;
 }
 
 export const getApiFeedbackMeQueryKey = ({

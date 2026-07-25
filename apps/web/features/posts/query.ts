@@ -1,10 +1,10 @@
 import {
-	getApiFeedQueryKey,
 	getApiPostsByPostIdQueryKey,
 	getApiPostsByPostIdRepliesQueryKey,
 	getApiPostsQueryKey,
 } from "@rezics/openapi-tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
+import { FeedQueryKey } from "@/features/content-feed/query";
 
 export async function invalidatePostQueries(
 	queryClient: QueryClient,
@@ -13,7 +13,7 @@ export async function invalidatePostQueries(
 ) {
 	await Promise.all([
 		queryClient.invalidateQueries({ queryKey: getApiPostsQueryKey() }),
-		queryClient.invalidateQueries({ queryKey: getApiFeedQueryKey() }),
+		queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
 		...(rootPostId
 			? [
 					queryClient.invalidateQueries({

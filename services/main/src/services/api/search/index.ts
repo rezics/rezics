@@ -14,7 +14,9 @@ import {
 	SharedSearchQueryDocument,
 	SearchTemplateId,
 } from "@rezics/search";
+import { FilterSchemaModels } from "@rezics/filter";
 import { getActiveObservability } from "@rezics/observability";
+import { type Static, Type } from "@sinclair/typebox";
 import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
@@ -114,19 +116,36 @@ const ZoneFeedBlockExecutionBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
+const SearchDocumentModel = Type.Object(
+	{
+		...SearchDocument.properties,
+		filter: Type.Optional(Type.Ref("UnitFilter")),
+	},
+	{ additionalProperties: false, $id: "SearchDocumentV1" },
+);
+const SearchFeatureDefinitionModel = Type.Object(
+	{
+		document: Type.Ref("SearchDocumentV1"),
+		controls: SearchFeatureDefinition.properties.controls,
+	},
+	{ additionalProperties: false, $id: "SearchFeatureDefinitionV1" },
+);
+const SearchDocumentInput = Type.Unsafe<Static<typeof SearchDocument>>(
+	Type.Ref("SearchDocumentV1"),
+);
+const SearchFeatureDefinitionResponse = Type.Unsafe<unknown>(Type.Ref("SearchFeatureDefinitionV1"));
 const ZoneSearchFeatureResponse = t.Object({
 	zoneId: Uuid,
 	searchDocumentId: Uuid,
 	enabled: t.Boolean(),
-	definition: SearchFeatureDefinition,
+	definition: SearchFeatureDefinitionResponse,
 	latestRevisionId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
 const ZoneSearchFeaturePutBody = t.Object(
 	{
-		enabled: t.Boolean(),
-		document: SearchDocument,
+		document: SearchDocumentInput,
 		baseRevisionId: t.Optional(Uuid),
 		message: t.Optional(t.String({ maxLength: 500 })),
 	},
@@ -247,12 +266,17 @@ async function presentSearchResultAsFeed(
 }
 
 export default new Elysia({ prefix: "/search" })
+	.model({
+		...FilterSchemaModels,
+		SearchDocumentV1: SearchDocumentModel,
+		SearchFeatureDefinitionV1: SearchFeatureDefinitionModel,
+	})
 	.get(
 		"/features/:template",
 		({ params }) => resolveSearchDocument(createDefaultSearchDocument(params.template)),
 		{
 			params: SearchFeatureTemplateParams,
-			response: { [StatusCodes.OK]: SearchFeatureDefinition },
+			response: { [StatusCodes.OK]: SearchFeatureDefinitionResponse },
 			detail: { summary: "Get a system Search Feature template", tags: ["Search"] },
 		},
 	)
@@ -358,7 +382,7 @@ export default new Elysia({ prefix: "/search" })
 			return presentZoneSearchFeature(
 				await putZoneSearchFeature({
 					zoneId: params.zoneId,
-					enabled: body.enabled,
+					enabled: true,
 					document: body.document,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId,

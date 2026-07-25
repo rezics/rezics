@@ -294,9 +294,7 @@ export function SearchFeature({
 			),
 		[initialSelections],
 	);
-	const [query, setQuery] = useState(
-		initialState?.query ?? initialQuery ?? document.query.initial ?? "",
-	);
+	const [query, setQuery] = useState(initialState?.query ?? initialQuery ?? "");
 	const [category, setCategory] = useState(() =>
 		valuesOf(initial.quick.find((value) => value.filter.field === "category")).flatMap(
 			(value) => (typeof value === "string" ? [value] : []),
@@ -499,7 +497,7 @@ export function SearchFeature({
 	}
 
 	function resetFilters() {
-		const defaultQuery = document.query.initial ?? "";
+		const defaultQuery = "";
 		const preferredLanguages = languageControl
 			? (preferences.data?.preferredLanguages ?? [])
 			: [];

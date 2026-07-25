@@ -4,12 +4,16 @@
 suite. A Search Block stores this configuration; it never stores PostgreSQL, Meilisearch,
 Algolia, or Elasticsearch DSL.
 
-Configuration has three different sources of state:
+The versioned Search Feature document has three different sources of state:
 
-- `constraints` are invisible, trusted predicates that user input cannot replace.
+- `filter` is an invisible, trusted `@rezics/filter` predicate that user input cannot replace.
 - `defaults` prefill a rendered control and disappear when the user supplies that field.
 - `controls` are the complete render allow-list. Omitting a control hides it; `optionPolicy`
   includes or excludes individual options.
+
+The lower-level Search engine configuration still uses normalized internal
+constraints after the domain Filter adapter runs. Those constraints are not a
+public API or a persisted Zone schema.
 
 Both basic and advanced modes compile into one canonical request. Basic mode is flat control
 state. Advanced mode is a bounded `all`/`any`/`not` expression tree with closed fields and

@@ -1,5 +1,6 @@
 import { type Static, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
+import { UnitFilter as UnitFilterSchema, assertUnitFilter, type UnitFilter } from "@rezics/filter";
 
 import type { SearchFilter as SearchFilterValue } from "./primitives";
 import {
@@ -31,13 +32,22 @@ const SearchSectionKey = Type.String({
 	pattern: "^[a-z][a-z0-9-]*$",
 });
 
-export const SearchTemplateIdValues = ["global", "book", "media", "software"] as const;
+export const SearchTemplateIdValues = [
+	"global",
+	"book",
+	"media",
+	"software",
+	"realm",
+	"zone",
+] as const;
 export type SearchTemplateId = (typeof SearchTemplateIdValues)[number];
 export const SearchTemplateId = Type.Union([
 	Type.Literal("global"),
 	Type.Literal("book"),
 	Type.Literal("media"),
 	Type.Literal("software"),
+	Type.Literal("realm"),
+	Type.Literal("zone"),
 ]);
 
 export const SearchDisclosureValues = ["visible", "hidden"] as const;
@@ -132,12 +142,11 @@ export const SearchDocument = Type.Object(
 			{
 				enabled: Type.Boolean(),
 				required: Type.Optional(Type.Boolean({ default: false })),
-				initial: Type.Optional(Type.String({ maxLength: 500 })),
 			},
 			{ additionalProperties: false },
 		),
 		/** Fixed document predicates; context predicates are composed separately. */
-		constraints: Type.Array(SearchFilter, { maxItems: 50 }),
+		filter: Type.Optional(Type.Unsafe<UnitFilter>(UnitFilterSchema)),
 		defaults: Type.Array(SearchControlValue, { maxItems: 50 }),
 		controls: Type.Array(SearchDocumentControl, { maxItems: 50 }),
 		sections: Type.Array(SearchDocumentSection, { maxItems: 20 }),
@@ -387,8 +396,8 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 	if (!unique(value.modes.available)) throw new TypeError("Search document modes must be unique");
 	if (!value.modes.available.includes(value.modes.default))
 		throw new TypeError("Search document default mode is unavailable");
-	if (!value.query.enabled && (value.query.required || value.query.initial))
-		throw new TypeError("Disabled Search query cannot be required or initialized");
+	if (!value.query.enabled && value.query.required)
+		throw new TypeError("Disabled Search query cannot be required");
 	if (!unique(value.controls.map((control) => control.key)))
 		throw new TypeError("Search document control keys must be unique");
 	if (!unique(value.sections.map((section) => section.key)))
@@ -428,9 +437,7 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 		if (!control || !control.enabled)
 			throw new TypeError(`Facet control ${controlKey} is unavailable`);
 	}
-	value.constraints.forEach((filter, index) =>
-		assertFilterShape(filter, `constraints[${index}]`),
-	);
+	if (value.filter) assertUnitFilter(value.filter);
 	if (!unique(value.defaults.map((item) => item.controlKey)))
 		throw new TypeError("Search defaults must target unique controls");
 	value.defaults.forEach((item, index) =>

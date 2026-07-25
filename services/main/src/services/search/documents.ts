@@ -6,6 +6,7 @@ import {
 	type SearchFilter,
 	type SearchScalar,
 } from "@rezics/search";
+import { collectUnitFilterReferenceIds } from "@rezics/filter";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -73,17 +74,15 @@ async function ensureDocumentReferences(
 		if (control.field === "tag" && control.optionPolicy?.kind !== "all")
 			for (const value of control.optionPolicy?.values ?? [])
 				if (typeof value === "string") tagIds.add(value);
-	for (const filter of [
-		...document.constraints,
-		...document.defaults.map((value) => value.filter),
-	])
+	for (const filter of document.defaults.map((value) => value.filter))
 		if (filter.field === "realm-tag-vote") {
 			realmIds.add(filter.realmId);
 			tagIds.add(filter.tagId);
 		} else if (filter.field === "tag")
 			for (const value of filterValues(filter))
 				if (typeof value === "string") tagIds.add(value);
-	const ids = [...new Set([...labelIds, ...tagIds, ...realmIds])];
+	const filterUnitIds = document.filter ? collectUnitFilterReferenceIds(document.filter) : [];
+	const ids = [...new Set([...labelIds, ...tagIds, ...realmIds, ...filterUnitIds])];
 	if (!ids.length) return;
 	const records = await tx
 		.select({
@@ -105,6 +104,14 @@ async function ensureDocumentReferences(
 			record.moderationStatus === "approved"
 		);
 	};
+	const isPublicUnit = (id: string) => {
+		const record = recordById.get(id);
+		return (
+			record?.status === "published" &&
+			record.visibility === "public" &&
+			record.moderationStatus === "approved"
+		);
+	};
 	if ([...labelIds].some((id) => !isPublicKind(id, "label")))
 		throw new InvalidSearch(
 			"Search document label references must target public active Label Units",
@@ -114,6 +121,10 @@ async function ensureDocumentReferences(
 	if ([...realmIds].some((id) => !isPublicKind(id, "realm")))
 		throw new InvalidSearch(
 			"Search document Realm references must target public active Realms",
+		);
+	if (filterUnitIds.some((id) => !isPublicUnit(id)))
+		throw new InvalidSearch(
+			"Search document Filter references must target public active Units",
 		);
 }
 

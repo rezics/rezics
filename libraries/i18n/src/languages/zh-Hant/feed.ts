@@ -27,6 +27,11 @@ export default {
 			all: `所有${realmTerms.pluralLabel}`,
 			unnamed: `未命名${realmTerms.label}`,
 		},
+		tags: {
+			label: "標籤",
+			all: "所有標籤",
+			unnamed: "未命名標籤",
+		},
 	},
 	contentFilterLabel: "內容篩選",
 	contentFilterPlaceholder: "內容",

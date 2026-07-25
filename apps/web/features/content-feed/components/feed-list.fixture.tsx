@@ -1,7 +1,7 @@
 "use client";
 
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
-import type { GetApiFeedSort } from "@rezics/openapi-tanstack-query";
+import type { PostApiFeedQueryRequestSortEnum } from "@rezics/openapi-tanstack-query";
 import { useState, type ReactNode } from "react";
 
 import {
@@ -15,7 +15,7 @@ import { FeedListControls } from "@/features/content-feed/data/api-feed-list";
 import { useTranslation } from "@/i18n/client";
 
 function FullFeedListFixture() {
-	const [sort, setSort] = useState<GetApiFeedSort>("best");
+	const [sort, setSort] = useState<PostApiFeedQueryRequestSortEnum>("best");
 	const [languages, setLanguages] = useState<readonly ContentLanguage[]>([
 		ContentLanguageValues[0],
 	]);

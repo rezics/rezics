@@ -6,6 +6,7 @@ import {
 	feedLanguagesParser,
 	feedRealmIdsParser,
 	feedSortParser,
+	feedTagIdsParser,
 	searchParamsParsers,
 	SearchScopes,
 } from "./search-params";
@@ -21,6 +22,7 @@ describe("URL state parsers", () => {
 			"realm-a",
 			"realm-b",
 		]);
+		expect(feedTagIdsParser.parseServerSide("tag-a,tag-b")).toEqual(["tag-a", "tag-b"]);
 	});
 
 	it("parses search state through its declared vocabulary", () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import {
-	type GetApiFeedStatus200,
+	type PostApiFeedQueryStatus200,
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,7 +31,7 @@ import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
 import { parseFeedReaction } from "../model/feed-reaction";
 import { formatRelativeTime } from "../model/format-relative-time";
 
-export type FeedItem = GetApiFeedStatus200["items"][number];
+export type FeedItem = PostApiFeedQueryStatus200["items"][number];
 export type FeedPost = Extract<FeedItem, { itemType: "post" }>;
 export type FeedUnit = Extract<FeedItem, { itemType: "unit" }>;
 

@@ -10,10 +10,12 @@
 	"dependencies": {
 		"@rezics/avatar": "workspace:*",
 		"@rezics/block": "workspace:*",
+		"@rezics/filter": "workspace:*",
 		"@rezics/i18n": "workspace:*",
 		"@rezics/license": "workspace:*",
 		"@rezics/openapi-tanstack-query": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
+		"@rezics/search": "workspace:*",
 		"@rezics/slug": "workspace:*",
 		"@rezics/ui": "workspace:*",
 		"@tanstack/react-query": "^5.101.2",

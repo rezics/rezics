@@ -19,6 +19,7 @@ import {
 } from "@rezics/search";
 
 import { InvalidSearch } from "./errors";
+import { compileUnitFilterSearch } from "../filter/search";
 import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
 import { SearchCategories } from "./schema";
 
@@ -148,6 +149,28 @@ const TemplateDefinitions = {
 		maxPageSize: 50,
 		maxResultWindow: 10_000,
 	},
+	realm: {
+		id: "realm",
+		categories: ["units"],
+		fields: [...CommonFields],
+		constraints: [{ field: "kind", operator: "equals", value: "realm" }],
+		visible: new Set<SearchField>(["language", "tag"]),
+		defaultFacets: ["language", "tag"],
+		sorts: CommonSorts,
+		maxPageSize: 50,
+		maxResultWindow: 10_000,
+	},
+	zone: {
+		id: "zone",
+		categories: ["units"],
+		fields: [...CommonFields],
+		constraints: [{ field: "kind", operator: "equals", value: "zone" }],
+		visible: new Set<SearchField>(["language", "tag"]),
+		defaultFacets: ["language", "tag"],
+		sorts: CommonSorts,
+		maxPageSize: 50,
+		maxResultWindow: 10_000,
+	},
 } as const satisfies Record<SearchTemplateId, SearchTemplateDefinition>;
 
 const StaticOptions: Partial<Record<SearchField, readonly SearchScalar[]>> = {
@@ -194,22 +217,14 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 	if (!document.categories.every((category) => template.categories.includes(category)))
 		throw new InvalidSearch("Search document category is outside its template");
 	const allowedFields = new Set<SearchField>(template.fields);
-	for (const constraint of document.constraints) {
-		if (!allowedFields.has(constraint.field))
+	if (document.filter)
+		try {
+			compileUnitFilterSearch(document.filter);
+		} catch (cause) {
 			throw new InvalidSearch(
-				`Search constraint ${constraint.field} is outside its template`,
+				cause instanceof Error ? cause.message : "Search document Filter is unsupported",
 			);
-		const definition = fieldDefinition(constraint.field);
-		if (!definition.operators.includes(constraint.operator))
-			throw new InvalidSearch(
-				`Search constraint ${constraint.field} uses an unsupported operator`,
-			);
-		if (!definition.categories.some((category) => document.categories.includes(category)))
-			throw new InvalidSearch(
-				`Search constraint ${constraint.field} does not apply to its categories`,
-			);
-		validateFilterValue(constraint);
-	}
+		}
 	const fieldCounts = new Map<SearchField, number>();
 	for (const control of document.controls) {
 		if (!allowedFields.has(control.field))
@@ -265,7 +280,6 @@ export function createDefaultSearchDocument(templateId: SearchTemplateId): Searc
 		categories: [...template.categories],
 		modes: { available: ["basic", "advanced"], default: "basic" },
 		query: { enabled: true },
-		constraints: [],
 		defaults: [],
 		controls,
 		sections: [
@@ -567,7 +581,7 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 		throw new InvalidSearch(`Search mode ${mode} is unavailable`);
 	if (!input.document.query.enabled && input.state.query)
 		throw new InvalidSearch("This Search document does not accept a query");
-	const query = input.state.query ?? input.document.query.initial ?? "";
+	const query = input.state.query ?? "";
 	if (input.document.query.required && !query.trim())
 		throw new InvalidSearch("Search query is required");
 	const sort = input.state.sort ?? input.document.sort.default;
@@ -628,6 +642,20 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 		if (control.required && control.modes.includes(mode) && !used.has(control.key))
 			throw new InvalidSearch(`Required Search control ${control.key} is missing`);
 
+	if (input.document.filter) {
+		let documentExpression: SearchExpression;
+		try {
+			documentExpression = compileUnitFilterSearch(input.document.filter);
+		} catch (cause) {
+			throw new InvalidSearch(
+				cause instanceof Error ? cause.message : "Search document Filter is unsupported",
+			);
+		}
+		expression = expression
+			? { operator: "all", clauses: [documentExpression, expression] }
+			: documentExpression;
+	}
+
 	const context = scopeForContexts(input.contexts);
 	if (context.contextExpression)
 		expression = expression
@@ -650,11 +678,7 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			categories: input.document.categories,
 			mode,
 			query,
-			constraints: [
-				...template.constraints,
-				...input.document.constraints,
-				...context.contextFilters,
-			],
+			constraints: [...template.constraints, ...context.contextFilters],
 			expression,
 			sort,
 			pageSize,

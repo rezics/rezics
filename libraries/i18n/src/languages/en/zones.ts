@@ -4,6 +4,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: postTerms } = enTerminology.post;
+const { forms: realmTerms } = enTerminology.realm;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
 
@@ -102,7 +103,14 @@ export default {
 		},
 		search: {
 			template: "Search template",
-			templates: { global: "Global", book: "Book", media: "Media", software: "Software" },
+			templates: {
+				global: "Global",
+				book: "Book",
+				media: "Media",
+				software: "Software",
+				realm: realmTerms.label,
+				zone: zoneTerms.label,
+			},
 			enabled: `Enable ${zoneTerms.inline} search`,
 			controls: "Search fields",
 			controlEnabled: "Enable field",
@@ -174,6 +182,8 @@ export default {
 				book: "Book template",
 				media: "Media template",
 				software: "Software template",
+				realm: `${realmTerms.label} template`,
+				zone: `${zoneTerms.label} template`,
 			},
 			appearances: {
 				inline: "Inline",

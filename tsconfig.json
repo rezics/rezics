@@ -32,6 +32,9 @@
 			"path": "./libraries/block"
 		},
 		{
+			"path": "./libraries/filter"
+		},
+		{
 			"path": "./libraries/search"
 		},
 		{

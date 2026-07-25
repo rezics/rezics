@@ -19,6 +19,7 @@ import { InvalidSearch } from "./errors";
 import { getActiveSearchGeneration } from "./generation";
 import { SearchCategories, type SearchCategory } from "./schema";
 import { searchDomain, searchDomainFacets } from "./service";
+import { compileUnitFilterSearch } from "../filter/search";
 
 const modes = ["basic", "advanced"] as const;
 
@@ -200,6 +201,7 @@ function combineExpressions(
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	categories: SearchCategory[];
 	filters: SearchFilter[];
+	expression?: SearchExpression;
 	scopeUnitId?: string;
 	includeScopeDescendants?: boolean;
 }> {
@@ -229,7 +231,8 @@ async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 		categories: compiled.categories.filter((category) =>
 			boundary.categories.includes(category),
 		),
-		filters: boundary.filters,
+		filters: [],
+		...(boundary.filter ? { expression: compileUnitFilterSearch(boundary.filter) } : {}),
 	};
 }
 
@@ -273,7 +276,13 @@ export async function executeCompiledSearch(
 		includeScopeDescendants: configuredScope.includeScopeDescendants,
 	};
 	const fixedExpression = combineFilters([...compiled.constraints, ...scope.filters]);
-	const expression = combineExpressions(fixedExpression, compiled.expression);
+	const expression = combineExpressions(
+		combineExpressions(
+			fixedExpression,
+			combineExpressions(configuredScope.expression, hostScope?.expression),
+		),
+		compiled.expression,
+	);
 	const generation = await getActiveSearchGeneration("current");
 	const requestHash = createHash("sha256")
 		.update(

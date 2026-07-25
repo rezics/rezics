@@ -1177,7 +1177,7 @@ async function seedToaruWiki(
 	await tx
 		.update(zone)
 		.set({
-			boundaryDocument: createZoneBoundaryDocument(["units"], [], "a10000000001"),
+			boundaryDocument: createZoneBoundaryDocument(["units"], undefined, "a10000000001"),
 			themeDocument: createZoneThemeDocument(
 				{ accent: "#2563eb", colorScheme: "dark", density: "compact" },
 				"a10000000002",

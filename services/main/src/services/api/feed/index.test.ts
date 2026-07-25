@@ -119,6 +119,66 @@ describe("feed eligibility SQL", () => {
 			expect.arrayContaining(["review", contextUnitId, 8, 9, 10, "general"]),
 		);
 	});
+
+	it("compiles Tag and displayed Score predicates from the public Filter tree", () => {
+		const realmId = "00000000-0000-4000-8000-000000000003";
+		const tagId = "00000000-0000-4000-8000-000000000004";
+		const query = dialect.sqlToQuery(
+			getFeedEligibilityCondition(
+				{
+					personalized: false,
+					contentRatings: ["general"],
+					preferredLanguages: [],
+				},
+				{
+					filter: {
+						all: [
+							{
+								tags: {
+									some: {
+										tag: { id: { in: [tagId] } },
+										authority: {
+											kind: "realm",
+											realm: { id: { in: [realmId] } },
+											view: {
+												kind: "community",
+												consensus: {
+													score: { range: { minimum: 1 } },
+												},
+											},
+										},
+									},
+								},
+							},
+							{
+								post: {
+									is: {
+										kind: { in: ["review"] },
+										scores: {
+											displayed: {
+												some: {
+													context: { id: { in: [realmId] } },
+													value: { in: [8, 9, 10] },
+												},
+											},
+										},
+									},
+								},
+							},
+						],
+					},
+				},
+				new Date("2026-07-16T00:00:00.000Z"),
+			),
+		);
+
+		expect(query.sql).toContain("realm_tag_vote_stat");
+		expect(query.sql).toContain("post_score filter_post_score");
+		expect(query.sql).toContain("score filter_score");
+		expect(query.params).toEqual(
+			expect.arrayContaining([tagId, realmId, 1, "review", realmId, 8, 9, 10]),
+		);
+	});
 });
 
 describe("feed candidate realm SQL", () => {

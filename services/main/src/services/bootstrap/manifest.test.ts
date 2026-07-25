@@ -68,11 +68,13 @@ describe("database bootstrap manifest", () => {
 		);
 	});
 
-	it("bootstraps exactly the three official libraries as renderable Zones", () => {
+	it("bootstraps the five official libraries as renderable Zones", () => {
 		expect(OfficialZoneManifest.map((value) => value.slug)).toEqual([
 			"book",
 			"media",
 			"software",
+			"realm",
+			"zone",
 		]);
 		expect(
 			OfficialZoneManifest.map((value) =>
@@ -91,19 +93,35 @@ describe("database bootstrap manifest", () => {
 				{ language: "zh", title: "軟體庫" },
 				{ language: "en", title: "Software Library" },
 			],
+			[
+				{ language: "zh", title: "領域庫" },
+				{ language: "en", title: "Realm Library" },
+			],
+			[
+				{ language: "zh", title: "專區庫" },
+				{ language: "en", title: "Zone Library" },
+			],
 		]);
 		expect(OfficialZoneManifest.map((value) => value.boundaryDocument)).toEqual([
 			expect.objectContaining({
 				categories: ["units"],
-				filters: [{ field: "kind", operator: "equals", value: "book" }],
+				filter: { kind: { in: ["book"] } },
 			}),
 			expect.objectContaining({
 				categories: ["units"],
-				filters: [{ field: "kind", operator: "equals", value: "media" }],
+				filter: { kind: { in: ["media"] } },
 			}),
 			expect.objectContaining({
 				categories: ["units"],
-				filters: [{ field: "kind", operator: "equals", value: "software" }],
+				filter: { kind: { in: ["software"] } },
+			}),
+			expect.objectContaining({
+				categories: ["units"],
+				filter: { kind: { in: ["realm"] } },
+			}),
+			expect.objectContaining({
+				categories: ["units"],
+				filter: { kind: { in: ["zone"] } },
 			}),
 		]);
 		for (const value of OfficialZoneManifest) {
@@ -127,6 +145,8 @@ describe("database bootstrap manifest", () => {
 			"book",
 			"media",
 			"software",
+			"realm",
+			"zone",
 		]);
 	});
 

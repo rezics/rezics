@@ -83,8 +83,8 @@ import type {
 	PatchApiApiTokenPoliciesByPolicyKeyResponses,
 	PutApiApiTokenPoliciesBindingsByTokenIdOptions,
 	PutApiApiTokenPoliciesBindingsByTokenIdResponses,
-	GetApiFeedOptions,
-	GetApiFeedResponses,
+	PostApiFeedQueryOptions,
+	PostApiFeedQueryResponses,
 	GetApiFeedbackMeOptions,
 	GetApiFeedbackMeResponses,
 	PostApiFeedbackOptions,
@@ -1331,15 +1331,15 @@ export function putApiApiTokenPoliciesBindingsByTokenId<ThrowOnError extends boo
 
 /**
  * @summary Ranked realm feed
- * {@link /api/feed}
+ * {@link /api/feed/query}
  */
-export function getApiFeed<ThrowOnError extends boolean = true>(
-	options: Options<GetApiFeedOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiFeedResponses, ThrowOnError>> {
+export function postApiFeedQuery<ThrowOnError extends boolean = true>(
+	options: Options<PostApiFeedQueryOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiFeedQueryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/feed", ...config }) as Promise<
-		RequestResult<GetApiFeedResponses, ThrowOnError>
+	return request({ method: "POST", url: "/api/feed/query", ...config }) as Promise<
+		RequestResult<PostApiFeedQueryResponses, ThrowOnError>
 	>;
 }
 

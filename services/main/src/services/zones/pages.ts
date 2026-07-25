@@ -5,6 +5,7 @@ import {
 	ZonePageBlockHostPolicy,
 	assertUnitReferencedBlockDocument,
 	parseDocument,
+	walkBlockTree,
 	type UnitReferencedBlockDocument as UnitReferencedBlockDocumentValue,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
@@ -71,6 +72,22 @@ interface StoredZonePageLocalization {
 	readonly title: string | null;
 	readonly content: unknown;
 	readonly contentStatus: "draft" | "published" | "archived" | null;
+}
+
+function hasFeedBlock(document: UnitReferencedBlockDocumentValue): boolean {
+	let found = false;
+	walkBlockTree(document, (block) => {
+		if (block._type === "feed") found = true;
+	});
+	return found;
+}
+
+function pagesHaveReachableFeed(pages: readonly ZonePageProjection[]): boolean {
+	return pages.some(
+		(page) =>
+			page.placement !== null &&
+			page.localizations.some((localization) => hasFeedBlock(localization.document)),
+	);
 }
 
 export interface ZonePagePlacementProjection {
@@ -459,6 +476,9 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 			}
 		}
 
+		const zonePages = await listZonePageUnits(tx, input.zoneId);
+		if (!pagesHaveReachableFeed(zonePages))
+			throw new ContentStructureInvalid("Every Zone requires at least one Feed Page");
 		const saved = await getZonePageUnitById(
 			tx,
 			input.zoneId,
@@ -567,6 +587,11 @@ export async function deleteZonePagePlacement(input: {
 			)
 			.limit(1);
 		if (child) throw new ContentStructureInvalid("Move child Pages before removing this index");
+		const remainingReachablePages = (await listZonePageUnits(tx, input.zoneId)).filter(
+			(page) => page.id !== input.pageId,
+		);
+		if (!pagesHaveReachableFeed(remainingReachablePages))
+			throw new ContentStructureInvalid("Every Zone requires at least one Feed Page");
 		await deleteContentStructureNode(tx, {
 			ownerUnitId: input.zoneId,
 			structureId: structure.id,
@@ -593,6 +618,11 @@ export async function deleteZonePageUnit(input: {
 			throw new ContentStructureInvalid(
 				"Remove the Zone Page from page-structure before deleting it",
 			);
+		const remainingPages = (await listZonePageUnits(tx, input.zoneId)).filter(
+			(candidate) => candidate.id !== input.pageId,
+		);
+		if (!pagesHaveReachableFeed(remainingPages))
+			throw new ContentStructureInvalid("Every Zone requires at least one Feed Page");
 		await input.ensureNotReferenced?.(tx);
 		await tx.update(unit).set({ deletedAt: new Date() }).where(eq(unit.id, input.pageId));
 		await recordUnitRevision(tx, {

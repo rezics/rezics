@@ -23,6 +23,7 @@
 		"@rezics/block": "workspace:*",
 		"@rezics/brand": "workspace:*",
 		"@rezics/email": "workspace:*",
+		"@rezics/filter": "workspace:*",
 		"@rezics/i18n": "workspace:*",
 		"@rezics/license": "workspace:*",
 		"@rezics/observability": "workspace:*",

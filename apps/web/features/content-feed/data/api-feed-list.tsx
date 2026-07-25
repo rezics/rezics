@@ -1,11 +1,12 @@
 "use client";
 
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
+import { createSimpleFeedFilter } from "@rezics/filter";
 import {
-	getApiFeed,
-	getApiFeedQueryKey,
-	type GetApiFeedSort,
+	postApiFeedQuery,
+	type PostApiFeedQueryRequestSortEnum,
 	useGetApiRealms,
+	useGetApiTags,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +17,7 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedFilterSelector, type FeedFilterOption } from "../components/feed-filter-selector";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
+import { FeedQueryKey } from "../query";
 
 const FeedSorts = [
 	"best",
@@ -23,16 +25,18 @@ const FeedSorts = [
 	"new",
 	"top",
 	"rising",
-] as const satisfies readonly GetApiFeedSort[];
+] as const satisfies readonly PostApiFeedQueryRequestSortEnum[];
 
 export interface ApiFeedListProps {
 	infinite?: boolean;
 	languages?: readonly ContentLanguage[];
 	onLanguagesChange?: (languages: readonly ContentLanguage[]) => void;
 	onRealmIdsChange?: (realmIds: readonly string[]) => void;
-	onSortChange?: (sort: GetApiFeedSort) => void;
+	onSortChange?: (sort: PostApiFeedQueryRequestSortEnum) => void;
+	onTagIdsChange?: (tagIds: readonly string[]) => void;
 	realmIds?: readonly string[];
-	sort?: GetApiFeedSort;
+	sort?: PostApiFeedQueryRequestSortEnum;
+	tagIds?: readonly string[];
 }
 
 export function ApiFeedList({
@@ -41,23 +45,27 @@ export function ApiFeedList({
 	onLanguagesChange,
 	onRealmIdsChange,
 	onSortChange,
+	onTagIdsChange,
 	realmIds = [],
 	sort = "best",
+	tagIds = [],
 }: ApiFeedListProps) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-	const baseQuery = {
+	const baseBody = {
 		limit: 20,
 		sort,
-		...(languages.length ? { languages: [...languages] } : {}),
-		...(realmIds.length ? { realmIds: [...realmIds] } : {}),
+		...(() => {
+			const filter = createSimpleFeedFilter({ languages, realmIds, tagIds });
+			return filter ? { filter } : {};
+		})(),
 	};
 	const query = useInfiniteQuery({
-		queryKey: getApiFeedQueryKey({ query: baseQuery }),
+		queryKey: [...FeedQueryKey, baseBody],
 		queryFn: async ({ pageParam, signal }) => {
-			const { data } = await getApiFeed({
-				query: { ...baseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
+			const { data } = await postApiFeedQuery({
+				body: { ...baseBody, ...(pageParam ? { cursor: pageParam } : {}) },
 				signal,
 			});
 			return data;
@@ -102,7 +110,9 @@ export function ApiFeedList({
 			else next.delete(id);
 			return next;
 		});
-	const showControls = Boolean(onSortChange || onLanguagesChange || onRealmIdsChange);
+	const showControls = Boolean(
+		onSortChange || onLanguagesChange || onRealmIdsChange || onTagIdsChange,
+	);
 	const requestedRealmId = realmIds.length === 1 ? realmIds[0] : undefined;
 
 	return (
@@ -111,6 +121,7 @@ export function ApiFeedList({
 			data-languages={languages.join(",")}
 			data-realms={realmIds.join(",")}
 			data-sort={sort}
+			data-tags={tagIds.join(",")}
 		>
 			{showControls ? (
 				<FeedListControls
@@ -118,8 +129,10 @@ export function ApiFeedList({
 					onLanguagesChange={onLanguagesChange}
 					onRealmIdsChange={onRealmIdsChange}
 					onSortChange={onSortChange}
+					onTagIdsChange={onTagIdsChange}
 					realmIds={realmIds}
 					sort={sort}
+					tagIds={tagIds}
 				/>
 			) : null}
 			<FeedList
@@ -196,21 +209,34 @@ export function FeedListControls({
 	onLanguagesChange,
 	onRealmIdsChange,
 	onSortChange,
+	onTagIdsChange,
 	realmIds = [],
 	sort,
+	tagIds = [],
 }: Pick<
 	ApiFeedListProps,
-	"languages" | "onLanguagesChange" | "onRealmIdsChange" | "onSortChange" | "realmIds" | "sort"
+	| "languages"
+	| "onLanguagesChange"
+	| "onRealmIdsChange"
+	| "onSortChange"
+	| "onTagIdsChange"
+	| "realmIds"
+	| "sort"
+	| "tagIds"
 >) {
 	const { t } = useTranslation(["feed"]);
 	const realms = useGetApiRealms(
 		{ query: { limit: 50 } },
 		{ query: { enabled: Boolean(onRealmIdsChange) } },
 	);
+	const tags = useGetApiTags(
+		{ query: { limit: 50 } },
+		{ query: { enabled: Boolean(onTagIdsChange) } },
+	);
 	const sortOptions = FeedSorts.map((value) => ({
 		value,
 		label: t.feed.sort[value],
-	})) satisfies readonly FeedFilterOption<GetApiFeedSort>[];
+	})) satisfies readonly FeedFilterOption<PostApiFeedQueryRequestSortEnum>[];
 	const languageOptions = ContentLanguageValues.map((value) => ({
 		value,
 		label: t.feed.filters.languages.options[value],
@@ -219,6 +245,11 @@ export function FeedListControls({
 		realms.data?.items.map((realm) => ({
 			value: realm.id,
 			label: realm.title ?? t.feed.filters.realms.unnamed,
+		})) ?? [];
+	const tagOptions =
+		tags.data?.items.map((tag) => ({
+			value: tag.id,
+			label: tag.title ?? t.feed.filters.tags.unnamed,
 		})) ?? [];
 
 	return (
@@ -262,6 +293,18 @@ export function FeedListControls({
 					selectedCountLabel={(count) => t.feed.filters.selectedCount({ count })}
 					unfilteredLabel={t.feed.filters.realms.all}
 					value={realmIds}
+				/>
+			) : null}
+			{onTagIdsChange && tagOptions.length ? (
+				<FeedFilterSelector
+					ariaLabel={t.feed.filters.tags.label}
+					clearLabel={t.feed.filters.clear}
+					groupLabel={t.feed.filters.tags.label}
+					onValueChange={onTagIdsChange}
+					options={tagOptions}
+					selectedCountLabel={(count) => t.feed.filters.selectedCount({ count })}
+					unfilteredLabel={t.feed.filters.tags.all}
+					value={tagIds}
 				/>
 			) : null}
 		</div>
