@@ -1,0 +1,279 @@
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+
+import type { DatabaseTransaction } from "../database";
+import {
+	contentStructure,
+	contentStructureNode,
+	post,
+	unitAccessBinding,
+	unitLocalization,
+} from "../database/schema";
+import { isPrimaryUnitLocalization } from "../units/localization";
+import { insertUnit } from "../units/create";
+import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
+import { applyNewPostTagMentionVotes } from "../posts/tag-mentions";
+import { createProfilePublisherAttribution } from "../units/attribution";
+import { recordUnitRevision } from "../units/history";
+import { diffContentStructureSnapshots } from "./contracts";
+import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
+import { mutateContentStructureWithHistory } from "./history";
+import { loadContentStructureSnapshot } from "./storage";
+import {
+	planBookContentStructureDraft,
+	type BookDraftNode,
+	type NewBookDraftNode,
+} from "./book-draft-plan";
+
+export type SaveBookContentStructureDraftInput = {
+	readonly ownerUnitId: string;
+	readonly baseRevisionId: string;
+	readonly actorProfileId: string;
+	readonly nodes: readonly BookDraftNode[];
+};
+
+async function createBookDraftContentUnit(
+	tx: DatabaseTransaction,
+	input: {
+		readonly bookId: string;
+		readonly actorProfileId: string;
+		readonly node: NewBookDraftNode;
+	},
+): Promise<string> {
+	const isChapter = input.node.contentKind === "chapter";
+	const published = isChapter ? input.node.status === "published" : true;
+	const created = await insertUnit(tx, {
+		kind: "post",
+		status: published ? "published" : "draft",
+		visibility: "public",
+		publishedAt: published ? new Date() : null,
+		statusActor: { kind: "profile", profileId: input.actorProfileId },
+	});
+	await ensureSubjectPostTargetingAllowed(tx, {
+		sourcePostId: created.id,
+		subjectUnitId: input.bookId,
+	});
+	await tx.insert(post).values({
+		id: created.id,
+		subjectUnitId: input.bookId,
+		kind: input.node.contentKind,
+	});
+	await tx.insert(unitLocalization).values({
+		unitId: created.id,
+		language: input.node.language,
+		title: input.node.title,
+		content: input.node.content,
+		contentStatus: isChapter ? input.node.status : undefined,
+	});
+	if (input.node.contentKind === "chapter")
+		await applyNewPostTagMentionVotes(tx, {
+			postId: created.id,
+			profileId: input.actorProfileId,
+			nextBody: input.node.content,
+		});
+	await tx.insert(unitAccessBinding).values({
+		unitId: created.id,
+		subjectKind: "profile",
+		profileId: input.actorProfileId,
+		role: "owner",
+		scope: [],
+		grantedByProfileId: input.actorProfileId,
+	});
+	await createProfilePublisherAttribution(tx, {
+		sourceUnitId: created.id,
+		profileId: input.actorProfileId,
+	});
+	await recordUnitRevision(tx, {
+		unitId: created.id,
+		actorProfileId: input.actorProfileId,
+		event: "create",
+	});
+	return created.id;
+}
+
+/**
+ * Persists one complete Book Content Structure draft and commits at most one
+ * Content Structure revision.
+ *
+ * @remarks
+ * The base revision check, new content creation, renames, hierarchy changes,
+ * ordering changes, and revision commit all execute in the caller's transaction.
+ * A semantic no-op performs no writes and creates no revision.
+ */
+export async function saveBookContentStructureDraft(
+	tx: DatabaseTransaction,
+	input: SaveBookContentStructureDraftInput,
+) {
+	const [structure] = await tx
+		.select()
+		.from(contentStructure)
+		.where(
+			and(
+				eq(contentStructure.ownerUnitId, input.ownerUnitId),
+				eq(contentStructure.kind, "book.contents"),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.limit(1);
+	if (!structure) throw new ContentStructureNotFound();
+
+	return mutateContentStructureWithHistory(
+		tx,
+		{
+			structureId: structure.id,
+			baseRevisionId: input.baseRevisionId,
+			actorProfileId: input.actorProfileId,
+		},
+		async () => {
+			const before = await loadContentStructureSnapshot(tx, {
+				structureId: structure.id,
+				ownerUnitId: input.ownerUnitId,
+			});
+			if (before.structure.kind !== "book.contents")
+				throw new ContentStructureInvalid("Book draft targets a non-Book structure");
+			const currentRows = await tx
+				.select({
+					id: contentStructureNode.id,
+					contentUnitId: contentStructureNode.contentUnitId,
+					parentId: contentStructureNode.parentId,
+					position: contentStructureNode.position,
+					title: unitLocalization.title,
+					contentKind: post.kind,
+				})
+				.from(contentStructureNode)
+				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+				.innerJoin(
+					unitLocalization,
+					and(
+						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
+					),
+				)
+				.where(
+					and(
+						eq(contentStructureNode.structureId, structure.id),
+						isNull(contentStructureNode.deletedAt),
+					),
+				)
+				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+			if (
+				currentRows.some(
+					(row) =>
+						row.title === null ||
+						(row.contentKind !== "chapter" && row.contentKind !== "chapter_group"),
+				)
+			)
+				throw new ContentStructureInvalid("Book structure contains invalid content nodes");
+			const current = currentRows.map((row) => ({
+				id: row.id,
+				parentId: row.parentId,
+				position: row.position,
+				title: row.title ?? "",
+			}));
+			const plan = planBookContentStructureDraft(current, input.nodes);
+			if (!plan.hasChanges) return { result: {} };
+
+			const currentById = new Map(currentRows.map((row) => [row.id, row]));
+			const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
+			const newNodeIds = plan.nodes
+				.filter((node) => node.state === "new")
+				.map(({ id }) => id);
+			const collidingNewNodes = newNodeIds.length
+				? await tx
+						.select({ id: contentStructureNode.id })
+						.from(contentStructureNode)
+						.where(inArray(contentStructureNode.id, newNodeIds))
+						.limit(1)
+				: [];
+			if (collidingNewNodes.length)
+				throw new ContentStructureInvalid("New Book draft node ID already exists");
+			for (const node of plan.nodes) {
+				if (node.state !== "new") continue;
+				const contentUnitId = await createBookDraftContentUnit(tx, {
+					bookId: input.ownerUnitId,
+					actorProfileId: input.actorProfileId,
+					node,
+				});
+				contentUnitIds.set(node.id, contentUnitId);
+				await tx.insert(contentStructureNode).values({
+					id: node.id,
+					structureId: structure.id,
+					ownerUnitId: input.ownerUnitId,
+					parentId: null,
+					contentUnitId,
+					position: node.position,
+				});
+			}
+
+			for (const node of plan.nodes) {
+				const currentNode = currentById.get(node.id);
+				if (
+					currentNode &&
+					currentNode.parentId === node.parentId &&
+					currentNode.position === node.position
+				)
+					continue;
+				await tx
+					.update(contentStructureNode)
+					.set({ parentId: node.parentId, position: node.position })
+					.where(
+						and(
+							eq(contentStructureNode.id, node.id),
+							eq(contentStructureNode.structureId, structure.id),
+							isNull(contentStructureNode.deletedAt),
+						),
+					);
+			}
+
+			for (const nodeId of plan.renamedExistingNodeIds) {
+				const node = plan.nodes.find((candidate) => candidate.id === nodeId);
+				const contentUnitId = contentUnitIds.get(nodeId);
+				if (!node || !contentUnitId)
+					throw new ContentStructureInvalid("Renamed Book node is unavailable");
+				const updated = await tx
+					.update(unitLocalization)
+					.set({ title: node.title })
+					.where(
+						and(
+							eq(unitLocalization.unitId, contentUnitId),
+							isPrimaryUnitLocalization(unitLocalization.unitId),
+						),
+					)
+					.returning({ unitId: unitLocalization.unitId });
+				if (!updated.length)
+					throw new ContentStructureInvalid("Renamed Book localization is unavailable");
+				await recordUnitRevision(tx, {
+					unitId: contentUnitId,
+					actorProfileId: input.actorProfileId,
+					event: "update",
+				});
+			}
+
+			const nextUpdatedAt = new Date(
+				Math.max(Date.now(), before.structure.updatedAt.getTime() + 1),
+			);
+			await tx
+				.update(contentStructure)
+				.set({ updatedAt: nextUpdatedAt })
+				.where(eq(contentStructure.id, structure.id));
+			const after = await loadContentStructureSnapshot(tx, {
+				structureId: structure.id,
+				ownerUnitId: input.ownerUnitId,
+			});
+			const delta = diffContentStructureSnapshots(before, after);
+			if (!delta)
+				throw new Error("Changed Book Content Structure draft produced no revision delta");
+			return {
+				result: {},
+				change: {
+					kind: "delta" as const,
+					delta,
+					checkpoint: () =>
+						loadContentStructureSnapshot(tx, {
+							structureId: structure.id,
+							ownerUnitId: input.ownerUnitId,
+						}),
+				},
+			};
+		},
+	);
+}

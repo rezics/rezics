@@ -367,6 +367,7 @@ export const UnitDetailResponse = t.Object({
 		canEdit: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageAssociations: t.Boolean(),
+		canPreviewContentStructure: t.Boolean(),
 	}),
 });
 
@@ -896,20 +897,25 @@ export const ReviewDetailResponse = t.Object({
 		canManageScores: t.Boolean(),
 	}),
 });
+const BookContentStructureNodeResponse = t.Object({
+	id: Uuid,
+	parentId: t.Nullable(Uuid),
+	contentUnitId: Uuid,
+	contentKind: t.Union([t.Literal("chapter"), t.Literal("chapter_group")]),
+	language: ContentLanguage,
+	title: t.String(),
+	position: FractionalPosition,
+});
 export const ContentStructureNodeListResponse = t.Object({
 	structureId: t.Nullable(Uuid),
 	latestRevisionId: t.Nullable(Uuid),
-	items: t.Array(
-		t.Object({
-			id: Uuid,
-			parentId: t.Nullable(Uuid),
-			contentUnitId: Uuid,
-			contentKind: t.Union([t.Literal("chapter"), t.Literal("chapter_group")]),
-			language: ContentLanguage,
-			title: t.String(),
-			position: FractionalPosition,
-		}),
-	),
+	items: t.Array(BookContentStructureNodeResponse),
+});
+export const SaveBookContentStructureDraftResponse = t.Object({
+	structureId: Uuid,
+	latestRevisionId: Uuid,
+	revisionCreated: t.Boolean(),
+	items: t.Array(BookContentStructureNodeResponse),
 });
 const GenericContentStructureTargetResponse = t.Union([
 	t.Object({ kind: t.Literal("content") }, { additionalProperties: false }),

@@ -381,9 +381,22 @@ export const EntityAssociationPolicyModeValues = [
 ] as const;
 export const AssociationProposalDirectionValues = ["request", "invitation"] as const;
 export const AssociationProposalResolutionValues = ["accepted", "declined", "cancelled"] as const;
+
+/**
+ * Grants access to unreleased Content Structure APIs for Unit types whose
+ * editors are still under development.
+ *
+ * @alpha
+ * @remarks
+ * This capability is a runtime authorization boundary. The annotation only
+ * communicates release maturity and must never be treated as access control.
+ */
+export const ContentStructurePreviewCapability = "unit.content_structure.preview" as const;
+
 export const PlatformCapabilityValues = [
 	"entity.associations.override",
 	"unit.edit",
+	ContentStructurePreviewCapability,
 	"unit.ownership.transfer",
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",

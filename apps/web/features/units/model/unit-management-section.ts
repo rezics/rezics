@@ -31,7 +31,7 @@ export function getUnitManagementSectionIds(
 		if (sectionId === "basic" || sectionId === "localizations") return capabilities.canEdit;
 		if (sectionId === "relationships")
 			return capabilities.canEdit || capabilities.canManageAssociations;
-		if (sectionId === "content-structure") return type === "book" && capabilities.canEdit;
+		if (sectionId === "content-structure") return type !== "series" && capabilities.canEdit;
 		if (sectionId === "releases") return type === "series" && capabilities.canEdit;
 		if (sectionId === "access") return capabilities.canManageAccess;
 		return true;

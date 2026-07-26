@@ -26461,6 +26461,7 @@ export type PostApiGovernanceGrantsRequestAuthorityEnum =
 export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
+	"unit.content_structure.preview": "unit.content_structure.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -35337,6 +35338,7 @@ export type GetApiUsersMeStatus200AvatarIconPrefixEnum =
 export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
+	"unit.content_structure.preview": "unit.content_structure.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -38658,6 +38660,7 @@ export type DeleteApiUsersByIdBlockResponse =
 export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
+	"unit.content_structure.preview": "unit.content_structure.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -38767,6 +38770,7 @@ export type GetApiStaffProfilesQuery = {
 export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
+	"unit.content_structure.preview": "unit.content_structure.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -38902,6 +38906,7 @@ export type GetApiStaffProfilesResponse =
 export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
+	"unit.content_structure.preview": "unit.content_structure.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -39040,6 +39045,7 @@ export type PutApiStaffMembersByProfileIdPath = {
 export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
+	"unit.content_structure.preview": "unit.content_structure.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -39232,6 +39238,7 @@ export type PutApiStaffMembersByProfileIdStatus500 = InternalError;
 export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
+	"unit.content_structure.preview": "unit.content_structure.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -45493,6 +45500,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canPreviewContentStructure: boolean;
 	};
 };
 
@@ -46980,6 +46991,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canPreviewContentStructure: boolean;
 	};
 };
 
@@ -48066,6 +48081,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canPreviewContentStructure: boolean;
 	};
 };
 
@@ -49632,6 +49651,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canPreviewContentStructure: boolean;
 	};
 };
 
@@ -50888,6 +50911,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canPreviewContentStructure: boolean;
 	};
 };
 
@@ -52149,6 +52176,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canPreviewContentStructure: boolean;
 	};
 };
 
@@ -59947,6 +59978,43 @@ export type GetApiUnitsByIdByUnitIdContentStructuresStatus200 = {
 	}[];
 };
 
+export const GetApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum =
+	(typeof GetApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum)[keyof typeof GetApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdContentStructuresStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -60000,6 +60068,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresOptions = {
  */
 export type GetApiUnitsByIdByUnitIdContentStructuresResponses = {
 	"200": GetApiUnitsByIdByUnitIdContentStructuresStatus200;
+	"403": GetApiUnitsByIdByUnitIdContentStructuresStatus403;
 	"404": GetApiUnitsByIdByUnitIdContentStructuresStatus404;
 	"422": GetApiUnitsByIdByUnitIdContentStructuresStatus422;
 	"500": GetApiUnitsByIdByUnitIdContentStructuresStatus500;
@@ -60010,6 +60079,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresResponses = {
  */
 export type GetApiUnitsByIdByUnitIdContentStructuresResponse =
 	| GetApiUnitsByIdByUnitIdContentStructuresStatus200
+	| GetApiUnitsByIdByUnitIdContentStructuresStatus403
 	| GetApiUnitsByIdByUnitIdContentStructuresStatus404
 	| GetApiUnitsByIdByUnitIdContentStructuresStatus422
 	| GetApiUnitsByIdByUnitIdContentStructuresStatus500;
@@ -60092,6 +60162,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresStatus400 = MalformedReques
 export const PostApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
 export type PostApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum =
@@ -60427,6 +60498,43 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200 = {
 	}[];
 };
 
+export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum =
+	(typeof GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum)[keyof typeof GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ContentStructureNotFound: "ContentStructureNotFound",
@@ -60488,6 +60596,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions = {
  */
 export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses = {
 	"200": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200;
+	"403": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403;
 	"404": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404;
 	"422": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422;
 	"500": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500;
@@ -60498,6 +60607,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses = {
  */
 export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponse =
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200
+	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500;
@@ -60549,6 +60659,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400 =
 export const DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum =
@@ -60828,6 +60939,44 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus
 	}[];
 };
 
+export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403ErrorCodeEnum =
+	{
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+		UnitProtected: "UnitProtected",
+		PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	} as const;
+
+export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403ErrorCodeEnum =
+	(typeof GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403ErrorCodeEnum)[keyof typeof GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus404ErrorCodeEnum =
 	{
 		UnitNotFound: "UnitNotFound",
@@ -60891,6 +61040,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOption
  */
 export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses = {
 	"200": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200;
+	"403": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403;
 	"404": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus404;
 	"422": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus422;
 	"500": GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus500;
@@ -60901,6 +61051,7 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsRespon
  */
 export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponse =
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200
+	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus404
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus422
 	| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus500;
@@ -60961,6 +61112,7 @@ export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRe
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
 		UnitProtected: "UnitProtected",
+		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	} as const;
 
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
@@ -61303,6 +61455,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403ErrorCodeEnum =
@@ -61753,6 +61906,7 @@ export const PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
 		UnitProtected: "UnitProtected",
+		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	} as const;
 
 export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403ErrorCodeEnum =
@@ -62079,6 +62233,7 @@ export const DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNode
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
 		UnitProtected: "UnitProtected",
+		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	} as const;
 
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403ErrorCodeEnum =
@@ -62406,7 +62561,7 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesResponse =
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesPath = {
+export type PutApiUnitsBookByUnitIdContentStructurePath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -62415,38 +62570,26 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesPath = {
 	unitId: string;
 };
 
-export const PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum = {
+export const PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum = {
 	chapter: "chapter",
 	chapter_group: "chapter_group",
 } as const;
 
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum =
-	(typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum];
+export type PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum];
 
-export const PostApiUnitsBookByUnitIdContentStructureNodesStatus200LanguageEnum = {
+export const PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
 } as const;
 
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200LanguageEnum =
-	(typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus200LanguageEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus200LanguageEnum];
+export type PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
+export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -62459,64 +62602,67 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 	 * @type string
 	 */
 	latestRevisionId: string;
-	parentId: (string | null) | null;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @type boolean
 	 */
-	contentUnitId: string;
+	revisionCreated: boolean;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	contentKind: PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum;
-	/**
-	 * @type string
-	 */
-	language: PostApiUnitsBookByUnitIdContentStructureNodesStatus200LanguageEnum;
-	/**
-	 * @type string
-	 */
-	title: string;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string
-	 */
-	position: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		parentId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contentUnitId: string;
+		/**
+		 * @type string
+		 */
+		contentKind: PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum;
+		/**
+		 * @type string
+		 */
+		language: PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum;
+		/**
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+	}[];
 };
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus400 = MalformedRequestBody;
+export type PutApiUnitsBookByUnitIdContentStructureStatus400 = MalformedRequestBody;
 
-export const PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum = {
+export const PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
 
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum];
+export type PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403 = {
+export type PutApiUnitsBookByUnitIdContentStructureStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -62525,7 +62671,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum;
+		code: PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -62544,7 +62690,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403 = {
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus404 = {
+export type PutApiUnitsBookByUnitIdContentStructureStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -62569,18 +62715,19 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus404 = {
 	requestId: string;
 };
 
-export const PostApiUnitsBookByUnitIdContentStructureNodesStatus409ErrorCodeEnum = {
+export const PutApiUnitsBookByUnitIdContentStructureStatus409ErrorCodeEnum = {
 	PostTargetingLocked: "PostTargetingLocked",
+	PostTagMentionVoteConflict: "PostTagMentionVoteConflict",
 	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
 } as const;
 
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus409ErrorCodeEnum =
-	(typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus409ErrorCodeEnum];
+export type PutApiUnitsBookByUnitIdContentStructureStatus409ErrorCodeEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureStatus409ErrorCodeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus409 = {
+export type PutApiUnitsBookByUnitIdContentStructureStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -62589,7 +62736,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus409 = {
 		 * @default 'PostTargetingLocked'
 		 * @type string
 		 */
-		code: PostApiUnitsBookByUnitIdContentStructureNodesStatus409ErrorCodeEnum;
+		code: PutApiUnitsBookByUnitIdContentStructureStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -62605,15 +62752,37 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus422 = ValidationError;
+export type PutApiUnitsBookByUnitIdContentStructureStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ContentStructureInvalid'
+				 * @type string
+				 */
+				code: "ContentStructureInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus429 = {
+export type PutApiUnitsBookByUnitIdContentStructureStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -62637,28 +62806,12 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus429 = {
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesStatus500 = InternalError;
-
-export const PostApiUnitsBookByUnitIdContentStructureNodesRequestLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PostApiUnitsBookByUnitIdContentStructureNodesRequestLanguageEnum =
-	(typeof PostApiUnitsBookByUnitIdContentStructureNodesRequestLanguageEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesRequestLanguageEnum];
-
-export const PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum = {
-	draft: "draft",
-	published: "published",
-} as const;
-
-export type PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum =
-	(typeof PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum];
+export type PutApiUnitsBookByUnitIdContentStructureStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesBody = {
+export type PutApiUnitsBookByUnitIdContentStructureBody = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -62666,59 +62819,95 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesBody = {
 	 */
 	baseRevisionId: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
+	 * @type array
 	 */
-	parentId?: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 500
-	 * @type string
-	 */
-	title: string;
-	/**
-	 * @type string
-	 */
-	language: PostApiUnitsBookByUnitIdContentStructureNodesRequestLanguageEnum;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string | undefined
-	 */
-	position?: string;
-	/**
-	 * @type object | undefined
-	 */
-	content?: {
-		/**
-		 * @type string
-		 */
-		_type: "portable-text";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		content: (
-			| {
+	nodes: (
+		| {
+				/**
+				 * @type string
+				 */
+				state: "existing";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				state: "new";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				contentKind: "chapter_group";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				state: "new";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				contentKind: "chapter";
+				/**
+				 * @type object
+				 */
+				content: {
 					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
 					 * @type string
 					 */
 					_key: string;
 					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
 					 * @type array
 					 */
-					children: (
+					content: (
 						| {
 								/**
 								 * @type string
@@ -62727,15 +62916,73 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesBody = {
 								/**
 								 * @type string
 								 */
-								_type: "span";
+								_type: "block";
 								/**
-								 * @type string
+								 * @type array
 								 */
-								text: string;
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
 								/**
 								 * @type array | undefined
 								 */
-								marks?: string[];
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
 						  }
 						| {
 								/**
@@ -62745,92 +62992,46 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesBody = {
 								/**
 								 * @type string
 								 */
-								_type: "unit-mention";
+								_type: "image";
 								/**
 								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 								 * @type string
 								 */
-								unitId: string;
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
 						  }
 					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "image";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					assetId: string;
-					/**
-					 * @type string | undefined
-					 */
-					alt?: string;
-					/**
-					 * @type string | undefined
-					 */
-					caption?: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @pattern ^(?!(?:block|image)$).+
-					 * @type string
-					 */
-					_type: string;
-					[key: string]: unknown;
-			  }
-		)[];
-	};
-	/**
-	 * @type string | undefined
-	 */
-	status?: PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum;
+				};
+				status: "draft" | "published";
+		  }
+	)[];
 };
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesOptions = {
-	body: PostApiUnitsBookByUnitIdContentStructureNodesBody;
-	path: PostApiUnitsBookByUnitIdContentStructureNodesPath;
+export type PutApiUnitsBookByUnitIdContentStructureOptions = {
+	body: PutApiUnitsBookByUnitIdContentStructureBody;
+	path: PutApiUnitsBookByUnitIdContentStructurePath;
 	query?: never;
 	headers?: never;
 };
@@ -62838,341 +63039,29 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesOptions = {
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesResponses = {
-	"200": PostApiUnitsBookByUnitIdContentStructureNodesStatus200;
-	"400": PostApiUnitsBookByUnitIdContentStructureNodesStatus400;
-	"403": PostApiUnitsBookByUnitIdContentStructureNodesStatus403;
-	"404": PostApiUnitsBookByUnitIdContentStructureNodesStatus404;
-	"409": PostApiUnitsBookByUnitIdContentStructureNodesStatus409;
-	"422": PostApiUnitsBookByUnitIdContentStructureNodesStatus422;
-	"429": PostApiUnitsBookByUnitIdContentStructureNodesStatus429;
-	"500": PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
+export type PutApiUnitsBookByUnitIdContentStructureResponses = {
+	"200": PutApiUnitsBookByUnitIdContentStructureStatus200;
+	"400": PutApiUnitsBookByUnitIdContentStructureStatus400;
+	"403": PutApiUnitsBookByUnitIdContentStructureStatus403;
+	"404": PutApiUnitsBookByUnitIdContentStructureStatus404;
+	"409": PutApiUnitsBookByUnitIdContentStructureStatus409;
+	"422": PutApiUnitsBookByUnitIdContentStructureStatus422;
+	"429": PutApiUnitsBookByUnitIdContentStructureStatus429;
+	"500": PutApiUnitsBookByUnitIdContentStructureStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiUnitsBookByUnitIdContentStructureNodesResponse =
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus200
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
-	| PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	nodeId: string;
-};
-
-export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum = {
-	chapter: "chapter",
-	chapter_group: "chapter_group",
-} as const;
-
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum =
-	(typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum];
-
-export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200LanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200LanguageEnum =
-	(typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200LanguageEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200LanguageEnum];
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	structureId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	latestRevisionId: string;
-	parentId: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	contentUnitId: string;
-	/**
-	 * @type string
-	 */
-	contentKind: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum;
-	/**
-	 * @type string
-	 */
-	language: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200LanguageEnum;
-	/**
-	 * @type string
-	 */
-	title: string;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string
-	 */
-	position: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400 = MalformedRequestBody;
-
-export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum =
-	(typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
-} as const;
-
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum =
-	(typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ContentStructureRevisionConflict'
-		 * @type string
-		 */
-		code: "ContentStructureRevisionConflict";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500 = InternalError;
-
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdBody =
-	| {
-			/**
-			 * @minLength 1
-			 * @maxLength 500
-			 * @type string
-			 */
-			title: string;
-	  }
-	| {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			baseRevisionId: string;
-			parentId?: (string | null) | null;
-			/**
-			 * @description
-			 * Format: `fractional-position`
-			 * @minLength 2
-			 * @maxLength 512
-			 * @type string | undefined
-			 */
-			position?: string;
-			/**
-			 * @minLength 1
-			 * @maxLength 500
-			 * @type string | undefined
-			 */
-			title?: string;
-	  };
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions = {
-	body: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdBody;
-	path: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses = {
-	"200": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200;
-	"400": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400;
-	"403": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403;
-	"404": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404;
-	"409": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409;
-	"422": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422;
-	"429": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429;
-	"500": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponse =
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
-	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500;
+export type PutApiUnitsBookByUnitIdContentStructureResponse =
+	| PutApiUnitsBookByUnitIdContentStructureStatus200
+	| PutApiUnitsBookByUnitIdContentStructureStatus400
+	| PutApiUnitsBookByUnitIdContentStructureStatus403
+	| PutApiUnitsBookByUnitIdContentStructureStatus404
+	| PutApiUnitsBookByUnitIdContentStructureStatus409
+	| PutApiUnitsBookByUnitIdContentStructureStatus422
+	| PutApiUnitsBookByUnitIdContentStructureStatus429
+	| PutApiUnitsBookByUnitIdContentStructureStatus500;
 
 /**
  * @type object

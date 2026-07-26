@@ -124,8 +124,14 @@ function UnitManagementWorkspaceContent({
 			id: "content-structure",
 			href: unitManagementSectionHref(type, unitId, "content-structure"),
 			label: labels.contentStructure.label,
-			description: labels.contentStructure.description,
+			description:
+				type === "book"
+					? labels.contentStructure.description
+					: t.units.content.developmentDescription,
 			icon: ListTree,
+			...(type === "media" || type === "software"
+				? { badge: labels.contentStructure.developmentBadge }
+				: {}),
 		},
 		{
 			id: "releases",

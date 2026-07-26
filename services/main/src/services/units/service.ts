@@ -44,6 +44,7 @@ import {
 	unitTag,
 	unitTagVoteStat,
 	unitVariant,
+	ContentStructurePreviewCapability,
 } from "../database/schema";
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
@@ -306,11 +307,13 @@ export async function getUnit(
 		kind === "series"
 			? { role: "standalone" }
 			: await getUnitVariantContext(base.id, authorization.profileId);
-	const [canEdit, accessDecision, associationDecision] = await Promise.all([
-		authorization.unit.canUpdate(base.id),
-		authorization.unit.decide(base.id, "unit.access.manage"),
-		authorization.unit.decide(base.id, "unit.association.manage"),
-	]);
+	const [canEdit, accessDecision, associationDecision, canPreviewContentStructure] =
+		await Promise.all([
+			authorization.unit.canUpdate(base.id),
+			authorization.unit.decide(base.id, "unit.access.manage"),
+			authorization.unit.decide(base.id, "unit.association.manage"),
+			authorization.platform.hasCapability(ContentStructurePreviewCapability),
+		]);
 	const details = await getUnitDetails(kind, base.id);
 	return {
 		id: base.id,
@@ -415,6 +418,7 @@ export async function getUnit(
 			canEdit,
 			canManageAccess: accessDecision.allowed,
 			canManageAssociations: associationDecision.allowed,
+			canPreviewContentStructure,
 		},
 	};
 }

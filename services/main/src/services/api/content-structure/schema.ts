@@ -99,39 +99,58 @@ export const RestoreContentStructureRevisionBody = t.Object(
 export const BookContentStructureParams = t.Object({ unitId: Uuid });
 export type BookContentStructureParams = Static<typeof BookContentStructureParams>;
 
-export const CreateContentStructureNodeBody = t.Object(
+const BookContentStructureDraftNodeBase = {
+	id: Uuid,
+	parentId: t.Nullable(Uuid),
+	order: t.Integer({ minimum: 0 }),
+	title: t.String({ minLength: 1, maxLength: 500 }),
+};
+
+const ExistingBookContentStructureDraftNode = t.Object(
 	{
-		baseRevisionId: Uuid,
-		parentId: t.Optional(Uuid),
-		title: t.String({ minLength: 1, maxLength: 500 }),
-		language: ContentLanguage,
-		position: t.Optional(FractionalPosition),
-		content: t.Optional(PortableTextDocument),
-		status: t.Optional(t.Union([t.Literal("draft"), t.Literal("published")])),
+		state: t.Literal("existing"),
+		...BookContentStructureDraftNodeBase,
 	},
 	{ additionalProperties: false },
 );
-export type CreateContentStructureNodeBody = Static<typeof CreateContentStructureNodeBody>;
 
-export const ContentStructureNodeParams = t.Object({ unitId: Uuid, nodeId: Uuid });
-export type ContentStructureNodeParams = Static<typeof ContentStructureNodeParams>;
+const NewBookContentStructureGroupDraftNode = t.Object(
+	{
+		state: t.Literal("new"),
+		...BookContentStructureDraftNodeBase,
+		language: ContentLanguage,
+		contentKind: t.Literal("chapter_group"),
+	},
+	{ additionalProperties: false },
+);
 
-export const UpdateContentStructureNodeBody = t.Union([
-	t.Object(
-		{ title: t.String({ minLength: 1, maxLength: 500 }) },
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			baseRevisionId: Uuid,
-			parentId: t.Optional(t.Nullable(Uuid)),
-			position: t.Optional(FractionalPosition),
-			title: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
-		},
-		{ additionalProperties: false, minProperties: 2 },
-	),
-]);
-export type UpdateContentStructureNodeBody = Static<typeof UpdateContentStructureNodeBody>;
+const NewBookContentStructureChapterDraftNode = t.Object(
+	{
+		state: t.Literal("new"),
+		...BookContentStructureDraftNodeBase,
+		language: ContentLanguage,
+		contentKind: t.Literal("chapter"),
+		content: PortableTextDocument,
+		status: t.Union([t.Literal("draft"), t.Literal("published")]),
+	},
+	{ additionalProperties: false },
+);
+
+export const SaveBookContentStructureDraftBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		nodes: t.Array(
+			t.Union([
+				ExistingBookContentStructureDraftNode,
+				NewBookContentStructureGroupDraftNode,
+				NewBookContentStructureChapterDraftNode,
+			]),
+			{ maxItems: 10_000 },
+		),
+	},
+	{ additionalProperties: false },
+);
+export type SaveBookContentStructureDraftBody = Static<typeof SaveBookContentStructureDraftBody>;
 
 export const ChapterParams = t.Object({ chapterId: Uuid });
 export type ChapterParams = Static<typeof ChapterParams>;

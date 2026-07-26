@@ -397,10 +397,8 @@ import type {
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
 	GetApiUnitsBookByUnitIdContentStructureNodesOptions,
 	GetApiUnitsBookByUnitIdContentStructureNodesResponses,
-	PostApiUnitsBookByUnitIdContentStructureNodesOptions,
-	PostApiUnitsBookByUnitIdContentStructureNodesResponses,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses,
+	PutApiUnitsBookByUnitIdContentStructureOptions,
+	PutApiUnitsBookByUnitIdContentStructureResponses,
 	GetApiChaptersByChapterIdOptions,
 	GetApiChaptersByChapterIdResponses,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -4575,51 +4573,23 @@ export function getApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extend
 }
 
 /**
- * @summary Create book group or chapter
- * {@link /api/units/book/:unitId/content-structure/nodes}
+ * @summary Save a complete Book Content Structure draft
+ * {@link /api/units/book/:unitId/content-structure}
  */
-export function postApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsBookByUnitIdContentStructureNodesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>> {
+export function putApiUnitsBookByUnitIdContentStructure<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsBookByUnitIdContentStructureOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsBookByUnitIdContentStructureResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "POST",
-		url: "/api/units/book/{unitId}/content-structure/nodes",
+		method: "PUT",
+		url: "/api/units/book/{unitId}/content-structure",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Move or rename Content Structure node
- * {@link /api/units/book/:unitId/content-structure/nodes/:nodeId}
- */
-export function patchApiUnitsBookByUnitIdContentStructureNodesByNodeId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PATCH",
-		url: "/api/units/book/{unitId}/content-structure/nodes/{nodeId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<PutApiUnitsBookByUnitIdContentStructureResponses, ThrowOnError>>;
 }
 
 /**

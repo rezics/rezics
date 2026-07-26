@@ -11,3 +11,10 @@
 - Abstractions must compress meaning, not merely shorten syntax: they should capture invariants, protocols, lifecycles, or genuinely reusable complete semantics. Delete one-use wrappers that only forward, rename, or pass arguments when the inline form is equally clear. Framework entry points, public package entry points, generated code, and upstream mirrors are external-contract boundaries and are not judged by call count; within a boundary, still express intent directly.
 - Use only the `public` database schema. Use `snake_case` for physical table, column, constraint, and index names; use lower camel case for TypeScript exports.
 - Declare Drizzle `relations` only when a `database.query` relation query needs them. Table-definition foreign keys provide integrity; do not pre-maintain bidirectional relation metadata.
+
+## TSDoc release maturity
+
+- Use TSDoc syntax for exported TypeScript boundaries. Mark an API intended to become public but not yet released with `@alpha`, and explain the current product state and intended audience in `@remarks`.
+- Promote the release tag to `@beta` only after an API is deliberately available as a supported preview or beta. Use `@internal` only for APIs that are not intended for third-party use. No release tag is a synonym for "unfinished."
+- Put the maturity annotation on the owning exported boundary instead of repeating it on every implementation helper.
+- Documentation tags never enforce authorization. Any staff-only or otherwise restricted API must also have a typed runtime policy, server-side enforcement, and tests for allowed and denied callers.

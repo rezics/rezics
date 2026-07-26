@@ -64,6 +64,7 @@ export default {
 			contentStructure: {
 				label: "Content structure",
 				description: "Manage Book chapters in a collapsible, indented tree editor.",
+				developmentBadge: "In development",
 			},
 			releases: {
 				label: "Series releases",
@@ -249,6 +250,22 @@ export default {
 		createChapter: "Create chapter",
 		createGroup: "Create group",
 		noContent: "There are no chapters yet.",
+		saveDraft: "Save content structure",
+		discardDraft: "Discard draft changes",
+		unsavedDraft: "There are unsaved changes",
+		draftHint:
+			"Creating, renaming, and moving only update the draft. Saving writes every change at once.",
+		selectedCount: insert("{{count}} items selected", { count: Number }),
+		clearSelection: "Clear selection",
+		moveSelection: "Move selected items",
+		moveDestination: "Choose a new parent",
+		moveDescription:
+			"Choose the top level or any item. The selection becomes children of that destination.",
+		dropBefore: "Move before this item",
+		dropInside: "Move under this item",
+		dropAfter: "Move after this item",
+		development: "The content structure editor is in development",
+		developmentDescription: `Content structure is not available for this unit type yet. Preview ${verbatimTerms.api.value} access is limited to staff accounts.`,
 	},
 	chapter: {
 		title: "Edit chapter",

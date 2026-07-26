@@ -1232,6 +1232,7 @@ import type {
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresStatus200,
+	GetApiUnitsByIdByUnitIdContentStructuresStatus403,
 	GetApiUnitsByIdByUnitIdContentStructuresStatus404,
 	GetApiUnitsByIdByUnitIdContentStructuresStatus422,
 	GetApiUnitsByIdByUnitIdContentStructuresStatus500,
@@ -1245,6 +1246,7 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
+	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500,
@@ -1259,6 +1261,7 @@ import type {
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
+	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus404,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus422,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus500,
@@ -1303,24 +1306,15 @@ import type {
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus404,
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus422,
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus500,
-	PostApiUnitsBookByUnitIdContentStructureNodesOptions,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus400,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus403,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus404,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus409,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus422,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus429,
-	PostApiUnitsBookByUnitIdContentStructureNodesStatus500,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429,
-	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500,
+	PutApiUnitsBookByUnitIdContentStructureOptions,
+	PutApiUnitsBookByUnitIdContentStructureStatus200,
+	PutApiUnitsBookByUnitIdContentStructureStatus400,
+	PutApiUnitsBookByUnitIdContentStructureStatus403,
+	PutApiUnitsBookByUnitIdContentStructureStatus404,
+	PutApiUnitsBookByUnitIdContentStructureStatus409,
+	PutApiUnitsBookByUnitIdContentStructureStatus422,
+	PutApiUnitsBookByUnitIdContentStructureStatus429,
+	PutApiUnitsBookByUnitIdContentStructureStatus500,
 	GetApiChaptersByChapterIdOptions,
 	GetApiChaptersByChapterIdStatus200,
 	GetApiChaptersByChapterIdStatus404,
@@ -2192,8 +2186,7 @@ import {
 	patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId,
 	deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId,
 	getApiUnitsBookByUnitIdContentStructureNodes,
-	postApiUnitsBookByUnitIdContentStructureNodes,
-	patchApiUnitsBookByUnitIdContentStructureNodesByNodeId,
+	putApiUnitsBookByUnitIdContentStructure,
 	getApiChaptersByChapterId,
 	putApiChaptersByChapterIdLocalizationsByLanguageContent,
 	getApiProgress,
@@ -21204,6 +21197,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresQueryOptions(
 	return queryOptions<
 		GetApiUnitsByIdByUnitIdContentStructuresStatus200,
 		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdContentStructuresStatus403
 			| GetApiUnitsByIdByUnitIdContentStructuresStatus404
 			| GetApiUnitsByIdByUnitIdContentStructuresStatus422
 			| GetApiUnitsByIdByUnitIdContentStructuresStatus500
@@ -21245,6 +21239,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructures<
 			QueryObserverOptions<
 				GetApiUnitsByIdByUnitIdContentStructuresStatus200,
 				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdContentStructuresStatus403
 					| GetApiUnitsByIdByUnitIdContentStructuresStatus404
 					| GetApiUnitsByIdByUnitIdContentStructuresStatus422
 					| GetApiUnitsByIdByUnitIdContentStructuresStatus500
@@ -21274,6 +21269,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructures<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdContentStructuresStatus403
 			| GetApiUnitsByIdByUnitIdContentStructuresStatus404
 			| GetApiUnitsByIdByUnitIdContentStructuresStatus422
 			| GetApiUnitsByIdByUnitIdContentStructuresStatus500
@@ -21412,6 +21408,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryOption
 	return queryOptions<
 		GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
@@ -21453,6 +21450,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureId<
 			QueryObserverOptions<
 				GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
 				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
 					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
@@ -21485,6 +21483,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
@@ -21636,6 +21635,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQu
 	return queryOptions<
 		GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
 		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus404
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus422
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus500
@@ -21683,6 +21683,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevision
 			QueryObserverOptions<
 				GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
 				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403
 					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus404
 					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus422
 					| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus500
@@ -21718,6 +21719,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevision
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus404
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus422
 			| GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus500
@@ -22307,30 +22309,30 @@ export function useGetApiUnitsBookByUnitIdContentStructureNodes<
 	return queryResult;
 }
 
-export const postApiUnitsBookByUnitIdContentStructureNodesMutationKey = () =>
-	[{ url: "/api/units/book/:unitId/content-structure/nodes" }] as const;
+export const putApiUnitsBookByUnitIdContentStructureMutationKey = () =>
+	[{ url: "/api/units/book/:unitId/content-structure" }] as const;
 
-export function postApiUnitsBookByUnitIdContentStructureNodesMutationOptions<TContext = unknown>(
+export function putApiUnitsBookByUnitIdContentStructureMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiUnitsBookByUnitIdContentStructureNodesMutationKey();
+	const mutationKey = putApiUnitsBookByUnitIdContentStructureMutationKey();
 	return mutationOptions<
-		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
+		PutApiUnitsBookByUnitIdContentStructureStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
+			| PutApiUnitsBookByUnitIdContentStructureStatus400
+			| PutApiUnitsBookByUnitIdContentStructureStatus403
+			| PutApiUnitsBookByUnitIdContentStructureStatus404
+			| PutApiUnitsBookByUnitIdContentStructureStatus409
+			| PutApiUnitsBookByUnitIdContentStructureStatus422
+			| PutApiUnitsBookByUnitIdContentStructureStatus429
+			| PutApiUnitsBookByUnitIdContentStructureStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
+		PutApiUnitsBookByUnitIdContentStructureOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsBookByUnitIdContentStructureNodes({
+			const { data } = await putApiUnitsBookByUnitIdContentStructure({
 				...config,
 				path,
 				body,
@@ -22342,23 +22344,23 @@ export function postApiUnitsBookByUnitIdContentStructureNodesMutationOptions<TCo
 }
 
 /**
- * @summary Create book group or chapter
- * {@link /api/units/book/:unitId/content-structure/nodes}
+ * @summary Save a complete Book Content Structure draft
+ * {@link /api/units/book/:unitId/content-structure}
  */
-export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
+export function usePutApiUnitsBookByUnitIdContentStructure<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
+			PutApiUnitsBookByUnitIdContentStructureStatus200,
 			ResponseErrorConfig<
-				| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
-				| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
-				| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
-				| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
-				| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
-				| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
-				| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
+				| PutApiUnitsBookByUnitIdContentStructureStatus400
+				| PutApiUnitsBookByUnitIdContentStructureStatus403
+				| PutApiUnitsBookByUnitIdContentStructureStatus404
+				| PutApiUnitsBookByUnitIdContentStructureStatus409
+				| PutApiUnitsBookByUnitIdContentStructureStatus422
+				| PutApiUnitsBookByUnitIdContentStructureStatus429
+				| PutApiUnitsBookByUnitIdContentStructureStatus500
 			>,
-			PostApiUnitsBookByUnitIdContentStructureNodesOptions,
+			PutApiUnitsBookByUnitIdContentStructureOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -22367,37 +22369,37 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? postApiUnitsBookByUnitIdContentStructureNodesMutationKey();
+		mutationOptions.mutationKey ?? putApiUnitsBookByUnitIdContentStructureMutationKey();
 
-	const baseOptions = postApiUnitsBookByUnitIdContentStructureNodesMutationOptions(
+	const baseOptions = putApiUnitsBookByUnitIdContentStructureMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
+		PutApiUnitsBookByUnitIdContentStructureStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
+			| PutApiUnitsBookByUnitIdContentStructureStatus400
+			| PutApiUnitsBookByUnitIdContentStructureStatus403
+			| PutApiUnitsBookByUnitIdContentStructureStatus404
+			| PutApiUnitsBookByUnitIdContentStructureStatus409
+			| PutApiUnitsBookByUnitIdContentStructureStatus422
+			| PutApiUnitsBookByUnitIdContentStructureStatus429
+			| PutApiUnitsBookByUnitIdContentStructureStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
+		PutApiUnitsBookByUnitIdContentStructureOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
+		PutApiUnitsBookByUnitIdContentStructureStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
+			| PutApiUnitsBookByUnitIdContentStructureStatus400
+			| PutApiUnitsBookByUnitIdContentStructureStatus403
+			| PutApiUnitsBookByUnitIdContentStructureStatus404
+			| PutApiUnitsBookByUnitIdContentStructureStatus409
+			| PutApiUnitsBookByUnitIdContentStructureStatus422
+			| PutApiUnitsBookByUnitIdContentStructureStatus429
+			| PutApiUnitsBookByUnitIdContentStructureStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
+		PutApiUnitsBookByUnitIdContentStructureOptions,
 		TContext
 	>(
 		{
@@ -22407,133 +22409,17 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
+		PutApiUnitsBookByUnitIdContentStructureStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus400
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
-			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
+			| PutApiUnitsBookByUnitIdContentStructureStatus400
+			| PutApiUnitsBookByUnitIdContentStructureStatus403
+			| PutApiUnitsBookByUnitIdContentStructureStatus404
+			| PutApiUnitsBookByUnitIdContentStructureStatus409
+			| PutApiUnitsBookByUnitIdContentStructureStatus422
+			| PutApiUnitsBookByUnitIdContentStructureStatus429
+			| PutApiUnitsBookByUnitIdContentStructureStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
-		TContext
-	>;
-}
-
-export const patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationKey = () =>
-	[{ url: "/api/units/book/:unitId/content-structure/nodes/:nodeId" }] as const;
-
-export function patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationKey();
-	return mutationOptions<
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
-		>,
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiUnitsBookByUnitIdContentStructureNodesByNodeId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Move or rename Content Structure node
- * {@link /api/units/book/:unitId/content-structure/nodes/:nodeId}
- */
-export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
-			ResponseErrorConfig<
-				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
-				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
-				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
-				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
-				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
-				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
-				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
-			>,
-			PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ??
-		patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationKey();
-
-	const baseOptions = patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
-		>,
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
-		>,
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
-		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus400
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
-			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
-		>,
-		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
+		PutApiUnitsBookByUnitIdContentStructureOptions,
 		TContext
 	>;
 }

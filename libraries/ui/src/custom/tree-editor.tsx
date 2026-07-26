@@ -1,12 +1,15 @@
 "use client";
 
 import type { TreeCollection } from "@ark-ui/react/collection";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "../utils";
 import { TreeView, TreeViewLabel, TreeViewTree, type TreeNodeType } from "../ui/tree-view";
 
-export interface TreeEditorProps<T extends TreeNodeType> {
+export interface TreeEditorProps<T extends TreeNodeType> extends Pick<
+	ComponentProps<typeof TreeView>,
+	"expandOnClick" | "onSelectionChange" | "selectedValue" | "selectionMode"
+> {
 	collection: TreeCollection<T>;
 	label: string;
 	renderNode: (node: T, indexPath: number[]) => ReactNode;
@@ -24,6 +27,10 @@ export function TreeEditor<T extends TreeNodeType>({
 	renderNode,
 	className,
 	defaultExpandedValue,
+	expandOnClick,
+	onSelectionChange,
+	selectedValue,
+	selectionMode,
 }: TreeEditorProps<T>) {
 	return (
 		<TreeView
@@ -33,6 +40,10 @@ export function TreeEditor<T extends TreeNodeType>({
 			)}
 			collection={collection}
 			defaultExpandedValue={defaultExpandedValue}
+			expandOnClick={expandOnClick}
+			onSelectionChange={onSelectionChange}
+			selectedValue={selectedValue}
+			selectionMode={selectionMode}
 		>
 			<TreeViewLabel className="sr-only">{label}</TreeViewLabel>
 			<TreeViewTree>

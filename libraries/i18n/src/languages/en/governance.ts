@@ -43,6 +43,7 @@ export default {
 	capabilities: {
 		"entity.associations.override": "Override catalog Entity association policy",
 		"unit.edit": "Edit every Unit",
+		"unit.content_structure.preview": "Preview unreleased content structure features",
 		"unit.ownership.transfer": "Transfer Unit ownership",
 		"unit.slug.manage": "Manage Unit public addresses",
 		"unit.slug.namespace.manage": "Manage address namespaces",
