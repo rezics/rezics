@@ -81710,7 +81710,8 @@
 													"contentKind",
 													"language",
 													"title",
-													"position"
+													"position",
+													"contentMetrics"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -81739,6 +81740,41 @@
 														"minLength": 2,
 														"maxLength": 512,
 														"type": "string"
+													},
+													"contentMetrics": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["wordCount", "characterCount"],
+														"properties": {
+															"wordCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"characterCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															}
+														}
 													}
 												}
 											}
@@ -82313,7 +82349,8 @@
 													"contentKind",
 													"language",
 													"title",
-													"position"
+													"position",
+													"contentMetrics"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -82342,6 +82379,41 @@
 														"minLength": 2,
 														"maxLength": 512,
 														"type": "string"
+													},
+													"contentMetrics": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["wordCount", "characterCount"],
+														"properties": {
+															"wordCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"characterCount": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															}
+														}
 													}
 												}
 											}

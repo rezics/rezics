@@ -905,6 +905,7 @@ const BookContentStructureNodeResponse = t.Object({
 	language: ContentLanguage,
 	title: t.String(),
 	position: FractionalPosition,
+	contentMetrics: ContentMetricResponse,
 });
 export const ContentStructureNodeListResponse = t.Object({
 	structureId: t.Nullable(Uuid),

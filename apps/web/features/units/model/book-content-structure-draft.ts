@@ -52,6 +52,20 @@ export type BookDraftDropTarget =
 			readonly placement: "before" | "inside" | "after";
 	  };
 
+/**
+ * Identifies nodes that may receive children through the book structure editor.
+ *
+ * @remarks
+ * This is intentionally a frontend authoring rule: chapters created or moved by
+ * the editor remain leaves, while labels may contain chapters or other labels.
+ * The backend does not need to enforce this experience-only convention because
+ * bypassing it affects only the bypassing author's own structure. Existing
+ * non-leaf chapters are still accepted and rendered as labels by the frontend.
+ */
+export function isBookDraftParentTarget(node: BookDraftNode): boolean {
+	return node.contentKind === "chapter_group";
+}
+
 function compareRemoteNodes(left: RemoteBookNode, right: RemoteBookNode): number {
 	return left.position < right.position ? -1 : left.position > right.position ? 1 : 0;
 }
@@ -134,6 +148,41 @@ export function addBookDraftNode(
 	return [...nodes, { ...node, order }];
 }
 
+export function addBookDraftNodeAfter(
+	nodes: readonly BookDraftNode[],
+	node: NewBookDraftNodeInput,
+	siblingId: string,
+): BookDraftNode[] {
+	const sibling = nodes.find(({ id }) => id === siblingId);
+	if (!sibling || sibling.parentId !== node.parentId) return addBookDraftNode(nodes, node);
+
+	const siblings = nodes
+		.filter(({ parentId }) => parentId === node.parentId)
+		.toSorted(compareDraftNodes);
+	const siblingIndex = siblings.findIndex(({ id }) => id === siblingId);
+	if (siblingIndex < 0) return addBookDraftNode(nodes, node);
+	const inserted = [
+		...siblings.slice(0, siblingIndex + 1),
+		{ ...node, order: siblingIndex + 1 },
+		...siblings.slice(siblingIndex + 1),
+	];
+	const reordered = new Map(
+		inserted.map((entry, order) => [entry.id, { ...entry, order }] as const),
+	);
+	const insertedNode = reordered.get(node.id);
+	return insertedNode
+		? [...nodes.map((entry) => reordered.get(entry.id) ?? entry), insertedNode]
+		: addBookDraftNode(nodes, node);
+}
+
+export function findLastBookDraftLabelId(nodes: readonly BookDraftNode[]): string | null {
+	let lastLabelId: string | null = null;
+	for (const node of flattenBookDraftTree(buildBookDraftTree(nodes))) {
+		if (isBookDraftParentTarget(node)) lastLabelId = node.id;
+	}
+	return lastLabelId;
+}
+
 export function renameBookDraftNode(
 	nodes: readonly BookDraftNode[],
 	nodeId: string,
@@ -199,8 +248,11 @@ export function moveBookDraftSelection(
 	const validTargetIds = getBookDraftMoveTargetIds(nodes, selectedIds);
 	const targetNode =
 		target.kind === "node" ? nodes.find(({ id }) => id === target.nodeId) : undefined;
-	if (target.kind === "node" && (!targetNode || !validTargetIds.has(target.nodeId)))
-		return [...nodes];
+	if (target.kind === "node") {
+		if (!targetNode || !validTargetIds.has(target.nodeId)) return [...nodes];
+		if (target.placement === "inside" && !isBookDraftParentTarget(targetNode))
+			return [...nodes];
+	}
 
 	const siblings = siblingMap(nodes);
 	for (const [parentId, entries] of siblings)
@@ -231,6 +283,25 @@ export function moveBookDraftSelection(
 	const reordered = new Map<string, BookDraftNode>();
 	for (const entries of siblings.values())
 		entries.forEach((node, order) => reordered.set(node.id, { ...node, order }));
+	return nodes.map((node) => reordered.get(node.id) ?? node);
+}
+
+export function moveBookDraftSelectionToSiblingEdge(
+	nodes: readonly BookDraftNode[],
+	selectedIds: ReadonlySet<string>,
+	edge: "first" | "last",
+): BookDraftNode[] {
+	const movingIds = new Set(getBookDraftSelectionRoots(nodes, selectedIds).map(({ id }) => id));
+	if (!movingIds.size) return [...nodes];
+
+	const reordered = new Map<string, BookDraftNode>();
+	for (const siblings of siblingMap(nodes).values()) {
+		const moving = siblings.filter(({ id }) => movingIds.has(id));
+		if (!moving.length) continue;
+		const stationary = siblings.filter(({ id }) => !movingIds.has(id));
+		const ordered = edge === "first" ? [...moving, ...stationary] : [...stationary, ...moving];
+		ordered.forEach((node, order) => reordered.set(node.id, { ...node, order }));
+	}
 	return nodes.map((node) => reordered.get(node.id) ?? node);
 }
 

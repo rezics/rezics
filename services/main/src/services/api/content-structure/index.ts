@@ -17,6 +17,7 @@ import {
 	unit,
 	unitAccessBinding,
 	unitLocalization,
+	unitLocalizationContentMetric,
 	ContentStructurePreviewCapability,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
@@ -173,6 +174,8 @@ async function readBookContentStructure(
 			language: unitLocalization.language,
 			title: unitLocalization.title,
 			position: contentStructureNode.position,
+			wordCount: unitLocalizationContentMetric.wordCount,
+			characterCount: unitLocalizationContentMetric.characterCount,
 			unitStatus: unit.status,
 			unitVisibility: unit.visibility,
 			contentStatus: unitLocalization.contentStatus,
@@ -185,6 +188,13 @@ async function readBookContentStructure(
 			and(
 				eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
 				isPrimaryUnitLocalization(unitLocalization.unitId),
+			),
+		)
+		.leftJoin(
+			unitLocalizationContentMetric,
+			and(
+				eq(unitLocalizationContentMetric.unitId, contentStructureNode.contentUnitId),
+				eq(unitLocalizationContentMetric.language, unitLocalization.language),
 			),
 		)
 		.where(
@@ -212,14 +222,28 @@ async function readBookContentStructure(
 					unitVisibility: _visibility,
 					contentStatus: _contentStatus,
 					...node
-				}) => ({
-					...node,
-					contentKind:
-						node.contentKind === "chapter"
-							? ("chapter" as const)
-							: ("chapter_group" as const),
-					title: node.title ?? "",
-				}),
+				}) => {
+					if (
+						node.contentKind === "chapter" &&
+						(node.wordCount === null || node.characterCount === null)
+					)
+						throw new Error(
+							`Missing content metric for chapter ${node.contentUnitId} localization ${node.language}`,
+						);
+					const { wordCount, characterCount, ...contentNode } = node;
+					return {
+						...contentNode,
+						contentKind:
+							contentNode.contentKind === "chapter"
+								? ("chapter" as const)
+								: ("chapter_group" as const),
+						title: contentNode.title ?? "",
+						contentMetrics: {
+							wordCount: wordCount ?? 0,
+							characterCount: characterCount ?? 0,
+						},
+					};
+				},
 			),
 	};
 }

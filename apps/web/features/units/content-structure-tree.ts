@@ -1,8 +1,10 @@
 import type { GetApiUnitsBookByUnitIdContentStructureNodesStatus200 } from "@rezics/openapi-tanstack-query";
 import { generateKeyBetween } from "fractional-indexing";
 
-export type ContentStructureNode =
+type RemoteContentStructureNode =
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus200["items"][number];
+
+export type ContentStructureNode = Omit<RemoteContentStructureNode, "contentMetrics">;
 
 export interface ContentStructureTreeNode {
 	node: ContentStructureNode;

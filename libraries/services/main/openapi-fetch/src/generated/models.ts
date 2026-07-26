@@ -62488,6 +62488,13 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 		 * @type string
 		 */
 		position: string;
+		/**
+		 * @type object
+		 */
+		contentMetrics: {
+			wordCount: string | number;
+			characterCount: string | number;
+		};
 	}[];
 };
 
@@ -62643,6 +62650,13 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
 		 * @type string
 		 */
 		position: string;
+		/**
+		 * @type object
+		 */
+		contentMetrics: {
+			wordCount: string | number;
+			characterCount: string | number;
+		};
 	}[];
 };
 
