@@ -4,10 +4,15 @@ import {
 	defineSchema,
 	EditorProvider,
 	PortableTextEditable,
+	type Editor,
+	type EditorSelection,
 	type RenderAnnotationFunction,
+	type RenderChildFunction,
 	type RenderDecoratorFunction,
 	type RenderStyleFunction,
+	useEditor,
 } from "@portabletext/editor";
+import * as selectors from "@portabletext/editor/selectors";
 import { EventListenerPlugin } from "@portabletext/editor/plugins";
 import {
 	blockquote,
@@ -35,6 +40,7 @@ import {
 	useToolbarSchema,
 } from "@portabletext/toolbar";
 import {
+	isPortableTextUnitMention,
 	normalizePortableText,
 	normalizePortableTextUrl,
 	type PortableTextValue,
@@ -50,9 +56,18 @@ import {
 	PilcrowIcon,
 	QuoteIcon,
 	Redo2Icon,
+	SearchIcon,
 	Undo2Icon,
 } from "lucide-react";
-import { type FormEvent, type ReactNode, useId, useState } from "react";
+import {
+	type FormEvent,
+	type KeyboardEvent,
+	type ReactNode,
+	useEffect,
+	useId,
+	useMemo,
+	useState,
+} from "react";
 
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
@@ -70,7 +85,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "../utils";
 import { Button } from "./button";
 import { PortableTextContent } from "./portable-text-content";
-import { useUiMessages } from "./ui-provider";
+import { IdentityAvatar } from "./identity-avatar";
+import { parsePortableTextSlashToken, type PortableTextMentionPrefix } from "./portable-text-slash";
+import { type EntityPickerHit, useEntitySearch, useUiMessages } from "./ui-provider";
+import { UnitMentionBadge, useUnitMentionPresentations } from "./unit-mention";
 
 export type PortableTextEditorValue = PortableTextValue;
 export type PortableTextEditorVariant = "compact" | "document";
@@ -92,7 +110,12 @@ const schemaDefinition = defineSchema({
 			],
 		},
 	],
-	inlineObjects: [],
+	inlineObjects: [
+		{
+			name: "unit-mention",
+			fields: [{ name: "unitId", type: "string" }],
+		},
+	],
 	blockObjects: [],
 });
 
@@ -172,6 +195,419 @@ const renderAnnotation: RenderAnnotationFunction = ({ value, children }) => {
 		</a>
 	);
 };
+
+type SlashRange = {
+	readonly path: NonNullable<EditorSelection>["focus"]["path"];
+	readonly start: number;
+	readonly end: number;
+};
+type ActiveSlash =
+	| {
+			readonly kind: "block";
+			readonly query: string;
+			readonly range: SlashRange;
+			readonly position: { readonly left: number; readonly top: number };
+	  }
+	| {
+			readonly kind: "mention";
+			readonly prefix: PortableTextMentionPrefix;
+			readonly query: string;
+			readonly range: SlashRange;
+			readonly position: { readonly left: number; readonly top: number };
+	  };
+
+const MentionSearchIndex = {
+	u: "units",
+	t: "tags",
+	e: "entity",
+	r: "realms",
+	z: "units",
+} as const satisfies Record<PortableTextMentionPrefix, string>;
+
+function samePath(left: readonly unknown[], right: readonly unknown[]): boolean {
+	return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function currentCaretPosition(): { left: number; top: number } {
+	const nativeSelection = window.getSelection();
+	const range =
+		nativeSelection && nativeSelection.rangeCount > 0
+			? nativeSelection.getRangeAt(0)
+			: undefined;
+	const rectangle = range?.getBoundingClientRect();
+	const left = Math.max(
+		12,
+		Math.min(rectangle?.left ?? 12, Math.max(12, window.innerWidth - 332)),
+	);
+	const preferredTop = (rectangle?.bottom ?? 0) + 8;
+	return {
+		left,
+		top: Math.max(12, Math.min(preferredTop, Math.max(12, window.innerHeight - 360))),
+	};
+}
+
+function readActiveSlash(editor: Editor): ActiveSlash | null {
+	const snapshot = editor.getSnapshot();
+	const selection = selectors.getSelection(snapshot);
+	const focusSpan = selectors.getFocusSpan(snapshot);
+	if (
+		!selection ||
+		!selectors.isSelectionCollapsed(snapshot) ||
+		!focusSpan ||
+		!samePath(selection.focus.path, focusSpan.path)
+	)
+		return null;
+	const before = focusSpan.node.text.slice(0, selection.focus.offset);
+	const token = parsePortableTextSlashToken(before);
+	if (!token) return null;
+	if (token.kind === "mention") {
+		return {
+			kind: "mention",
+			prefix: token.prefix,
+			query: token.query,
+			range: {
+				path: selection.focus.path,
+				start: token.start,
+				end: token.end,
+			},
+			position: currentCaretPosition(),
+		};
+	}
+	return {
+		kind: "block",
+		query: token.query,
+		range: {
+			path: selection.focus.path,
+			start: token.start,
+			end: token.end,
+		},
+		position: currentCaretPosition(),
+	};
+}
+
+type BlockSlashCommand = {
+	readonly id: string;
+	readonly label: string;
+	readonly keywords: string;
+	readonly apply: (editor: Editor) => void;
+};
+
+function deleteSlashToken(editor: Editor, range: SlashRange) {
+	editor.send({
+		type: "delete.text",
+		at: {
+			anchor: { path: range.path, offset: range.start },
+			focus: { path: range.path, offset: range.end },
+		},
+	});
+}
+
+function SlashCommandEditable({
+	ariaLabel,
+	ariaLabelledBy,
+	required,
+	variant,
+	presentations,
+}: {
+	ariaLabel: string;
+	ariaLabelledBy?: string;
+	required: boolean;
+	variant: PortableTextEditorVariant;
+	presentations: ReturnType<typeof useUnitMentionPresentations>;
+}) {
+	const messages = useUiMessages();
+	const labels = messages.editor;
+	const editor = useEditor();
+	const searchEntities = useEntitySearch();
+	const [activeSlash, setActiveSlash] = useState<ActiveSlash | null>(null);
+	const [hits, setHits] = useState<readonly EntityPickerHit[]>([]);
+	const [isPending, setIsPending] = useState(false);
+	const [isError, setIsError] = useState(false);
+	const [activeIndex, setActiveIndex] = useState(0);
+	const blockCommands = useMemo<readonly BlockSlashCommand[]>(
+		() => [
+			{
+				id: "paragraph",
+				label: labels.paragraph,
+				keywords: "paragraph text normal",
+				apply: (target) => target.send({ type: "style.toggle", style: "normal" }),
+			},
+			{
+				id: "heading-2",
+				label: labels.heading2,
+				keywords: "heading title h2",
+				apply: (target) => target.send({ type: "style.toggle", style: "h2" }),
+			},
+			{
+				id: "heading-3",
+				label: labels.heading3,
+				keywords: "heading subtitle h3",
+				apply: (target) => target.send({ type: "style.toggle", style: "h3" }),
+			},
+			{
+				id: "quote",
+				label: labels.quote,
+				keywords: "quote blockquote citation",
+				apply: (target) => target.send({ type: "style.toggle", style: "blockquote" }),
+			},
+			{
+				id: "bullet-list",
+				label: labels.bulletList,
+				keywords: "bullet unordered list",
+				apply: (target) => target.send({ type: "list item.toggle", listItem: "bullet" }),
+			},
+			{
+				id: "number-list",
+				label: labels.numberedList,
+				keywords: "number ordered list",
+				apply: (target) => target.send({ type: "list item.toggle", listItem: "number" }),
+			},
+		],
+		[
+			labels.bulletList,
+			labels.heading2,
+			labels.heading3,
+			labels.numberedList,
+			labels.paragraph,
+			labels.quote,
+		],
+	);
+	const filteredBlockCommands =
+		activeSlash?.kind === "block"
+			? blockCommands.filter((command) => {
+					const query = activeSlash.query.trim().toLocaleLowerCase();
+					return (
+						!query ||
+						command.label.toLocaleLowerCase().includes(query) ||
+						command.keywords.includes(query)
+					);
+				})
+			: [];
+	const itemCount = activeSlash?.kind === "block" ? filteredBlockCommands.length : hits.length;
+
+	useEffect(() => {
+		if (activeSlash?.kind !== "mention" || !searchEntities) {
+			setHits([]);
+			setIsPending(false);
+			setIsError(false);
+			return;
+		}
+		const query = activeSlash.query.trim();
+		if (!query) {
+			setHits([]);
+			setIsPending(false);
+			setIsError(false);
+			return;
+		}
+		const controller = new AbortController();
+		const timer = window.setTimeout(() => {
+			setIsPending(true);
+			setIsError(false);
+			void searchEntities(MentionSearchIndex[activeSlash.prefix], query, controller.signal)
+				.then(
+					(items) => {
+						if (controller.signal.aborted) return;
+						setHits(
+							activeSlash.prefix === "z"
+								? items.filter((item) => item.kind === "zone")
+								: items,
+						);
+					},
+					() => {
+						if (!controller.signal.aborted) {
+							setHits([]);
+							setIsError(true);
+						}
+					},
+				)
+				.finally(() => {
+					if (!controller.signal.aborted) setIsPending(false);
+				});
+		}, 180);
+		return () => {
+			window.clearTimeout(timer);
+			controller.abort();
+		};
+	}, [activeSlash, searchEntities]);
+
+	useEffect(() => {
+		setActiveIndex((index) => Math.min(index, Math.max(0, itemCount - 1)));
+	}, [itemCount]);
+
+	function chooseBlock(command: BlockSlashCommand) {
+		if (activeSlash?.kind !== "block") return;
+		deleteSlashToken(editor, activeSlash.range);
+		command.apply(editor);
+		editor.send({ type: "focus" });
+		setActiveSlash(null);
+	}
+
+	function chooseMention(hit: EntityPickerHit) {
+		if (activeSlash?.kind !== "mention") return;
+		deleteSlashToken(editor, activeSlash.range);
+		editor.send({
+			type: "insert.inline object",
+			inlineObject: { name: "unit-mention", value: { unitId: hit.id } },
+		});
+		editor.send({ type: "insert.span", text: " " });
+		editor.send({ type: "focus" });
+		setActiveSlash(null);
+	}
+
+	function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+		if (!activeSlash) return;
+		if (event.key === "Escape") {
+			event.preventDefault();
+			setActiveSlash(null);
+			return;
+		}
+		if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+			event.preventDefault();
+			if (itemCount === 0) return;
+			setActiveIndex((index) =>
+				event.key === "ArrowDown"
+					? (index + 1) % itemCount
+					: (index - 1 + itemCount) % itemCount,
+			);
+			return;
+		}
+		if (event.key !== "Enter" || itemCount === 0) return;
+		event.preventDefault();
+		if (activeSlash.kind === "block") {
+			const command = filteredBlockCommands[activeIndex];
+			if (command) chooseBlock(command);
+		} else {
+			const hit = hits[activeIndex];
+			if (hit) chooseMention(hit);
+		}
+	}
+
+	function handleKeyUp(event: KeyboardEvent<HTMLDivElement>) {
+		if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(event.key)) return;
+		setActiveSlash(readActiveSlash(editor));
+	}
+
+	const mentionGroupLabel =
+		activeSlash?.kind === "mention"
+			? {
+					u: labels.mentionUnits,
+					t: labels.mentionTags,
+					e: labels.mentionEntities,
+					r: labels.mentionRealms,
+					z: labels.mentionZones,
+				}[activeSlash.prefix]
+			: undefined;
+	const renderChild: RenderChildFunction = ({ value, children }) =>
+		isPortableTextUnitMention(value) ? (
+			<span>
+				{children}
+				<UnitMentionBadge presentation={presentations.get(value.unitId)} value={value} />
+			</span>
+		) : (
+			children
+		);
+
+	return (
+		<>
+			<PortableTextEditable
+				aria-label={ariaLabelledBy ? undefined : ariaLabel}
+				aria-labelledby={ariaLabelledBy}
+				aria-required={required}
+				className={cn(
+					"max-w-none overflow-y-auto px-5 py-4 font-sans outline-none sm:px-6 sm:py-5",
+					"[&_ol]:my-3 [&_ol]:list-decimal [&_ol]:ps-6 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:ps-6",
+					"focus-visible:outline-none",
+					variant === "document" ? "min-h-[30rem] text-base" : "min-h-44 text-[15px]",
+				)}
+				onBlur={() => setActiveSlash(null)}
+				onClick={() => setActiveSlash(readActiveSlash(editor))}
+				onKeyDown={handleKeyDown}
+				onKeyUp={handleKeyUp}
+				renderAnnotation={renderAnnotation}
+				renderChild={renderChild}
+				renderDecorator={renderDecorator}
+				renderListItem={({ children }) => children}
+				renderPlaceholder={() => (
+					<span className="text-muted-foreground">{labels.placeholder}</span>
+				)}
+				renderStyle={renderStyle}
+			/>
+			{activeSlash ? (
+				<div
+					aria-label={labels.slashMenu}
+					className="fixed z-[100] w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-lg"
+					role="listbox"
+					style={{ left: activeSlash.position.left, top: activeSlash.position.top }}
+				>
+					<div className="flex items-center gap-2 border-b px-3 py-2 text-muted-foreground text-xs">
+						<SearchIcon className="size-3.5" />
+						<span>{mentionGroupLabel ?? labels.slashMenu}</span>
+						<span className="ms-auto font-mono">
+							{activeSlash.kind === "mention" ? `${activeSlash.prefix}/` : "/"}
+						</span>
+					</div>
+					<div className="max-h-72 overflow-y-auto p-1.5">
+						{activeSlash.kind === "block"
+							? filteredBlockCommands.map((command, index) => (
+									<button
+										aria-selected={index === activeIndex}
+										className="flex w-full items-center rounded-lg px-3 py-2 text-start text-sm aria-selected:bg-surface-selected"
+										key={command.id}
+										onMouseDown={(event) => {
+											event.preventDefault();
+											chooseBlock(command);
+										}}
+										role="option"
+										type="button"
+									>
+										{command.label}
+									</button>
+								))
+							: hits.map((hit, index) => (
+									<button
+										aria-selected={index === activeIndex}
+										className="flex w-full min-w-0 items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm aria-selected:bg-surface-selected"
+										key={hit.id}
+										onMouseDown={(event) => {
+											event.preventDefault();
+											chooseMention(hit);
+										}}
+										role="option"
+										type="button"
+									>
+										<IdentityAvatar
+											avatar={hit.avatar}
+											className="size-7 shrink-0"
+											fallback={(hit.label || "?").slice(0, 1).toUpperCase()}
+										/>
+										<span className="min-w-0 flex-1 truncate">
+											{hit.label || messages.unnamed}
+										</span>
+									</button>
+								))}
+						{isPending ? (
+							<p className="px-3 py-2 text-muted-foreground text-sm">
+								{messages.loading}
+							</p>
+						) : null}
+						{isError ? (
+							<p className="px-3 py-2 text-destructive text-sm" role="alert">
+								{messages.error}
+							</p>
+						) : null}
+						{!isPending && !isError && itemCount === 0 ? (
+							<p className="px-3 py-2 text-muted-foreground text-sm">
+								{activeSlash.kind === "mention" && !activeSlash.query.trim()
+									? messages.searchPlaceholder
+									: messages.empty}
+							</p>
+						) : null}
+					</div>
+				</div>
+			) : null}
+		</>
+	);
+}
 
 function ToolbarTooltip({ label, children }: { label: string; children: ReactNode }) {
 	return (
@@ -423,6 +859,7 @@ function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType })
 }
 
 function Toolbar({ variant }: { variant: PortableTextEditorVariant }) {
+	const { editor: labels } = useUiMessages();
 	const schema = useToolbarSchema({
 		extendAnnotation,
 		extendDecorator,
@@ -432,7 +869,7 @@ function Toolbar({ variant }: { variant: PortableTextEditorVariant }) {
 
 	return (
 		<div
-			aria-label="Portable Text"
+			aria-label={labels.toolbar}
 			className="flex min-h-11 items-center gap-1 overflow-x-auto overscroll-x-contain border-border-weak border-b bg-muted/20 px-2 py-1.5 [scrollbar-width:thin]"
 			role="toolbar"
 		>
@@ -467,6 +904,7 @@ function EditorSurface({
 	ariaLabel,
 	ariaLabelledBy,
 	required,
+	presentations,
 }: {
 	value: PortableTextEditorValue;
 	onChange: (value: PortableTextEditorValue) => void;
@@ -474,7 +912,9 @@ function EditorSurface({
 	ariaLabel: string;
 	ariaLabelledBy?: string;
 	required: boolean;
+	presentations: ReturnType<typeof useUnitMentionPresentations>;
 }) {
+	const { editor: labels } = useUiMessages();
 	return (
 		<EditorProvider initialConfig={{ schemaDefinition, initialValue: value }}>
 			<EventListenerPlugin
@@ -483,21 +923,16 @@ function EditorSurface({
 				}}
 			/>
 			<Toolbar variant={variant} />
-			<PortableTextEditable
-				aria-label={ariaLabelledBy ? undefined : ariaLabel}
-				aria-labelledby={ariaLabelledBy}
-				aria-required={required}
-				className={cn(
-					"max-w-none overflow-y-auto px-5 py-4 font-sans outline-none sm:px-6 sm:py-5",
-					"[&_ol]:my-3 [&_ol]:list-decimal [&_ol]:ps-6 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:ps-6",
-					"focus-visible:outline-none",
-					variant === "document" ? "min-h-[30rem] text-base" : "min-h-44 text-[15px]",
-				)}
-				renderAnnotation={renderAnnotation}
-				renderDecorator={renderDecorator}
-				renderListItem={({ children }) => children}
-				renderStyle={renderStyle}
+			<SlashCommandEditable
+				ariaLabel={ariaLabel}
+				ariaLabelledBy={ariaLabelledBy}
+				presentations={presentations}
+				required={required}
+				variant={variant}
 			/>
+			<div className="border-border-weak border-t bg-muted/15 px-4 py-1.5 text-muted-foreground text-xs">
+				{labels.slashHint}
+			</div>
 		</EditorProvider>
 	);
 }
@@ -519,14 +954,16 @@ export function PortableTextEditor({
 }) {
 	const { editor: labels } = useUiMessages();
 	const normalized = normalizePortableText(value);
+	const presentations = useUnitMentionPresentations(normalized);
 	const labelId = useId();
-	const ariaLabel = label ?? "Portable Text";
+	const ariaLabel = label ?? labels.richText;
 	const frameLabel = label ? { "aria-labelledby": labelId } : { "aria-label": ariaLabel };
 	const surface = (surfaceVariant: PortableTextEditorVariant) => (
 		<EditorSurface
 			ariaLabel={ariaLabel}
 			ariaLabelledBy={label ? labelId : undefined}
 			onChange={onChange}
+			presentations={presentations}
 			required={required}
 			value={normalized}
 			variant={surfaceVariant}
@@ -551,7 +988,11 @@ export function PortableTextEditor({
 							{labels.preview}
 						</div>
 						<div className="max-h-[36rem] overflow-y-auto px-6 py-5 sm:px-8 sm:py-7">
-							<PortableTextContent value={normalized} variant="article" />
+							<PortableTextContent
+								unitMentionPresentations={presentations}
+								value={normalized}
+								variant="article"
+							/>
 						</div>
 					</section>
 				</div>

@@ -3333,11 +3333,14 @@ export type PortableTextDocument = {
 							 */
 							_key: string;
 							/**
-							 * @pattern ^(?!span$).+
 							 * @type string
 							 */
-							_type: string;
-							[key: string]: unknown;
+							_type: "unit-mention";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							unitId: string;
 					  }
 				)[];
 				/**
@@ -4840,6 +4843,7 @@ export const ApiErrorCode = {
 	AssociationProposalExpired: "AssociationProposalExpired",
 	AssociationProposalExpiryInvalid: "AssociationProposalExpiryInvalid",
 	AssociationProposalRoleInvalid: "AssociationProposalRoleInvalid",
+	AssociationContextPostInvalid: "AssociationContextPostInvalid",
 	EntityEntryNotFound: "EntityEntryNotFound",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 	CreditAttributionNotFound: "CreditAttributionNotFound",
@@ -4952,6 +4956,7 @@ export const ApiErrorCode = {
 	ReplyDepthExceeded: "ReplyDepthExceeded",
 	PostScoreNotFound: "PostScoreNotFound",
 	PostScoreDuplicate: "PostScoreDuplicate",
+	PostTagMentionVoteConflict: "PostTagMentionVoteConflict",
 	InvalidNotificationCursor: "InvalidNotificationCursor",
 	NotificationNotFound: "NotificationNotFound",
 	AliasNotFound: "AliasNotFound",
@@ -5316,6 +5321,7 @@ export type GetApiUnitByUnitIdAssociationProposalsStatus200 = {
 		 * @type string
 		 */
 		role: GetApiUnitByUnitIdAssociationProposalsStatus200ItemsRoleEnum;
+		contextPostId: (string | null) | null;
 	}[];
 };
 
@@ -5573,11 +5579,13 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200 = {
 	 * @type string
 	 */
 	role: PostApiUnitByUnitIdAssociationProposalsRequestsStatus200RoleEnum;
+	contextPostId: (string | null) | null;
 };
 
 export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum = {
 	AssociationProposalExpiryInvalid: "AssociationProposalExpiryInvalid",
 	AssociationProposalRoleInvalid: "AssociationProposalRoleInvalid",
+	AssociationContextPostInvalid: "AssociationContextPostInvalid",
 } as const;
 
 export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum =
@@ -5731,14 +5739,6 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus422 = Validatio
  */
 export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus500 = InternalError;
 
-export const PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum = {
-	credit: "credit",
-	subject: "subject",
-} as const;
-
-export type PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum =
-	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum];
-
 export const PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -5771,33 +5771,59 @@ export const PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum = {
 export type PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum];
 
-/**
- * @type object
- */
-export type PostApiUnitByUnitIdAssociationProposalsRequestsBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	targetUnitId: string;
-	/**
-	 * @default 'credit'
-	 * @type string
-	 */
-	kind: PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum;
-	/**
-	 * @default 'author'
-	 * @type string
-	 */
-	role: PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	expiresAt: string;
-};
+export type PostApiUnitByUnitIdAssociationProposalsRequestsBody =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			targetUnitId: string;
+			/**
+			 * @type string
+			 */
+			kind: "credit";
+			/**
+			 * @default 'author'
+			 * @type string
+			 */
+			role: PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			expiresAt: string;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			targetUnitId: string;
+			/**
+			 * @type string
+			 */
+			kind: "subject";
+			/**
+			 * @default 'author'
+			 * @type string
+			 */
+			role: PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string | undefined
+			 */
+			contextPostId?: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			expiresAt: string;
+	  };
 
 /**
  * @type object
@@ -5972,11 +5998,13 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200 = {
 	 * @type string
 	 */
 	role: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200RoleEnum;
+	contextPostId: (string | null) | null;
 };
 
 export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum = {
 	AssociationProposalExpiryInvalid: "AssociationProposalExpiryInvalid",
 	AssociationProposalRoleInvalid: "AssociationProposalRoleInvalid",
+	AssociationContextPostInvalid: "AssociationContextPostInvalid",
 } as const;
 
 export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum =
@@ -6130,14 +6158,6 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422 = Valida
  */
 export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500 = InternalError;
 
-export const PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum = {
-	credit: "credit",
-	subject: "subject",
-} as const;
-
-export type PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum =
-	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum];
-
 export const PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -6170,33 +6190,59 @@ export const PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum =
 export type PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum];
 
-/**
- * @type object
- */
-export type PostApiUnitByUnitIdAssociationProposalsInvitationsBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	sourceUnitId: string;
-	/**
-	 * @default 'credit'
-	 * @type string
-	 */
-	kind: PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum;
-	/**
-	 * @default 'author'
-	 * @type string
-	 */
-	role: PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	expiresAt: string;
-};
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsBody =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			sourceUnitId: string;
+			/**
+			 * @type string
+			 */
+			kind: "credit";
+			/**
+			 * @default 'author'
+			 * @type string
+			 */
+			role: PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			expiresAt: string;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			sourceUnitId: string;
+			/**
+			 * @type string
+			 */
+			kind: "subject";
+			/**
+			 * @default 'author'
+			 * @type string
+			 */
+			role: PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string | undefined
+			 */
+			contextPostId?: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			expiresAt: string;
+	  };
 
 /**
  * @type object
@@ -6377,6 +6423,7 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200 =
 	 * @type string
 	 */
 	role: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200RoleEnum;
+	contextPostId: (string | null) | null;
 };
 
 /**
@@ -6690,6 +6737,7 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200 
 	 * @type string
 	 */
 	role: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200RoleEnum;
+	contextPostId: (string | null) | null;
 };
 
 /**
@@ -9263,11 +9311,14 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 													 */
 													_key: string;
 													/**
-													 * @pattern ^(?!span$).+
 													 * @type string
 													 */
-													_type: string;
-													[key: string]: unknown;
+													_type: "unit-mention";
+													/**
+													 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+													 * @type string
+													 */
+													unitId: string;
 											  }
 										)[];
 										/**
@@ -9911,11 +9962,14 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 													 */
 													_key: string;
 													/**
-													 * @pattern ^(?!span$).+
 													 * @type string
 													 */
-													_type: string;
-													[key: string]: unknown;
+													_type: "unit-mention";
+													/**
+													 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+													 * @type string
+													 */
+													unitId: string;
 											  }
 										)[];
 										/**
@@ -15326,11 +15380,14 @@ export type PostApiFeedQueryStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**
@@ -15973,11 +16030,14 @@ export type PostApiFeedQueryStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**
@@ -16508,11 +16568,14 @@ export type GetApiFeedbackMeStatus200 = {
 										 */
 										_key: string;
 										/**
-										 * @pattern ^(?!span$).+
 										 * @type string
 										 */
-										_type: string;
-										[key: string]: unknown;
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
 								  }
 							)[];
 							/**
@@ -16652,11 +16715,14 @@ export type GetApiFeedbackMeStatus200 = {
 												 */
 												_key: string;
 												/**
-												 * @pattern ^(?!span$).+
 												 * @type string
 												 */
-												_type: string;
-												[key: string]: unknown;
+												_type: "unit-mention";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string
+												 */
+												unitId: string;
 										  }
 									)[];
 									/**
@@ -16913,11 +16979,14 @@ export type PostApiFeedbackStatus200 = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -17057,11 +17126,14 @@ export type PostApiFeedbackStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -17319,11 +17391,14 @@ export type PostApiFeedbackBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -19388,11 +19463,14 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -20134,11 +20212,14 @@ export type PostApiGovernanceUnitByUnitIdProtectionsBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -21819,11 +21900,14 @@ export type GetApiGovernanceNotesByPostIdStatus200 = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -22075,11 +22159,14 @@ export type PatchApiGovernanceNotesByPostIdStatus200 = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -22371,11 +22458,14 @@ export type PatchApiGovernanceNotesByPostIdBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -22660,11 +22750,14 @@ export type GetApiGovernanceModerationCasesStatus200 = {
 										 */
 										_key: string;
 										/**
-										 * @pattern ^(?!span$).+
 										 * @type string
 										 */
-										_type: string;
-										[key: string]: unknown;
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
 								  }
 							)[];
 							/**
@@ -22971,11 +23064,14 @@ export type GetApiGovernanceModerationCasesByCaseIdStatus200 = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -23311,11 +23407,14 @@ export type PatchApiGovernanceModerationCasesByCaseIdStatus200 = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -23585,11 +23684,14 @@ export type PatchApiGovernanceModerationCasesByCaseIdBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -24018,11 +24120,14 @@ export type PostApiGovernanceModerationActionsBody =
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -24182,11 +24287,14 @@ export type PostApiGovernanceModerationActionsBody =
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -24347,11 +24455,14 @@ export type PostApiGovernanceModerationActionsBody =
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -24507,11 +24618,14 @@ export type PostApiGovernanceModerationActionsBody =
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -24669,11 +24783,14 @@ export type PostApiGovernanceModerationActionsBody =
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -25010,11 +25127,14 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -25412,11 +25532,14 @@ export type PostApiGovernanceModerationEnforcementsBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -25837,11 +25960,14 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -26753,11 +26879,14 @@ export type PostApiSeriesBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -28265,11 +28394,14 @@ export type PatchApiZonesByZoneIdBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -32861,11 +32993,14 @@ export type PostApiZonesBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -35391,11 +35526,14 @@ export type GetApiUsersMeStatus200 = {
 										 */
 										_key: string;
 										/**
-										 * @pattern ^(?!span$).+
 										 * @type string
 										 */
-										_type: string;
-										[key: string]: unknown;
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
 								  }
 							)[];
 							/**
@@ -35766,11 +35904,14 @@ export type PatchApiUsersMeStatus200 = {
 										 */
 										_key: string;
 										/**
-										 * @pattern ^(?!span$).+
 										 * @type string
 										 */
-										_type: string;
-										[key: string]: unknown;
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
 								  }
 							)[];
 							/**
@@ -36135,11 +36276,14 @@ export type PatchApiUsersMeBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -38041,11 +38185,14 @@ export type GetApiUsersByIdStatus200 = {
 										 */
 										_key: string;
 										/**
-										 * @pattern ^(?!span$).+
 										 * @type string
 										 */
-										_type: string;
-										[key: string]: unknown;
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
 								  }
 							)[];
 							/**
@@ -43388,6 +43535,179 @@ export type ReleaseSlugRedirectAsStaffResponse =
 	| ReleaseSlugRedirectAsStaffStatus422
 	| ReleaseSlugRedirectAsStaffStatus500;
 
+export const PostApiUnitsPresentationsStatus200ItemsKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiUnitsPresentationsStatus200ItemsKindEnum =
+	(typeof PostApiUnitsPresentationsStatus200ItemsKindEnum)[keyof typeof PostApiUnitsPresentationsStatus200ItemsKindEnum];
+
+export const PostApiUnitsPresentationsStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiUnitsPresentationsStatus200ItemsAvatarIconPrefixEnum =
+	(typeof PostApiUnitsPresentationsStatus200ItemsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsPresentationsStatus200ItemsAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsPresentationsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'slug_namespace'
+		 * @type string
+		 */
+		kind: PostApiUnitsPresentationsStatus200ItemsKindEnum;
+		title: (string | null) | null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiUnitsPresentationsStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsPresentationsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsPresentationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsPresentationsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsPresentationsBody = {
+	/**
+	 * @type array
+	 */
+	ids: string[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsPresentationsOptions = {
+	body: PostApiUnitsPresentationsBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsPresentationsResponses = {
+	"200": PostApiUnitsPresentationsStatus200;
+	"400": PostApiUnitsPresentationsStatus400;
+	"422": PostApiUnitsPresentationsStatus422;
+	"500": PostApiUnitsPresentationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsPresentationsResponse =
+	| PostApiUnitsPresentationsStatus200
+	| PostApiUnitsPresentationsStatus400
+	| PostApiUnitsPresentationsStatus422
+	| PostApiUnitsPresentationsStatus500;
+
 /**
  * @type object
  */
@@ -44717,11 +45037,14 @@ export type PostApiUnitsByTypeStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -44926,6 +45249,36 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		position: string;
 		title: (string | null) | null;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -45418,11 +45771,14 @@ export type PostApiUnitsByTypeBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -46168,11 +46524,14 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -46377,6 +46736,36 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		position: string;
 		title: (string | null) | null;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -47221,11 +47610,14 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -47430,6 +47822,36 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		position: string;
 		title: (string | null) | null;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -48754,11 +49176,14 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -48963,6 +49388,36 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 */
 		position: string;
 		title: (string | null) | null;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -49977,11 +50432,14 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -50186,6 +50644,36 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 */
 		position: string;
 		title: (string | null) | null;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -51205,11 +51693,14 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -51414,6 +51905,36 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		position: string;
 		title: (string | null) | null;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -51850,11 +52371,14 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -54047,11 +54571,14 @@ export type PostApiEntitiesBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -54562,11 +55089,14 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -54922,6 +55452,36 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 * @type string
 		 */
 		role: GetApiEntitiesByUnitIdStatus200SubjectAssociationsRoleEnum;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
 	}[];
 };
 
@@ -55216,11 +55776,14 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -55915,11 +56478,14 @@ export type PostApiTagsBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -57669,6 +58235,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
 	 * @type string
 	 */
 	entityId: string;
+	contextPostId: (string | null) | null;
 	/**
 	 * @default 'primary_character'
 	 * @type string
@@ -57696,10 +58263,32 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 = MalformedRequestBody;
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'AssociationContextPostInvalid'
+				 * @type string
+				 */
+				code: "AssociationContextPostInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -57832,6 +58421,12 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsBody = {
 	 * @type string
 	 */
 	entityId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	contextPostId?: string;
 	/**
 	 * @default 'primary_character'
 	 * @type string
@@ -62148,11 +62743,14 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -62706,11 +63304,14 @@ export type GetApiChaptersByChapterIdStatus200 = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -62981,6 +63582,34 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404 = {
 /**
  * @type object
  */
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PostTagMentionVoteConflict'
+		 * @type string
+		 */
+		code: "PostTagMentionVoteConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422 = ValidationError;
 
 /**
@@ -63085,11 +63714,14 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -63182,6 +63814,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses = {
 	"400": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400;
 	"403": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403;
 	"404": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404;
+	"409": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409;
 	"422": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422;
 	"429": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429;
 	"500": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500;
@@ -63195,6 +63828,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentResponse =
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
+	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500;
@@ -65352,11 +65986,14 @@ export type PostApiCollectionsBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -68467,11 +69104,14 @@ export type PatchApiCollectionsByCollectionIdBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -70592,11 +71232,14 @@ export type GetApiReviewsStatus200 = {
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -71274,11 +71917,14 @@ export type PostApiReviewsBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -71669,11 +72315,14 @@ export type GetApiReviewsByReviewIdStatus200 = {
 										 */
 										_key: string;
 										/**
-										 * @pattern ^(?!span$).+
 										 * @type string
 										 */
-										_type: string;
-										[key: string]: unknown;
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
 								  }
 							)[];
 							/**
@@ -71997,6 +72646,34 @@ export type PatchApiReviewsByReviewIdStatus404 = {
 /**
  * @type object
  */
+export type PatchApiReviewsByReviewIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PostTagMentionVoteConflict'
+		 * @type string
+		 */
+		code: "PostTagMentionVoteConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiReviewsByReviewIdStatus422 = ValidationError;
 
 /**
@@ -72109,11 +72786,14 @@ export type PatchApiReviewsByReviewIdBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -72202,6 +72882,7 @@ export type PatchApiReviewsByReviewIdResponses = {
 	"400": PatchApiReviewsByReviewIdStatus400;
 	"403": PatchApiReviewsByReviewIdStatus403;
 	"404": PatchApiReviewsByReviewIdStatus404;
+	"409": PatchApiReviewsByReviewIdStatus409;
 	"422": PatchApiReviewsByReviewIdStatus422;
 	"429": PatchApiReviewsByReviewIdStatus429;
 	"500": PatchApiReviewsByReviewIdStatus500;
@@ -72215,6 +72896,7 @@ export type PatchApiReviewsByReviewIdResponse =
 	| PatchApiReviewsByReviewIdStatus400
 	| PatchApiReviewsByReviewIdStatus403
 	| PatchApiReviewsByReviewIdStatus404
+	| PatchApiReviewsByReviewIdStatus409
 	| PatchApiReviewsByReviewIdStatus422
 	| PatchApiReviewsByReviewIdStatus429
 	| PatchApiReviewsByReviewIdStatus500;
@@ -75076,11 +75758,14 @@ export type GetApiPostsStatus200 = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -75433,11 +76118,14 @@ export type PostApiPostsBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -75850,11 +76538,14 @@ export type GetApiPostsByPostIdStatus200 = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -76184,6 +76875,14 @@ export type PatchApiPostsByPostIdStatus404 = {
 	requestId: string;
 };
 
+export const PatchApiPostsByPostIdStatus409ErrorCodeEnum = {
+	UnitRevisionConflict: "UnitRevisionConflict",
+	PostTagMentionVoteConflict: "PostTagMentionVoteConflict",
+} as const;
+
+export type PatchApiPostsByPostIdStatus409ErrorCodeEnum =
+	(typeof PatchApiPostsByPostIdStatus409ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -76196,7 +76895,7 @@ export type PatchApiPostsByPostIdStatus409 = {
 		 * @default 'UnitRevisionConflict'
 		 * @type string
 		 */
-		code: "UnitRevisionConflict";
+		code: PatchApiPostsByPostIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -76310,11 +77009,14 @@ export type PatchApiPostsByPostIdBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -76888,11 +77590,14 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -77359,11 +78064,14 @@ export type PostApiPostsByPostIdRepliesBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -77578,6 +78286,14 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus404 = {
 	requestId: string;
 };
 
+export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus409ErrorCodeEnum = {
+	UnitRevisionConflict: "UnitRevisionConflict",
+	PostTagMentionVoteConflict: "PostTagMentionVoteConflict",
+} as const;
+
+export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus409ErrorCodeEnum =
+	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus409ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -77590,7 +78306,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus409 = {
 		 * @default 'UnitRevisionConflict'
 		 * @type string
 		 */
-		code: "UnitRevisionConflict";
+		code: PatchApiPostsByPostIdRepliesByReplyPostIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -77698,11 +78414,14 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdBody = {
 								 */
 								_key: string;
 								/**
-								 * @pattern ^(?!span$).+
 								 * @type string
 								 */
-								_type: string;
-								[key: string]: unknown;
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
 						  }
 					)[];
 					/**
@@ -78380,11 +79099,14 @@ export type PostApiRealmsBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -79540,11 +80262,14 @@ export type PatchApiRealmsByRealmIdBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -81458,11 +82183,14 @@ export type PutApiRealmsByRealmIdRulesBody = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -81678,11 +82406,14 @@ export type GetApiRealmsByRealmIdRulesStatus200 = {
 									 */
 									_key: string;
 									/**
-									 * @pattern ^(?!span$).+
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
 							  }
 						)[];
 						/**
@@ -82885,11 +83616,14 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**
@@ -83533,11 +84267,14 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**
@@ -85504,11 +86241,14 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200 = {
 										 */
 										_key: string;
 										/**
-										 * @pattern ^(?!span$).+
 										 * @type string
 										 */
-										_type: string;
-										[key: string]: unknown;
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
 								  }
 							)[];
 							/**
@@ -86045,11 +86785,14 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -86196,11 +86939,14 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 											 */
 											_key: string;
 											/**
-											 * @pattern ^(?!span$).+
 											 * @type string
 											 */
-											_type: string;
-											[key: string]: unknown;
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
 									  }
 								)[];
 								/**
@@ -89656,11 +90402,14 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**
@@ -90304,11 +91053,14 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**
@@ -97259,11 +98011,14 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**
@@ -97907,11 +98662,14 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 															 */
 															_key: string;
 															/**
-															 * @pattern ^(?!span$).+
 															 * @type string
 															 */
-															_type: string;
-															[key: string]: unknown;
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
 													  }
 												)[];
 												/**

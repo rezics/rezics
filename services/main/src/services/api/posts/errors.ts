@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import * as Data from "effect/Data";
 
-import { PostTargetingLocked } from "../../posts/errors";
-export { PostTargetingLocked } from "../../posts/errors";
+import { PostTagMentionVoteConflict, PostTargetingLocked } from "../../posts/errors";
+export { PostTagMentionVoteConflict, PostTargetingLocked } from "../../posts/errors";
 
 export class PostNotFound extends Data.TaggedError("PostNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
@@ -55,4 +55,5 @@ export const PostErrors = [
 	ReplyDepthExceeded,
 	PostScoreNotFound,
 	PostScoreDuplicate,
+	PostTagMentionVoteConflict,
 ] as const;

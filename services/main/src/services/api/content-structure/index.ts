@@ -79,6 +79,7 @@ import {
 } from "../../content-structure/history";
 import { toApiErrorResponse } from "../schema/response";
 import { getUnitLocalizationContentMetric } from "../../content-metrics/service";
+import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden", "UnitProtected"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -639,6 +640,12 @@ export default new Elysia()
 					content: body.content,
 					contentStatus: hasContent ? (body.status ?? "draft") : undefined,
 				});
+				if (body.content)
+					await applyNewPostTagMentionVotes(tx, {
+						postId: contentUnit.id,
+						profileId: profile.unitId,
+						nextBody: body.content,
+					});
 				await tx.insert(unitAccessBinding).values({
 					unitId: contentUnit.id,
 					subjectKind: "profile",
@@ -945,6 +952,17 @@ export default new Elysia()
 				["localizations", params.language],
 			]);
 			await database.transaction(async (tx) => {
+				const [current] = await tx
+					.select({ content: unitLocalization.content })
+					.from(unitLocalization)
+					.where(
+						and(
+							eq(unitLocalization.unitId, params.chapterId),
+							eq(unitLocalization.language, params.language),
+						),
+					)
+					.for("update")
+					.limit(1);
 				await tx
 					.insert(unitLocalization)
 					.values({
@@ -962,6 +980,12 @@ export default new Elysia()
 							contentStatus: body.status,
 						},
 					});
+				await applyNewPostTagMentionVotes(tx, {
+					postId: params.chapterId,
+					profileId: profile.unitId,
+					previousBody: current?.content,
+					nextBody: body.content,
+				});
 				await recordUnitRevision(tx, {
 					unitId: params.chapterId,
 					actorProfileId: profile.unitId,
@@ -978,6 +1002,7 @@ export default new Elysia()
 				[StatusCodes.OK]: UpdateStateResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),
 			},
 			detail: { summary: "Create or replace chapter content", tags: ["Books"] },
 		},

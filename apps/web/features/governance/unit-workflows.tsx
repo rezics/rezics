@@ -24,9 +24,9 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 
-import { Badge } from "@rezics/ui";
+import { Badge, EntityPicker } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -361,6 +361,7 @@ function AssociationProposalManager({
 	const cancel = useDeleteApiUnitByUnitIdAssociationProposalsByProposalId({
 		mutation: { onSuccess: refresh },
 	});
+	const [contextPost, setContextPost] = useState<{ id: string; label: string }>();
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -402,6 +403,7 @@ function AssociationProposalManager({
 							role,
 							expiresAt,
 							targetUnitId: relatedUnitId,
+							...(contextPost ? { contextPostId: contextPost.id } : {}),
 						},
 					});
 				else
@@ -412,10 +414,12 @@ function AssociationProposalManager({
 							role,
 							expiresAt,
 							sourceUnitId: relatedUnitId,
+							...(contextPost ? { contextPostId: contextPost.id } : {}),
 						},
 					});
 			}
 			formElement.reset();
+			setContextPost(undefined);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -472,6 +476,28 @@ function AssociationProposalManager({
 								/>
 							</Field>
 						</div>
+						{kind === "subject" ? (
+							<Field>
+								<FieldLabel>{t.governance.contextWikiPost}</FieldLabel>
+								<div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+									<EntityPicker
+										index="posts"
+										kind="wiki"
+										onChange={setContextPost}
+										value={contextPost}
+									/>
+									{contextPost ? (
+										<Button
+											onClick={() => setContextPost(undefined)}
+											type="button"
+											variant="outline"
+										>
+											{t.ui.clear}
+										</Button>
+									) : null}
+								</div>
+							</Field>
+						) : null}
 						<RequestFailure error={side === "source" ? request.error : invite.error} />
 						<Button
 							variant="solid"

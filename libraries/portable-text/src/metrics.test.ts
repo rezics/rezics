@@ -99,4 +99,27 @@ describe("Portable Text content metrics", () => {
 			characterCount: 0,
 		});
 	});
+
+	it("does not copy mutable Unit presentation into prose metrics", () => {
+		const content: PortableText = [
+			{
+				_key: "mention",
+				_type: "block",
+				children: [
+					{
+						_key: "unit",
+						_type: "unit-mention",
+						unitId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+					},
+				],
+				markDefs: [],
+			},
+		];
+
+		expect(portableTextMetricText(content)).toBe("");
+		expect(measurePortableText(content, "en")).toEqual({
+			wordCount: 0,
+			characterCount: 0,
+		});
+	});
 });

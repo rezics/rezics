@@ -12,6 +12,7 @@ export default {
 	submit: "Submit",
 	create: "Create",
 	edit: "Edit",
+	clear: "Clear",
 	search: "Search",
 	title: "Title",
 	summary: "Summary",

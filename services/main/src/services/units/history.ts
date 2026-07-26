@@ -75,7 +75,8 @@ import {
 	compareFractionalPositions,
 	isFractionalPosition,
 } from "../ordering/position";
-import { UnitRevisionConflict } from "./errors";
+import { AssociationContextPostInvalid, UnitRevisionConflict } from "./errors";
+import { ensureWikiAssociationContextPost } from "./association-context";
 import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
@@ -695,6 +696,19 @@ export async function restoreUnitSnapshot(
 		.map(({ entityId }) => entityId)
 		.sort((left, right) => left.localeCompare(right)))
 		await authorization.entity.ensureAssociationAllowed(tx, targetEntityId, "subject");
+	for (const contextPostId of [
+		...new Set(
+			subjectAssociations.flatMap(({ contextPostId }) =>
+				contextPostId ? [contextPostId] : [],
+			),
+		),
+	].sort((left, right) => left.localeCompare(right))) {
+		await authorization.unit.ensureCanRead(
+			contextPostId,
+			() => new AssociationContextPostInvalid(),
+		);
+		await ensureWikiAssociationContextPost(tx, contextPostId);
+	}
 	if (snapshot.kind === "post" && snapshot.extension) {
 		const postState = postStateSchema.parse(snapshot.extension);
 		if (postState.subjectUnitId)

@@ -30,6 +30,17 @@ export interface UiMessages {
 		redo: string;
 		style: string;
 		preview: string;
+		placeholder: string;
+		slashMenu: string;
+		slashHint: string;
+		mentionUnits: string;
+		mentionTags: string;
+		mentionEntities: string;
+		mentionRealms: string;
+		mentionZones: string;
+		unavailableMention: string;
+		richText: string;
+		toolbar: string;
 	};
 }
 
@@ -44,15 +55,24 @@ export interface EntityPickerHit {
 	avatar?: PresentedAvatar | null;
 }
 
+export interface UnitMentionPresentation extends EntityPickerHit {
+	kind: string;
+}
+
 export type EntitySearch = (
 	index: string,
 	query: string,
 	signal: AbortSignal,
 ) => Promise<readonly EntityPickerHit[]>;
+export type UnitMentionResolver = (
+	unitIds: readonly string[],
+	signal: AbortSignal,
+) => Promise<readonly UnitMentionPresentation[]>;
 
 interface UiContextValue {
 	messages: UiMessages;
 	searchEntities?: EntitySearch;
+	resolveUnitMentions?: UnitMentionResolver;
 	errorMessage?: (error: unknown) => ReactNode;
 }
 
@@ -83,6 +103,17 @@ const DefaultMessages = {
 		redo: "Redo",
 		style: "Text style",
 		preview: "Preview",
+		placeholder: "Write something, or type / for blocks.",
+		slashMenu: "Insert",
+		slashHint: "Use / for blocks or u/, t/, e/, r/, z/ for Unit mentions.",
+		mentionUnits: "Units",
+		mentionTags: "Tags",
+		mentionEntities: "Entities",
+		mentionRealms: "Realms",
+		mentionZones: "Zones",
+		unavailableMention: "Unavailable Unit",
+		richText: "Rich text",
+		toolbar: "Formatting toolbar",
 	},
 } satisfies UiMessages;
 
@@ -94,11 +125,13 @@ export function UiProvider({
 	children,
 	messages,
 	searchEntities,
+	resolveUnitMentions,
 	errorMessage,
 }: {
 	children: ReactNode;
 	messages?: UiMessagesInput;
 	searchEntities?: EntitySearch;
+	resolveUnitMentions?: UnitMentionResolver;
 	errorMessage?: (error: unknown) => ReactNode;
 }) {
 	const value = useMemo<UiContextValue>(
@@ -109,9 +142,10 @@ export function UiProvider({
 				editor: { ...DefaultMessages.editor, ...messages?.editor },
 			},
 			searchEntities,
+			resolveUnitMentions,
 			errorMessage,
 		}),
-		[errorMessage, messages, searchEntities],
+		[errorMessage, messages, resolveUnitMentions, searchEntities],
 	);
 
 	return <UiContext.Provider value={value}>{children}</UiContext.Provider>;
@@ -127,4 +161,8 @@ export function useUiErrorMessage() {
 
 export function useEntitySearch() {
 	return useContext(UiContext).searchEntities;
+}
+
+export function useUnitMentionResolver() {
+	return useContext(UiContext).resolveUnitMentions;
 }

@@ -15,6 +15,7 @@ import {
 } from "./slug-address";
 import { presentAvatar } from "./avatar";
 import type { PresentedAvatar } from "@rezics/avatar";
+import { getUnitReadCondition } from "../authorization/unit/query";
 
 export const PublisherAttributionRole = "publisher" as const;
 
@@ -33,6 +34,8 @@ export type UnitAttributionSummary = {
 };
 
 export type UnitSummary = UnitAttributionSummary["creditedUnit"];
+
+export type UnitMentionPresentation = Pick<UnitSummary, "id" | "kind" | "title" | "avatar">;
 
 export type UnitAttributionSummaryWithStatistics = Omit<UnitAttributionSummary, "creditedUnit"> & {
 	readonly creditedUnit: UnitSummary & {
@@ -70,6 +73,32 @@ export async function getPublicUnitSummariesByIds(
 			{
 				...row,
 				slugAddress: slugAddresses.get(row.id) ?? null,
+				avatar: presentAvatar(avatar),
+			},
+		]),
+	);
+}
+
+/** Resolve mention presentation for every Unit readable by the current viewer. */
+export async function getReadableUnitPresentationsByIds(
+	unitIds: readonly string[],
+	profileId?: string,
+): Promise<Map<string, UnitMentionPresentation>> {
+	if (!unitIds.length) return new Map();
+	const rows = await database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			title: primaryUnitTitle(unit.id),
+			avatar: resolvedUnitLocalizationAvatar(unit.id),
+		})
+		.from(unit)
+		.where(and(inArray(unit.id, [...unitIds]), getUnitReadCondition(profileId)));
+	return new Map(
+		rows.map(({ avatar, ...row }) => [
+			row.id,
+			{
+				...row,
 				avatar: presentAvatar(avatar),
 			},
 		]),

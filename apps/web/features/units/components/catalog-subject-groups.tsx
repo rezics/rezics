@@ -1,8 +1,8 @@
 "use client";
 
 import type { GetApiUnitsByTypeByUnitIdStatus200 } from "@rezics/openapi-tanstack-query";
+import { Badge } from "@rezics/ui";
 import Link from "next/link";
-import { Fragment } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { groupByAssociationRole } from "../attribution-role";
@@ -22,19 +22,42 @@ export function CatalogSubjectGroups({
 					<h3 className="text-sm font-semibold">
 						{t.units.subjectAssociationRoles[group.role]}
 					</h3>
-					<p className="min-w-0 break-words text-sm">
-						{group.items.map((association, index) => (
-							<Fragment key={association.id}>
-								{index > 0 ? ", " : null}
+					<div className="grid gap-2">
+						{group.items.map((association) => (
+							<div className="grid gap-1 rounded-lg border p-3" key={association.id}>
 								<Link
 									className="font-medium text-link hover:text-link-hover hover:underline"
 									href={`/entities/${association.entityEntryId}`}
 								>
 									{association.title ?? t.ui.unnamed}
 								</Link>
-							</Fragment>
+								{association.contextPost ? (
+									<div className="grid gap-2">
+										<Link
+											className="w-fit text-muted-foreground text-xs hover:text-link hover:underline"
+											href={`/posts/${association.contextPost.id}`}
+										>
+											{association.contextPost.title ??
+												t.units.editor.contextWikiPost}
+										</Link>
+										{association.contextPost.tags.length ? (
+											<div className="flex flex-wrap gap-1.5">
+												{association.contextPost.tags.map((tag) => (
+													<Badge
+														key={tag.tagId}
+														size="sm"
+														variant="outline"
+													>
+														{tag.title ?? t.ui.unnamed} · {tag.score}
+													</Badge>
+												))}
+											</div>
+										) : null}
+									</div>
+								) : null}
+							</div>
 						))}
-					</p>
+					</div>
 				</section>
 			))}
 		</div>

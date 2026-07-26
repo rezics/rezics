@@ -71,6 +71,7 @@ import {
 	ReplyPostNotFound,
 } from "./errors";
 import { selectReplyTree } from "./reply-tree-query";
+import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
@@ -305,6 +306,11 @@ export default new Elysia()
 							content: body.body,
 							contentStatus: "published",
 						});
+						await applyNewPostTagMentionVotes(tx, {
+							postId: created.id,
+							profileId: profile.unitId,
+							nextBody: body.body,
+						});
 						await tx.insert(unitAccessBinding).values({
 							unitId: created.id,
 							subjectKind: "profile",
@@ -478,7 +484,10 @@ export default new Elysia()
 					await authorization.unit.ensureCanUpdate(params.postId, [["localizations"]]);
 					await database.transaction(async (tx) => {
 						const [current] = await tx
-							.select({ language: unitLocalization.language })
+							.select({
+								language: unitLocalization.language,
+								content: unitLocalization.content,
+							})
 							.from(unitLocalization)
 							.where(
 								and(
@@ -486,6 +495,7 @@ export default new Elysia()
 									isPrimaryUnitLocalization(unitLocalization.unitId),
 								),
 							)
+							.for("update")
 							.limit(1);
 						if (!current) throw new PostLocalizationNotFound();
 						await tx
@@ -497,6 +507,12 @@ export default new Elysia()
 									eq(unitLocalization.language, current.language),
 								),
 							);
+						await applyNewPostTagMentionVotes(tx, {
+							postId: params.postId,
+							profileId: profile.unitId,
+							previousBody: current.content,
+							nextBody: body.body,
+						});
 						await recordUnitRevision(tx, {
 							unitId: params.postId,
 							actorProfileId: profile.unitId,
@@ -520,7 +536,10 @@ export default new Elysia()
 							"PostNotFound",
 							"PostLocalizationNotFound",
 						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitRevisionConflict",
+							"PostTagMentionVoteConflict",
+						]),
 					},
 					detail: { summary: "Update post", tags: ["Posts"] },
 				},
@@ -720,6 +739,11 @@ export default new Elysia()
 							content: body.body,
 							contentStatus: "published",
 						});
+						await applyNewPostTagMentionVotes(tx, {
+							postId: created.id,
+							profileId: profile.unitId,
+							nextBody: body.body,
+						});
 						await tx.insert(unitAccessBinding).values({
 							unitId: created.id,
 							subjectKind: "profile",
@@ -803,6 +827,18 @@ export default new Elysia()
 						"localizations",
 					]);
 					await database.transaction(async (tx) => {
+						const [current] = await tx
+							.select({ content: unitLocalization.content })
+							.from(unitLocalization)
+							.where(
+								and(
+									eq(unitLocalization.unitId, params.replyPostId),
+									isPrimaryUnitLocalization(unitLocalization.unitId),
+								),
+							)
+							.for("update")
+							.limit(1);
+						if (!current) throw new PostLocalizationNotFound();
 						await tx
 							.update(unitLocalization)
 							.set({ content: body.body })
@@ -812,6 +848,12 @@ export default new Elysia()
 									isPrimaryUnitLocalization(unitLocalization.unitId),
 								),
 							);
+						await applyNewPostTagMentionVotes(tx, {
+							postId: params.replyPostId,
+							profileId: profile.unitId,
+							previousBody: current.content,
+							nextBody: body.body,
+						});
 						await recordUnitRevision(tx, {
 							unitId: params.replyPostId,
 							actorProfileId: profile.unitId,
@@ -837,7 +879,10 @@ export default new Elysia()
 							"ReplyPostNotFound",
 							"UnitNotFound",
 						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitRevisionConflict",
+							"PostTagMentionVoteConflict",
+						]),
 					},
 					detail: { summary: "Update reply post", tags: ["Posts"] },
 				},

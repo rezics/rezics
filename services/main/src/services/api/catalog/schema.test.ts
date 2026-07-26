@@ -46,14 +46,22 @@ describe("Entity association API contracts", () => {
 		expect(
 			Check(AddUnitSubjectAssociationBody, {
 				entityId: UnitId,
+				contextPostId: "019f73cb-926e-7e50-9a7f-da67701accb4",
 				role: "primary_character",
 			}),
 		).toBe(true);
 		expect(
 			Check(AddUnitSubjectAssociationBody, {
 				entityId: UnitId,
+				contextPostId: "019f73cb-926e-7e50-9a7f-da67701accb4",
 				role: "arbitrary-subject",
 			}),
 		).toBe(false);
+		expect(
+			Check(AddUnitSubjectAssociationBody, {
+				entityId: UnitId,
+				role: "primary_character",
+			}),
+		).toBe(true);
 	});
 });

@@ -1,4 +1,8 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: realmTerms } = enTerminology.realm;
+const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
 	paragraph: "Paragraph",
@@ -20,4 +24,15 @@ export default {
 	redo: "Redo",
 	style: "Text style",
 	preview: "Preview",
+	placeholder: "Write something, or type / for blocks.",
+	slashMenu: "Insert",
+	slashHint: "Use / for blocks or u/, t/, e/, r/, z/ for Unit mentions.",
+	mentionUnits: "Units",
+	mentionTags: "Tags",
+	mentionEntities: "Entities",
+	mentionRealms: realmTerms.pluralLabel,
+	mentionZones: zoneTerms.pluralLabel,
+	unavailableMention: "Unavailable Unit",
+	richText: "Rich text",
+	toolbar: "Formatting toolbar",
 } satisfies typeof import("../zh-Hant/editor").default;

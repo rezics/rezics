@@ -29,14 +29,21 @@ import {
 	UpdateUnitVariantContextBody,
 	PromoteUnitVariantBody,
 	UnitSeriesMembershipListResponse,
+	ResolveUnitPresentationsBody,
 } from "./schema";
-import { toApiErrorResponse, UnitDetailResponse, UnitListResponse } from "../schema/response";
+import {
+	toApiErrorResponse,
+	UnitDetailResponse,
+	UnitListResponse,
+	UnitPresentationListResponse,
+} from "../schema/response";
 import { NoContentResponse } from "../schema/action-response";
 import {
 	getUnitSeriesMemberships,
 	promoteUnitVariantToMain,
 	updateUnitVariantContext,
 } from "../../units/variants";
+import { getReadableUnitPresentationsByIds } from "../../units/attribution";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -71,6 +78,27 @@ const UnitVariantConflictResponse = toApiErrorResponse([
 ]);
 export default new Elysia({ prefix: "/units" })
 	.use(session)
+	.post(
+		"/presentations",
+		async ({ body, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			const presentations = await getReadableUnitPresentationsByIds(
+				body.ids,
+				identity.authorization.profileId,
+			);
+			return {
+				items: body.ids.flatMap((id) => {
+					const presentation = presentations.get(id);
+					return presentation ? [presentation] : [];
+				}),
+			};
+		},
+		{
+			body: ResolveUnitPresentationsBody,
+			response: { [StatusCodes.OK]: UnitPresentationListResponse },
+			detail: { summary: "Resolve readable Unit presentations", tags: ["Units"] },
+		},
+	)
 	.get(
 		"/by-id/:unitId/series-memberships",
 		async ({ params, request }) => {

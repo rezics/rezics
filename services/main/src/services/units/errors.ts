@@ -207,6 +207,14 @@ export class AssociationProposalRoleInvalid extends Data.TaggedError(
 	readonly message = "Association proposal role does not match its kind";
 }
 
+export class AssociationContextPostInvalid extends Data.TaggedError(
+	"AssociationContextPostInvalid",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = AssociationContextPostInvalid.status;
+	readonly message = "Subject association context must be a wiki Post";
+}
+
 export const UnitErrors = [
 	UnitNotFound,
 	UnitPermissionForbidden,
@@ -234,4 +242,5 @@ export const UnitErrors = [
 	AssociationProposalExpired,
 	AssociationProposalExpiryInvalid,
 	AssociationProposalRoleInvalid,
+	AssociationContextPostInvalid,
 ] as const;

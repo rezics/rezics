@@ -23,6 +23,7 @@ import { FavoriteButton } from "@/features/collections/components/favorite-butto
 import { UnitShelf } from "@/features/explore/unit-shelf";
 import { BookChapters } from "./reader";
 import type { UnitType } from "./unit-types";
+import { CatalogSubjectGroups } from "./components/catalog-subject-groups";
 
 const Icons = { book: BookOpen, software: Gamepad2, media: PlaySquare, series: LibraryBig };
 
@@ -312,16 +313,8 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					{item.subjectAssociations.length > 0 && (
 						<DetailSection title={t.units.detail.subjectAssociations}>
 							<Card>
-								<CardContent className="grid gap-2 p-5 text-sm">
-									{item.subjectAssociations.map((association) => (
-										<Link
-											key={association.id}
-											className="min-w-0 break-words text-link hover:text-link-hover hover:underline"
-											href={`/entities/${association.entityEntryId}`}
-										>
-											{association.title ?? t.ui.unnamed} · {association.role}
-										</Link>
-									))}
+								<CardContent className="p-5">
+									<CatalogSubjectGroups associations={item.subjectAssociations} />
 								</CardContent>
 							</Card>
 						</DetailSection>

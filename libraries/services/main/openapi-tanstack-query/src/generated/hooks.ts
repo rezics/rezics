@@ -938,6 +938,11 @@ import type {
 	ReleaseSlugRedirectAsStaffStatus404,
 	ReleaseSlugRedirectAsStaffStatus422,
 	ReleaseSlugRedirectAsStaffStatus500,
+	PostApiUnitsPresentationsOptions,
+	PostApiUnitsPresentationsStatus200,
+	PostApiUnitsPresentationsStatus400,
+	PostApiUnitsPresentationsStatus422,
+	PostApiUnitsPresentationsStatus500,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsStatus404,
@@ -1326,6 +1331,7 @@ import type {
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404,
+	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500,
@@ -1470,6 +1476,7 @@ import type {
 	PatchApiReviewsByReviewIdStatus400,
 	PatchApiReviewsByReviewIdStatus403,
 	PatchApiReviewsByReviewIdStatus404,
+	PatchApiReviewsByReviewIdStatus409,
 	PatchApiReviewsByReviewIdStatus422,
 	PatchApiReviewsByReviewIdStatus429,
 	PatchApiReviewsByReviewIdStatus500,
@@ -2132,6 +2139,7 @@ import {
 	getUnitSlugAddressAsStaff,
 	replaceUnitSlugAddressAsStaff,
 	releaseSlugRedirectAsStaff,
+	postApiUnitsPresentations,
 	getApiUnitsByIdByUnitIdSeriesMemberships,
 	getApiUnitsByIdByUnitIdStatusEvents,
 	getApiUnitsByType,
@@ -16717,6 +16725,97 @@ export function useReleaseSlugRedirectAsStaff<TContext>(
 	>;
 }
 
+export const postApiUnitsPresentationsMutationKey = () =>
+	[{ url: "/api/units/presentations" }] as const;
+
+export function postApiUnitsPresentationsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiUnitsPresentationsMutationKey();
+	return mutationOptions<
+		PostApiUnitsPresentationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsPresentationsStatus400
+			| PostApiUnitsPresentationsStatus422
+			| PostApiUnitsPresentationsStatus500
+		>,
+		PostApiUnitsPresentationsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiUnitsPresentations({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve readable Unit presentations
+ * {@link /api/units/presentations}
+ */
+export function usePostApiUnitsPresentations<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsPresentationsStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitsPresentationsStatus400
+				| PostApiUnitsPresentationsStatus422
+				| PostApiUnitsPresentationsStatus500
+			>,
+			PostApiUnitsPresentationsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiUnitsPresentationsMutationKey();
+
+	const baseOptions = postApiUnitsPresentationsMutationOptions(config) as UseMutationOptions<
+		PostApiUnitsPresentationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsPresentationsStatus400
+			| PostApiUnitsPresentationsStatus422
+			| PostApiUnitsPresentationsStatus500
+		>,
+		PostApiUnitsPresentationsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsPresentationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsPresentationsStatus400
+			| PostApiUnitsPresentationsStatus422
+			| PostApiUnitsPresentationsStatus500
+		>,
+		PostApiUnitsPresentationsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsPresentationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsPresentationsStatus400
+			| PostApiUnitsPresentationsStatus422
+			| PostApiUnitsPresentationsStatus500
+		>,
+		PostApiUnitsPresentationsOptions,
+		TContext
+	>;
+}
+
 export const getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByIdByUnitIdSeriesMembershipsOptions, "headers">) =>
@@ -22555,6 +22654,7 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContentMutationO
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
@@ -22587,6 +22687,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
+				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
@@ -22611,6 +22712,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
@@ -22625,6 +22727,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
@@ -22644,6 +22747,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
@@ -24812,6 +24916,7 @@ export function patchApiReviewsByReviewIdMutationOptions<TContext = unknown>(
 			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
+			| PatchApiReviewsByReviewIdStatus409
 			| PatchApiReviewsByReviewIdStatus422
 			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500
@@ -24844,6 +24949,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 				| PatchApiReviewsByReviewIdStatus400
 				| PatchApiReviewsByReviewIdStatus403
 				| PatchApiReviewsByReviewIdStatus404
+				| PatchApiReviewsByReviewIdStatus409
 				| PatchApiReviewsByReviewIdStatus422
 				| PatchApiReviewsByReviewIdStatus429
 				| PatchApiReviewsByReviewIdStatus500
@@ -24864,6 +24970,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
+			| PatchApiReviewsByReviewIdStatus409
 			| PatchApiReviewsByReviewIdStatus422
 			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500
@@ -24878,6 +24985,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
+			| PatchApiReviewsByReviewIdStatus409
 			| PatchApiReviewsByReviewIdStatus422
 			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500
@@ -24897,6 +25005,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 			| PatchApiReviewsByReviewIdStatus400
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
+			| PatchApiReviewsByReviewIdStatus409
 			| PatchApiReviewsByReviewIdStatus422
 			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500

@@ -2,6 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: postTerms } = enTerminology.post;
 
 export default {
 	title: "Unit governance",
@@ -35,6 +36,7 @@ export default {
 	sourceUnit: `Source Unit ${verbatimTerms.id.value}`,
 	associationRole: "Association role",
 	proposalExpiry: "Proposal expiry",
+	contextWikiPost: `Optional context wiki ${postTerms.label}`,
 	requestAssociation: "Request association",
 	inviteAssociation: "Invite association",
 	noProposals: "There are no association proposals.",

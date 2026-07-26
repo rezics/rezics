@@ -2722,6 +2722,13 @@ async function seedCoverageContracts(
 	const secondTag = itemAt(catalog.tags, 1);
 	const targetRealm = itemAt(catalog.realms, 0);
 	const contextPost = itemAt(content.rootPosts, 0);
+	const [associationContextPost] = await tx
+		.select({ id: post.id, createdAt: post.createdAt })
+		.from(post)
+		.where(eq(post.kind, "wiki"))
+		.limit(1);
+	if (!associationContextPost)
+		throw new Error("Coverage scenario requires a wiki association context Post");
 	const createdAt = latestDate(
 		data.pastDate(30),
 		actor.createdAt,
@@ -2732,6 +2739,7 @@ async function seedCoverageContracts(
 		secondTag.createdAt,
 		targetRealm.createdAt,
 		contextPost.createdAt,
+		associationContextPost.createdAt,
 	);
 	const expiresAt = new Date(data.referenceTime.getTime() + 30 * 86_400_000);
 
@@ -2771,6 +2779,7 @@ async function seedCoverageContracts(
 	await tx.insert(subjectAssociation).values({
 		unitId: target.id,
 		entityId: targetEntity.id,
+		contextPostId: associationContextPost.id,
 		role: "about",
 		position: fractionalPositionAt(0),
 		createdAt,

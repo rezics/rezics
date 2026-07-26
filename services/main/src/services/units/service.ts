@@ -59,6 +59,7 @@ import { getUnitVariantContext } from "./variants";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import { presentAvatar } from "./avatar";
 import { listPublishedBookContentMetrics } from "../content-metrics/service";
+import { getAssociationContextPostsByAssociationIds } from "./association-context";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
@@ -249,7 +250,7 @@ export async function getUnit(
 	const primaryLanguage = localizations[0]?.language ?? null;
 	const attributions =
 		(await getAttributionSummariesWithStatisticsByUnitIds([base.id])).get(base.id) ?? [];
-	const subjectAssociations = await database
+	const subjectAssociationRows = await database
 		.select({
 			id: subjectAssociation.id,
 			entityEntryId: subjectAssociation.entityId,
@@ -261,6 +262,15 @@ export async function getUnit(
 		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
 		.where(eq(subjectAssociation.unitId, base.id))
 		.orderBy(subjectAssociation.position, subjectAssociation.id);
+	const contextPosts = await getAssociationContextPostsByAssociationIds(
+		subjectAssociationRows.map(({ id }) => id),
+		primaryLanguage ?? undefined,
+		authorization.profileId,
+	);
+	const subjectAssociations = subjectAssociationRows.map((association) => ({
+		...association,
+		contextPost: contextPosts.get(association.id) ?? null,
+	}));
 	const links = await database
 		.select()
 		.from(unitLink)

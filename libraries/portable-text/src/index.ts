@@ -35,15 +35,25 @@ export const PortableTextSpan = Type.Object(
 );
 export type PortableTextSpan = Static<typeof PortableTextSpan>;
 
-const PortableTextInlineObject = Type.Object(
+const UUID_PATTERN =
+	"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
+
+/**
+ * An inline reference to a Unit. Presentation is resolved from the immutable
+ * Unit identity at read time; mutable titles, avatars, and search kinds are
+ * deliberately not copied into the document.
+ */
+export const PortableTextUnitMention = Type.Object(
 	{
 		_key: Type.String(),
-		_type: Type.String({ pattern: "^(?!span$).+" }),
+		_type: Type.Literal("unit-mention"),
+		unitId: Type.String({ pattern: UUID_PATTERN }),
 	},
-	{ additionalProperties: JsonValue },
+	{ additionalProperties: false, $id: "PortableTextUnitMention" },
 );
+export type PortableTextUnitMention = Static<typeof PortableTextUnitMention>;
 
-export const PortableTextChild = Type.Union([PortableTextSpan, PortableTextInlineObject], {
+export const PortableTextChild = Type.Union([PortableTextSpan, PortableTextUnitMention], {
 	$id: "PortableTextChild",
 });
 export type PortableTextChild = Static<typeof PortableTextChild>;
@@ -77,10 +87,7 @@ export const PortableTextImage = Type.Object(
 	{
 		_key: Type.String(),
 		_type: Type.Literal("image"),
-		assetId: Type.String({
-			pattern:
-				"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-		}),
+		assetId: Type.String({ pattern: UUID_PATTERN }),
 		alt: Type.Optional(Type.String()),
 		caption: Type.Optional(Type.String()),
 	},
@@ -129,11 +136,20 @@ export interface PortableTextValueSpan {
 	marks: string[];
 }
 
+export interface PortableTextValueUnitMention {
+	[key: string]: unknown;
+	_key: string;
+	_type: "unit-mention";
+	unitId: string;
+}
+
+export type PortableTextValueChild = PortableTextValueSpan | PortableTextValueUnitMention;
+
 export interface PortableTextValueBlock {
 	[key: string]: unknown;
 	_key: string;
 	_type: "block";
-	children: PortableTextValueSpan[];
+	children: PortableTextValueChild[];
 	markDefs: PortableTextLinkDefinition[];
 	style: PortableTextStyle;
 	listItem?: PortableTextList;
@@ -179,6 +195,31 @@ export function normalizePortableTextUrl(value: unknown): string | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null;
+}
+
+export function isPortableTextUnitMention(value: unknown): value is PortableTextValueUnitMention {
+	return (
+		isRecord(value) &&
+		value._type === "unit-mention" &&
+		typeof value._key === "string" &&
+		typeof value.unitId === "string" &&
+		new RegExp(UUID_PATTERN, "i").test(value.unitId)
+	);
+}
+
+/** Collects distinct mentioned Unit identities in first-appearance order. */
+export function collectPortableTextUnitMentionIds(value: unknown): string[] {
+	const ids = new Set<string>();
+	const content =
+		isRecord(value) && value._type === "portable-text" && Array.isArray(value.content)
+			? value.content
+			: value;
+	for (const block of normalizePortableText(content)) {
+		if (!isPortableTextValueBlock(block)) continue;
+		for (const child of block.children)
+			if (child._type === "unit-mention") ids.add(child.unitId);
+	}
+	return [...ids];
 }
 
 function memberOf<const Values extends readonly string[]>(
@@ -283,14 +324,21 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 			: [];
 		const annotationKeys = new Set(markDefs.map(({ _key }) => _key));
 		const children = Array.isArray(candidate.children)
-			? candidate.children.flatMap((child, childIndex): PortableTextValueSpan[] => {
+			? candidate.children.flatMap((child, childIndex): PortableTextValueChild[] => {
+					if (isPortableTextUnitMention(child))
+						return [
+							{
+								_key: keyOr(child._key, `unit-mention-${blockIndex}-${childIndex}`),
+								_type: "unit-mention",
+								unitId: child.unitId,
+							},
+						];
 					if (
 						!isRecord(child) ||
 						child._type !== "span" ||
 						typeof child.text !== "string"
-					) {
+					)
 						return [];
-					}
 					const marks = Array.isArray(child.marks)
 						? child.marks.filter(
 								(mark): mark is string =>

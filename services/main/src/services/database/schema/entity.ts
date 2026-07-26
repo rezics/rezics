@@ -10,6 +10,7 @@ import {
 	fractionalIndexPosition,
 } from "./columns";
 import { profile, unit } from "./core";
+import { post } from "./post";
 import {
 	AssociationKindValues,
 	AssociationProposalDirectionValues,
@@ -89,6 +90,11 @@ export const unitAssociationProposal = pgTable(
 		targetUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
+		/**
+		 * Optional evidence context for subject proposals. Credit proposals do
+		 * not use a context Post; any stored context must be a wiki Post.
+		 */
+		contextPostId: uuid().references(() => post.id, { onDelete: "restrict" }),
 		kind: associationKind().notNull(),
 		role: text().$type<AssociationRole>().notNull(),
 		direction: associationProposalDirection().notNull(),
@@ -109,6 +115,9 @@ export const unitAssociationProposal = pgTable(
 		index("unit_association_proposal_target_unresolved_idx")
 			.on(table.targetUnitId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.resolution} is null`),
+		index("unit_association_proposal_context_post_idx")
+			.on(table.contextPostId)
+			.where(sql`${table.contextPostId} is not null`),
 		index("unit_association_proposal_created_by_idx").on(table.createdByProfileId),
 		index("unit_association_proposal_resolved_by_idx").on(table.resolvedByProfileId),
 		check("unit_association_proposal_role_not_blank", sql`btrim(${table.role}) <> ''`),
@@ -121,6 +130,14 @@ export const unitAssociationProposal = pgTable(
 				${table.kind} = 'credit' and ${inArray(table.role, CreditAttributionRoleValues)}
 			) or (
 				${table.kind} = 'subject' and ${inArray(table.role, SubjectAssociationRoleValues)}
+			)`,
+		),
+		check(
+			"unit_association_proposal_context_post_shape_check",
+			sql`(
+				${table.kind} = 'credit' and ${table.contextPostId} is null
+			) or (
+				${table.kind} = 'subject'
 			)`,
 		),
 		check(
@@ -182,7 +199,7 @@ export const creditAttribution = pgTable(
 
 /**
  * A structured “is about” relationship. It does not assert contribution,
- * authorship, endorsement, or identity ownership.
+ * authorship, endorsement, or identity ownership. Its wiki context is optional.
  */
 export const subjectAssociation = pgTable(
 	"subject_association",
@@ -194,6 +211,7 @@ export const subjectAssociation = pgTable(
 		entityId: uuid()
 			.notNull()
 			.references(() => entity.id, { onDelete: "restrict" }),
+		contextPostId: uuid().references(() => post.id, { onDelete: "restrict" }),
 		role: text().$type<SubjectAssociationRole>().notNull(),
 		position: fractionalIndexPosition()
 			.default(sql`'a0'::text`)
@@ -208,6 +226,9 @@ export const subjectAssociation = pgTable(
 			table.role,
 		),
 		index("subject_association_entity_role_idx").on(table.entityId, table.role),
+		index("subject_association_context_post_idx")
+			.on(table.contextPostId)
+			.where(sql`${table.contextPostId} is not null`),
 		index("subject_association_unit_position_idx").on(table.unitId, table.position, table.id),
 		check("subject_association_role_check", inArray(table.role, SubjectAssociationRoleValues)),
 		check("subject_association_not_self_check", sql`${table.unitId} <> ${table.entityId}`),

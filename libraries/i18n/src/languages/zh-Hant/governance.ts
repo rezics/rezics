@@ -2,6 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
 	title: "條目治理",
@@ -33,6 +34,7 @@ export default {
 	sourceUnit: `來源條目 ${verbatimTerms.id.value}`,
 	associationRole: "關聯角色",
 	proposalExpiry: "提案有效期限",
+	contextWikiPost: `選填脈絡知識${postTerms.label}`,
 	requestAssociation: "請求關聯",
 	inviteAssociation: "邀請關聯",
 	noProposals: "目前沒有關聯提案。",

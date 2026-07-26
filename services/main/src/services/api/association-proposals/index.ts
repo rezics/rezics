@@ -95,6 +95,7 @@ export default new Elysia({ prefix: "/unit" })
 				...common,
 				kind: body.kind,
 				role: body.role,
+				...(body.contextPostId ? { contextPostId: body.contextPostId } : {}),
 			});
 		},
 		{
@@ -106,6 +107,7 @@ export default new Elysia({ prefix: "/unit" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"AssociationProposalExpiryInvalid",
 					"AssociationProposalRoleInvalid",
+					"AssociationContextPostInvalid",
 				]),
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
@@ -135,6 +137,7 @@ export default new Elysia({ prefix: "/unit" })
 				...common,
 				kind: body.kind,
 				role: body.role,
+				...(body.contextPostId ? { contextPostId: body.contextPostId } : {}),
 			});
 		},
 		{
@@ -146,6 +149,7 @@ export default new Elysia({ prefix: "/unit" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"AssociationProposalExpiryInvalid",
 					"AssociationProposalRoleInvalid",
+					"AssociationContextPostInvalid",
 				]),
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,

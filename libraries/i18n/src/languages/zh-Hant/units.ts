@@ -211,6 +211,7 @@ export default {
 		linkUrl: "連結網址",
 		credit: "新增署名",
 		subjectAssociation: "新增主體關聯",
+		contextWikiPost: `選填脈絡知識${postTerms.label}`,
 		link: "新增連結",
 		tag: "新增標籤",
 		version: "關聯版本",

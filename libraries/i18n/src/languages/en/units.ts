@@ -223,6 +223,7 @@ export default {
 		linkUrl: `Link ${verbatimTerms.url.value}`,
 		credit: "Add credit",
 		subjectAssociation: "Add subject association",
+		contextWikiPost: `Optional context wiki ${postTerms.label}`,
 		link: "Add link",
 		tag: "Add tag",
 		version: "Attach version",

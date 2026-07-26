@@ -1,4 +1,5 @@
 import {
+	collectPortableTextUnitMentionIds,
 	isPortableTextValueBlock,
 	normalizePortableText,
 	normalizePortableTextUrl,
@@ -55,6 +56,74 @@ describe("Portable Text boundaries", () => {
 		];
 
 		expect(normalizePortableText(document)).toEqual(document);
+	});
+
+	it("keeps only identity in generic Unit mentions and collects distinct identities", () => {
+		const document = [
+			{
+				_key: "block-1",
+				_type: "block",
+				children: [
+					{
+						_key: "mention-1",
+						_type: "unit-mention",
+						unitId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+						title: "Stale title",
+					},
+					{
+						_key: "mention-2",
+						_type: "unit-mention",
+						unitId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+					},
+				],
+			},
+		];
+
+		expect(normalizePortableText(document)).toEqual([
+			{
+				_key: "block-1",
+				_type: "block",
+				children: [
+					{
+						_key: "mention-1",
+						_type: "unit-mention",
+						unitId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+					},
+					{
+						_key: "mention-2",
+						_type: "unit-mention",
+						unitId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+					},
+				],
+				markDefs: [],
+				style: "normal",
+			},
+		]);
+		expect(collectPortableTextUnitMentionIds(document)).toEqual([
+			"019f73cb-926e-7e50-9a7f-da67701accb3",
+		]);
+	});
+
+	it("drops malformed and unsupported inline objects", () => {
+		expect(
+			normalizePortableText([
+				{
+					_type: "block",
+					children: [
+						{ _type: "unit-mention", _key: "bad", unitId: "not-a-uuid" },
+						{ _type: "profile-mention", _key: "unsupported", profileId: "one" },
+					],
+				},
+			]),
+		).toEqual([
+			{
+				_key: "block-0",
+				_type: "block",
+				children: [],
+				markDefs: [],
+				style: "normal",
+			},
+		]);
 	});
 
 	it("drops unsupported blocks, marks, and unsafe annotation values", () => {

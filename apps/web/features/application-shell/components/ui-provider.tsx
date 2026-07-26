@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { UiProvider } from "@rezics/ui";
 
 import { searchEntities } from "@/features/search/search-entities";
+import { resolveUnitMentions } from "@/features/editor/resolve-unit-mentions";
 import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
 
@@ -50,9 +51,21 @@ export function TranslatedUiProvider({ children }: Readonly<{ children: ReactNod
 					redo: t.editor.redo,
 					style: t.editor.style,
 					preview: t.editor.preview,
+					placeholder: t.editor.placeholder,
+					slashMenu: t.editor.slashMenu,
+					slashHint: t.editor.slashHint,
+					mentionUnits: t.editor.mentionUnits,
+					mentionTags: t.editor.mentionTags,
+					mentionEntities: t.editor.mentionEntities,
+					mentionRealms: t.editor.mentionRealms,
+					mentionZones: t.editor.mentionZones,
+					unavailableMention: t.editor.unavailableMention,
+					richText: t.editor.richText,
+					toolbar: t.editor.toolbar,
 				},
 			}}
 			searchEntities={searchEntities}
+			resolveUnitMentions={resolveUnitMentions}
 		>
 			{children}
 		</UiProvider>

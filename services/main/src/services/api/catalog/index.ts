@@ -61,6 +61,10 @@ import { checkUnitType, createCatalogUnit } from "./service";
 import { upsertLocalization } from "../../units/service";
 import { UnitLocalizationBody } from "../units/schema";
 import { recordUnitRevision } from "../../units/history";
+import {
+	ensureWikiAssociationContextPost,
+	getAssociationContextPostsByAssociationIds,
+} from "../../units/association-context";
 import { updateUnitVariantContext } from "../../units/variants";
 import {
 	getAttributionSummariesByUnitIds,
@@ -96,6 +100,7 @@ import {
 	SubjectAssociationNotFound,
 } from "../../entities/errors";
 import { resolveEntityAssociationPolicy } from "../../authorization/entity/policy";
+import { AssociationContextPostInvalid } from "../../units/errors";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -320,6 +325,15 @@ export default new Elysia()
 								publiclyReadableUnitCondition(),
 							),
 						);
+					const contextPosts = await getAssociationContextPostsByAssociationIds(
+						subjectAssociations.map(({ id }) => id),
+						query.language,
+						identity.authorization.profileId,
+					);
+					const presentedSubjectAssociations = subjectAssociations.map((association) => ({
+						...association,
+						contextPost: contextPosts.get(association.id) ?? null,
+					}));
 					const [owner] = await database
 						.select({ profileId: unitAccessBinding.profileId })
 						.from(unitAccessBinding)
@@ -373,7 +387,7 @@ export default new Elysia()
 							canManageSubjectAssociations: subjectDecision.allowed,
 						},
 						creditAttributions,
-						subjectAssociations,
+						subjectAssociations: presentedSubjectAssociations,
 					};
 				},
 				{
@@ -881,7 +895,14 @@ export default new Elysia()
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"subject-associations",
 					]);
+					if (body.contextPostId)
+						await authorization.unit.ensureCanRead(
+							body.contextPostId,
+							() => new AssociationContextPostInvalid(),
+						);
 					const association = await database.transaction(async (tx) => {
+						if (body.contextPostId)
+							await ensureWikiAssociationContextPost(tx, body.contextPostId);
 						await authorization.entity.ensureAssociationAllowed(
 							tx,
 							body.entityId,
@@ -900,7 +921,9 @@ export default new Elysia()
 							.insert(subjectAssociation)
 							.values({
 								unitId: params.unitId,
-								...body,
+								entityId: body.entityId,
+								contextPostId: body.contextPostId ?? null,
+								role: body.role,
 								position:
 									body.position ??
 									fractionalPositionBetween(last?.position, null),
@@ -923,6 +946,9 @@ export default new Elysia()
 					body: AddUnitSubjectAssociationBody,
 					response: {
 						[StatusCodes.OK]: SubjectAssociationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"AssociationContextPostInvalid",
+						]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"UnitProtected",

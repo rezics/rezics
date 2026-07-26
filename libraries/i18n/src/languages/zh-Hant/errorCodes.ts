@@ -193,4 +193,6 @@ export default {
 	TagStructureApplicationNotFound: `這個內容沒有套用該${tagStructureTerms.inline}。`,
 	TagStructureChanged: `這個${tagStructureTerms.inline}已在其他地方變更，請重新整理後再試一次。`,
 	TagStructureDefinitionConflict: `已有內容完全相同的${tagStructureTerms.inline}。`,
+	AssociationContextPostInvalid: `關聯脈絡必須是知識型${postTerms.inline}。`,
+	PostTagMentionVoteConflict: `這個標籤提及與你對該${postTerms.inline}的既有負票衝突。`,
 };

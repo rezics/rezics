@@ -25,3 +25,10 @@ export class PostTargetingLocked extends Data.TaggedError("PostTargetingLocked")
 		super();
 	}
 }
+
+export class PostTagMentionVoteConflict extends Data.TaggedError("PostTagMentionVoteConflict") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = PostTagMentionVoteConflict.status;
+	readonly message =
+		"A mentioned Tag cannot be auto-voted because this Profile has already downvoted it on the Post";
+}

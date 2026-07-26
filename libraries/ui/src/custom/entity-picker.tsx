@@ -17,10 +17,12 @@ type EntityPickerValue = { id: string; label: string };
 
 export function EntityPicker({
 	index,
+	kind,
 	value,
 	onChange,
 }: {
 	index: string;
+	kind?: string;
 	value?: EntityPickerValue;
 	onChange: (value: EntityPickerValue) => void;
 }) {
@@ -54,7 +56,8 @@ export function EntityPicker({
 			void searchEntities(index, query, request.signal)
 				.then(
 					(nextHits) => {
-						if (!request.signal.aborted) set([...nextHits]);
+						if (!request.signal.aborted)
+							set(nextHits.filter((hit) => !kind || hit.kind === kind));
 					},
 					() => {
 						if (!request.signal.aborted) {
@@ -71,10 +74,10 @@ export function EntityPicker({
 			window.clearTimeout(timer);
 			controller?.abort();
 		};
-	}, [index, inputValue, searchEntities, set]);
+	}, [index, inputValue, kind, searchEntities, set]);
 
 	useEffect(() => {
-		if (value?.label) setInputValue(value.label);
+		setInputValue(value?.label ?? "");
 	}, [value?.id, value?.label]);
 
 	return (

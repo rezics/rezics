@@ -12,6 +12,7 @@ export default {
 	submit: "提交",
 	create: "建立",
 	edit: "編輯",
+	clear: "清除",
 	search: "搜尋",
 	title: "標題",
 	summary: "摘要",

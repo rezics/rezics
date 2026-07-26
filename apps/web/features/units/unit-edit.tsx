@@ -525,6 +525,7 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 	});
 	const [creditEntity, setCreditEntity] = useState<SelectedEntity>();
 	const [subjectEntity, setSubjectEntity] = useState<SelectedEntity>();
+	const [subjectContextPost, setSubjectContextPost] = useState<SelectedEntity>();
 	const [linkSource, setLinkSource] = useState<SelectedEntity>();
 	const [canonicalUnit, setCanonicalUnit] = useState<SelectedEntity>();
 
@@ -592,10 +593,14 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 								path: { type, unitId: unit.id },
 								body: {
 									entityId: subjectEntity.id,
+									...(subjectContextPost
+										? { contextPostId: subjectContextPost.id }
+										: {}),
 									role,
 								},
 							});
 							setSubjectEntity(undefined);
+							setSubjectContextPost(undefined);
 							formElement.reset();
 						} catch {
 							// The typed mutation state supplies the visible API error.
@@ -607,6 +612,26 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 						onChange={setSubjectEntity}
 						value={subjectEntity}
 					/>
+					<Field>
+						<FieldLabel>{t.units.editor.contextWikiPost}</FieldLabel>
+						<div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+							<EntityPicker
+								index="posts"
+								kind="wiki"
+								onChange={setSubjectContextPost}
+								value={subjectContextPost}
+							/>
+							{subjectContextPost ? (
+								<Button
+									onClick={() => setSubjectContextPost(undefined)}
+									type="button"
+									variant="outline"
+								>
+									{t.ui.clear}
+								</Button>
+							) : null}
+						</div>
+					</Field>
 					<Field required>
 						<FieldLabel>{t.units.editor.subjectRole}</FieldLabel>
 						<NativeSelect name="role" required>

@@ -291,6 +291,8 @@ import type {
 	ReplaceUnitSlugAddressAsStaffResponses,
 	ReleaseSlugRedirectAsStaffOptions,
 	ReleaseSlugRedirectAsStaffResponses,
+	PostApiUnitsPresentationsOptions,
+	PostApiUnitsPresentationsResponses,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsResponses,
 	GetApiUnitsByIdByUnitIdStatusEventsOptions,
@@ -3433,6 +3435,20 @@ export function releaseSlugRedirectAsStaff<ThrowOnError extends boolean = true>(
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReleaseSlugRedirectAsStaffResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve readable Unit presentations
+ * {@link /api/units/presentations}
+ */
+export function postApiUnitsPresentations<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsPresentationsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/units/presentations", ...config }) as Promise<
+		RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>
+	>;
 }
 
 /**

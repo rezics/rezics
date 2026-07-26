@@ -145,6 +145,16 @@ const UnitSummaryFields = {
 } as const;
 
 export const UnitSummaryResponse = t.Object(UnitSummaryFields);
+export const UnitPresentationListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			kind: t.UnionEnum(UnitKindValues),
+			title: NullableText,
+			avatar: AvatarResponse,
+		}),
+	),
+});
 
 const UnitAttributionSummaryFields = {
 	id: Uuid,
@@ -272,6 +282,21 @@ export const UnitProgressStatisticsResponse = t.Object({
 	backlog: t.Integer({ minimum: 0 }),
 });
 
+export const AssociationContextPostResponse = t.Object({
+	id: Uuid,
+	subjectId: t.Nullable(Uuid),
+	title: NullableText,
+	tags: t.Array(
+		t.Object({
+			tagId: Uuid,
+			title: NullableText,
+			score: t.Integer(),
+			voteCount: t.Integer({ minimum: 0 }),
+			pinned: t.Boolean(),
+		}),
+	),
+});
+
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
 	type: CatalogUnitTypeResponse,
@@ -300,6 +325,7 @@ export const UnitDetailResponse = t.Object({
 			role: t.UnionEnum(SubjectAssociationRoleValues),
 			position: FractionalPosition,
 			title: NullableText,
+			contextPost: t.Nullable(AssociationContextPostResponse),
 		}),
 	),
 	links: t.Array(
@@ -769,6 +795,7 @@ export const EntityDetailResponse = t.Object({
 			id: Uuid,
 			unitId: Uuid,
 			role: t.UnionEnum(SubjectAssociationRoleValues),
+			contextPost: t.Nullable(AssociationContextPostResponse),
 		}),
 	),
 });
@@ -1004,6 +1031,7 @@ export const SubjectAssociationResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
 	entityId: Uuid,
+	contextPostId: t.Nullable(Uuid),
 	role: t.UnionEnum(SubjectAssociationRoleValues),
 	position: FractionalPosition,
 	createdAt: DateTime,

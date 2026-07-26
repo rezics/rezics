@@ -81,6 +81,7 @@ import {
 import { ContentLanguage, Uuid } from "../schema";
 import { RecommendationPolicyVersionSchema } from "../recommendations/schema";
 import { ValidationError } from "../errors";
+import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
@@ -361,6 +362,11 @@ export default new Elysia()
 							content: body.body,
 							contentStatus: "published",
 						});
+						await applyNewPostTagMentionVotes(tx, {
+							postId: created.id,
+							profileId: profile.unitId,
+							nextBody: body.body,
+						});
 						await tx.insert(unitAccessBinding).values({
 							unitId: created.id,
 							subjectKind: "profile",
@@ -531,6 +537,17 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.reviewId, [["localizations"]]);
 					await database.transaction(async (tx) => {
+						const [current] = await tx
+							.select({ content: unitLocalization.content })
+							.from(unitLocalization)
+							.where(
+								and(
+									eq(unitLocalization.unitId, params.reviewId),
+									isPrimaryUnitLocalization(unitLocalization.unitId),
+								),
+							)
+							.for("update")
+							.limit(1);
 						await tx
 							.insert(unitLocalization)
 							.values({
@@ -550,6 +567,12 @@ export default new Elysia()
 									contentStatus: "published",
 								},
 							});
+						await applyNewPostTagMentionVotes(tx, {
+							postId: params.reviewId,
+							profileId: profile.unitId,
+							previousBody: current?.content,
+							nextBody: body.body,
+						});
 						await makePrimaryUnitLocalization(tx, params.reviewId, body.language);
 						await recordUnitRevision(tx, {
 							unitId: params.reviewId,
@@ -567,6 +590,7 @@ export default new Elysia()
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),
 					},
 					detail: { summary: "Update review", tags: ["Reviews"] },
 				},

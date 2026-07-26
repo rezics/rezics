@@ -47,6 +47,7 @@ export type AddUnitCreditBody = Static<typeof AddUnitCreditBody>;
 export const AddUnitSubjectAssociationBody = t.Object(
 	{
 		entityId: Uuid,
+		contextPostId: t.Optional(Uuid),
 		role: t.UnionEnum(SubjectAssociationRoleValues),
 		position: t.Optional(FractionalPosition),
 	},

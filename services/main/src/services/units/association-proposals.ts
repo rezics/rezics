@@ -26,19 +26,29 @@ import {
 	ensureCreditAttributionRequestAllowed,
 } from "./attribution-authorization";
 import {
+	AssociationContextPostInvalid,
 	AssociationProposalConflict,
 	AssociationProposalExpired,
 	AssociationProposalNotFound,
 	UnitNotFound,
 } from "./errors";
+import { ensureWikiAssociationContextPost } from "./association-context";
 
 export type AssociationProposalState =
 	"pending" | "expired" | "accepted" | "declined" | "cancelled";
 
 type ProposalRecord = typeof unitAssociationProposal.$inferSelect;
 type AssociationRoleInput =
-	| { readonly kind: "credit"; readonly role: CreditAttributionRole }
-	| { readonly kind: "subject"; readonly role: SubjectAssociationRole };
+	| {
+			readonly kind: "credit";
+			readonly role: CreditAttributionRole;
+			readonly contextPostId?: never;
+	  }
+	| {
+			readonly kind: "subject";
+			readonly role: SubjectAssociationRole;
+			readonly contextPostId?: string;
+	  };
 type AssociationTargetInput = {
 	readonly sourceUnitId: string;
 	readonly targetUnitId: string;
@@ -60,9 +70,22 @@ export function associationProposalState(
 export function presentAssociationProposal(record: ProposalRecord, now = new Date()) {
 	const state = associationProposalState(record, now);
 	if (record.kind === "credit" && isCreditAttributionRole(record.role))
-		return { ...record, kind: record.kind, role: record.role, state };
-	if (record.kind === "subject" && isSubjectAssociationRole(record.role))
-		return { ...record, kind: record.kind, role: record.role, state };
+		return {
+			...record,
+			kind: record.kind,
+			role: record.role,
+			contextPostId: null,
+			state,
+		};
+	if (record.kind === "subject" && isSubjectAssociationRole(record.role)) {
+		return {
+			...record,
+			kind: record.kind,
+			role: record.role,
+			contextPostId: record.contextPostId ?? null,
+			state,
+		};
+	}
 	throw new TypeError("Stored association proposal role does not match its kind");
 }
 
@@ -158,7 +181,13 @@ async function insertProposal(
 		readonly expiresAt: Date;
 	},
 ) {
-	const [created] = await tx.insert(unitAssociationProposal).values(input).returning();
+	const [created] = await tx
+		.insert(unitAssociationProposal)
+		.values({
+			...input,
+			contextPostId: input.kind === "subject" ? (input.contextPostId ?? null) : null,
+		})
+		.returning();
 	if (!created) throw new Error("Association proposal insertion returned no row");
 	await recordProposalAudit(tx, {
 		actorProfileId: input.createdByProfileId,
@@ -169,6 +198,7 @@ async function insertProposal(
 			targetUnitId: input.targetUnitId,
 			kind: input.kind,
 			role: input.role,
+			contextPostId: input.kind === "subject" ? (input.contextPostId ?? null) : null,
 		},
 	});
 	return presentAssociationProposal(created);
@@ -189,12 +219,20 @@ export async function createAssociationRequest(
 		);
 		if (input.kind === "credit")
 			await ensureCreditAttributionRequestAllowed(authorization, tx, input.targetUnitId);
-		else
+		else {
+			if (input.contextPostId) {
+				await authorization.unit.ensureCanRead(
+					input.contextPostId,
+					() => new AssociationContextPostInvalid(),
+				);
+				await ensureWikiAssociationContextPost(tx, input.contextPostId);
+			}
 			await authorization.entity.ensureAssociationRequestAllowed(
 				tx,
 				input.targetUnitId,
 				input.kind,
 			);
+		}
 		await ensureNoRelationshipOrProposal(tx, input);
 		return insertProposal(tx, {
 			...input,
@@ -214,12 +252,20 @@ export async function createAssociationInvitation(
 		await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetUnitId);
 		if (input.kind === "credit")
 			await ensureCreditAttributionInvitationAllowed(authorization, tx, input.targetUnitId);
-		else
+		else {
+			if (input.contextPostId) {
+				await authorization.unit.ensureCanRead(
+					input.contextPostId,
+					() => new AssociationContextPostInvalid(),
+				);
+				await ensureWikiAssociationContextPost(tx, input.contextPostId);
+			}
 			await authorization.entity.ensureAssociationInvitationAllowed(
 				tx,
 				input.targetUnitId,
 				input.kind,
 			);
+		}
 		await ensureSourceUnitExists(tx, input.sourceUnitId);
 		await ensureNoRelationshipOrProposal(tx, input);
 		return insertProposal(tx, {
@@ -372,6 +418,13 @@ async function materializeProposal(
 	} else {
 		if (!isSubjectAssociationRole(proposal.role))
 			throw new TypeError("Stored subject proposal has an invalid role");
+		if (proposal.contextPostId) {
+			await proposerAuthorization.unit.ensureCanRead(
+				proposal.contextPostId,
+				() => new AssociationContextPostInvalid(),
+			);
+			await ensureWikiAssociationContextPost(tx, proposal.contextPostId);
+		}
 		const [last] = await tx
 			.select({ position: subjectAssociation.position })
 			.from(subjectAssociation)
@@ -382,6 +435,7 @@ async function materializeProposal(
 			id: proposal.id,
 			unitId: proposal.sourceUnitId,
 			entityId: proposal.targetUnitId,
+			contextPostId: proposal.contextPostId,
 			role: proposal.role,
 			position: fractionalPositionBetween(last?.position, null),
 		});
@@ -457,6 +511,11 @@ export async function resolveAssociationProposal(
 			input.actingUnitId,
 			input.action,
 		);
+		if (input.action === "accept" && proposal.kind === "subject" && proposal.contextPostId)
+			await authorization.unit.ensureCanRead(
+				proposal.contextPostId,
+				() => new AssociationContextPostInvalid(),
+			);
 		if (input.action === "accept") await materializeProposal(tx, proposal, actorProfileId);
 		const resolution =
 			input.action === "accept"

@@ -202,4 +202,6 @@ export default {
 	TagStructureApplicationNotFound: `This Unit does not have that ${tagStructureTerms.inline}.`,
 	TagStructureChanged: `This ${tagStructureTerms.inline} changed elsewhere. Refresh and try again.`,
 	TagStructureDefinitionConflict: `An identical ${tagStructureTerms.inline} already exists.`,
+	AssociationContextPostInvalid: `The relationship context must be a wiki ${postTerms.label}.`,
+	PostTagMentionVoteConflict: `This Tag mention conflicts with your existing downvote on the ${postTerms.label}.`,
 } satisfies typeof import("../zh-Hant/errorCodes").default;

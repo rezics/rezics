@@ -23,6 +23,10 @@ export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
 export const CatalogUnitTypeParams = t.Object({ type: CatalogUnitType });
 
 export const UnitStatusEventParams = t.Object({ unitId: Uuid });
+export const ResolveUnitPresentationsBody = t.Object(
+	{ ids: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }) },
+	{ additionalProperties: false },
+);
 export const UnitStatusEventListQuery = t.Object({
 	cursor: t.Optional(t.String()),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),

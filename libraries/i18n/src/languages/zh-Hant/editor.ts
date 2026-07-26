@@ -1,4 +1,8 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
 	paragraph: "內文",
@@ -20,4 +24,15 @@ export default {
 	redo: "重做",
 	style: "文字樣式",
 	preview: "預覽",
+	placeholder: "開始撰寫，或輸入 / 插入內容區塊。",
+	slashMenu: "插入",
+	slashHint: "輸入 / 插入區塊；輸入 u/、t/、e/、r/、z/ 插入項目提及。",
+	mentionUnits: "作品",
+	mentionTags: "標籤",
+	mentionEntities: "實體",
+	mentionRealms: realmTerms.label,
+	mentionZones: zoneTerms.label,
+	unavailableMention: "無法顯示的項目",
+	richText: "多格式文字",
+	toolbar: "文字格式工具列",
 };

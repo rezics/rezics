@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	PortableText,
 	type PortableTextComponents,
@@ -7,10 +9,13 @@ import {
 	normalizePortableText,
 	normalizePortableTextUrl,
 	type PortableTextImageBlock,
+	type PortableTextValueUnitMention,
 	type PortableTextValueBlock,
 } from "@rezics/portable-text";
 
 import { cn } from "../utils";
+import { UnitMentionBadge, useUnitMentionPresentations } from "./unit-mention";
+import type { UnitMentionPresentation } from "./ui-provider";
 
 export type PortableTextContentVariant = "compact" | "article" | "preview";
 
@@ -53,7 +58,9 @@ const components = {
 			</figure>
 		),
 	},
-} satisfies PortableTextComponents<PortableTextValueBlock | PortableTextImageBlock>;
+} satisfies PortableTextComponents<
+	PortableTextValueBlock | PortableTextImageBlock | PortableTextValueUnitMention
+>;
 
 const previewComponents = {
 	...components,
@@ -77,19 +84,32 @@ export function PortableTextContent({
 	variant = "compact",
 	className,
 	types,
+	unitMentionPresentations,
 }: {
 	value: unknown;
 	variant?: PortableTextContentVariant;
 	className?: string;
 	/** Custom Portable Text block-object renderers keyed by `_type`. */
 	types?: Readonly<Record<string, PortableTextTypeComponent | undefined>>;
+	unitMentionPresentations?: ReadonlyMap<string, UnitMentionPresentation>;
 }) {
 	const normalized = normalizePortableText(value);
+	const resolvedUnitMentions = useUnitMentionPresentations(
+		unitMentionPresentations ? [] : normalized,
+	);
+	const mentions = unitMentionPresentations ?? resolvedUnitMentions;
 	if (normalized.length === 0) return null;
 	const baseComponents = variant === "preview" ? previewComponents : components;
-	const resolvedComponents = types
-		? { ...baseComponents, types: { ...baseComponents.types, ...types } }
-		: baseComponents;
+	const resolvedComponents = {
+		...baseComponents,
+		types: {
+			...baseComponents.types,
+			"unit-mention": ({ value }: { value: PortableTextValueUnitMention }) => (
+				<UnitMentionBadge presentation={mentions.get(value.unitId)} value={value} />
+			),
+			...types,
+		},
+	};
 
 	return (
 		<div className={cn(variantClasses[variant], className)} data-portable-text={variant}>

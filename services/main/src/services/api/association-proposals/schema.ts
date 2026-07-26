@@ -24,24 +24,38 @@ const AssociationRole = t.UnionEnum([
 	...SubjectAssociationRoleValues,
 ]);
 
-export const CreateAssociationRequestBody = t.Object(
-	{
-		targetUnitId: Uuid,
-		kind: AssociationKind,
-		role: AssociationRole,
-		expiresAt: t.String({ format: "date-time" }),
-	},
-	{ additionalProperties: false },
-);
-export const CreateAssociationInvitationBody = t.Object(
-	{
-		sourceUnitId: Uuid,
-		kind: AssociationKind,
-		role: AssociationRole,
-		expiresAt: t.String({ format: "date-time" }),
-	},
-	{ additionalProperties: false },
-);
+const CreditAssociationProposalInput = {
+	kind: t.Literal("credit"),
+	role: AssociationRole,
+	expiresAt: t.String({ format: "date-time" }),
+} as const;
+const SubjectAssociationProposalInput = {
+	kind: t.Literal("subject"),
+	role: AssociationRole,
+	contextPostId: t.Optional(Uuid),
+	expiresAt: t.String({ format: "date-time" }),
+} as const;
+
+export const CreateAssociationRequestBody = t.Union([
+	t.Object(
+		{ targetUnitId: Uuid, ...CreditAssociationProposalInput },
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{ targetUnitId: Uuid, ...SubjectAssociationProposalInput },
+		{ additionalProperties: false },
+	),
+]);
+export const CreateAssociationInvitationBody = t.Union([
+	t.Object(
+		{ sourceUnitId: Uuid, ...CreditAssociationProposalInput },
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{ sourceUnitId: Uuid, ...SubjectAssociationProposalInput },
+		{ additionalProperties: false },
+	),
+]);
 
 const AssociationProposalResponseFields = {
 	id: Uuid,
@@ -69,6 +83,7 @@ export const AssociationProposalResponse = t.Object({
 	...AssociationProposalResponseFields,
 	kind: AssociationKind,
 	role: AssociationRole,
+	contextPostId: t.Nullable(Uuid),
 });
 export const AssociationProposalListResponse = t.Object({
 	items: t.Array(AssociationProposalResponse),
