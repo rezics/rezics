@@ -1,5 +1,22 @@
 export type PortableTextMentionPrefix = "u" | "t" | "e" | "r" | "z";
 
+const PortableTextMentionSearchCategoryByPrefix = {
+	u: "users",
+	t: "tags",
+	e: "entity",
+	r: "realms",
+	z: "units",
+} as const satisfies Record<PortableTextMentionPrefix, string>;
+
+export type PortableTextMentionSearchCategory =
+	(typeof PortableTextMentionSearchCategoryByPrefix)[PortableTextMentionPrefix];
+
+export function portableTextMentionSearchCategory(
+	prefix: PortableTextMentionPrefix,
+): PortableTextMentionSearchCategory {
+	return PortableTextMentionSearchCategoryByPrefix[prefix];
+}
+
 export type PortableTextSlashToken =
 	| {
 			readonly kind: "block";

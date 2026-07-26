@@ -86,7 +86,11 @@ import { cn } from "../utils";
 import { Button } from "./button";
 import { PortableTextContent } from "./portable-text-content";
 import { IdentityAvatar } from "./identity-avatar";
-import { parsePortableTextSlashToken, type PortableTextMentionPrefix } from "./portable-text-slash";
+import {
+	parsePortableTextSlashToken,
+	portableTextMentionSearchCategory,
+	type PortableTextMentionPrefix,
+} from "./portable-text-slash";
 import { type EntityPickerHit, useEntitySearch, useUiMessages } from "./ui-provider";
 import { UnitMentionBadge, useUnitMentionPresentations } from "./unit-mention";
 
@@ -215,14 +219,6 @@ type ActiveSlash =
 			readonly range: SlashRange;
 			readonly position: { readonly left: number; readonly top: number };
 	  };
-
-const MentionSearchIndex = {
-	u: "units",
-	t: "tags",
-	e: "entity",
-	r: "realms",
-	z: "units",
-} as const satisfies Record<PortableTextMentionPrefix, string>;
 
 function samePath(left: readonly unknown[], right: readonly unknown[]): boolean {
 	return JSON.stringify(left) === JSON.stringify(right);
@@ -386,6 +382,13 @@ function SlashCommandEditable({
 	const itemCount = activeSlash?.kind === "block" ? filteredBlockCommands.length : hits.length;
 
 	useEffect(() => {
+		const subscription = editor.on("mutation", () => setActiveSlash(readActiveSlash(editor)), {
+			batch: true,
+		});
+		return () => subscription.unsubscribe();
+	}, [editor]);
+
+	useEffect(() => {
 		if (activeSlash?.kind !== "mention" || !searchEntities) {
 			setHits([]);
 			setIsPending(false);
@@ -403,7 +406,11 @@ function SlashCommandEditable({
 		const timer = window.setTimeout(() => {
 			setIsPending(true);
 			setIsError(false);
-			void searchEntities(MentionSearchIndex[activeSlash.prefix], query, controller.signal)
+			void searchEntities(
+				portableTextMentionSearchCategory(activeSlash.prefix),
+				query,
+				controller.signal,
+			)
 				.then(
 					(items) => {
 						if (controller.signal.aborted) return;
@@ -455,6 +462,7 @@ function SlashCommandEditable({
 	}
 
 	function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+		if (event.nativeEvent.isComposing) return;
 		if (!activeSlash) return;
 		if (event.key === "Escape") {
 			event.preventDefault();
@@ -483,6 +491,7 @@ function SlashCommandEditable({
 	}
 
 	function handleKeyUp(event: KeyboardEvent<HTMLDivElement>) {
+		if (event.nativeEvent.isComposing) return;
 		if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(event.key)) return;
 		setActiveSlash(readActiveSlash(editor));
 	}
@@ -490,7 +499,7 @@ function SlashCommandEditable({
 	const mentionGroupLabel =
 		activeSlash?.kind === "mention"
 			? {
-					u: labels.mentionUnits,
+					u: labels.mentionUsers,
 					t: labels.mentionTags,
 					e: labels.mentionEntities,
 					r: labels.mentionRealms,
@@ -598,7 +607,7 @@ function SlashCommandEditable({
 						{!isPending && !isError && itemCount === 0 ? (
 							<p className="px-3 py-2 text-muted-foreground text-sm">
 								{activeSlash.kind === "mention" && !activeSlash.query.trim()
-									? messages.searchPlaceholder
+									? labels.mentionSearchPrompt
 									: messages.empty}
 							</p>
 						) : null}

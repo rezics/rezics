@@ -33,7 +33,8 @@ export interface UiMessages {
 		placeholder: string;
 		slashMenu: string;
 		slashHint: string;
-		mentionUnits: string;
+		mentionSearchPrompt: string;
+		mentionUsers: string;
 		mentionTags: string;
 		mentionEntities: string;
 		mentionRealms: string;
@@ -106,7 +107,8 @@ const DefaultMessages = {
 		placeholder: "Write something, or type / for blocks.",
 		slashMenu: "Insert",
 		slashHint: "Use / for blocks or u/, t/, e/, r/, z/ for Unit mentions.",
-		mentionUnits: "Units",
+		mentionSearchPrompt: "Type to search.",
+		mentionUsers: "Users",
 		mentionTags: "Tags",
 		mentionEntities: "Entities",
 		mentionRealms: "Realms",
