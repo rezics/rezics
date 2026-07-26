@@ -73,11 +73,13 @@ export function ManagementWorkspaceHeader({
 export function ManagementWorkspace({
 	header,
 	navigation,
+	mobileNavigation,
 	children,
 	className,
 }: {
 	header: ReactNode;
 	navigation: ReactNode;
+	mobileNavigation?: ReactNode;
 	children: ReactNode;
 	className?: string;
 }) {
@@ -89,6 +91,7 @@ export function ManagementWorkspace({
 			)}
 		>
 			{header}
+			{mobileNavigation ? <div className="md:hidden">{mobileNavigation}</div> : null}
 			<div className="grid min-w-0 gap-8 md:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12">
 				<aside className="hidden min-w-0 md:block">{navigation}</aside>
 				<div className="min-w-0">{children}</div>
@@ -200,17 +203,25 @@ export function ManagementWorkspaceSectionHeader({
 	description,
 	action,
 	link,
-}: ManagementWorkspaceHeaderProps) {
+	showBackOnMobile = true,
+}: ManagementWorkspaceHeaderProps & { showBackOnMobile?: boolean }) {
 	const Link = link;
 	return (
 		<header className="mb-8 flex flex-wrap items-start justify-between gap-4">
 			<div className="min-w-0">
-				<Button asChild className="-ms-2 mb-3 w-fit md:hidden" size="sm" variant="quiet">
-					<Link href={backHref}>
-						<ArrowLeft aria-hidden className="size-4" />
-						{backLabel}
-					</Link>
-				</Button>
+				{showBackOnMobile ? (
+					<Button
+						asChild
+						className="-ms-2 mb-3 w-fit md:hidden"
+						size="sm"
+						variant="quiet"
+					>
+						<Link href={backHref}>
+							<ArrowLeft aria-hidden className="size-4" />
+							{backLabel}
+						</Link>
+					</Button>
+				) : null}
 				<h2 className="font-heading text-2xl font-semibold leading-tight tracking-tight text-balance">
 					{title}
 				</h2>

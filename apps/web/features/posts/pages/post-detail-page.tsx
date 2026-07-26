@@ -8,6 +8,7 @@ import { useTranslation } from "@/i18n/client";
 import { PostDeleteButton } from "../components/post-delete-button";
 import { PostDetailArticle } from "../components/post-detail-article";
 import { PostSubjectHero } from "../components/post-subject-hero";
+import { canOpenPostManagement } from "../model/post-management-section";
 import { RelatedPostRecommendations } from "../post-list";
 import { ReplyPostThread } from "../reply-thread";
 
@@ -22,22 +23,23 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 	if (!query.data) return <QueryPending />;
 	const post = query.data;
 	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
+	const canManage = canOpenPostManagement({
+		kind: "post",
+		capabilities: post.capabilities,
+	});
 	return (
 		<main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
 			{post.subject ? <PostSubjectHero subject={post.subject} /> : null}
 			<PostDetailArticle
 				actions={
 					<>
-						<Button asChild size="sm" variant="outline">
-							<Link href={`/posts/${post.id}/history`}>{t.posts.history}</Link>
-						</Button>
+						{canManage ? (
+							<Button asChild size="sm" variant="outline">
+								<Link href={`/posts/${post.id}/edit`}>{t.ui.edit}</Link>
+							</Button>
+						) : null}
 						{post.capabilities.canEdit ? (
-							<>
-								<Button asChild size="sm" variant="outline">
-									<Link href={`/posts/${post.id}/edit`}>{t.ui.edit}</Link>
-								</Button>
-								<PostDeleteButton postId={post.id} rootPostId={post.rootPostId} />
-							</>
+							<PostDeleteButton postId={post.id} rootPostId={post.rootPostId} />
 						) : null}
 					</>
 				}

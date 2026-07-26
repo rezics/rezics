@@ -1,1 +1,1 @@
-export { ReviewsPage as default } from "@/features/reviews/reviews";
+export { ReviewsPage as default } from "@/features/reviews/pages/reviews-page";

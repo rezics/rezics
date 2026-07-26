@@ -410,29 +410,38 @@ export default new Elysia()
 									canRead ? getPostSubjectPresentation(subjectId) : null,
 								)
 						: Promise.resolve(null);
-					const [attributionMap, scores, subject, canEdit, targetingLock] =
-						await Promise.all([
-							getAttributionSummariesByUnitIds([row.id]),
-							selectPostScores(row.id).then((items) =>
-								items.map(({ scoreId, contextUnitId, value }) => ({
-									scoreId,
-									contextUnitId,
-									value,
-								})),
-							),
-							subjectPromise,
-							authorization.unit.canUpdate(row.id),
-							findPostTargetingLock(database, {
-								targets:
-									row.postKind === "reply" && row.rootPostId
-										? [
-												{ relation: "root", unitId: row.rootPostId },
-												{ relation: "parent", unitId: row.id },
-											]
-										: [{ relation: "root", unitId: row.id }],
-								...(query.realmId ? { realmId: query.realmId } : {}),
-							}),
-						]);
+					const [
+						attributionMap,
+						scores,
+						subject,
+						canEdit,
+						canManageAttributions,
+						accessDecision,
+						targetingLock,
+					] = await Promise.all([
+						getAttributionSummariesByUnitIds([row.id]),
+						selectPostScores(row.id).then((items) =>
+							items.map(({ scoreId, contextUnitId, value }) => ({
+								scoreId,
+								contextUnitId,
+								value,
+							})),
+						),
+						subjectPromise,
+						authorization.unit.canUpdate(row.id, ["localizations"]),
+						authorization.unit.canUpdate(row.id, ["credit-attributions"]),
+						authorization.unit.decide(row.id, "unit.access.manage"),
+						findPostTargetingLock(database, {
+							targets:
+								row.postKind === "reply" && row.rootPostId
+									? [
+											{ relation: "root", unitId: row.rootPostId },
+											{ relation: "parent", unitId: row.id },
+										]
+									: [{ relation: "root", unitId: row.id }],
+							...(query.realmId ? { realmId: query.realmId } : {}),
+						}),
+					]);
 					return {
 						...row,
 						realmId: query.realmId ?? null,
@@ -443,6 +452,8 @@ export default new Elysia()
 						scores,
 						capabilities: {
 							canEdit,
+							canManageAttributions,
+							canManageAccess: accessDecision.allowed,
 							canReply: !targetingLock,
 						},
 					};

@@ -1,4 +1,4 @@
-import { PostCreatePage } from "@/features/posts/post-pages";
+import { PostCreatePage } from "@/features/posts/pages/post-create-page";
 import { postCreateSearchParams } from "@/lib/search-params.server";
 
 export default async function Page({

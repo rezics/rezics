@@ -4670,7 +4670,7 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Get progress
+ * @summary Get progress state
  * {@link /api/progress/:unitId}
  */
 export function getApiProgressByUnitId<ThrowOnError extends boolean = true>(

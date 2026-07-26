@@ -22772,7 +22772,7 @@ export function getApiProgressByUnitIdQueryOptions(
 }
 
 /**
- * @summary Get progress
+ * @summary Get progress state
  * {@link /api/progress/:unitId}
  */
 export function useGetApiProgressByUnitId<

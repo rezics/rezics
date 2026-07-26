@@ -4,6 +4,10 @@ import { TranslationBoundary } from "@/i18n/translation-boundary";
 
 export default function ReviewsLayout({ children }: { children: ReactNode }) {
 	return (
-		<TranslationBoundary namespaces={["engagement", "posts"]}>{children}</TranslationBoundary>
+		<TranslationBoundary
+			namespaces={["engagement", "feed", "governance", "history", "posts", "units"]}
+		>
+			{children}
+		</TranslationBoundary>
 	);
 }

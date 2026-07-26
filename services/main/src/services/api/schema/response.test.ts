@@ -121,9 +121,21 @@ describe("API response values", () => {
 	it("keeps Post detail presentation and engagement context explicit", () => {
 		expect(PostDetailResponse.required).toContain("subject");
 		expect(PostDetailResponse.required).toContain("scores");
+		expect(PostDetailResponse.properties.capabilities.required).toEqual([
+			"canEdit",
+			"canManageAttributions",
+			"canManageAccess",
+			"canReply",
+		]);
 		expect(ReviewDetailResponse.required).toContain("postKind");
 		expect(ReviewDetailResponse.required).toContain("subject");
 		expect(ReviewDetailResponse.required).toContain("scores");
+		expect(ReviewDetailResponse.properties.capabilities.required).toEqual([
+			"canEdit",
+			"canManageAttributions",
+			"canManageAccess",
+			"canManageScores",
+		]);
 		expect(ReactionSummaryResponse.required).toContain("viewerReaction");
 	});
 

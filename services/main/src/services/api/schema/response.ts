@@ -841,7 +841,12 @@ export const PostDetailResponse = t.Object({
 	updatedAt: DateTime,
 	subject: t.Nullable(t.Object(PostSubjectPresentationFields)),
 	scores: t.Array(PostAttachedScoreResponse),
-	capabilities: t.Object({ canEdit: t.Boolean(), canReply: t.Boolean() }),
+	capabilities: t.Object({
+		canEdit: t.Boolean(),
+		canManageAttributions: t.Boolean(),
+		canManageAccess: t.Boolean(),
+		canReply: t.Boolean(),
+	}),
 });
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
@@ -857,7 +862,12 @@ export const ReviewDetailResponse = t.Object({
 	updatedAt: DateTime,
 	subject: t.Nullable(t.Object(PostSubjectPresentationFields)),
 	scores: t.Array(PostAttachedScoreResponse),
-	capabilities: t.Object({ canEdit: t.Boolean() }),
+	capabilities: t.Object({
+		canEdit: t.Boolean(),
+		canManageAttributions: t.Boolean(),
+		canManageAccess: t.Boolean(),
+		canManageScores: t.Boolean(),
+	}),
 });
 export const ContentStructureNodeListResponse = t.Object({
 	structureId: t.Nullable(Uuid),

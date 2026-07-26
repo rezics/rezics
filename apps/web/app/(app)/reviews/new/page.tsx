@@ -1,1 +1,1 @@
-export { ReviewCreate as default } from "@/features/reviews/reviews";
+export { ReviewCreatePage as default } from "@/features/reviews/pages/review-create-page";

@@ -27,6 +27,7 @@ import {
 } from "@rezics/ui";
 import { PostDetailArticle } from "@/features/posts/components/post-detail-article";
 import { PostSubjectHero } from "@/features/posts/components/post-subject-hero";
+import { canOpenPostManagement } from "@/features/posts/model/post-management-section";
 import { RelatedPostRecommendations } from "@/features/posts/post-list";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -51,6 +52,10 @@ export function ReviewDetailPage({
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return null;
 	const review = query.data;
+	const canManage = canOpenPostManagement({
+		kind: "review",
+		capabilities: review.capabilities,
+	});
 	const deleteReview = async () => {
 		try {
 			await remove.mutateAsync({ path: { reviewId: id } });
@@ -70,40 +75,44 @@ export function ReviewDetailPage({
 			{review.subject ? <PostSubjectHero subject={review.subject} /> : null}
 			<PostDetailArticle
 				actions={
-					review.capabilities.canEdit ? (
+					canManage ? (
 						<>
 							<Button asChild size="sm" variant="outline">
 								<Link href={`/reviews/${id}/edit`}>{t.ui.edit}</Link>
 							</Button>
-							<AlertDialog>
-								<AlertDialogTrigger asChild>
-									<Button size="sm" variant="destructive">
-										{t.engagement.deleteReview}
-									</Button>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle>
+							{review.capabilities.canEdit ? (
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<Button size="sm" variant="destructive">
 											{t.engagement.deleteReview}
-										</AlertDialogTitle>
-									</AlertDialogHeader>
-									<AlertDialogBody>
-										<AlertDialogDescription>
-											{t.engagement.deleteReviewPrompt}
-										</AlertDialogDescription>
-									</AlertDialogBody>
-									<AlertDialogFooter>
-										<AlertDialogCancel>{t.engagement.cancel}</AlertDialogCancel>
-										<AlertDialogAction
-											isLoading={remove.isPending}
-											onClick={() => void deleteReview()}
-											variant="destructive"
-										>
-											{t.engagement.delete}
-										</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
-							</AlertDialog>
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle>
+												{t.engagement.deleteReview}
+											</AlertDialogTitle>
+										</AlertDialogHeader>
+										<AlertDialogBody>
+											<AlertDialogDescription>
+												{t.engagement.deleteReviewPrompt}
+											</AlertDialogDescription>
+										</AlertDialogBody>
+										<AlertDialogFooter>
+											<AlertDialogCancel>
+												{t.engagement.cancel}
+											</AlertDialogCancel>
+											<AlertDialogAction
+												isLoading={remove.isPending}
+												onClick={() => void deleteReview()}
+												variant="destructive"
+											>
+												{t.engagement.delete}
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialog>
+							) : null}
 						</>
 					) : undefined
 				}

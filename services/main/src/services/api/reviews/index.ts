@@ -473,7 +473,15 @@ export default new Elysia()
 					const subjectPromise = authorization.unit
 						.canRead(targetId)
 						.then((canRead) => (canRead ? getPostSubjectPresentation(targetId) : null));
-					const [attributionMap, scores, subject, canEdit] = await Promise.all([
+					const [
+						attributionMap,
+						scores,
+						subject,
+						canEdit,
+						canManageAttributions,
+						accessDecision,
+						canManageScores,
+					] = await Promise.all([
 						getAttributionSummariesByUnitIds([review.id]),
 						selectPostScores(review.id).then((items) =>
 							items.map(({ scoreId, contextUnitId, value }) => ({
@@ -483,7 +491,10 @@ export default new Elysia()
 							})),
 						),
 						subjectPromise,
-						authorization.unit.canUpdate(params.reviewId),
+						authorization.unit.canUpdate(params.reviewId, ["localizations"]),
+						authorization.unit.canUpdate(params.reviewId, ["credit-attributions"]),
+						authorization.unit.decide(params.reviewId, "unit.access.manage"),
+						authorization.unit.canUpdate(params.reviewId, ["relations", "scores"]),
 					]);
 					return {
 						...review,
@@ -496,6 +507,9 @@ export default new Elysia()
 						scores,
 						capabilities: {
 							canEdit,
+							canManageAttributions,
+							canManageAccess: accessDecision.allowed,
+							canManageScores,
 						},
 					};
 				},

@@ -42,6 +42,13 @@ export default {
 	scoreEditorHint: `選擇${realmTerms.label}以修改既有評分，或在其他${realmTerms.label}新增評分。`,
 	editScores: "管理評分",
 	noScoredContexts: "尚未在任何語境評分。",
+	scoreAssociation: "評分關聯",
+	scoreAssociationDescription: "選擇這篇評論要引用的評分，或移除目前的評分關聯。",
+	scoreAssociationOption: insert("{{context}} · {{score}}／10", {
+		context: String,
+		score: String,
+	}),
+	saveScoreAssociation: "儲存評分關聯",
 	allReviewRealms: `所有${realmTerms.pluralLabel}`,
 	filterReviewRealm: `依${realmTerms.label}篩選`,
 	searchReviews: "搜尋評論內容",

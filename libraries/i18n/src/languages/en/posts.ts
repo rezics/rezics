@@ -47,4 +47,25 @@ export default {
 	clearSubject: "Remove subject",
 	attributions: "Credits",
 	viewRealm: `View ${realmTerms.inline}`,
+	workspace: {
+		description: "Edit the main content, credit relationships, access, and revision history.",
+		backToContent: "Back to content",
+		navigation: "Content management navigation",
+		sections: {
+			main: {
+				label: "Main content",
+				postDescription: `Edit the ${postTerms.inline} title and body.`,
+				replyDescription: `Edit the reply ${postTerms.inline} body.`,
+				reviewDescription: "Edit the review title, summary, body, and Score association.",
+			},
+			attributions: {
+				label: "Credit relationships",
+				description:
+					"Review current credits and manage credit proposals that the other party must accept.",
+			},
+		},
+		currentAttributions: "Current credits",
+		currentAttributionsDescription:
+			"Credit relationships that are established and displayed on this content.",
+	},
 } satisfies typeof import("../zh-Hant/posts").default;

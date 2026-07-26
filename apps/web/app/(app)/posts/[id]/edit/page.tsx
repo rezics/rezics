@@ -1,4 +1,1 @@
-import { PostEditPage } from "@/features/posts/post-pages";
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-	return <PostEditPage id={(await params).id} />;
-}
+export { PostEditPage as default } from "@/features/posts/pages/post-edit-page";

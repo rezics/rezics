@@ -4896,7 +4896,6 @@ export const ApiErrorCode = {
 	PollSingleChoiceInvalid: "PollSingleChoiceInvalid",
 	PollOptionInvalid: "PollOptionInvalid",
 	PollAlreadyClosed: "PollAlreadyClosed",
-	ProgressNotFound: "ProgressNotFound",
 	ContentStructureInvalid: "ContentStructureInvalid",
 	ContentStructureNotFound: "ContentStructureNotFound",
 	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
@@ -63357,7 +63356,7 @@ export type GetApiProgressByUnitIdPath = {
 	unitId: string;
 };
 
-export const GetApiProgressByUnitIdStatus200StatusEnum = {
+export const GetApiProgressByUnitIdStatus200RecordStatusEnum = {
 	backlog: "backlog",
 	active: "active",
 	paused: "paused",
@@ -63365,75 +63364,80 @@ export const GetApiProgressByUnitIdStatus200StatusEnum = {
 	dropped: "dropped",
 } as const;
 
-export type GetApiProgressByUnitIdStatus200StatusEnum =
-	(typeof GetApiProgressByUnitIdStatus200StatusEnum)[keyof typeof GetApiProgressByUnitIdStatus200StatusEnum];
+export type GetApiProgressByUnitIdStatus200RecordStatusEnum =
+	(typeof GetApiProgressByUnitIdStatus200RecordStatusEnum)[keyof typeof GetApiProgressByUnitIdStatus200RecordStatusEnum];
 
-/**
- * @type object
- */
-export type GetApiProgressByUnitIdStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @default 'backlog'
-	 * @type string
-	 */
-	status: GetApiProgressByUnitIdStatus200StatusEnum;
-	/**
-	 * @type number
-	 */
-	progress: number;
-	/**
-	 * @type boolean
-	 */
-	isDeleted: boolean;
-	completedCount: string | number;
-	totalTimeMs: string | number;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	firstSeenAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	lastSeenAt: string;
-	lastContentStructureNodeId: (string | null) | null;
-	lastReadAnchor: (void | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const GetApiProgressByUnitIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ProgressNotFound: "ProgressNotFound",
-} as const;
-
-export type GetApiProgressByUnitIdStatus404ErrorCodeEnum =
-	(typeof GetApiProgressByUnitIdStatus404ErrorCodeEnum)[keyof typeof GetApiProgressByUnitIdStatus404ErrorCodeEnum];
+export type GetApiProgressByUnitIdStatus200 =
+	| {
+			/**
+			 * @type string
+			 */
+			state: "untracked";
+	  }
+	| {
+			/**
+			 * @type string
+			 */
+			state: "tracked";
+			/**
+			 * @type object
+			 */
+			record: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				unitId: string;
+				/**
+				 * @default 'backlog'
+				 * @type string
+				 */
+				status: GetApiProgressByUnitIdStatus200RecordStatusEnum;
+				/**
+				 * @type number
+				 */
+				progress: number;
+				/**
+				 * @type boolean
+				 */
+				isDeleted: boolean;
+				completedCount: string | number;
+				totalTimeMs: string | number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				firstSeenAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				lastSeenAt: string;
+				lastContentStructureNodeId: (string | null) | null;
+				lastReadAnchor: (void | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				updatedAt: string;
+			};
+	  };
 
 /**
  * @type object
@@ -63447,7 +63451,7 @@ export type GetApiProgressByUnitIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: GetApiProgressByUnitIdStatus404ErrorCodeEnum;
+		code: "UnitNotFound";
 		/**
 		 * @type string
 		 */
@@ -71807,6 +71811,18 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAttributions: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageScores: boolean;
 	};
 };
 
@@ -75976,6 +75992,14 @@ export type GetApiPostsByPostIdStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAttributions: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
 		/**
 		 * @type boolean
 		 */

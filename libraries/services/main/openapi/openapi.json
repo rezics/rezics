@@ -9217,7 +9217,6 @@
 					"PollSingleChoiceInvalid",
 					"PollOptionInvalid",
 					"PollAlreadyClosed",
-					"ProgressNotFound",
 					"ContentStructureInvalid",
 					"ContentStructureNotFound",
 					"ContentStructureRevisionConflict",
@@ -83514,7 +83513,7 @@
 		},
 		"/api/progress/{unitId}": {
 			"get": {
-				"summary": "Get progress",
+				"summary": "Get progress state",
 				"tags": ["Progress"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -83531,74 +83530,115 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": [
-										"profileId",
-										"unitId",
-										"status",
-										"progress",
-										"isDeleted",
-										"completedCount",
-										"totalTimeMs",
-										"firstSeenAt",
-										"lastSeenAt",
-										"lastContentStructureNodeId",
-										"lastReadAnchor",
-										"createdAt",
-										"updatedAt"
-									],
-									"properties": {
-										"profileId": { "format": "uuid", "type": "string" },
-										"unitId": { "format": "uuid", "type": "string" },
-										"status": {
-											"default": "backlog",
-											"type": "string",
-											"enum": [
-												"backlog",
-												"active",
-												"paused",
-												"completed",
-												"dropped"
-											]
+									"anyOf": [
+										{
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["state"],
+											"properties": {
+												"state": { "const": "untracked", "type": "string" }
+											}
 										},
-										"progress": { "type": "number" },
-										"isDeleted": { "type": "boolean" },
-										"completedCount": {
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
-												},
-												{ "type": "integer" }
-											]
-										},
-										"totalTimeMs": {
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
-												},
-												{ "type": "integer" }
-											]
-										},
-										"firstSeenAt": { "format": "date-time", "type": "string" },
-										"lastSeenAt": { "format": "date-time", "type": "string" },
-										"lastContentStructureNodeId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"lastReadAnchor": {
-											"nullable": true,
-											"anyOf": [{}, { "type": "null" }]
-										},
-										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
-									}
+										{
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["state", "record"],
+											"properties": {
+												"state": { "const": "tracked", "type": "string" },
+												"record": {
+													"type": "object",
+													"required": [
+														"profileId",
+														"unitId",
+														"status",
+														"progress",
+														"isDeleted",
+														"completedCount",
+														"totalTimeMs",
+														"firstSeenAt",
+														"lastSeenAt",
+														"lastContentStructureNodeId",
+														"lastReadAnchor",
+														"createdAt",
+														"updatedAt"
+													],
+													"properties": {
+														"profileId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"unitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"status": {
+															"default": "backlog",
+															"type": "string",
+															"enum": [
+																"backlog",
+																"active",
+																"paused",
+																"completed",
+																"dropped"
+															]
+														},
+														"progress": { "type": "number" },
+														"isDeleted": { "type": "boolean" },
+														"completedCount": {
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "type": "integer" }
+															]
+														},
+														"totalTimeMs": {
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "type": "integer" }
+															]
+														},
+														"firstSeenAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"lastSeenAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"lastContentStructureNodeId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"lastReadAnchor": {
+															"nullable": true,
+															"anyOf": [{}, { "type": "null" }]
+														},
+														"createdAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"updatedAt": {
+															"format": "date-time",
+															"type": "string"
+														}
+													}
+												}
+											}
+										}
+									]
 								}
 							}
 						}
@@ -83618,7 +83658,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "ProgressNotFound"]
+													"enum": ["UnitNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -99479,8 +99519,18 @@
 										},
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit"],
-											"properties": { "canEdit": { "type": "boolean" } }
+											"required": [
+												"canEdit",
+												"canManageAttributions",
+												"canManageAccess",
+												"canManageScores"
+											],
+											"properties": {
+												"canEdit": { "type": "boolean" },
+												"canManageAttributions": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
+												"canManageScores": { "type": "boolean" }
+											}
 										}
 									}
 								}
@@ -104309,9 +104359,16 @@
 										},
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit", "canReply"],
+											"required": [
+												"canEdit",
+												"canManageAttributions",
+												"canManageAccess",
+												"canReply"
+											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canManageAttributions": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
 												"canReply": { "type": "boolean" }
 											}
 										}

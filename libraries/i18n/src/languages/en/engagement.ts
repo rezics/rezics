@@ -44,6 +44,14 @@ export default {
 	scoreEditorHint: `Choose a ${realmTerms.label} to update an existing Score or add a Score in another ${realmTerms.label}.`,
 	editScores: "Manage Scores",
 	noScoredContexts: "No Scores in any context yet.",
+	scoreAssociation: "Score association",
+	scoreAssociationDescription:
+		"Choose the Score referenced by this review, or remove its current Score association.",
+	scoreAssociationOption: insert("{{context}} · {{score}}/10", {
+		context: String,
+		score: String,
+	}),
+	saveScoreAssociation: "Save Score association",
 	allReviewRealms: `All ${realmTerms.pluralLabel}`,
 	filterReviewRealm: `Filter by ${realmTerms.label}`,
 	searchReviews: "Search review text",
