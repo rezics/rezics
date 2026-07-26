@@ -281,5 +281,7 @@ export default {
 		increaseFontSize: "放大字級",
 		markChapterComplete: "標記章節已完成",
 		markChapterIncomplete: "取消章節完成標記",
+		read: "已讀",
+		unread: "未讀",
 	},
 };

@@ -21,7 +21,7 @@ import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { FavoriteButton } from "@/features/collections/components/favorite-button";
 import { UnitShelf } from "@/features/explore/unit-shelf";
-import { BookChapters } from "./reader";
+import { BookContents } from "./components/book-contents";
 import type { UnitType } from "./unit-types";
 import { CatalogSubjectGroups } from "./components/catalog-subject-groups";
 
@@ -233,7 +233,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						</Card>
 					</DetailSection>
 
-					{type === "book" && <BookChapters bookId={item.id} />}
+					{type === "book" && <BookContents bookId={item.id} />}
 				</div>
 
 				<aside className="flex min-w-0 flex-col gap-6">

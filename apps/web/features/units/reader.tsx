@@ -9,25 +9,14 @@ import {
 
 import {
 	type GetApiChaptersByChapterIdStatus200,
-	getApiProgressByUnitIdNodesQueryKey,
-	useDeleteApiProgressByUnitIdNodesByNodeId,
 	useGetApiChaptersByChapterId,
-	useGetApiProgressByUnitIdNodes,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
 	useGetApiUnitsByTypeByUnitId,
-	usePutApiProgressByUnitIdNodesByNodeId,
 	usePutApiChaptersByChapterIdLocalizationsByLanguageContent,
 } from "@rezics/openapi-tanstack-query";
 import { measurePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowLeftIcon,
-	CheckIcon,
-	HistoryIcon,
-	ListTreeIcon,
-	MinusIcon,
-	PlusIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, HistoryIcon, ListTreeIcon, MinusIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 
@@ -61,103 +50,13 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { hasErrorCode } from "@/i18n/errors";
 import { readPortableText, writePortableText } from "@/lib/block";
-import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { buildContentStructureTree, type ContentStructureTreeNode } from "./content-structure-tree";
 import { invalidateChapterContent } from "./unit-cache";
 import { chapterHistoryHref, unitManagementSectionHref } from "./routing/unit-management-routes";
 
-export function BookChapters({ bookId }: { bookId: string }) {
-	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
-	const { data: session } = useHydratedSession();
-	const queryClient = useQueryClient();
-	const query = useGetApiUnitsBookByUnitIdContentStructureNodes({
-		path: { unitId: bookId },
-	});
-	const completion = useGetApiProgressByUnitIdNodes(
-		{ path: { unitId: bookId } },
-		{ query: { enabled: Boolean(session) } },
-	);
-	const completeNode = usePutApiProgressByUnitIdNodesByNodeId();
-	const uncompleteNode = useDeleteApiProgressByUnitIdNodesByNodeId();
-	const [changingNodeId, setChangingNodeId] = useState<string>();
-	const completedNodeIds = new Set(completion.data?.items.map(({ nodeId }) => nodeId) ?? []);
-
-	async function toggleNodeCompletion(nodeId: string) {
-		const completed = completedNodeIds.has(nodeId);
-		setChangingNodeId(nodeId);
-		try {
-			if (completed) await uncompleteNode.mutateAsync({ path: { unitId: bookId, nodeId } });
-			else await completeNode.mutateAsync({ path: { unitId: bookId, nodeId } });
-			await queryClient.invalidateQueries({
-				queryKey: getApiProgressByUnitIdNodesQueryKey({
-					path: { unitId: bookId },
-				}),
-			});
-		} catch {
-			// The server projection remains the source of truth.
-		} finally {
-			setChangingNodeId(undefined);
-		}
-	}
-	if (query.isPending)
-		return (
-			<section className="flex flex-col gap-4">
-				<h2 className="font-heading text-xl font-bold">{t.units.content.title}</h2>
-				<Skeleton className="h-24 rounded-xl" />
-			</section>
-		);
-	if (query.isError)
-		return (
-			<section className="grid gap-3">
-				<p className="text-destructive text-sm">{t.state.error}</p>
-				<Button className="w-fit" onClick={() => void query.refetch()} variant="outline">
-					{t.actions.retry}
-				</Button>
-			</section>
-		);
-	if (!query.data?.items.length)
-		return (
-			<section className="flex flex-col gap-4">
-				<h2 className="font-heading text-xl font-bold">{t.units.content.title}</h2>
-				<p className="text-muted-foreground text-sm">{t.units.content.noContent}</p>
-			</section>
-		);
-	return (
-		<section className="flex flex-col gap-4">
-			<h2 className="font-heading text-xl font-bold">{t.units.content.title}</h2>
-			<ContentReadTree
-				bookId={bookId}
-				completion={
-					session
-						? {
-								changingNodeId,
-								completedNodeIds,
-								disabled: completion.isPending || completion.isError,
-								onToggle: toggleNodeCompletion,
-							}
-						: undefined
-				}
-				label={t.units.content.title}
-				nodes={buildContentStructureTree(query.data.items)}
-			/>
-			<RequestFailure
-				error={completion.error ?? completeNode.error ?? uncompleteNode.error}
-				fallback={t.ui.retryLater}
-			/>
-		</section>
-	);
-}
-
 interface ReadTreeNode extends Omit<TreeNodeType, "children"> {
 	contentUnitId: string | null;
 	children?: ReadTreeNode[];
-}
-
-interface ContentReadCompletion {
-	readonly changingNodeId: string | undefined;
-	readonly completedNodeIds: ReadonlySet<string>;
-	readonly disabled: boolean;
-	readonly onToggle: (nodeId: string) => void | Promise<void>;
 }
 
 function ContentReadTree({
@@ -166,14 +65,12 @@ function ContentReadTree({
 	nodes,
 	currentChapterId,
 	className,
-	completion,
 }: {
 	bookId: string;
 	label: string;
 	nodes: readonly ContentStructureTreeNode[];
 	currentChapterId?: string;
 	className?: string;
-	completion?: ContentReadCompletion;
 }) {
 	const rootNode = {
 		children: toReadTreeNodes(nodes),
@@ -193,7 +90,6 @@ function ContentReadTree({
 				{collection.rootNode.children?.map((node, index) => (
 					<ContentReadTreeNode
 						bookId={bookId}
-						completion={completion}
 						currentChapterId={currentChapterId}
 						indexPath={[index]}
 						key={node.id}
@@ -210,16 +106,12 @@ function ContentReadTreeNode({
 	indexPath,
 	node,
 	currentChapterId,
-	completion,
 }: {
 	bookId: string;
 	indexPath: number[];
 	node: ReadTreeNode;
 	currentChapterId?: string;
-	completion?: ContentReadCompletion;
 }) {
-	const { t } = useTranslation(["units"]);
-	const completed = completion?.completedNodeIds.has(node.id) ?? false;
 	return (
 		<TreeViewNode indexPath={indexPath} node={node}>
 			{node.children?.length ? (
@@ -231,7 +123,6 @@ function ContentReadTreeNode({
 						{node.children.map((child, index) => (
 							<ContentReadTreeNode
 								bookId={bookId}
-								completion={completion}
 								currentChapterId={currentChapterId}
 								indexPath={[...indexPath, index]}
 								key={child.id}
@@ -241,41 +132,18 @@ function ContentReadTreeNode({
 					</TreeViewBranchContent>
 				</TreeViewBranch>
 			) : node.contentUnitId ? (
-				<div className="relative">
-					<TreeViewContent asChild>
-						<Link
-							aria-current={
-								node.contentUnitId === currentChapterId ? "page" : undefined
-							}
-							className={cn(
-								completion && "pe-12",
-								node.contentUnitId === currentChapterId &&
-									"bg-surface-selected text-foreground",
-							)}
-							href={`/units/book/${bookId}/read/${node.contentUnitId}`}
-						>
-							<TreeViewItem>{node.name}</TreeViewItem>
-						</Link>
-					</TreeViewContent>
-					{completion ? (
-						<Button
-							aria-label={
-								completed
-									? t.units.reader.markChapterIncomplete
-									: t.units.reader.markChapterComplete
-							}
-							aria-pressed={completed}
-							className="absolute end-1 top-1/2 -translate-y-1/2"
-							disabled={completion.disabled}
-							isLoading={completion.changingNodeId === node.id}
-							onClick={() => void completion.onToggle(node.id)}
-							size="icon-sm"
-							variant={completed ? "secondary" : "quiet"}
-						>
-							<CheckIcon aria-hidden />
-						</Button>
-					) : null}
-				</div>
+				<TreeViewContent asChild>
+					<Link
+						aria-current={node.contentUnitId === currentChapterId ? "page" : undefined}
+						className={cn(
+							node.contentUnitId === currentChapterId &&
+								"bg-surface-selected text-foreground",
+						)}
+						href={`/units/book/${bookId}/read/${node.contentUnitId}`}
+					>
+						<TreeViewItem>{node.name}</TreeViewItem>
+					</Link>
+				</TreeViewContent>
 			) : (
 				<TreeViewContent>
 					<TreeViewItem>{node.name}</TreeViewItem>

@@ -84,20 +84,24 @@ export function createBookContentStructureDraft(
 			node.parentId && node.parentId !== node.id && knownIds.has(node.parentId)
 				? node.parentId
 				: null;
-		children.set(parentId, [...(children.get(parentId) ?? []), node]);
+		const siblings = children.get(parentId);
+		if (siblings) siblings.push(node);
+		else children.set(parentId, [node]);
 	}
 	for (const siblings of children.values()) siblings.sort(compareRemoteNodes);
+	const orderByNodeId = new Map<string, number>();
+	for (const siblings of children.values())
+		siblings.forEach((node, order) => orderByNodeId.set(node.id, order));
 	return remoteNodes.map((node) => {
 		const parentId =
 			node.parentId && node.parentId !== node.id && knownIds.has(node.parentId)
 				? node.parentId
 				: null;
-		const order = (children.get(parentId) ?? []).findIndex(({ id }) => id === node.id);
 		return {
 			state: "existing",
 			id: node.id,
 			parentId,
-			order,
+			order: orderByNodeId.get(node.id) ?? 0,
 			title: node.title,
 			contentUnitId: node.contentUnitId,
 			contentKind: node.contentKind,
@@ -114,7 +118,9 @@ export function buildBookDraftTree(nodes: readonly BookDraftNode[]): BookDraftTr
 			node.parentId && node.parentId !== node.id && knownIds.has(node.parentId)
 				? node.parentId
 				: null;
-		children.set(parentId, [...(children.get(parentId) ?? []), node]);
+		const siblings = children.get(parentId);
+		if (siblings) siblings.push(node);
+		else children.set(parentId, [node]);
 	}
 	for (const siblings of children.values()) siblings.sort(compareDraftNodes);
 	const seen = new Set<string>();
@@ -194,17 +200,23 @@ export function renameBookDraftNode(
 }
 
 function descendantIds(nodes: readonly BookDraftNode[], parentIds: ReadonlySet<string>) {
+	const childrenByParentId = new Map<string, string[]>();
+	for (const node of nodes) {
+		if (!node.parentId) continue;
+		const children = childrenByParentId.get(node.parentId);
+		if (children) children.push(node.id);
+		else childrenByParentId.set(node.parentId, [node.id]);
+	}
 	const descendants = new Set<string>();
-	let frontier = new Set(parentIds);
-	while (frontier.size) {
-		const next = new Set<string>();
-		for (const node of nodes) {
-			if (node.parentId && frontier.has(node.parentId) && !descendants.has(node.id)) {
-				descendants.add(node.id);
-				next.add(node.id);
-			}
+	const stack = [...parentIds];
+	while (stack.length) {
+		const parentId = stack.pop();
+		if (!parentId) continue;
+		for (const childId of childrenByParentId.get(parentId) ?? []) {
+			if (descendants.has(childId) || parentIds.has(childId)) continue;
+			descendants.add(childId);
+			stack.push(childId);
 		}
-		frontier = next;
 	}
 	return descendants;
 }
@@ -214,10 +226,50 @@ export function getBookDraftSelectionRoots(
 	selectedIds: ReadonlySet<string>,
 ): BookDraftNode[] {
 	const selected = new Set(nodes.filter(({ id }) => selectedIds.has(id)).map(({ id }) => id));
-	const selectedDescendants = descendantIds(nodes, selected);
-	return flattenBookDraftTree(buildBookDraftTree(nodes)).filter(
-		(node) => selected.has(node.id) && !selectedDescendants.has(node.id),
-	);
+	const roots: BookDraftNode[] = [];
+
+	function visit(entries: readonly BookDraftTreeNode[], ancestorSelected: boolean): void {
+		for (const entry of entries) {
+			const nodeSelected = selected.has(entry.node.id);
+			if (nodeSelected && !ancestorSelected) roots.push(entry.node);
+			visit(entry.children, ancestorSelected || nodeSelected);
+		}
+	}
+
+	visit(buildBookDraftTree(nodes), false);
+	return roots;
+}
+
+export function normalizeBookDraftSelectionIds(
+	nodes: readonly BookDraftNode[],
+	selectedIds: ReadonlySet<string>,
+): ReadonlySet<string> {
+	return new Set(getBookDraftSelectionRoots(nodes, selectedIds).map(({ id }) => id));
+}
+
+export function indexBookDraftSelectionCoverage(
+	nodes: readonly BookDraftNode[],
+	selectedIds: ReadonlySet<string>,
+): ReadonlyMap<string, string> {
+	const roots = getBookDraftSelectionRoots(nodes, selectedIds);
+	const coverage = new Map(roots.map(({ id }) => [id, id] as const));
+	const childrenByParentId = new Map<string, string[]>();
+	for (const node of nodes) {
+		if (!node.parentId) continue;
+		const children = childrenByParentId.get(node.parentId);
+		if (children) children.push(node.id);
+		else childrenByParentId.set(node.parentId, [node.id]);
+	}
+	for (const root of roots) {
+		const stack = [...(childrenByParentId.get(root.id) ?? [])];
+		while (stack.length) {
+			const nodeId = stack.pop();
+			if (!nodeId || coverage.has(nodeId)) continue;
+			coverage.set(nodeId, root.id);
+			stack.push(...(childrenByParentId.get(nodeId) ?? []));
+		}
+	}
+	return coverage;
 }
 
 export function getBookDraftMoveTargetIds(
@@ -232,8 +284,11 @@ export function getBookDraftMoveTargetIds(
 
 function siblingMap(nodes: readonly BookDraftNode[]): Map<string | null, BookDraftNode[]> {
 	const result = new Map<string | null, BookDraftNode[]>();
-	for (const node of nodes.toSorted(compareDraftNodes))
-		result.set(node.parentId, [...(result.get(node.parentId) ?? []), node]);
+	for (const node of nodes.toSorted(compareDraftNodes)) {
+		const siblings = result.get(node.parentId);
+		if (siblings) siblings.push(node);
+		else result.set(node.parentId, [node]);
+	}
 	return result;
 }
 

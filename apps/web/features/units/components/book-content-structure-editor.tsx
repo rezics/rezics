@@ -14,7 +14,6 @@ import {
 	ChevronsDownUp,
 	ChevronsUpDown,
 	Ellipsis,
-	Eye,
 	FileText,
 	Folder,
 	GripVertical,
@@ -26,18 +25,15 @@ import {
 	Save,
 	Square,
 	SquareCheckBig,
-	Text,
 	Undo2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type CSSProperties, type DragEvent, type MouseEvent, useMemo, useState } from "react";
+import { type DragEvent, type MouseEvent, useMemo, useState } from "react";
 
 import {
 	Badge,
 	Button,
-	Card,
-	CardContent,
 	cn,
 	ContextMenu,
 	ContextMenuContent,
@@ -70,16 +66,27 @@ import {
 	createBookContentStructureDraft,
 	findLastBookDraftLabelId,
 	getBookDraftMoveTargetIds,
+	indexBookDraftSelectionCoverage,
 	isBookDraftParentTarget,
 	moveBookDraftSelection,
 	moveBookDraftSelectionToSiblingEdge,
+	normalizeBookDraftSelectionIds,
 	renameBookDraftNode,
 	toBookContentStructureSaveNodes,
 	type BookDraftDropTarget,
 	type BookDraftNode,
-	type BookDraftTreeNode,
 	type NewBookDraftNodeInput,
 } from "../model/book-content-structure-draft";
+import {
+	collectBookStructureLabelIds,
+	countBookStructureDisplayedKinds,
+	EmptyBookStructureContentMetrics,
+	flattenVisibleBookStructureTree,
+	indexBookStructureSubtreeContentMetrics,
+	isBookStructureDisplayLabel,
+	type BookStructureContentMetrics,
+	type VisibleBookStructureTreeNode,
+} from "../model/book-content-structure-view";
 import {
 	bookContentStructureHistoryHref,
 	chapterEditorHref,
@@ -89,6 +96,14 @@ import {
 	BookContentStructureDestinationDialog,
 	type BookStructureDestination,
 } from "./book-content-structure-destination-dialog";
+import {
+	BookContentStructureChapterViewMetric,
+	BookContentStructureRowFrame,
+	BookContentStructureRowText,
+	BookContentStructureSection,
+	EmptyBookContentStructureList,
+	VirtualizedBookContentStructureRows,
+} from "./book-content-structure-list";
 import { UnitSectionHeader } from "./unit-section-header";
 
 type BookStructureResponse = GetApiUnitsBookByUnitIdContentStructureNodesStatus200;
@@ -97,7 +112,7 @@ type EditorDocument = {
 	readonly baseRevisionId: string;
 	readonly baseline: readonly BookDraftNode[];
 	readonly draft: readonly BookDraftNode[];
-	readonly ownContentMetricsByNodeId: ReadonlyMap<string, ContentMetrics>;
+	readonly ownContentMetricsByNodeId: ReadonlyMap<string, BookStructureContentMetrics>;
 };
 
 type CreateRequest = {
@@ -109,19 +124,9 @@ type ActiveDropTarget = BookDraftDropTarget | undefined;
 
 const EmptyIdSet: ReadonlySet<string> = new Set();
 
-type ContentMetrics = {
-	readonly wordCount: number;
-	readonly characterCount: number;
-};
-
-const EmptyContentMetrics: ContentMetrics = {
-	wordCount: 0,
-	characterCount: 0,
-};
-
 type StructureTreeProps = {
 	nodes: readonly BookDraftNode[];
-	ownContentMetricsByNodeId: ReadonlyMap<string, ContentMetrics>;
+	ownContentMetricsByNodeId: ReadonlyMap<string, BookStructureContentMetrics>;
 	pending: boolean;
 	onChange: (change: (nodes: readonly BookDraftNode[]) => BookDraftNode[]) => void;
 	onCreate: (request: CreateRequest) => void;
@@ -129,15 +134,14 @@ type StructureTreeProps = {
 };
 
 type StructureRowProps = {
-	entry: BookDraftTreeNode;
-	depth: number;
+	visibleEntry: VisibleBookStructureTreeNode<BookDraftNode>;
 	siblingsByParentId: ReadonlyMap<string | null, readonly BookDraftNode[]>;
 	pending: boolean;
 	expandedIds: ReadonlySet<string>;
 	draggingIds: ReadonlySet<string>;
 	dropTarget?: ActiveDropTarget;
 	validDropTargetIds: ReadonlySet<string>;
-	contentMetricsByNodeId: ReadonlyMap<string, ContentMetrics>;
+	contentMetricsByNodeId: ReadonlyMap<string, BookStructureContentMetrics>;
 	selectedIds: ReadonlySet<string>;
 	selectionMode: boolean;
 	onCreate: (request: CreateRequest) => void;
@@ -180,9 +184,15 @@ export function BookContentStructureEditor({
 	});
 	const [createRequest, setCreateRequest] = useState<CreateRequest>();
 	const save = usePutApiUnitsBookByUnitIdContentStructure();
-	const dirty =
-		bookContentStructureDraftFingerprint(document.draft) !==
-		bookContentStructureDraftFingerprint(document.baseline);
+	const draftFingerprint = useMemo(
+		() => bookContentStructureDraftFingerprint(document.draft),
+		[document.draft],
+	);
+	const baselineFingerprint = useMemo(
+		() => bookContentStructureDraftFingerprint(document.baseline),
+		[document.baseline],
+	);
+	const dirty = draftFingerprint !== baselineFingerprint;
 
 	async function saveDraft() {
 		if (!dirty || save.isPending) return undefined;
@@ -469,10 +479,10 @@ function BookContentStructureTree({
 	const { t } = useTranslation(["units"]);
 	const tree = useMemo(() => buildBookDraftTree(nodes), [nodes]);
 	const siblingsByParentId = useMemo(() => groupSiblings(nodes), [nodes]);
-	const allExpandableIds = useMemo(() => collectLabelIds(tree), [tree]);
+	const allExpandableIds = useMemo(() => collectBookStructureLabelIds(tree), [tree]);
 	const expandableIdSet = useMemo(() => new Set(allExpandableIds), [allExpandableIds]);
 	const contentMetricsByNodeId = useMemo(
-		() => indexSubtreeContentMetrics(tree, ownContentMetricsByNodeId),
+		() => indexBookStructureSubtreeContentMetrics(tree, ownContentMetricsByNodeId),
 		[tree, ownContentMetricsByNodeId],
 	);
 	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(
@@ -482,19 +492,31 @@ function BookContentStructureTree({
 	const [draggingIds, setDraggingIds] = useState<ReadonlySet<string>>(EmptyIdSet);
 	const [dropTarget, setDropTarget] = useState<ActiveDropTarget>();
 	const [selectionMode, setSelectionMode] = useState(false);
-	const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(EmptyIdSet);
+	const [selectedRootIds, setSelectedRootIds] = useState<ReadonlySet<string>>(EmptyIdSet);
 	const [selectionAnchorId, setSelectionAnchorId] = useState<string>();
 	const [movingIds, setMovingIds] = useState<ReadonlySet<string>>();
-	const visibleNodeIds = useMemo(
-		() => collectVisibleNodeIds(tree, expandedIds),
+	const visibleEntries = useMemo(
+		() => flattenVisibleBookStructureTree(tree, expandedIds),
 		[tree, expandedIds],
 	);
+	const visibleNodeIds = useMemo(
+		() => visibleEntries.map(({ entry }) => entry.node.id),
+		[visibleEntries],
+	);
+	const selectionCoverage = useMemo(
+		() => indexBookDraftSelectionCoverage(nodes, selectedRootIds),
+		[nodes, selectedRootIds],
+	);
+	const selectedIds = useMemo(() => new Set(selectionCoverage.keys()), [selectionCoverage]);
 	const validDropTargetIds = useMemo(
 		() =>
 			draggingIds.size ? getBookDraftMoveTargetIds(nodes, draggingIds) : new Set<string>(),
 		[nodes, draggingIds],
 	);
-	const { chapterCount, labelCount } = countDisplayedKinds(tree);
+	const { chapterCount, labelCount } = useMemo(
+		() => countBookStructureDisplayedKinds(tree),
+		[tree],
+	);
 
 	function requestCreate(request: CreateRequest) {
 		if (request.destination.kind === "node" && request.destination.placement === "inside") {
@@ -533,7 +555,7 @@ function BookContentStructureTree({
 	}
 
 	function actionIds(nodeId: string): ReadonlySet<string> {
-		return selectionMode && selectedIds.has(nodeId) ? selectedIds : new Set([nodeId]);
+		return selectionMode && selectionCoverage.has(nodeId) ? selectedRootIds : new Set([nodeId]);
 	}
 
 	function moveToEdge(nodeId: string, edge: "first" | "last") {
@@ -546,7 +568,7 @@ function BookContentStructureTree({
 	}
 
 	function startDrag(nodeId: string) {
-		setDraggingIds(new Set(actionIds(nodeId)));
+		setDraggingIds(new Set([...actionIds(nodeId), nodeId]));
 	}
 
 	function toggle(nodeId: string) {
@@ -561,7 +583,7 @@ function BookContentStructureTree({
 	function setMultiSelectMode(enabled: boolean) {
 		setSelectionMode(enabled);
 		if (enabled) return;
-		setSelectedIds(EmptyIdSet);
+		setSelectedRootIds(EmptyIdSet);
 		setSelectionAnchorId(undefined);
 	}
 
@@ -589,27 +611,31 @@ function BookContentStructureTree({
 				const start = Math.min(anchorIndex, nodeIndex);
 				const end = Math.max(anchorIndex, nodeIndex);
 				const range = visibleNodeIds.slice(start, end + 1);
-				setSelectedIds((current) =>
-					modifiers.ctrlKey || modifiers.metaKey
-						? new Set([...current, ...range])
-						: new Set(range),
+				setSelectedRootIds((current) =>
+					normalizeBookDraftSelectionIds(
+						nodes,
+						modifiers.ctrlKey || modifiers.metaKey
+							? new Set([...current, ...range])
+							: new Set(range),
+					),
 				);
 				return;
 			}
 		}
 
-		setSelectedIds((current) => {
+		setSelectedRootIds((current) => {
 			const next = new Set(current);
-			if (next.has(nodeId)) next.delete(nodeId);
+			const coveringRootId = indexBookDraftSelectionCoverage(nodes, current).get(nodeId);
+			if (coveringRootId) next.delete(coveringRootId);
 			else next.add(nodeId);
-			return next;
+			return normalizeBookDraftSelectionIds(nodes, next);
 		});
 		setSelectionAnchorId(nodeId);
 	}
 
 	function contextTarget(nodeId: string) {
-		if (!selectionMode || selectedIds.has(nodeId)) return;
-		setSelectedIds(new Set([nodeId]));
+		if (!selectionMode || selectionCoverage.has(nodeId)) return;
+		setSelectedRootIds(new Set([nodeId]));
 		setSelectionAnchorId(nodeId);
 	}
 
@@ -625,148 +651,139 @@ function BookContentStructureTree({
 
 	return (
 		<>
-			<Card appearance="outlined">
-				<CardContent className="p-0">
-					<div className="flex min-h-18 flex-wrap items-center justify-between gap-4 border-b border-border-weak px-5 py-4">
-						<div className="min-w-0">
-							<h2 className="font-heading font-semibold text-lg">
-								{t.units.content.title}
-							</h2>
-							<p className="mt-1 text-muted-foreground text-sm">
-								{t.units.content.structureSummary({
-									chapters: chapterCount,
-									labels: labelCount,
-								})}
+			<BookContentStructureSection
+				actions={
+					<>
+						<Button
+							aria-pressed={selectionMode}
+							onClick={() => setMultiSelectMode(!selectionMode)}
+							type="button"
+							variant={selectionMode ? "outline" : "quiet"}
+						>
+							{selectionMode ? (
+								<SquareCheckBig aria-hidden />
+							) : (
+								<Square aria-hidden />
+							)}
+							{selectionMode
+								? t.units.content.selectedCount({
+										count: selectedRootIds.size,
+									})
+								: t.units.content.multiSelect}
+						</Button>
+						<Button
+							onClick={() => setExpandedIds(new Set(allExpandableIds))}
+							type="button"
+							variant="quiet"
+						>
+							<ChevronsUpDown aria-hidden />
+							{t.units.content.expandAll}
+						</Button>
+						<Button
+							onClick={() => setExpandedIds(new Set())}
+							type="button"
+							variant="quiet"
+						>
+							<ChevronsDownUp aria-hidden />
+							{t.units.content.collapseAll}
+						</Button>
+						<span aria-hidden className="mx-1 h-7 w-px bg-border-weak" />
+						<Button
+							disabled={pending}
+							onClick={() =>
+								requestCreate({ kind: "label", destination: { kind: "root" } })
+							}
+							type="button"
+							variant="outline"
+						>
+							<ListTree aria-hidden />
+							{t.units.content.newLabel}
+						</Button>
+						<Button
+							disabled={pending}
+							onClick={requestMainChapter}
+							type="button"
+							variant="solid"
+						>
+							<Plus aria-hidden />
+							{t.units.content.newChapter}
+						</Button>
+					</>
+				}
+				chapterCount={chapterCount}
+				labelCount={labelCount}
+			>
+				<div className="min-h-[36rem]">
+					{draggingIds.size ? (
+						<div
+							className={cn(
+								"relative flex min-h-24 items-center gap-3 border-b border-border-weak px-4 transition-colors",
+								"bg-muted/20",
+								dropTarget?.kind === "root" &&
+									"bg-primary/8 outline-2 outline-primary -outline-offset-2",
+							)}
+							onDragOverCapture={(event) => {
+								event.preventDefault();
+								event.dataTransfer.dropEffect = "move";
+								changeDropTarget({ kind: "root" });
+							}}
+							onDrop={(event) => {
+								event.preventDefault();
+								drop({ kind: "root" });
+							}}
+						>
+							<div className="grid size-10 shrink-0 place-items-center rounded-xl bg-foreground text-background">
+								<BookOpenText aria-hidden className="size-5" />
+							</div>
+							<p className="min-w-0 flex-1 truncate font-heading font-semibold text-base">
+								{t.units.content.root}
 							</p>
 						</div>
-						<div className="flex flex-wrap items-center justify-end gap-2">
-							<Button
-								aria-pressed={selectionMode}
-								onClick={() => setMultiSelectMode(!selectionMode)}
-								type="button"
-								variant={selectionMode ? "outline" : "quiet"}
-							>
-								{selectionMode ? (
-									<SquareCheckBig aria-hidden />
-								) : (
-									<Square aria-hidden />
-								)}
-								{selectionMode
-									? t.units.content.selectedCount({ count: selectedIds.size })
-									: t.units.content.multiSelect}
-							</Button>
-							<Button
-								onClick={() => setExpandedIds(new Set(allExpandableIds))}
-								type="button"
-								variant="quiet"
-							>
-								<ChevronsUpDown aria-hidden />
-								{t.units.content.expandAll}
-							</Button>
-							<Button
-								onClick={() => setExpandedIds(new Set())}
-								type="button"
-								variant="quiet"
-							>
-								<ChevronsDownUp aria-hidden />
-								{t.units.content.collapseAll}
-							</Button>
-							<span aria-hidden className="mx-1 h-7 w-px bg-border-weak" />
-							<Button
-								disabled={pending}
-								onClick={() =>
-									requestCreate({ kind: "label", destination: { kind: "root" } })
-								}
-								type="button"
-								variant="outline"
-							>
-								<ListTree aria-hidden />
-								{t.units.content.newLabel}
-							</Button>
-							<Button
-								disabled={pending}
-								onClick={requestMainChapter}
-								type="button"
-								variant="solid"
-							>
-								<Plus aria-hidden />
-								{t.units.content.newChapter}
-							</Button>
-						</div>
-					</div>
-					<div className="min-h-[36rem]">
-						{draggingIds.size ? (
-							<div
-								className={cn(
-									"relative flex min-h-24 items-center gap-3 border-b border-border-weak px-4 transition-colors",
-									"bg-muted/20",
-									dropTarget?.kind === "root" &&
-										"bg-primary/8 outline-2 outline-primary -outline-offset-2",
-								)}
-								onDragOver={(event) => {
-									event.preventDefault();
-									event.dataTransfer.dropEffect = "move";
-									changeDropTarget({ kind: "root" });
-								}}
-								onDrop={(event) => {
-									event.preventDefault();
-									drop({ kind: "root" });
-								}}
-							>
-								<div className="grid size-10 shrink-0 place-items-center rounded-xl bg-foreground text-background">
-									<BookOpenText aria-hidden className="size-5" />
-								</div>
-								<p className="min-w-0 flex-1 truncate font-heading font-semibold text-base">
-									{t.units.content.root}
-								</p>
-							</div>
-						) : null}
-						{tree.length ? (
-							<ul aria-label={t.units.content.title} className="m-0 list-none p-0">
-								{tree.map((entry) => (
-									<BookContentStructureRow
-										depth={0}
-										draggingIds={draggingIds}
-										dropTarget={dropTarget}
-										entry={entry}
-										expandedIds={expandedIds}
-										key={entry.node.id}
-										contentMetricsByNodeId={contentMetricsByNodeId}
-										selectedIds={selectedIds}
-										selectionMode={selectionMode}
-										onActivate={activate}
-										onContextTarget={contextTarget}
-										onCreate={requestCreate}
-										onDragEnd={finishDrag}
-										onDragStart={startDrag}
-										onDrop={drop}
-										onDropTargetChange={changeDropTarget}
-										onMoveRequest={requestMove}
-										onMoveToEdge={moveToEdge}
-										onRename={setRenamingNode}
-										onToggle={toggle}
-										pending={pending}
-										siblingsByParentId={siblingsByParentId}
-										validDropTargetIds={validDropTargetIds}
-									/>
-								))}
-							</ul>
-						) : (
-							<div className="grid min-h-72 place-items-center px-6 text-center">
-								<div>
-									<ListTree
-										aria-hidden
-										className="mx-auto size-8 text-muted-foreground"
-									/>
-									<p className="mt-3 text-muted-foreground text-sm">
-										{t.units.content.noContent}
-									</p>
-								</div>
-							</div>
-						)}
-					</div>
-				</CardContent>
-			</Card>
+					) : null}
+					{tree.length ? (
+						<VirtualizedBookContentStructureRows
+							ariaMultiselectable={selectionMode}
+							entries={visibleEntries}
+							label={t.units.content.title}
+							onDragOverCapture={(event) => {
+								if (!draggingIds.size) return;
+								const distanceFromTop = event.clientY;
+								const distanceFromBottom = window.innerHeight - event.clientY;
+								if (distanceFromTop < 96) window.scrollBy({ top: -24 });
+								else if (distanceFromBottom < 96) window.scrollBy({ top: 24 });
+							}}
+							pinnedNodeIds={draggingIds}
+							renderRow={(visibleEntry) => (
+								<BookContentStructureRow
+									contentMetricsByNodeId={contentMetricsByNodeId}
+									draggingIds={draggingIds}
+									dropTarget={dropTarget}
+									expandedIds={expandedIds}
+									onActivate={activate}
+									onContextTarget={contextTarget}
+									onCreate={requestCreate}
+									onDragEnd={finishDrag}
+									onDragStart={startDrag}
+									onDrop={drop}
+									onDropTargetChange={changeDropTarget}
+									onMoveRequest={requestMove}
+									onMoveToEdge={moveToEdge}
+									onRename={setRenamingNode}
+									onToggle={toggle}
+									pending={pending}
+									selectedIds={selectedIds}
+									selectionMode={selectionMode}
+									siblingsByParentId={siblingsByParentId}
+									validDropTargetIds={validDropTargetIds}
+									visibleEntry={visibleEntry}
+								/>
+							)}
+						/>
+					) : (
+						<EmptyBookContentStructureList />
+					)}
+				</div>
+			</BookContentStructureSection>
 			{renamingNode ? (
 				<RenameStructureNodeDialog
 					node={renamingNode}
@@ -798,78 +815,23 @@ function BookContentStructureTree({
 	);
 }
 
-function collectLabelIds(nodes: readonly BookDraftTreeNode[]): string[] {
-	return nodes.flatMap(({ node, children }) =>
-		isDisplayLabel(node, children)
-			? [node.id, ...collectLabelIds(children)]
-			: collectLabelIds(children),
-	);
-}
-
-function collectVisibleNodeIds(
-	nodes: readonly BookDraftTreeNode[],
-	expandedIds: ReadonlySet<string>,
-): string[] {
-	return nodes.flatMap(({ node, children }) => [
-		node.id,
-		...(expandedIds.has(node.id) ? collectVisibleNodeIds(children, expandedIds) : []),
-	]);
-}
-
 function groupSiblings(
 	nodes: readonly BookDraftNode[],
 ): ReadonlyMap<string | null, readonly BookDraftNode[]> {
 	const groups = new Map<string | null, BookDraftNode[]>();
-	for (const node of nodes)
-		groups.set(node.parentId, [...(groups.get(node.parentId) ?? []), node]);
+	for (const node of nodes) {
+		const siblings = groups.get(node.parentId);
+		if (siblings) siblings.push(node);
+		else groups.set(node.parentId, [node]);
+	}
 	for (const siblings of groups.values())
 		siblings.sort((left, right) => left.order - right.order || left.id.localeCompare(right.id));
 	return groups;
 }
 
-function countDisplayedKinds(nodes: readonly BookDraftTreeNode[]): {
-	readonly chapterCount: number;
-	readonly labelCount: number;
-} {
-	let chapterCount = 0;
-	let labelCount = 0;
-	for (const { node, children } of nodes) {
-		if (isDisplayLabel(node, children)) labelCount += 1;
-		else chapterCount += 1;
-		const childCounts = countDisplayedKinds(children);
-		chapterCount += childCounts.chapterCount;
-		labelCount += childCounts.labelCount;
-	}
-	return { chapterCount, labelCount };
-}
-
-function indexSubtreeContentMetrics(
-	nodes: readonly BookDraftTreeNode[],
-	ownContentMetricsByNodeId: ReadonlyMap<string, ContentMetrics>,
-): ReadonlyMap<string, ContentMetrics> {
-	const contentMetricsByNodeId = new Map<string, ContentMetrics>();
-
-	function visit({ node, children }: BookDraftTreeNode): ContentMetrics {
-		const own = ownContentMetricsByNodeId.get(node.id) ?? EmptyContentMetrics;
-		let wordCount = own.wordCount;
-		let characterCount = own.characterCount;
-		for (const child of children) {
-			const childMetrics = visit(child);
-			wordCount += childMetrics.wordCount;
-			characterCount += childMetrics.characterCount;
-		}
-		const total = { wordCount, characterCount };
-		contentMetricsByNodeId.set(node.id, total);
-		return total;
-	}
-
-	for (const node of nodes) visit(node);
-	return contentMetricsByNodeId;
-}
-
 function indexOwnContentMetrics(
 	nodes: BookStructureResponse["items"],
-): ReadonlyMap<string, ContentMetrics> {
+): ReadonlyMap<string, BookStructureContentMetrics> {
 	return new Map(
 		nodes.map((node) => [
 			node.id,
@@ -881,26 +843,9 @@ function indexOwnContentMetrics(
 	);
 }
 
-function isDisplayLabel(node: BookDraftNode, children: readonly BookDraftTreeNode[]): boolean {
-	return node.contentKind === "chapter_group" || children.length > 0;
-}
-
-/**
- * @todo Render the persisted chapter view count beside this affordance after
- * durable per-chapter readership records are available from the structure API.
- */
-function ChapterViewMetric({ label }: { label: string }) {
-	return (
-		<span aria-label={label} className="inline-flex items-center" role="img" title={label}>
-			<Eye aria-hidden className="size-4" />
-		</span>
-	);
-}
-
 function BookContentStructureRow(props: StructureRowProps) {
 	const {
-		entry,
-		depth,
+		visibleEntry,
 		siblingsByParentId,
 		pending,
 		expandedIds,
@@ -923,8 +868,9 @@ function BookContentStructureRow(props: StructureRowProps) {
 		onToggle,
 	} = props;
 	const { t } = useTranslation(["units"]);
+	const { entry, depth, positionInSet, setSize } = visibleEntry;
 	const { node, children } = entry;
-	const displayAsLabel = isDisplayLabel(node, children);
+	const displayAsLabel = isBookStructureDisplayLabel(entry);
 	const acceptsChildren = isBookDraftParentTarget(node);
 	const expanded = expandedIds.has(node.id);
 	const canDrop = validDropTargetIds.has(node.id);
@@ -935,10 +881,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 		dropTarget?.kind === "node" && dropTarget.nodeId === node.id
 			? dropTarget.placement
 			: undefined;
-	const contentMetrics = contentMetricsByNodeId.get(node.id) ?? EmptyContentMetrics;
-	const rowStyle = {
-		paddingInlineStart: `${1 + depth * 2}rem`,
-	} satisfies CSSProperties;
+	const contentMetrics = contentMetricsByNodeId.get(node.id) ?? EmptyBookStructureContentMetrics;
 
 	function placement(event: DragEvent<HTMLDivElement>): "before" | "inside" | "after" {
 		const bounds = event.currentTarget.getBoundingClientRect();
@@ -948,17 +891,15 @@ function BookContentStructureRow(props: StructureRowProps) {
 	}
 
 	const row = (
-		<div
-			className={cn(
-				"group/structure-row relative flex min-h-24 items-center gap-3 pe-3 transition-colors",
-				draggingIds.has(node.id) && "opacity-45",
-				activePlacement === "before" && "border-t-2 border-t-primary",
-				activePlacement === "inside" &&
-					"bg-primary/8 outline-2 outline-primary -outline-offset-2",
-				activePlacement === "after" && "border-b-2 border-b-primary",
-				!activePlacement && !selected && "hover:bg-muted/40",
-				selected && "bg-accent/70",
-			)}
+		<BookContentStructureRowFrame
+			activePlacement={activePlacement}
+			aria-checked={selectionMode ? selected : undefined}
+			aria-expanded={displayAsLabel ? expanded : undefined}
+			aria-level={depth + 1}
+			aria-posinset={positionInSet}
+			aria-setsize={setSize}
+			depth={depth}
+			dragging={draggingIds.has(node.id)}
 			onDragOver={(event) => {
 				if (!canDrop) return;
 				event.preventDefault();
@@ -981,26 +922,10 @@ function BookContentStructureRow(props: StructureRowProps) {
 				});
 			}}
 			onContextMenu={() => onContextTarget(node.id)}
-			style={rowStyle}
+			role="treeitem"
+			selected={selected}
 		>
-			{depth > 0 ? (
-				<span
-					aria-hidden
-					className="absolute inset-y-0 w-px bg-border-weak"
-					style={{ insetInlineStart: `${depth * 2}rem` }}
-				/>
-			) : null}
-			<span
-				aria-hidden
-				className="pointer-events-none absolute bottom-0 h-px bg-border-weak"
-				style={{
-					insetInlineEnd: 0,
-					insetInlineStart: depth > 0 ? `${depth * 2}rem` : 0,
-				}}
-			/>
 			<button
-				aria-expanded={displayAsLabel ? expanded : undefined}
-				aria-pressed={selectionMode ? selected : undefined}
 				className="flex min-w-0 flex-1 items-center gap-3 self-stretch text-start outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
 				disabled={pending}
 				onClick={(event: MouseEvent<HTMLButtonElement>) =>
@@ -1019,48 +944,19 @@ function BookContentStructureRow(props: StructureRowProps) {
 						<Square aria-hidden className="size-5 shrink-0 text-muted-foreground" />
 					)
 				) : null}
-				<span className="min-w-0 flex-1">
-					<span className="flex min-w-0 items-center gap-2">
-						{displayAsLabel ? (
-							<ChevronRight
-								aria-hidden
-								className={cn(
-									"size-4 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none",
-									expanded && "rotate-90",
-								)}
-							/>
-						) : null}
-						<span className="truncate font-heading font-semibold text-base text-foreground">
-							{node.title}
-						</span>
-					</span>
-					<span className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">
-						{displayAsLabel ? (
-							<span>{t.units.content.childCount({ count: children.length })}</span>
-						) : null}
-						<span className="inline-flex items-center gap-1.5">
-							<Text aria-hidden className="size-4" />
-							{node.language === "zh"
-								? displayAsLabel
-									? t.units.content.totalCharacterCount({
-											count: contentMetrics.characterCount,
-										})
-									: t.units.chapter.characterCount({
-											count: contentMetrics.characterCount,
-										})
-								: displayAsLabel
-									? t.units.content.totalWordCount({
-											count: contentMetrics.wordCount,
-										})
-									: t.units.chapter.wordCount({
-											count: contentMetrics.wordCount,
-										})}
-						</span>
-						{displayAsLabel ? null : (
-							<ChapterViewMetric label={t.units.content.views} />
-						)}
-					</span>
-				</span>
+				<BookContentStructureRowText
+					contentMetrics={contentMetrics}
+					directChildCount={children.length}
+					expanded={expanded}
+					label={displayAsLabel}
+					language={node.language}
+					metadataAfter={
+						displayAsLabel ? null : (
+							<BookContentStructureChapterViewMetric label={t.units.content.views} />
+						)
+					}
+					title={node.title}
+				/>
 			</button>
 			<button
 				aria-label={t.units.content.dragHandle}
@@ -1106,57 +1002,43 @@ function BookContentStructureRow(props: StructureRowProps) {
 					pending={pending}
 				/>
 			)}
-		</div>
+		</BookContentStructureRowFrame>
 	);
 
 	return (
-		<li className="m-0 list-none p-0">
-			<ContextMenu>
-				<ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
-				<ContextMenuContent>
-					{selectionMode ? (
-						<SelectionContextMenuItems
-							canMoveToFirst={selected ? true : siblingIndex > 0}
-							canMoveToLast={
-								selected
-									? true
-									: siblingIndex >= 0 && siblingIndex < siblings.length - 1
-							}
-							nodeId={node.id}
-							onMoveRequest={onMoveRequest}
-							onMoveToEdge={onMoveToEdge}
-							pending={pending}
-						/>
-					) : (
-						<NodeContextMenuItems
-							canMoveToFirst={siblingIndex > 0}
-							canMoveToLast={siblingIndex >= 0 && siblingIndex < siblings.length - 1}
-							displayAsLabel={displayAsLabel}
-							expanded={expanded}
-							node={node}
-							onCreate={onCreate}
-							onMoveRequest={onMoveRequest}
-							onMoveToEdge={onMoveToEdge}
-							onRename={onRename}
-							onToggle={onToggle}
-							pending={pending}
-						/>
-					)}
-				</ContextMenuContent>
-			</ContextMenu>
-			{displayAsLabel && expanded && children.length ? (
-				<ul className="m-0 list-none p-0">
-					{children.map((child) => (
-						<BookContentStructureRow
-							{...props}
-							depth={depth + 1}
-							entry={child}
-							key={child.node.id}
-						/>
-					))}
-				</ul>
-			) : null}
-		</li>
+		<ContextMenu>
+			<ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
+			<ContextMenuContent>
+				{selectionMode ? (
+					<SelectionContextMenuItems
+						canMoveToFirst={selected ? true : siblingIndex > 0}
+						canMoveToLast={
+							selected
+								? true
+								: siblingIndex >= 0 && siblingIndex < siblings.length - 1
+						}
+						nodeId={node.id}
+						onMoveRequest={onMoveRequest}
+						onMoveToEdge={onMoveToEdge}
+						pending={pending}
+					/>
+				) : (
+					<NodeContextMenuItems
+						canMoveToFirst={siblingIndex > 0}
+						canMoveToLast={siblingIndex >= 0 && siblingIndex < siblings.length - 1}
+						displayAsLabel={displayAsLabel}
+						expanded={expanded}
+						node={node}
+						onCreate={onCreate}
+						onMoveRequest={onMoveRequest}
+						onMoveToEdge={onMoveToEdge}
+						onRename={onRename}
+						onToggle={onToggle}
+						pending={pending}
+					/>
+				)}
+			</ContextMenuContent>
+		</ContextMenu>
 	);
 }
 

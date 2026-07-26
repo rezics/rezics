@@ -21,50 +21,11 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 type ShareStatus = "idle" | "copied" | "error";
 
 export function CatalogShareAction({ unitId }: { readonly unitId: string }) {
-	const { data: session } = useHydratedSession();
-	const { t } = useTranslation(["engagement", "feed"]);
-	const recordShare = usePutApiReactionsSharesByUnitId();
+	const { t } = useTranslation(["feed"]);
 	const [open, setOpen] = useState(false);
-	const [nativeShareAvailable, setNativeShareAvailable] = useState(false);
-	const [status, setStatus] = useState<ShareStatus>("idle");
-
-	useEffect(() => {
-		setNativeShareAvailable("share" in navigator);
-	}, []);
-
-	function record() {
-		if (session) recordShare.mutate({ path: { unitId } });
-	}
-
-	async function shareNative() {
-		try {
-			await navigator.share({ url: window.location.href });
-			record();
-			setOpen(false);
-		} catch (error) {
-			if (error instanceof DOMException && error.name === "AbortError") return;
-			setStatus("error");
-		}
-	}
-
-	async function copyLink() {
-		try {
-			await navigator.clipboard.writeText(window.location.href);
-			record();
-			setStatus("copied");
-		} catch {
-			setStatus("error");
-		}
-	}
 
 	return (
-		<Dialog
-			onOpenChange={({ open: nextOpen }) => {
-				setOpen(nextOpen);
-				if (nextOpen) setStatus("idle");
-			}}
-			open={open}
-		>
+		<>
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<Button
@@ -78,7 +39,72 @@ export function CatalogShareAction({ unitId }: { readonly unitId: string }) {
 				</TooltipTrigger>
 				<TooltipContent>{t.feed.actions.shareTitle}</TooltipContent>
 			</Tooltip>
+			<CatalogShareDialog onOpenChange={setOpen} open={open} unitId={unitId} />
+		</>
+	);
+}
 
+export function CatalogShareDialog({
+	href,
+	onOpenChange,
+	open,
+	unitId,
+}: {
+	readonly href?: string;
+	readonly onOpenChange: (open: boolean) => void;
+	readonly open: boolean;
+	readonly unitId: string;
+}) {
+	const { data: session } = useHydratedSession();
+	const { t } = useTranslation(["engagement", "feed"]);
+	const recordShare = usePutApiReactionsSharesByUnitId();
+	const [nativeShareAvailable, setNativeShareAvailable] = useState(false);
+	const [status, setStatus] = useState<ShareStatus>("idle");
+
+	useEffect(() => {
+		setNativeShareAvailable("share" in navigator);
+	}, []);
+	useEffect(() => {
+		if (open) setStatus("idle");
+	}, [open]);
+
+	function record() {
+		if (session) recordShare.mutate({ path: { unitId } });
+	}
+
+	function getShareUrl(): string {
+		return href ? new URL(href, window.location.origin).toString() : window.location.href;
+	}
+
+	async function shareNative() {
+		try {
+			await navigator.share({ url: getShareUrl() });
+			record();
+			onOpenChange(false);
+		} catch (error) {
+			if (error instanceof DOMException && error.name === "AbortError") return;
+			setStatus("error");
+		}
+	}
+
+	async function copyLink() {
+		try {
+			await navigator.clipboard.writeText(getShareUrl());
+			record();
+			setStatus("copied");
+		} catch {
+			setStatus("error");
+		}
+	}
+
+	return (
+		<Dialog
+			onOpenChange={({ open: nextOpen }) => {
+				onOpenChange(nextOpen);
+				if (nextOpen) setStatus("idle");
+			}}
+			open={open}
+		>
 			<DialogContent showCloseButton={false} size="sm">
 				<DialogHeader
 					description={t.feed.actions.shareDescription}
@@ -106,7 +132,7 @@ export function CatalogShareAction({ unitId }: { readonly unitId: string }) {
 					) : null}
 				</DialogBody>
 				<DialogFooter className="border-t">
-					<Button onClick={() => setOpen(false)} variant="secondary">
+					<Button onClick={() => onOpenChange(false)} variant="secondary">
 						{t.engagement.cancel}
 					</Button>
 				</DialogFooter>

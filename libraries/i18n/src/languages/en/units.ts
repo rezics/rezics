@@ -297,5 +297,7 @@ export default {
 		increaseFontSize: "Increase font size",
 		markChapterComplete: "Mark chapter complete",
 		markChapterIncomplete: "Mark chapter incomplete",
+		read: "Read",
+		unread: "Unread",
 	},
 } satisfies typeof import("../zh-Hant/units").default;

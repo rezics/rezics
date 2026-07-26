@@ -6,13 +6,17 @@ type RemoteContentStructureNode =
 
 export type ContentStructureNode = Omit<RemoteContentStructureNode, "contentMetrics">;
 
-export interface ContentStructureTreeNode {
-	node: ContentStructureNode;
-	children: ContentStructureTreeNode[];
+export interface ContentStructureTreeNode<
+	Node extends ContentStructureNode = ContentStructureNode,
+> {
+	node: Node;
+	children: ContentStructureTreeNode<Node>[];
 }
 
-export interface FlattenedContentStructureTreeNode {
-	node: ContentStructureNode;
+export interface FlattenedContentStructureTreeNode<
+	Node extends ContentStructureNode = ContentStructureNode,
+> {
+	node: Node;
 	depth: number;
 }
 
@@ -24,26 +28,25 @@ function comparePosition(left: ContentStructureNode, right: ContentStructureNode
  * Builds a display tree without trusting malformed parent links. Orphaned and
  * cyclic nodes remain visible at the root rather than disappearing from the editor.
  */
-export function buildContentStructureTree(
-	nodes: readonly ContentStructureNode[],
-): ContentStructureTreeNode[] {
+export function buildContentStructureTree<Node extends ContentStructureNode>(
+	nodes: readonly Node[],
+): ContentStructureTreeNode<Node>[] {
 	const knownIds = new Set(nodes.map((node) => node.id));
-	const children = new Map<string | null, ContentStructureNode[]>();
+	const children = new Map<string | null, Node[]>();
 
 	for (const node of nodes) {
 		const parentId =
 			node.parentId && node.parentId !== node.id && knownIds.has(node.parentId)
 				? node.parentId
 				: null;
-		children.set(parentId, [...(children.get(parentId) ?? []), node]);
+		const siblings = children.get(parentId);
+		if (siblings) siblings.push(node);
+		else children.set(parentId, [node]);
 	}
 	for (const siblings of children.values()) siblings.sort(comparePosition);
 
 	const seen = new Set<string>();
-	function visit(
-		node: ContentStructureNode,
-		ancestors: ReadonlySet<string>,
-	): ContentStructureTreeNode {
+	function visit(node: Node, ancestors: ReadonlySet<string>): ContentStructureTreeNode<Node> {
 		seen.add(node.id);
 		const nextAncestors = new Set(ancestors);
 		nextAncestors.add(node.id);
@@ -62,10 +65,10 @@ export function buildContentStructureTree(
 	return roots;
 }
 
-export function flattenContentStructureTree(
-	nodes: readonly ContentStructureTreeNode[],
+export function flattenContentStructureTree<Node extends ContentStructureNode>(
+	nodes: readonly ContentStructureTreeNode<Node>[],
 	depth = 0,
-): FlattenedContentStructureTreeNode[] {
+): FlattenedContentStructureTreeNode<Node>[] {
 	return nodes.flatMap((entry) => [
 		{ node: entry.node, depth },
 		...flattenContentStructureTree(entry.children, depth + 1),
@@ -79,7 +82,9 @@ export function getContentStructureMoveTargets(
 	const children = new Map<string, string[]>();
 	for (const node of nodes) {
 		if (!node.parentId) continue;
-		children.set(node.parentId, [...(children.get(node.parentId) ?? []), node.id]);
+		const childIds = children.get(node.parentId);
+		if (childIds) childIds.push(node.id);
+		else children.set(node.parentId, [node.id]);
 	}
 	const blocked = new Set<string>();
 	function visit(nodeId: string) {
