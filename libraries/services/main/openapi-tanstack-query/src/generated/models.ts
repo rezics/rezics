@@ -81761,6 +81761,192 @@ export type GetApiRealmsByRealmIdPinsPath = {
 	realmId: string;
 };
 
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsRecommendationReason = {
+	followed_unit: "followed_unit",
+	followed_realm: "followed_realm",
+	based_on_activity: "based_on_activity",
+	related_subject: "related_subject",
+	popular_now: "popular_now",
+	new_and_relevant: "new_and_relevant",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsRecommendationReason =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsRecommendationReason)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsRecommendationReason];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum = {
+	home_feed: "home_feed",
+	home_book: "home_book",
+	home_software: "home_software",
+	home_media: "home_media",
+	unit_related: "unit_related",
+	post_related: "post_related",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum = {
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	poll: "poll",
+	realm: "realm",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsPresentationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsPresentationAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsPresentationAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsPresentationAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsRoleEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsRoleEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsRoleEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsPostKindEnum = {
+	post: "post",
+	reply: "reply",
+	excerpt: "excerpt",
+	chapter: "chapter",
+	chapter_group: "chapter_group",
+	wiki: "wiki",
+	picture: "picture",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsPostKindEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsPostKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsPostKindEnum];
+
 /**
  * @type object
  */
@@ -81806,6 +81992,1776 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	/**
+	 * @type array
+	 */
+	contentItems: (
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				language: (("zh" | "en") | null) | null;
+				/**
+				 * @type array
+				 */
+				attributions: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'author'
+					 * @type string
+					 */
+					role: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum;
+					/**
+					 * @description
+					 * Format: `fractional-position`
+					 * @minLength 2
+					 * @maxLength 512
+					 * @type string
+					 */
+					position: string;
+					/**
+					 * @type object
+					 */
+					creditedUnit: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @default 'slug_namespace'
+						 * @type string
+						 */
+						kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						avatar:
+							| (
+									| (
+											| {
+													/**
+													 * @type string
+													 */
+													type: "image";
+													/**
+													 * @type object
+													 */
+													image: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														id: string;
+														/**
+														 * @type string
+														 */
+														url: string;
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "emoji";
+													/**
+													 * @maxLength 64
+													 * @type string
+													 */
+													emoji: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "icon";
+													/**
+													 * @type object
+													 */
+													icon: {
+														/**
+														 * @type string
+														 */
+														provider: "font-awesome";
+														/**
+														 * @type string
+														 */
+														prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+														/**
+														 * @maxLength 128
+														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+														 * @type string
+														 */
+														name: string;
+													};
+											  }
+									  )
+									| null
+							  )
+							| null;
+					};
+				}[];
+				realmId: (string | null) | null;
+				/**
+				 * @type array
+				 */
+				realms: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				title: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				updatedAt: string;
+				/**
+				 * @type object
+				 */
+				reactions: {
+					upvote: string | number;
+					downvote: string | number;
+				};
+				viewerReaction: (string | null) | null;
+				recommendationReason:
+					| (GetApiRealmsByRealmIdPinsStatus200ContentItemsRecommendationReason | null)
+					| null;
+				tracking:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							requestId: string;
+							/**
+							 * @default 'home_feed'
+							 * @type string
+							 */
+							surface: GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum;
+							position: string | number;
+							/**
+							 * @minLength 1
+							 * @maxLength 64
+							 * @pattern \S
+							 * @type string
+							 */
+							policyVersion: string;
+							/**
+							 * @minLength 43
+							 * @maxLength 43
+							 * @pattern ^[A-Za-z0-9_-]{43}$
+							 * @type string
+							 */
+							signature: string;
+					  } | null)
+					| null;
+				/**
+				 * @type string
+				 */
+				itemType: "unit";
+				/**
+				 * @default 'profile'
+				 * @type string
+				 */
+				unitKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum;
+				/**
+				 * @type null
+				 */
+				postKind: null;
+				summary: (string | null) | null;
+				cover:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				collection:
+					| ({
+							directItemCount: string | number;
+					  } | null)
+					| null;
+				presentation:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "rated-work";
+							/**
+							 * @type object
+							 */
+							scores: {
+								preferred:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+								global:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "identity";
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsPresentationAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+							banner:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "general";
+					  };
+		  }
+		| (
+				| {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						language: (("zh" | "en") | null) | null;
+						/**
+						 * @type array
+						 */
+						attributions: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'author'
+							 * @type string
+							 */
+							role: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum;
+							/**
+							 * @description
+							 * Format: `fractional-position`
+							 * @minLength 2
+							 * @maxLength 512
+							 * @type string
+							 */
+							position: string;
+							/**
+							 * @type object
+							 */
+							creditedUnit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'slug_namespace'
+								 * @type string
+								 */
+								kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+								title: (string | null) | null;
+								summary: (string | null) | null;
+								avatar:
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
+									| null;
+							};
+						}[];
+						realmId: (string | null) | null;
+						/**
+						 * @type array
+						 */
+						realms: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+							title: (string | null) | null;
+							summary: (string | null) | null;
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+						}[];
+						title: (string | null) | null;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						createdAt: string;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						updatedAt: string;
+						/**
+						 * @type object
+						 */
+						reactions: {
+							upvote: string | number;
+							downvote: string | number;
+						};
+						viewerReaction: (string | null) | null;
+						recommendationReason:
+							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsRecommendationReason | null)
+							| null;
+						tracking:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									requestId: string;
+									/**
+									 * @default 'home_feed'
+									 * @type string
+									 */
+									surface: GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum;
+									position: string | number;
+									/**
+									 * @minLength 1
+									 * @maxLength 64
+									 * @pattern \S
+									 * @type string
+									 */
+									policyVersion: string;
+									/**
+									 * @minLength 43
+									 * @maxLength 43
+									 * @pattern ^[A-Za-z0-9_-]{43}$
+									 * @type string
+									 */
+									signature: string;
+							  } | null)
+							| null;
+						/**
+						 * @type string
+						 */
+						itemType: "post";
+						/**
+						 * @type string
+						 */
+						unitKind: "post";
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+						subjectId: (string | null) | null;
+						rootPostId: (string | null) | null;
+						parentPostId: (string | null) | null;
+						body:
+							| ({
+									/**
+									 * @type string
+									 */
+									_type: "portable-text";
+									/**
+									 * @pattern ^[0-9a-f]{12}$
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type array
+									 */
+									content: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "block";
+												/**
+												 * @type array
+												 */
+												children: (
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @type string
+															 */
+															_type: "span";
+															/**
+															 * @type string
+															 */
+															text: string;
+															/**
+															 * @type array | undefined
+															 */
+															marks?: string[];
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @pattern ^(?!span$).+
+															 * @type string
+															 */
+															_type: string;
+															[key: string]: unknown;
+													  }
+												)[];
+												/**
+												 * @type array | undefined
+												 */
+												markDefs?: {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: string;
+													[key: string]: unknown;
+												}[];
+												/**
+												 * @type string | undefined
+												 */
+												listItem?: string;
+												/**
+												 * @type string | undefined
+												 */
+												style?: string;
+												/**
+												 * @minLength 1
+												 * @type integer | undefined
+												 */
+												level?: number;
+												[key: string]: unknown;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "image";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string
+												 */
+												assetId: string;
+												/**
+												 * @type string | undefined
+												 */
+												alt?: string;
+												/**
+												 * @type string | undefined
+												 */
+												caption?: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @pattern ^(?!(?:block|image)$).+
+												 * @type string
+												 */
+												_type: string;
+												[key: string]: unknown;
+										  }
+									)[];
+							  } | null)
+							| null;
+						replyCount: string | number;
+						latestRevisionId: (string | null) | null;
+						replyContext:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									rootPostId: string;
+									title: (string | null) | null;
+									/**
+									 * @type array
+									 */
+									attributions: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @default 'author'
+										 * @type string
+										 */
+										role: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsRoleEnum;
+										/**
+										 * @description
+										 * Format: `fractional-position`
+										 * @minLength 2
+										 * @maxLength 512
+										 * @type string
+										 */
+										position: string;
+										/**
+										 * @type object
+										 */
+										creditedUnit: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @default 'slug_namespace'
+											 * @type string
+											 */
+											kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum;
+											slugAddress:
+												| ({
+														/**
+														 * @minLength 1
+														 * @maxLength 63
+														 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+														 * @type string
+														 */
+														slug: string;
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														scopeUnitId: string;
+														/**
+														 * @type array
+														 */
+														canonicalPath: string[];
+												  } | null)
+												| null;
+											title: (string | null) | null;
+											summary: (string | null) | null;
+											avatar:
+												| (
+														| (
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "image";
+																		/**
+																		 * @type object
+																		 */
+																		image: {
+																			/**
+																			 * @description
+																			 * Format: `uuid`
+																			 * @type string
+																			 */
+																			id: string;
+																			/**
+																			 * @type string
+																			 */
+																			url: string;
+																		};
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "emoji";
+																		/**
+																		 * @maxLength 64
+																		 * @type string
+																		 */
+																		emoji: string;
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "icon";
+																		/**
+																		 * @type object
+																		 */
+																		icon: {
+																			/**
+																			 * @type string
+																			 */
+																			provider: "font-awesome";
+																			/**
+																			 * @type string
+																			 */
+																			prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			/**
+																			 * @maxLength 128
+																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																			 * @type string
+																			 */
+																			name: string;
+																		};
+																  }
+														  )
+														| null
+												  )
+												| null;
+										};
+									}[];
+									subjectId: (string | null) | null;
+							  } | null)
+							| null;
+						subject:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									type: string;
+									title: (string | null) | null;
+									summary: (string | null) | null;
+									cover:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+										  } | null)
+										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
+							  } | null)
+							| null;
+						/**
+						 * @default 'post'
+						 * @type string
+						 */
+						postKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsPostKindEnum;
+				  }
+				| {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						language: (("zh" | "en") | null) | null;
+						/**
+						 * @type array
+						 */
+						attributions: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'author'
+							 * @type string
+							 */
+							role: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum;
+							/**
+							 * @description
+							 * Format: `fractional-position`
+							 * @minLength 2
+							 * @maxLength 512
+							 * @type string
+							 */
+							position: string;
+							/**
+							 * @type object
+							 */
+							creditedUnit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'slug_namespace'
+								 * @type string
+								 */
+								kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+								title: (string | null) | null;
+								summary: (string | null) | null;
+								avatar:
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
+									| null;
+							};
+						}[];
+						realmId: (string | null) | null;
+						/**
+						 * @type array
+						 */
+						realms: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+							title: (string | null) | null;
+							summary: (string | null) | null;
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+						}[];
+						title: (string | null) | null;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						createdAt: string;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						updatedAt: string;
+						/**
+						 * @type object
+						 */
+						reactions: {
+							upvote: string | number;
+							downvote: string | number;
+						};
+						viewerReaction: (string | null) | null;
+						recommendationReason:
+							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsRecommendationReason | null)
+							| null;
+						tracking:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									requestId: string;
+									/**
+									 * @default 'home_feed'
+									 * @type string
+									 */
+									surface: GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum;
+									position: string | number;
+									/**
+									 * @minLength 1
+									 * @maxLength 64
+									 * @pattern \S
+									 * @type string
+									 */
+									policyVersion: string;
+									/**
+									 * @minLength 43
+									 * @maxLength 43
+									 * @pattern ^[A-Za-z0-9_-]{43}$
+									 * @type string
+									 */
+									signature: string;
+							  } | null)
+							| null;
+						/**
+						 * @type string
+						 */
+						itemType: "post";
+						/**
+						 * @type string
+						 */
+						unitKind: "post";
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+						subjectId: (string | null) | null;
+						rootPostId: (string | null) | null;
+						parentPostId: (string | null) | null;
+						body:
+							| ({
+									/**
+									 * @type string
+									 */
+									_type: "portable-text";
+									/**
+									 * @pattern ^[0-9a-f]{12}$
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type array
+									 */
+									content: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "block";
+												/**
+												 * @type array
+												 */
+												children: (
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @type string
+															 */
+															_type: "span";
+															/**
+															 * @type string
+															 */
+															text: string;
+															/**
+															 * @type array | undefined
+															 */
+															marks?: string[];
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @pattern ^(?!span$).+
+															 * @type string
+															 */
+															_type: string;
+															[key: string]: unknown;
+													  }
+												)[];
+												/**
+												 * @type array | undefined
+												 */
+												markDefs?: {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: string;
+													[key: string]: unknown;
+												}[];
+												/**
+												 * @type string | undefined
+												 */
+												listItem?: string;
+												/**
+												 * @type string | undefined
+												 */
+												style?: string;
+												/**
+												 * @minLength 1
+												 * @type integer | undefined
+												 */
+												level?: number;
+												[key: string]: unknown;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "image";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string
+												 */
+												assetId: string;
+												/**
+												 * @type string | undefined
+												 */
+												alt?: string;
+												/**
+												 * @type string | undefined
+												 */
+												caption?: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @pattern ^(?!(?:block|image)$).+
+												 * @type string
+												 */
+												_type: string;
+												[key: string]: unknown;
+										  }
+									)[];
+							  } | null)
+							| null;
+						replyCount: string | number;
+						latestRevisionId: (string | null) | null;
+						replyContext:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									rootPostId: string;
+									title: (string | null) | null;
+									/**
+									 * @type array
+									 */
+									attributions: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @default 'author'
+										 * @type string
+										 */
+										role: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsRoleEnum;
+										/**
+										 * @description
+										 * Format: `fractional-position`
+										 * @minLength 2
+										 * @maxLength 512
+										 * @type string
+										 */
+										position: string;
+										/**
+										 * @type object
+										 */
+										creditedUnit: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @default 'slug_namespace'
+											 * @type string
+											 */
+											kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum;
+											slugAddress:
+												| ({
+														/**
+														 * @minLength 1
+														 * @maxLength 63
+														 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+														 * @type string
+														 */
+														slug: string;
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														scopeUnitId: string;
+														/**
+														 * @type array
+														 */
+														canonicalPath: string[];
+												  } | null)
+												| null;
+											title: (string | null) | null;
+											summary: (string | null) | null;
+											avatar:
+												| (
+														| (
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "image";
+																		/**
+																		 * @type object
+																		 */
+																		image: {
+																			/**
+																			 * @description
+																			 * Format: `uuid`
+																			 * @type string
+																			 */
+																			id: string;
+																			/**
+																			 * @type string
+																			 */
+																			url: string;
+																		};
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "emoji";
+																		/**
+																		 * @maxLength 64
+																		 * @type string
+																		 */
+																		emoji: string;
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "icon";
+																		/**
+																		 * @type object
+																		 */
+																		icon: {
+																			/**
+																			 * @type string
+																			 */
+																			provider: "font-awesome";
+																			/**
+																			 * @type string
+																			 */
+																			prefix: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			/**
+																			 * @maxLength 128
+																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																			 * @type string
+																			 */
+																			name: string;
+																		};
+																  }
+														  )
+														| null
+												  )
+												| null;
+										};
+									}[];
+									subjectId: (string | null) | null;
+							  } | null)
+							| null;
+						subject:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									type: string;
+									title: (string | null) | null;
+									summary: (string | null) | null;
+									cover:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+										  } | null)
+										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
+							  } | null)
+							| null;
+						/**
+						 * @type string
+						 */
+						postKind: "review";
+						/**
+						 * @type array
+						 */
+						scores: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							scoreId: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							contextUnitId: string;
+							value: string | number;
+						}[];
+				  }
+		  )
+	)[];
 };
 
 /**

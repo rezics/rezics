@@ -53,6 +53,8 @@ export default {
 	pins: "置頂內容",
 	pinnedContent: "置頂內容",
 	pinnedContentEmpty: "目前沒有置頂內容。",
+	pinnedCarouselPrevious: "上一則置頂內容",
+	pinnedCarouselNext: "下一則置頂內容",
 	pinPosition: "位置",
 	members: "成員",
 	unknownMember: "未知成員",

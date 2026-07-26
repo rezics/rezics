@@ -70,6 +70,8 @@ export default {
 	pins: "Pinned content",
 	pinnedContent: "Pinned content",
 	pinnedContentEmpty: "No pinned content yet.",
+	pinnedCarouselPrevious: "Previous pinned content",
+	pinnedCarouselNext: "Next pinned content",
 	pinPosition: "Position",
 	members: "Members",
 	unknownMember: "Unknown member",

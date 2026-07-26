@@ -10,16 +10,15 @@ import {
 	useGetApiRealmsByRealmIdRules,
 	usePostApiRealms,
 	usePutApiRealmsByRealmIdMembership,
+	type GetApiRealmsByRealmIdPinsStatus200,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { PinIcon, ShieldCheckIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
 import { Banner, PageHeading } from "@rezics/ui";
-import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Badge } from "@rezics/ui";
@@ -44,14 +43,18 @@ import {
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
 import { PostList } from "@/features/posts/post-list";
+import { postHref } from "@/features/posts/url";
+import { tagDetailHref } from "@/features/tags/routing/tag-links";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
 import { useTranslation } from "@/i18n/client";
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
-import { readPortableText } from "@/lib/block";
 import { RequestFailure } from "@/i18n/request-failure";
+import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
+import { RealmPinnedContentSection } from "./components/realm-pinned-content-section";
+import { RealmRulesCard } from "./components/realm-rules-card";
 
 export function RealmsPage() {
 	const { t, locale } = useTranslation([
@@ -338,82 +341,85 @@ export function RealmDetailPage({ id }: { id: string }) {
 			</header>
 
 			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
-				<Card className="min-w-0 gap-0 overflow-hidden py-0">
-					<div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-5">
-						<div>
-							<h2 className="font-serif font-semibold text-2xl">{t.realms.feed}</h2>
-							<p className="mt-1 text-muted-foreground text-sm">{t.feed.trending}</p>
-						</div>
-						{canPost ? (
-							<Button variant="solid" asChild size="sm">
-								<Link href={`/posts/new?realmId=${realm.id}`}>
-									{t.posts.create}
-								</Link>
-							</Button>
-						) : null}
-					</div>
-					<PostList realmId={realm.id} />
-				</Card>
+				<div className="grid min-w-0 gap-5">
+					<RealmPinnedContentSection
+						emptyLabel={t.realms.pinnedContentEmpty}
+						nextLabel={t.realms.pinnedCarouselNext}
+						previousLabel={t.realms.pinnedCarouselPrevious}
+						state={
+							pins.isError
+								? {
+										status: "error",
+										feedback: <RequestFailure error={pins.error} />,
+									}
+								: pins.data
+									? {
+											status: "ready",
+											items: pins.data.contentItems.map((item) => ({
+												id: item.id,
+												body:
+													item.itemType === "post"
+														? item.body
+														: undefined,
+												href: realmPinnedContentHref(item, realm.id),
+												imageUrl: item.cover?.url,
+												summary: item.summary,
+												title: item.title,
+											})),
+										}
+									: { status: "loading" }
+						}
+						title={t.realms.pins}
+						untitledLabel={t.ui.unnamed}
+					/>
 
-				<aside className="grid min-w-0 gap-5 lg:sticky lg:top-20">
+					<Card className="min-w-0 gap-0 overflow-hidden py-0">
+						<div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-5">
+							<div>
+								<h2 className="font-serif font-semibold text-2xl">
+									{t.realms.feed}
+								</h2>
+								<p className="mt-1 text-muted-foreground text-sm">
+									{t.feed.trending}
+								</p>
+							</div>
+							{canPost ? (
+								<Button variant="solid" asChild size="sm">
+									<Link href={`/posts/new?realmId=${realm.id}`}>
+										{t.posts.create}
+									</Link>
+								</Button>
+							) : null}
+						</div>
+						<PostList realmId={realm.id} />
+					</Card>
+				</div>
+
+				<aside className="grid min-w-0 max-w-full gap-5 overflow-hidden lg:sticky lg:top-20">
 					{rules.isError ? (
 						<RequestFailure error={rules.error} />
 					) : rules.data?.items.length ? (
-						<Card className="min-w-0">
-							<CardContent className="grid gap-4 px-5">
-								<div className="flex items-center justify-between gap-3">
-									<h2 className="font-serif font-semibold text-lg">
-										{t.realms.rules}
-									</h2>
-									<ShieldCheckIcon aria-hidden className="size-4 text-brand" />
-								</div>
-								{rules.data.items.map((rule, index) => (
-									<section
-										className="grid gap-1.5 border-t pt-3 first:border-t-0 first:pt-0"
-										key={rule.id}
-									>
-										<h3 className="font-medium text-sm">
-											{index + 1}. {rule.title}
-										</h3>
-										<PortableTextContent
-											value={readPortableText(rule.content)}
-											variant="compact"
-										/>
-									</section>
-								))}
-							</CardContent>
-						</Card>
-					) : null}
-
-					{pins.isError ? (
-						<RequestFailure error={pins.error} />
-					) : pins.data?.items.length ? (
-						<Card className="min-w-0">
-							<CardContent className="grid gap-3 px-5">
-								<div className="flex items-center justify-between gap-3">
-									<h2 className="font-serif font-semibold text-lg">
-										{t.realms.pins}
-									</h2>
-									<PinIcon aria-hidden className="size-4 text-brand" />
-								</div>
-								{pins.data.items.map((pin) => (
-									<div
-										className="border-t pt-3 text-sm first:border-t-0 first:pt-0"
-										key={pin.unitId}
-									>
-										<p className="font-medium">{t.realms.pinnedContent}</p>
-										<p className="mt-1 text-muted-foreground text-xs">
-											{t.realms.pinPosition}: {pin.position}
-										</p>
-									</div>
-								))}
-							</CardContent>
-						</Card>
+						<RealmRulesCard rules={rules.data.items} title={t.realms.rules} />
 					) : null}
 				</aside>
 			</div>
 		</main>
 	);
+}
+
+function realmPinnedContentHref(
+	item: GetApiRealmsByRealmIdPinsStatus200["contentItems"][number],
+	realmId: string,
+): string | undefined {
+	if (item.itemType === "post") {
+		if (item.postKind === "post" || item.postKind === "reply") {
+			return postHref(item.id, realmId);
+		}
+		if (item.postKind === "review") return `/reviews/${item.id}`;
+		return undefined;
+	}
+	if (item.unitKind === "tag") return tagDetailHref(item.id);
+	return publicUnitHref(item.unitKind, item);
 }
 
 function RealmActions({
