@@ -115,6 +115,38 @@ const excerpt = {
 	},
 } satisfies FeedPost;
 
+const review = {
+	...excerpt,
+	id: "019f9872-bd49-7bb4-a6b7-ec621fca2035",
+	postKind: "review",
+	title: "A scored review",
+	body: null,
+	subject: {
+		...excerpt.subject,
+		scores: {
+			preferred: {
+				contextUnitId: "019f9872-bd49-7bb4-a6b7-ec621fca2036",
+				contextTitle: "我的讀書會",
+				totalScore: 18,
+				totalCount: 2,
+			},
+			global: {
+				contextUnitId: "019b76da-a800-7300-8000-000000000002",
+				contextTitle: "全域評分",
+				totalScore: 86,
+				totalCount: 10,
+			},
+		},
+	},
+	scores: [
+		{
+			scoreId: "019f9872-bd49-7bb4-a6b7-ec621fca2037",
+			contextUnitId: "019f9872-bd49-7bb4-a6b7-ec621fca2038",
+			value: 7,
+		},
+	],
+} satisfies FeedPost;
+
 describe("FeedPostCard", () => {
 	it("renders an Excerpt source as an internal Unit link without a duplicate target card", () => {
 		const { container } = render(
@@ -130,6 +162,41 @@ describe("FeedPostCard", () => {
 			within(source).getByRole("link", { name: "Glorious Exploits" }).getAttribute("href"),
 		).toBe(`/units/book/${excerpt.subject.id}`);
 		expect(container.querySelector('[data-slot="feed-card-target"]')).toBeNull();
+	});
+
+	it("renders the Post-attached Score in the subject card before aggregates", () => {
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedPostCard post={review} />
+			</TranslationProvider>,
+		);
+
+		expect(screen.getAllByText("7／10")).toHaveLength(1);
+		expect(screen.queryByText("我的讀書會")).toBeNull();
+		expect(screen.queryByText("9.0／10 · 2 人評分")).toBeNull();
+	});
+
+	it("falls back to the subject global aggregate without an attached Score", () => {
+		const reviewWithoutAttachedScore = {
+			...review,
+			scores: [],
+			subject: {
+				...review.subject,
+				scores: {
+					preferred: null,
+					global: review.subject.scores.global,
+				},
+			},
+		} satisfies FeedPost;
+
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedPostCard post={reviewWithoutAttachedScore} />
+			</TranslationProvider>,
+		);
+
+		expect(screen.getByText("全域評分")).toBeTruthy();
+		expect(screen.getByText("8.6／10 · 10 人評分")).toBeTruthy();
 	});
 });
 

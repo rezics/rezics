@@ -107,7 +107,7 @@ export function PostFeedCard() {
 				imageAlt={fixture.collection.coverAlt}
 				imageUrl={FeedFixtureAssetUrls[fixture.collection.coverAsset]}
 				label={feed.relatedWork}
-				score={fixture.collection.score}
+				rating={{ kind: "aggregate", score: fixture.collection.score }}
 				title={fixture.collection.title}
 			/>
 			<FixtureActionBar

@@ -25,6 +25,7 @@ import {
 	RealmInfoCard,
 	type RealmInfoCardData,
 } from "@/features/realms/components/realm-info-card";
+import type { UnitScore } from "@/features/reviews/model/score-value";
 import { isKnownAttributionRole } from "@/features/units/attribution-role";
 import { useTranslation } from "@/i18n/client";
 import { useFineHover } from "../hooks/use-fine-hover";
@@ -51,6 +52,16 @@ export interface FeedTargetScore {
 	readonly totalScore: number;
 	readonly totalCount: number;
 }
+
+export type FeedTargetRating =
+	| {
+			readonly kind: "attached";
+			readonly value: UnitScore;
+	  }
+	| {
+			readonly kind: "aggregate";
+			readonly score: FeedTargetScore | null;
+	  };
 
 export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 	return (
@@ -195,7 +206,7 @@ export function FeedCardTarget({
 	imageUrl,
 	imageAlt = "",
 	imageFallback = <BookOpenIcon aria-hidden />,
-	score,
+	rating,
 }: {
 	href: string;
 	label: string;
@@ -204,7 +215,7 @@ export function FeedCardTarget({
 	imageUrl?: string;
 	imageAlt?: string;
 	imageFallback?: ReactNode;
-	score?: FeedTargetScore | null;
+	rating?: FeedTargetRating;
 }) {
 	return (
 		<CardContent className="px-4 pt-3 sm:px-5" data-slot="feed-card-target">
@@ -225,7 +236,7 @@ export function FeedCardTarget({
 								{description}
 							</ItemDescription>
 						) : null}
-						{score !== undefined ? <FeedCardRating score={score} /> : null}
+						{rating ? <FeedCardRating rating={rating} /> : null}
 					</ItemContent>
 					<ChevronRightIcon aria-hidden className="text-muted-foreground" />
 				</a>
@@ -236,12 +247,25 @@ export function FeedCardTarget({
 
 export function FeedCardRating({
 	className,
-	score,
+	rating,
 }: {
 	readonly className?: string;
-	readonly score: FeedTargetScore | null;
+	readonly rating: FeedTargetRating;
 }) {
-	const { locale, t } = useTranslation(["feed"]);
+	const { locale, t } = useTranslation(["engagement", "feed"]);
+	if (rating.kind === "attached")
+		return (
+			<p
+				className={cn("mt-1 flex items-center gap-1.5 text-xs", className)}
+				data-slot="feed-card-rating"
+			>
+				<StarIcon aria-hidden className="size-3.5 fill-warning text-warning" />
+				<span className="font-semibold tabular-nums text-foreground">
+					{t.engagement.scoreOutOfTen({ score: String(rating.value) })}
+				</span>
+			</p>
+		);
+	const { score } = rating;
 	if (!score)
 		return (
 			<p

@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 
 import { CardContent, cn, Cover, IdentityAvatar, PortableTextContent } from "@rezics/ui";
 import { postHref } from "@/features/posts/url";
+import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
 import { realmHref } from "@/features/slugs/unit-route";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
@@ -28,6 +29,7 @@ import {
 	FeedCardTarget,
 	type FeedAttributionContext,
 	type FeedRealmContext,
+	type FeedTargetRating,
 	type FeedTargetScore,
 } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
@@ -89,7 +91,7 @@ export function FeedPostCard({
 	position?: number;
 	setSize?: number;
 }) {
-	const { t, locale } = useTranslation(["actions", "engagement", "feed", "posts", "state", "ui"]);
+	const { t, locale } = useTranslation(["actions", "feed", "posts", "state", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
@@ -105,6 +107,20 @@ export function FeedPostCard({
 	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
 	const attributions = toFeedAttributionContexts(post.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
+	const attachedScore = post.postKind === "review" ? post.scores[0] : undefined;
+	const attachedScoreValue = attachedScore ? apiValueToUnitScore(attachedScore.value) : undefined;
+	const subjectRating: FeedTargetRating | undefined =
+		post.subject && isRatedWorkKind(post.subject.type)
+			? attachedScoreValue
+				? { kind: "attached", value: attachedScoreValue }
+				: {
+						kind: "aggregate",
+						score: toFeedTargetScore(
+							selectFeedRating(post.subject.scores),
+							t.ui.unnamed,
+						),
+					}
+			: undefined;
 
 	return (
 		<FeedCard
@@ -130,15 +146,6 @@ export function FeedPostCard({
 				<p className="font-semibold text-brand text-xs">
 					{t.feed.content.kinds[`post:${post.postKind}`]}
 				</p>
-				{post.postKind === "review" && post.scores.length ? (
-					<p className="font-medium text-sm">
-						{post.scores
-							.map(({ value }) =>
-								t.engagement.scoreOutOfTen({ score: String(value) }),
-							)
-							.join(" · ")}
-					</p>
-				) : null}
 				{post.replyContext ? (
 					<Link
 						className="flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
@@ -188,18 +195,11 @@ export function FeedPostCard({
 				<FeedCardTarget
 					{...(post.subject.summary ? { description: post.subject.summary } : {})}
 					{...(post.subject.cover ? { imageUrl: post.subject.cover.url } : {})}
-					{...(isRatedWorkKind(post.subject.type)
-						? {
-								score: toFeedTargetScore(
-									selectFeedRating(post.subject.scores),
-									t.ui.unnamed,
-								),
-							}
-						: {})}
 					href={subjectHref}
 					imageAlt={post.subject.title ?? t.actions.view}
 					imageFallback={<FeedUnitCoverFallback kind={post.subject.type} />}
 					label={t.feed.relatedWork}
+					rating={subjectRating}
 					title={post.subject.title ?? t.actions.view}
 				/>
 			) : null}
@@ -230,9 +230,15 @@ export function FeedUnitCard({
 	const title = unit.title ?? t.ui.unnamed;
 	const attributions = toFeedAttributionContexts(unit.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(unit.realms, t.ui.unnamed);
-	const score =
+	const rating: FeedTargetRating | undefined =
 		unit.presentation.kind === "rated-work"
-			? toFeedTargetScore(selectFeedRating(unit.presentation.scores), t.ui.unnamed)
+			? {
+					kind: "aggregate",
+					score: toFeedTargetScore(
+						selectFeedRating(unit.presentation.scores),
+						t.ui.unnamed,
+					),
+				}
 			: undefined;
 	const identityPresentation = unit.presentation.kind === "identity" ? unit.presentation : null;
 
@@ -295,7 +301,7 @@ export function FeedUnitCard({
 						>
 							{title}
 						</h2>
-						{score !== undefined ? <FeedCardRating score={score} /> : null}
+						{rating ? <FeedCardRating rating={rating} /> : null}
 						{unit.summary ? (
 							<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
 								{unit.summary}

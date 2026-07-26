@@ -40,7 +40,10 @@ vi.stubGlobal("matchMedia", (query: string) => ({
 	dispatchEvent: vi.fn(),
 }));
 
-const translation = await create(resources).getTranslation(["feed", "posts", "units"], ["zh-Hant"]);
+const translation = await create(resources).getTranslation(
+	["engagement", "feed", "posts", "units"],
+	["zh-Hant"],
+);
 
 afterEach(cleanup);
 
@@ -145,11 +148,14 @@ describe("FeedCardTarget", () => {
 					imageAlt="書籍封面"
 					imageUrl="/cover.jpg"
 					label="討論關聯作品"
-					score={{
-						contextLabel: "讀書會",
-						contextUnitId: "realm-1",
-						totalScore: 184,
-						totalCount: 40,
+					rating={{
+						kind: "aggregate",
+						score: {
+							contextLabel: "讀書會",
+							contextUnitId: "realm-1",
+							totalScore: 184,
+							totalCount: 40,
+						},
 					}}
 					title="測試書籍"
 				/>
@@ -177,7 +183,7 @@ describe("FeedCardTarget", () => {
 				<FeedCardTarget
 					href="/units/media/media-1"
 					label="討論關聯作品"
-					score={null}
+					rating={{ kind: "aggregate", score: null }}
 					title="尚無素材的作品"
 				/>
 			</TranslationProvider>,
