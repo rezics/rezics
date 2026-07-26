@@ -1014,7 +1014,7 @@ export async function hydrateFeedItems(
 						subject.id,
 						{
 							...subject,
-							cover: presentImageAsset(coverAssetId),
+							cover: presentImageAsset(coverAssetId, "cover"),
 						},
 					] as const,
 			),
@@ -1120,7 +1120,7 @@ export async function hydrateFeedItems(
 				itemType: "unit" as const,
 				postKind: null,
 				summary: row.summary,
-				cover: presentImageAsset(row.coverAssetId),
+				cover: presentImageAsset(row.coverAssetId, "cover"),
 				collection:
 					row.unitKind === "collection"
 						? {
@@ -1147,7 +1147,7 @@ export async function hydrateFeedItems(
 						presentation: {
 							kind: "identity",
 							avatar: presentAvatar(row.avatar),
-							banner: presentImageAsset(row.bannerAssetId),
+							banner: presentImageAsset(row.bannerAssetId, "banner"),
 						},
 					},
 				];
@@ -1167,7 +1167,7 @@ export async function hydrateFeedItems(
 			itemType: "post" as const,
 			unitKind: "post" as const,
 			summary: row.summary,
-			cover: presentImageAsset(row.coverAssetId),
+			cover: presentImageAsset(row.coverAssetId, "cover"),
 			subjectId: row.subjectId,
 			rootPostId: row.rootPostId,
 			parentPostId: row.parentPostId,

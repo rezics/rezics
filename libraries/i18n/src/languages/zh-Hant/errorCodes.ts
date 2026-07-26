@@ -168,6 +168,7 @@ export default {
 	ImageAssetInvalidSize: "圖片大小無效。",
 	ImageAssetContentMismatch: "圖片內容與上傳宣告不一致。",
 	ImageAssetInvalidState: "圖片資源目前的狀態不允許這項操作。",
+	ImageAssetInvalidPresentation: "這張圖片的顯示範圍不符合指定用途。",
 	ImageAssetInUse: "正在使用的圖片資源不能刪除。",
 	UnitPrimaryLanguageMissing: "主要語言必須對應一個已有的在地化版本。",
 	InvalidSlug: `${unitSlugTerms.label}必須是 1 至 63 個字元的小寫 ${verbatimTerms.ascii.value} 短橫線標籤。`,

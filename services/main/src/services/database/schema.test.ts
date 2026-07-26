@@ -71,6 +71,10 @@ import {
 	unitRevisionSlot,
 	unitStatusEvent,
 	unitVariant,
+	imageAssetPresentation,
+	imageObject,
+	ImageAssetPresentationFitValues,
+	ImageAssetPresentationRoleValues,
 	UnitRevisionSlotRoleValues,
 	UnitStatusActorKindValues,
 	PlatformCapabilityValues,
@@ -85,6 +89,27 @@ describe("database schema contracts", () => {
 	it("uses PostgreSQL uuidv7 for generated identifiers", () => {
 		expect(dialect.sqlToQuery(unit.id.default as SQL).sql).toBe("uuidv7()");
 		expect(dialect.sqlToQuery(sharedSearchQuery.id.default as SQL).sql).toBe("uuidv7()");
+	});
+
+	it("stores provider-neutral ImageAsset presentations with bounded crop contracts", () => {
+		expect(imageAssetPresentation.role.enumValues).toEqual(ImageAssetPresentationRoleValues);
+		expect(imageAssetPresentation.fit.enumValues).toEqual(ImageAssetPresentationFitValues);
+		const presentation = getTableConfig(imageAssetPresentation);
+		expect(presentation.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"asset_id",
+			"role",
+		]);
+		expect(presentation.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"image_asset_presentation_shape_check",
+				"image_asset_presentation_crop_bounds_check",
+				"image_asset_presentation_revision_check",
+			]),
+		);
+		const object = getTableConfig(imageObject);
+		expect(object.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining(["width", "height"]),
+		);
 	});
 
 	it("keeps Follow generic across Units while preventing self-follow", () => {

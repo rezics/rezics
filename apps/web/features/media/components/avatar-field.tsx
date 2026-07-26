@@ -104,11 +104,12 @@ export function AvatarField({
 							displayed ? t.media.avatarPicker.edit : t.media.avatarPicker.setup
 						}
 						className={cn(
-							"group/avatar-field relative size-28 overflow-hidden rounded-full p-0",
+							"group/avatar-field relative size-28 overflow-hidden p-0",
 							displayed
 								? "border-transparent bg-transparent"
 								: "border-2 border-dashed bg-muted/30",
 						)}
+						pill
 						type="button"
 						variant="outline"
 					>
@@ -244,10 +245,10 @@ export function AvatarField({
 								allowRemove={false}
 								fallback={imageFallback}
 								onChange={(asset) => {
-									if (asset) select({ type: "image", image: asset });
+									if (asset) onChange({ type: "image", image: asset });
 								}}
+								onPresentationSaved={() => setOpen(false)}
 								role="avatar"
-								shape="avatar"
 								value={imageValue}
 							/>
 						</TabsContent>

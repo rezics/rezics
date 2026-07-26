@@ -37,6 +37,14 @@ export class ImageAssetInvalidState extends Data.TaggedError("ImageAssetInvalidS
 	readonly message = "Image asset state does not allow this operation";
 }
 
+export class ImageAssetInvalidPresentation extends Data.TaggedError(
+	"ImageAssetInvalidPresentation",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = ImageAssetInvalidPresentation.status;
+	readonly message = "Image presentation is invalid for this asset and role";
+}
+
 export class ImageAssetInUse extends Data.TaggedError("ImageAssetInUse") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = ImageAssetInUse.status;
@@ -50,5 +58,6 @@ export const ImageAssetErrors = [
 	ImageAssetInvalidSize,
 	ImageAssetContentMismatch,
 	ImageAssetInvalidState,
+	ImageAssetInvalidPresentation,
 	ImageAssetInUse,
 ] as const;

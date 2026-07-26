@@ -4857,6 +4857,7 @@ export const ApiErrorCode = {
 	ImageAssetInvalidSize: "ImageAssetInvalidSize",
 	ImageAssetContentMismatch: "ImageAssetContentMismatch",
 	ImageAssetInvalidState: "ImageAssetInvalidState",
+	ImageAssetInvalidPresentation: "ImageAssetInvalidPresentation",
 	ImageAssetInUse: "ImageAssetInUse",
 	ApiTokenNotFound: "ApiTokenNotFound",
 	ApiTokenPolicyInvalid: "ApiTokenPolicyInvalid",
@@ -5059,6 +5060,104 @@ export type InternalError = {
 	 */
 	requestId: string;
 };
+
+export const GetImageAssetsByIdPresentationsByRoleContentRole = {
+	avatar: "avatar",
+	banner: "banner",
+	cover: "cover",
+} as const;
+
+export type GetImageAssetsByIdPresentationsByRoleContentRole =
+	(typeof GetImageAssetsByIdPresentationsByRoleContentRole)[keyof typeof GetImageAssetsByIdPresentationsByRoleContentRole];
+
+/**
+ * @type object
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @default 'avatar'
+	 * @type string
+	 */
+	role: GetImageAssetsByIdPresentationsByRoleContentRole;
+};
+
+/**
+ * @type void
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentStatus302 = void;
+
+/**
+ * @type object
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ImageAssetNotFound'
+		 * @type string
+		 */
+		code: "ImageAssetNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentOptions = {
+	body?: never;
+	path: GetImageAssetsByIdPresentationsByRoleContentPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentResponses = {
+	"302": GetImageAssetsByIdPresentationsByRoleContentStatus302;
+	"404": GetImageAssetsByIdPresentationsByRoleContentStatus404;
+	"422": GetImageAssetsByIdPresentationsByRoleContentStatus422;
+	"500": GetImageAssetsByIdPresentationsByRoleContentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetImageAssetsByIdPresentationsByRoleContentResponse =
+	| GetImageAssetsByIdPresentationsByRoleContentStatus302
+	| GetImageAssetsByIdPresentationsByRoleContentStatus404
+	| GetImageAssetsByIdPresentationsByRoleContentStatus422
+	| GetImageAssetsByIdPresentationsByRoleContentStatus500;
 
 /**
  * @type object
@@ -62488,6 +62587,13 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 		 * @type string
 		 */
 		position: string;
+		/**
+		 * @type object
+		 */
+		contentMetrics: {
+			wordCount: string | number;
+			characterCount: string | number;
+		};
 	}[];
 };
 
@@ -62643,6 +62749,13 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
 		 * @type string
 		 */
 		position: string;
+		/**
+		 * @type object
+		 */
+		contentMetrics: {
+			wordCount: string | number;
+			characterCount: string | number;
+		};
 	}[];
 };
 
@@ -102595,6 +102708,24 @@ export type PostApiSearchByIndexResponse =
 	| PostApiSearchByIndexStatus500
 	| PostApiSearchByIndexStatus503;
 
+export const PostApiImageAssetsStatus200StatusEnum = {
+	pending: "pending",
+	ready: "ready",
+	failed: "failed",
+} as const;
+
+export type PostApiImageAssetsStatus200StatusEnum =
+	(typeof PostApiImageAssetsStatus200StatusEnum)[keyof typeof PostApiImageAssetsStatus200StatusEnum];
+
+export const PostApiImageAssetsStatus200PresentationsRoleEnum = {
+	avatar: "avatar",
+	banner: "banner",
+	cover: "cover",
+} as const;
+
+export type PostApiImageAssetsStatus200PresentationsRoleEnum =
+	(typeof PostApiImageAssetsStatus200PresentationsRoleEnum)[keyof typeof PostApiImageAssetsStatus200PresentationsRoleEnum];
+
 export type PostApiImageAssetsStatus200 = {
 	/**
 	 * @description
@@ -102602,14 +102733,62 @@ export type PostApiImageAssetsStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	status: "pending" | "ready" | "failed";
+	/**
+	 * @default 'pending'
+	 * @type string
+	 */
+	status: PostApiImageAssetsStatus200StatusEnum;
 	access: "private" | "public";
 	contentType: (string | null) | null;
 	size: ((string | number) | null) | null;
+	width: ((string | number) | null) | null;
+	height: ((string | number) | null) | null;
 	/**
 	 * @type string
 	 */
 	contentUrl: string;
+	/**
+	 * @type array
+	 */
+	presentations: {
+		/**
+		 * @default 'avatar'
+		 * @type string
+		 */
+		role: PostApiImageAssetsStatus200PresentationsRoleEnum;
+		fit: "crop" | "contain";
+		crop:
+			| ({
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number
+					 */
+					x: number;
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number
+					 */
+					y: number;
+					/**
+					 * @maxLength 1
+					 * @type number
+					 */
+					width: number;
+					/**
+					 * @maxLength 1
+					 * @type number
+					 */
+					height: number;
+			  } | null)
+			| null;
+		revision: string | number;
+		/**
+		 * @type string
+		 */
+		contentUrl: string;
+	}[];
 	createdAt: void | string | string | number;
 	updatedAt: void | string | string | number;
 } & {
@@ -102815,6 +102994,23 @@ export const PostApiImageAssetsByIdCompleteStatus200AccessEnum = {
 export type PostApiImageAssetsByIdCompleteStatus200AccessEnum =
 	(typeof PostApiImageAssetsByIdCompleteStatus200AccessEnum)[keyof typeof PostApiImageAssetsByIdCompleteStatus200AccessEnum];
 
+export const PostApiImageAssetsByIdCompleteStatus200PresentationsRoleEnum = {
+	avatar: "avatar",
+	banner: "banner",
+	cover: "cover",
+} as const;
+
+export type PostApiImageAssetsByIdCompleteStatus200PresentationsRoleEnum =
+	(typeof PostApiImageAssetsByIdCompleteStatus200PresentationsRoleEnum)[keyof typeof PostApiImageAssetsByIdCompleteStatus200PresentationsRoleEnum];
+
+export const PostApiImageAssetsByIdCompleteStatus200PresentationsFitEnum = {
+	crop: "crop",
+	contain: "contain",
+} as const;
+
+export type PostApiImageAssetsByIdCompleteStatus200PresentationsFitEnum =
+	(typeof PostApiImageAssetsByIdCompleteStatus200PresentationsFitEnum)[keyof typeof PostApiImageAssetsByIdCompleteStatus200PresentationsFitEnum];
+
 /**
  * @type object
  */
@@ -102826,6 +103022,7 @@ export type PostApiImageAssetsByIdCompleteStatus200 = {
 	 */
 	id: string;
 	/**
+	 * @default 'pending'
 	 * @type string
 	 */
 	status: PostApiImageAssetsByIdCompleteStatus200StatusEnum;
@@ -102835,13 +103032,65 @@ export type PostApiImageAssetsByIdCompleteStatus200 = {
 	access: PostApiImageAssetsByIdCompleteStatus200AccessEnum;
 	contentType: (string | null) | null;
 	size: ((string | number) | null) | null;
+	width: ((string | number) | null) | null;
+	height: ((string | number) | null) | null;
 	/**
 	 * @type string
 	 */
 	contentUrl: string;
+	/**
+	 * @type array
+	 */
+	presentations: {
+		/**
+		 * @default 'avatar'
+		 * @type string
+		 */
+		role: PostApiImageAssetsByIdCompleteStatus200PresentationsRoleEnum;
+		/**
+		 * @type string
+		 */
+		fit: PostApiImageAssetsByIdCompleteStatus200PresentationsFitEnum;
+		crop:
+			| ({
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number
+					 */
+					x: number;
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number
+					 */
+					y: number;
+					/**
+					 * @maxLength 1
+					 * @type number
+					 */
+					width: number;
+					/**
+					 * @maxLength 1
+					 * @type number
+					 */
+					height: number;
+			  } | null)
+			| null;
+		revision: string | number;
+		/**
+		 * @type string
+		 */
+		contentUrl: string;
+	}[];
 	createdAt: void | string | string | number;
 	updatedAt: void | string | string | number;
 };
+
+/**
+ * @type object
+ */
+export type PostApiImageAssetsByIdCompleteStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -102999,11 +103248,31 @@ export type PostApiImageAssetsByIdCompleteStatus429 = {
  */
 export type PostApiImageAssetsByIdCompleteStatus500 = InternalError;
 
+export const PostApiImageAssetsByIdCompleteRequestRoleEnum = {
+	avatar: "avatar",
+	banner: "banner",
+	cover: "cover",
+} as const;
+
+export type PostApiImageAssetsByIdCompleteRequestRoleEnum =
+	(typeof PostApiImageAssetsByIdCompleteRequestRoleEnum)[keyof typeof PostApiImageAssetsByIdCompleteRequestRoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiImageAssetsByIdCompleteBody = {
+	/**
+	 * @default 'avatar'
+	 * @type string
+	 */
+	role: PostApiImageAssetsByIdCompleteRequestRoleEnum;
+};
+
 /**
  * @type object
  */
 export type PostApiImageAssetsByIdCompleteOptions = {
-	body?: never;
+	body: PostApiImageAssetsByIdCompleteBody;
 	path: PostApiImageAssetsByIdCompletePath;
 	query?: never;
 	headers?: never;
@@ -103014,6 +103283,7 @@ export type PostApiImageAssetsByIdCompleteOptions = {
  */
 export type PostApiImageAssetsByIdCompleteResponses = {
 	"200": PostApiImageAssetsByIdCompleteStatus200;
+	"400": PostApiImageAssetsByIdCompleteStatus400;
 	"401": PostApiImageAssetsByIdCompleteStatus401;
 	"404": PostApiImageAssetsByIdCompleteStatus404;
 	"409": PostApiImageAssetsByIdCompleteStatus409;
@@ -103027,12 +103297,325 @@ export type PostApiImageAssetsByIdCompleteResponses = {
  */
 export type PostApiImageAssetsByIdCompleteResponse =
 	| PostApiImageAssetsByIdCompleteStatus200
+	| PostApiImageAssetsByIdCompleteStatus400
 	| PostApiImageAssetsByIdCompleteStatus401
 	| PostApiImageAssetsByIdCompleteStatus404
 	| PostApiImageAssetsByIdCompleteStatus409
 	| PostApiImageAssetsByIdCompleteStatus422
 	| PostApiImageAssetsByIdCompleteStatus429
 	| PostApiImageAssetsByIdCompleteStatus500;
+
+export const PutApiImageAssetsByIdPresentationsByRoleRole = {
+	avatar: "avatar",
+	banner: "banner",
+	cover: "cover",
+} as const;
+
+export type PutApiImageAssetsByIdPresentationsByRoleRole =
+	(typeof PutApiImageAssetsByIdPresentationsByRoleRole)[keyof typeof PutApiImageAssetsByIdPresentationsByRoleRole];
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRolePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @default 'avatar'
+	 * @type string
+	 */
+	role: PutApiImageAssetsByIdPresentationsByRoleRole;
+};
+
+export const PutApiImageAssetsByIdPresentationsByRoleStatus200RoleEnum = {
+	avatar: "avatar",
+	banner: "banner",
+	cover: "cover",
+} as const;
+
+export type PutApiImageAssetsByIdPresentationsByRoleStatus200RoleEnum =
+	(typeof PutApiImageAssetsByIdPresentationsByRoleStatus200RoleEnum)[keyof typeof PutApiImageAssetsByIdPresentationsByRoleStatus200RoleEnum];
+
+export const PutApiImageAssetsByIdPresentationsByRoleStatus200FitEnum = {
+	crop: "crop",
+	contain: "contain",
+} as const;
+
+export type PutApiImageAssetsByIdPresentationsByRoleStatus200FitEnum =
+	(typeof PutApiImageAssetsByIdPresentationsByRoleStatus200FitEnum)[keyof typeof PutApiImageAssetsByIdPresentationsByRoleStatus200FitEnum];
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleStatus200 = {
+	/**
+	 * @default 'avatar'
+	 * @type string
+	 */
+	role: PutApiImageAssetsByIdPresentationsByRoleStatus200RoleEnum;
+	/**
+	 * @type string
+	 */
+	fit: PutApiImageAssetsByIdPresentationsByRoleStatus200FitEnum;
+	crop:
+		| ({
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number
+				 */
+				x: number;
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number
+				 */
+				y: number;
+				/**
+				 * @maxLength 1
+				 * @type number
+				 */
+				width: number;
+				/**
+				 * @maxLength 1
+				 * @type number
+				 */
+				height: number;
+		  } | null)
+		| null;
+	revision: string | number;
+	/**
+	 * @type string
+	 */
+	contentUrl: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ImageAssetNotFound'
+		 * @type string
+		 */
+		code: "ImageAssetNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ImageAssetInvalidState'
+		 * @type string
+		 */
+		code: "ImageAssetInvalidState";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiImageAssetsByIdPresentationsByRoleStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ImageAssetInvalidPresentation'
+				 * @type string
+				 */
+				code: "ImageAssetInvalidPresentation";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleStatus500 = InternalError;
+
+export type PutApiImageAssetsByIdPresentationsByRoleBody =
+	| {
+			/**
+			 * @type string
+			 */
+			fit: "contain";
+	  }
+	| {
+			/**
+			 * @type string
+			 */
+			fit: "crop";
+			/**
+			 * @type object
+			 */
+			crop: {
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number
+				 */
+				x: number;
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number
+				 */
+				y: number;
+				/**
+				 * @maxLength 1
+				 * @type number
+				 */
+				width: number;
+				/**
+				 * @maxLength 1
+				 * @type number
+				 */
+				height: number;
+			};
+	  };
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleOptions = {
+	body: PutApiImageAssetsByIdPresentationsByRoleBody;
+	path: PutApiImageAssetsByIdPresentationsByRolePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleResponses = {
+	"200": PutApiImageAssetsByIdPresentationsByRoleStatus200;
+	"400": PutApiImageAssetsByIdPresentationsByRoleStatus400;
+	"401": PutApiImageAssetsByIdPresentationsByRoleStatus401;
+	"404": PutApiImageAssetsByIdPresentationsByRoleStatus404;
+	"409": PutApiImageAssetsByIdPresentationsByRoleStatus409;
+	"422": PutApiImageAssetsByIdPresentationsByRoleStatus422;
+	"429": PutApiImageAssetsByIdPresentationsByRoleStatus429;
+	"500": PutApiImageAssetsByIdPresentationsByRoleStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiImageAssetsByIdPresentationsByRoleResponse =
+	| PutApiImageAssetsByIdPresentationsByRoleStatus200
+	| PutApiImageAssetsByIdPresentationsByRoleStatus400
+	| PutApiImageAssetsByIdPresentationsByRoleStatus401
+	| PutApiImageAssetsByIdPresentationsByRoleStatus404
+	| PutApiImageAssetsByIdPresentationsByRoleStatus409
+	| PutApiImageAssetsByIdPresentationsByRoleStatus422
+	| PutApiImageAssetsByIdPresentationsByRoleStatus429
+	| PutApiImageAssetsByIdPresentationsByRoleStatus500;
 
 /**
  * @type object
@@ -103063,6 +103646,23 @@ export const GetApiImageAssetsByIdStatus200AccessEnum = {
 export type GetApiImageAssetsByIdStatus200AccessEnum =
 	(typeof GetApiImageAssetsByIdStatus200AccessEnum)[keyof typeof GetApiImageAssetsByIdStatus200AccessEnum];
 
+export const GetApiImageAssetsByIdStatus200PresentationsRoleEnum = {
+	avatar: "avatar",
+	banner: "banner",
+	cover: "cover",
+} as const;
+
+export type GetApiImageAssetsByIdStatus200PresentationsRoleEnum =
+	(typeof GetApiImageAssetsByIdStatus200PresentationsRoleEnum)[keyof typeof GetApiImageAssetsByIdStatus200PresentationsRoleEnum];
+
+export const GetApiImageAssetsByIdStatus200PresentationsFitEnum = {
+	crop: "crop",
+	contain: "contain",
+} as const;
+
+export type GetApiImageAssetsByIdStatus200PresentationsFitEnum =
+	(typeof GetApiImageAssetsByIdStatus200PresentationsFitEnum)[keyof typeof GetApiImageAssetsByIdStatus200PresentationsFitEnum];
+
 /**
  * @type object
  */
@@ -103074,6 +103674,7 @@ export type GetApiImageAssetsByIdStatus200 = {
 	 */
 	id: string;
 	/**
+	 * @default 'pending'
 	 * @type string
 	 */
 	status: GetApiImageAssetsByIdStatus200StatusEnum;
@@ -103083,10 +103684,57 @@ export type GetApiImageAssetsByIdStatus200 = {
 	access: GetApiImageAssetsByIdStatus200AccessEnum;
 	contentType: (string | null) | null;
 	size: ((string | number) | null) | null;
+	width: ((string | number) | null) | null;
+	height: ((string | number) | null) | null;
 	/**
 	 * @type string
 	 */
 	contentUrl: string;
+	/**
+	 * @type array
+	 */
+	presentations: {
+		/**
+		 * @default 'avatar'
+		 * @type string
+		 */
+		role: GetApiImageAssetsByIdStatus200PresentationsRoleEnum;
+		/**
+		 * @type string
+		 */
+		fit: GetApiImageAssetsByIdStatus200PresentationsFitEnum;
+		crop:
+			| ({
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number
+					 */
+					x: number;
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number
+					 */
+					y: number;
+					/**
+					 * @maxLength 1
+					 * @type number
+					 */
+					width: number;
+					/**
+					 * @maxLength 1
+					 * @type number
+					 */
+					height: number;
+			  } | null)
+			| null;
+		revision: string | number;
+		/**
+		 * @type string
+		 */
+		contentUrl: string;
+	}[];
 	createdAt: void | string | string | number;
 	updatedAt: void | string | string | number;
 };

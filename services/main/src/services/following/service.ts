@@ -88,7 +88,7 @@ export async function listFollowing(input: ListFollowingInput) {
 			...record,
 			slugAddress: slugAddresses.get(record.id) ?? null,
 			avatar: presentAvatar(avatar),
-			cover: presentImageAsset(coverAssetId),
+			cover: presentImageAsset(coverAssetId, "cover"),
 		})),
 		nextCursor:
 			rows.length > input.limit && last

@@ -221,8 +221,8 @@ export default new Elysia()
 							...item,
 							kind: item.kind ?? "unknown",
 							avatar: presentAvatar(avatar),
-							banner: presentImageAsset(bannerAssetId),
-							cover: presentImageAsset(coverAssetId),
+							banner: presentImageAsset(bannerAssetId, "banner"),
+							cover: presentImageAsset(coverAssetId, "cover"),
 						})),
 					};
 				},
@@ -292,8 +292,8 @@ export default new Elysia()
 								? null
 								: toPortableTextResponse(row.description),
 						avatar: presentAvatar(avatarReferenceFromColumns(row)),
-						banner: presentImageAsset(row.bannerAssetId),
-						cover: presentImageAsset(row.coverAssetId),
+						banner: presentImageAsset(row.bannerAssetId, "banner"),
+						cover: presentImageAsset(row.coverAssetId, "cover"),
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 					}));
@@ -375,8 +375,8 @@ export default new Elysia()
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
 						avatar: presentAvatar(avatar),
-						banner: presentImageAsset(bannerAssetId),
-						cover: presentImageAsset(coverAssetId),
+						banner: presentImageAsset(bannerAssetId, "banner"),
+						cover: presentImageAsset(coverAssetId, "cover"),
 						localizations,
 						associationPolicy: await getEntityAssociationPolicy(params.unitId),
 						owner: ownerSummary,

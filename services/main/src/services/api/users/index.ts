@@ -9,7 +9,7 @@ import { database } from "../../database";
 import {
 	avatarReferenceToColumns,
 	isPrimaryUnitLocalization,
-	unitLocalizationImageAssetIds,
+	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
 	unit,
@@ -121,7 +121,7 @@ export default new Elysia({ prefix: "/users" })
 				await ensureImageAssetsAttachable(
 					tx,
 					profile.unitId,
-					unitLocalizationImageAssetIds(body),
+					unitLocalizationImageAssetReferences(body),
 				);
 				const [current] = await tx
 					.select({ id: profileTable.id })

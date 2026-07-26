@@ -13,7 +13,7 @@ import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	toUnitLocalizationStorage,
-	unitLocalizationImageAssetIds,
+	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
 	collection,
@@ -107,7 +107,7 @@ export default new Elysia({ prefix: "/collections" })
 			return {
 				items: items.map(({ coverAssetId, ...item }) => ({
 					...item,
-					cover: presentImageAsset(coverAssetId),
+					cover: presentImageAsset(coverAssetId, "cover"),
 				})),
 			};
 		},
@@ -124,7 +124,7 @@ export default new Elysia({ prefix: "/collections" })
 				await ensureImageAssetsAttachable(
 					tx,
 					profile.unitId,
-					unitLocalizationImageAssetIds(body.localization),
+					unitLocalizationImageAssetReferences(body.localization),
 				);
 				const definitionDocument =
 					body.definitionDocument ?? createManualCollectionDefinitionDocument();
@@ -222,7 +222,7 @@ export default new Elysia({ prefix: "/collections" })
 					await ensureImageAssetsAttachable(
 						tx,
 						profile.unitId,
-						unitLocalizationImageAssetIds(body.localization),
+						unitLocalizationImageAssetReferences(body.localization),
 					);
 				await tx
 					.update(unit)

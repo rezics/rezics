@@ -12,6 +12,42 @@ export default {
 	invalid: `Choose a ${SupportedImageFormats} image under 10 ${verbatimTerms.mib.value}.`,
 	current: "Current language override",
 	displayPreview: "Displayed area",
+	editPresentation: "Adjust displayed area",
+	presentationEditor: {
+		title: {
+			avatar: "Adjust avatar",
+			banner: "Adjust banner",
+			cover: "Adjust cover",
+		},
+		description: {
+			avatar: "Drag and zoom the image inside the square crop. The circular avatar preview does not remove the original corners.",
+			banner: "Drag and zoom the image inside the fixed 4:1 crop. New banners start from the top-left.",
+			cover: "Keep the complete image by default, or switch to a fixed 3:4 crop when composition matters more.",
+		},
+		close: "Close image adjustment",
+		loading: "Loading the original image…",
+		loadFailed: "The original image or its presentation could not be loaded.",
+		cropArea:
+			"Image crop area. Drag to reposition, use the mouse wheel to zoom, or use arrow keys to move.",
+		zoom: "Zoom",
+		zoomIn: "Zoom in",
+		zoomOut: "Zoom out",
+		reset: "Reset",
+		avatarPreview: "Circular preview",
+		bannerPreview: "Banner preview",
+		coverPreview: "Complete cover preview",
+		coverMode: {
+			label: "Cover display mode",
+			contain: "Show complete image",
+			crop: "Crop to 3:4",
+			containDescription:
+				"The complete image remains visible. The frame uses a blurred backdrop when its proportions differ.",
+			cropDescription: "Only the selected 3:4 area is delivered and displayed.",
+		},
+		cancel: "Cancel",
+		save: "Save displayed area",
+		saveFailed: "The displayed area could not be saved. Try again.",
+	},
 	avatarPicker: {
 		setup: "Set up avatar",
 		edit: "Edit avatar",
@@ -44,8 +80,7 @@ export default {
 		},
 	},
 	bannerPreview: {
-		description:
-			"The original is preserved. Areas outside this frame are not shown. A 4:1 image is recommended.",
+		description: "The delivered banner uses the saved 4:1 area.",
 		showOriginal: "View full image",
 		hideOriginal: "Hide full image",
 		original: "Full image",

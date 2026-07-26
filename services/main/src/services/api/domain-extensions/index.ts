@@ -70,7 +70,7 @@ import {
 	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
 	toUnitLocalizationStorage,
-	unitLocalizationImageAssetIds,
+	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { presentAvatar } from "../../units/avatar";
@@ -189,7 +189,7 @@ async function createBaseUnit(
 	await ensureImageAssetsAttachable(
 		tx,
 		input.ownerId,
-		unitLocalizationImageAssetIds(input.localization),
+		unitLocalizationImageAssetReferences(input.localization),
 	);
 	const created = await insertUnit(tx, {
 		kind: input.kind,
@@ -265,8 +265,8 @@ async function toZoneResponse(
 		slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 		language: localizations[0]?.language ?? null,
 		avatar: presentAvatar(avatar),
-		banner: presentImageAsset(bannerAssetId),
-		cover: presentImageAsset(coverAssetId),
+		banner: presentImageAsset(bannerAssetId, "banner"),
+		cover: presentImageAsset(coverAssetId, "cover"),
 		localizations: localizations.map(
 			({
 				avatarType,
@@ -288,8 +288,8 @@ async function toZoneResponse(
 						avatarIconName,
 					}),
 				),
-				banner: presentImageAsset(bannerAssetId),
-				cover: presentImageAsset(coverAssetId),
+				banner: presentImageAsset(bannerAssetId, "banner"),
+				cover: presentImageAsset(coverAssetId, "cover"),
 			}),
 		),
 		boundaryDocument: parseDocument(ZoneBoundaryDocument, record.boundaryDocument),
@@ -369,9 +369,11 @@ function presentRenderUnit(
 		avatar: presentAvatar(resolveUnitLocalizationAvatarFromOrdered(rows, preferredLanguage)),
 		banner: presentImageAsset(
 			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "banner", preferredLanguage),
+			"banner",
 		),
 		cover: presentImageAsset(
 			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "cover", preferredLanguage),
+			"cover",
 		),
 	};
 }
@@ -534,7 +536,7 @@ export default new Elysia()
 												id: row.releaseUnitId,
 												type,
 												title,
-												cover: presentImageAsset(coverAssetId),
+												cover: presentImageAsset(coverAssetId, "cover"),
 											},
 										},
 									]
@@ -847,7 +849,7 @@ export default new Elysia()
 							await ensureImageAssetsAttachable(
 								tx,
 								profile.unitId,
-								unitLocalizationImageAssetIds(body.localization),
+								unitLocalizationImageAssetReferences(body.localization),
 							);
 							await tx
 								.insert(unitLocalization)

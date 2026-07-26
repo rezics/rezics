@@ -915,7 +915,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 							'type', 'image',
 							'image', jsonb_build_object(
 								'id', ${unitLocalization.avatarAssetId},
-								'url', '/image-assets/' || ${unitLocalization.avatarAssetId} || '/content'
+								'url', '/image-assets/' || ${unitLocalization.avatarAssetId} || '/presentations/avatar/content'
 							)
 						)
 						when 'emoji' then jsonb_build_object(
@@ -964,7 +964,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 							'cover', case when ${searchMainCoverAssetId} is null then null
 								else jsonb_build_object(
 									'id', ${searchMainCoverAssetId},
-									'url', '/image-assets/' || ${searchMainCoverAssetId} || '/content'
+									'url', '/image-assets/' || ${searchMainCoverAssetId} || '/presentations/cover/content'
 								) end
 						)
 					) else jsonb_build_object('state', 'unavailable') end

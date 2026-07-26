@@ -496,7 +496,6 @@ function UnitLocalizationForm({
 						onChange={setCover}
 						options={coverOptions}
 						role="cover"
-						shape={type === "book" ? "portrait" : "landscape"}
 						value={cover}
 					/>
 				</Field>

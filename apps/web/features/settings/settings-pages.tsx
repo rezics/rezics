@@ -152,7 +152,6 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 						<LocalizationImageUploadField
 							onChange={setBanner}
 							role="banner"
-							shape="banner"
 							value={banner}
 						/>
 					</Field>

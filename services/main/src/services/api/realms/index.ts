@@ -23,7 +23,7 @@ import {
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 	toUnitLocalizationStorage,
-	unitLocalizationImageAssetIds,
+	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
 	auditEvent,
@@ -313,8 +313,8 @@ export default new Elysia({ prefix: "/realms" })
 					...item,
 					slugAddress: slugAddresses.get(item.id) ?? null,
 					avatar: presentAvatar(avatar),
-					banner: presentImageAsset(bannerAssetId),
-					cover: presentImageAsset(coverAssetId),
+					banner: presentImageAsset(bannerAssetId, "banner"),
+					cover: presentImageAsset(coverAssetId, "cover"),
 				})),
 			};
 		},
@@ -331,7 +331,7 @@ export default new Elysia({ prefix: "/realms" })
 				await ensureImageAssetsAttachable(
 					tx,
 					profile.unitId,
-					unitLocalizationImageAssetIds(body.localization),
+					unitLocalizationImageAssetReferences(body.localization),
 				);
 				const created = await insertUnit(tx, {
 					kind: "realm",
@@ -510,8 +510,8 @@ export default new Elysia({ prefix: "/realms" })
 				slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 				language: localizations[0]?.language ?? null,
 				avatar: presentAvatar(avatar),
-				banner: presentImageAsset(bannerAssetId),
-				cover: presentImageAsset(coverAssetId),
+				banner: presentImageAsset(bannerAssetId, "banner"),
+				cover: presentImageAsset(coverAssetId, "cover"),
 				localizations: localizations.map(
 					({
 						avatarType,
@@ -533,8 +533,8 @@ export default new Elysia({ prefix: "/realms" })
 								avatarIconName,
 							}),
 						),
-						banner: presentImageAsset(bannerAssetId),
-						cover: presentImageAsset(coverAssetId),
+						banner: presentImageAsset(bannerAssetId, "banner"),
+						cover: presentImageAsset(coverAssetId, "cover"),
 					}),
 				),
 				viewerMembership: viewerMembership
@@ -684,7 +684,7 @@ export default new Elysia({ prefix: "/realms" })
 					await ensureImageAssetsAttachable(
 						tx,
 						profile.unitId,
-						unitLocalizationImageAssetIds(body.localization),
+						unitLocalizationImageAssetReferences(body.localization),
 					);
 				const updated = await tx
 					.update(unit)

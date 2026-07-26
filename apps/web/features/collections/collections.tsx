@@ -137,12 +137,7 @@ function CollectionFields({
 		<FieldGroup>
 			<Field>
 				<FieldLabel>{t.cover.title}</FieldLabel>
-				<LocalizationImageUploadField
-					onChange={onCoverChange}
-					role="cover"
-					shape="portrait"
-					value={cover}
-				/>
+				<LocalizationImageUploadField onChange={onCoverChange} role="cover" value={cover} />
 			</Field>
 			<Field required>
 				<FieldLabel>{t.ui.title}</FieldLabel>

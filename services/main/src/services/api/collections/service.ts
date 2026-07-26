@@ -194,13 +194,13 @@ export async function getCollection(
 						avatarIconName,
 					}),
 				),
-				banner: presentImageAsset(bannerAssetId),
-				cover: presentImageAsset(coverAssetId),
+				banner: presentImageAsset(bannerAssetId, "banner"),
+				cover: presentImageAsset(coverAssetId, "cover"),
 			}),
 		),
 		items: items.map(({ coverAssetId, ...item }) => ({
 			...item,
-			cover: presentImageAsset(coverAssetId),
+			cover: presentImageAsset(coverAssetId, "cover"),
 			parentTargetId: null,
 		})),
 	};

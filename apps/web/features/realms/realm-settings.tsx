@@ -197,7 +197,6 @@ export function RealmProfileSettings({
 									onChange={setBanner}
 									options={bannerOptions}
 									role="banner"
-									shape="banner"
 									value={banner}
 								/>
 							</Field>

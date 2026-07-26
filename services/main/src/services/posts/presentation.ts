@@ -25,6 +25,6 @@ export async function getPostSubjectPresentation(subjectId: string) {
 	const { coverAssetId, ...presentation } = subject;
 	return {
 		...presentation,
-		cover: presentImageAsset(coverAssetId),
+		cover: presentImageAsset(coverAssetId, "cover"),
 	};
 }

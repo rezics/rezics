@@ -13,20 +13,28 @@ vi.mock("@/i18n/client", async () => {
 	return createReactI18n(resources);
 });
 
-vi.mock("./localization-image-upload-field", () => ({
-	LocalizationImageUploadField: ({
-		onChange,
-	}: {
-		readonly onChange: (value: { readonly id: string; readonly url: string }) => void;
-	}) => (
-		<button
-			onClick={() => onChange({ id: "asset-1", url: "https://example.com/avatar.jpg" })}
-			type="button"
-		>
-			Upload test image
-		</button>
-	),
-}));
+vi.mock("./localization-image-upload-field", async () => {
+	const { Button } = await import("@rezics/ui");
+	return {
+		LocalizationImageUploadField: ({
+			onChange,
+			onPresentationSaved,
+		}: {
+			readonly onChange: (value: { readonly id: string; readonly url: string }) => void;
+			readonly onPresentationSaved?: () => void;
+		}) => (
+			<Button
+				onClick={() => {
+					onChange({ id: "asset-1", url: "https://example.com/avatar.jpg" });
+					onPresentationSaved?.();
+				}}
+				type="button"
+			>
+				Upload test image
+			</Button>
+		),
+	};
+});
 
 vi.mock("./font-awesome-icon-picker", () => ({
 	FontAwesomeIconPicker: () => null,

@@ -371,7 +371,7 @@ export async function recommendUnits(input: {
 					updatedAt: detail.updatedAt,
 					title: localization?.title ?? null,
 					summary: localization?.summary ?? null,
-					cover: presentImageAsset(detail.coverAssetId),
+					cover: presentImageAsset(detail.coverAssetId, "cover"),
 					recommendationReason: reasons.get(detail.id) ?? null,
 					source: input.seedUnitId
 						? directIds.has(detail.id)

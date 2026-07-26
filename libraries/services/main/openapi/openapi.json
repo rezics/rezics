@@ -9158,6 +9158,7 @@
 					"ImageAssetInvalidSize",
 					"ImageAssetContentMismatch",
 					"ImageAssetInvalidState",
+					"ImageAssetInvalidPresentation",
 					"ImageAssetInUse",
 					"ApiTokenNotFound",
 					"ApiTokenPolicyInvalid",
@@ -9352,6 +9353,81 @@
 		}
 	},
 	"paths": {
+		"/image-assets/{id}/presentations/{role}/content": {
+			"get": {
+				"summary": "Resolve rendered image asset presentation",
+				"tags": ["Image Assets"],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "role",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"default": "avatar",
+							"type": "string",
+							"enum": ["avatar", "banner", "cover"]
+						}
+					}
+				],
+				"responses": {
+					"302": {
+						"description": "Response for status 302",
+						"content": { "type": "void" }
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getImage-assetsByIdPresentationsByRoleContent",
+				"x-rezics-policy-operation-id": "getImage-assetsByIdPresentationsByRoleContent"
+			}
+		},
 		"/image-assets/{id}/content": {
 			"get": {
 				"summary": "Resolve image asset content",
@@ -152345,18 +152421,19 @@
 												"access",
 												"contentType",
 												"size",
+												"width",
+												"height",
 												"contentUrl",
+												"presentations",
 												"createdAt",
 												"updatedAt"
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
 												"status": {
-													"anyOf": [
-														{ "const": "pending", "type": "string" },
-														{ "const": "ready", "type": "string" },
-														{ "const": "failed", "type": "string" }
-													]
+													"default": "pending",
+													"type": "string",
+													"enum": ["pending", "ready", "failed"]
 												},
 												"access": {
 													"anyOf": [
@@ -152387,7 +152464,130 @@
 														{ "type": "null" }
 													]
 												},
+												"width": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"minimum": 1,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 1, "type": "integer" }
+															]
+														},
+														{ "type": "null" }
+													]
+												},
+												"height": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"minimum": 1,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 1, "type": "integer" }
+															]
+														},
+														{ "type": "null" }
+													]
+												},
 												"contentUrl": { "type": "string" },
+												"presentations": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"required": [
+															"role",
+															"fit",
+															"crop",
+															"revision",
+															"contentUrl"
+														],
+														"properties": {
+															"role": {
+																"default": "avatar",
+																"type": "string",
+																"enum": [
+																	"avatar",
+																	"banner",
+																	"cover"
+																]
+															},
+															"fit": {
+																"anyOf": [
+																	{
+																		"const": "crop",
+																		"type": "string"
+																	},
+																	{
+																		"const": "contain",
+																		"type": "string"
+																	}
+																]
+															},
+															"crop": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"x",
+																			"y",
+																			"width",
+																			"height"
+																		],
+																		"properties": {
+																			"x": {
+																				"minimum": 0,
+																				"maximum": 1,
+																				"type": "number"
+																			},
+																			"y": {
+																				"minimum": 0,
+																				"maximum": 1,
+																				"type": "number"
+																			},
+																			"width": {
+																				"exclusiveMinimum": 0,
+																				"maximum": 1,
+																				"type": "number"
+																			},
+																			"height": {
+																				"exclusiveMinimum": 0,
+																				"maximum": 1,
+																				"type": "number"
+																			}
+																		}
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"revision": {
+																"minimum": 1,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 1,
+																		"type": "integer"
+																	}
+																]
+															},
+															"contentUrl": { "type": "string" }
+														}
+													}
+												},
 												"createdAt": {
 													"anyOf": [
 														{ "type": "Date" },
@@ -152570,6 +152770,25 @@
 						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["role"],
+								"properties": {
+									"role": {
+										"default": "avatar",
+										"type": "string",
+										"enum": ["avatar", "banner", "cover"]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -152583,13 +152802,17 @@
 										"access",
 										"contentType",
 										"size",
+										"width",
+										"height",
 										"contentUrl",
+										"presentations",
 										"createdAt",
 										"updatedAt"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"status": {
+											"default": "pending",
 											"type": "string",
 											"enum": ["pending", "ready", "failed"]
 										},
@@ -152617,7 +152840,115 @@
 												{ "type": "null" }
 											]
 										},
+										"width": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"height": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
 										"contentUrl": { "type": "string" },
+										"presentations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"role",
+													"fit",
+													"crop",
+													"revision",
+													"contentUrl"
+												],
+												"properties": {
+													"role": {
+														"default": "avatar",
+														"type": "string",
+														"enum": ["avatar", "banner", "cover"]
+													},
+													"fit": {
+														"type": "string",
+														"enum": ["crop", "contain"]
+													},
+													"crop": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"x",
+																	"y",
+																	"width",
+																	"height"
+																],
+																"properties": {
+																	"x": {
+																		"minimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	},
+																	"y": {
+																		"minimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	},
+																	"width": {
+																		"exclusiveMinimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	},
+																	"height": {
+																		"exclusiveMinimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"revision": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													},
+													"contentUrl": { "type": "string" }
+												}
+											}
+										},
 										"createdAt": {
 											"anyOf": [
 												{ "type": "Date" },
@@ -152636,6 +152967,14 @@
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -152805,6 +153144,318 @@
 				"x-rezics-policy-operation-id": "postApiImage-assetsByIdComplete"
 			}
 		},
+		"/api/image-assets/{id}/presentations/{role}": {
+			"put": {
+				"summary": "Update image asset presentation",
+				"tags": ["Image Assets"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "role",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"default": "avatar",
+							"type": "string",
+							"enum": ["avatar", "banner", "cover"]
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["fit"],
+										"properties": {
+											"fit": { "const": "contain", "type": "string" }
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["fit", "crop"],
+										"properties": {
+											"fit": { "const": "crop", "type": "string" },
+											"crop": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["x", "y", "width", "height"],
+												"properties": {
+													"x": {
+														"minimum": 0,
+														"maximum": 1,
+														"type": "number"
+													},
+													"y": {
+														"minimum": 0,
+														"maximum": 1,
+														"type": "number"
+													},
+													"width": {
+														"exclusiveMinimum": 0,
+														"maximum": 1,
+														"type": "number"
+													},
+													"height": {
+														"exclusiveMinimum": 0,
+														"maximum": 1,
+														"type": "number"
+													}
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["role", "fit", "crop", "revision", "contentUrl"],
+									"properties": {
+										"role": {
+											"default": "avatar",
+											"type": "string",
+											"enum": ["avatar", "banner", "cover"]
+										},
+										"fit": { "type": "string", "enum": ["crop", "contain"] },
+										"crop": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["x", "y", "width", "height"],
+													"properties": {
+														"x": {
+															"minimum": 0,
+															"maximum": 1,
+															"type": "number"
+														},
+														"y": {
+															"minimum": 0,
+															"maximum": 1,
+															"type": "number"
+														},
+														"width": {
+															"exclusiveMinimum": 0,
+															"maximum": 1,
+															"type": "number"
+														},
+														"height": {
+															"exclusiveMinimum": 0,
+															"maximum": 1,
+															"type": "number"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"revision": {
+											"minimum": 1,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 1, "type": "integer" }
+											]
+										},
+										"contentUrl": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetInvalidState",
+													"type": "string",
+													"enum": ["ImageAssetInvalidState"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ImageAssetInvalidPresentation",
+															"type": "string",
+															"enum": [
+																"ImageAssetInvalidPresentation"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiImage-assetsByIdPresentationsByRole",
+				"x-rezics-policy-operation-id": "putApiImage-assetsByIdPresentationsByRole"
+			}
+		},
 		"/api/image-assets/{id}": {
 			"get": {
 				"summary": "Get image asset",
@@ -152831,13 +153482,17 @@
 										"access",
 										"contentType",
 										"size",
+										"width",
+										"height",
 										"contentUrl",
+										"presentations",
 										"createdAt",
 										"updatedAt"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"status": {
+											"default": "pending",
 											"type": "string",
 											"enum": ["pending", "ready", "failed"]
 										},
@@ -152865,7 +153520,115 @@
 												{ "type": "null" }
 											]
 										},
+										"width": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"height": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
 										"contentUrl": { "type": "string" },
+										"presentations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"role",
+													"fit",
+													"crop",
+													"revision",
+													"contentUrl"
+												],
+												"properties": {
+													"role": {
+														"default": "avatar",
+														"type": "string",
+														"enum": ["avatar", "banner", "cover"]
+													},
+													"fit": {
+														"type": "string",
+														"enum": ["crop", "contain"]
+													},
+													"crop": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"x",
+																	"y",
+																	"width",
+																	"height"
+																],
+																"properties": {
+																	"x": {
+																		"minimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	},
+																	"y": {
+																		"minimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	},
+																	"width": {
+																		"exclusiveMinimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	},
+																	"height": {
+																		"exclusiveMinimum": 0,
+																		"maximum": 1,
+																		"type": "number"
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"revision": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													},
+													"contentUrl": { "type": "string" }
+												}
+											}
+										},
 										"createdAt": {
 											"anyOf": [
 												{ "type": "Date" },

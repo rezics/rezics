@@ -147,7 +147,6 @@ function SeriesCreatePage() {
 							<LocalizationImageUploadField
 								onChange={setCover}
 								role="cover"
-								shape="landscape"
 								value={cover}
 							/>
 						</Field>
@@ -249,7 +248,6 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								value={cover}
 								onChange={setCover}
 								role="cover"
-								shape={type === "book" ? "portrait" : "landscape"}
 							/>
 						</Field>
 						<Field>

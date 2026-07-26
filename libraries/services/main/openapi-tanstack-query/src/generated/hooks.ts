@@ -52,6 +52,11 @@ import type {
 	GetImageAssetsByIdContentStatus404,
 	GetImageAssetsByIdContentStatus422,
 	GetImageAssetsByIdContentStatus500,
+	GetImageAssetsByIdPresentationsByRoleContentOptions,
+	GetImageAssetsByIdPresentationsByRoleContentResponse,
+	GetImageAssetsByIdPresentationsByRoleContentStatus404,
+	GetImageAssetsByIdPresentationsByRoleContentStatus422,
+	GetImageAssetsByIdPresentationsByRoleContentStatus500,
 	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
 	PostApiUnitByUnitIdAssociationProposalsRequestsStatus200,
 	PostApiUnitByUnitIdAssociationProposalsRequestsStatus400,
@@ -1959,12 +1964,22 @@ import type {
 	PostApiImageAssetsStatus500,
 	PostApiImageAssetsByIdCompleteOptions,
 	PostApiImageAssetsByIdCompleteStatus200,
+	PostApiImageAssetsByIdCompleteStatus400,
 	PostApiImageAssetsByIdCompleteStatus401,
 	PostApiImageAssetsByIdCompleteStatus404,
 	PostApiImageAssetsByIdCompleteStatus409,
 	PostApiImageAssetsByIdCompleteStatus422,
 	PostApiImageAssetsByIdCompleteStatus429,
 	PostApiImageAssetsByIdCompleteStatus500,
+	PutApiImageAssetsByIdPresentationsByRoleOptions,
+	PutApiImageAssetsByIdPresentationsByRoleStatus200,
+	PutApiImageAssetsByIdPresentationsByRoleStatus400,
+	PutApiImageAssetsByIdPresentationsByRoleStatus401,
+	PutApiImageAssetsByIdPresentationsByRoleStatus404,
+	PutApiImageAssetsByIdPresentationsByRoleStatus409,
+	PutApiImageAssetsByIdPresentationsByRoleStatus422,
+	PutApiImageAssetsByIdPresentationsByRoleStatus429,
+	PutApiImageAssetsByIdPresentationsByRoleStatus500,
 	GetApiImageAssetsByIdOptions,
 	GetApiImageAssetsByIdStatus200,
 	GetApiImageAssetsByIdStatus401,
@@ -1997,6 +2012,7 @@ import {
 	deleteApiUnitByUnitIdAssociationProposalsByProposalId,
 	getApiUnitByUnitIdAssociationProposals,
 	getImageAssetsByIdContent,
+	getImageAssetsByIdPresentationsByRoleContent,
 	postApiUnitByUnitIdAssociationProposalsRequests,
 	postApiUnitByUnitIdAssociationProposalsInvitations,
 	postApiUnitByUnitIdAssociationProposalsByProposalIdAccept,
@@ -2285,10 +2301,109 @@ import {
 	postApiSearchByIndex,
 	postApiImageAssets,
 	postApiImageAssetsByIdComplete,
+	putApiImageAssetsByIdPresentationsByRole,
 	getApiImageAssetsById,
 	deleteApiImageAssetsById,
 } from "./client";
 import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
+
+export const getImageAssetsByIdPresentationsByRoleContentQueryKey = ({
+	path,
+}: Omit<GetImageAssetsByIdPresentationsByRoleContentOptions, "headers">) =>
+	[{ url: "/image-assets/:id/presentations/:role/content", params: path }] as const;
+
+type GetImageAssetsByIdPresentationsByRoleContentQueryKey = ReturnType<
+	typeof getImageAssetsByIdPresentationsByRoleContentQueryKey
+>;
+
+export function getImageAssetsByIdPresentationsByRoleContentQueryOptions(
+	{ path }: GetImageAssetsByIdPresentationsByRoleContentOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getImageAssetsByIdPresentationsByRoleContentQueryKey({ path });
+	return queryOptions<
+		GetImageAssetsByIdPresentationsByRoleContentResponse,
+		ResponseErrorConfig<
+			| GetImageAssetsByIdPresentationsByRoleContentStatus404
+			| GetImageAssetsByIdPresentationsByRoleContentStatus422
+			| GetImageAssetsByIdPresentationsByRoleContentStatus500
+		>,
+		GetImageAssetsByIdPresentationsByRoleContentResponse,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getImageAssetsByIdPresentationsByRoleContent({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve rendered image asset presentation
+ * {@link /image-assets/:id/presentations/:role/content}
+ */
+export function useGetImageAssetsByIdPresentationsByRoleContent<
+	TData = GetImageAssetsByIdPresentationsByRoleContentResponse,
+	TQueryData = GetImageAssetsByIdPresentationsByRoleContentResponse,
+	TQueryKey extends QueryKey = GetImageAssetsByIdPresentationsByRoleContentQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetImageAssetsByIdPresentationsByRoleContentOptions["path"]
+			| (() => GetImageAssetsByIdPresentationsByRoleContentOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetImageAssetsByIdPresentationsByRoleContentResponse,
+				ResponseErrorConfig<
+					| GetImageAssetsByIdPresentationsByRoleContentStatus404
+					| GetImageAssetsByIdPresentationsByRoleContentStatus422
+					| GetImageAssetsByIdPresentationsByRoleContentStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getImageAssetsByIdPresentationsByRoleContentQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getImageAssetsByIdPresentationsByRoleContentQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetImageAssetsByIdPresentationsByRoleContentStatus404
+			| GetImageAssetsByIdPresentationsByRoleContentStatus422
+			| GetImageAssetsByIdPresentationsByRoleContentStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
 
 export const getImageAssetsByIdContentQueryKey = ({
 	path,
@@ -32309,6 +32424,7 @@ export function postApiImageAssetsByIdCompleteMutationOptions<TContext = unknown
 	return mutationOptions<
 		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsByIdCompleteStatus400
 			| PostApiImageAssetsByIdCompleteStatus401
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
@@ -32320,10 +32436,11 @@ export function postApiImageAssetsByIdCompleteMutationOptions<TContext = unknown
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await postApiImageAssetsByIdComplete({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -32340,6 +32457,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiImageAssetsByIdCompleteStatus200,
 			ResponseErrorConfig<
+				| PostApiImageAssetsByIdCompleteStatus400
 				| PostApiImageAssetsByIdCompleteStatus401
 				| PostApiImageAssetsByIdCompleteStatus404
 				| PostApiImageAssetsByIdCompleteStatus409
@@ -32360,6 +32478,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 	const baseOptions = postApiImageAssetsByIdCompleteMutationOptions(config) as UseMutationOptions<
 		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsByIdCompleteStatus400
 			| PostApiImageAssetsByIdCompleteStatus401
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
@@ -32374,6 +32493,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 	return useMutation<
 		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsByIdCompleteStatus400
 			| PostApiImageAssetsByIdCompleteStatus401
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
@@ -32393,6 +32513,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 	) as UseMutationResult<
 		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
+			| PostApiImageAssetsByIdCompleteStatus400
 			| PostApiImageAssetsByIdCompleteStatus401
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
@@ -32401,6 +32522,121 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 			| PostApiImageAssetsByIdCompleteStatus500
 		>,
 		PostApiImageAssetsByIdCompleteOptions,
+		TContext
+	>;
+}
+
+export const putApiImageAssetsByIdPresentationsByRoleMutationKey = () =>
+	[{ url: "/api/image-assets/:id/presentations/:role" }] as const;
+
+export function putApiImageAssetsByIdPresentationsByRoleMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiImageAssetsByIdPresentationsByRoleMutationKey();
+	return mutationOptions<
+		PutApiImageAssetsByIdPresentationsByRoleStatus200,
+		ResponseErrorConfig<
+			| PutApiImageAssetsByIdPresentationsByRoleStatus400
+			| PutApiImageAssetsByIdPresentationsByRoleStatus401
+			| PutApiImageAssetsByIdPresentationsByRoleStatus404
+			| PutApiImageAssetsByIdPresentationsByRoleStatus409
+			| PutApiImageAssetsByIdPresentationsByRoleStatus422
+			| PutApiImageAssetsByIdPresentationsByRoleStatus429
+			| PutApiImageAssetsByIdPresentationsByRoleStatus500
+		>,
+		PutApiImageAssetsByIdPresentationsByRoleOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiImageAssetsByIdPresentationsByRole({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update image asset presentation
+ * {@link /api/image-assets/:id/presentations/:role}
+ */
+export function usePutApiImageAssetsByIdPresentationsByRole<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiImageAssetsByIdPresentationsByRoleStatus200,
+			ResponseErrorConfig<
+				| PutApiImageAssetsByIdPresentationsByRoleStatus400
+				| PutApiImageAssetsByIdPresentationsByRoleStatus401
+				| PutApiImageAssetsByIdPresentationsByRoleStatus404
+				| PutApiImageAssetsByIdPresentationsByRoleStatus409
+				| PutApiImageAssetsByIdPresentationsByRoleStatus422
+				| PutApiImageAssetsByIdPresentationsByRoleStatus429
+				| PutApiImageAssetsByIdPresentationsByRoleStatus500
+			>,
+			PutApiImageAssetsByIdPresentationsByRoleOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiImageAssetsByIdPresentationsByRoleMutationKey();
+
+	const baseOptions = putApiImageAssetsByIdPresentationsByRoleMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiImageAssetsByIdPresentationsByRoleStatus200,
+		ResponseErrorConfig<
+			| PutApiImageAssetsByIdPresentationsByRoleStatus400
+			| PutApiImageAssetsByIdPresentationsByRoleStatus401
+			| PutApiImageAssetsByIdPresentationsByRoleStatus404
+			| PutApiImageAssetsByIdPresentationsByRoleStatus409
+			| PutApiImageAssetsByIdPresentationsByRoleStatus422
+			| PutApiImageAssetsByIdPresentationsByRoleStatus429
+			| PutApiImageAssetsByIdPresentationsByRoleStatus500
+		>,
+		PutApiImageAssetsByIdPresentationsByRoleOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiImageAssetsByIdPresentationsByRoleStatus200,
+		ResponseErrorConfig<
+			| PutApiImageAssetsByIdPresentationsByRoleStatus400
+			| PutApiImageAssetsByIdPresentationsByRoleStatus401
+			| PutApiImageAssetsByIdPresentationsByRoleStatus404
+			| PutApiImageAssetsByIdPresentationsByRoleStatus409
+			| PutApiImageAssetsByIdPresentationsByRoleStatus422
+			| PutApiImageAssetsByIdPresentationsByRoleStatus429
+			| PutApiImageAssetsByIdPresentationsByRoleStatus500
+		>,
+		PutApiImageAssetsByIdPresentationsByRoleOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiImageAssetsByIdPresentationsByRoleStatus200,
+		ResponseErrorConfig<
+			| PutApiImageAssetsByIdPresentationsByRoleStatus400
+			| PutApiImageAssetsByIdPresentationsByRoleStatus401
+			| PutApiImageAssetsByIdPresentationsByRoleStatus404
+			| PutApiImageAssetsByIdPresentationsByRoleStatus409
+			| PutApiImageAssetsByIdPresentationsByRoleStatus422
+			| PutApiImageAssetsByIdPresentationsByRoleStatus429
+			| PutApiImageAssetsByIdPresentationsByRoleStatus500
+		>,
+		PutApiImageAssetsByIdPresentationsByRoleOptions,
 		TContext
 	>;
 }

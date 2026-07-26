@@ -15,7 +15,10 @@ import {
 	createProfileOwnedUnitAccess,
 } from "../../authorization/unit/ownership";
 import { insertUnit } from "../../units/create";
-import { toUnitLocalizationStorage, unitLocalizationImageAssetIds } from "../../units/localization";
+import {
+	toUnitLocalizationStorage,
+	unitLocalizationImageAssetReferences,
+} from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import type { CreateCatalogUnitBody } from "./schema";
 
@@ -28,7 +31,7 @@ export async function createCatalogUnit(
 		await ensureImageAssetsAttachable(
 			tx,
 			ownerId,
-			unitLocalizationImageAssetIds(body.localization),
+			unitLocalizationImageAssetReferences(body.localization),
 		);
 		const created = await insertUnit(tx, {
 			kind: type,

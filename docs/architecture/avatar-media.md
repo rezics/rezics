@@ -64,6 +64,41 @@ Images continue to use managed image assets. Only the image variant owns an
 asset foreign key. Replacing an avatar with emoji or icon clears that foreign
 key and every other inactive payload column.
 
+## ImageAsset presentations
+
+The immutable original and its rendering intent have separate storage
+responsibilities:
+
+- `image_object` owns the decoded, auto-oriented width and height alongside
+  the original media type and byte size.
+- `image_asset_presentation` is a child of `image_asset`, keyed by
+  `(asset_id, role)`. It owns `fit`, a normalized crop rectangle, and a
+  monotonically increasing `revision`.
+- Unit localization rows continue to reference only the ImageAsset identity.
+  Attachment validation requires a ready presentation for the referenced role.
+
+Avatar and banner use the same fixed-crop strategy. Avatar is 1:1, defaults to
+a centered crop, and receives its circle only as a rendering mask. Banner is
+4:1 and defaults to a top-left crop. Cover defaults to `contain`, preserving the
+complete source in the 3:4 Cover component with its blurred backdrop; authors
+may explicitly choose a 3:4 crop.
+
+Crop coordinates are fractions of the auto-oriented original rather than
+provider-specific transformation strings. The delivery boundary converts the
+rectangle into top/right/bottom/left pixel trim, then resizes and negotiates
+AVIF or WebP when accepted, with PNG/JPEG fallback. Derived objects use a key
+containing role, presentation revision, output size, and format, and are stored
+with immutable cache metadata. The stable presentation route has a short edge
+cache lifetime and varies by `Accept`; mutation responses append the revision
+as a cache-busting query.
+
+PostgreSQL enforces row-local invariants: only Cover may use `contain`, crop
+coordinates must be complete and bounded, and revisions must be positive.
+Effective pixel aspect ratio depends on `image_object` dimensions, so the
+ImageAsset service validates it against the immutable ready-object dimensions
+before each presentation write rather than placing a cross-table assumption in
+a `CHECK` constraint.
+
 ## Changing provider or version
 
 Provider support is centralized in `@rezics/avatar`, the database constraints,

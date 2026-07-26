@@ -41,7 +41,7 @@ export function Banner({
 					<img
 						alt={alt}
 						className={cn(
-							"absolute inset-x-0 top-1/2 z-10 h-auto w-full -translate-y-1/2",
+							"absolute inset-0 z-10 size-full object-cover object-left-top",
 							imageClassName,
 						)}
 						data-slot="banner-image"

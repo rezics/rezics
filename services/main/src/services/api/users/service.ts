@@ -66,6 +66,6 @@ export async function presentProfile<
 		visibility: profile.visibility.toLowerCase(),
 		description: parseNullableDocument(PortableTextDocument, profile.description),
 		avatar: presentAvatar(avatar),
-		banner: presentImageAsset(bannerAssetId),
+		banner: presentImageAsset(bannerAssetId, "banner"),
 	};
 }

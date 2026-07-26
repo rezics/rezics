@@ -177,6 +177,7 @@ export default {
 	ImageAssetInvalidSize: "The image size is invalid.",
 	ImageAssetContentMismatch: "The image content does not match its upload declaration.",
 	ImageAssetInvalidState: "The image asset state does not allow this operation.",
+	ImageAssetInvalidPresentation: "The displayed area is invalid for this image and role.",
 	ImageAssetInUse: "An image asset in use cannot be deleted.",
 	UnitPrimaryLanguageMissing: "The primary language must have an existing localization.",
 	InvalidSlug: `${unitSlugTerms.label} must be a 1-63 character lowercase ${verbatimTerms.ascii.value} hyphenated label.`,

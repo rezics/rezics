@@ -325,7 +325,6 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 							onChange={setBanner}
 							options={bannerOptions}
 							role="banner"
-							shape="banner"
 							value={banner}
 						/>
 					</Field>
@@ -433,7 +432,6 @@ export function EntityCreatePage() {
 						<LocalizationImageUploadField
 							onChange={setBanner}
 							role="banner"
-							shape="banner"
 							value={banner}
 						/>
 					</Field>

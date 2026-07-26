@@ -185,7 +185,6 @@ export function RealmCreatePage() {
 							<LocalizationImageUploadField
 								onChange={setBanner}
 								role="banner"
-								shape="banner"
 								value={banner}
 							/>
 						</Field>

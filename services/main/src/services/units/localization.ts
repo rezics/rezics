@@ -28,13 +28,19 @@ export interface UnitLocalizationAvatarColumns {
 	avatarIconName: string | null;
 }
 
-export function unitLocalizationImageAssetIds(
+export function unitLocalizationImageAssetReferences(
 	input: UnitLocalizationImageAssetInput,
-): readonly (string | null | undefined)[] {
+): readonly {
+	readonly assetId: string | null | undefined;
+	readonly role: "avatar" | UnitLocalizationImageRole;
+}[] {
 	return [
-		input.avatar?.type === "image" ? input.avatar.image.assetId : undefined,
-		input.bannerAssetId,
-		input.coverAssetId,
+		{
+			assetId: input.avatar?.type === "image" ? input.avatar.image.assetId : undefined,
+			role: "avatar",
+		},
+		{ assetId: input.bannerAssetId, role: "banner" },
+		{ assetId: input.coverAssetId, role: "cover" },
 	];
 }
 

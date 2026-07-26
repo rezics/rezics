@@ -26,7 +26,7 @@ import {
 	resolvedUnitLocalizationTitle,
 	resolveUnitLocalizationAvatarFromOrdered,
 	toUnitLocalizationStorage,
-	unitLocalizationImageAssetIds,
+	unitLocalizationImageAssetReferences,
 } from "./localization";
 import {
 	book,
@@ -46,6 +46,7 @@ import {
 	unitVariant,
 	ContentStructurePreviewCapability,
 } from "../database/schema";
+import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
 import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors";
@@ -108,8 +109,15 @@ export interface UpdateUnitInput {
 	};
 }
 
-export function presentImageAsset(assetId: string | null) {
-	return assetId ? { id: assetId, url: imageAssetContentUrl(assetId) } : null;
+export function presentImageAsset(assetId: string | null, role?: "avatar" | "banner" | "cover") {
+	return assetId
+		? {
+				id: assetId,
+				url: role
+					? imageAssetPresentationContentUrl(assetId, role)
+					: imageAssetContentUrl(assetId),
+			}
+		: null;
 }
 
 export async function createUnit(
@@ -122,7 +130,7 @@ export async function createUnit(
 		await ensureImageAssetsAttachable(
 			tx,
 			ownerId,
-			unitLocalizationImageAssetIds(input.localization),
+			unitLocalizationImageAssetReferences(input.localization),
 		);
 		const created = await insertUnit(tx, {
 			kind,
@@ -340,9 +348,11 @@ export async function getUnit(
 		avatar: presentAvatar(resolveUnitLocalizationAvatarFromOrdered(localizations)),
 		banner: presentImageAsset(
 			localizations.find(({ bannerAssetId }) => bannerAssetId)?.bannerAssetId ?? null,
+			"banner",
 		),
 		cover: presentImageAsset(
 			localizations.find(({ coverAssetId }) => coverAssetId)?.coverAssetId ?? null,
+			"cover",
 		),
 		localizations: localizations.map(
 			({
@@ -369,8 +379,8 @@ export async function getUnit(
 						avatarIconName,
 					}),
 				),
-				banner: presentImageAsset(bannerAssetId),
-				cover: presentImageAsset(coverAssetId),
+				banner: presentImageAsset(bannerAssetId, "banner"),
+				cover: presentImageAsset(coverAssetId, "cover"),
 			}),
 		),
 		subjectAssociations,
@@ -474,8 +484,8 @@ export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string]
 			...row,
 			attributions: attributions.get(row.id) ?? [],
 			avatar: presentAvatar(avatar),
-			banner: presentImageAsset(bannerAssetId),
-			cover: presentImageAsset(coverAssetId),
+			banner: presentImageAsset(bannerAssetId, "banner"),
+			cover: presentImageAsset(coverAssetId, "cover"),
 		})),
 	);
 }
@@ -647,7 +657,7 @@ export async function upsertLocalization(
 		await ensureImageAssetsAttachable(
 			tx,
 			authorization.profileId,
-			unitLocalizationImageAssetIds(input),
+			unitLocalizationImageAssetReferences(input),
 		);
 		await tx
 			.insert(unitLocalization)

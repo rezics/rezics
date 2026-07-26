@@ -7,8 +7,8 @@ import {
 	usePostApiImageAssets,
 	usePostApiImageAssetsByIdComplete,
 } from "@rezics/openapi-tanstack-query";
-import { Eye, EyeOff, ImagePlus, RefreshCw, Trash2, X } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { ImagePlus, RefreshCw, Scan, Trash2, X } from "lucide-react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import {
 	Banner,
@@ -27,14 +27,15 @@ import {
 	cn,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import type { ImageAssetPresentationRole } from "../model/image-asset-presentation";
 
-export type LocalizationImagePresentation =
-	| { role: "avatar"; shape: "avatar" }
-	| { role: "banner"; shape: "banner" }
-	| { role: "cover"; shape: "landscape" | "portrait" };
+const ImageAssetPresentationEditor = lazy(() =>
+	import("./image-asset-presentation-editor").then(({ ImageAssetPresentationEditor }) => ({
+		default: ImageAssetPresentationEditor,
+	})),
+);
 
-export type LocalizationImageRole = LocalizationImagePresentation["role"];
-export type LocalizationImageShape = LocalizationImagePresentation["shape"];
+export type LocalizationImageRole = ImageAssetPresentationRole;
 
 export interface LocalizationImageAssetValue {
 	id: string;
@@ -45,12 +46,14 @@ export interface LocalizationImageAssetOption extends LocalizationImageAssetValu
 	label: string;
 }
 
-type LocalizationImageUploadFieldProps = LocalizationImagePresentation & {
+type LocalizationImageUploadFieldProps = {
 	value: LocalizationImageAssetValue | null;
 	onChange: (value: LocalizationImageAssetValue | null) => void;
 	fallback?: LocalizationImageAssetValue | null;
 	options?: readonly LocalizationImageAssetOption[];
 	allowRemove?: boolean;
+	onPresentationSaved?: () => void;
+	role: LocalizationImageRole;
 };
 
 const AcceptedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
@@ -61,8 +64,8 @@ export function LocalizationImageUploadField({
 	fallback = null,
 	options = [],
 	allowRemove = true,
+	onPresentationSaved,
 	role,
-	shape,
 }: LocalizationImageUploadFieldProps) {
 	const { t } = useTranslation(["media"]);
 	const copy = t.media.roles[role];
@@ -72,10 +75,10 @@ export function LocalizationImageUploadField({
 	const xhr = useRef<XMLHttpRequest | null>(null);
 	const [files, setFiles] = useState<File[]>([]);
 	const [preview, setPreview] = useState<string>();
-	const [showOriginal, setShowOriginal] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [error, setError] = useState<string>();
-	const originalPreviewId = useId();
+	const [editorAssetId, setEditorAssetId] = useState<string>();
+	const [editorOpen, setEditorOpen] = useState(false);
 	const displayed = preview ?? value?.url ?? fallback?.url;
 
 	useEffect(
@@ -89,7 +92,6 @@ export function LocalizationImageUploadField({
 	async function choose(file?: File) {
 		if (!file) return;
 		setError(undefined);
-		setShowOriginal(false);
 		if (!AcceptedTypes.includes(file.type) || file.size > 10_485_760) {
 			setError(t.media.invalid);
 			return;
@@ -103,8 +105,17 @@ export function LocalizationImageUploadField({
 			});
 			assetId = asset.id;
 			await uploadFile(asset.upload.url, asset.upload.headers, file, setProgress, xhr);
-			const completed = await completeUpload.mutateAsync({ path: { id: asset.id } });
-			onChange({ id: completed.id, url: completed.contentUrl });
+			const completed = await completeUpload.mutateAsync({
+				path: { id: asset.id },
+				body: { role },
+			});
+			const presentation = completed.presentations.find((item) => item.role === role);
+			if (!presentation) throw new Error("Completed image has no requested presentation");
+			if (preview) URL.revokeObjectURL(preview);
+			setPreview(undefined);
+			onChange({ id: completed.id, url: presentation.contentUrl });
+			setEditorAssetId(completed.id);
+			setEditorOpen(true);
 		} catch {
 			if (assetId)
 				await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
@@ -120,7 +131,6 @@ export function LocalizationImageUploadField({
 		onChange(null);
 		setProgress(0);
 		setFiles([]);
-		setShowOriginal(false);
 		if (preview) URL.revokeObjectURL(preview);
 		setPreview(undefined);
 		setError(undefined);
@@ -148,7 +158,6 @@ export function LocalizationImageUploadField({
 						const selected = options.find(({ id }) => id === event.currentTarget.value);
 						onChange(selected ? { id: selected.id, url: selected.url } : null);
 						setPreview(undefined);
-						setShowOriginal(false);
 					}}
 				>
 					<NativeSelectOption value="">{copy.inherit}</NativeSelectOption>
@@ -168,13 +177,11 @@ export function LocalizationImageUploadField({
 			<FileUploadDropzone
 				className={cn(
 					"group bg-muted/45 relative grid max-w-md place-items-center overflow-hidden border-dashed p-0 transition-colors",
-					shape === "avatar"
-						? "aspect-square max-w-48 rounded-full"
-						: shape === "banner"
+					role === "avatar"
+						? "aspect-square max-w-48"
+						: role === "banner"
 							? "aspect-[4/1] max-w-2xl"
-							: shape === "landscape"
-								? "aspect-video"
-								: "aspect-[3/4] max-h-96",
+							: "aspect-[3/4] max-h-96",
 				)}
 				disableClick={Boolean(displayed)}
 				onPaste={(event) => {
@@ -185,9 +192,9 @@ export function LocalizationImageUploadField({
 				}}
 			>
 				{displayed ? (
-					shape === "portrait" ? (
+					role === "cover" ? (
 						<Cover alt="" className="size-full rounded-none" src={displayed} />
-					) : shape === "banner" ? (
+					) : role === "banner" ? (
 						<Banner alt="" className="size-full rounded-none" src={displayed} />
 					) : (
 						<img alt="" className="size-full object-cover" src={displayed} />
@@ -209,55 +216,26 @@ export function LocalizationImageUploadField({
 					</div>
 				)}
 			</FileUploadDropzone>
-			{displayed && shape === "banner" ? (
-				<div className="grid max-w-2xl gap-2">
-					<p className="text-muted-foreground text-xs leading-5">
-						{t.media.bannerPreview.description}
-					</p>
-					<Button
-						aria-controls={originalPreviewId}
-						aria-expanded={showOriginal}
-						className="w-fit"
-						onClick={() => setShowOriginal((visible) => !visible)}
-						size="sm"
-						type="button"
-						variant="quiet"
-					>
-						{showOriginal ? (
-							<EyeOff aria-hidden className="size-3.5" />
-						) : (
-							<Eye aria-hidden className="size-3.5" />
-						)}
-						{showOriginal
-							? t.media.bannerPreview.hideOriginal
-							: t.media.bannerPreview.showOriginal}
-					</Button>
-					{showOriginal ? (
-						<div
-							className="grid gap-2 rounded-xl border bg-muted/30 p-3"
-							id={originalPreviewId}
-						>
-							<p className="font-medium text-foreground text-xs">
-								{t.media.bannerPreview.original}
-							</p>
-							<div className="flex max-h-80 justify-center overflow-hidden rounded-lg bg-surface-container">
-								<div className="relative inline-block max-h-72 max-w-full overflow-hidden">
-									<img
-										alt=""
-										className="block max-h-72 max-w-full object-contain"
-										src={displayed}
-									/>
-									<div
-										aria-hidden
-										className="pointer-events-none absolute inset-x-0 top-1/2 aspect-[4/1] -translate-y-1/2 border-2 border-primary shadow-[0_0_0_9999px_rgb(0_0_0/0.5)]"
-									/>
-								</div>
-							</div>
-						</div>
-					) : null}
-				</div>
+			{displayed && role === "banner" ? (
+				<p className="max-w-2xl text-muted-foreground text-xs leading-5">
+					{t.media.bannerPreview.description}
+				</p>
 			) : null}
 			<div className="flex flex-wrap gap-2">
+				{value ? (
+					<Button
+						onClick={() => {
+							setEditorAssetId(value.id);
+							setEditorOpen(true);
+						}}
+						size="sm"
+						type="button"
+						variant="outline"
+					>
+						<Scan aria-hidden className="size-3.5" />
+						{t.media.editPresentation}
+					</Button>
+				) : null}
 				{displayed && (
 					<FileUploadTrigger asChild>
 						<Button disabled={busy} size="sm" type="button" variant="outline">
@@ -285,6 +263,26 @@ export function LocalizationImageUploadField({
 				)}
 			</div>
 			{error && <p className="text-destructive text-sm">{error}</p>}
+			{editorAssetId ? (
+				<Suspense
+					fallback={
+						<p className="text-muted-foreground text-sm">
+							{t.media.presentationEditor.loading}
+						</p>
+					}
+				>
+					<ImageAssetPresentationEditor
+						assetId={editorAssetId}
+						onOpenChange={setEditorOpen}
+						onSaved={(asset) => {
+							onChange(asset);
+							onPresentationSaved?.();
+						}}
+						open={editorOpen}
+						role={role}
+					/>
+				</Suspense>
+			) : null}
 		</FileUpload>
 	);
 }

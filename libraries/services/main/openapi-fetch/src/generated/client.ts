@@ -19,6 +19,8 @@ import type {
 	GetApiUnitByUnitIdAssociationProposalsResponses,
 	GetImageAssetsByIdContentOptions,
 	GetImageAssetsByIdContentResponses,
+	GetImageAssetsByIdPresentationsByRoleContentOptions,
+	GetImageAssetsByIdPresentationsByRoleContentResponses,
 	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
 	PostApiUnitByUnitIdAssociationProposalsRequestsResponses,
 	PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
@@ -595,12 +597,32 @@ import type {
 	PostApiImageAssetsResponses,
 	PostApiImageAssetsByIdCompleteOptions,
 	PostApiImageAssetsByIdCompleteResponses,
+	PutApiImageAssetsByIdPresentationsByRoleOptions,
+	PutApiImageAssetsByIdPresentationsByRoleResponses,
 	GetApiImageAssetsByIdOptions,
 	GetApiImageAssetsByIdResponses,
 	DeleteApiImageAssetsByIdOptions,
 	DeleteApiImageAssetsByIdResponses,
 } from "./models";
 import { client } from "./.kubb/client";
+
+/**
+ * @summary Resolve rendered image asset presentation
+ * {@link /image-assets/:id/presentations/:role/content}
+ */
+export function getImageAssetsByIdPresentationsByRoleContent<ThrowOnError extends boolean = true>(
+	options: Options<GetImageAssetsByIdPresentationsByRoleContentOptions, ThrowOnError>,
+): Promise<RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/image-assets/{id}/presentations/{role}/content",
+		...config,
+	}) as Promise<
+		RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>
+	>;
+}
 
 /**
  * @summary Resolve image asset content
@@ -6447,6 +6469,26 @@ export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = tr
 		],
 		...config,
 	}) as Promise<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Update image asset presentation
+ * {@link /api/image-assets/:id/presentations/:role}
+ */
+export function putApiImageAssetsByIdPresentationsByRole<ThrowOnError extends boolean = true>(
+	options: Options<PutApiImageAssetsByIdPresentationsByRoleOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiImageAssetsByIdPresentationsByRoleResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/image-assets/{id}/presentations/{role}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiImageAssetsByIdPresentationsByRoleResponses, ThrowOnError>>;
 }
 
 /**

@@ -170,6 +170,10 @@ export const ModerationStatusValues = ["approved", "pending", "removed"] as cons
 export const ContentStatusValues = ["draft", "published", "archived"] as const;
 export const ImageAssetStatusValues = ["pending", "ready", "failed"] as const;
 export const ImageAssetAccessValues = ["private", "public"] as const;
+export const ImageAssetPresentationRoleValues = ["avatar", "banner", "cover"] as const;
+export type ImageAssetPresentationRole = (typeof ImageAssetPresentationRoleValues)[number];
+export const ImageAssetPresentationFitValues = ["crop", "contain"] as const;
+export type ImageAssetPresentationFit = (typeof ImageAssetPresentationFitValues)[number];
 export const PostKindValues = [
 	"post",
 	"reply",

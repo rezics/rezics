@@ -14,7 +14,7 @@ import {
 	type VariantCapableUnitKind,
 	VariantCapableUnitKindValues,
 } from "../database/schema";
-import { imageAssetContentUrl } from "../api/image-assets/service";
+import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import { isPrimaryUnitLocalization, firstUnitLocalizationCoverAssetId } from "./localization";
 import {
 	UnitNotFound,
@@ -207,7 +207,10 @@ async function readableSummaries(
 			type: row.type,
 			title: row.title,
 			cover: row.coverAssetId
-				? { id: row.coverAssetId, url: imageAssetContentUrl(row.coverAssetId) }
+				? {
+						id: row.coverAssetId,
+						url: imageAssetPresentationContentUrl(row.coverAssetId, "cover"),
+					}
 				: null,
 		});
 	}
@@ -296,7 +299,10 @@ export async function getUnitSeriesMemberships(
 				id: row.seriesId,
 				title: row.title,
 				cover: row.coverAssetId
-					? { id: row.coverAssetId, url: imageAssetContentUrl(row.coverAssetId) }
+					? {
+							id: row.coverAssetId,
+							url: imageAssetPresentationContentUrl(row.coverAssetId, "cover"),
+						}
 					: null,
 			},
 			releaseUnitId: row.releaseUnitId,
