@@ -15,6 +15,7 @@ export default async function Page({
 	if (!isUuid(id)) notFound();
 	const route = parseRealmSettingsPath(section);
 	if (!route) notFound();
+	if (route.memberProfileId && !isUuid(route.memberProfileId)) notFound();
 	const suffix = section?.length ? `/${section.join("/")}` : "";
 	const revisionQuery = new URLSearchParams();
 	if (route.comparison && query.from) revisionQuery.set("from", query.from);
@@ -31,6 +32,7 @@ export default async function Page({
 			}
 			realmId={id}
 			section={route.section}
+			memberProfileId={route.memberProfileId}
 		/>
 	);
 }

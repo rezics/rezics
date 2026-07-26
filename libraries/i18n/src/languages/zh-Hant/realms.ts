@@ -1,8 +1,12 @@
+import { insert } from "native-i18n";
+
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 
 export default {
 	title: realmTerms.pluralLabel,
@@ -26,10 +30,6 @@ export default {
 				description: "管理名稱、摘要、圖片、生命週期、加入方式與公開網址。",
 			},
 			members: { label: "成員與角色", description: "管理成員角色、狀態與參與資格。" },
-			"member-access": {
-				label: "成員細部權限",
-				description: `檢視角色與平台授權來源，並管理成員的${realmTerms.label}直接授權。`,
-			},
 			rules: { label: "規則", description: "編輯多語規則與需要確認規則的操作。" },
 			pins: { label: "置頂內容", description: "管理置頂與精選內容，以及顯示順序。" },
 			access: {
@@ -59,15 +59,39 @@ export default {
 	unknownMember: "未知成員",
 	memberRole: "角色",
 	memberState: "狀態",
+	membersView: {
+		searchLabel: "搜尋成員",
+		searchPlaceholder: `依名稱或 ${verbatimTerms.profileSlugPrefix.value}${unitSlugTerms.inline}搜尋`,
+		roleFilter: "依角色篩選",
+		allRoles: "所有角色",
+		stateFilter: "依狀態篩選",
+		allStates: "所有狀態",
+		resultCount: insert("顯示 {{visible}} 位，共 {{total}} 位成員", {
+			visible: Number,
+			total: Number,
+		}),
+		selectAll: "選取目前顯示的所有成員",
+		selectMember: insert("選取{{member}}", { member: String }),
+		selectedCount: insert("已選取 {{count}} 位", { count: Number }),
+		bulkRole: "變更角色",
+		bulkState: "變更狀態",
+		roleFor: insert("{{member}}的角色", { member: String }),
+		stateFor: insert("{{member}}的狀態", { member: String }),
+		actionsFor: insert("{{member}}的操作", { member: String }),
+		editPermissions: "編輯成員細部權限",
+		noMatches: "沒有符合目前篩選條件的成員。",
+	},
 	memberAccess: {
-		selectMember: "選擇成員",
-		selectMemberPlaceholder: "請選擇一位正常狀態的成員",
+		title: insert("{{member}}的細部權限", { member: String }),
+		description: `檢視繼承的權限來源，並管理這位成員的${realmTerms.label}直接授權。所有變更都會自動儲存。`,
+		backToMembers: "返回成員與角色",
 		directAccess: `${realmTerms.label}直接授權`,
 		effectiveSources: "生效來源",
 		expiry: "整組直接授權到期時間",
 		noExpiry: "不設到期時間",
-		mixedExpiry: "目前直接授權的到期時間不同；儲存前請明確選擇新的共同到期時間。",
-		save: "儲存成員細部權限",
+		mixedExpiry: "目前直接授權的到期時間不同；編輯權限前，請先選擇新的共同到期時間。",
+		saving: "正在儲存變更……",
+		autoSaveHint: "角色、狀態與權限變更都會自動儲存。",
 		noDirectAccess: `這位成員目前沒有${realmTerms.label}直接授權。`,
 	},
 	roles: {

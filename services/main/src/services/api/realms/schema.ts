@@ -70,6 +70,7 @@ export const JoinRealmBody = t.Object({
 export type JoinRealmBody = Static<typeof JoinRealmBody>;
 
 export const ListRealmMembersQuery = t.Object({
+	profileId: t.Optional(Uuid),
 	state: t.Optional(RealmMemberState),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 });

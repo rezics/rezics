@@ -10,3 +10,7 @@ export function realmSettingsSectionHref(
 export function realmSettingsHistoryCompareHref(baseHref: string): string {
 	return `${realmSettingsSectionHref(baseHref, "history")}/compare`;
 }
+
+export function realmMemberPermissionsHref(baseHref: string, profileId: string): string {
+	return `${realmSettingsSectionHref(baseHref, "members")}/${encodeURIComponent(profileId)}/permissions`;
+}

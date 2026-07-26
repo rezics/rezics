@@ -26,7 +26,7 @@ export default {
 	preview: "預覽",
 	placeholder: "開始撰寫，或輸入 / 插入內容區塊。",
 	slashMenu: "插入",
-	slashHint: "輸入 / 插入區塊；輸入 u/、t/、e/、r/、z/ 插入項目提及。",
+	slashHint: `輸入 / 插入區塊；輸入 ${verbatimTerms.profileSlugPrefix.value}、t/、e/、r/、z/ 插入項目提及。`,
 	mentionSearchPrompt: "請輸入文字以搜尋。",
 	mentionUsers: "使用者",
 	mentionTags: "標籤",

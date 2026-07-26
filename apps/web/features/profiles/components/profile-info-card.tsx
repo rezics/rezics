@@ -1,4 +1,5 @@
 import type { PresentedAvatar } from "@rezics/avatar";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { IdentityAvatar } from "@rezics/ui";
 
 export interface ProfileInfoCardData {
@@ -24,7 +25,8 @@ export function ProfileInfoCard({ profile }: { profile: ProfileInfoCardData }) {
 					<p className="truncate font-heading font-bold text-base">{profile.name}</p>
 					{profile.slug ? (
 						<p className="truncate font-mono text-muted-foreground text-xs">
-							@{profile.slug}
+							{verbatimTerms.profileSlugPrefix.value}
+							{profile.slug}
 						</p>
 					) : null}
 				</div>

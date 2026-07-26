@@ -1,5 +1,6 @@
 "use client";
 
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import {
 	getApiUsersByIdQueryKey,
 	type GetApiUsersByIdStatus200,
@@ -121,7 +122,8 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 							</h1>
 							{user.slugAddress ? (
 								<p className="mt-1 font-mono text-muted-foreground text-sm">
-									@{user.slugAddress.slug}
+									{verbatimTerms.profileSlugPrefix.value}
+									{user.slugAddress.slug}
 								</p>
 							) : null}
 							{user.summary ? (

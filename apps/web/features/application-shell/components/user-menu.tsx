@@ -1,6 +1,7 @@
 "use client";
 
 import { isUiLocale, type UiLocale } from "@rezics/i18n";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
@@ -179,7 +180,7 @@ function DesktopUserMenu({
 							<span className="block truncate font-medium">{name}</span>
 							<span className="block truncate text-muted-foreground text-xs">
 								{profile?.slugAddress
-									? `@${profile.slugAddress.slug}`
+									? `${verbatimTerms.profileSlugPrefix.value}${profile.slugAddress.slug}`
 									: t.nav.userMenu.viewProfile}
 							</span>
 						</span>
@@ -390,7 +391,7 @@ function MobileUserMenu(model: UserMenuModel) {
 										<span className="block truncate font-medium">{name}</span>
 										<span className="block truncate text-muted-foreground text-xs">
 											{profile?.slugAddress
-												? `@${profile.slugAddress.slug}`
+												? `${verbatimTerms.profileSlugPrefix.value}${profile.slugAddress.slug}`
 												: t.nav.userMenu.viewProfile}
 										</span>
 									</span>

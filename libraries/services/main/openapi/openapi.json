@@ -109809,6 +109809,12 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "profileId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
 						"name": "state",
 						"in": "query",
 						"required": false,
@@ -109848,6 +109854,8 @@
 												"required": [
 													"profileId",
 													"name",
+													"slugAddress",
+													"avatar",
 													"role",
 													"state",
 													"joinedAt"
@@ -109864,8 +109872,164 @@
 															{ "type": "null" }
 														]
 													},
-													"role": { "type": "string" },
-													"state": { "type": "string" },
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"image"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"image": {
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"url"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"url": {
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"emoji"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "emoji",
+																				"type": "string"
+																			},
+																			"emoji": {
+																				"maxLength": 64,
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"icon"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "icon",
+																				"type": "string"
+																			},
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"provider",
+																					"prefix",
+																					"name"
+																				],
+																				"properties": {
+																					"provider": {
+																						"const": "font-awesome",
+																						"type": "string"
+																					},
+																					"prefix": {
+																						"type": "string",
+																						"enum": [
+																							"fas",
+																							"fab"
+																						]
+																					},
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"role": {
+														"default": "owner",
+														"type": "string",
+														"enum": [
+															"owner",
+															"admin",
+															"moderator",
+															"member"
+														]
+													},
+													"state": {
+														"default": "active",
+														"type": "string",
+														"enum": [
+															"active",
+															"pending",
+															"muted",
+															"removed",
+															"banned"
+														]
+													},
 													"joinedAt": {
 														"format": "date-time",
 														"type": "string"
@@ -110017,8 +110181,22 @@
 									"properties": {
 										"realmId": { "format": "uuid", "type": "string" },
 										"profileId": { "format": "uuid", "type": "string" },
-										"role": { "type": "string" },
-										"state": { "type": "string" },
+										"role": {
+											"default": "owner",
+											"type": "string",
+											"enum": ["owner", "admin", "moderator", "member"]
+										},
+										"state": {
+											"default": "active",
+											"type": "string",
+											"enum": [
+												"active",
+												"pending",
+												"muted",
+												"removed",
+												"banned"
+											]
+										},
 										"joinedAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}

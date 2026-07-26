@@ -25,6 +25,7 @@ import {
 	RealmInfoCard,
 	type RealmInfoCardData,
 } from "@/features/realms/components/realm-info-card";
+import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
 import type { UnitScore } from "@/features/reviews/model/score-value";
 import { isKnownAttributionRole } from "@/features/units/attribution-role";
 import { useTranslation } from "@/i18n/client";
@@ -433,6 +434,19 @@ function FeedAttributionInfoCard({
 	attribution: FeedAttributionContext;
 	roleLabel: string;
 }) {
+	if (attribution.kind === "profile")
+		return (
+			<ProfileInfoCard
+				profile={{
+					id: attribution.id,
+					name: attribution.name,
+					initials: attribution.initials,
+					avatar: attribution.avatar,
+					slug: attribution.slug,
+					summary: attribution.summary,
+				}}
+			/>
+		);
 	return (
 		<div className="grid gap-3" data-slot="attribution-info-card">
 			<div className="flex min-w-0 items-center gap-3">
@@ -444,12 +458,7 @@ function FeedAttributionInfoCard({
 				/>
 				<div className="min-w-0">
 					<p className="truncate font-heading font-bold text-base">{attribution.name}</p>
-					<p className="truncate text-muted-foreground text-xs">
-						{roleLabel}
-						{attribution.kind === "profile" && attribution.slug
-							? ` · @${attribution.slug}`
-							: null}
-					</p>
+					<p className="truncate text-muted-foreground text-xs">{roleLabel}</p>
 				</div>
 			</div>
 			{attribution.summary ? (

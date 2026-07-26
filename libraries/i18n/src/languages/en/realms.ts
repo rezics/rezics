@@ -1,8 +1,12 @@
+import { insert } from "native-i18n";
+
 import { enTerminology } from "@rezics/i18n/terminology/en";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: unitSlugTerms } = enTerminology.unitSlug;
 
 export default {
 	title: realmTerms.pluralLabel,
@@ -29,10 +33,6 @@ export default {
 			members: {
 				label: "Members and roles",
 				description: "Manage member roles, states, and participation eligibility.",
-			},
-			"member-access": {
-				label: "Member capabilities",
-				description: `Review role and platform sources and manage direct ${realmTerms.label} grants for members.`,
 			},
 			rules: {
 				label: "Rules",
@@ -76,16 +76,40 @@ export default {
 	unknownMember: "Unknown member",
 	memberRole: "Role",
 	memberState: "State",
+	membersView: {
+		searchLabel: "Search members",
+		searchPlaceholder: `Search by name or ${verbatimTerms.profileSlugPrefix.value}${unitSlugTerms.inline}`,
+		roleFilter: "Filter by role",
+		allRoles: "All roles",
+		stateFilter: "Filter by status",
+		allStates: "All statuses",
+		resultCount: insert("{{visible}} of {{total}} members", {
+			visible: Number,
+			total: Number,
+		}),
+		selectAll: "Select all visible members",
+		selectMember: insert("Select {{member}}", { member: String }),
+		selectedCount: insert("{{count}} selected", { count: Number }),
+		bulkRole: "Change role",
+		bulkState: "Change status",
+		roleFor: insert("Role for {{member}}", { member: String }),
+		stateFor: insert("Status for {{member}}", { member: String }),
+		actionsFor: insert("Actions for {{member}}", { member: String }),
+		editPermissions: "Edit member permissions",
+		noMatches: "No members match these filters.",
+	},
 	memberAccess: {
-		selectMember: "Select a member",
-		selectMemberPlaceholder: "Choose an active member",
+		title: insert("Permissions for {{member}}", { member: String }),
+		description: `Review inherited access and manage direct ${realmTerms.label} grants. Changes are saved automatically.`,
+		backToMembers: "Back to members and roles",
 		directAccess: `Direct ${realmTerms.label} grants`,
 		effectiveSources: "Effective sources",
 		expiry: "Direct-grant bundle expiry",
 		noExpiry: "No expiry",
 		mixedExpiry:
-			"These direct grants have different expiries. Choose a new shared expiry before saving.",
-		save: "Save member capabilities",
+			"These direct grants have different expiries. Choose a new shared expiry before editing permissions.",
+		saving: "Saving changes…",
+		autoSaveHint: "Role, status, and permission changes are saved automatically.",
 		noDirectAccess: `This member currently has no direct ${realmTerms.label} grants.`,
 	},
 	roles: {

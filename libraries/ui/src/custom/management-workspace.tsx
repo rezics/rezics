@@ -204,15 +204,22 @@ export function ManagementWorkspaceSectionHeader({
 	action,
 	link,
 	showBackOnMobile = true,
-}: ManagementWorkspaceHeaderProps & { showBackOnMobile?: boolean }) {
+	showBackOnDesktop = false,
+}: ManagementWorkspaceHeaderProps & {
+	showBackOnMobile?: boolean;
+	showBackOnDesktop?: boolean;
+}) {
 	const Link = link;
 	return (
 		<header className="mb-8 flex flex-wrap items-start justify-between gap-4">
 			<div className="min-w-0">
-				{showBackOnMobile ? (
+				{showBackOnMobile || showBackOnDesktop ? (
 					<Button
 						asChild
-						className="-ms-2 mb-3 w-fit md:hidden"
+						className={cn(
+							"-ms-2 mb-3 w-fit",
+							showBackOnDesktop ? undefined : "md:hidden",
+						)}
 						size="sm"
 						variant="quiet"
 					>

@@ -23,7 +23,6 @@ import {
 	Pin,
 	ScrollText,
 	ShieldCheck,
-	ShieldEllipsis,
 	UserRound,
 	UsersRound,
 } from "lucide-react";
@@ -40,7 +39,8 @@ import { useTranslation } from "@/i18n/client";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./realm-moderation";
 import { RealmMemberAccess } from "./realm-member-access";
-import { RealmMembers, RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
+import { RealmMembers } from "./realm-members";
+import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
 import { invalidateRealmDetails } from "./query";
 import {
@@ -53,11 +53,13 @@ export function RealmSettingsWorkspacePage({
 	baseHref,
 	section,
 	comparison,
+	memberProfileId,
 }: {
 	realmId: string;
 	baseHref: string;
 	section?: RealmSettingsSectionId;
 	comparison?: { from: string | null; to: string | null };
+	memberProfileId?: string;
 }) {
 	return (
 		<RequireSession>
@@ -66,6 +68,7 @@ export function RealmSettingsWorkspacePage({
 				comparison={comparison}
 				realmId={realmId}
 				section={section}
+				memberProfileId={memberProfileId}
 			/>
 		</RequireSession>
 	);
@@ -76,11 +79,13 @@ function RealmSettingsWorkspaceContent({
 	baseHref,
 	section,
 	comparison,
+	memberProfileId,
 }: {
 	realmId: string;
 	baseHref: string;
 	section?: RealmSettingsSectionId;
 	comparison?: { from: string | null; to: string | null };
+	memberProfileId?: string;
 }) {
 	const { t, locale } = useTranslation(["errors", "history", "realms"]);
 	const realm = useGetApiRealmsByRealmId({
@@ -112,13 +117,6 @@ function RealmSettingsWorkspaceContent({
 			label: labels.members.label,
 			description: labels.members.description,
 			icon: UsersRound,
-		},
-		{
-			id: "member-access",
-			href: realmSettingsSectionHref(baseHref, "member-access"),
-			label: labels["member-access"].label,
-			description: labels["member-access"].description,
-			icon: ShieldEllipsis,
 		},
 		{
 			id: "rules",
@@ -158,7 +156,9 @@ function RealmSettingsWorkspaceContent({
 	];
 	const visibleSectionIds = new Set(getRealmSettingsSectionIds(capabilities));
 	const sections = allSections.filter((candidate) => visibleSectionIds.has(candidate.id));
-	const sectionAllowed = !section || visibleSectionIds.has(section);
+	const sectionAllowed =
+		(!section || visibleSectionIds.has(section)) &&
+		(!memberProfileId || capabilities.canManageMembers);
 	const localization =
 		realm.data.localizations.find(
 			(item) => item.language === toContentLanguage(locale.target),
@@ -198,13 +198,19 @@ function RealmSettingsWorkspaceContent({
 					<RealmProfileSettings embedded realm={realm.data} />
 				</RealmSettingsSection>
 			) : section === "members" ? (
-				<RealmMembersSection
-					baseHref={baseHref}
-					canManage={capabilities.canManageMembers}
-					realmId={realmId}
-				/>
-			) : section === "member-access" ? (
-				<RealmMemberAccessSection baseHref={baseHref} realmId={realmId} />
+				memberProfileId ? (
+					<RealmMemberAccessSection
+						baseHref={baseHref}
+						profileId={memberProfileId}
+						realmId={realmId}
+					/>
+				) : (
+					<RealmMembersSection
+						baseHref={baseHref}
+						canManage={capabilities.canManageMembers}
+						realmId={realmId}
+					/>
+				)
 			) : section === "rules" ? (
 				<RealmRulesSection baseHref={baseHref} realmId={realmId} />
 			) : section === "pins" ? (
@@ -232,21 +238,28 @@ function RealmSettingsWorkspaceContent({
 	);
 }
 
-function RealmMemberAccessSection({ baseHref, realmId }: { baseHref: string; realmId: string }) {
-	const query = useGetApiRealmsByRealmIdMembers({
-		path: { realmId },
-		query: { limit: 100 },
-	});
+function RealmMemberAccessSection({
+	baseHref,
+	realmId,
+	profileId,
+}: {
+	baseHref: string;
+	realmId: string;
+	profileId: string;
+}) {
+	const { t } = useTranslation(["realms"]);
 	return (
-		<RealmSettingsSection baseHref={baseHref} section="member-access">
-			{query.isPending ? (
-				<QueryPending />
-			) : query.isError || !query.data ? (
-				<QueryFailure error={query.error} retry={() => void query.refetch()} />
-			) : (
-				<RealmMemberAccess members={query.data.items} realmId={realmId} />
-			)}
-		</RealmSettingsSection>
+		<section>
+			<ManagementWorkspaceSectionHeader
+				backHref={realmSettingsSectionHref(baseHref, "members")}
+				backLabel={t.realms.memberAccess.backToMembers}
+				description={t.realms.memberAccess.description}
+				link={Link}
+				showBackOnDesktop
+				title={t.realms.membersView.editPermissions}
+			/>
+			<RealmMemberAccess profileId={profileId} realmId={realmId} />
+		</section>
 	);
 }
 
@@ -288,8 +301,8 @@ function RealmMembersSection({
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="members">
 			<RealmMembers
+				baseHref={baseHref}
 				canManage={canManage}
-				embedded
 				error={query.error}
 				members={query.data?.items}
 				pending={query.isPending}

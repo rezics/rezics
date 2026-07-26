@@ -1,7 +1,6 @@
 export const RealmSettingsSectionIds = [
 	"profile",
 	"members",
-	"member-access",
 	"rules",
 	"pins",
 	"access",
@@ -16,8 +15,13 @@ export function isRealmSettingsSectionId(value: string): value is RealmSettingsS
 }
 
 export type RealmSettingsPath =
-	| { section?: RealmSettingsSectionId; comparison: false }
-	| { section: "history"; comparison: true };
+	| {
+			section?: Exclude<RealmSettingsSectionId, "members">;
+			comparison: false;
+			memberProfileId?: never;
+	  }
+	| { section: "members"; comparison: false; memberProfileId?: string }
+	| { section: "history"; comparison: true; memberProfileId?: never };
 
 export function parseRealmSettingsPath(
 	segments: readonly string[] | undefined,
@@ -26,6 +30,17 @@ export function parseRealmSettingsPath(
 	const first = segments[0];
 	if (segments.length === 1 && first && isRealmSettingsSectionId(first))
 		return { section: first, comparison: false };
+	if (
+		segments.length === 3 &&
+		segments[0] === "members" &&
+		segments[1] &&
+		segments[2] === "permissions"
+	)
+		return {
+			section: "members",
+			comparison: false,
+			memberProfileId: segments[1],
+		};
 	if (segments.length === 2 && segments[0] === "history" && segments[1] === "compare")
 		return { section: "history", comparison: true };
 	return undefined;

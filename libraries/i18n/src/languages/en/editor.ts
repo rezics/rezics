@@ -26,7 +26,7 @@ export default {
 	preview: "Preview",
 	placeholder: "Write something, or type / for blocks.",
 	slashMenu: "Insert",
-	slashHint: "Use / for blocks or u/, t/, e/, r/, z/ for Unit mentions.",
+	slashHint: `Use / for blocks or ${verbatimTerms.profileSlugPrefix.value}, t/, e/, r/, z/ for Unit mentions.`,
 	mentionSearchPrompt: "Type to search.",
 	mentionUsers: "Users",
 	mentionTags: "Tags",

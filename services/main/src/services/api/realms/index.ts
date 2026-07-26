@@ -888,25 +888,35 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/members",
 		async ({ params, authorization, query }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.members.read");
+			const members = await database
+				.select({
+					profileId: realmMember.profileId,
+					name: primaryUnitTitle(profileTable.id),
+					avatar: resolvedUnitLocalizationAvatar(profileTable.id),
+					role: realmMember.role,
+					state: realmMember.state,
+					joinedAt: realmMember.joinedAt,
+				})
+				.from(realmMember)
+				.innerJoin(profileTable, eq(profileTable.id, realmMember.profileId))
+				.where(
+					and(
+						eq(realmMember.realmId, params.realmId),
+						query.profileId ? eq(realmMember.profileId, query.profileId) : undefined,
+						query.state ? eq(realmMember.state, query.state) : undefined,
+					),
+				)
+				.orderBy(desc(realmMember.joinedAt), desc(realmMember.profileId))
+				.limit(query.limit ?? 50);
+			const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
+				members.map((member) => member.profileId),
+			);
 			return {
-				items: await database
-					.select({
-						profileId: realmMember.profileId,
-						name: primaryUnitTitle(profileTable.id),
-						role: realmMember.role,
-						state: realmMember.state,
-						joinedAt: realmMember.joinedAt,
-					})
-					.from(realmMember)
-					.innerJoin(profileTable, eq(profileTable.id, realmMember.profileId))
-					.where(
-						and(
-							eq(realmMember.realmId, params.realmId),
-							query.state ? eq(realmMember.state, query.state) : undefined,
-						),
-					)
-					.orderBy(desc(realmMember.joinedAt), desc(realmMember.profileId))
-					.limit(query.limit ?? 50),
+				items: members.map(({ avatar, ...member }) => ({
+					...member,
+					slugAddress: slugAddresses.get(member.profileId) ?? null,
+					avatar: presentAvatar(avatar),
+				})),
 			};
 		},
 		{

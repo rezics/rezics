@@ -9,12 +9,10 @@ import {
 import { publicSlugHref } from "@rezics/slug";
 
 import {
-	getApiRealmsByRealmIdMembersQueryKey,
 	getApiRealmsByRealmIdPinsQueryKey,
 	getApiRealmsByRealmIdRulesQueryKey,
 	useDeleteApiRealmsByRealmIdPinsByUnitId,
 	usePatchApiRealmsByRealmId,
-	usePatchApiRealmsByRealmIdMembersByProfileId,
 	usePutApiRealmsByRealmIdPinsByUnitId,
 	usePutApiRealmsByRealmIdRules,
 	useReplaceRealmSlugAddress,
@@ -55,9 +53,6 @@ import { readPortableText, writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { invalidateRealmDetails } from "./query";
 
-const MemberRoles = ["owner", "admin", "moderator", "member"] as const;
-const MemberStates = ["active", "pending", "muted", "removed", "banned"] as const;
-
 type PickedEntity = { id: string; label: string };
 type RuleDraft = {
 	language: ContentLanguage;
@@ -65,8 +60,6 @@ type RuleDraft = {
 	content: PortableTextValue;
 	document?: PortableTextDocument;
 };
-type MemberRole = (typeof MemberRoles)[number];
-type MemberState = (typeof MemberStates)[number];
 
 export function RealmProfileSettings({
 	realm,
@@ -270,136 +263,6 @@ export function RealmProfileSettings({
 				</CardContent>
 			</Card>
 		</section>
-	);
-}
-
-export function RealmMembers({
-	realmId,
-	members,
-	pending,
-	error,
-	canManage = true,
-	embedded = false,
-}: {
-	realmId: string;
-	members:
-		| readonly { profileId: string; name: string | null; role: string; state: string }[]
-		| undefined;
-	pending: boolean;
-	error: Parameters<typeof RequestFailure>[0]["error"];
-	canManage?: boolean;
-	embedded?: boolean;
-}) {
-	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
-	return (
-		<section className="grid gap-3">
-			{embedded ? null : (
-				<h2 className="font-heading text-xl font-bold">{t.realms.members}</h2>
-			)}
-			{pending ? (
-				<Skeleton className="h-48 rounded-xl" />
-			) : error ? (
-				<RequestFailure error={error} />
-			) : members?.length ? (
-				<div className="grid gap-3">
-					{members.map((member) => (
-						<RealmMember
-							canManage={canManage}
-							key={member.profileId}
-							member={member}
-							realmId={realmId}
-						/>
-					))}
-				</div>
-			) : (
-				<p className="text-muted-foreground text-sm">{t.state.empty}</p>
-			)}
-		</section>
-	);
-}
-
-function RealmMember({
-	realmId,
-	member,
-	canManage,
-}: {
-	realmId: string;
-	member: { profileId: string; name: string | null; role: string; state: string };
-	canManage: boolean;
-}) {
-	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
-	const queryClient = useQueryClient();
-	const update = usePatchApiRealmsByRealmIdMembersByProfileId();
-	const [role, setRole] = useState<MemberRole>(toMemberRole(member.role));
-	const [state, setState] = useState<MemberState>(toMemberState(member.state));
-	return (
-		<Card>
-			<CardContent className="grid gap-3 p-5 sm:grid-cols-[1fr_9rem_9rem_auto] sm:items-end">
-				<div className="min-w-0">
-					<p className="truncate font-medium">{member.name ?? t.realms.unknownMember}</p>
-				</div>
-				<Field>
-					<FieldLabel>{t.realms.memberRole}</FieldLabel>
-					<NativeSelect
-						disabled={!canManage}
-						value={role}
-						onChange={(event) => setRole(toMemberRole(event.currentTarget.value))}
-					>
-						{MemberRoles.map((value) => (
-							<NativeSelectOption key={value} value={value}>
-								{t.realms.roles[value]}
-							</NativeSelectOption>
-						))}
-					</NativeSelect>
-				</Field>
-				<Field>
-					<FieldLabel>{t.realms.memberState}</FieldLabel>
-					<NativeSelect
-						disabled={!canManage}
-						value={state}
-						onChange={(event) => setState(toMemberState(event.currentTarget.value))}
-					>
-						{MemberStates.map((value) => (
-							<NativeSelectOption key={value} value={value}>
-								{t.realms.memberStates[value]}
-							</NativeSelectOption>
-						))}
-					</NativeSelect>
-				</Field>
-				{canManage ? (
-					<div className="grid gap-2">
-						<Button
-							variant="solid"
-							size="sm"
-							isLoading={update.isPending}
-							onClick={() =>
-								update.mutate(
-									{
-										path: { realmId, profileId: member.profileId },
-										body: { role, state },
-									},
-									{
-										onSuccess: async () => {
-											await Promise.all([
-												queryClient.invalidateQueries({
-													queryKey: getApiRealmsByRealmIdMembersQueryKey({
-														path: { realmId },
-													}),
-												}),
-												invalidateRealmDetails(queryClient, realmId),
-											]);
-										},
-									},
-								)
-							}
-						>
-							{t.ui.save}
-						</Button>
-						<RequestFailure error={update.error} />
-					</div>
-				) : null}
-			</CardContent>
-		</Card>
 	);
 }
 
@@ -771,12 +634,4 @@ export function RealmPins({
 			</Card>
 		</section>
 	);
-}
-
-function toMemberRole(value: string): MemberRole {
-	return MemberRoles.find((role) => role === value) ?? "member";
-}
-
-function toMemberState(value: string): MemberState {
-	return MemberStates.find((state) => state === value) ?? "active";
 }

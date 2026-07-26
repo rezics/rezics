@@ -152,6 +152,11 @@ export const verbatimTerms = {
 		category: "identifier",
 		rationale: "Stable identifier label used in technical interfaces.",
 	},
+	profileSlugPrefix: {
+		value: "u/",
+		category: "identifier",
+		rationale: "Canonical public Profile slug route prefix.",
+	},
 	isbn13: {
 		value: "ISBN-13",
 		category: "identifier",

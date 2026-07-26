@@ -37,7 +37,7 @@ describe("realm membership permissions", () => {
 		).toBe(false);
 	});
 
-	it("shows direct member capabilities only to member managers", () => {
+	it("keeps member capabilities inside the members section", () => {
 		expect(
 			getRealmSettingsSectionIds({
 				canUpdateSettings: false,
@@ -49,7 +49,7 @@ describe("realm membership permissions", () => {
 				canManageAccess: false,
 				canRestoreHistory: false,
 			}),
-		).toEqual(["members", "member-access", "history"]);
+		).toEqual(["members", "history"]);
 	});
 
 	it.each([

@@ -2,6 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, UnitKind, Uuid } from ".";
+import {
+	RealmMemberRoleValues,
+	RealmMemberStateValues,
+} from "../../database/schema/contract-values";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import { AvatarResponse, FeedPostItemResponse, FeedUnitItemResponse } from "./response";
 
@@ -96,8 +100,10 @@ export const RealmMemberListResponse = t.Object({
 		t.Object({
 			profileId: Uuid,
 			name: t.Nullable(t.String()),
-			role: t.String(),
-			state: t.String(),
+			slugAddress: NullablePublicSlugAddressResponse,
+			avatar: AvatarResponse,
+			role: t.UnionEnum(RealmMemberRoleValues),
+			state: t.UnionEnum(RealmMemberStateValues),
 			joinedAt: DateTime,
 		}),
 	),
@@ -105,8 +111,8 @@ export const RealmMemberListResponse = t.Object({
 export const RealmMemberResponse = t.Object({
 	realmId: Uuid,
 	profileId: Uuid,
-	role: t.String(),
-	state: t.String(),
+	role: t.UnionEnum(RealmMemberRoleValues),
+	state: t.UnionEnum(RealmMemberStateValues),
 	joinedAt: DateTime,
 	updatedAt: DateTime,
 });

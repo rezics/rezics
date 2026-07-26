@@ -81669,6 +81669,12 @@ export type GetApiRealmsByRealmIdMembersState =
  */
 export type GetApiRealmsByRealmIdMembersQuery = {
 	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	profileId?: string;
+	/**
 	 * @type string | undefined
 	 */
 	state?: GetApiRealmsByRealmIdMembersState;
@@ -81677,6 +81683,35 @@ export type GetApiRealmsByRealmIdMembersQuery = {
 	 */
 	limit?: string | number;
 };
+
+export const GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum = {
+	owner: "owner",
+	admin: "admin",
+	moderator: "moderator",
+	member: "member",
+} as const;
+
+export type GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum =
+	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum];
+
+export const GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum = {
+	active: "active",
+	pending: "pending",
+	muted: "muted",
+	removed: "removed",
+	banned: "banned",
+} as const;
+
+export type GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum =
+	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum];
 
 /**
  * @type object
@@ -81693,14 +81728,101 @@ export type GetApiRealmsByRealmIdMembersStatus200 = {
 		 */
 		profileId: string;
 		name: (string | null) | null;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		/**
+		 * @default 'owner'
 		 * @type string
 		 */
-		role: string;
+		role: GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum;
 		/**
+		 * @default 'active'
 		 * @type string
 		 */
-		state: string;
+		state: GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -81821,6 +81943,27 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdPath = {
 	profileId: string;
 };
 
+export const PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum = {
+	owner: "owner",
+	admin: "admin",
+	moderator: "moderator",
+	member: "member",
+} as const;
+
+export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum =
+	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum];
+
+export const PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum = {
+	active: "active",
+	pending: "pending",
+	muted: "muted",
+	removed: "removed",
+	banned: "banned",
+} as const;
+
+export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum =
+	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum];
+
 /**
  * @type object
  */
@@ -81838,13 +81981,15 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200 = {
 	 */
 	profileId: string;
 	/**
+	 * @default 'owner'
 	 * @type string
 	 */
-	role: string;
+	role: PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum;
 	/**
+	 * @default 'active'
 	 * @type string
 	 */
-	state: string;
+	state: PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum;
 	/**
 	 * @description
 	 * Format: `date-time`
