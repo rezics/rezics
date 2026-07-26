@@ -8,18 +8,27 @@ const observability = initializeObservability({
 	},
 });
 
-const [{ serve }, { env }, { database }, recommendationWorker, emailDispatcher, workerHealth] =
-	await Promise.all([
-		import("srvx"),
-		import("./services/config"),
-		import("./services/database"),
-		import("./services/recommendations/worker"),
-		import("./services/email/dispatcher"),
-		import("./services/health/worker-health"),
-	]);
+const [
+	{ serve },
+	{ env },
+	{ database },
+	recommendationWorker,
+	emailDispatcher,
+	imageAssetCleanup,
+	workerHealth,
+] = await Promise.all([
+	import("srvx"),
+	import("./services/config"),
+	import("./services/database"),
+	import("./services/recommendations/worker"),
+	import("./services/email/dispatcher"),
+	import("./services/image-assets/cleanup"),
+	import("./services/health/worker-health"),
+]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
 	recommendationWorker;
 const { dispatchEmailBatch } = emailDispatcher;
+const { cleanupExpiredPendingImageAssets } = imageAssetCleanup;
 const { logger } = observability;
 const healthState = new workerHealth.WorkerHealthState();
 const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
@@ -64,6 +73,7 @@ function wait(duration: number) {
 
 async function run() {
 	let nextRecommendationAt = 0;
+	let nextImageAssetCleanupAt = 0;
 	while (!stopping) {
 		healthState.startJob();
 		observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
@@ -85,6 +95,17 @@ async function run() {
 								: "recommendation.refresh.skipped",
 						},
 					);
+				});
+			}
+			if (Date.now() >= nextImageAssetCleanupAt) {
+				nextImageAssetCleanupAt = Date.now() + env.IMAGE_ASSET_CLEANUP_INTERVAL_MS;
+				await runWorkerJob({ name: "image_asset.cleanup", retryCount: 0 }, async () => {
+					const cleaned = await cleanupExpiredPendingImageAssets();
+					if (cleaned > 0)
+						logger.info("Expired image assets cleaned", {
+							eventName: "image_asset.cleanup.completed",
+							attributes: { cleaned },
+						});
 				});
 			}
 		} catch {

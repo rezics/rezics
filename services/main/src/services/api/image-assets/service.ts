@@ -2,6 +2,7 @@ import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 
+import { env } from "../../config";
 import type { DatabaseTransaction } from "../../database";
 import { database } from "../../database";
 import {
@@ -37,7 +38,6 @@ const allowedTypes = new Set(["image/avif", "image/gif", "image/jpeg", "image/pn
 const maximumImageBytes = 10_485_760;
 const maximumImagePixels = 40_000_000;
 const maximumImageDimension = 32_768;
-const uploadExpiresIn = 900;
 
 export function imageAssetContentUrl(assetId: string): string {
 	return `/image-assets/${assetId}/content`;
@@ -224,7 +224,7 @@ export async function createImageAsset(profileId: string, input: CreateImageAsse
 			Metadata: tracking,
 			Tagging: headers["x-amz-tagging"],
 		},
-		uploadExpiresIn,
+		env.S3_PRESIGN_EXPIRES_IN,
 	);
 	return {
 		id: created.id,
@@ -238,7 +238,7 @@ export async function createImageAsset(profileId: string, input: CreateImageAsse
 		presentations: [],
 		createdAt: created.createdAt,
 		updatedAt: created.updatedAt,
-		upload: { url, expiresIn: uploadExpiresIn, headers },
+		upload: { url, expiresIn: env.S3_PRESIGN_EXPIRES_IN, headers },
 	};
 }
 

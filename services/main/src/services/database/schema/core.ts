@@ -244,6 +244,9 @@ export const imageAsset = pgTable(
 			table.status,
 			table.createdAt,
 		),
+		index("image_asset_cleanup_idx")
+			.on(table.status, table.createdAt, table.id)
+			.where(sql`${table.deletedAt} is null`),
 		check(
 			"image_asset_deleted_at_check",
 			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
