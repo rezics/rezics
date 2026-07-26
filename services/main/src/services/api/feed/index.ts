@@ -12,6 +12,7 @@ import {
 	type UnitPredicate,
 } from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
@@ -87,6 +88,7 @@ import {
 	type FeedPostKind,
 	FeedPostKindValues,
 	FeedRequest,
+	FeedRatedWorkUnitKindValues,
 	FeedSortSchema,
 	type FeedUnitKind,
 	FeedUnitKindValues,
@@ -183,6 +185,7 @@ const FeedContentDefinitions = {
 
 const FeedUnitKinds: ReadonlySet<string> = new Set(FeedUnitKindValues);
 const FeedPostKinds: ReadonlySet<string> = new Set(FeedPostKindValues);
+const FeedRatedWorkUnitKinds: ReadonlySet<string> = new Set(FeedRatedWorkUnitKindValues);
 
 function isFeedUnitKind(value: string): value is FeedUnitKind {
 	return FeedUnitKinds.has(value);
@@ -190,6 +193,46 @@ function isFeedUnitKind(value: string): value is FeedUnitKind {
 
 function isFeedPostKind(value: string | null): value is FeedPostKind {
 	return value !== null && FeedPostKinds.has(value);
+}
+
+function isFeedRatedWorkUnitKind(
+	value: FeedUnitKind,
+): value is (typeof FeedRatedWorkUnitKindValues)[number] {
+	return FeedRatedWorkUnitKinds.has(value);
+}
+
+interface FeedScoreAggregate {
+	readonly contextUnitId: string;
+	readonly totalScore: number;
+	readonly totalCount: number;
+}
+
+export function createFeedScoreCandidates({
+	aggregates,
+	contextTitles,
+	defaultContextUnitId,
+	globalContextUnitId,
+	targetId,
+}: {
+	readonly aggregates: ReadonlyMap<string, FeedScoreAggregate>;
+	readonly contextTitles: ReadonlyMap<string, string | null>;
+	readonly defaultContextUnitId: string;
+	readonly globalContextUnitId: string;
+	readonly targetId: string;
+}) {
+	const present = (contextUnitId: string) => {
+		const aggregate = aggregates.get(`${targetId}:${contextUnitId}`);
+		return aggregate
+			? {
+					...aggregate,
+					contextTitle: contextTitles.get(aggregate.contextUnitId) ?? null,
+				}
+			: null;
+	};
+	return {
+		preferred: present(defaultContextUnitId),
+		global: present(globalContextUnitId),
+	};
 }
 
 export function resolveFeedContentSelection(content?: readonly FeedContentKind[]) {
@@ -276,7 +319,10 @@ function validateCursor(
 }
 
 export function getFeedEligibilityCondition(
-	viewer: RecommendationViewer,
+	viewer: Pick<
+		RecommendationViewer,
+		"contentRatings" | "personalized" | "preferredLanguages" | "profileId"
+	>,
 	scope: FeedEligibilityScope,
 	asOf: Date,
 	anchorId?: string,
@@ -754,6 +800,12 @@ export async function hydrateFeedItems(
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
 			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", displayLanguages),
+			avatar: resolvedUnitLocalizationAvatar(unit.id, displayLanguages),
+			bannerAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"banner",
+				displayLanguages,
+			),
 			latestRevisionId: unitRevisionHead.revisionId,
 			createdAt: unit.createdAt,
 			updatedAt: unit.updatedAt,
@@ -781,10 +833,20 @@ export async function hydrateFeedItems(
 	const collectionIds = rows
 		.filter(({ unitKind }) => unitKind === "collection")
 		.map(({ id }) => id);
+	const ratedWorkIds = rows
+		.filter(
+			(row): row is typeof row & { unitKind: FeedUnitKind } =>
+				isFeedUnitKind(row.unitKind) && isFeedRatedWorkUnitKind(row.unitKind),
+		)
+		.map(({ id }) => id);
 	const subjectIds = [
 		...new Set(rows.flatMap(({ subjectId }) => (subjectId ? [subjectId] : []))),
 	];
-	const subjectRealmIds = [...new Set(page.flatMap(({ realmId }) => (realmId ? [realmId] : [])))];
+	const scoreTargetIds = [...new Set([...ratedWorkIds, ...subjectIds])];
+	const globalScoreContextUnitId = OfficialRealmUnitIds.score;
+	const scoreContextUnitIds = [
+		...new Set([viewer.defaultScoreContextUnitId, globalScoreContextUnitId]),
+	];
 	const rootIds = [
 		...new Set(rows.flatMap(({ rootPostId }) => (rootPostId ? [rootPostId] : []))),
 	];
@@ -794,7 +856,8 @@ export async function hydrateFeedItems(
 		reactions,
 		viewerReactions,
 		subjectRows,
-		subjectScores,
+		scoreRows,
+		scoreContextRows,
 		rootRows,
 		collectionCounts,
 		reviewScores,
@@ -867,22 +930,29 @@ export async function hydrateFeedItems(
 						),
 					)
 			: [],
-		subjectIds.length && subjectRealmIds.length
+		scoreTargetIds.length
 			? database
 					.select({
 						unitId: scoreStat.unitId,
-						realmId: scoreStat.contextUnitId,
+						contextUnitId: scoreStat.contextUnitId,
 						totalScore: scoreStat.totalScore,
 						totalCount: scoreStat.totalCount,
 					})
 					.from(scoreStat)
 					.where(
 						and(
-							inArray(scoreStat.unitId, subjectIds),
-							inArray(scoreStat.contextUnitId, subjectRealmIds),
+							inArray(scoreStat.unitId, scoreTargetIds),
+							inArray(scoreStat.contextUnitId, scoreContextUnitIds),
 						),
 					)
 			: [],
+		database
+			.select({
+				id: unit.id,
+				title: primaryUnitTitle(unit.id),
+			})
+			.from(unit)
+			.where(inArray(unit.id, scoreContextUnitIds)),
 		rootIds.length
 			? database
 					.select({
@@ -976,16 +1046,16 @@ export async function hydrateFeedItems(
 	const ownReaction = new Map(
 		viewerReactions.map((row) => [`${row.unitId}:${row.realmId ?? ""}`, row.reaction]),
 	);
-	const subjectScore = new Map(
-		subjectScores.flatMap((row) => {
-			const totalCount = toSafeInteger(row.totalCount, "subject score count");
+	const scoreAggregates = new Map(
+		scoreRows.flatMap((row) => {
+			const totalCount = toSafeInteger(row.totalCount, "feed score count");
 			return totalCount > 0
 				? [
 						[
-							`${row.unitId}:${row.realmId}`,
+							`${row.unitId}:${row.contextUnitId}`,
 							{
-								contextUnitId: row.realmId,
-								totalScore: toSafeInteger(row.totalScore, "subject total score"),
+								contextUnitId: row.contextUnitId,
+								totalScore: toSafeInteger(row.totalScore, "feed total score"),
 								totalCount,
 							},
 						] as const,
@@ -993,6 +1063,17 @@ export async function hydrateFeedItems(
 				: [];
 		}),
 	);
+	const scoreContextTitles = new Map(
+		scoreContextRows.map(({ id, title }) => [id, title] as const),
+	);
+	const scoresFor = (targetId: string) =>
+		createFeedScoreCandidates({
+			aggregates: scoreAggregates,
+			contextTitles: scoreContextTitles,
+			defaultContextUnitId: viewer.defaultScoreContextUnitId,
+			globalContextUnitId: globalScoreContextUnitId,
+			targetId,
+		});
 	const scoresByPostId = new Map<
 		string,
 		{ scoreId: string; contextUnitId: string; value: number }[]
@@ -1033,34 +1114,54 @@ export async function hydrateFeedItems(
 				origin.kind === "recommendation" ? (origin.reasons.get(row.id) ?? null) : null,
 			tracking,
 		};
-		if (isFeedUnitKind(row.unitKind))
+		if (isFeedUnitKind(row.unitKind)) {
+			const unitItem = {
+				...common,
+				itemType: "unit" as const,
+				postKind: null,
+				summary: row.summary,
+				cover: presentImageAsset(row.coverAssetId),
+				collection:
+					row.unitKind === "collection"
+						? {
+								directItemCount: collectionDirectItemCount.get(row.id) ?? 0,
+							}
+						: null,
+			};
+			if (isFeedRatedWorkUnitKind(row.unitKind))
+				return [
+					{
+						...unitItem,
+						unitKind: row.unitKind,
+						presentation: {
+							kind: "rated-work",
+							scores: scoresFor(row.id),
+						},
+					},
+				];
+			if (row.unitKind === "realm" || row.unitKind === "zone")
+				return [
+					{
+						...unitItem,
+						unitKind: row.unitKind,
+						presentation: {
+							kind: "identity",
+							avatar: presentAvatar(row.avatar),
+							banner: presentImageAsset(row.bannerAssetId),
+						},
+					},
+				];
 			return [
 				{
-					...common,
-					itemType: "unit" as const,
+					...unitItem,
 					unitKind: row.unitKind,
-					postKind: null,
-					summary: row.summary,
-					cover: presentImageAsset(row.coverAssetId),
-					collection:
-						row.unitKind === "collection"
-							? {
-									directItemCount: collectionDirectItemCount.get(row.id) ?? 0,
-								}
-							: null,
+					presentation: { kind: "general" },
 				},
 			];
+		}
 		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];
 		const subject = row.subjectId ? subjects.get(row.subjectId) : undefined;
 		if (row.postKind === "excerpt" && !subject) return [];
-		const scoreContext =
-			ranked.realmId === null
-				? undefined
-				: realmContexts.get(row.id)?.find((realm) => realm.id === ranked.realmId);
-		const scoreAggregate =
-			ranked.realmId && row.subjectId
-				? (subjectScore.get(`${row.subjectId}:${ranked.realmId}`) ?? null)
-				: null;
 		const postItem = {
 			...common,
 			itemType: "post" as const,
@@ -1081,12 +1182,7 @@ export async function hydrateFeedItems(
 			subject: subject
 				? {
 						...subject,
-						score: scoreAggregate
-							? {
-									...scoreAggregate,
-									contextTitle: scoreContext?.title ?? null,
-								}
-							: null,
+						scores: scoresFor(subject.id),
 					}
 				: null,
 		};

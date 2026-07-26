@@ -125,5 +125,6 @@ export default {
 		score: String,
 		count: Number,
 	}),
+	noRatings: "尚無評分",
 	collectionDirectItems: insert("{{count}} 個直接條目", { count: Number }),
 };

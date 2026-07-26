@@ -19,12 +19,15 @@ describe("getFeedActionPolicy", () => {
 		}
 	});
 
-	it("gives collections a follow action", () => {
-		expect(getFeedActionPolicy({ itemType: "unit", unitKind: "collection" })).toEqual({
-			comments: false,
-			primary: "follow",
-		});
-	});
+	it.each(["collection", "realm", "zone"] as const)(
+		"gives %s Units a follow action",
+		(unitKind) => {
+			expect(getFeedActionPolicy({ itemType: "unit", unitKind })).toEqual({
+				comments: false,
+				primary: "follow",
+			});
+		},
+	);
 
 	it("covers every generated unit kind", () => {
 		for (const unitKind of Object.values(PostApiFeedQueryStatus200ItemsUnitKindEnum)) {

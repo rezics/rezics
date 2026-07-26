@@ -14430,7 +14430,7 @@
 																			"title",
 																			"summary",
 																			"cover",
-																			"score"
+																			"scores"
 																		],
 																		"properties": {
 																			"id": {
@@ -14486,67 +14486,138 @@
 																					}
 																				]
 																			},
-																			"score": {
-																				"nullable": true,
-																				"anyOf": [
-																					{
-																						"type": "object",
-																						"required": [
-																							"contextUnitId",
-																							"contextTitle",
-																							"totalScore",
-																							"totalCount"
-																						],
-																						"properties": {
-																							"contextUnitId": {
-																								"format": "uuid",
-																								"type": "string"
-																							},
-																							"contextTitle": {
-																								"nullable": true,
-																								"anyOf": [
-																									{
+																			"scores": {
+																				"type": "object",
+																				"required": [
+																					"preferred",
+																					"global"
+																				],
+																				"properties": {
+																					"preferred": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
 																										"type": "string"
 																									},
-																									{
-																										"type": "null"
-																									}
-																								]
-																							},
-																							"totalScore": {
-																								"minimum": 1,
-																								"anyOf": [
-																									{
-																										"format": "integer",
-																										"default": 0,
-																										"type": "string"
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
 																									},
-																									{
+																									"totalScore": {
 																										"minimum": 1,
-																										"type": "integer"
-																									}
-																								]
-																							},
-																							"totalCount": {
-																								"minimum": 1,
-																								"anyOf": [
-																									{
-																										"format": "integer",
-																										"default": 0,
-																										"type": "string"
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
 																									},
-																									{
+																									"totalCount": {
 																										"minimum": 1,
-																										"type": "integer"
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
 																									}
-																								]
+																								}
+																							},
+																							{
+																								"type": "null"
 																							}
-																						}
+																						]
 																					},
-																					{
-																						"type": "null"
+																					"global": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
 																					}
-																				]
+																				}
 																			}
 																		}
 																	},
@@ -15881,7 +15952,7 @@
 																			"title",
 																			"summary",
 																			"cover",
-																			"score"
+																			"scores"
 																		],
 																		"properties": {
 																			"id": {
@@ -15937,67 +16008,138 @@
 																					}
 																				]
 																			},
-																			"score": {
-																				"nullable": true,
-																				"anyOf": [
-																					{
-																						"type": "object",
-																						"required": [
-																							"contextUnitId",
-																							"contextTitle",
-																							"totalScore",
-																							"totalCount"
-																						],
-																						"properties": {
-																							"contextUnitId": {
-																								"format": "uuid",
-																								"type": "string"
-																							},
-																							"contextTitle": {
-																								"nullable": true,
-																								"anyOf": [
-																									{
+																			"scores": {
+																				"type": "object",
+																				"required": [
+																					"preferred",
+																					"global"
+																				],
+																				"properties": {
+																					"preferred": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
 																										"type": "string"
 																									},
-																									{
-																										"type": "null"
-																									}
-																								]
-																							},
-																							"totalScore": {
-																								"minimum": 1,
-																								"anyOf": [
-																									{
-																										"format": "integer",
-																										"default": 0,
-																										"type": "string"
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
 																									},
-																									{
+																									"totalScore": {
 																										"minimum": 1,
-																										"type": "integer"
-																									}
-																								]
-																							},
-																							"totalCount": {
-																								"minimum": 1,
-																								"anyOf": [
-																									{
-																										"format": "integer",
-																										"default": 0,
-																										"type": "string"
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
 																									},
-																									{
+																									"totalCount": {
 																										"minimum": 1,
-																										"type": "integer"
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
 																									}
-																								]
+																								}
+																							},
+																							{
+																								"type": "null"
 																							}
-																						}
+																						]
 																					},
-																					{
-																						"type": "null"
+																					"global": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
 																					}
-																				]
+																				}
 																			}
 																		}
 																	},
@@ -21584,7 +21726,8 @@
 															"postKind",
 															"summary",
 															"cover",
-															"collection"
+															"collection",
+															"presentation"
 														],
 														"properties": {
 															"id": {
@@ -22249,6 +22392,305 @@
 																		}
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"presentation": {
+																"anyOf": [
+																	{
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"scores"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "rated-work",
+																				"type": "string"
+																			},
+																			"scores": {
+																				"type": "object",
+																				"required": [
+																					"preferred",
+																					"global"
+																				],
+																				"properties": {
+																					"preferred": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					},
+																					"global": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"avatar",
+																			"banner"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "identity",
+																				"type": "string"
+																			},
+																			"avatar": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"image"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "image",
+																										"type": "string"
+																									},
+																									"image": {
+																										"type": "object",
+																										"required": [
+																											"id",
+																											"url"
+																										],
+																										"properties": {
+																											"id": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"url": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"emoji"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "emoji",
+																										"type": "string"
+																									},
+																									"emoji": {
+																										"maxLength": 64,
+																										"type": "string"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"icon"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "icon",
+																										"type": "string"
+																									},
+																									"icon": {
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"provider",
+																											"prefix",
+																											"name"
+																										],
+																										"properties": {
+																											"provider": {
+																												"const": "font-awesome",
+																												"type": "string"
+																											},
+																											"prefix": {
+																												"type": "string",
+																												"enum": [
+																													"fas",
+																													"fab"
+																												]
+																											},
+																											"name": {
+																												"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																												"maxLength": 128,
+																												"type": "string"
+																											}
+																										}
+																									}
+																								}
+																							}
+																						]
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"banner": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "object",
+																						"required": [
+																							"id",
+																							"url"
+																						],
+																						"properties": {
+																							"id": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"url": {
+																								"type": "string"
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"required": ["kind"],
+																		"properties": {
+																			"kind": {
+																				"const": "general",
+																				"type": "string"
+																			}
+																		}
+																	}
 																]
 															}
 														}
@@ -23585,7 +24027,7 @@
 																					"title",
 																					"summary",
 																					"cover",
-																					"score"
+																					"scores"
 																				],
 																				"properties": {
 																					"id": {
@@ -23641,67 +24083,138 @@
 																							}
 																						]
 																					},
-																					"score": {
-																						"nullable": true,
-																						"anyOf": [
-																							{
-																								"type": "object",
-																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
-																									"totalScore",
-																									"totalCount"
-																								],
-																								"properties": {
-																									"contextUnitId": {
-																										"format": "uuid",
-																										"type": "string"
-																									},
-																									"contextTitle": {
-																										"nullable": true,
-																										"anyOf": [
-																											{
+																					"scores": {
+																						"type": "object",
+																						"required": [
+																							"preferred",
+																							"global"
+																						],
+																						"properties": {
+																							"preferred": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
 																												"type": "string"
 																											},
-																											{
-																												"type": "null"
-																											}
-																										]
-																									},
-																									"totalScore": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
 																											},
-																											{
+																											"totalScore": {
 																												"minimum": 1,
-																												"type": "integer"
-																											}
-																										]
-																									},
-																									"totalCount": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											},
-																											{
+																											"totalCount": {
 																												"minimum": 1,
-																												"type": "integer"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											}
-																										]
+																										}
+																									},
+																									{
+																										"type": "null"
 																									}
-																								}
+																								]
 																							},
-																							{
-																								"type": "null"
+																							"global": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
+																											},
+																											"totalScore": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											},
+																											"totalCount": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											}
+																										}
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
 																							}
-																						]
+																						}
 																					}
 																				}
 																			},
@@ -25054,7 +25567,7 @@
 																					"title",
 																					"summary",
 																					"cover",
-																					"score"
+																					"scores"
 																				],
 																				"properties": {
 																					"id": {
@@ -25110,67 +25623,138 @@
 																							}
 																						]
 																					},
-																					"score": {
-																						"nullable": true,
-																						"anyOf": [
-																							{
-																								"type": "object",
-																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
-																									"totalScore",
-																									"totalCount"
-																								],
-																								"properties": {
-																									"contextUnitId": {
-																										"format": "uuid",
-																										"type": "string"
-																									},
-																									"contextTitle": {
-																										"nullable": true,
-																										"anyOf": [
-																											{
+																					"scores": {
+																						"type": "object",
+																						"required": [
+																							"preferred",
+																							"global"
+																						],
+																						"properties": {
+																							"preferred": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
 																												"type": "string"
 																											},
-																											{
-																												"type": "null"
-																											}
-																										]
-																									},
-																									"totalScore": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
 																											},
-																											{
+																											"totalScore": {
 																												"minimum": 1,
-																												"type": "integer"
-																											}
-																										]
-																									},
-																									"totalCount": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											},
-																											{
+																											"totalCount": {
 																												"minimum": 1,
-																												"type": "integer"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											}
-																										]
+																										}
+																									},
+																									{
+																										"type": "null"
 																									}
-																								}
+																								]
 																							},
-																							{
-																								"type": "null"
+																							"global": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
+																											},
+																											"totalScore": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											},
+																											"totalCount": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											}
+																										}
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
 																							}
-																						]
+																						}
 																					}
 																				}
 																			},
@@ -97446,7 +98030,7 @@
 																	"title",
 																	"summary",
 																	"cover",
-																	"score"
+																	"scores"
 																],
 																"properties": {
 																	"id": {
@@ -97490,65 +98074,138 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"score": {
-																		"nullable": true,
-																		"anyOf": [
-																			{
-																				"type": "object",
-																				"required": [
-																					"contextUnitId",
-																					"contextTitle",
-																					"totalScore",
-																					"totalCount"
-																				],
-																				"properties": {
-																					"contextUnitId": {
-																						"format": "uuid",
-																						"type": "string"
-																					},
-																					"contextTitle": {
-																						"nullable": true,
-																						"anyOf": [
-																							{
+																	"scores": {
+																		"type": "object",
+																		"required": [
+																			"preferred",
+																			"global"
+																		],
+																		"properties": {
+																			"preferred": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "object",
+																						"required": [
+																							"contextUnitId",
+																							"contextTitle",
+																							"totalScore",
+																							"totalCount"
+																						],
+																						"properties": {
+																							"contextUnitId": {
+																								"format": "uuid",
 																								"type": "string"
 																							},
-																							{
-																								"type": "null"
-																							}
-																						]
-																					},
-																					"totalScore": {
-																						"minimum": 1,
-																						"anyOf": [
-																							{
-																								"format": "integer",
-																								"default": 0,
-																								"type": "string"
+																							"contextTitle": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
 																							},
-																							{
+																							"totalScore": {
 																								"minimum": 1,
-																								"type": "integer"
-																							}
-																						]
-																					},
-																					"totalCount": {
-																						"minimum": 1,
-																						"anyOf": [
-																							{
-																								"format": "integer",
-																								"default": 0,
-																								"type": "string"
+																								"anyOf": [
+																									{
+																										"format": "integer",
+																										"default": 0,
+																										"type": "string"
+																									},
+																									{
+																										"minimum": 1,
+																										"type": "integer"
+																									}
+																								]
 																							},
-																							{
+																							"totalCount": {
 																								"minimum": 1,
-																								"type": "integer"
+																								"anyOf": [
+																									{
+																										"format": "integer",
+																										"default": 0,
+																										"type": "string"
+																									},
+																									{
+																										"minimum": 1,
+																										"type": "integer"
+																									}
+																								]
 																							}
-																						]
+																						}
+																					},
+																					{
+																						"type": "null"
 																					}
-																				}
+																				]
 																			},
-																			{ "type": "null" }
-																		]
+																			"global": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "object",
+																						"required": [
+																							"contextUnitId",
+																							"contextTitle",
+																							"totalScore",
+																							"totalCount"
+																						],
+																						"properties": {
+																							"contextUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"contextTitle": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
+																							},
+																							"totalScore": {
+																								"minimum": 1,
+																								"anyOf": [
+																									{
+																										"format": "integer",
+																										"default": 0,
+																										"type": "string"
+																									},
+																									{
+																										"minimum": 1,
+																										"type": "integer"
+																									}
+																								]
+																							},
+																							"totalCount": {
+																								"minimum": 1,
+																								"anyOf": [
+																									{
+																										"format": "integer",
+																										"default": 0,
+																										"type": "string"
+																									},
+																									{
+																										"minimum": 1,
+																										"type": "integer"
+																									}
+																								]
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	}
 																}
 															},
@@ -123219,7 +123876,8 @@
 															"postKind",
 															"summary",
 															"cover",
-															"collection"
+															"collection",
+															"presentation"
 														],
 														"properties": {
 															"id": {
@@ -123884,6 +124542,305 @@
 																		}
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"presentation": {
+																"anyOf": [
+																	{
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"scores"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "rated-work",
+																				"type": "string"
+																			},
+																			"scores": {
+																				"type": "object",
+																				"required": [
+																					"preferred",
+																					"global"
+																				],
+																				"properties": {
+																					"preferred": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					},
+																					"global": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"avatar",
+																			"banner"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "identity",
+																				"type": "string"
+																			},
+																			"avatar": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"image"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "image",
+																										"type": "string"
+																									},
+																									"image": {
+																										"type": "object",
+																										"required": [
+																											"id",
+																											"url"
+																										],
+																										"properties": {
+																											"id": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"url": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"emoji"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "emoji",
+																										"type": "string"
+																									},
+																									"emoji": {
+																										"maxLength": 64,
+																										"type": "string"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"icon"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "icon",
+																										"type": "string"
+																									},
+																									"icon": {
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"provider",
+																											"prefix",
+																											"name"
+																										],
+																										"properties": {
+																											"provider": {
+																												"const": "font-awesome",
+																												"type": "string"
+																											},
+																											"prefix": {
+																												"type": "string",
+																												"enum": [
+																													"fas",
+																													"fab"
+																												]
+																											},
+																											"name": {
+																												"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																												"maxLength": 128,
+																												"type": "string"
+																											}
+																										}
+																									}
+																								}
+																							}
+																						]
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"banner": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "object",
+																						"required": [
+																							"id",
+																							"url"
+																						],
+																						"properties": {
+																							"id": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"url": {
+																								"type": "string"
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"required": ["kind"],
+																		"properties": {
+																			"kind": {
+																				"const": "general",
+																				"type": "string"
+																			}
+																		}
+																	}
 																]
 															}
 														}
@@ -125220,7 +126177,7 @@
 																					"title",
 																					"summary",
 																					"cover",
-																					"score"
+																					"scores"
 																				],
 																				"properties": {
 																					"id": {
@@ -125276,67 +126233,138 @@
 																							}
 																						]
 																					},
-																					"score": {
-																						"nullable": true,
-																						"anyOf": [
-																							{
-																								"type": "object",
-																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
-																									"totalScore",
-																									"totalCount"
-																								],
-																								"properties": {
-																									"contextUnitId": {
-																										"format": "uuid",
-																										"type": "string"
-																									},
-																									"contextTitle": {
-																										"nullable": true,
-																										"anyOf": [
-																											{
+																					"scores": {
+																						"type": "object",
+																						"required": [
+																							"preferred",
+																							"global"
+																						],
+																						"properties": {
+																							"preferred": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
 																												"type": "string"
 																											},
-																											{
-																												"type": "null"
-																											}
-																										]
-																									},
-																									"totalScore": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
 																											},
-																											{
+																											"totalScore": {
 																												"minimum": 1,
-																												"type": "integer"
-																											}
-																										]
-																									},
-																									"totalCount": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											},
-																											{
+																											"totalCount": {
 																												"minimum": 1,
-																												"type": "integer"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											}
-																										]
+																										}
+																									},
+																									{
+																										"type": "null"
 																									}
-																								}
+																								]
 																							},
-																							{
-																								"type": "null"
+																							"global": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
+																											},
+																											"totalScore": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											},
+																											"totalCount": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											}
+																										}
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
 																							}
-																						]
+																						}
 																					}
 																				}
 																			},
@@ -126689,7 +127717,7 @@
 																					"title",
 																					"summary",
 																					"cover",
-																					"score"
+																					"scores"
 																				],
 																				"properties": {
 																					"id": {
@@ -126745,67 +127773,138 @@
 																							}
 																						]
 																					},
-																					"score": {
-																						"nullable": true,
-																						"anyOf": [
-																							{
-																								"type": "object",
-																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
-																									"totalScore",
-																									"totalCount"
-																								],
-																								"properties": {
-																									"contextUnitId": {
-																										"format": "uuid",
-																										"type": "string"
-																									},
-																									"contextTitle": {
-																										"nullable": true,
-																										"anyOf": [
-																											{
+																					"scores": {
+																						"type": "object",
+																						"required": [
+																							"preferred",
+																							"global"
+																						],
+																						"properties": {
+																							"preferred": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
 																												"type": "string"
 																											},
-																											{
-																												"type": "null"
-																											}
-																										]
-																									},
-																									"totalScore": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
 																											},
-																											{
+																											"totalScore": {
 																												"minimum": 1,
-																												"type": "integer"
-																											}
-																										]
-																									},
-																									"totalCount": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											},
-																											{
+																											"totalCount": {
 																												"minimum": 1,
-																												"type": "integer"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											}
-																										]
+																										}
+																									},
+																									{
+																										"type": "null"
 																									}
-																								}
+																								]
 																							},
-																							{
-																								"type": "null"
+																							"global": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
+																											},
+																											"totalScore": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											},
+																											"totalCount": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											}
+																										}
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
 																							}
-																						]
+																						}
 																					}
 																				}
 																			},
@@ -145952,7 +147051,8 @@
 															"postKind",
 															"summary",
 															"cover",
-															"collection"
+															"collection",
+															"presentation"
 														],
 														"properties": {
 															"id": {
@@ -146617,6 +147717,305 @@
 																		}
 																	},
 																	{ "type": "null" }
+																]
+															},
+															"presentation": {
+																"anyOf": [
+																	{
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"scores"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "rated-work",
+																				"type": "string"
+																			},
+																			"scores": {
+																				"type": "object",
+																				"required": [
+																					"preferred",
+																					"global"
+																				],
+																				"properties": {
+																					"preferred": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					},
+																					"global": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"type": "object",
+																								"required": [
+																									"contextUnitId",
+																									"contextTitle",
+																									"totalScore",
+																									"totalCount"
+																								],
+																								"properties": {
+																									"contextUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"contextTitle": {
+																										"nullable": true,
+																										"anyOf": [
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "null"
+																											}
+																										]
+																									},
+																									"totalScore": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									},
+																									"totalCount": {
+																										"minimum": 1,
+																										"anyOf": [
+																											{
+																												"format": "integer",
+																												"default": 0,
+																												"type": "string"
+																											},
+																											{
+																												"minimum": 1,
+																												"type": "integer"
+																											}
+																										]
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"avatar",
+																			"banner"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "identity",
+																				"type": "string"
+																			},
+																			"avatar": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"image"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "image",
+																										"type": "string"
+																									},
+																									"image": {
+																										"type": "object",
+																										"required": [
+																											"id",
+																											"url"
+																										],
+																										"properties": {
+																											"id": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"url": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"emoji"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "emoji",
+																										"type": "string"
+																									},
+																									"emoji": {
+																										"maxLength": 64,
+																										"type": "string"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"type",
+																									"icon"
+																								],
+																								"properties": {
+																									"type": {
+																										"const": "icon",
+																										"type": "string"
+																									},
+																									"icon": {
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"provider",
+																											"prefix",
+																											"name"
+																										],
+																										"properties": {
+																											"provider": {
+																												"const": "font-awesome",
+																												"type": "string"
+																											},
+																											"prefix": {
+																												"type": "string",
+																												"enum": [
+																													"fas",
+																													"fab"
+																												]
+																											},
+																											"name": {
+																												"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																												"maxLength": 128,
+																												"type": "string"
+																											}
+																										}
+																									}
+																								}
+																							}
+																						]
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"banner": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "object",
+																						"required": [
+																							"id",
+																							"url"
+																						],
+																						"properties": {
+																							"id": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"url": {
+																								"type": "string"
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"required": ["kind"],
+																		"properties": {
+																			"kind": {
+																				"const": "general",
+																				"type": "string"
+																			}
+																		}
+																	}
 																]
 															}
 														}
@@ -147953,7 +149352,7 @@
 																					"title",
 																					"summary",
 																					"cover",
-																					"score"
+																					"scores"
 																				],
 																				"properties": {
 																					"id": {
@@ -148009,67 +149408,138 @@
 																							}
 																						]
 																					},
-																					"score": {
-																						"nullable": true,
-																						"anyOf": [
-																							{
-																								"type": "object",
-																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
-																									"totalScore",
-																									"totalCount"
-																								],
-																								"properties": {
-																									"contextUnitId": {
-																										"format": "uuid",
-																										"type": "string"
-																									},
-																									"contextTitle": {
-																										"nullable": true,
-																										"anyOf": [
-																											{
+																					"scores": {
+																						"type": "object",
+																						"required": [
+																							"preferred",
+																							"global"
+																						],
+																						"properties": {
+																							"preferred": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
 																												"type": "string"
 																											},
-																											{
-																												"type": "null"
-																											}
-																										]
-																									},
-																									"totalScore": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
 																											},
-																											{
+																											"totalScore": {
 																												"minimum": 1,
-																												"type": "integer"
-																											}
-																										]
-																									},
-																									"totalCount": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											},
-																											{
+																											"totalCount": {
 																												"minimum": 1,
-																												"type": "integer"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											}
-																										]
+																										}
+																									},
+																									{
+																										"type": "null"
 																									}
-																								}
+																								]
 																							},
-																							{
-																								"type": "null"
+																							"global": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
+																											},
+																											"totalScore": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											},
+																											"totalCount": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											}
+																										}
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
 																							}
-																						]
+																						}
 																					}
 																				}
 																			},
@@ -149422,7 +150892,7 @@
 																					"title",
 																					"summary",
 																					"cover",
-																					"score"
+																					"scores"
 																				],
 																				"properties": {
 																					"id": {
@@ -149478,67 +150948,138 @@
 																							}
 																						]
 																					},
-																					"score": {
-																						"nullable": true,
-																						"anyOf": [
-																							{
-																								"type": "object",
-																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
-																									"totalScore",
-																									"totalCount"
-																								],
-																								"properties": {
-																									"contextUnitId": {
-																										"format": "uuid",
-																										"type": "string"
-																									},
-																									"contextTitle": {
-																										"nullable": true,
-																										"anyOf": [
-																											{
+																					"scores": {
+																						"type": "object",
+																						"required": [
+																							"preferred",
+																							"global"
+																						],
+																						"properties": {
+																							"preferred": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
 																												"type": "string"
 																											},
-																											{
-																												"type": "null"
-																											}
-																										]
-																									},
-																									"totalScore": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
 																											},
-																											{
+																											"totalScore": {
 																												"minimum": 1,
-																												"type": "integer"
-																											}
-																										]
-																									},
-																									"totalCount": {
-																										"minimum": 1,
-																										"anyOf": [
-																											{
-																												"format": "integer",
-																												"default": 0,
-																												"type": "string"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											},
-																											{
+																											"totalCount": {
 																												"minimum": 1,
-																												"type": "integer"
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
 																											}
-																										]
+																										}
+																									},
+																									{
+																										"type": "null"
 																									}
-																								}
+																								]
 																							},
-																							{
-																								"type": "null"
+																							"global": {
+																								"nullable": true,
+																								"anyOf": [
+																									{
+																										"type": "object",
+																										"required": [
+																											"contextUnitId",
+																											"contextTitle",
+																											"totalScore",
+																											"totalCount"
+																										],
+																										"properties": {
+																											"contextUnitId": {
+																												"format": "uuid",
+																												"type": "string"
+																											},
+																											"contextTitle": {
+																												"nullable": true,
+																												"anyOf": [
+																													{
+																														"type": "string"
+																													},
+																													{
+																														"type": "null"
+																													}
+																												]
+																											},
+																											"totalScore": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											},
+																											"totalCount": {
+																												"minimum": 1,
+																												"anyOf": [
+																													{
+																														"format": "integer",
+																														"default": 0,
+																														"type": "string"
+																													},
+																													{
+																														"minimum": 1,
+																														"type": "integer"
+																													}
+																												]
+																											}
+																										}
+																									},
+																									{
+																										"type": "null"
+																									}
+																								]
 																							}
-																						]
+																						}
 																					}
 																				}
 																			},

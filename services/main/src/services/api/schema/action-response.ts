@@ -3,7 +3,7 @@ import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, UnitKind, Uuid } from ".";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
-import { AvatarResponse } from "./response";
+import { AvatarResponse, FeedPostItemResponse, FeedUnitItemResponse } from "./response";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -134,4 +134,7 @@ export const RealmPinResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const RealmPinListResponse = t.Object({ items: t.Array(RealmPinResponse) });
+export const RealmPinListResponse = t.Object({
+	items: t.Array(RealmPinResponse),
+	contentItems: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
+});

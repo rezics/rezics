@@ -1,5 +1,6 @@
 import { and, desc, eq, gte } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { database } from "../database";
 import { ContentRatingValues, profilePreference, recommendationSnapshot } from "../database/schema";
@@ -10,6 +11,7 @@ export interface RecommendationViewer {
 	personalized: boolean;
 	contentRatings: (typeof ContentRatingValues)[number][];
 	preferredLanguages: ContentLanguage[];
+	defaultScoreContextUnitId: string;
 }
 
 export function resolvePersonalization(
@@ -29,12 +31,14 @@ export async function resolveRecommendationViewer(
 			personalized: false,
 			contentRatings: [],
 			preferredLanguages: [],
+			defaultScoreContextUnitId: OfficialRealmUnitIds.score,
 		};
 	const [preference] = await database
 		.select({
 			personalized: profilePreference.personalizedFeed,
 			contentRatings: profilePreference.contentRatings,
 			preferredLanguages: profilePreference.preferredLanguages,
+			defaultScoreContextUnitId: profilePreference.defaultScoreContextUnitId,
 		})
 		.from(profilePreference)
 		.where(eq(profilePreference.profileId, profileId))
@@ -44,6 +48,8 @@ export async function resolveRecommendationViewer(
 		personalized: resolvePersonalization(preference?.personalized, personalizedOverride),
 		contentRatings: preference?.contentRatings ?? [],
 		preferredLanguages: preference?.preferredLanguages ?? [],
+		defaultScoreContextUnitId:
+			preference?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score,
 	};
 }
 

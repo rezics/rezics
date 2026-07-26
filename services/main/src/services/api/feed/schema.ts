@@ -25,6 +25,29 @@ export const FeedUnitKindValues = [
 ] as const satisfies readonly UnitKind[];
 export type FeedUnitKind = (typeof FeedUnitKindValues)[number];
 
+export const FeedRatedWorkUnitKindValues = [
+	"book",
+	"software",
+	"media",
+] as const satisfies readonly FeedUnitKind[];
+export type FeedRatedWorkUnitKind = (typeof FeedRatedWorkUnitKindValues)[number];
+
+export const FeedIdentityUnitKindValues = [
+	"zone",
+	"realm",
+] as const satisfies readonly FeedUnitKind[];
+export type FeedIdentityUnitKind = (typeof FeedIdentityUnitKindValues)[number];
+
+export const FeedGeneralUnitKindValues = [
+	"profile",
+	"release",
+	"entity",
+	"tag",
+	"series",
+	"collection",
+	"poll",
+] as const satisfies readonly Exclude<FeedUnitKind, FeedRatedWorkUnitKind | FeedIdentityUnitKind>[];
+
 export const FeedPostKindValues = [
 	"post",
 	"reply",

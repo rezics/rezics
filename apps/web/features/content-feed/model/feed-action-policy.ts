@@ -36,6 +36,8 @@ export function getFeedActionPolicy(input: FeedActionPolicyInput): FeedActionPol
 function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): FeedActionPolicy {
 	switch (kind) {
 		case "collection":
+		case "realm":
+		case "zone":
 			return { comments: false, primary: "follow" };
 		case "poll":
 			return { comments: false, primary: "none" };
@@ -47,8 +49,6 @@ function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): 
 		case "entity":
 		case "tag":
 		case "series":
-		case "zone":
-		case "realm":
 			return { comments: false, primary: "collect" };
 		default:
 			return assertNever(kind);

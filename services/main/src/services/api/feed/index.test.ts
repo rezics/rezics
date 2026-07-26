@@ -2,6 +2,7 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
+	createFeedScoreCandidates,
 	getFeedCandidateRealmIdExpression,
 	getFeedEligibilityCondition,
 	prioritizeFeedRealmContexts,
@@ -9,6 +10,91 @@ import {
 } from "./index";
 
 const dialect = new PgDialect();
+
+describe("feed score candidates", () => {
+	const targetId = "00000000-0000-4000-8000-000000000001";
+	const preferredContextUnitId = "00000000-0000-4000-8000-000000000002";
+	const globalContextUnitId = "00000000-0000-4000-8000-000000000003";
+	const contextTitles = new Map([
+		[preferredContextUnitId, "Preferred"],
+		[globalContextUnitId, "Global"],
+	]);
+
+	it("returns both aggregates so presentation can prefer the viewer context", () => {
+		const aggregates = new Map([
+			[
+				`${targetId}:${preferredContextUnitId}`,
+				{
+					contextUnitId: preferredContextUnitId,
+					totalScore: 18,
+					totalCount: 2,
+				},
+			],
+			[
+				`${targetId}:${globalContextUnitId}`,
+				{
+					contextUnitId: globalContextUnitId,
+					totalScore: 80,
+					totalCount: 10,
+				},
+			],
+		]);
+
+		expect(
+			createFeedScoreCandidates({
+				aggregates,
+				contextTitles,
+				defaultContextUnitId: preferredContextUnitId,
+				globalContextUnitId,
+				targetId,
+			}),
+		).toEqual({
+			preferred: {
+				contextUnitId: preferredContextUnitId,
+				contextTitle: "Preferred",
+				totalScore: 18,
+				totalCount: 2,
+			},
+			global: {
+				contextUnitId: globalContextUnitId,
+				contextTitle: "Global",
+				totalScore: 80,
+				totalCount: 10,
+			},
+		});
+	});
+
+	it("leaves a missing preferred aggregate empty while retaining the global candidate", () => {
+		const aggregates = new Map([
+			[
+				`${targetId}:${globalContextUnitId}`,
+				{
+					contextUnitId: globalContextUnitId,
+					totalScore: 80,
+					totalCount: 10,
+				},
+			],
+		]);
+
+		expect(
+			createFeedScoreCandidates({
+				aggregates,
+				contextTitles,
+				defaultContextUnitId: preferredContextUnitId,
+				globalContextUnitId,
+				targetId,
+			}),
+		).toEqual({
+			preferred: null,
+			global: {
+				contextUnitId: globalContextUnitId,
+				contextTitle: "Global",
+				totalScore: 80,
+				totalCount: 10,
+			},
+		});
+	});
+});
 
 describe("feed eligibility SQL", () => {
 	it("defaults to feedable Units and Post kinds without replies", () => {

@@ -139,6 +139,9 @@ import {
 	SlugAddressMutationResponse,
 } from "../slug-addresses/schema";
 import { replaceRealmSlugAddress } from "../../units/slug-address";
+import { resolveRecommendationViewer } from "../../recommendations/context";
+import { hydrateFeedItems } from "../feed";
+import { FeedContentKindValues } from "../feed/schema";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -1160,19 +1163,35 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/pins",
 		async ({ params, request }) => {
 			await ensureRealmVisible(params.realmId, request.headers);
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			const items = await database
+				.select({
+					realmId: realmPin.realmId,
+					unitId: realmPin.unitId,
+					kind: realmPin.kind,
+					position: realmPin.position,
+					createdAt: realmPin.createdAt,
+					updatedAt: realmPin.updatedAt,
+				})
+				.from(realmPin)
+				.where(eq(realmPin.realmId, params.realmId))
+				.orderBy(realmPin.kind, realmPin.position, realmPin.unitId);
+			const viewer = await resolveRecommendationViewer(
+				identity.authorization.profileId,
+				false,
+			);
 			return {
-				items: await database
-					.select({
-						realmId: realmPin.realmId,
-						unitId: realmPin.unitId,
-						kind: realmPin.kind,
-						position: realmPin.position,
-						createdAt: realmPin.createdAt,
-						updatedAt: realmPin.updatedAt,
-					})
-					.from(realmPin)
-					.where(eq(realmPin.realmId, params.realmId))
-					.orderBy(realmPin.kind, realmPin.position, realmPin.unitId),
+				items,
+				contentItems: await hydrateFeedItems(
+					items.map((item) => ({
+						id: item.unitId,
+						realmId: params.realmId,
+					})),
+					viewer,
+					{ content: FeedContentKindValues },
+					new Date(),
+					{ kind: "contextual" },
+				),
 			};
 		},
 		{

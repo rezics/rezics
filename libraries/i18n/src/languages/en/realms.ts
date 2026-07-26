@@ -69,6 +69,7 @@ export default {
 	rules: "Rules",
 	pins: "Pinned content",
 	pinnedContent: "Pinned content",
+	pinnedContentEmpty: "No pinned content yet.",
 	pinPosition: "Position",
 	members: "Members",
 	unknownMember: "Unknown member",

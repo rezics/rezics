@@ -122,5 +122,6 @@ export default {
 		score: String,
 		count: Number,
 	}),
+	noRatings: "No ratings yet",
 	collectionDirectItems: insert("{{count}} direct items", { count: Number }),
 } satisfies typeof import("../zh-Hant/feed").default;

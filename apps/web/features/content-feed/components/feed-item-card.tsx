@@ -5,10 +5,11 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
+import { AppWindowIcon, BookOpenIcon, ClapperboardIcon, LibraryIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Badge, CardContent, cn, Cover, PortableTextContent } from "@rezics/ui";
+import { CardContent, cn, Cover, IdentityAvatar, PortableTextContent } from "@rezics/ui";
 import { postHref } from "@/features/posts/url";
 import { realmHref } from "@/features/slugs/unit-route";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
@@ -23,12 +24,15 @@ import {
 	FeedCard,
 	FeedCardContent,
 	FeedCardHeader,
+	FeedCardRating,
 	FeedCardTarget,
 	type FeedAttributionContext,
 	type FeedRealmContext,
+	type FeedTargetScore,
 } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
 import { parseFeedReaction } from "../model/feed-reaction";
+import { selectFeedRating, type FeedRatingAggregate } from "../model/feed-rating";
 import { formatRelativeTime } from "../model/format-relative-time";
 
 export type FeedItem = PostApiFeedQueryStatus200["items"][number];
@@ -123,9 +127,9 @@ export function FeedPostCard({
 				timestamp={formatRelativeTime(post.createdAt, locale.target)}
 			/>
 			<FeedCardContent>
-				<Badge className="w-fit" size="sm" variant="outline">
+				<p className="font-semibold text-brand text-xs">
 					{t.feed.content.kinds[`post:${post.postKind}`]}
-				</Badge>
+				</p>
 				{post.postKind === "review" && post.scores.length ? (
 					<p className="font-medium text-sm">
 						{post.scores
@@ -184,18 +188,17 @@ export function FeedPostCard({
 				<FeedCardTarget
 					{...(post.subject.summary ? { description: post.subject.summary } : {})}
 					{...(post.subject.cover ? { imageUrl: post.subject.cover.url } : {})}
-					{...(post.subject.score
+					{...(isRatedWorkKind(post.subject.type)
 						? {
-								score: {
-									contextLabel: post.subject.score.contextTitle ?? t.ui.unnamed,
-									contextUnitId: post.subject.score.contextUnitId,
-									totalCount: Number(post.subject.score.totalCount),
-									totalScore: Number(post.subject.score.totalScore),
-								},
+								score: toFeedTargetScore(
+									selectFeedRating(post.subject.scores),
+									t.ui.unnamed,
+								),
 							}
 						: {})}
 					href={subjectHref}
 					imageAlt={post.subject.title ?? t.actions.view}
+					imageFallback={<FeedUnitCoverFallback kind={post.subject.type} />}
 					label={t.feed.relatedWork}
 					title={post.subject.title ?? t.actions.view}
 				/>
@@ -207,7 +210,7 @@ export function FeedPostCard({
 	);
 }
 
-function FeedUnitCard({
+export function FeedUnitCard({
 	unit,
 	canExclude,
 	onHiddenChange,
@@ -227,6 +230,11 @@ function FeedUnitCard({
 	const title = unit.title ?? t.ui.unnamed;
 	const attributions = toFeedAttributionContexts(unit.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(unit.realms, t.ui.unnamed);
+	const score =
+		unit.presentation.kind === "rated-work"
+			? toFeedTargetScore(selectFeedRating(unit.presentation.scores), t.ui.unnamed)
+			: undefined;
+	const identityPresentation = unit.presentation.kind === "identity" ? unit.presentation : null;
 
 	return (
 		<FeedCard
@@ -250,21 +258,32 @@ function FeedUnitCard({
 			/>
 			<CardContent
 				className={cn(
-					"grid gap-4 px-4 pb-4 pt-3 sm:px-5",
-					unit.cover &&
-						"grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7.5rem_minmax(0,1fr)]",
+					"grid gap-4 px-4 pb-0 pt-3 sm:px-5",
+					identityPresentation
+						? "grid-cols-[4.5rem_minmax(0,1fr)] sm:grid-cols-[5rem_minmax(0,1fr)]"
+						: "grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7.5rem_minmax(0,1fr)]",
 				)}
 			>
-				{unit.cover ? (
+				{identityPresentation ? (
+					<FeedItemMain className="block" href={href} onOpen={trackOpen}>
+						<IdentityAvatar
+							avatar={identityPresentation.avatar}
+							className="size-[4.5rem] border border-border-weak text-2xl shadow-sm/5 sm:size-20"
+							fallback={contextInitials(title)}
+							imageAlt={title}
+						/>
+					</FeedItemMain>
+				) : (
 					<FeedItemMain className="block" href={href} onOpen={trackOpen}>
 						<Cover
 							alt={title}
-							className="rounded-xl border border-border-weak shadow-sm/5"
+							className="w-full rounded-xl border border-border-weak shadow-sm/5"
+							fallback={<FeedUnitCoverFallback kind={unit.unitKind} />}
 							sizes="(min-width: 640px) 120px, 80px"
-							src={unit.cover.url}
+							src={unit.cover?.url}
 						/>
 					</FeedItemMain>
-				) : null}
+				)}
 				<div className="min-w-0">
 					<p className="font-semibold text-brand text-xs">
 						{t.feed.content.kinds[`unit:${unit.unitKind}`]}
@@ -276,6 +295,7 @@ function FeedUnitCard({
 						>
 							{title}
 						</h2>
+						{score !== undefined ? <FeedCardRating score={score} /> : null}
 						{unit.summary ? (
 							<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
 								{unit.summary}
@@ -289,11 +309,43 @@ function FeedUnitCard({
 							</p>
 						) : null}
 					</FeedItemMain>
-					<FeedItemActions href={href} item={unit} onOpen={trackOpen} />
 				</div>
+			</CardContent>
+			<CardContent className="px-4 pb-4 sm:px-5">
+				<FeedItemActions href={href} item={unit} onOpen={trackOpen} />
 			</CardContent>
 		</FeedCard>
 	);
+}
+
+function FeedUnitCoverFallback({ kind }: { readonly kind: string }) {
+	const Icon =
+		kind === "book"
+			? BookOpenIcon
+			: kind === "media"
+				? ClapperboardIcon
+				: kind === "software"
+					? AppWindowIcon
+					: LibraryIcon;
+	return <Icon aria-hidden className="size-7 text-muted-foreground" />;
+}
+
+function isRatedWorkKind(kind: string): kind is "book" | "media" | "software" {
+	return kind === "book" || kind === "media" || kind === "software";
+}
+
+function toFeedTargetScore(
+	score: FeedRatingAggregate | null,
+	unnamedContext: string,
+): FeedTargetScore | null {
+	return score
+		? {
+				contextLabel: score.contextTitle ?? unnamedContext,
+				contextUnitId: score.contextUnitId,
+				totalCount: Number(score.totalCount),
+				totalScore: Number(score.totalScore),
+			}
+		: null;
 }
 
 function FeedItemOverflowMenu({

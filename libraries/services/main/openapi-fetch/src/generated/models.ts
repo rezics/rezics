@@ -9560,19 +9560,37 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 										url: string;
 								  } | null)
 								| null;
-							score:
-								| ({
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										contextUnitId: string;
-										contextTitle: (string | null) | null;
-										totalScore: string | number;
-										totalCount: string | number;
-								  } | null)
-								| null;
+							/**
+							 * @type object
+							 */
+							scores: {
+								preferred:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+								global:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+							};
 					  } | null)
 					| null;
 				/**
@@ -10190,19 +10208,37 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 										url: string;
 								  } | null)
 								| null;
-							score:
-								| ({
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										contextUnitId: string;
-										contextTitle: (string | null) | null;
-										totalScore: string | number;
-										totalCount: string | number;
-								  } | null)
-								| null;
+							/**
+							 * @type object
+							 */
+							scores: {
+								preferred:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+								global:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+							};
 					  } | null)
 					| null;
 				/**
@@ -14443,6 +14479,14 @@ export const PostApiFeedQueryStatus200ItemsUnitKindEnum = {
 export type PostApiFeedQueryStatus200ItemsUnitKindEnum =
 	(typeof PostApiFeedQueryStatus200ItemsUnitKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsUnitKindEnum];
 
+export const PostApiFeedQueryStatus200ItemsPresentationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsPresentationAvatarIconPrefixEnum =
+	(typeof PostApiFeedQueryStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsPresentationAvatarIconPrefixEnum];
+
 export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -14841,6 +14885,134 @@ export type PostApiFeedQueryStatus200 = {
 							directItemCount: string | number;
 					  } | null)
 					| null;
+				presentation:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "rated-work";
+							/**
+							 * @type object
+							 */
+							scores: {
+								preferred:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+								global:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "identity";
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: PostApiFeedQueryStatus200ItemsPresentationAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+							banner:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "general";
+					  };
 		  }
 		| (
 				| {
@@ -15451,19 +15623,37 @@ export type PostApiFeedQueryStatus200 = {
 												url: string;
 										  } | null)
 										| null;
-									score:
-										| ({
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												contextUnitId: string;
-												contextTitle: (string | null) | null;
-												totalScore: string | number;
-												totalCount: string | number;
-										  } | null)
-										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
 							  } | null)
 							| null;
 						/**
@@ -16080,19 +16270,37 @@ export type PostApiFeedQueryStatus200 = {
 												url: string;
 										  } | null)
 										| null;
-									score:
-										| ({
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												contextUnitId: string;
-												contextTitle: (string | null) | null;
-												totalScore: string | number;
-												totalCount: string | number;
-										  } | null)
-										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
 							  } | null)
 							| null;
 						/**
@@ -70676,19 +70884,37 @@ export type GetApiReviewsStatus200 = {
 								url: string;
 						  } | null)
 						| null;
-					score:
-						| ({
-								/**
-								 * @description
-								 * Format: `uuid`
-								 * @type string
-								 */
-								contextUnitId: string;
-								contextTitle: (string | null) | null;
-								totalScore: string | number;
-								totalCount: string | number;
-						  } | null)
-						| null;
+					/**
+					 * @type object
+					 */
+					scores: {
+						preferred:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									contextUnitId: string;
+									contextTitle: (string | null) | null;
+									totalScore: string | number;
+									totalCount: string | number;
+							  } | null)
+							| null;
+						global:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									contextUnitId: string;
+									contextTitle: (string | null) | null;
+									totalScore: string | number;
+									totalCount: string | number;
+							  } | null)
+							| null;
+					};
 			  } | null)
 			| null;
 		/**
@@ -86886,6 +87112,14 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum = {
 export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum];
 
+export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum];
+
 export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -87294,6 +87528,134 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							directItemCount: string | number;
 					  } | null)
 					| null;
+				presentation:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "rated-work";
+							/**
+							 * @type object
+							 */
+							scores: {
+								preferred:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+								global:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "identity";
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: PostApiSearchFeaturesByTemplateFeedStatus200ItemsPresentationAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+							banner:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "general";
+					  };
 		  }
 		| (
 				| {
@@ -87905,19 +88267,37 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 												url: string;
 										  } | null)
 										| null;
-									score:
-										| ({
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												contextUnitId: string;
-												contextTitle: (string | null) | null;
-												totalScore: string | number;
-												totalCount: string | number;
-										  } | null)
-										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
 							  } | null)
 							| null;
 						/**
@@ -88535,19 +88915,37 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 												url: string;
 										  } | null)
 										| null;
-									score:
-										| ({
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												contextUnitId: string;
-												contextTitle: (string | null) | null;
-												totalScore: string | number;
-												totalCount: string | number;
-										  } | null)
-										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
 							  } | null)
 							| null;
 						/**
@@ -95898,6 +96296,15 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsUnitKindEnum];
 
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPresentationAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPresentationAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPresentationAvatarIconPrefixEnum];
+
 export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsRoleEnum =
 	{
 		author: "author",
@@ -96308,6 +96715,134 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 							directItemCount: string | number;
 					  } | null)
 					| null;
+				presentation:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "rated-work";
+							/**
+							 * @type object
+							 */
+							scores: {
+								preferred:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+								global:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "identity";
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPresentationAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+							banner:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "general";
+					  };
 		  }
 		| (
 				| {
@@ -96919,19 +97454,37 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 												url: string;
 										  } | null)
 										| null;
-									score:
-										| ({
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												contextUnitId: string;
-												contextTitle: (string | null) | null;
-												totalScore: string | number;
-												totalCount: string | number;
-										  } | null)
-										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
 							  } | null)
 							| null;
 						/**
@@ -97549,19 +98102,37 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 												url: string;
 										  } | null)
 										| null;
-									score:
-										| ({
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												contextUnitId: string;
-												contextTitle: (string | null) | null;
-												totalScore: string | number;
-												totalCount: string | number;
-										  } | null)
-										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
 							  } | null)
 							| null;
 						/**

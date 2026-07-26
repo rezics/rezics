@@ -170,4 +170,21 @@ describe("FeedCardTarget", () => {
 			Node.DOCUMENT_POSITION_FOLLOWING,
 		);
 	});
+
+	it("keeps the Cover and rating rows when a rated work has neither", () => {
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedCardTarget
+					href="/units/media/media-1"
+					label="討論關聯作品"
+					score={null}
+					title="尚無素材的作品"
+				/>
+			</TranslationProvider>,
+		);
+
+		expect(container.querySelector('[data-slot="cover"]')).toBeTruthy();
+		expect(container.querySelector('[data-slot="feed-card-rating"]')).toBeTruthy();
+		expect(screen.getByText("尚無評分")).toBeTruthy();
+	});
 });

@@ -488,7 +488,7 @@ const FeedItemBaseResponse = {
 	tracking: t.Nullable(RecommendationTrackingSchema),
 };
 
-export const FeedUnitItemResponse = t.Object({
+const FeedUnitItemFields = {
 	...FeedItemBaseResponse,
 	itemType: t.Literal("unit"),
 	unitKind: t.UnionEnum(FeedUnitKindValues),
@@ -500,6 +500,38 @@ export const FeedUnitItemResponse = t.Object({
 			directItemCount: t.Integer({ minimum: 0 }),
 		}),
 	),
+} as const;
+
+const FeedRatingAggregateResponse = t.Object({
+	contextUnitId: Uuid,
+	contextTitle: NullableText,
+	totalScore: t.Integer({ minimum: 1 }),
+	totalCount: t.Integer({ minimum: 1 }),
+});
+
+const FeedScoreCandidatesResponse = t.Object({
+	preferred: t.Nullable(FeedRatingAggregateResponse),
+	global: t.Nullable(FeedRatingAggregateResponse),
+});
+
+const FeedUnitPresentationResponse = t.Union([
+	t.Object({
+		kind: t.Literal("rated-work"),
+		scores: FeedScoreCandidatesResponse,
+	}),
+	t.Object({
+		kind: t.Literal("identity"),
+		avatar: AvatarResponse,
+		banner: ImageAssetResponse,
+	}),
+	t.Object({
+		kind: t.Literal("general"),
+	}),
+]);
+
+export const FeedUnitItemResponse = t.Object({
+	...FeedUnitItemFields,
+	presentation: FeedUnitPresentationResponse,
 });
 
 const FeedPostItemFields = {
@@ -529,14 +561,7 @@ const FeedPostItemFields = {
 			title: NullableText,
 			summary: NullableText,
 			cover: ImageAssetResponse,
-			score: t.Nullable(
-				t.Object({
-					contextUnitId: Uuid,
-					contextTitle: NullableText,
-					totalScore: t.Integer({ minimum: 1 }),
-					totalCount: t.Integer({ minimum: 1 }),
-				}),
-			),
+			scores: FeedScoreCandidatesResponse,
 		}),
 	),
 } as const;

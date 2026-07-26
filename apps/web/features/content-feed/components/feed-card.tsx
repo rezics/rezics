@@ -194,6 +194,7 @@ export function FeedCardTarget({
 	description,
 	imageUrl,
 	imageAlt = "",
+	imageFallback = <BookOpenIcon aria-hidden />,
 	score,
 }: {
 	href: string;
@@ -202,19 +203,18 @@ export function FeedCardTarget({
 	description?: string;
 	imageUrl?: string;
 	imageAlt?: string;
-	score?: FeedTargetScore;
+	imageFallback?: ReactNode;
+	score?: FeedTargetScore | null;
 }) {
-	const { locale, t } = useTranslation(["feed"]);
-	const averageScore = score && score.totalCount > 0 ? score.totalScore / score.totalCount : null;
 	return (
 		<CardContent className="px-4 pt-3 sm:px-5" data-slot="feed-card-target">
 			<div className="mb-3 border-border-weak border-t" />
-			<Item asChild className="p-2.5 hover:bg-surface-hover" variant="muted">
+			<Item asChild className="p-0 hover:bg-transparent">
 				<a data-slot="feed-card-target-link" href={href}>
 					<Cover
 						alt={imageAlt || title}
-						className="w-12 rounded-md"
-						fallback={<BookOpenIcon aria-hidden />}
+						className="w-14 rounded-lg border border-border-weak shadow-sm/5"
+						fallback={imageFallback}
 						src={imageUrl}
 					/>
 					<ItemContent className="min-w-0">
@@ -225,26 +225,57 @@ export function FeedCardTarget({
 								{description}
 							</ItemDescription>
 						) : null}
-						{score && averageScore !== null ? (
-							<p className="mt-0.5 flex items-center gap-1 text-muted-foreground text-xs">
-								<span>{score.contextLabel}</span>
-								<StarIcon aria-hidden className="size-3 fill-current" />
-								<span>
-									{t.feed.targetScore({
-										score: new Intl.NumberFormat(locale.target, {
-											maximumFractionDigits: 1,
-											minimumFractionDigits: 1,
-										}).format(averageScore),
-										count: score.totalCount,
-									})}
-								</span>
-							</p>
-						) : null}
+						{score !== undefined ? <FeedCardRating score={score} /> : null}
 					</ItemContent>
 					<ChevronRightIcon aria-hidden className="text-muted-foreground" />
 				</a>
 			</Item>
 		</CardContent>
+	);
+}
+
+export function FeedCardRating({
+	className,
+	score,
+}: {
+	readonly className?: string;
+	readonly score: FeedTargetScore | null;
+}) {
+	const { locale, t } = useTranslation(["feed"]);
+	if (!score)
+		return (
+			<p
+				className={cn(
+					"mt-1 flex items-center gap-1.5 text-muted-foreground text-xs",
+					className,
+				)}
+				data-slot="feed-card-rating"
+			>
+				<StarIcon aria-hidden className="size-3.5" />
+				<span>{t.feed.noRatings}</span>
+			</p>
+		);
+	const averageScore = score.totalScore / score.totalCount;
+	return (
+		<p
+			className={cn(
+				"mt-1 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs",
+				className,
+			)}
+			data-slot="feed-card-rating"
+		>
+			<span className="truncate text-muted-foreground">{score.contextLabel}</span>
+			<StarIcon aria-hidden className="size-3.5 fill-warning text-warning" />
+			<span className="font-semibold tabular-nums text-foreground">
+				{t.feed.targetScore({
+					score: new Intl.NumberFormat(locale.target, {
+						maximumFractionDigits: 1,
+						minimumFractionDigits: 1,
+					}).format(averageScore),
+					count: score.totalCount,
+				})}
+			</span>
+		</p>
 	);
 }
 

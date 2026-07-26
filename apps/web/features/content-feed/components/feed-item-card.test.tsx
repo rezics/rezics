@@ -1,12 +1,12 @@
 /** @vitest-environment jsdom */
 
 import { resources } from "@rezics/i18n/resources";
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { create } from "native-i18n";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { FeedPostCard, type FeedPost } from "./feed-item-card";
+import { FeedPostCard, type FeedPost, FeedUnitCard, type FeedUnit } from "./feed-item-card";
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
@@ -52,6 +52,8 @@ const translation = await create(resources).getTranslation(
 	["actions", "engagement", "feed", "posts", "state", "ui", "units"],
 	["zh-Hant"],
 );
+
+afterEach(cleanup);
 
 const excerpt = {
 	id: "019f9872-bd49-7bb4-a6b7-ec621fca2032",
@@ -109,7 +111,7 @@ const excerpt = {
 		title: "Glorious Exploits",
 		summary: "A novel.",
 		cover: null,
-		score: null,
+		scores: { preferred: null, global: null },
 	},
 } satisfies FeedPost;
 
@@ -128,5 +130,140 @@ describe("FeedPostCard", () => {
 			within(source).getByRole("link", { name: "Glorious Exploits" }).getAttribute("href"),
 		).toBe(`/units/book/${excerpt.subject.id}`);
 		expect(container.querySelector('[data-slot="feed-card-target"]')).toBeNull();
+	});
+});
+
+type FeedUnitCommon = Pick<
+	FeedUnit,
+	| "attributions"
+	| "collection"
+	| "createdAt"
+	| "itemType"
+	| "language"
+	| "postKind"
+	| "reactions"
+	| "realmId"
+	| "realms"
+	| "recommendationReason"
+	| "tracking"
+	| "updatedAt"
+	| "viewerReaction"
+>;
+
+const unitCommon = {
+	language: "zh",
+	itemType: "unit",
+	postKind: null,
+	attributions: [],
+	realmId: null,
+	realms: [],
+	createdAt: "2026-07-25T04:00:00.000Z",
+	updatedAt: "2026-07-25T04:00:00.000Z",
+	reactions: { upvote: 0, downvote: 0 },
+	viewerReaction: null,
+	recommendationReason: null,
+	tracking: null,
+	collection: null,
+} satisfies FeedUnitCommon;
+
+describe("FeedUnitCard", () => {
+	it("keeps the fixed Cover slot and falls back to the global score per work", () => {
+		const media = {
+			...unitCommon,
+			id: "019f9872-bd49-7bb4-a6b7-ec621fca2040",
+			unitKind: "media",
+			title: "無封面媒體",
+			summary: "測試摘要",
+			cover: null,
+			presentation: {
+				kind: "rated-work",
+				scores: {
+					preferred: null,
+					global: {
+						contextUnitId: "019b76da-a800-7300-8000-000000000002",
+						contextTitle: "全域評分",
+						totalScore: 86,
+						totalCount: 10,
+					},
+				},
+			},
+		} satisfies FeedUnit;
+
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedUnitCard canExclude={false} unit={media} />
+			</TranslationProvider>,
+		);
+
+		expect(container.querySelector('[data-slot="cover"]')).toBeTruthy();
+		expect(screen.getByText("全域評分")).toBeTruthy();
+		expect(screen.getByText("8.6／10 · 10 人評分")).toBeTruthy();
+	});
+
+	it("uses the preferred score when both score candidates exist", () => {
+		const book = {
+			...unitCommon,
+			id: "019f9872-bd49-7bb4-a6b7-ec621fca2041",
+			unitKind: "book",
+			title: "偏好語境書籍",
+			summary: null,
+			cover: null,
+			presentation: {
+				kind: "rated-work",
+				scores: {
+					preferred: {
+						contextUnitId: "019f9872-bd49-7bb4-a6b7-ec621fca2042",
+						contextTitle: "我的讀書會",
+						totalScore: 18,
+						totalCount: 2,
+					},
+					global: {
+						contextUnitId: "019b76da-a800-7300-8000-000000000002",
+						contextTitle: "全域評分",
+						totalScore: 86,
+						totalCount: 10,
+					},
+				},
+			},
+		} satisfies FeedUnit;
+
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedUnitCard canExclude={false} unit={book} />
+			</TranslationProvider>,
+		);
+
+		expect(screen.getByText("我的讀書會")).toBeTruthy();
+		expect(screen.getByText("9.0／10 · 2 人評分")).toBeTruthy();
+		expect(screen.queryByText("全域評分")).toBeNull();
+	});
+
+	it("renders Realm identity through its avatar without showing its banner", () => {
+		const realm = {
+			...unitCommon,
+			id: "019f9872-bd49-7bb4-a6b7-ec621fca2043",
+			unitKind: "realm",
+			title: "群體智慧",
+			summary: null,
+			cover: null,
+			presentation: {
+				kind: "identity",
+				avatar: { type: "emoji", emoji: "🧠" },
+				banner: {
+					id: "019f9872-bd49-7bb4-a6b7-ec621fca2044",
+					url: "/banner.jpg",
+				},
+			},
+		} satisfies FeedUnit;
+
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedUnitCard canExclude={false} unit={realm} />
+			</TranslationProvider>,
+		);
+
+		expect(container.querySelector('[data-slot="avatar-emoji"]')?.textContent).toBe("🧠");
+		expect(container.querySelector('[data-slot="cover"]')).toBeNull();
+		expect(container.querySelector('[data-slot="banner"]')).toBeNull();
 	});
 });
