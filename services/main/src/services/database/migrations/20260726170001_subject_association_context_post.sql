@@ -1,4 +1,4 @@
--- Modify "subject_association" table
+-- Add an optional wiki Post context to subject associations.
 ALTER TABLE "subject_association" ADD COLUMN "context_post_id" uuid NULL, ADD CONSTRAINT "subject_association_context_post_id_post_id_fkey" FOREIGN KEY ("context_post_id") REFERENCES "post" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
 -- Create index "subject_association_context_post_idx" to table: "subject_association"
 CREATE INDEX "subject_association_context_post_idx" ON "subject_association" ("context_post_id") WHERE "context_post_id" IS NOT NULL;
