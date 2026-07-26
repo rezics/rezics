@@ -98852,6 +98852,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"postKind",
 										"attributions",
 										"targetId",
 										"realmId",
@@ -98861,10 +98862,13 @@
 										"body",
 										"createdAt",
 										"updatedAt",
+										"subject",
+										"scores",
 										"capabilities"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"postKind": { "const": "review", "type": "string" },
 										"attributions": {
 											"type": "array",
 											"items": {
@@ -99420,6 +99424,93 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
+										"subject": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": [
+														"id",
+														"type",
+														"title",
+														"summary",
+														"cover"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"type": { "type": "string" },
+														"title": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"summary": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"cover": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"type": "object",
+																	"required": ["id", "url"],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"url": { "type": "string" }
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"scores": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["scoreId", "contextUnitId", "value"],
+												"properties": {
+													"scoreId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"contextUnitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"value": {
+														"minimum": 1,
+														"maximum": 10,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{
+																"minimum": 1,
+																"maximum": 10,
+																"type": "integer"
+															}
+														]
+													}
+												}
+											}
+										},
 										"capabilities": {
 											"type": "object",
 											"required": ["canEdit"],
@@ -100574,7 +100665,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "viewerReaction"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -100595,6 +100686,10 @@
 													}
 												}
 											}
+										},
+										"viewerReaction": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										}
 									}
 								}
@@ -103601,6 +103696,8 @@
 										"latestRevisionId",
 										"createdAt",
 										"updatedAt",
+										"subject",
+										"scores",
 										"capabilities"
 									],
 									"properties": {
@@ -104157,6 +104254,93 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
+										"subject": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": [
+														"id",
+														"type",
+														"title",
+														"summary",
+														"cover"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"type": { "type": "string" },
+														"title": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"summary": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"cover": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"type": "object",
+																	"required": ["id", "url"],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"url": { "type": "string" }
+																	}
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"scores": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["scoreId", "contextUnitId", "value"],
+												"properties": {
+													"scoreId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"contextUnitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"value": {
+														"minimum": 1,
+														"maximum": 10,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{
+																"minimum": 1,
+																"maximum": 10,
+																"type": "integer"
+															}
+														]
+													}
+												}
+											}
+										},
 										"capabilities": {
 											"type": "object",
 											"required": ["canEdit", "canReply"],

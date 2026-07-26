@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -32,6 +32,8 @@ import {
 	findPostTargetingLock,
 	getPostTargetingLockedUnitIds,
 } from "../../posts/targeting";
+import { getPostSubjectPresentation } from "../../posts/presentation";
+import { selectPostScores } from "../../posts/scores";
 import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
@@ -122,23 +124,6 @@ const replySelection = {
 	createdAt: unit.createdAt,
 	updatedAt: unit.updatedAt,
 };
-
-async function selectPostScores(postId: string) {
-	return database
-		.select({
-			scoreId: score.id,
-			profileId: score.profileId,
-			unitId: score.unitId,
-			contextUnitId: score.contextUnitId,
-			value: score.value,
-			position: postScore.position,
-			updatedAt: score.updatedAt,
-		})
-		.from(postScore)
-		.innerJoin(score, eq(score.id, postScore.scoreId))
-		.where(eq(postScore.postId, postId))
-		.orderBy(asc(postScore.position), asc(postScore.scoreId));
-}
 
 export default new Elysia()
 	.use(session)
@@ -417,17 +402,27 @@ export default new Elysia()
 						)
 						.limit(1);
 					if (!row) throw new PostNotFound();
-					const attributions =
-						(await getAttributionSummariesByUnitIds([row.id])).get(row.id) ?? [];
-					return {
-						...row,
-						realmId: query.realmId ?? null,
-						attributions,
-						replyCount: toSafeInteger(row.replyCount, "reply count"),
-						body: toPortableTextResponse(row.body),
-						capabilities: {
-							canEdit: await authorization.unit.canUpdate(row.id),
-							canReply: !(await findPostTargetingLock(database, {
+					const subjectId = row.subjectId;
+					const subjectPromise = subjectId
+						? authorization.unit
+								.canRead(subjectId)
+								.then((canRead) =>
+									canRead ? getPostSubjectPresentation(subjectId) : null,
+								)
+						: Promise.resolve(null);
+					const [attributionMap, scores, subject, canEdit, targetingLock] =
+						await Promise.all([
+							getAttributionSummariesByUnitIds([row.id]),
+							selectPostScores(row.id).then((items) =>
+								items.map(({ scoreId, contextUnitId, value }) => ({
+									scoreId,
+									contextUnitId,
+									value,
+								})),
+							),
+							subjectPromise,
+							authorization.unit.canUpdate(row.id),
+							findPostTargetingLock(database, {
 								targets:
 									row.postKind === "reply" && row.rootPostId
 										? [
@@ -436,7 +431,19 @@ export default new Elysia()
 											]
 										: [{ relation: "root", unitId: row.id }],
 								...(query.realmId ? { realmId: query.realmId } : {}),
-							})),
+							}),
+						]);
+					return {
+						...row,
+						realmId: query.realmId ?? null,
+						attributions: attributionMap.get(row.id) ?? [],
+						replyCount: toSafeInteger(row.replyCount, "reply count"),
+						body: toPortableTextResponse(row.body),
+						subject,
+						scores,
+						capabilities: {
+							canEdit,
+							canReply: !targetingLock,
 						},
 					};
 				},

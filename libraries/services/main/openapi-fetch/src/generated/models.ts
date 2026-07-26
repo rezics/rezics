@@ -71526,6 +71526,10 @@ export type GetApiReviewsByReviewIdStatus200 = {
 	 */
 	id: string;
 	/**
+	 * @type string
+	 */
+	postKind: "review";
+	/**
 	 * @type array
 	 */
 	attributions: {
@@ -71800,6 +71804,54 @@ export type GetApiReviewsByReviewIdStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
+	subject:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				type: string;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				cover:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	scores: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		scoreId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contextUnitId: string;
+		value: string | number;
+	}[];
 	/**
 	 * @type object
 	 */
@@ -72883,6 +72935,7 @@ export type GetApiReactionsUnitsByUnitIdStatus200 = {
 		reaction: string;
 		count: string | number;
 	}[];
+	viewerReaction: (string | null) | null;
 };
 
 /**
@@ -75920,6 +75973,54 @@ export type GetApiPostsByPostIdStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
+	subject:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				type: string;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				cover:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	scores: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		scoreId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contextUnitId: string;
+		value: string | number;
+	}[];
 	/**
 	 * @type object
 	 */

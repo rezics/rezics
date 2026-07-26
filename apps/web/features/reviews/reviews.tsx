@@ -4,20 +4,11 @@ import { toContentLanguage } from "@rezics/i18n";
 
 import {
 	type GetApiReviewsByReviewIdStatus200,
-	getApiReactionsUnitsByUnitIdQueryKey,
 	getApiReviewsByReviewIdQueryKey,
 	getApiReviewsQueryKey,
-	getApiScoresByTargetIdQueryKey,
-	useDeleteApiReactionsUnitsByUnitId,
-	useDeleteApiReviewsByReviewId,
-	useGetApiReactionsUnitsByUnitId,
 	useGetApiReviews,
 	useGetApiReviewsByReviewId,
-	useGetApiPostsByPostIdScores,
-	useGetApiScoresByTargetId,
 	usePatchApiReviewsByReviewId,
-	usePutApiReactionsUnitsByUnitId,
-	usePutApiScoresByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,32 +17,16 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
-import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogBody,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@rezics/ui";
 import { Button } from "@rezics/ui";
-import { Card, CardContent, CardHeader } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
-import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { UnitAttributionProposalManager } from "@/features/governance/unit-workflows";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
-import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { ReviewComposer } from "./components/review-composer";
 import { ReviewCards } from "./components/unit-review-list";
 
@@ -106,113 +81,6 @@ export function ReviewCreate() {
 				<ReviewComposer onCreated={(reviewId) => router.push(`/reviews/${reviewId}`)} />
 			</main>
 		</RequireSession>
-	);
-}
-
-export function ReviewDetail({ id }: { id: string }) {
-	const query = useGetApiReviewsByReviewId({ path: { reviewId: id } });
-	const remove = useDeleteApiReviewsByReviewId();
-	const queryClient = useQueryClient();
-	const router = useRouter();
-	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
-	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data) return null;
-	const review = query.data;
-	async function deleteReview() {
-		try {
-			await remove.mutateAsync({ path: { reviewId: id } });
-			await invalidateReviews(queryClient, id);
-			router.push("/reviews");
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
-	return (
-		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading
-				title={review.title ?? t.ui.unnamed}
-				description={review.summary ?? undefined}
-				action={
-					review.capabilities.canEdit ? (
-						<div className="flex shrink-0 flex-wrap gap-2">
-							<Button asChild variant="outline">
-								<Link href={`/reviews/${id}/edit`}>{t.ui.edit}</Link>
-							</Button>
-							<AlertDialog>
-								<AlertDialogTrigger asChild>
-									<Button variant="destructive">
-										{t.engagement.deleteReview}
-									</Button>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle>
-											{t.engagement.deleteReview}
-										</AlertDialogTitle>
-									</AlertDialogHeader>
-									<AlertDialogBody>
-										<AlertDialogDescription>
-											{t.engagement.deleteReviewPrompt}
-										</AlertDialogDescription>
-									</AlertDialogBody>
-									<AlertDialogFooter>
-										<AlertDialogCancel>{t.engagement.cancel}</AlertDialogCancel>
-										<AlertDialogAction
-											isLoading={remove.isPending}
-											onClick={() => void deleteReview()}
-											variant="destructive"
-										>
-											{t.engagement.delete}
-										</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
-							</AlertDialog>
-						</div>
-					) : undefined
-				}
-			/>
-			{review.body && (
-				<Card>
-					<CardContent className="prose max-w-none py-2">
-						<PortableTextContent
-							value={readPortableText(review.body)}
-							variant="article"
-						/>
-					</CardContent>
-				</Card>
-			)}
-			<BoundScores postId={review.id} />
-			{review.realmId && (
-				<ScorePanel contextUnitId={review.realmId} targetId={review.targetId} />
-			)}
-			<ReactionControls targetId={review.id} />
-			<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
-		</main>
-	);
-}
-
-function BoundScores({ postId }: { postId: string }) {
-	const query = useGetApiPostsByPostIdScores({ path: { postId } });
-	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (query.isPending || !query.data?.items.length) return null;
-	return (
-		<Card>
-			<CardHeader title={t.engagement.reviewScore} />
-			<CardContent className="flex flex-wrap gap-2">
-				{query.data.items.map((item) => (
-					<span
-						className="bg-surface-muted rounded-md px-3 py-2 text-sm font-medium"
-						key={item.scoreId}
-					>
-						{t.engagement.scoreOutOfTen({ score: String(item.value) })}
-					</span>
-				))}
-			</CardContent>
-		</Card>
 	);
 }
 
@@ -310,143 +178,5 @@ function ReviewEditForm({
 				<UnitAttributionProposalManager unitId={reviewId} />
 			</main>
 		</RequireSession>
-	);
-}
-
-function ScorePanel({ contextUnitId, targetId }: { contextUnitId: string; targetId: string }) {
-	const aggregate = useGetApiScoresByTargetId({
-		path: { targetId },
-		query: { contextUnitId },
-	});
-	const setScore = usePutApiScoresByTargetId();
-	const queryClient = useQueryClient();
-	const { data: session } = useHydratedSession();
-	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
-	const [score, setScoreValue] = useState("5");
-	const count = Number(aggregate.data?.totalCount ?? 0);
-	const average = count ? Number(aggregate.data?.totalScore ?? 0) / count : 0;
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		try {
-			await setScore.mutateAsync({
-				path: { targetId },
-				body: { contextUnitId, score: Number(score) },
-			});
-			await queryClient.invalidateQueries({
-				queryKey: getApiScoresByTargetIdQueryKey({
-					path: { targetId },
-					query: { contextUnitId },
-				}),
-			});
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
-	return (
-		<Card>
-			<CardHeader title={t.engagement.scoreAverage} />
-			<CardContent className="flex flex-col gap-4">
-				{aggregate.isError ? (
-					<RequestFailure error={aggregate.error} fallback={t.ui.retryLater} />
-				) : (
-					<p className="text-muted-foreground text-sm">
-						{average.toFixed(1)} · {count} {t.engagement.scoreCount}
-					</p>
-				)}
-				{session ? (
-					<form
-						className="flex flex-wrap items-end gap-3"
-						onSubmit={(event) => void submit(event)}
-					>
-						<Field className="w-full max-w-32">
-							<FieldLabel>{t.engagement.reviewScore}</FieldLabel>
-							<Input
-								max={10}
-								min={1}
-								onChange={(event) => setScoreValue(event.currentTarget.value)}
-								type="number"
-								value={score}
-							/>
-						</Field>
-						<Button variant="solid" isLoading={setScore.isPending} type="submit">
-							{t.engagement.setScore}
-						</Button>
-					</form>
-				) : (
-					<SignInButton size="sm" variant="outline">
-						{t.actions.login}
-					</SignInButton>
-				)}
-				<RequestFailure error={setScore.error} fallback={t.ui.retryLater} />
-			</CardContent>
-		</Card>
-	);
-}
-
-function ReactionControls({ targetId }: { targetId: string }) {
-	const reactions = useGetApiReactionsUnitsByUnitId({ path: { unitId: targetId } });
-	const setReaction = usePutApiReactionsUnitsByUnitId();
-	const removeReaction = useDeleteApiReactionsUnitsByUnitId();
-	const queryClient = useQueryClient();
-	const { data: session } = useHydratedSession();
-	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
-	const [selected, setSelected] = useState<"upvote" | "downvote" | null>(null);
-	const counts = new Map(reactions.data?.items.map((item) => [item.reaction, item.count]) ?? []);
-	async function change(reaction: "upvote" | "downvote") {
-		try {
-			if (selected === reaction) {
-				await removeReaction.mutateAsync({
-					path: { unitId: targetId },
-					body: { reaction },
-				});
-				setSelected(null);
-			} else {
-				await setReaction.mutateAsync({
-					path: { unitId: targetId },
-					body: { reaction },
-				});
-				setSelected(reaction);
-			}
-			await queryClient.invalidateQueries({
-				queryKey: getApiReactionsUnitsByUnitIdQueryKey({
-					path: { unitId: targetId },
-				}),
-			});
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
-	return (
-		<Card>
-			<CardHeader title={t.engagement.reaction} />
-			<CardContent className="flex flex-wrap items-center gap-2">
-				{session ? (
-					<>
-						<Button
-							isLoading={setReaction.isPending || removeReaction.isPending}
-							onClick={() => void change("upvote")}
-							variant={selected === "upvote" ? "secondary" : "outline"}
-						>
-							{t.engagement.upvote} ({counts.get("upvote") ?? 0})
-						</Button>
-						<Button
-							isLoading={setReaction.isPending || removeReaction.isPending}
-							onClick={() => void change("downvote")}
-							variant={selected === "downvote" ? "secondary" : "outline"}
-						>
-							{t.engagement.downvote} ({counts.get("downvote") ?? 0})
-						</Button>
-					</>
-				) : (
-					<SignInButton size="sm" variant="outline">
-						{t.actions.login}
-					</SignInButton>
-				)}
-				<RequestFailure
-					error={reactions.error ?? setReaction.error ?? removeReaction.error}
-					fallback={t.ui.retryLater}
-				/>
-			</CardContent>
-		</Card>
 	);
 }

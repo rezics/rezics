@@ -3,8 +3,6 @@
 import { toContentLanguage } from "@rezics/i18n";
 
 import {
-	useDeleteApiPostsByPostId,
-	useDeleteApiPostsByPostIdRepliesByReplyPostId,
 	useGetApiPostsByPostId,
 	useGetApiRealmsByRealmId,
 	usePatchApiPostsByPostId,
@@ -21,20 +19,8 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
-import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import {
-	AlertDialog,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@rezics/ui";
-import { Button } from "@rezics/ui";
-import { Card, CardContent, CardDescription, CardHeader, Spinner } from "@rezics/ui";
+import { Button, Spinner } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
@@ -44,11 +30,8 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
-import { ReplyPostThread } from "./reply-thread";
-import { PostList, RelatedPostRecommendations } from "./post-list";
+import { PostList } from "./post-list";
 import { invalidatePostQueries } from "./query";
-import { AttributionLinks } from "./attribution-list";
-import { realmHref } from "@/features/slugs/unit-route";
 import { postHref } from "./url";
 
 type PickedEntity = { id: string; label: string };
@@ -169,90 +152,6 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 				</form>
 			</main>
 		</RequireSession>
-	);
-}
-
-export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }) {
-	const { t } = useTranslation(["errors", "posts", "ui"]);
-	const query = useGetApiPostsByPostId({
-		path: { postId: id },
-		query: { ...(realmId ? { realmId } : {}) },
-	});
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data) return <QueryPending />;
-	const post = query.data;
-	return (
-		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading
-				title={
-					post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled)
-				}
-				action={
-					<div className="flex flex-wrap gap-2">
-						<Button variant="outline" asChild>
-							<Link href={`/posts/${post.id}/history`}>{t.posts.history}</Link>
-						</Button>
-						{post.capabilities.canEdit && (
-							<>
-								<Button variant="outline" asChild>
-									<Link href={`/posts/${post.id}/edit`}>{t.ui.edit}</Link>
-								</Button>
-								<PostDeleteButton postId={post.id} rootPostId={post.rootPostId} />
-							</>
-						)}
-					</div>
-				}
-			/>
-			<Card>
-				<CardHeader>
-					<CardDescription className="flex flex-wrap gap-x-4 gap-y-2">
-						<span className="inline-flex gap-1">
-							<span>{t.posts.attributions}:</span>
-							<AttributionLinks
-								attributions={post.attributions}
-								className="text-link hover:text-link-hover"
-								emptyLabel={t.posts.unknownAttribution}
-							/>
-						</span>
-						{post.realmId && (
-							<Link
-								className="text-link hover:text-link-hover"
-								href={realmHref({ id: post.realmId })}
-							>
-								{t.posts.viewRealm}
-							</Link>
-						)}
-						<span className="text-muted-foreground">
-							{post.replyCount} {t.posts.replies}
-						</span>
-						{post.rootPostId && (
-							<Link
-								className="text-link hover:text-link-hover"
-								href={postHref(post.rootPostId, realmId, "replies")}
-							>
-								{t.posts.viewThread}
-							</Link>
-						)}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<article className="prose max-w-none">
-						<PortableTextContent
-							value={readPortableText(post.body)}
-							variant="article"
-						/>
-					</article>
-				</CardContent>
-			</Card>
-			<ReplyPostThread
-				rootPostId={post.rootPostId ?? post.id}
-				parentPostId={post.postKind === "reply" ? post.id : undefined}
-				realmId={realmId}
-				canReply={post.capabilities.canReply}
-			/>
-			<RelatedPostRecommendations postId={post.id} />
-		</main>
 	);
 }
 
@@ -442,54 +341,5 @@ function PostFields({
 				{submitLabel}
 			</Button>
 		</>
-	);
-}
-
-function PostDeleteButton({ postId, rootPostId }: { postId: string; rootPostId: string | null }) {
-	const { t } = useTranslation(["errors", "posts", "ui"]);
-	const router = useRouter();
-	const queryClient = useQueryClient();
-	const removePost = useDeleteApiPostsByPostId();
-	const removeReply = useDeleteApiPostsByPostIdRepliesByReplyPostId();
-	const pending = removePost.isPending || removeReply.isPending;
-	const error = rootPostId ? removeReply.error : removePost.error;
-	const onSuccess = async () => {
-		await invalidatePostQueries(queryClient, rootPostId ?? postId, postId);
-		router.replace(rootPostId ? `/posts/${rootPostId}#replies` : "/posts");
-	};
-	const remove = () => {
-		if (rootPostId) {
-			removeReply.mutate(
-				{ path: { postId: rootPostId, replyPostId: postId } },
-				{ onSuccess },
-			);
-			return;
-		}
-		removePost.mutate({ path: { postId } }, { onSuccess });
-	};
-	return (
-		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button variant="destructive">{t.posts.delete}</Button>
-			</AlertDialogTrigger>
-			<AlertDialogContent>
-				<AlertDialogHeader>
-					<AlertDialogTitle>{t.posts.deleteTitle}</AlertDialogTitle>
-					<AlertDialogDescription>{t.posts.deleteDescription}</AlertDialogDescription>
-				</AlertDialogHeader>
-				<RequestFailure error={error} />
-				<AlertDialogFooter>
-					<AlertDialogCancel>{t.posts.cancel}</AlertDialogCancel>
-					<Button
-						type="button"
-						variant="destructive"
-						isLoading={pending}
-						onClick={remove}
-					>
-						{t.posts.delete}
-					</Button>
-				</AlertDialogFooter>
-			</AlertDialogContent>
-		</AlertDialog>
 	);
 }

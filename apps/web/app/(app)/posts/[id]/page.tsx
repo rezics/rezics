@@ -1,4 +1,4 @@
-import { PostDetailPage } from "@/features/posts/post-pages";
+import { PostDetailPage } from "@/features/posts/pages/post-detail-page";
 import { postDetailSearchParams } from "@/lib/search-params.server";
 
 export default async function Page({

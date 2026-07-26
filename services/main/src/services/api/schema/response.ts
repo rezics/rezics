@@ -514,6 +514,20 @@ const FeedScoreCandidatesResponse = t.Object({
 	global: t.Nullable(FeedRatingAggregateResponse),
 });
 
+const PostSubjectPresentationFields = {
+	id: Uuid,
+	type: t.String(),
+	title: NullableText,
+	summary: NullableText,
+	cover: ImageAssetResponse,
+} as const;
+
+const PostAttachedScoreResponse = t.Object({
+	scoreId: Uuid,
+	contextUnitId: Uuid,
+	value: t.Integer({ minimum: 1, maximum: 10 }),
+});
+
 const FeedUnitPresentationResponse = t.Union([
 	t.Object({
 		kind: t.Literal("rated-work"),
@@ -556,11 +570,7 @@ const FeedPostItemFields = {
 	),
 	subject: t.Nullable(
 		t.Object({
-			id: Uuid,
-			type: t.String(),
-			title: NullableText,
-			summary: NullableText,
-			cover: ImageAssetResponse,
+			...PostSubjectPresentationFields,
 			scores: FeedScoreCandidatesResponse,
 		}),
 	),
@@ -574,13 +584,7 @@ export const FeedNonReviewPostItemResponse = t.Object({
 export const FeedReviewItemResponse = t.Object({
 	...FeedPostItemFields,
 	postKind: t.Literal("review"),
-	scores: t.Array(
-		t.Object({
-			scoreId: Uuid,
-			contextUnitId: Uuid,
-			value: t.Integer({ minimum: 1, maximum: 10 }),
-		}),
-	),
+	scores: t.Array(PostAttachedScoreResponse),
 });
 
 export const FeedPostItemResponse = t.Union([
@@ -835,10 +839,13 @@ export const PostDetailResponse = t.Object({
 	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+	subject: t.Nullable(t.Object(PostSubjectPresentationFields)),
+	scores: t.Array(PostAttachedScoreResponse),
 	capabilities: t.Object({ canEdit: t.Boolean(), canReply: t.Boolean() }),
 });
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
+	postKind: t.Literal("review"),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	targetId: Uuid,
 	realmId: t.Nullable(Uuid),
@@ -848,6 +855,8 @@ export const ReviewDetailResponse = t.Object({
 	body: t.Nullable(PortableTextDocument),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+	subject: t.Nullable(t.Object(PostSubjectPresentationFields)),
+	scores: t.Array(PostAttachedScoreResponse),
 	capabilities: t.Object({ canEdit: t.Boolean() }),
 });
 export const ContentStructureNodeListResponse = t.Object({

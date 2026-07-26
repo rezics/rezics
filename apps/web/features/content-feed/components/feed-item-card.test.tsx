@@ -176,6 +176,21 @@ describe("FeedPostCard", () => {
 		expect(screen.queryByText("9.0／10 · 2 人評分")).toBeNull();
 	});
 
+	it("removes the redundant subject card in its Unit context and keeps the attached Score", () => {
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedPostCard
+					displayContext={{ kind: "unit", unitId: review.subject.id }}
+					post={review}
+				/>
+			</TranslationProvider>,
+		);
+
+		expect(container.querySelector('[data-slot="feed-card-target"]')).toBeNull();
+		expect(screen.getAllByText("7／10")).toHaveLength(1);
+		expect(screen.queryByText("我的讀書會")).toBeNull();
+	});
+
 	it("falls back to the subject global aggregate without an attached Score", () => {
 		const reviewWithoutAttachedScore = {
 			...review,

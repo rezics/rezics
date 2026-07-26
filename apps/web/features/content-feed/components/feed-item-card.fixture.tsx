@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import { FeedListItems } from "./feed-list";
-import { FeedUnitCard, type FeedUnit } from "./feed-item-card";
+import { FeedPostCard, type FeedPost, FeedUnitCard, type FeedUnit } from "./feed-item-card";
 import { useTranslation } from "@/i18n/client";
 
 const attribution = {
@@ -143,6 +143,48 @@ const zoneWithoutAvatar = {
 	presentation: { kind: "identity", avatar: null, banner: null },
 } satisfies FeedUnit;
 
+const contextualReview = {
+	id: "019f9d16-1000-7000-8000-000000000060",
+	language: "zh",
+	itemType: "post",
+	unitKind: "post",
+	postKind: "review",
+	attributions: [attribution],
+	realmId: realmContext.id,
+	realms: [realmContext],
+	title: "重新理解兩種知識傳統的交會",
+	summary: "這個情境驗證 Unit 頁面只保留文章評分，不重複渲染作品子卡片。",
+	cover: null,
+	subjectId: book.id,
+	rootPostId: null,
+	parentPostId: null,
+	body: null,
+	replyCount: 3,
+	latestRevisionId: null,
+	replyContext: null,
+	subject: {
+		id: book.id,
+		type: book.unitKind,
+		title: book.title,
+		summary: book.summary,
+		cover: book.cover,
+		scores: book.presentation.scores,
+	},
+	scores: [
+		{
+			scoreId: "019f9d16-1000-7000-8000-000000000061",
+			contextUnitId: realmContext.id,
+			value: 9,
+		},
+	],
+	createdAt: "2026-07-21T12:30:00.000Z",
+	updatedAt: "2026-07-21T12:30:00.000Z",
+	reactions: { upvote: 42, downvote: 1 },
+	viewerReaction: "upvote",
+	recommendationReason: null,
+	tracking: null,
+} satisfies FeedPost;
+
 function ProductionUnitCards() {
 	const { t } = useTranslation(["feed"]);
 	return (
@@ -165,6 +207,13 @@ const fixtures = {
 	"Work · unrated without cover": <FeedUnitCard canExclude={false} unit={unratedSoftware} />,
 	"Identity · Realm avatar": <FeedUnitCard canExclude={false} unit={realm} />,
 	"Identity · Zone fallback": <FeedUnitCard canExclude={false} unit={zoneWithoutAvatar} />,
+	"Post · Unit context hides repeated subject": (
+		<FeedPostCard
+			canExclude={false}
+			displayContext={{ kind: "unit", unitId: book.id }}
+			post={contextualReview}
+		/>
+	),
 } satisfies Record<string, ReactNode>;
 
 export default fixtures;

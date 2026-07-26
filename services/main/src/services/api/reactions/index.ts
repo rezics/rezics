@@ -28,31 +28,49 @@ export default new Elysia({ prefix: "/reactions" })
 	.get(
 		"/units/:unitId",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers, "interaction:read");
+			const { authorization, profile } = await resolveIdentity(
+				request.headers,
+				"interaction:read",
+			);
 			await authorization.unit.ensureCanRead(params.unitId);
 			if (query.realmId) {
 				await authorization.unit.ensureCanRead(query.realmId);
 			}
+			const [items, viewerRows] = await Promise.all([
+				database
+					.select({
+						reaction: unitReactionStat.reaction,
+						count: unitReactionStat.reactionCount,
+					})
+					.from(unitReactionStat)
+					.where(
+						and(
+							eq(unitReactionStat.unitId, params.unitId),
+							query.realmId
+								? eq(unitReactionStat.realmId, query.realmId)
+								: isNull(unitReactionStat.realmId),
+						),
+					),
+				profile
+					? database
+							.select({ reaction: unitReaction.reaction })
+							.from(unitReaction)
+							.where(
+								and(
+									eq(unitReaction.profileId, profile.unitId),
+									eq(unitReaction.unitId, params.unitId),
+									getContextCondition(unitReaction, query.realmId),
+								),
+							)
+							.limit(1)
+					: [],
+			]);
 			return {
-				items: (
-					await database
-						.select({
-							reaction: unitReactionStat.reaction,
-							count: unitReactionStat.reactionCount,
-						})
-						.from(unitReactionStat)
-						.where(
-							and(
-								eq(unitReactionStat.unitId, params.unitId),
-								query.realmId
-									? eq(unitReactionStat.realmId, query.realmId)
-									: isNull(unitReactionStat.realmId),
-							),
-						)
-				).map((row) => ({
+				items: items.map((row) => ({
 					reaction: row.reaction,
 					count: toSafeInteger(row.count, "reaction count"),
 				})),
+				viewerReaction: viewerRows[0]?.reaction ?? null,
 			};
 		},
 		{

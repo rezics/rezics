@@ -5,15 +5,16 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { AppWindowIcon, BookOpenIcon, ClapperboardIcon, LibraryIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { CardContent, cn, Cover, IdentityAvatar, PortableTextContent } from "@rezics/ui";
 import { postHref } from "@/features/posts/url";
 import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
+import { reviewHref } from "@/features/reviews/routing/review-routes";
 import { realmHref } from "@/features/slugs/unit-route";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
@@ -33,6 +34,11 @@ import {
 	type FeedTargetScore,
 } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
+import {
+	isCurrentFeedSubject,
+	type FeedDisplayContext,
+	UnscopedFeedDisplayContext,
+} from "../model/feed-display-context";
 import { parseFeedReaction } from "../model/feed-reaction";
 import { selectFeedRating, type FeedRatingAggregate } from "../model/feed-rating";
 import { formatRelativeTime } from "../model/format-relative-time";
@@ -43,6 +49,7 @@ export type FeedUnit = Extract<FeedItem, { itemType: "unit" }>;
 
 export function FeedItemCard({
 	canExclude = false,
+	displayContext = UnscopedFeedDisplayContext,
 	item,
 	onHiddenChange,
 	position,
@@ -50,6 +57,7 @@ export function FeedItemCard({
 	setSize,
 }: {
 	canExclude?: boolean;
+	displayContext?: FeedDisplayContext;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
 	position?: number;
@@ -59,6 +67,7 @@ export function FeedItemCard({
 	return item.itemType === "post" ? (
 		<FeedPostCard
 			canExclude={canExclude}
+			displayContext={displayContext}
 			onHiddenChange={onHiddenChange}
 			post={item}
 			position={position}
@@ -80,6 +89,7 @@ export function FeedPostCard({
 	post,
 	requestedRealmId,
 	canExclude = false,
+	displayContext = UnscopedFeedDisplayContext,
 	onHiddenChange,
 	position,
 	setSize,
@@ -87,6 +97,7 @@ export function FeedPostCard({
 	post: FeedPost;
 	requestedRealmId?: string;
 	canExclude?: boolean;
+	displayContext?: FeedDisplayContext;
 	onHiddenChange?: (hidden: boolean) => void;
 	position?: number;
 	setSize?: number;
@@ -109,10 +120,13 @@ export function FeedPostCard({
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
 	const attachedScore = post.postKind === "review" ? post.scores[0] : undefined;
 	const attachedScoreValue = attachedScore ? apiValueToUnitScore(attachedScore.value) : undefined;
+	const attachedRating: FeedTargetRating | undefined = attachedScoreValue
+		? { kind: "attached", value: attachedScoreValue }
+		: undefined;
 	const subjectRating: FeedTargetRating | undefined =
 		post.subject && isRatedWorkKind(post.subject.type)
-			? attachedScoreValue
-				? { kind: "attached", value: attachedScoreValue }
+			? attachedRating
+				? attachedRating
 				: {
 						kind: "aggregate",
 						score: toFeedTargetScore(
@@ -121,6 +135,7 @@ export function FeedPostCard({
 						),
 					}
 			: undefined;
+	const subjectIsCurrentUnit = isCurrentFeedSubject(displayContext, post.subject?.id);
 
 	return (
 		<FeedCard
@@ -143,9 +158,14 @@ export function FeedPostCard({
 				timestamp={formatRelativeTime(post.createdAt, locale.target)}
 			/>
 			<FeedCardContent>
-				<p className="font-semibold text-brand text-xs">
-					{t.feed.content.kinds[`post:${post.postKind}`]}
-				</p>
+				<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+					<p className="font-semibold text-brand text-xs">
+						{t.feed.content.kinds[`post:${post.postKind}`]}
+					</p>
+					{subjectIsCurrentUnit && attachedRating ? (
+						<FeedCardRating className="mt-0" rating={attachedRating} />
+					) : null}
+				</div>
 				{post.replyContext ? (
 					<Link
 						className="flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
@@ -191,13 +211,13 @@ export function FeedPostCard({
 					</p>
 				) : null}
 			</FeedCardContent>
-			{post.postKind !== "excerpt" && post.subject && subjectHref ? (
+			{post.postKind !== "excerpt" && post.subject && subjectHref && !subjectIsCurrentUnit ? (
 				<FeedCardTarget
 					{...(post.subject.summary ? { description: post.subject.summary } : {})}
 					{...(post.subject.cover ? { imageUrl: post.subject.cover.url } : {})}
 					href={subjectHref}
 					imageAlt={post.subject.title ?? t.actions.view}
-					imageFallback={<FeedUnitCoverFallback kind={post.subject.type} />}
+					imageFallback={<UnitCoverFallback kind={post.subject.type} />}
 					label={t.feed.relatedWork}
 					rating={subjectRating}
 					title={post.subject.title ?? t.actions.view}
@@ -284,7 +304,7 @@ export function FeedUnitCard({
 						<Cover
 							alt={title}
 							className="w-full rounded-xl border border-border-weak shadow-sm/5"
-							fallback={<FeedUnitCoverFallback kind={unit.unitKind} />}
+							fallback={<UnitCoverFallback kind={unit.unitKind} />}
 							sizes="(min-width: 640px) 120px, 80px"
 							src={unit.cover?.url}
 						/>
@@ -322,18 +342,6 @@ export function FeedUnitCard({
 			</CardContent>
 		</FeedCard>
 	);
-}
-
-function FeedUnitCoverFallback({ kind }: { readonly kind: string }) {
-	const Icon =
-		kind === "book"
-			? BookOpenIcon
-			: kind === "media"
-				? ClapperboardIcon
-				: kind === "software"
-					? AppWindowIcon
-					: LibraryIcon;
-	return <Icon aria-hidden className="size-7 text-muted-foreground" />;
 }
 
 function isRatedWorkKind(kind: string): kind is "book" | "media" | "software" {
@@ -487,7 +495,7 @@ function contextInitials(name: string): string {
 
 function feedPostHref(post: FeedPost, realmId?: string): string | undefined {
 	if (post.postKind === "post" || post.postKind === "reply") return postHref(post.id, realmId);
-	if (post.postKind === "review") return `/reviews/${post.id}`;
+	if (post.postKind === "review") return reviewHref(post.id, realmId);
 	return undefined;
 }
 

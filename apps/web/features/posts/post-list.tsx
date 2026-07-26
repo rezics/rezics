@@ -9,6 +9,7 @@ import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { FeedPostCard } from "@/features/content-feed/components/feed-item-card";
 import { FeedListItems } from "@/features/content-feed/components/feed-list";
 import { SearchFeedList } from "@/features/content-feed/data/search-feed-list";
+import type { FeedDisplayContext } from "@/features/content-feed/model/feed-display-context";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
@@ -77,6 +78,11 @@ export function PostList({
 
 	return (
 		<SearchFeedList
+			displayContext={
+				subjectId
+					? ({ kind: "unit", unitId: subjectId } satisfies FeedDisplayContext)
+					: undefined
+			}
 			infinite={infinite}
 			request={{
 				contexts: [],

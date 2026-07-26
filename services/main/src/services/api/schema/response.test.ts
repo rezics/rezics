@@ -8,10 +8,13 @@ import {
 	FeedNonReviewPostItemResponse,
 	FeedReviewItemResponse,
 	LocalizedContentMetricResponse,
+	PostDetailResponse,
+	ReviewDetailResponse,
 	UnitDetailAttributionSummaryResponse,
 	UnitProgressStatisticsResponse,
 	UnitVariantContextResponse,
 } from "./response";
+import { ReactionSummaryResponse } from "./action-response";
 
 describe("API response values", () => {
 	it("keeps Date values in code and ISO timestamps on the wire", () => {
@@ -113,6 +116,15 @@ describe("API response values", () => {
 		expect(FeedReviewItemResponse.required).toContain("scores");
 		expect(FeedReviewItemResponse.properties.postKind.const).toBe("review");
 		expect("scores" in FeedNonReviewPostItemResponse.properties).toBe(false);
+	});
+
+	it("keeps Post detail presentation and engagement context explicit", () => {
+		expect(PostDetailResponse.required).toContain("subject");
+		expect(PostDetailResponse.required).toContain("scores");
+		expect(ReviewDetailResponse.required).toContain("postKind");
+		expect(ReviewDetailResponse.required).toContain("subject");
+		expect(ReviewDetailResponse.required).toContain("scores");
+		expect(ReactionSummaryResponse.required).toContain("viewerReaction");
 	});
 
 	it("requires non-negative attribution statistics in Unit summaries", () => {

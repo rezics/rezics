@@ -36,6 +36,7 @@ export const ScoreContextResponse = t.Object({ contextPostId: t.Nullable(Uuid) }
 
 export const ReactionSummaryResponse = t.Object({
 	items: t.Array(t.Object({ reaction: t.String(), count: t.Integer() })),
+	viewerReaction: t.Nullable(t.String()),
 });
 export const ReactionResponse = t.Object({ reaction: t.Nullable(t.String()) });
 

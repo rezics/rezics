@@ -6,6 +6,7 @@ import {
 	useDeleteApiCollectionsFavoritesItemsByTargetId,
 	useDeleteApiReactionsUnitsByUnitId,
 	useGetApiCollectionsFavorites,
+	useGetApiReactionsUnitsByUnitId,
 	usePutApiCollectionsFavoritesItemsByTargetId,
 	usePutApiReactionsSharesByUnitId,
 	usePutApiReactionsUnitsByUnitId,
@@ -46,9 +47,10 @@ import { CollectionPickerButton } from "@/features/collections/components/collec
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import type { FeedActionPolicy } from "../model/feed-action-policy";
-import { getFeedReactionScore, type FeedReaction } from "../model/feed-reaction";
+import { getFeedReactionScore, parseFeedReaction, type FeedReaction } from "../model/feed-reaction";
 
 export type { FeedReaction } from "../model/feed-reaction";
 
@@ -218,6 +220,45 @@ export function FeedEngagementBar({
 				fallback={t.ui.retryLater}
 			/>
 		</div>
+	);
+}
+
+export function ConnectedFeedEngagementBar({
+	href,
+	itemId,
+	policy,
+	realmId,
+	replyCount = 0,
+}: {
+	readonly href?: string;
+	readonly itemId: string;
+	readonly policy: FeedActionPolicy;
+	readonly realmId?: string;
+	readonly replyCount?: number;
+}) {
+	const reactions = useGetApiReactionsUnitsByUnitId({
+		path: { unitId: itemId },
+		query: { ...(realmId ? { realmId } : {}) },
+	});
+	const counts = new Map(
+		reactions.data?.items.map(({ count, reaction }) => [
+			reaction,
+			toNonNegativeApiInteger(count),
+		]) ?? [],
+	);
+	return (
+		<>
+			<FeedEngagementBar
+				href={href}
+				initialReaction={parseFeedReaction(reactions.data?.viewerReaction)}
+				itemId={itemId}
+				policy={policy}
+				realmId={realmId}
+				replyCount={replyCount}
+				score={(counts.get("upvote") ?? 0) - (counts.get("downvote") ?? 0)}
+			/>
+			<RequestFailure error={reactions.error} />
+		</>
 	);
 }
 

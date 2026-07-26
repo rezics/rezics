@@ -32,6 +32,8 @@ import {
 	ensurePostMountTargetingAllowed,
 	ensureSubjectPostTargetingAllowed,
 } from "../../posts/targeting";
+import { getPostSubjectPresentation } from "../../posts/presentation";
+import { selectPostScores } from "../../posts/scores";
 import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
@@ -467,16 +469,33 @@ export default new Elysia()
 						)
 						.limit(1);
 					if (!review?.targetId) throw new ReviewNotFound();
-					const attributions =
-						(await getAttributionSummariesByUnitIds([review.id])).get(review.id) ?? [];
+					const targetId = review.targetId;
+					const subjectPromise = authorization.unit
+						.canRead(targetId)
+						.then((canRead) => (canRead ? getPostSubjectPresentation(targetId) : null));
+					const [attributionMap, scores, subject, canEdit] = await Promise.all([
+						getAttributionSummariesByUnitIds([review.id]),
+						selectPostScores(review.id).then((items) =>
+							items.map(({ scoreId, contextUnitId, value }) => ({
+								scoreId,
+								contextUnitId,
+								value,
+							})),
+						),
+						subjectPromise,
+						authorization.unit.canUpdate(params.reviewId),
+					]);
 					return {
 						...review,
+						postKind: "review" as const,
 						realmId: query.realmId ?? null,
-						attributions,
-						targetId: review.targetId,
+						attributions: attributionMap.get(review.id) ?? [],
+						targetId,
 						body: review.body === null ? null : toPortableTextResponse(review.body),
+						subject,
+						scores,
 						capabilities: {
-							canEdit: await authorization.unit.canUpdate(params.reviewId),
+							canEdit,
 						},
 					};
 				},

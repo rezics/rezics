@@ -13,6 +13,7 @@ import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
+import { type FeedDisplayContext, UnscopedFeedDisplayContext } from "../model/feed-display-context";
 
 type SearchFeedRequest = Pick<
 	PostApiSearchFeaturesByTemplateExecuteBody,
@@ -20,11 +21,13 @@ type SearchFeedRequest = Pick<
 >;
 
 export function SearchFeedList({
+	displayContext = UnscopedFeedDisplayContext,
 	infinite = false,
 	request,
 	requestedRealmId,
 	template,
 }: {
+	displayContext?: FeedDisplayContext;
 	infinite?: boolean;
 	request: SearchFeedRequest;
 	requestedRealmId?: string;
@@ -139,6 +142,7 @@ export function SearchFeedList({
 			renderItem={(item, metadata) => (
 				<FeedItemCard
 					canExclude={Boolean(session)}
+					displayContext={displayContext}
 					item={item}
 					onHiddenChange={(value) => setItemHidden(item.id, value)}
 					position={metadata.position}

@@ -124,7 +124,10 @@ export function UnitRatingsReviewsSection({
 						retry={() => void reviewsQuery.refetch()}
 					/>
 				) : reviewsQuery.data.items.length ? (
-					<ReviewCards items={reviewsQuery.data.items} />
+					<ReviewCards
+						displayContext={{ kind: "unit", unitId: targetId }}
+						items={reviewsQuery.data.items}
+					/>
 				) : (
 					<p className="text-sm text-muted-foreground">
 						{hasFilters ? t.engagement.emptyFilteredReviews : t.engagement.emptyReviews}
