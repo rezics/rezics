@@ -22,8 +22,6 @@ import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
-import type { Authorization } from "../../authorization";
-import { PlatformCapabilityRequired } from "../../authorization/errors";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { AuthenticationRequired } from "../../auth/errors";
 import {
@@ -46,7 +44,6 @@ import {
 } from "../../search/shared-queries";
 import { database } from "../../database";
 import { unitDock } from "../../database/schema";
-import { ZonePreviewCapability } from "../../database/schema/contract-values";
 import { UnitNotFound } from "../../units/errors";
 import { getZonePageUnitById } from "../../zones/pages";
 import {
@@ -83,16 +80,9 @@ function logSearchFailure(message: string, eventName: string, error: unknown): v
 const SearchUnavailableResponse = toApiErrorResponse(["SearchUnavailable"]);
 const InvalidSearchResponse = toApiErrorResponse(["InvalidSearch"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"PlatformCapabilityRequired",
 	"UnitPermissionForbidden",
 	"UnitProtected",
 ]);
-const ZonePreviewRequiredResponse = toApiErrorResponse(["PlatformCapabilityRequired"]);
-
-async function ensureZonePreview(authorization: Authorization): Promise<void> {
-	if (!(await authorization.platform.hasCapability(ZonePreviewCapability)))
-		throw new PlatformCapabilityRequired();
-}
 
 const ZoneDockSearchParams = t.Object({ zoneId: Uuid, blockKey: BlockKey });
 const ZoneFeedBlockParams = ZoneDockSearchParams;
@@ -365,7 +355,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/feature",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -393,7 +382,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/feature",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:update");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const actorProfileId = identity.authorization.profileId;
 			if (!actorProfileId) throw new UnitNotFound("Profile");
@@ -425,7 +413,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/feature/execute",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -450,7 +437,6 @@ export default new Elysia({ prefix: "/search" })
 			body: ZoneSearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"ZoneSearchFeatureNotFound",
@@ -465,7 +451,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/feature/revisions",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:update");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const revisions = await database.transaction((tx) =>
 				listZoneSearchFeatureRevisions(tx, params.zoneId),
@@ -490,7 +475,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/feature/restore",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:update");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const actorProfileId = identity.authorization.profileId;
 			if (!actorProfileId) throw new UnitNotFound("Profile");
@@ -527,7 +511,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/dock/blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -574,7 +557,6 @@ export default new Elysia({ prefix: "/search" })
 			body: ZoneSearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"DockNotFound",
@@ -590,7 +572,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -629,7 +610,6 @@ export default new Elysia({ prefix: "/search" })
 			body: ZoneSearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"ZonePageNotFound",
@@ -645,7 +625,6 @@ export default new Elysia({ prefix: "/search" })
 		"/zones/:zoneId/feed-blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
-			await ensureZonePreview(identity.authorization);
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
@@ -707,7 +686,6 @@ export default new Elysia({ prefix: "/search" })
 			body: ZoneFeedBlockExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchFeedResponse,
-				[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"DockNotFound",

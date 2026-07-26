@@ -42,6 +42,8 @@ export function DevelopmentPage() {
 						<a
 							className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-current"
 							href={ContactUrl}
+							rel="noreferrer"
+							target="_blank"
 						>
 							{t.development.contact}
 						</a>

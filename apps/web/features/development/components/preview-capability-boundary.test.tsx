@@ -44,13 +44,13 @@ describe("PreviewCapabilityBoundary", () => {
 
 	it("shows the development notice without the required capability", () => {
 		render(
-			<PreviewCapabilityBoundary capability="unit.zone.preview">
-				<div>zone-content</div>
+			<PreviewCapabilityBoundary capability="unit.realm.preview">
+				<div>realm-content</div>
 			</PreviewCapabilityBoundary>,
 		);
 
 		expect(screen.getByText("development-notice")).toBeTruthy();
-		expect(screen.queryByText("zone-content")).toBeNull();
+		expect(screen.queryByText("realm-content")).toBeNull();
 	});
 
 	it("renders protected content when the capability is present", () => {

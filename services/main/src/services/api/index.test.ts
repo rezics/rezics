@@ -116,6 +116,25 @@ describe("API root", () => {
 		expect(document.paths["/api/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
 	});
 
+	it("limits the Zone preview capability requirement to Zone creation", () => {
+		const document = toOpenAPISchema(api);
+		const methods = ["delete", "get", "patch", "post", "put"] as const;
+		const previewProtectedZoneOperations = Object.entries(document.paths).flatMap(
+			([path, item]) =>
+				path.includes("/zones")
+					? methods.flatMap((method) => {
+							const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
+							return forbidden &&
+								JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
+								? [`${method.toUpperCase()} ${path}`]
+								: [];
+						})
+					: [],
+		);
+
+		expect(previewProtectedZoneOperations).toEqual(["POST /api/zones"]);
+	});
+
 	it("documents untracked progress as a successful state", () => {
 		const document = toOpenAPISchema(api);
 		const responses = document.paths["/api/progress/{unitId}"]?.get?.responses;

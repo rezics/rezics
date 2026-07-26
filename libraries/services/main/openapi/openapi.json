@@ -39751,10 +39751,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -40308,33 +40307,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -41233,10 +41205,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -42422,33 +42393,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -42669,33 +42613,6 @@
 												{ "type": "null" }
 											]
 										}
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -42969,10 +42886,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -43227,33 +43143,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -43533,10 +43422,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -43680,10 +43568,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44010,10 +43897,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44189,10 +44075,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44414,33 +44299,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -44591,10 +44449,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44733,33 +44590,6 @@
 										"latestRevisionId": { "format": "uuid", "type": "string" },
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -44925,10 +44755,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -45083,10 +44912,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -45348,10 +45176,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -45468,10 +45295,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -46477,10 +46303,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -46770,10 +46595,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -46893,10 +46717,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -129859,10 +129682,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -130007,10 +129829,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -133257,33 +133078,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -133485,10 +133279,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -133635,10 +133428,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -136898,33 +136690,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -140174,33 +139939,6 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
 							}
 						}
 					},
@@ -147208,33 +146946,6 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
 							}
 						}
 					},

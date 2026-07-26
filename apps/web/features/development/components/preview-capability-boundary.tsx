@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { DevelopmentPage } from "./development-page";
 
-export type PreviewCapability = "unit.realm.preview" | "unit.zone.preview";
+export type PreviewCapability = "unit.realm.preview";
 
 export function PreviewCapabilityBoundary({
 	capability,
