@@ -3916,6 +3916,7 @@ __metadata:
   dependencies:
     "@mdx-js/react": "npm:^3.1.1"
     "@mdx-js/rollup": "npm:^3.1.1"
+    "@rezics/brand": "workspace:*"
     "@rezics/i18n": "workspace:^"
     "@rezics/icons": "npm:^0.1.2"
     "@tailwindcss/vite": "npm:^4.3.0"

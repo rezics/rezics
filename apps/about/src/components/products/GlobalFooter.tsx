@@ -1,3 +1,4 @@
+import brandMarkUrl from "@rezics/brand/mark.svg?url&no-inline";
 import { getLocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
 import {
@@ -21,7 +22,7 @@ export function GlobalFooter({ locale }: { locale: AboutLocale }) {
 							href={getHomePath(locale)}
 							aria-label={copy.a11y.home}
 						>
-							<img src="/logo.svg" width="34" height="24" alt="" />
+							<img src={brandMarkUrl} width="34" height="24" alt="" />
 						</a>
 						<p>{copy.footer.statement}</p>
 					</div>

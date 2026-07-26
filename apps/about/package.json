@@ -26,6 +26,7 @@
 		"vitest": "4.1.10"
 	},
 	"dependencies": {
+		"@rezics/brand": "workspace:*",
 		"@rezics/i18n": "workspace:^",
 		"@rezics/icons": "^0.1.2",
 		"lucide-react": "^1.24.0",

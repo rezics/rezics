@@ -1,3 +1,4 @@
+import brandMarkUrl from "@rezics/brand/mark.svg?url&no-inline";
 import { ChevronRight, Languages, Menu, Moon, Settings, Sun, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { LocaleContent } from "../../content/locales";
@@ -98,7 +99,7 @@ export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Pr
 						href={getHomePath(locale)}
 						aria-label={copy.a11y.home}
 					>
-						<img src="/logo.svg" width="34" height="24" alt="" />
+						<img src={brandMarkUrl} width="34" height="24" alt="" />
 					</a>
 					<nav className="global-nav" aria-label={copy.a11y.primaryNavigation}>
 						{links.map((link) => (

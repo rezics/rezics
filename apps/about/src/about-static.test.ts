@@ -413,7 +413,7 @@ describe("design constraints", () => {
 			await readFile(join(workspaceRoot, "src", "styles", "site.css"), "utf8")
 		).toLowerCase();
 		const logo = (
-			await readFile(join(workspaceRoot, "public", "logo.svg"), "utf8")
+			await readFile(fileURLToPath(import.meta.resolve("@rezics/brand/mark.svg")), "utf8")
 		).toLowerCase();
 
 		for (const color of [
@@ -432,7 +432,8 @@ describe("design constraints", () => {
 		]) {
 			expect(css).toContain(color);
 		}
-		expect(logo).toContain("#db515c");
+		expect(logo).toContain("#ef4444");
+		expect(logo).toContain("#ef44ff");
 	});
 
 	test("removes the obsolete abstract graph implementation", async () => {
