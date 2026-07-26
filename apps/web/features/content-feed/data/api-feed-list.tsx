@@ -4,13 +4,22 @@ import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { createSimpleFeedFilter, type SimpleFeedContentKind } from "@rezics/filter";
 import { postApiFeedQuery, useGetApiRealms, useGetApiTags } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { ListFilterIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { Alert, AlertAction, AlertDescription, Button, ChoiceSelect } from "@rezics/ui";
+import {
+	Alert,
+	AlertAction,
+	AlertDescription,
+	Badge,
+	Button,
+	ChoiceSelect,
+	type ChoiceOption,
+} from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedContentSelector } from "../components/feed-content-selector";
-import { FeedFilterSelector, type FeedFilterOption } from "../components/feed-filter-selector";
+import { FeedFiltersDialog } from "../components/feed-filters-dialog";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
 import { FeedSortValues, type FeedSort } from "../model/feed-sort";
@@ -234,6 +243,7 @@ export function FeedListControls({
 	| "tagIds"
 >) {
 	const { t } = useTranslation(["feed"]);
+	const [filtersOpen, setFiltersOpen] = useState(false);
 	const realms = useGetApiRealms(
 		{ query: { limit: 50 } },
 		{ query: { enabled: Boolean(onRealmIdsChange) } },
@@ -245,11 +255,11 @@ export function FeedListControls({
 	const sortOptions = FeedSortValues.map((value) => ({
 		value,
 		label: t.feed.sort[value],
-	})) satisfies readonly FeedFilterOption<FeedSort>[];
+	})) satisfies readonly ChoiceOption<FeedSort>[];
 	const languageOptions = ContentLanguageValues.map((value) => ({
 		value,
 		label: t.feed.filters.languages.options[value],
-	})) satisfies readonly FeedFilterOption<ContentLanguage>[];
+	})) satisfies readonly ChoiceOption<ContentLanguage>[];
 	const realmOptions =
 		realms.data?.items.map((realm) => ({
 			value: realm.id,
@@ -260,65 +270,75 @@ export function FeedListControls({
 			value: tag.id,
 			label: tag.title ?? t.feed.filters.tags.unnamed,
 		})) ?? [];
+	const hasAdditionalFilters = Boolean(onLanguagesChange || onRealmIdsChange || onTagIdsChange);
+	const selectedFilterCount =
+		(onLanguagesChange ? languages.length : 0) +
+		(onRealmIdsChange ? realmIds.length : 0) +
+		(onTagIdsChange ? tagIds.length : 0);
+	const filtersAriaLabel =
+		selectedFilterCount > 0
+			? `${t.feed.filters.title}, ${t.feed.filters.selectedCount({
+					count: selectedFilterCount,
+				})}`
+			: t.feed.filters.title;
 
 	return (
-		<div
-			aria-label={t.feed.filtersLabel}
-			className="flex flex-wrap items-center justify-start gap-1 border-b border-border-weak pb-5"
-			role="group"
-		>
-			{onSortChange ? (
-				<ChoiceSelect
-					ariaLabel={t.feed.sortLabel}
-					className="min-w-0"
-					onValueChange={([nextSort]) => {
-						if (nextSort) onSortChange(nextSort);
-					}}
-					options={sortOptions}
-					placeholder={t.feed.sortLabel}
-					size="lg"
-					value={[sort ?? "best"]}
+		<>
+			<div
+				aria-label={t.feed.filtersLabel}
+				className="flex flex-wrap items-center justify-start gap-1 border-b border-border-weak pb-5"
+				role="group"
+			>
+				{onSortChange ? (
+					<ChoiceSelect
+						ariaLabel={t.feed.sortLabel}
+						className="min-w-0"
+						onValueChange={([nextSort]) => {
+							if (nextSort) onSortChange(nextSort);
+						}}
+						options={sortOptions}
+						placeholder={t.feed.sortLabel}
+						size="lg"
+						value={[sort ?? "best"]}
+					/>
+				) : null}
+				{onContentKindsChange ? (
+					<FeedContentSelector
+						onValueChange={onContentKindsChange}
+						value={contentKinds}
+					/>
+				) : null}
+				{hasAdditionalFilters ? (
+					<Button
+						aria-label={filtersAriaLabel}
+						onClick={() => setFiltersOpen(true)}
+						size="lg"
+						type="button"
+					>
+						<ListFilterIcon aria-hidden data-icon="inline-start" />
+						{t.feed.filters.title}
+						{selectedFilterCount > 0 ? (
+							<Badge aria-hidden size="sm" variant="secondary">
+								{selectedFilterCount}
+							</Badge>
+						) : null}
+					</Button>
+				) : null}
+			</div>
+			{filtersOpen ? (
+				<FeedFiltersDialog
+					languageOptions={languageOptions}
+					languages={languages}
+					onClose={() => setFiltersOpen(false)}
+					onLanguagesChange={onLanguagesChange}
+					onRealmIdsChange={onRealmIdsChange}
+					onTagIdsChange={onTagIdsChange}
+					realmIds={realmIds}
+					realmOptions={realmOptions}
+					tagIds={tagIds}
+					tagOptions={tagOptions}
 				/>
 			) : null}
-			{onContentKindsChange ? (
-				<FeedContentSelector onValueChange={onContentKindsChange} value={contentKinds} />
-			) : null}
-			{onLanguagesChange ? (
-				<FeedFilterSelector
-					ariaLabel={t.feed.filters.languages.label}
-					clearLabel={t.feed.filters.clear}
-					groupLabel={t.feed.filters.languages.label}
-					onValueChange={onLanguagesChange}
-					options={languageOptions}
-					selectedCountLabel={(count) => t.feed.filters.selectedCount({ count })}
-					unfilteredLabel={t.feed.filters.languages.all}
-					value={languages}
-				/>
-			) : null}
-			{onRealmIdsChange && realmOptions.length ? (
-				<FeedFilterSelector
-					ariaLabel={t.feed.filters.realms.label}
-					clearLabel={t.feed.filters.clear}
-					groupLabel={t.feed.filters.realms.label}
-					onValueChange={onRealmIdsChange}
-					options={realmOptions}
-					selectedCountLabel={(count) => t.feed.filters.selectedCount({ count })}
-					unfilteredLabel={t.feed.filters.realms.all}
-					value={realmIds}
-				/>
-			) : null}
-			{onTagIdsChange && tagOptions.length ? (
-				<FeedFilterSelector
-					ariaLabel={t.feed.filters.tags.label}
-					clearLabel={t.feed.filters.clear}
-					groupLabel={t.feed.filters.tags.label}
-					onValueChange={onTagIdsChange}
-					options={tagOptions}
-					selectedCountLabel={(count) => t.feed.filters.selectedCount({ count })}
-					unfilteredLabel={t.feed.filters.tags.all}
-					value={tagIds}
-				/>
-			) : null}
-		</div>
+		</>
 	);
 }

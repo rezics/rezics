@@ -42,7 +42,6 @@ import {
 	type AvatarFieldValue,
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
-import { PostList } from "@/features/posts/post-list";
 import { postHref } from "@/features/posts/url";
 import { tagDetailHref } from "@/features/tags/routing/tag-links";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -53,19 +52,12 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
+import { RealmFeed } from "./components/realm-feed";
 import { RealmPinnedContentSection } from "./components/realm-pinned-content-section";
 import { RealmRulesCard } from "./components/realm-rules-card";
 
 export function RealmsPage() {
-	const { t, locale } = useTranslation([
-		"actions",
-		"feed",
-		"media",
-		"posts",
-		"realms",
-		"state",
-		"ui",
-	]);
+	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
 	const query = useGetApiRealms({
 		query: { language: toContentLanguage(locale.target), limit: 20 },
 	});
@@ -134,15 +126,7 @@ export function RealmsPage() {
 }
 
 export function RealmCreatePage() {
-	const { t, locale } = useTranslation([
-		"actions",
-		"feed",
-		"media",
-		"posts",
-		"realms",
-		"state",
-		"ui",
-	]);
+	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
@@ -235,7 +219,6 @@ export function RealmCreatePage() {
 export function RealmDetailPage({ id }: { id: string }) {
 	const { t, locale } = useTranslation([
 		"actions",
-		"feed",
 		"media",
 		"posts",
 		"realms",
@@ -335,6 +318,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 				</div>
 				<RealmActions
 					canManage={canManage}
+					canPost={canPost}
 					realm={realm}
 					ruleRevisionId={rules.data?.revisionId ?? undefined}
 				/>
@@ -373,26 +357,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 						untitledLabel={t.ui.unnamed}
 					/>
 
-					<Card className="min-w-0 gap-0 overflow-hidden py-0">
-						<div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-5">
-							<div>
-								<h2 className="font-serif font-semibold text-2xl">
-									{t.realms.feed}
-								</h2>
-								<p className="mt-1 text-muted-foreground text-sm">
-									{t.feed.trending}
-								</p>
-							</div>
-							{canPost ? (
-								<Button variant="solid" asChild size="sm">
-									<Link href={`/posts/new?realmId=${realm.id}`}>
-										{t.posts.create}
-									</Link>
-								</Button>
-							) : null}
-						</div>
-						<PostList realmId={realm.id} />
-					</Card>
+					<RealmFeed realmId={realm.id} />
 				</div>
 
 				<aside className="grid min-w-0 max-w-full gap-5 overflow-hidden lg:sticky lg:top-20">
@@ -426,20 +391,14 @@ function RealmActions({
 	realm,
 	ruleRevisionId,
 	canManage,
+	canPost,
 }: {
 	realm: GetApiRealmsByRealmIdStatus200;
 	ruleRevisionId?: string;
 	canManage: boolean;
+	canPost: boolean;
 }) {
-	const { t, locale } = useTranslation([
-		"actions",
-		"feed",
-		"media",
-		"posts",
-		"realms",
-		"state",
-		"ui",
-	]);
+	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const join = usePutApiRealmsByRealmIdMembership();
@@ -489,6 +448,11 @@ function RealmActions({
 						{membership ? t.realms.leave : t.realms.join}
 					</Button>
 				)}
+				{canPost ? (
+					<Button variant="solid" asChild>
+						<Link href={`/posts/new?realmId=${realm.id}`}>{t.posts.create}</Link>
+					</Button>
+				) : null}
 				{canManage && (
 					<Button variant="solid" asChild>
 						<Link href={realmSettingsHref(realm)}>{t.realms.settings}</Link>

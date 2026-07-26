@@ -15,7 +15,10 @@ export default {
 	sort: { best: "Best", hot: "Hot", new: "New", top: "Top", rising: "Rising" },
 	filtersLabel: "Feed filters",
 	filters: {
-		clear: "Clear filter",
+		title: "Filters",
+		clear: "Clear filters",
+		cancel: "Cancel",
+		apply: "Apply filters",
 		selectedCount: insert("{{count}} selected", { count: Number }),
 		languages: {
 			label: "Languages",
@@ -99,7 +102,6 @@ export default {
 	replyingIn: "Replying in",
 	relatedPosts: "Related discussions",
 	relatedWorks: "Similar works",
-	trending: "Trending now",
 	activeRealms: `Active ${realmTerms.pluralLabel}`,
 	continueReading: "Continue reading",
 	viewAll: "View all",

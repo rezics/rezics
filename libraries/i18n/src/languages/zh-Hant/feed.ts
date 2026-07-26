@@ -15,7 +15,10 @@ export default {
 	sort: { best: "最佳", hot: "熱門", new: "最新", top: "高評價", rising: "熱度上升" },
 	filtersLabel: "動態篩選",
 	filters: {
+		title: "篩選",
 		clear: "清除篩選",
+		cancel: "取消",
+		apply: "套用篩選",
 		selectedCount: insert("已選 {{count}} 項", { count: Number }),
 		languages: {
 			label: "語言",
@@ -99,7 +102,6 @@ export default {
 	replyingIn: "回覆自",
 	relatedPosts: "相關推薦討論",
 	relatedWorks: "相似作品",
-	trending: "正在熱議",
 	activeRealms: `活躍${realmTerms.pluralLabel}`,
 	continueReading: "繼續閱讀",
 	viewAll: "檢視全部",
