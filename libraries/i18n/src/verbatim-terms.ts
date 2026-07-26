@@ -45,6 +45,23 @@ export const verbatimTerms = {
 		category: "brand",
 		rationale: "External service brand spelling.",
 	},
+	rezicsRepository: {
+		value: "rezics/rezics",
+		category: "domain-identifier",
+		rationale: "Canonical GitHub repository coordinate.",
+	},
+	edgeCoordinates: {
+		value: "Edge-coordinates",
+		category: "domain-identifier",
+		rationale: "Maintainer's canonical GitHub account identifier.",
+		scope: "about",
+	},
+	edgeCoordinatesEmail: {
+		value: "Edgecoordinates@gmail.com",
+		category: "identifier",
+		rationale: "Maintainer's canonical contact email address.",
+		scope: "about",
+	},
 	fontAwesome: {
 		value: "Font Awesome",
 		category: "brand",

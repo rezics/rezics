@@ -2,6 +2,7 @@ import { PRODUCT_DEFINITIONS } from "./content/productRegistry";
 import { ABOUT_LOCALES } from "./i18n/locales";
 import {
 	getCanonicalForPath,
+	getContactPath,
 	getHomePath,
 	getProductPath,
 	getProductsPath,
@@ -12,6 +13,7 @@ export function createSitemapXml(): string {
 		[
 			getHomePath(locale),
 			getProductsPath(locale),
+			getContactPath(locale),
 			...PRODUCT_DEFINITIONS.map((product) => getProductPath(locale, product.slug)),
 		].map(getCanonicalForPath),
 	);

@@ -32,10 +32,13 @@ import { assertUnitPredicate, FilterSchemaModels } from "@rezics/filter";
 import { ZoneHomePageSlug } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
+import type { Authorization } from "../../authorization";
+import { PlatformCapabilityRequired } from "../../authorization/errors";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
 import { database } from "../../database";
+import { ZonePreviewCapability } from "../../database/schema/contract-values";
 import {
 	software,
 	softwareRequirement,
@@ -142,10 +145,17 @@ import {
 } from "./errors";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"PlatformCapabilityRequired",
 	"UnitPermissionForbidden",
 	"UnitProtected",
 ]);
+const ZonePreviewRequiredResponse = toApiErrorResponse(["PlatformCapabilityRequired"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
+
+async function ensureZonePreview(authorization: Authorization): Promise<void> {
+	if (!(await authorization.platform.hasCapability(ZonePreviewCapability)))
+		throw new PlatformCapabilityRequired();
+}
 
 function presentSystemRequirement<Requirement extends { hardware: Record<string, unknown> }>(
 	requirement: Requirement,
@@ -559,6 +569,7 @@ export default new Elysia()
 			.put(
 				"/:zoneId/slug-address",
 				async ({ params, authorization, body }) => {
+					await ensureZonePreview(authorization);
 					const result = await replaceZoneSlugAddress(authorization, {
 						zoneId: params.zoneId,
 						slug: body.slug,
@@ -597,6 +608,7 @@ export default new Elysia()
 				async ({ params, query, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
+					await ensureZonePreview(authorization);
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
@@ -612,6 +624,7 @@ export default new Elysia()
 					query: ZoneDetailQuery,
 					response: {
 						[StatusCodes.OK]: ZoneResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
 					detail: { summary: "Get Zone configuration", tags: ["Zones"] },
@@ -621,6 +634,7 @@ export default new Elysia()
 				"/:zoneId/render",
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request.headers, "unit:read");
+					await ensureZonePreview(identity.authorization);
 					await identity.authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
@@ -792,6 +806,7 @@ export default new Elysia()
 					query: ZoneRenderQuery,
 					response: {
 						[StatusCodes.OK]: ZoneRenderResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"ZonePageNotFound",
@@ -807,6 +822,7 @@ export default new Elysia()
 			.patch(
 				"/:zoneId",
 				async ({ params, profile, authorization, body }) => {
+					await ensureZonePreview(authorization);
 					if (body.boundaryDocument?.filter)
 						try {
 							assertUnitPredicate(body.boundaryDocument.filter);
@@ -916,6 +932,7 @@ export default new Elysia()
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
+					await ensureZonePreview(authorization);
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
@@ -930,6 +947,7 @@ export default new Elysia()
 					params: ZoneParams,
 					response: {
 						[StatusCodes.OK]: ZonePageListResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
 					detail: { summary: "List Zone pages", tags: ["Zones"] },
@@ -938,6 +956,7 @@ export default new Elysia()
 			.post(
 				"/:zoneId/pages",
 				async ({ params, profile, authorization, body }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page",
@@ -987,6 +1006,7 @@ export default new Elysia()
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
+					await ensureZonePreview(authorization);
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
@@ -1001,6 +1021,7 @@ export default new Elysia()
 					params: ZonePageIdParams,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"ZonePageNotFound",
@@ -1012,6 +1033,7 @@ export default new Elysia()
 			.put(
 				"/:zoneId/pages/:pageId",
 				async ({ params, profile, authorization, body }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page",
@@ -1061,6 +1083,7 @@ export default new Elysia()
 			.put(
 				"/:zoneId/pages/:pageId/placement",
 				async ({ params, profile, authorization, body }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page-structure",
@@ -1095,6 +1118,7 @@ export default new Elysia()
 			.delete(
 				"/:zoneId/pages/:pageId/placement",
 				async ({ params, body, profile, authorization }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page-structure",
@@ -1135,6 +1159,7 @@ export default new Elysia()
 			.delete(
 				"/:zoneId/pages/:pageId",
 				async ({ params, profile, authorization }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page",
@@ -1216,6 +1241,7 @@ export default new Elysia()
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
+					await ensureZonePreview(authorization);
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
@@ -1244,6 +1270,7 @@ export default new Elysia()
 					params: ZoneParams,
 					response: {
 						[StatusCodes.OK]: ZoneNavigationListResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
 					detail: { summary: "List Zone navigation resources", tags: ["Zones"] },
@@ -1252,6 +1279,7 @@ export default new Elysia()
 			.post(
 				"/:zoneId/navigation",
 				async ({ params, profile, authorization, body }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"navigation",
@@ -1298,6 +1326,7 @@ export default new Elysia()
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
+					await ensureZonePreview(authorization);
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
@@ -1327,6 +1356,7 @@ export default new Elysia()
 					params: ZoneNavigationParams,
 					response: {
 						[StatusCodes.OK]: ZoneNavigationResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"ZoneNavigationNotFound",
@@ -1338,6 +1368,7 @@ export default new Elysia()
 			.put(
 				"/:zoneId/navigation/:navigationId",
 				async ({ params, profile, authorization, body }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"navigation",
@@ -1398,6 +1429,7 @@ export default new Elysia()
 			.delete(
 				"/:zoneId/navigation/:navigationId",
 				async ({ params, body, profile, authorization }) => {
+					await ensureZonePreview(authorization);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"navigation",
@@ -1580,7 +1612,8 @@ export default new Elysia()
 	.group("/zones", (app) =>
 		app.post(
 			"",
-			async ({ profile, body }) => {
+			async ({ profile, authorization, body }) => {
+				await ensureZonePreview(authorization);
 				if (body.boundaryDocument.filter)
 					try {
 						assertUnitPredicate(body.boundaryDocument.filter);
@@ -1628,6 +1661,7 @@ export default new Elysia()
 						"ZoneDocumentInvalid",
 						"ZoneTimeRangeInvalid",
 					]),
+					[StatusCodes.FORBIDDEN]: ZonePreviewRequiredResponse,
 					[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 				},
 				detail: { summary: "Create Zone", tags: ["Zones"] },

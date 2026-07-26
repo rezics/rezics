@@ -6,6 +6,7 @@ import {
 	CollectionConfigV1,
 	FollowingListQuery,
 	ReplacePreferencesBody,
+	StudioContentListQuery,
 	UpdateInterfaceLocaleBody,
 } from "./schema";
 
@@ -54,6 +55,15 @@ describe("following API contracts", () => {
 				position: "a0V",
 			}),
 		).toBe(false);
+	});
+});
+
+describe("Studio content list contract", () => {
+	it("accepts only supported sections and bounded limits", () => {
+		expect(Check(StudioContentListQuery, { section: "book" })).toBe(true);
+		expect(Check(StudioContentListQuery, { section: "review", limit: 100 })).toBe(true);
+		expect(Check(StudioContentListQuery, { section: "zone" })).toBe(false);
+		expect(Check(StudioContentListQuery, { section: "book", limit: 101 })).toBe(false);
 	});
 });
 

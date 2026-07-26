@@ -26561,6 +26561,8 @@ export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
+	"unit.realm.preview": "unit.realm.preview",
+	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -27377,6 +27379,7 @@ export type ReplaceZoneSlugAddressStatus400 =
 	| MalformedRequestBody;
 
 export const ReplaceZoneSlugAddressStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -27393,7 +27396,7 @@ export type ReplaceZoneSlugAddressStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: ReplaceZoneSlugAddressStatus403ErrorCodeEnum;
@@ -27900,6 +27903,34 @@ export type GetApiZonesByZoneIdStatus200 = {
 /**
  * @type object
  */
+export type GetApiZonesByZoneIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiZonesByZoneIdStatus404 = {
 	/**
 	 * @type object
@@ -27950,6 +27981,7 @@ export type GetApiZonesByZoneIdOptions = {
  */
 export type GetApiZonesByZoneIdResponses = {
 	"200": GetApiZonesByZoneIdStatus200;
+	"403": GetApiZonesByZoneIdStatus403;
 	"404": GetApiZonesByZoneIdStatus404;
 	"422": GetApiZonesByZoneIdStatus422;
 	"500": GetApiZonesByZoneIdStatus500;
@@ -27960,6 +27992,7 @@ export type GetApiZonesByZoneIdResponses = {
  */
 export type GetApiZonesByZoneIdResponse =
 	| GetApiZonesByZoneIdStatus200
+	| GetApiZonesByZoneIdStatus403
 	| GetApiZonesByZoneIdStatus404
 	| GetApiZonesByZoneIdStatus422
 	| GetApiZonesByZoneIdStatus500;
@@ -28296,6 +28329,7 @@ export type PatchApiZonesByZoneIdStatus400 =
 	| MalformedRequestBody;
 
 export const PatchApiZonesByZoneIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -28312,7 +28346,7 @@ export type PatchApiZonesByZoneIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PatchApiZonesByZoneIdStatus403ErrorCodeEnum;
@@ -29440,6 +29474,34 @@ export type GetZoneRenderProjectionStatus200 = {
 	};
 };
 
+/**
+ * @type object
+ */
+export type GetZoneRenderProjectionStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const GetZoneRenderProjectionStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ZonePageNotFound: "ZonePageNotFound",
@@ -29501,6 +29563,7 @@ export type GetZoneRenderProjectionOptions = {
  */
 export type GetZoneRenderProjectionResponses = {
 	"200": GetZoneRenderProjectionStatus200;
+	"403": GetZoneRenderProjectionStatus403;
 	"404": GetZoneRenderProjectionStatus404;
 	"422": GetZoneRenderProjectionStatus422;
 	"500": GetZoneRenderProjectionStatus500;
@@ -29511,6 +29574,7 @@ export type GetZoneRenderProjectionResponses = {
  */
 export type GetZoneRenderProjectionResponse =
 	| GetZoneRenderProjectionStatus200
+	| GetZoneRenderProjectionStatus403
 	| GetZoneRenderProjectionStatus404
 	| GetZoneRenderProjectionStatus422
 	| GetZoneRenderProjectionStatus500;
@@ -29682,6 +29746,34 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 /**
  * @type object
  */
+export type GetApiZonesByZoneIdPagesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiZonesByZoneIdPagesStatus404 = {
 	/**
 	 * @type object
@@ -29732,6 +29824,7 @@ export type GetApiZonesByZoneIdPagesOptions = {
  */
 export type GetApiZonesByZoneIdPagesResponses = {
 	"200": GetApiZonesByZoneIdPagesStatus200;
+	"403": GetApiZonesByZoneIdPagesStatus403;
 	"404": GetApiZonesByZoneIdPagesStatus404;
 	"422": GetApiZonesByZoneIdPagesStatus422;
 	"500": GetApiZonesByZoneIdPagesStatus500;
@@ -29742,6 +29835,7 @@ export type GetApiZonesByZoneIdPagesResponses = {
  */
 export type GetApiZonesByZoneIdPagesResponse =
 	| GetApiZonesByZoneIdPagesStatus200
+	| GetApiZonesByZoneIdPagesStatus403
 	| GetApiZonesByZoneIdPagesStatus404
 	| GetApiZonesByZoneIdPagesStatus422
 	| GetApiZonesByZoneIdPagesStatus500;
@@ -29925,6 +30019,7 @@ export type PostApiZonesByZoneIdPagesStatus400 =
 	| MalformedRequestBody;
 
 export const PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -29941,7 +30036,7 @@ export type PostApiZonesByZoneIdPagesStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum;
@@ -30292,6 +30387,34 @@ export type GetApiZonesByZoneIdPagesByPageIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesByPageIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const GetApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ZonePageNotFound: "ZonePageNotFound",
@@ -30353,6 +30476,7 @@ export type GetApiZonesByZoneIdPagesByPageIdOptions = {
  */
 export type GetApiZonesByZoneIdPagesByPageIdResponses = {
 	"200": GetApiZonesByZoneIdPagesByPageIdStatus200;
+	"403": GetApiZonesByZoneIdPagesByPageIdStatus403;
 	"404": GetApiZonesByZoneIdPagesByPageIdStatus404;
 	"422": GetApiZonesByZoneIdPagesByPageIdStatus422;
 	"500": GetApiZonesByZoneIdPagesByPageIdStatus500;
@@ -30363,6 +30487,7 @@ export type GetApiZonesByZoneIdPagesByPageIdResponses = {
  */
 export type GetApiZonesByZoneIdPagesByPageIdResponse =
 	| GetApiZonesByZoneIdPagesByPageIdStatus200
+	| GetApiZonesByZoneIdPagesByPageIdStatus403
 	| GetApiZonesByZoneIdPagesByPageIdStatus404
 	| GetApiZonesByZoneIdPagesByPageIdStatus422
 	| GetApiZonesByZoneIdPagesByPageIdStatus500;
@@ -30552,6 +30677,7 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus400 =
 	| MalformedRequestBody;
 
 export const PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -30568,7 +30694,7 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
@@ -30794,6 +30920,7 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPath = {
 export type DeleteApiZonesByZoneIdPagesByPageIdStatus204 = void;
 
 export const DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -30810,7 +30937,7 @@ export type DeleteApiZonesByZoneIdPagesByPageIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
@@ -31117,6 +31244,7 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200 = {
 export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus400 = MalformedRequestBody;
 
 export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -31133,7 +31261,7 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum;
@@ -31359,6 +31487,7 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus204 = void;
 export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400 = MalformedRequestBody;
 
 export const DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -31375,7 +31504,7 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum;
@@ -31609,6 +31738,34 @@ export type GetApiZonesByZoneIdNavigationStatus200 = {
 /**
  * @type object
  */
+export type GetApiZonesByZoneIdNavigationStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiZonesByZoneIdNavigationStatus404 = {
 	/**
 	 * @type object
@@ -31659,6 +31816,7 @@ export type GetApiZonesByZoneIdNavigationOptions = {
  */
 export type GetApiZonesByZoneIdNavigationResponses = {
 	"200": GetApiZonesByZoneIdNavigationStatus200;
+	"403": GetApiZonesByZoneIdNavigationStatus403;
 	"404": GetApiZonesByZoneIdNavigationStatus404;
 	"422": GetApiZonesByZoneIdNavigationStatus422;
 	"500": GetApiZonesByZoneIdNavigationStatus500;
@@ -31669,6 +31827,7 @@ export type GetApiZonesByZoneIdNavigationResponses = {
  */
 export type GetApiZonesByZoneIdNavigationResponse =
 	| GetApiZonesByZoneIdNavigationStatus200
+	| GetApiZonesByZoneIdNavigationStatus403
 	| GetApiZonesByZoneIdNavigationStatus404
 	| GetApiZonesByZoneIdNavigationStatus422
 	| GetApiZonesByZoneIdNavigationStatus500;
@@ -31753,6 +31912,7 @@ export type PostApiZonesByZoneIdNavigationStatus400 =
 	| MalformedRequestBody;
 
 export const PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -31769,7 +31929,7 @@ export type PostApiZonesByZoneIdNavigationStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum;
@@ -31953,6 +32113,34 @@ export type GetApiZonesByZoneIdNavigationByNavigationIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByNavigationIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const GetApiZonesByZoneIdNavigationByNavigationIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ZoneNavigationNotFound: "ZoneNavigationNotFound",
@@ -32014,6 +32202,7 @@ export type GetApiZonesByZoneIdNavigationByNavigationIdOptions = {
  */
 export type GetApiZonesByZoneIdNavigationByNavigationIdResponses = {
 	"200": GetApiZonesByZoneIdNavigationByNavigationIdStatus200;
+	"403": GetApiZonesByZoneIdNavigationByNavigationIdStatus403;
 	"404": GetApiZonesByZoneIdNavigationByNavigationIdStatus404;
 	"422": GetApiZonesByZoneIdNavigationByNavigationIdStatus422;
 	"500": GetApiZonesByZoneIdNavigationByNavigationIdStatus500;
@@ -32024,6 +32213,7 @@ export type GetApiZonesByZoneIdNavigationByNavigationIdResponses = {
  */
 export type GetApiZonesByZoneIdNavigationByNavigationIdResponse =
 	| GetApiZonesByZoneIdNavigationByNavigationIdStatus200
+	| GetApiZonesByZoneIdNavigationByNavigationIdStatus403
 	| GetApiZonesByZoneIdNavigationByNavigationIdStatus404
 	| GetApiZonesByZoneIdNavigationByNavigationIdStatus422
 	| GetApiZonesByZoneIdNavigationByNavigationIdStatus500;
@@ -32114,6 +32304,7 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus400 =
 	| MalformedRequestBody;
 
 export const PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -32130,7 +32321,7 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum;
@@ -32329,6 +32520,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204 = void;
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400 = MalformedRequestBody;
 
 export const DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -32345,7 +32537,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum;
@@ -32582,6 +32774,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400 = MalformedRequestBody;
 
 export const PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -32598,7 +32791,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum;
@@ -32753,6 +32946,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdPath = {
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204 = void;
 
 export const DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -32769,7 +32963,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum;
@@ -32937,6 +33131,34 @@ export type PostApiZonesStatus400 =
 			requestId: string;
 	  }
 	| MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiZonesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -33262,6 +33484,7 @@ export type PostApiZonesOptions = {
 export type PostApiZonesResponses = {
 	"200": PostApiZonesStatus200;
 	"400": PostApiZonesStatus400;
+	"403": PostApiZonesStatus403;
 	"404": PostApiZonesStatus404;
 	"422": PostApiZonesStatus422;
 	"429": PostApiZonesStatus429;
@@ -33274,6 +33497,7 @@ export type PostApiZonesResponses = {
 export type PostApiZonesResponse =
 	| PostApiZonesStatus200
 	| PostApiZonesStatus400
+	| PostApiZonesStatus403
 	| PostApiZonesStatus404
 	| PostApiZonesStatus422
 	| PostApiZonesStatus429
@@ -33503,6 +33727,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 =
 	| MalformedRequestBody;
 
 export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -33519,7 +33744,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum;
@@ -33767,6 +33992,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 	| MalformedRequestBody;
 
 export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -33783,7 +34009,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
@@ -33960,6 +34186,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 
 export const DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
 	{
+		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 		UnitPermissionForbidden: "UnitPermissionForbidden",
 		UnitProtected: "UnitProtected",
 	} as const;
@@ -33976,7 +34203,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
@@ -35438,6 +35665,8 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
+	"unit.realm.preview": "unit.realm.preview",
+	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -36491,6 +36720,209 @@ export type PatchApiUsersMeResponse =
 	| PatchApiUsersMeStatus422
 	| PatchApiUsersMeStatus429
 	| PatchApiUsersMeStatus500;
+
+export const ListCurrentUserStudioContentSection = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+	tag: "tag",
+	realm: "realm",
+	post: "post",
+	collection: "collection",
+	review: "review",
+	poll: "poll",
+} as const;
+
+export type ListCurrentUserStudioContentSection =
+	(typeof ListCurrentUserStudioContentSection)[keyof typeof ListCurrentUserStudioContentSection];
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentQuery = {
+	/**
+	 * @default 'book'
+	 * @type string
+	 */
+	section: ListCurrentUserStudioContentSection;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const ListCurrentUserStudioContentStatus200ItemsSectionEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+	tag: "tag",
+	realm: "realm",
+	post: "post",
+	collection: "collection",
+	review: "review",
+	poll: "poll",
+} as const;
+
+export type ListCurrentUserStudioContentStatus200ItemsSectionEnum =
+	(typeof ListCurrentUserStudioContentStatus200ItemsSectionEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsSectionEnum];
+
+export const ListCurrentUserStudioContentStatus200ItemsStatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type ListCurrentUserStudioContentStatus200ItemsStatusEnum =
+	(typeof ListCurrentUserStudioContentStatus200ItemsStatusEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsStatusEnum];
+
+export const ListCurrentUserStudioContentStatus200ItemsVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type ListCurrentUserStudioContentStatus200ItemsVisibilityEnum =
+	(typeof ListCurrentUserStudioContentStatus200ItemsVisibilityEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsVisibilityEnum];
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'book'
+		 * @type string
+		 */
+		section: ListCurrentUserStudioContentStatus200ItemsSectionEnum;
+		title: (string | null) | null;
+		/**
+		 * @default 'draft'
+		 * @type string
+		 */
+		status: ListCurrentUserStudioContentStatus200ItemsStatusEnum;
+		/**
+		 * @default 'public'
+		 * @type string
+		 */
+		visibility: ListCurrentUserStudioContentStatus200ItemsVisibilityEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentOptions = {
+	body?: never;
+	path?: never;
+	query: ListCurrentUserStudioContentQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserStudioContentResponses = {
+	"200": ListCurrentUserStudioContentStatus200;
+	"403": ListCurrentUserStudioContentStatus403;
+	"422": ListCurrentUserStudioContentStatus422;
+	"429": ListCurrentUserStudioContentStatus429;
+	"500": ListCurrentUserStudioContentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListCurrentUserStudioContentResponse =
+	| ListCurrentUserStudioContentStatus200
+	| ListCurrentUserStudioContentStatus403
+	| ListCurrentUserStudioContentStatus422
+	| ListCurrentUserStudioContentStatus429
+	| ListCurrentUserStudioContentStatus500;
 
 export const GetApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 	en: "en",
@@ -38760,6 +39192,8 @@ export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
+	"unit.realm.preview": "unit.realm.preview",
+	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -38870,6 +39304,8 @@ export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
+	"unit.realm.preview": "unit.realm.preview",
+	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -39006,6 +39442,8 @@ export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
+	"unit.realm.preview": "unit.realm.preview",
+	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -39145,6 +39583,8 @@ export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
+	"unit.realm.preview": "unit.realm.preview",
+	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -39338,6 +39778,8 @@ export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
+	"unit.realm.preview": "unit.realm.preview",
+	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -78932,6 +79374,34 @@ export type PostApiRealmsStatus400 = MalformedRequestBody;
 /**
  * @type object
  */
+export type PostApiRealmsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiRealmsStatus404 = {
 	/**
 	 * @type object
@@ -79268,6 +79738,7 @@ export type PostApiRealmsOptions = {
 export type PostApiRealmsResponses = {
 	"200": PostApiRealmsStatus200;
 	"400": PostApiRealmsStatus400;
+	"403": PostApiRealmsStatus403;
 	"404": PostApiRealmsStatus404;
 	"422": PostApiRealmsStatus422;
 	"429": PostApiRealmsStatus429;
@@ -79280,6 +79751,7 @@ export type PostApiRealmsResponses = {
 export type PostApiRealmsResponse =
 	| PostApiRealmsStatus200
 	| PostApiRealmsStatus400
+	| PostApiRealmsStatus403
 	| PostApiRealmsStatus404
 	| PostApiRealmsStatus422
 	| PostApiRealmsStatus429
@@ -92429,6 +92901,7 @@ export type GetApiSearchZonesByZoneIdFeatureStatus200 = {
 };
 
 export const GetApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -92445,7 +92918,7 @@ export type GetApiSearchZonesByZoneIdFeatureStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: GetApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum;
@@ -92603,6 +93076,7 @@ export type PutApiSearchZonesByZoneIdFeatureStatus200 = {
 export type PutApiSearchZonesByZoneIdFeatureStatus400 = MalformedRequestBody;
 
 export const PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -92619,7 +93093,7 @@ export type PutApiSearchZonesByZoneIdFeatureStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum;
@@ -93077,6 +93551,34 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteStatus200 = {
  * @type object
  */
 export type PostApiSearchZonesByZoneIdFeatureExecuteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureExecuteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 export const PostApiSearchZonesByZoneIdFeatureExecuteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -94011,6 +94513,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteOptions = {
 export type PostApiSearchZonesByZoneIdFeatureExecuteResponses = {
 	"200": PostApiSearchZonesByZoneIdFeatureExecuteStatus200;
 	"400": PostApiSearchZonesByZoneIdFeatureExecuteStatus400;
+	"403": PostApiSearchZonesByZoneIdFeatureExecuteStatus403;
 	"404": PostApiSearchZonesByZoneIdFeatureExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdFeatureExecuteStatus422;
 	"500": PostApiSearchZonesByZoneIdFeatureExecuteStatus500;
@@ -94023,6 +94526,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteResponses = {
 export type PostApiSearchZonesByZoneIdFeatureExecuteResponse =
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus200
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
+	| PostApiSearchZonesByZoneIdFeatureExecuteStatus403
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 	| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -94083,6 +94587,7 @@ export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus200 = {
 };
 
 export const GetApiSearchZonesByZoneIdFeatureRevisionsStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -94099,7 +94604,7 @@ export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: GetApiSearchZonesByZoneIdFeatureRevisionsStatus403ErrorCodeEnum;
@@ -94257,6 +94762,7 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200 = {
 export type PostApiSearchZonesByZoneIdFeatureRestoreStatus400 = MalformedRequestBody;
 
 export const PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
 } as const;
@@ -94273,7 +94779,7 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
 		code: PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum;
@@ -94751,6 +95257,34 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
  * @type object
  */
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -95686,6 +96220,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions = {
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses = {
 	"200": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200;
 	"400": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400;
+	"403": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403;
 	"404": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422;
 	"500": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500;
@@ -95698,6 +96233,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses = {
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -96015,6 +96551,34 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus
  */
 export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400 =
 	MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 export const PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
 	{
@@ -96952,6 +97516,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOption
 export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses = {
 	"200": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200;
 	"400": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400;
+	"403": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403;
 	"404": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422;
 	"500": PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500;
@@ -96964,6 +97529,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRespon
 export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
 	| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
@@ -99015,6 +99581,34 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
  */
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400 = MalformedRequestBody;
 
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	DockNotFound: "DockNotFound",
@@ -99969,6 +100563,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions = {
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses = {
 	"200": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200;
 	"400": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400;
+	"403": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403;
 	"404": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404;
 	"422": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422;
 	"500": PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500;
@@ -99981,6 +100576,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses = {
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponse =
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
 	| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500

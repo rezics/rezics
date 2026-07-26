@@ -22,6 +22,7 @@ import {
 import {
 	getAlternatePaths,
 	getCanonicalForPath,
+	getContactPath,
 	getHomePath,
 	getProductPath,
 	getProductsPath,
@@ -282,6 +283,7 @@ describe("public routes, redirects, and discovery", () => {
 		expect(getHomePath("zh-hant")).toBe("/zh-hant/");
 		expect(getProductsPath("de")).toBe("/de/products/");
 		expect(getProductPath("ko", "book")).toBe("/ko/products/book/");
+		expect(getContactPath("ja")).toBe("/ja/contact-us/");
 		expect(getCanonicalForPath("/en/products/book/")).toBe(
 			`${ABOUT_SITE_ORIGIN}/en/products/book/`,
 		);
@@ -296,9 +298,36 @@ describe("public routes, redirects, and discovery", () => {
 		const sitemap = createSitemapXml();
 		const urls = sitemap.match(/<url>/g) ?? [];
 
-		expect(urls).toHaveLength(ABOUT_LOCALES.length * (PRODUCT_DEFINITIONS.length + 2));
+		expect(urls).toHaveLength(ABOUT_LOCALES.length * (PRODUCT_DEFINITIONS.length + 3));
 		expect(sitemap).toContain("<loc>https://about.rezics.com/zh-hant/products/gamebook/</loc>");
 		expect(sitemap).toContain("<loc>https://about.rezics.com/de/products/entity/</loc>");
+		expect(sitemap).toContain("<loc>https://about.rezics.com/en/contact-us/</loc>");
+	});
+
+	test("redirects every registered public path that omits its locale", async () => {
+		const next = () => new Response(null, { status: 204 });
+		const paths = [
+			["/", getHomePath("ko")],
+			["/products/", getProductsPath("ko")],
+			["/contact-us/", getContactPath("ko")],
+			...PRODUCT_DEFINITIONS.map(
+				({ slug }) => [`/products/${slug}/`, getProductPath("ko", slug)] as const,
+			),
+		] as const;
+
+		for (const [source, target] of paths) {
+			const response = await languageMiddleware({
+				request: new Request(`https://about.rezics.com${source}`, {
+					headers: { "accept-language": "ko-KR" },
+				}),
+				next,
+			});
+			expect(response.status, source).toBe(302);
+			expect(response.headers.get("location"), source).toBe(
+				`https://about.rezics.com${target}`,
+			);
+			expect(response.headers.get("vary"), source).toBe("Accept-Language");
+		}
 	});
 
 	test("negotiates neutral legacy and plural entry paths", async () => {
@@ -328,6 +357,31 @@ describe("public routes, redirects, and discovery", () => {
 		expect(detailRedirect.headers.get("location")).toBe(
 			"https://about.rezics.com/de/products/gamebook/",
 		);
+
+		const contactRedirect = await languageMiddleware({
+			request: new Request("https://about.rezics.com/contact-us/?from=studio", {
+				headers: { "accept-language": "en-US" },
+			}),
+			next,
+		});
+		expect(contactRedirect.status).toBe(302);
+		expect(contactRedirect.headers.get("location")).toBe(
+			"https://about.rezics.com/en/contact-us/?from=studio",
+		);
+
+		const invalidProduct = await languageMiddleware({
+			request: new Request("https://about.rezics.com/products/not-a-product/", {
+				headers: { "accept-language": "de" },
+			}),
+			next,
+		});
+		expect(invalidProduct.status).toBe(204);
+
+		const invalidLegacyProduct = await languageMiddleware({
+			request: new Request("https://about.rezics.com/en/product/not-a-product/"),
+			next,
+		});
+		expect(invalidLegacyProduct.status).toBe(204);
 
 		const permanentRedirect = await languageMiddleware({
 			request: new Request("https://about.rezics.com/ja/product/gamebook/?from=old"),

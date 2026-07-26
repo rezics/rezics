@@ -1,10 +1,20 @@
+import { PRODUCT_DEFINITIONS } from "../src/content/productRegistry";
 import { isAboutLocale, negotiateAboutLocale, type AboutLocale } from "../src/i18n/locales";
-import { getHomePath, getProductPath, getProductsPath } from "../src/i18n/productPaths";
+import {
+	getContactPath,
+	getHomePath,
+	getProductPath,
+	getProductsPath,
+} from "../src/i18n/productPaths";
 
 type PagesMiddlewareContext = {
 	request: Request;
 	next: () => Response | Promise<Response>;
 };
+
+const publicProductSlugs: ReadonlySet<string> = new Set(
+	PRODUCT_DEFINITIONS.map((product) => product.slug),
+);
 
 function normalizePathname(pathname: string): string {
 	return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
@@ -17,9 +27,10 @@ function resolveLocalizedEntry(pathname: string, locale: AboutLocale): string | 
 	if (normalized === "/product" || normalized === "/products") {
 		return getProductsPath(locale);
 	}
+	if (normalized === "/contact-us") return getContactPath(locale);
 
 	const detail = normalized.match(/^\/(?:product|products)\/([^/]+)$/);
-	if (!detail?.[1]) return undefined;
+	if (!detail?.[1] || !publicProductSlugs.has(detail[1])) return undefined;
 
 	return getProductPath(locale, detail[1]);
 }
@@ -33,7 +44,12 @@ function resolveLocalizedLegacyPath(pathname: string): string | undefined {
 	}
 
 	const legacyDetail = normalized.match(/^\/([^/]+)\/product\/([^/]+)$/);
-	if (legacyDetail?.[1] && legacyDetail[2] && isAboutLocale(legacyDetail[1])) {
+	if (
+		legacyDetail?.[1] &&
+		legacyDetail[2] &&
+		isAboutLocale(legacyDetail[1]) &&
+		publicProductSlugs.has(legacyDetail[2])
+	) {
 		return getProductPath(legacyDetail[1], legacyDetail[2]);
 	}
 

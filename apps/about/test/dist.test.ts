@@ -16,6 +16,7 @@ describe("Vike prerender output", () => {
 		for (const locale of ABOUT_LOCALES) {
 			const paths = [
 				join(dist, locale, "index.html"),
+				join(dist, locale, "contact-us", "index.html"),
 				join(dist, locale, "products", "index.html"),
 				...PRODUCT_DEFINITIONS.map((product) =>
 					join(dist, locale, "products", product.slug, "index.html"),

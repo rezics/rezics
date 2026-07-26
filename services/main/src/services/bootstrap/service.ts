@@ -1,7 +1,7 @@
 import { hashPassword } from "better-auth/crypto";
 import type { AvatarReference } from "@rezics/avatar";
 import { walkBlockTree } from "@rezics/block";
-import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, count, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -541,7 +541,7 @@ async function ensureBootstrapProfiles(
 
 async function ensureBootstrapSuperAdminGrants(tx: DatabaseTransaction): Promise<void> {
 	await lockPlatformAccessGrants(tx);
-	const [permanentGrantManager] = await tx
+	const [externalPermanentGrantManager] = await tx
 		.select({ profileId: capabilityGrant.profileId })
 		.from(capabilityGrant)
 		.where(
@@ -549,12 +549,13 @@ async function ensureBootstrapSuperAdminGrants(tx: DatabaseTransaction): Promise
 				eq(capabilityGrant.authority, "platform"),
 				isNull(capabilityGrant.realmId),
 				eq(capabilityGrant.capability, "platform.grants.manage"),
+				ne(capabilityGrant.profileId, BootstrapSuperAdminProfile.profileId),
 				isNull(capabilityGrant.expiresAt),
 				isNull(capabilityGrant.revokedAt),
 			),
 		)
 		.limit(1);
-	if (permanentGrantManager) return;
+	if (externalPermanentGrantManager) return;
 	const createdAt = bootstrapEpoch();
 	for (const capability of BootstrapSuperAdminProfile.capabilities) {
 		const [current] = await tx

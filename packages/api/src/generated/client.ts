@@ -217,6 +217,8 @@ import type {
 	GetApiUsersMeResponses,
 	PatchApiUsersMeOptions,
 	PatchApiUsersMeResponses,
+	ListCurrentUserStudioContentOptions,
+	ListCurrentUserStudioContentResponses,
 	GetApiUsersMePreferencesOptions,
 	GetApiUsersMePreferencesResponses,
 	PatchApiUsersMePreferencesOptions,
@@ -2693,6 +2695,26 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiUsersMeResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List current user's created Studio content
+ * {@link /api/users/me/studio}
+ */
+export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
+	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError>,
+): Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/users/me/studio",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>>;
 }
 
 /**

@@ -12,6 +12,8 @@ export const resources = defineResources({
 			catalog: () => import("./languages/zh-Hant/catalog").then((module) => module.default),
 			cover: () => import("./languages/zh-Hant/cover").then((module) => module.default),
 			create: () => import("./languages/zh-Hant/create").then((module) => module.default),
+			development: () =>
+				import("./languages/zh-Hant/development").then((module) => module.default),
 			editor: () => import("./languages/zh-Hant/editor").then((module) => module.default),
 			emails: () => import("./languages/zh-Hant/emails").then((module) => module.default),
 			engagement: () =>
@@ -52,6 +54,8 @@ export const resources = defineResources({
 			catalog: () => import("./languages/en/catalog").then((module) => module.default),
 			cover: () => import("./languages/en/cover").then((module) => module.default),
 			create: () => import("./languages/en/create").then((module) => module.default),
+			development: () =>
+				import("./languages/en/development").then((module) => module.default),
 			editor: () => import("./languages/en/editor").then((module) => module.default),
 			emails: () => import("./languages/en/emails").then((module) => module.default),
 			engagement: () => import("./languages/en/engagement").then((module) => module.default),

@@ -12,6 +12,7 @@ export type AboutPageData =
 	| { kind: "root"; metadata: AboutPageMetadata }
 	| { kind: "home"; locale: AboutLocale; metadata: AboutPageMetadata }
 	| { kind: "products"; locale: AboutLocale; metadata: AboutPageMetadata }
+	| { kind: "contact"; locale: AboutLocale; metadata: AboutPageMetadata }
 	| {
 			kind: "product";
 			locale: AboutLocale;

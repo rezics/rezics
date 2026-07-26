@@ -31,6 +31,7 @@ import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import { PreviewCapabilityBoundary } from "@/features/development/components/preview-capability-boundary";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { realmHref, realmSettingsHref } from "@/features/slugs/unit-route";
 import {
@@ -125,7 +126,7 @@ export function RealmsPage() {
 	);
 }
 
-export function RealmCreatePage() {
+function RealmCreateContent() {
 	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -212,6 +213,14 @@ export function RealmCreatePage() {
 				</form>
 			</main>
 		</RequireSession>
+	);
+}
+
+export function RealmCreatePage() {
+	return (
+		<PreviewCapabilityBoundary capability="unit.realm.preview">
+			<RealmCreateContent />
+		</PreviewCapabilityBoundary>
 	);
 }
 

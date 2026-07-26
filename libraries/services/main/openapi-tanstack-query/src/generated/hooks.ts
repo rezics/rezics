@@ -497,6 +497,7 @@ import type {
 	ReplaceZoneSlugAddressStatus500,
 	GetApiZonesByZoneIdOptions,
 	GetApiZonesByZoneIdStatus200,
+	GetApiZonesByZoneIdStatus403,
 	GetApiZonesByZoneIdStatus404,
 	GetApiZonesByZoneIdStatus422,
 	GetApiZonesByZoneIdStatus500,
@@ -510,11 +511,13 @@ import type {
 	PatchApiZonesByZoneIdStatus500,
 	GetZoneRenderProjectionOptions,
 	GetZoneRenderProjectionStatus200,
+	GetZoneRenderProjectionStatus403,
 	GetZoneRenderProjectionStatus404,
 	GetZoneRenderProjectionStatus422,
 	GetZoneRenderProjectionStatus500,
 	GetApiZonesByZoneIdPagesOptions,
 	GetApiZonesByZoneIdPagesStatus200,
+	GetApiZonesByZoneIdPagesStatus403,
 	GetApiZonesByZoneIdPagesStatus404,
 	GetApiZonesByZoneIdPagesStatus422,
 	GetApiZonesByZoneIdPagesStatus500,
@@ -529,6 +532,7 @@ import type {
 	PostApiZonesByZoneIdPagesStatus500,
 	GetApiZonesByZoneIdPagesByPageIdOptions,
 	GetApiZonesByZoneIdPagesByPageIdStatus200,
+	GetApiZonesByZoneIdPagesByPageIdStatus403,
 	GetApiZonesByZoneIdPagesByPageIdStatus404,
 	GetApiZonesByZoneIdPagesByPageIdStatus422,
 	GetApiZonesByZoneIdPagesByPageIdStatus500,
@@ -569,6 +573,7 @@ import type {
 	DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus500,
 	GetApiZonesByZoneIdNavigationOptions,
 	GetApiZonesByZoneIdNavigationStatus200,
+	GetApiZonesByZoneIdNavigationStatus403,
 	GetApiZonesByZoneIdNavigationStatus404,
 	GetApiZonesByZoneIdNavigationStatus422,
 	GetApiZonesByZoneIdNavigationStatus500,
@@ -582,6 +587,7 @@ import type {
 	PostApiZonesByZoneIdNavigationStatus500,
 	GetApiZonesByZoneIdNavigationByNavigationIdOptions,
 	GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
+	GetApiZonesByZoneIdNavigationByNavigationIdStatus403,
 	GetApiZonesByZoneIdNavigationByNavigationIdStatus404,
 	GetApiZonesByZoneIdNavigationByNavigationIdStatus422,
 	GetApiZonesByZoneIdNavigationByNavigationIdStatus500,
@@ -621,6 +627,7 @@ import type {
 	PostApiZonesOptions,
 	PostApiZonesStatus200,
 	PostApiZonesStatus400,
+	PostApiZonesStatus403,
 	PostApiZonesStatus404,
 	PostApiZonesStatus422,
 	PostApiZonesStatus429,
@@ -711,6 +718,12 @@ import type {
 	PatchApiUsersMeStatus422,
 	PatchApiUsersMeStatus429,
 	PatchApiUsersMeStatus500,
+	ListCurrentUserStudioContentOptions,
+	ListCurrentUserStudioContentStatus200,
+	ListCurrentUserStudioContentStatus403,
+	ListCurrentUserStudioContentStatus422,
+	ListCurrentUserStudioContentStatus429,
+	ListCurrentUserStudioContentStatus500,
 	GetApiUsersMePreferencesStatus200,
 	GetApiUsersMePreferencesStatus404,
 	GetApiUsersMePreferencesStatus429,
@@ -1656,6 +1669,7 @@ import type {
 	PostApiRealmsOptions,
 	PostApiRealmsStatus200,
 	PostApiRealmsStatus400,
+	PostApiRealmsStatus403,
 	PostApiRealmsStatus404,
 	PostApiRealmsStatus422,
 	PostApiRealmsStatus429,
@@ -1891,6 +1905,7 @@ import type {
 	PostApiSearchZonesByZoneIdFeatureExecuteOptions,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus400,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus403,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus404,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus422,
 	PostApiSearchZonesByZoneIdFeatureExecuteStatus500,
@@ -1912,6 +1927,7 @@ import type {
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400,
+	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500,
@@ -1919,6 +1935,7 @@ import type {
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422,
 	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500,
@@ -1926,6 +1943,7 @@ import type {
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400,
+	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422,
 	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500,
@@ -2111,6 +2129,7 @@ import {
 	postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore,
 	getApiUsersMe,
 	patchApiUsersMe,
+	listCurrentUserStudioContent,
 	getApiUsersMePreferences,
 	patchApiUsersMePreferences,
 	putApiUsersMePreferences,
@@ -9858,6 +9877,7 @@ export function getApiZonesByZoneIdQueryOptions(
 	return queryOptions<
 		GetApiZonesByZoneIdStatus200,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdStatus403
 			| GetApiZonesByZoneIdStatus404
 			| GetApiZonesByZoneIdStatus422
 			| GetApiZonesByZoneIdStatus500
@@ -9900,6 +9920,7 @@ export function useGetApiZonesByZoneId<
 			QueryObserverOptions<
 				GetApiZonesByZoneIdStatus200,
 				ResponseErrorConfig<
+					| GetApiZonesByZoneIdStatus403
 					| GetApiZonesByZoneIdStatus404
 					| GetApiZonesByZoneIdStatus422
 					| GetApiZonesByZoneIdStatus500
@@ -9930,6 +9951,7 @@ export function useGetApiZonesByZoneId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdStatus403
 			| GetApiZonesByZoneIdStatus404
 			| GetApiZonesByZoneIdStatus422
 			| GetApiZonesByZoneIdStatus500
@@ -10063,6 +10085,7 @@ export function getZoneRenderProjectionQueryOptions(
 	return queryOptions<
 		GetZoneRenderProjectionStatus200,
 		ResponseErrorConfig<
+			| GetZoneRenderProjectionStatus403
 			| GetZoneRenderProjectionStatus404
 			| GetZoneRenderProjectionStatus422
 			| GetZoneRenderProjectionStatus500
@@ -10108,6 +10131,7 @@ export function useGetZoneRenderProjection<
 			QueryObserverOptions<
 				GetZoneRenderProjectionStatus200,
 				ResponseErrorConfig<
+					| GetZoneRenderProjectionStatus403
 					| GetZoneRenderProjectionStatus404
 					| GetZoneRenderProjectionStatus422
 					| GetZoneRenderProjectionStatus500
@@ -10138,6 +10162,7 @@ export function useGetZoneRenderProjection<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetZoneRenderProjectionStatus403
 			| GetZoneRenderProjectionStatus404
 			| GetZoneRenderProjectionStatus422
 			| GetZoneRenderProjectionStatus500
@@ -10164,6 +10189,7 @@ export function getApiZonesByZoneIdPagesQueryOptions(
 	return queryOptions<
 		GetApiZonesByZoneIdPagesStatus200,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdPagesStatus403
 			| GetApiZonesByZoneIdPagesStatus404
 			| GetApiZonesByZoneIdPagesStatus422
 			| GetApiZonesByZoneIdPagesStatus500
@@ -10205,6 +10231,7 @@ export function useGetApiZonesByZoneIdPages<
 			QueryObserverOptions<
 				GetApiZonesByZoneIdPagesStatus200,
 				ResponseErrorConfig<
+					| GetApiZonesByZoneIdPagesStatus403
 					| GetApiZonesByZoneIdPagesStatus404
 					| GetApiZonesByZoneIdPagesStatus422
 					| GetApiZonesByZoneIdPagesStatus500
@@ -10232,6 +10259,7 @@ export function useGetApiZonesByZoneIdPages<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdPagesStatus403
 			| GetApiZonesByZoneIdPagesStatus404
 			| GetApiZonesByZoneIdPagesStatus422
 			| GetApiZonesByZoneIdPagesStatus500
@@ -10372,6 +10400,7 @@ export function getApiZonesByZoneIdPagesByPageIdQueryOptions(
 	return queryOptions<
 		GetApiZonesByZoneIdPagesByPageIdStatus200,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdPagesByPageIdStatus403
 			| GetApiZonesByZoneIdPagesByPageIdStatus404
 			| GetApiZonesByZoneIdPagesByPageIdStatus422
 			| GetApiZonesByZoneIdPagesByPageIdStatus500
@@ -10413,6 +10442,7 @@ export function useGetApiZonesByZoneIdPagesByPageId<
 			QueryObserverOptions<
 				GetApiZonesByZoneIdPagesByPageIdStatus200,
 				ResponseErrorConfig<
+					| GetApiZonesByZoneIdPagesByPageIdStatus403
 					| GetApiZonesByZoneIdPagesByPageIdStatus404
 					| GetApiZonesByZoneIdPagesByPageIdStatus422
 					| GetApiZonesByZoneIdPagesByPageIdStatus500
@@ -10441,6 +10471,7 @@ export function useGetApiZonesByZoneIdPagesByPageId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdPagesByPageIdStatus403
 			| GetApiZonesByZoneIdPagesByPageIdStatus404
 			| GetApiZonesByZoneIdPagesByPageIdStatus422
 			| GetApiZonesByZoneIdPagesByPageIdStatus500
@@ -10923,6 +10954,7 @@ export function getApiZonesByZoneIdNavigationQueryOptions(
 	return queryOptions<
 		GetApiZonesByZoneIdNavigationStatus200,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdNavigationStatus403
 			| GetApiZonesByZoneIdNavigationStatus404
 			| GetApiZonesByZoneIdNavigationStatus422
 			| GetApiZonesByZoneIdNavigationStatus500
@@ -10964,6 +10996,7 @@ export function useGetApiZonesByZoneIdNavigation<
 			QueryObserverOptions<
 				GetApiZonesByZoneIdNavigationStatus200,
 				ResponseErrorConfig<
+					| GetApiZonesByZoneIdNavigationStatus403
 					| GetApiZonesByZoneIdNavigationStatus404
 					| GetApiZonesByZoneIdNavigationStatus422
 					| GetApiZonesByZoneIdNavigationStatus500
@@ -10992,6 +11025,7 @@ export function useGetApiZonesByZoneIdNavigation<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdNavigationStatus403
 			| GetApiZonesByZoneIdNavigationStatus404
 			| GetApiZonesByZoneIdNavigationStatus422
 			| GetApiZonesByZoneIdNavigationStatus500
@@ -11127,6 +11161,7 @@ export function getApiZonesByZoneIdNavigationByNavigationIdQueryOptions(
 	return queryOptions<
 		GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus403
 			| GetApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| GetApiZonesByZoneIdNavigationByNavigationIdStatus422
 			| GetApiZonesByZoneIdNavigationByNavigationIdStatus500
@@ -11168,6 +11203,7 @@ export function useGetApiZonesByZoneIdNavigationByNavigationId<
 			QueryObserverOptions<
 				GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
 				ResponseErrorConfig<
+					| GetApiZonesByZoneIdNavigationByNavigationIdStatus403
 					| GetApiZonesByZoneIdNavigationByNavigationIdStatus404
 					| GetApiZonesByZoneIdNavigationByNavigationIdStatus422
 					| GetApiZonesByZoneIdNavigationByNavigationIdStatus500
@@ -11197,6 +11233,7 @@ export function useGetApiZonesByZoneIdNavigationByNavigationId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus403
 			| GetApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| GetApiZonesByZoneIdNavigationByNavigationIdStatus422
 			| GetApiZonesByZoneIdNavigationByNavigationIdStatus500
@@ -11662,6 +11699,7 @@ export function postApiZonesMutationOptions<TContext = unknown>(
 		PostApiZonesStatus200,
 		ResponseErrorConfig<
 			| PostApiZonesStatus400
+			| PostApiZonesStatus403
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
 			| PostApiZonesStatus429
@@ -11688,6 +11726,7 @@ export function usePostApiZones<TContext>(
 			PostApiZonesStatus200,
 			ResponseErrorConfig<
 				| PostApiZonesStatus400
+				| PostApiZonesStatus403
 				| PostApiZonesStatus404
 				| PostApiZonesStatus422
 				| PostApiZonesStatus429
@@ -11707,6 +11746,7 @@ export function usePostApiZones<TContext>(
 		PostApiZonesStatus200,
 		ResponseErrorConfig<
 			| PostApiZonesStatus400
+			| PostApiZonesStatus403
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
 			| PostApiZonesStatus429
@@ -11720,6 +11760,7 @@ export function usePostApiZones<TContext>(
 		PostApiZonesStatus200,
 		ResponseErrorConfig<
 			| PostApiZonesStatus400
+			| PostApiZonesStatus403
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
 			| PostApiZonesStatus429
@@ -11738,6 +11779,7 @@ export function usePostApiZones<TContext>(
 		PostApiZonesStatus200,
 		ResponseErrorConfig<
 			| PostApiZonesStatus400
+			| PostApiZonesStatus403
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
 			| PostApiZonesStatus429
@@ -13011,6 +13053,104 @@ export function usePatchApiUsersMe<TContext>(
 		PatchApiUsersMeOptions,
 		TContext
 	>;
+}
+
+export const listCurrentUserStudioContentQueryKey = ({
+	query,
+}: Omit<ListCurrentUserStudioContentOptions, "headers">) =>
+	[{ url: "/api/users/me/studio" }, ...(query ? [query] : [])] as const;
+
+type ListCurrentUserStudioContentQueryKey = ReturnType<typeof listCurrentUserStudioContentQueryKey>;
+
+export function listCurrentUserStudioContentQueryOptions(
+	{ query }: ListCurrentUserStudioContentOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listCurrentUserStudioContentQueryKey({ query });
+	return queryOptions<
+		ListCurrentUserStudioContentStatus200,
+		ResponseErrorConfig<
+			| ListCurrentUserStudioContentStatus403
+			| ListCurrentUserStudioContentStatus422
+			| ListCurrentUserStudioContentStatus429
+			| ListCurrentUserStudioContentStatus500
+		>,
+		ListCurrentUserStudioContentStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listCurrentUserStudioContent({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List current user's created Studio content
+ * {@link /api/users/me/studio}
+ */
+export function useListCurrentUserStudioContent<
+	TData = ListCurrentUserStudioContentStatus200,
+	TQueryData = ListCurrentUserStudioContentStatus200,
+	TQueryKey extends QueryKey = ListCurrentUserStudioContentQueryKey,
+>(
+	{
+		query,
+	}: {
+		query:
+			| ListCurrentUserStudioContentOptions["query"]
+			| (() => ListCurrentUserStudioContentOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListCurrentUserStudioContentStatus200,
+				ResponseErrorConfig<
+					| ListCurrentUserStudioContentStatus403
+					| ListCurrentUserStudioContentStatus422
+					| ListCurrentUserStudioContentStatus429
+					| ListCurrentUserStudioContentStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? listCurrentUserStudioContentQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listCurrentUserStudioContentQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListCurrentUserStudioContentStatus403
+			| ListCurrentUserStudioContentStatus422
+			| ListCurrentUserStudioContentStatus429
+			| ListCurrentUserStudioContentStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const getApiUsersMePreferencesQueryKey = () =>
@@ -27643,6 +27783,7 @@ export function postApiRealmsMutationOptions<TContext = unknown>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
+			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -27669,6 +27810,7 @@ export function usePostApiRealms<TContext>(
 			PostApiRealmsStatus200,
 			ResponseErrorConfig<
 				| PostApiRealmsStatus400
+				| PostApiRealmsStatus403
 				| PostApiRealmsStatus404
 				| PostApiRealmsStatus422
 				| PostApiRealmsStatus429
@@ -27688,6 +27830,7 @@ export function usePostApiRealms<TContext>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
+			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -27701,6 +27844,7 @@ export function usePostApiRealms<TContext>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
+			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -27719,6 +27863,7 @@ export function usePostApiRealms<TContext>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
+			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -31304,6 +31449,7 @@ export function postApiSearchZonesByZoneIdFeatureExecuteMutationOptions<TContext
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -31335,6 +31481,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 			PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
+				| PostApiSearchZonesByZoneIdFeatureExecuteStatus403
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 				| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -31357,6 +31504,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -31370,6 +31518,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -31388,6 +31537,7 @@ export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
 		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
@@ -31620,6 +31770,7 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOpt
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -31651,6 +31802,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 			PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
+				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -31674,6 +31826,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -31687,6 +31840,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -31705,6 +31859,7 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
@@ -31726,6 +31881,7 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMu
 		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
@@ -31757,6 +31913,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
@@ -31781,6 +31938,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
 				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
@@ -31794,6 +31952,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
@@ -31812,6 +31971,7 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
@@ -31833,6 +31993,7 @@ export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOpt
 		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
@@ -31864,6 +32025,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 			PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
 				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
@@ -31887,6 +32049,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
@@ -31900,6 +32063,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
@@ -31918,6 +32082,7 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus403
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
 			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500

@@ -3,6 +3,7 @@ import { getLocaleContent } from "./content/locales";
 import { ABOUT_LOCALES, DEFAULT_LOCALE, type AboutLocale } from "./i18n/locales";
 import {
 	getAlternatePaths,
+	getContactPath,
 	getHomePath,
 	getProductPath,
 	getProductsPath,
@@ -62,6 +63,20 @@ export function createProductsPageData(locale: AboutLocale): AboutPageData {
 	};
 }
 
+export function createContactPageData(locale: AboutLocale): AboutPageData {
+	const content = getLocaleContent(locale);
+	return {
+		kind: "contact",
+		locale,
+		metadata: makeMetadata(
+			content.contact.meta.title,
+			content.contact.meta.description,
+			getContactPath(locale),
+			"contact",
+		),
+	};
+}
+
 export function createProductPageData(
 	locale: AboutLocale,
 	productId: ProductId,
@@ -114,6 +129,7 @@ export function createErrorPageData(statusCode: 404 | 500 = 404): AboutPageData 
 
 export const getPrerenderHomeUrls = () => ABOUT_LOCALES.map(getHomePath);
 export const getPrerenderProductsUrls = () => ABOUT_LOCALES.map(getProductsPath);
+export const getPrerenderContactUrls = () => ABOUT_LOCALES.map(getContactPath);
 export const getPrerenderProductUrls = () =>
 	ABOUT_LOCALES.flatMap((locale) =>
 		PRODUCT_DEFINITIONS.map((product) => getProductPath(locale, product.slug)),

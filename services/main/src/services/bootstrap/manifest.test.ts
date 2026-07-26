@@ -61,7 +61,13 @@ describe("database bootstrap manifest", () => {
 		expect(OfficialProfileManifest).not.toContain(BootstrapSuperAdminProfile);
 		expect(BootstrapSuperAdminProfile.email).toBe("admin@rezics.com");
 		expect(BootstrapSuperAdminProfile.capabilities).toEqual(
-			expect.arrayContaining(["platform.grants.manage", "unit.edit"]),
+			expect.arrayContaining([
+				"platform.grants.manage",
+				"unit.edit",
+				"unit.content_structure.preview",
+				"unit.realm.preview",
+				"unit.zone.preview",
+			]),
 		);
 		expect(new Set(BootstrapSuperAdminProfile.capabilities).size).toBe(
 			BootstrapSuperAdminProfile.capabilities.length,

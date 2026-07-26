@@ -2,16 +2,59 @@ import { type Static, t } from "elysia";
 import { Value } from "@sinclair/typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
-import { ContentRatingValues } from "../../database/schema/contract-values";
+import {
+	ContentRatingValues,
+	UnitStatusValues,
+	UnitVisibilityValues,
+} from "../../database/schema/contract-values";
 import {
 	AvatarInput,
 	ContentLanguage,
+	DateTime,
 	FractionalPosition,
 	PublicationLicense,
 	StoredUiLocale,
 	UnitKind,
 	Uuid,
 } from "../schema";
+
+export const StudioSectionValues = [
+	"book",
+	"software",
+	"media",
+	"entity",
+	"tag",
+	"realm",
+	"post",
+	"collection",
+	"review",
+	"poll",
+] as const;
+export const StudioSection = t.UnionEnum(StudioSectionValues);
+export type StudioSection = Static<typeof StudioSection>;
+
+export const StudioContentListQuery = t.Object(
+	{
+		section: StudioSection,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+export type StudioContentListQuery = Static<typeof StudioContentListQuery>;
+
+export const StudioContentListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			section: StudioSection,
+			title: t.Nullable(t.String()),
+			status: t.UnionEnum(UnitStatusValues),
+			visibility: t.UnionEnum(UnitVisibilityValues),
+			createdAt: DateTime,
+			updatedAt: DateTime,
+		}),
+	),
+});
 
 export const CollectionConfigV1 = t.Object(
 	{

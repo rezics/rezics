@@ -38593,6 +38593,8 @@
 											"entity.associations.override",
 											"unit.edit",
 											"unit.content_structure.preview",
+											"unit.realm.preview",
+											"unit.zone.preview",
 											"unit.ownership.transfer",
 											"unit.slug.manage",
 											"unit.slug.namespace.manage",
@@ -39749,9 +39751,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -40305,6 +40308,33 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -41203,9 +41233,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -42391,6 +42422,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -42611,6 +42669,33 @@
 												{ "type": "null" }
 											]
 										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -42884,9 +42969,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -43141,6 +43227,33 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -43420,9 +43533,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -43566,9 +43680,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -43895,9 +44010,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44073,9 +44189,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44297,6 +44414,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -44447,9 +44591,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44588,6 +44733,33 @@
 										"latestRevisionId": { "format": "uuid", "type": "string" },
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -44753,9 +44925,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -44910,9 +45083,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -45174,9 +45348,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -45293,9 +45468,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -45859,6 +46035,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -46274,9 +46477,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -46566,9 +46770,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -46688,9 +46893,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -48436,6 +48642,8 @@
 															"entity.associations.override",
 															"unit.edit",
 															"unit.content_structure.preview",
+															"unit.realm.preview",
+															"unit.zone.preview",
 															"unit.ownership.transfer",
 															"unit.slug.manage",
 															"unit.slug.namespace.manage",
@@ -49475,6 +49683,203 @@
 				},
 				"operationId": "patchApiUsersMe",
 				"x-rezics-policy-operation-id": "patchApiUsersMe"
+			}
+		},
+		"/api/users/me/studio": {
+			"get": {
+				"operationId": "listCurrentUserStudioContent",
+				"summary": "List current user's created Studio content",
+				"tags": ["Users", "Studio"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "section",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"default": "book",
+							"type": "string",
+							"enum": [
+								"book",
+								"software",
+								"media",
+								"entity",
+								"tag",
+								"realm",
+								"post",
+								"collection",
+								"review",
+								"poll"
+							]
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"section",
+													"title",
+													"status",
+													"visibility",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"section": {
+														"default": "book",
+														"type": "string",
+														"enum": [
+															"book",
+															"software",
+															"media",
+															"entity",
+															"tag",
+															"realm",
+															"post",
+															"collection",
+															"review",
+															"poll"
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"status": {
+														"default": "draft",
+														"type": "string",
+														"enum": ["draft", "published", "archived"]
+													},
+													"visibility": {
+														"default": "public",
+														"type": "string",
+														"enum": ["public", "unlisted", "private"]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"x-rezics-policy-operation-id": "getApiUsersMeStudio"
 			}
 		},
 		"/api/users/me/preferences": {
@@ -51883,6 +52288,8 @@
 													"entity.associations.override",
 													"unit.edit",
 													"unit.content_structure.preview",
+													"unit.realm.preview",
+													"unit.zone.preview",
 													"unit.ownership.transfer",
 													"unit.slug.manage",
 													"unit.slug.namespace.manage",
@@ -52026,6 +52433,8 @@
 																		"entity.associations.override",
 																		"unit.edit",
 																		"unit.content_structure.preview",
+																		"unit.realm.preview",
+																		"unit.zone.preview",
 																		"unit.ownership.transfer",
 																		"unit.slug.manage",
 																		"unit.slug.namespace.manage",
@@ -52175,6 +52584,8 @@
 																		"entity.associations.override",
 																		"unit.edit",
 																		"unit.content_structure.preview",
+																		"unit.realm.preview",
+																		"unit.zone.preview",
 																		"unit.ownership.transfer",
 																		"unit.slug.manage",
 																		"unit.slug.namespace.manage",
@@ -52280,7 +52691,7 @@
 								"required": ["capabilities", "expiresAt"],
 								"properties": {
 									"capabilities": {
-										"maxItems": 18,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -52290,6 +52701,8 @@
 												"entity.associations.override",
 												"unit.edit",
 												"unit.content_structure.preview",
+												"unit.realm.preview",
+												"unit.zone.preview",
 												"unit.ownership.transfer",
 												"unit.slug.manage",
 												"unit.slug.namespace.manage",
@@ -52359,6 +52772,8 @@
 															"entity.associations.override",
 															"unit.edit",
 															"unit.content_structure.preview",
+															"unit.realm.preview",
+															"unit.zone.preview",
 															"unit.ownership.transfer",
 															"unit.slug.manage",
 															"unit.slug.namespace.manage",
@@ -107354,6 +107769,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -129239,9 +129681,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -129386,9 +129829,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -132635,6 +133079,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -132836,9 +133307,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -132985,9 +133457,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
 													"enum": [
+														"PlatformCapabilityRequired",
 														"UnitPermissionForbidden",
 														"UnitProtected"
 													]
@@ -136247,6 +136720,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -139496,6 +139996,33 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
 							}
 						}
 					},
@@ -146503,6 +147030,33 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
 							}
 						}
 					},

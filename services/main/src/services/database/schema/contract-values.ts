@@ -397,10 +397,33 @@ export const AssociationProposalResolutionValues = ["accepted", "declined", "can
  */
 export const ContentStructurePreviewCapability = "unit.content_structure.preview" as const;
 
+/**
+ * Grants access to the unreleased Realm creation workflow.
+ *
+ * @alpha
+ * @remarks
+ * Public Realm reading remains released. This capability protects only the
+ * unfinished authoring entry point and its server-side creation operation.
+ */
+export const RealmPreviewCapability = "unit.realm.preview" as const;
+
+/**
+ * Grants access to the unreleased Zone product and Zone-owned APIs.
+ *
+ * @alpha
+ * @remarks
+ * This is a server-enforced product preview boundary. Unit ownership or public
+ * visibility does not replace this platform capability while Zone is in
+ * development.
+ */
+export const ZonePreviewCapability = "unit.zone.preview" as const;
+
 export const PlatformCapabilityValues = [
 	"entity.associations.override",
 	"unit.edit",
 	ContentStructurePreviewCapability,
+	RealmPreviewCapability,
+	ZonePreviewCapability,
 	"unit.ownership.transfer",
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",

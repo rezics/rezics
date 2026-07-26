@@ -1239,3 +1239,121 @@ body.has-open-drawer {
 		transition: none;
 	}
 }
+
+.contact-page {
+	min-height: clamp(38rem, 72vh, 54rem);
+	padding: clamp(5rem, 11vw, 9rem) 0;
+}
+
+.contact-page__inner {
+	display: grid;
+	gap: clamp(3rem, 7vw, 6rem);
+	grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
+	align-items: start;
+}
+
+.contact-page__header {
+	max-width: 46rem;
+}
+
+.contact-page__header h1 {
+	max-width: 14ch;
+	margin: 1rem 0 1.5rem;
+	font-family: var(--font-serif);
+	font-size: clamp(2.8rem, 7vw, 5.8rem);
+	font-weight: 500;
+	letter-spacing: -0.045em;
+	line-height: 0.98;
+}
+
+.contact-page__header > p:last-child {
+	max-width: 42rem;
+	margin: 0;
+	color: var(--colors-text-secondary);
+	font-size: clamp(1rem, 1.5vw, 1.15rem);
+	line-height: 1.75;
+}
+
+.contact-card {
+	display: grid;
+	gap: 1.5rem;
+	padding: clamp(1.5rem, 4vw, 2.5rem);
+	border: 1px solid var(--colors-border-whisper);
+	background: var(--colors-surface-base);
+	box-shadow: var(--shadow-modal);
+}
+
+.contact-card__avatar {
+	display: block;
+	width: 6.5rem;
+	height: 6.5rem;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.contact-card__identity h2 {
+	margin: 0;
+	font-size: 1.35rem;
+	font-weight: 600;
+}
+
+.contact-card__identity p {
+	margin: 0.35rem 0 0;
+	color: var(--colors-text-secondary);
+	font-size: 0.92rem;
+}
+
+.contact-card__links {
+	display: grid;
+	gap: 1rem;
+	margin: 0;
+	padding-top: 1.25rem;
+	border-top: 1px solid var(--colors-border-whisper);
+}
+
+.contact-card__links div {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.contact-card__links dt {
+	color: var(--colors-text-tertiary);
+	font-size: 0.75rem;
+	font-weight: 650;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.contact-card__links dd {
+	margin: 0;
+}
+
+.contact-card__links a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--colors-text-primary);
+	font-weight: 550;
+	text-decoration-color: var(--colors-border-defined);
+	text-underline-offset: 0.25rem;
+}
+
+.contact-card__links a:hover {
+	text-decoration-color: currentColor;
+}
+
+.contact-card__links svg {
+	width: 1rem;
+	height: 1rem;
+	fill: currentColor;
+}
+
+@media (max-width: 760px) {
+	.contact-page__inner {
+		grid-template-columns: 1fr;
+	}
+
+	.contact-page__header h1 {
+		max-width: 16ch;
+	}
+}

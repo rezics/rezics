@@ -1,10 +1,15 @@
 import { getLocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
-import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
+import {
+	getContactPath,
+	getHomePath,
+	getProductPath,
+	getProductsPath,
+} from "../../i18n/productPaths";
 
 export function GlobalFooter({ locale }: { locale: AboutLocale }) {
 	const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
-	const { common: copy, products } = getLocaleContent(locale);
+	const { common: copy, contact, products } = getLocaleContent(locale);
 	const names = products.common.names;
 	return (
 		<footer className="global-footer">
@@ -50,6 +55,7 @@ export function GlobalFooter({ locale }: { locale: AboutLocale }) {
 						<a href="https://www.rezics.com" target="_blank" rel="noreferrer">
 							rezics.com
 						</a>
+						<a href={getContactPath(locale)}>{contact.eyebrow}</a>
 					</nav>
 				</div>
 				<div className="footer-meta">

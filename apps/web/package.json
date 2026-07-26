@@ -12,6 +12,7 @@
 		"@rezics/block": "workspace:*",
 		"@rezics/filter": "workspace:*",
 		"@rezics/i18n": "workspace:*",
+		"@rezics/icons": "^0.1.2",
 		"@rezics/license": "workspace:*",
 		"@rezics/openapi-tanstack-query": "workspace:*",
 		"@rezics/portable-text": "workspace:*",

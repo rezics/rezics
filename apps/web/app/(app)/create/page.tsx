@@ -1,1 +1,1 @@
-export { CreateHub as default } from "@/features/create/create-hub";
+export { StudioOverviewPage as default } from "@/features/create/pages/studio-overview-page";

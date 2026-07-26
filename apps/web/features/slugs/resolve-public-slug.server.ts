@@ -110,19 +110,29 @@ export interface ZonePageAddress {
 	readonly slug: string | null;
 }
 
+export type ZonePageAddressResult =
+	| { readonly status: "found"; readonly page: ZonePageAddress }
+	| { readonly status: "forbidden" }
+	| { readonly status: "not-found" };
+
 export async function getZonePageAddressById(
 	zoneId: string,
 	pageId: string,
-): Promise<ZonePageAddress | null> {
-	if (!UuidPattern.test(zoneId) || !UuidPattern.test(pageId)) return null;
+	requestCookie: string | null,
+): Promise<ZonePageAddressResult> {
+	if (!UuidPattern.test(zoneId) || !UuidPattern.test(pageId)) return { status: "not-found" };
 	const response = await fetch(
 		new URL(
 			`/api/zones/${encodeURIComponent(zoneId)}/pages/${encodeURIComponent(pageId)}`,
 			apiOrigin(),
 		),
-		{ cache: "no-store" },
+		{
+			cache: "no-store",
+			headers: requestCookie ? { cookie: requestCookie } : undefined,
+		},
 	);
-	if (response.status === 404) return null;
+	if (response.status === 403) return { status: "forbidden" };
+	if (response.status === 404) return { status: "not-found" };
 	if (!response.ok) throw new Error(`Zone Page API failed with status ${response.status}`);
 	const value = await readJson(response);
 	if (
@@ -135,7 +145,10 @@ export async function getZonePageAddressById(
 		)
 	)
 		throw new Error("Zone Page API returned an invalid address");
-	return { id: pageId, zoneId, slug: value.slug };
+	return {
+		status: "found",
+		page: { id: pageId, zoneId, slug: value.slug },
+	};
 }
 
 export async function getPublicSlugHrefByUnitId(
