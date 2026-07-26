@@ -44,11 +44,11 @@ import {
 	InternalError,
 	isApiError,
 	MalformedRequestBody,
-	ValidationError,
 } from "./errors";
 import { toUnitVariantConstraintError } from "../units/variants";
 import { toPostTargetingConstraintError } from "../posts/targeting";
 import { toTagStructureConstraintError } from "../tag-structures/service";
+import { classifyValidationFailure } from "./validation-failure";
 
 const { logger } = getActiveObservability();
 
@@ -101,8 +101,27 @@ export default new Elysia()
 			);
 		}
 		if (code === "VALIDATION") {
-			const validationError = new ValidationError();
-			return status(validationError.status, toApiErrorBody(validationError, requestId));
+			const failure = classifyValidationFailure(error);
+			const details = {
+				eventName:
+					failure.kind === "response"
+						? "http.response.validation_failed"
+						: "http.request.validation_failed",
+				errorCode: failure.publicError._tag,
+				request: { method: request.method, route: route || "unmatched" },
+				attributes: {
+					requestId,
+					validationIssues: failure.issues,
+					validationSource: failure.source,
+				},
+			};
+			if (failure.kind === "response")
+				logger.error("Response validation failed", { ...details, error });
+			else logger.info("Request validation failed", details);
+			return status(
+				failure.publicError.status,
+				toApiErrorBody(failure.publicError, requestId),
+			);
 		}
 		logger.error("Request failed", {
 			eventName: "http.request.failed",
