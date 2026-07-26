@@ -232,9 +232,7 @@ export async function verifySeedSearch(): Promise<void> {
 				contexts: [{ kind: "zone", zoneId: officialZone.id }],
 				injections: [],
 				state: {
-					mode: "basic",
 					filter: { search: { query: fixture.en } },
-					values: [],
 					pageSize: 5,
 				},
 			},

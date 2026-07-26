@@ -40,22 +40,6 @@ export function PostList({
 					filter: { field: "kind", operator: "equals", value: "post" },
 				},
 			},
-			...(realmId
-				? [
-						{
-							source: "realm" as const,
-							removable: false,
-							value: {
-								controlKey: "realm",
-								filter: {
-									field: "realm" as const,
-									operator: "equals" as const,
-									value: realmId,
-								},
-							},
-						},
-					]
-				: []),
 			...(subjectId
 				? [
 						{
@@ -73,7 +57,7 @@ export function PostList({
 					]
 				: []),
 		],
-		[realmId, subjectId],
+		[subjectId],
 	);
 
 	return (
@@ -85,13 +69,11 @@ export function PostList({
 			}
 			infinite={infinite}
 			request={{
-				contexts: [],
+				contexts: realmId ? [{ kind: "realm", realmId }] : [],
 				injections,
 				state: {
-					mode: "basic",
 					pageSize: 20,
 					sort: "createdAt:desc",
-					values: [],
 				},
 			}}
 			requestedRealmId={realmId}

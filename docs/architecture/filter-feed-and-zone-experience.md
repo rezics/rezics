@@ -65,8 +65,9 @@ The shared toolbar keeps its product-wide order fixed as sort, schema-selected
 quick filters, then the remaining Filter action. Schema controls capabilities,
 option order, and defaults; it does not duplicate this invariant layout in
 every document.
-Advanced Search exposes the trusted `kind` control under the user-facing
-“Content type” label.
+The frontend-only Advanced Search builder exposes the trusted `kind` control
+under the user-facing “Content type” label and emits the same
+`SearchControlExpression` contract as quick filters.
 
 ## Required Zone experience
 

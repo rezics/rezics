@@ -79,12 +79,16 @@ function expressionClauses(
 			: [];
 }
 
+/**
+ * Projects the unified Search expression into quick-filter controls and the
+ * advanced builder. "Advanced" is only a frontend editing affordance; both
+ * editors emit the same engine-independent SearchControlExpression contract.
+ */
 function classifyInitialState(state: SharedSearchQueryState | undefined): {
 	readonly quick: readonly SearchControlValue[];
 	readonly advanced?: SearchControlExpression;
 } {
 	if (!state) return { quick: [] };
-	if (state.mode === "basic") return { quick: state.values };
 	const quick: SearchControlValue[] = [];
 	const advanced: SearchControlExpression[] = [];
 	for (const clause of expressionClauses(state.expression)) {
@@ -149,9 +153,7 @@ function stateContainsSelection(
 	state: SharedSearchQueryState,
 	selection: SharedSearchQuerySelection,
 ): boolean {
-	return state.mode === "advanced"
-		? expressionContainsSelection(state.expression, selection)
-		: state.values.some((value) => expressionContainsSelection(value, selection));
+	return expressionContainsSelection(state.expression, selection);
 }
 
 function summarizeExpression(
@@ -374,7 +376,7 @@ export function SearchFeature({
 	const sort = activeSortOverride ?? defaultSearchSort(sortConfiguration, query);
 
 	const controlByField = (field: SearchField) =>
-		controls.find((control) => control.field === field && control.modes.includes("advanced"));
+		controls.find((control) => control.field === field);
 	const categoryControl = controlByField("category");
 	const languageControl = controlByField("language");
 	const tagControl = controlByField("tag");
@@ -497,7 +499,6 @@ export function SearchFeature({
 		if (nextAdvanced) clauses.push(nextAdvanced);
 		const filter = withUnitFilterSearch(initialState?.filter, query);
 		return {
-			mode: "advanced",
 			...(filter ? { filter } : {}),
 			expression: expressionFromClauses(clauses),
 			...(nextSort ? { sort: nextSort } : {}),
@@ -548,18 +549,10 @@ export function SearchFeature({
 		setSortOverride(undefined);
 		onExecute({
 			injections: [...injections],
-			state:
-				document.modes.default === "basic"
-					? {
-							mode: "basic",
-							...(filter ? { filter } : {}),
-							values: languageDefault ? [languageDefault] : [],
-						}
-					: {
-							mode: "advanced",
-							...(filter ? { filter } : {}),
-							...(languageDefault ? { expression: languageDefault } : {}),
-						},
+			state: {
+				...(filter ? { filter } : {}),
+				...(languageDefault ? { expression: languageDefault } : {}),
+			},
 		});
 	}
 

@@ -34,10 +34,6 @@ export const SearchCategoryValues = [
 export type SearchCategory = (typeof SearchCategoryValues)[number];
 export const SearchCategory = stringEnum(SearchCategoryValues);
 
-export const SearchModeValues = ["basic", "advanced"] as const;
-export type SearchMode = (typeof SearchModeValues)[number];
-export const SearchMode = stringEnum(SearchModeValues);
-
 export const SearchSortValues = [
 	"best",
 	"relevance",
@@ -307,7 +303,6 @@ export const SearchControl = Type.Object(
 			Type.Literal("value-range"),
 			Type.Literal("realm-tag-vote"),
 		]),
-		modes: Type.Array(SearchMode, { minItems: 1, maxItems: 2 }),
 		operators: Type.Array(SearchOperator, { minItems: 1, maxItems: 8 }),
 		optionSource: Type.Optional(SearchOptionSource),
 		optionPolicy: Type.Optional(SearchOptionPolicy),

@@ -105,8 +105,10 @@ restore, and undo never call Meilisearch.
 
 The search page exposes one everyday search surface: keywords, a small set of promoted filters,
 and a link-style advanced-filter action. Advanced conditions are edited as an explicit boolean
-expression and are rendered back on the main page as a read-only summary. Result groups remain
-separate so category identity and category-specific totals are not lost during presentation.
+expression and are rendered back on the main page as a read-only summary. Advanced editing is
+strictly a frontend affordance: quick filters and the advanced builder submit the same
+`SearchControlExpression`, and the server has no search mode. Result groups remain separate so
+category identity and category-specific totals are not lost during presentation.
 
 Shared queries are immutable, cursor-free `SharedSearchQueryDocument` values stored in
 `shared_search_query`. PostgreSQL 18 generates the public bearer identifier with native

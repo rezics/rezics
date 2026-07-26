@@ -6,14 +6,12 @@ import {
 	SearchControlPredicate,
 	type SearchCategory as SearchCategoryValue,
 	type SearchField as SearchFieldValue,
-	type SearchMode as SearchModeValue,
 	type SearchScope as SearchScopeValue,
 	type SearchSort as SearchSortValue,
 } from "@rezics/filter";
 
 type SearchCategory = SearchCategoryValue;
 type SearchField = SearchFieldValue;
-type SearchMode = SearchModeValue;
 type SearchScope = SearchScopeValue;
 type SearchSort = SearchSortValue;
 
@@ -71,7 +69,6 @@ export function combineSearchExpressions(
 export interface CompiledSearchRequest {
 	readonly scope: SearchScope;
 	readonly categories: readonly SearchCategory[];
-	readonly mode: SearchMode;
 	readonly query: string;
 	readonly constraints: readonly SearchControlPredicate[];
 	readonly searchExpression?: SearchExpression;

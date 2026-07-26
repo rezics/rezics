@@ -15,7 +15,6 @@ import {
 	type SearchFeatureSurface,
 	type SearchField,
 	type SearchControlPredicate,
-	type SearchMode,
 	type SearchScalar,
 	type SearchSort,
 	type SearchTemplateId,
@@ -241,8 +240,6 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 			throw new InvalidSearch(
 				`Search control ${control.key} does not apply to its categories`,
 			);
-		if (!control.modes.every((mode) => definition.modes.includes(mode)))
-			throw new InvalidSearch(`Search control ${control.key} uses an unsupported mode`);
 		if (control.optionPolicy && control.optionPolicy.kind !== "all")
 			for (const value of control.optionPolicy.values) validateScalar(control.field, value);
 	}
@@ -260,13 +257,11 @@ function defaultControl(
 	field: SearchField,
 	template: SearchTemplateDefinition,
 ): SearchDocumentControl {
-	const definition = fieldDefinition(field);
 	return {
 		key: field,
 		field,
 		enabled: true,
 		disclosure: template.visible.has(field) ? "visible" : "hidden",
-		modes: [...definition.modes],
 	};
 }
 
@@ -283,7 +278,6 @@ export function createDefaultSearchDocument(templateId: SearchTemplateId): Searc
 		version: 1,
 		template: { id: template.id, version: 1 },
 		categories: [...template.categories],
-		modes: { available: ["basic", "advanced"], default: "basic" },
 		query: { enabled: true },
 		defaults: [],
 		controls,
@@ -344,7 +338,6 @@ export function resolveSearchDocument(documentValue: unknown) {
 				key: control.key,
 				field: control.field,
 				component: componentFor(definition),
-				modes: [...control.modes],
 				operators: [...definition.operators],
 				...(optionSourceFor(control.field, definition)
 					? { optionSource: optionSourceFor(control.field, definition) }
@@ -360,7 +353,7 @@ export function resolveSearchDocument(documentValue: unknown) {
 		});
 	const controlByKey = new Map(controls.map((control) => [control.key, control]));
 	for (const value of document.defaults)
-		validateControlValue(value, controlByKey.get(value.controlKey), document.modes.default);
+		validateControlValue(value, controlByKey.get(value.controlKey));
 	return { document, controls } as const;
 }
 
@@ -429,13 +422,10 @@ function validateFilterValue(filter: SearchControlPredicate): void {
 function validateControlValue(
 	value: SearchControlValue,
 	control: ResolvedSearchControl | undefined,
-	mode: SearchMode,
 ): void {
 	if (!control) throw new InvalidSearch(`Search control ${value.controlKey} is unavailable`);
 	if (control.field !== value.filter.field)
 		throw new InvalidSearch(`Search control ${control.key} field does not match its value`);
-	if (!control.modes.includes(mode))
-		throw new InvalidSearch(`Search control ${control.key} is unavailable in ${mode} mode`);
 	if (!control.operators.includes(value.filter.operator))
 		throw new InvalidSearch(`Search control ${control.key} does not allow this operator`);
 	validateFilterValue(value.filter);
@@ -478,21 +468,20 @@ function normalizeFilterExpression(filter: SearchControlPredicate): SearchExpres
 function unwrapExpression(
 	expression: SearchControlExpression,
 	controls: ReadonlyMap<string, ResolvedSearchControl>,
-	mode: SearchMode,
 	used: Set<string>,
 ): SearchExpression {
 	if ("controlKey" in expression) {
-		validateControlValue(expression, controls.get(expression.controlKey), mode);
+		validateControlValue(expression, controls.get(expression.controlKey));
 		used.add(expression.controlKey);
 		return normalizeFilterExpression(expression.filter);
 	}
 	if (expression.operator === "not")
 		return {
 			operator: "not",
-			clause: unwrapExpression(expression.clause, controls, mode, used),
+			clause: unwrapExpression(expression.clause, controls, used),
 		};
 	const clauses = expression.clauses
-		.map((clause) => unwrapExpression(clause, controls, mode, used))
+		.map((clause) => unwrapExpression(clause, controls, used))
 		.flatMap((clause) =>
 			!("field" in clause) && clause.operator === expression.operator
 				? clause.clauses
@@ -587,9 +576,6 @@ export function compileSearchFeatureInput(
 	const template = validateTemplateDocument(input.document);
 	const resolved = resolveSearchDocument(input.document);
 	const controls = new Map(resolved.controls.map((control) => [control.key, control]));
-	const mode = input.state.mode;
-	if (!input.document.modes.available.includes(mode))
-		throw new InvalidSearch(`Search mode ${mode} is unavailable`);
 	const query = unitFilterSearchQuery(input.state.filter);
 	if (!input.document.query.enabled && query)
 		throw new InvalidSearch("This Search document does not accept a query");
@@ -607,43 +593,30 @@ export function compileSearchFeatureInput(
 
 	const baseline = new Map<string, SearchControlValue>();
 	for (const value of input.document.defaults) baseline.set(value.controlKey, value);
-	// Injections are composed constraints, not editable defaults. Keeping them
-	// separate prevents state from replacing link/tag/Realm context and permits
-	// repeated tag injections to mean an intersection.
+	// Link and Tag injections are composed constraints, not editable defaults.
+	// Keeping them separate prevents state from replacing them and permits
+	// repeated Tag injections to mean an intersection. Server-established
+	// contexts, including Realm scope, are composed separately below.
 	const injected = input.injections.map((injection) => injection.value);
 	const used = new Set<string>();
-	let searchExpression: SearchExpression | undefined;
-	if (mode === "basic") {
-		for (const value of input.state.values) baseline.set(value.controlKey, value);
-		const values = [...injected, ...baseline.values()];
-		for (const value of values) {
-			validateControlValue(value, controls.get(value.controlKey), mode);
-			used.add(value.controlKey);
-		}
-		searchExpression = combineSearchExpressions(
-			"all",
-			values.map((value) => normalizeFilterExpression(value.filter)),
-		);
-	} else {
-		searchExpression = input.state.expression
-			? unwrapExpression(input.state.expression, controls, mode, used)
-			: undefined;
-		const defaults = [
-			...injected,
-			...[...baseline.values()].filter((value) => !used.has(value.controlKey)),
-		];
-		for (const value of defaults) {
-			validateControlValue(value, controls.get(value.controlKey), mode);
-			used.add(value.controlKey);
-		}
-		if (defaults.length)
-			searchExpression = combineSearchExpressions("all", [
-				...defaults.map((value) => normalizeFilterExpression(value.filter)),
-				...(searchExpression ? [searchExpression] : []),
-			]);
+	let searchExpression = input.state.expression
+		? unwrapExpression(input.state.expression, controls, used)
+		: undefined;
+	const defaults = [
+		...injected,
+		...[...baseline.values()].filter((value) => !used.has(value.controlKey)),
+	];
+	for (const value of defaults) {
+		validateControlValue(value, controls.get(value.controlKey));
+		used.add(value.controlKey);
 	}
+	if (defaults.length)
+		searchExpression = combineSearchExpressions("all", [
+			...defaults.map((value) => normalizeFilterExpression(value.filter)),
+			...(searchExpression ? [searchExpression] : []),
+		]);
 	for (const control of resolved.controls)
-		if (control.required && control.modes.includes(mode) && !used.has(control.key))
+		if (control.required && !used.has(control.key))
 			throw new InvalidSearch(`Required Search control ${control.key} is missing`);
 
 	const context = scopeForContexts(input.contexts);
@@ -669,7 +642,6 @@ export function compileSearchFeatureInput(
 		request: {
 			scope: context.scope,
 			categories: input.document.categories,
-			mode,
 			query,
 			constraints: [...template.constraints, ...context.contextFilters],
 			searchExpression,

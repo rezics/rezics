@@ -2740,7 +2740,7 @@ async function seedCoverageContracts(
 		document: {
 			version: 1,
 			template: "global",
-			state: { mode: "basic", values: [] },
+			state: {},
 			selections: [],
 		},
 	});

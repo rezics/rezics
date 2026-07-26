@@ -541,24 +541,16 @@ function ZoneSearchFeature({
 	const rawDefinition = feature.kind === "template" ? template.data : zone.data?.definition;
 	const initialState = useMemo<SearchFeatureRequest["state"] | undefined>(() => {
 		if (!rawDefinition) return undefined;
-		const definition = parseSearchFeatureDefinition(rawDefinition);
 		const expression =
 			initialValues.length === 0
 				? undefined
 				: initialValues.length === 1
 					? initialValues[0]
 					: { operator: "all" as const, clauses: [...initialValues] };
-		return definition.document.modes.default === "basic"
-			? {
-					mode: "basic",
-					values: [...initialValues],
-					...(initialPageSize ? { pageSize: initialPageSize } : {}),
-				}
-			: {
-					mode: "advanced",
-					...(expression ? { expression } : {}),
-					...(initialPageSize ? { pageSize: initialPageSize } : {}),
-				};
+		return {
+			...(expression ? { expression } : {}),
+			...(initialPageSize ? { pageSize: initialPageSize } : {}),
+		};
 	}, [initialPageSize, initialValues, rawDefinition]);
 	const autoExecuted = useRef(false);
 	useEffect(() => {

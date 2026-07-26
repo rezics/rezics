@@ -165,10 +165,12 @@ context; Tag links inject refinements into the same input boundary. Contexts, do
 injections, defaults, and user state remain distinct by provenance and are composed by the compiler,
 so browser state cannot replace a fixed context or injected predicate.
 
-Normal and advanced modes and hidden-filter disclosure are renderer concerns over the same query
-engine. Controls retain stable `controlKey` identity, including repeated Tag controls, through UI
-state, compilation, facet results, and canonical input hashing. Search and Feed Blocks store only a
-stable template-or-Zone Search Feature source; Content Structure nodes never embed a query schema.
+Quick filters, the advanced builder, and hidden-filter disclosure are renderer concerns over one
+`SearchControlExpression` contract. “Advanced” names only the frontend editing experience; it never
+selects a backend mode, changes field availability, or changes execution semantics. Controls retain
+stable `controlKey` identity, including repeated Tag controls, through UI state, compilation, facet
+results, and canonical input hashing. Search and Feed Blocks store only a stable template-or-Zone
+Search Feature source; Content Structure nodes never embed a query schema.
 A Feed Block adds presentation settings only and does not persist Feed-owned filter defaults.
 Search owns execution controls, facets, relevance, and the Search Service adapter; it does not own
 a second filtering language. A Search Feature may be presented through the Feed item renderer

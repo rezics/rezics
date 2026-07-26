@@ -103,8 +103,6 @@ export default {
 	resetFilters: "Reset filters",
 	empty: "No matching results.",
 	query: "Keywords",
-	mode: "Search mode",
-	modes: { basic: "Standard", advanced: "Advanced" },
 	advancedCombination: "Combine filters",
 	advancedCombinations: { all: "Match all filters", any: "Match any filter" },
 	filters: "Filters",
@@ -143,7 +141,7 @@ export default {
 	failed: "Search is temporarily unavailable. Please try again later.",
 	appliedContext: "Applied search context",
 	removeAppliedContext: "Remove applied search context",
-	injectionSources: { tag: "Tag", realm: realmTerms.label, link: "Link" },
+	injectionSources: { tag: "Tag", link: "Link" },
 	fields: {
 		category: "Content category",
 		kind: "Content type",

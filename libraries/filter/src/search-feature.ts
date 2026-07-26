@@ -9,7 +9,6 @@ import {
 	SearchControl,
 	SearchControlPredicate,
 	SearchField,
-	SearchMode,
 	SearchOptionPolicy,
 	SearchScope,
 	SearchSort,
@@ -94,7 +93,6 @@ export const SearchDocumentControl = Type.Object(
 		field: SearchField,
 		enabled: Type.Boolean(),
 		disclosure: SearchDisclosure,
-		modes: Type.Array(SearchMode, { minItems: 1, maxItems: 2 }),
 		labelUnitId: Type.Optional(Uuid),
 		optionPolicy: Type.Optional(SearchOptionPolicy),
 		required: Type.Optional(Type.Boolean({ default: false })),
@@ -150,13 +148,6 @@ export const SearchDocument = Type.Object(
 			minItems: 1,
 			maxItems: SearchCategoryValues.length,
 		}),
-		modes: Type.Object(
-			{
-				available: Type.Array(SearchMode, { minItems: 1, maxItems: 2 }),
-				default: SearchMode,
-			},
-			{ additionalProperties: false },
-		),
 		query: Type.Object(
 			{
 				enabled: Type.Boolean(),
@@ -216,7 +207,7 @@ export type SearchFeatureContext = Static<typeof SearchFeatureContext>;
 
 export const SearchInjection = Type.Object(
 	{
-		source: Type.Union([Type.Literal("tag"), Type.Literal("realm"), Type.Literal("link")]),
+		source: Type.Union([Type.Literal("tag"), Type.Literal("link")]),
 		value: SearchControlValue,
 		removable: Type.Boolean({ default: true }),
 	},
@@ -230,56 +221,23 @@ const SearchExecutionBase = {
 	pageSize: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
 };
 
-export const SearchFeatureState = Type.Union(
-	[
-		Type.Object(
-			{
-				...SearchExecutionBase,
-				cursor: Type.Optional(
-					Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" }),
-				),
-				mode: Type.Literal("basic"),
-				values: Type.Array(SearchControlValue, { maxItems: 50 }),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{
-				...SearchExecutionBase,
-				cursor: Type.Optional(
-					Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" }),
-				),
-				mode: Type.Literal("advanced"),
-				expression: Type.Optional(SearchControlExpression),
-			},
-			{ additionalProperties: false },
-		),
-	],
-	{ $id: "SearchFeatureState" },
+export const SearchFeatureState = Type.Object(
+	{
+		...SearchExecutionBase,
+		cursor: Type.Optional(Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
+		expression: Type.Optional(SearchControlExpression),
+	},
+	{ additionalProperties: false, $id: "SearchFeatureState" },
 );
 export type SearchFeatureState = Static<typeof SearchFeatureState>;
 
 /** An immutable, cursor-free Search Feature state suitable for a public share link. */
-export const SharedSearchQueryState = Type.Union(
-	[
-		Type.Object(
-			{
-				...SearchExecutionBase,
-				mode: Type.Literal("basic"),
-				values: Type.Array(SearchControlValue, { maxItems: 50 }),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{
-				...SearchExecutionBase,
-				mode: Type.Literal("advanced"),
-				expression: Type.Optional(SearchControlExpression),
-			},
-			{ additionalProperties: false },
-		),
-	],
-	{ $id: "SharedSearchQueryState" },
+export const SharedSearchQueryState = Type.Object(
+	{
+		...SearchExecutionBase,
+		expression: Type.Optional(SearchControlExpression),
+	},
+	{ additionalProperties: false, $id: "SharedSearchQueryState" },
 );
 export type SharedSearchQueryState = Static<typeof SharedSearchQueryState>;
 
@@ -430,9 +388,6 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 		);
 	}
 	if (!unique(value.categories)) throw new TypeError("Search document categories must be unique");
-	if (!unique(value.modes.available)) throw new TypeError("Search document modes must be unique");
-	if (!value.modes.available.includes(value.modes.default))
-		throw new TypeError("Search document default mode is unavailable");
 	if (!value.query.enabled && value.query.required)
 		throw new TypeError("Disabled Search query cannot be required");
 	if (!unique(value.controls.map((control) => control.key)))
@@ -459,9 +414,6 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 
 	const controls = new Map(value.controls.map((control) => [control.key, control]));
 	for (const [index, control] of value.controls.entries()) {
-		if (!unique(control.modes)) throw new TypeError(`controls[${index}].modes must be unique`);
-		if (!control.modes.every((mode) => value.modes.available.includes(mode)))
-			throw new TypeError(`controls[${index}] uses an unavailable mode`);
 		if (
 			control.optionPolicy &&
 			control.optionPolicy.kind !== "all" &&
@@ -506,16 +458,8 @@ export function assertSearchFeatureInput(value: unknown): asserts value is Searc
 	for (const [index, injection] of value.injections.entries()) {
 		if (injection.source === "tag" && injection.value.filter.field !== "tag")
 			throw new TypeError(`injections[${index}] tag source must target a tag control`);
-		if (injection.source === "realm" && injection.value.filter.field !== "realm")
-			throw new TypeError(`injections[${index}] realm source must target a Realm control`);
 	}
-	if (value.state.mode === "basic") {
-		if (!unique(value.state.values.map((item) => item.controlKey)))
-			throw new TypeError("Basic Search values must target unique controls");
-		value.state.values.forEach((item, index) =>
-			assertControlValue(item, controls, `state.values[${index}]`),
-		);
-	} else if (value.state.expression) {
+	if (value.state.expression) {
 		visitControlExpression(value.state.expression, (item, path) =>
 			assertControlValue(item, controls, path),
 		);
@@ -566,8 +510,7 @@ export function parseSharedSearchQueryDocument(value: unknown): SharedSearchQuer
 		for (const scalar of values)
 			if (typeof scalar === "string") referenced.add(JSON.stringify([filter.field, scalar]));
 	};
-	if (value.state.mode === "basic") value.state.values.forEach(remember);
-	else if (value.state.expression) visitControlExpression(value.state.expression, remember);
+	if (value.state.expression) visitControlExpression(value.state.expression, remember);
 	if (
 		value.selections.some(
 			(selection) => !referenced.has(JSON.stringify([selection.field, selection.value])),

@@ -21,7 +21,7 @@ import {
 	Input,
 } from "@rezics/ui";
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import {
@@ -57,6 +57,13 @@ function selectedScalars(condition: DraftSearchCondition): readonly SearchScalar
 	return condition.values.map((value) => value.value);
 }
 
+/**
+ * Frontend-only editor for composing the unified SearchControlExpression.
+ *
+ * "Advanced" describes the richer UI (nested Boolean groups and operators);
+ * it does not select a backend mode, widen server capabilities, or alter
+ * execution semantics.
+ */
 export function AdvancedSearchBuilder({
 	open,
 	onOpenChange,
@@ -85,10 +92,7 @@ export function AdvancedSearchBuilder({
 	) => void;
 }) {
 	const { t } = useTranslation("search");
-	const advancedControls = useMemo(
-		() => controls.filter((control) => control.modes.includes("advanced")),
-		[controls],
-	);
+	const advancedControls = controls;
 	const [root, setRoot] = useState<DraftSearchGroup>(() =>
 		draftFromExpression(expression, selections),
 	);

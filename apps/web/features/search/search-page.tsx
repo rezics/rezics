@@ -14,6 +14,7 @@ import {
 	type SharedSearchQuerySelection,
 	type SharedSearchQueryState,
 	unitFilterSearchQuery,
+	withUnitFilterSearch,
 } from "@rezics/filter";
 import {
 	type PostApiSearchFeaturesByTemplateExecuteStatus200,
@@ -188,12 +189,9 @@ export function SearchSurface({
 	useEffect(() => {
 		if ((!initialState && !initialQuery?.trim()) || !rawDefinition || initialExecuted.current)
 			return;
-		const definition = parseSearchFeatureDefinition(rawDefinition);
-		const state =
-			initialState ??
-			(definition.document.modes.default === "basic"
-				? { mode: "basic" as const, query: initialQuery, values: [] }
-				: { mode: "advanced" as const, query: initialQuery });
+		const initialFilter = withUnitFilterSearch(undefined, initialQuery ?? "");
+		const state: SearchFeatureState =
+			initialState ?? (initialFilter ? { filter: initialFilter } : {});
 		initialExecuted.current = true;
 		void run({ injections: [...injections], state });
 	}, [initialQuery, initialState, injections, rawDefinition]);

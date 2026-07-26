@@ -103,8 +103,6 @@ export default {
 	resetFilters: "重設篩選",
 	empty: "找不到相符的內容。",
 	query: "關鍵字",
-	mode: "搜尋模式",
-	modes: { basic: "一般", advanced: "進階" },
 	advancedCombination: "篩選條件組合",
 	advancedCombinations: { all: "符合所有條件", any: "符合任一條件" },
 	filters: "篩選",
@@ -142,7 +140,7 @@ export default {
 	failed: "搜尋暫時無法使用，請稍後再試。",
 	appliedContext: "已套用的搜尋條件",
 	removeAppliedContext: "移除已套用的搜尋條件",
-	injectionSources: { tag: "標籤", realm: realmTerms.label, link: "連結" },
+	injectionSources: { tag: "標籤", link: "連結" },
 	fields: {
 		category: "內容類別",
 		kind: "內容類型",

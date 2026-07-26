@@ -20,7 +20,20 @@ describe("Search Feature v1", () => {
 	it.each(SearchTemplateIdValues)("resolves the %s server template", (template) => {
 		const resolved = resolveSearchDocument(createDefaultSearchDocument(template));
 		expect(resolved.document.template.id).toBe(template);
+		expect(resolved.document).not.toHaveProperty("modes");
+		expect(resolved.document.controls.every((control) => !("modes" in control))).toBe(true);
 		expect(resolved.controls.length).toBeGreaterThan(0);
+	});
+
+	it("rejects frontend editor modes at the execution boundary", () => {
+		expect(() =>
+			compileSearchFeatureInput({
+				document: createDefaultSearchDocument("global"),
+				contexts: [],
+				injections: [],
+				state: { mode: "basic", values: [] },
+			}),
+		).toThrow("Invalid Search Feature input v1");
 	});
 
 	it("reports the failing path for a legacy persisted sort contract", () => {
@@ -45,7 +58,7 @@ describe("Search Feature v1", () => {
 				document,
 				contexts: [],
 				injections: [],
-				state: { mode: "basic", values: [] },
+				state: {},
 			});
 			expect(compiled.request.constraints).toEqual([]);
 		},
@@ -53,7 +66,7 @@ describe("Search Feature v1", () => {
 
 	it("uses schema-controlled Search and Feed sorting profiles", () => {
 		const document = createDefaultSearchDocument("global");
-		const emptyState = { mode: "basic" as const, values: [] };
+		const emptyState = {};
 		const textState = {
 			...emptyState,
 			filter: { search: { query: "design" } },
@@ -100,7 +113,7 @@ describe("Search Feature v1", () => {
 			document: createDefaultSearchDocument("realm"),
 			contexts: [],
 			injections: [],
-			state: { mode: "basic", values: [] },
+			state: {},
 		});
 
 		expect(compiled.request.categories).toEqual(["realms"]);
@@ -142,18 +155,15 @@ describe("Search Feature v1", () => {
 				},
 			],
 			state: {
-				mode: "basic",
-				values: [
-					{
-						controlKey: "book-word-count",
-						filter: {
-							field: "book-word-count",
-							operator: "range",
-							lower: 50_000,
-							upper: 150_000,
-						},
+				expression: {
+					controlKey: "book-word-count",
+					filter: {
+						field: "book-word-count",
+						operator: "range",
+						lower: 50_000,
+						upper: 150_000,
 					},
-				],
+				},
 			},
 		});
 
@@ -170,7 +180,7 @@ describe("Search Feature v1", () => {
 			document: createDefaultSearchDocument("global"),
 			contexts: [{ kind: "profile", profileId: ProfileId }],
 			injections: [],
-			state: { mode: "basic", values: [] },
+			state: {},
 		});
 
 		expect(compiled.request.searchExpression).toEqual({
@@ -207,7 +217,7 @@ describe("Search Feature v1", () => {
 			document: createDefaultSearchDocument("global"),
 			contexts: [],
 			injections: [],
-			state: { mode: "basic" as const, values: [] },
+			state: {},
 		};
 		const first = compileSearchFeatureInput(input);
 		const next = compileSearchFeatureInput({
@@ -230,13 +240,10 @@ describe("Search Feature v1", () => {
 				},
 			})),
 			state: {
-				mode: "basic",
-				values: [
-					{
-						controlKey: "tag",
-						filter: { field: "tag", operator: "equals", value: RealmId },
-					},
-				],
+				expression: {
+					controlKey: "tag",
+					filter: { field: "tag", operator: "equals", value: RealmId },
+				},
 			},
 		});
 
@@ -257,7 +264,6 @@ describe("Search Feature v1", () => {
 			contexts: [],
 			injections: [],
 			state: {
-				mode: "advanced",
 				expression: {
 					operator: "all",
 					clauses: [
@@ -308,7 +314,6 @@ describe("Search Feature v1", () => {
 			contexts: [],
 			injections: [],
 			state: {
-				mode: "advanced",
 				expression: {
 					operator: "all",
 					clauses: [
@@ -350,17 +355,14 @@ describe("Search Feature v1", () => {
 				contexts: [],
 				injections: [],
 				state: {
-					mode: "basic",
-					values: [
-						{
-							controlKey: "book-word-count",
-							filter: {
-								field: "book-word-count",
-								operator: "range",
-								lower: 12.5,
-							},
+					expression: {
+						controlKey: "book-word-count",
+						filter: {
+							field: "book-word-count",
+							operator: "range",
+							lower: 12.5,
 						},
-					],
+					},
 				},
 			}),
 		).toThrow("invalid integer value");
@@ -381,7 +383,7 @@ describe("Search Feature v1", () => {
 			document,
 			contexts: [],
 			injections: [],
-			state: { mode: "basic", values: [] },
+			state: {},
 		});
 		expect(compiled.request.domainFilter).toEqual(document.filter);
 		expect(compiled.request.searchExpression).toBeUndefined();
@@ -414,7 +416,7 @@ describe("Search Feature v1", () => {
 			document: createDefaultSearchDocument("global"),
 			contexts: [],
 			injections: [],
-			state: { mode: "basic", values: [] },
+			state: {},
 		});
 		expect(compiled.request.maxResultWindow).toBe(10_000);
 	});
@@ -424,7 +426,6 @@ describe("Search Feature v1", () => {
 			version: 1,
 			template: "global",
 			state: {
-				mode: "advanced",
 				filter: { search: { query: "design" } },
 				expression: {
 					controlKey: "tag",

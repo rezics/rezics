@@ -6,6 +6,7 @@
 		"elysia",
 		"Elysia",
 		"intee",
+		"lifecycles",
 		"lucide",
 		"nmnmcc",
 		"portabletext",
@@ -14,7 +15,8 @@
 		"taskfile",
 		"Uuidv",
 		"vike",
-		"vinext"
+		"vinext",
+		"worktree"
 	],
 	"js/ts.experimental.useTsgo": true,
 	"oxc.fmt.configPath": ".oxfmtrc.json",
