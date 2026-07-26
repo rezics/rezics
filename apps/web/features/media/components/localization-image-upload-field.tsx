@@ -27,7 +27,13 @@ import {
 	cn,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { getErrorStatus } from "@/i18n/errors";
 import type { ImageAssetPresentationRole } from "../model/image-asset-presentation";
+import {
+	ImageUploadContentTypes,
+	MaximumImageUploadBytes,
+	validateImageUploadCandidate,
+} from "../model/image-upload";
 
 const ImageAssetPresentationEditor = lazy(() =>
 	import("./image-asset-presentation-editor").then(({ ImageAssetPresentationEditor }) => ({
@@ -55,8 +61,6 @@ type LocalizationImageUploadFieldProps = {
 	onPresentationSaved?: () => void;
 	role: LocalizationImageRole;
 };
-
-const AcceptedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 export function LocalizationImageUploadField({
 	value,
@@ -92,7 +96,8 @@ export function LocalizationImageUploadField({
 	async function choose(file?: File) {
 		if (!file) return;
 		setError(undefined);
-		if (!AcceptedTypes.includes(file.type) || file.size > 10_485_760) {
+		const validation = validateImageUploadCandidate(file);
+		if (!validation.ok) {
 			setError(t.media.invalid);
 			return;
 		}
@@ -101,7 +106,11 @@ export function LocalizationImageUploadField({
 		let assetId: string | undefined;
 		try {
 			const asset = await requestUpload.mutateAsync({
-				body: { contentType: file.type, size: file.size, access: "public" },
+				body: {
+					contentType: validation.contentType,
+					size: file.size,
+					access: "public",
+				},
 			});
 			assetId = asset.id;
 			await uploadFile(asset.upload.url, asset.upload.headers, file, setProgress, xhr);
@@ -116,10 +125,17 @@ export function LocalizationImageUploadField({
 			onChange({ id: completed.id, url: presentation.contentUrl });
 			setEditorAssetId(completed.id);
 			setEditorOpen(true);
-		} catch {
+		} catch (caught) {
 			if (assetId)
 				await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
-			setError(copy.failed);
+			const status = getErrorStatus(caught);
+			setError(
+				status === StatusCodes.UNPROCESSABLE_ENTITY ||
+					status === StatusCodes.UNSUPPORTED_MEDIA_TYPE ||
+					status === StatusCodes.REQUEST_TOO_LONG
+					? t.media.invalid
+					: copy.failed,
+			);
 			setProgress(0);
 		} finally {
 			setFiles([]);
@@ -141,11 +157,11 @@ export function LocalizationImageUploadField({
 	const valueIsReusableOption = options.some((option) => option.id === value?.id);
 	return (
 		<FileUpload
-			accept={AcceptedTypes.join(",")}
+			accept={ImageUploadContentTypes.join(",")}
 			acceptedFiles={files}
 			className="grid gap-2"
 			disabled={busy}
-			maxFileSize={10_485_760}
+			maxFileSize={MaximumImageUploadBytes}
 			maxFiles={1}
 			onFileAccept={({ files }) => void choose(files[0])}
 			onFileChange={({ acceptedFiles }) => setFiles(acceptedFiles)}

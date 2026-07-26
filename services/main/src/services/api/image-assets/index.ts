@@ -98,7 +98,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 		{
-			access: "write:upload:write",
+			access: "contribute:upload:write",
 			params: ImageAssetParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
