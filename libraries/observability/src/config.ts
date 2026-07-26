@@ -341,6 +341,24 @@ export function resolveObservabilityConfiguration(
 		1,
 		maxQueueSize,
 	);
+	const metricExportIntervalMillis = integerValue(
+		environment.OTEL_METRIC_EXPORT_INTERVAL,
+		60_000,
+		"OTEL_METRIC_EXPORT_INTERVAL",
+		1_000,
+		300_000,
+	);
+	const metricExportTimeoutMillis = integerValue(
+		environment.OTEL_METRIC_EXPORT_TIMEOUT,
+		Math.min(30_000, metricExportIntervalMillis),
+		"OTEL_METRIC_EXPORT_TIMEOUT",
+		100,
+		120_000,
+	);
+	if (metricExportTimeoutMillis > metricExportIntervalMillis)
+		throw new Error(
+			"OTEL_METRIC_EXPORT_TIMEOUT must be less than or equal to OTEL_METRIC_EXPORT_INTERVAL",
+		);
 
 	return {
 		disabled: booleanValue(environment.OTEL_SDK_DISABLED, false, "OTEL_SDK_DISABLED"),
@@ -422,20 +440,8 @@ export function resolveObservabilityConfiguration(
 				100,
 				120_000,
 			),
-			exportIntervalMillis: integerValue(
-				environment.OTEL_METRIC_EXPORT_INTERVAL,
-				60_000,
-				"OTEL_METRIC_EXPORT_INTERVAL",
-				1_000,
-				300_000,
-			),
-			exportTimeoutMillis: integerValue(
-				environment.OTEL_METRIC_EXPORT_TIMEOUT,
-				30_000,
-				"OTEL_METRIC_EXPORT_TIMEOUT",
-				100,
-				120_000,
-			),
+			exportIntervalMillis: metricExportIntervalMillis,
+			exportTimeoutMillis: metricExportTimeoutMillis,
 		},
 		lifecycleTimeoutMillis: integerValue(
 			environment.REZICS_OBSERVABILITY_SHUTDOWN_TIMEOUT_MS,

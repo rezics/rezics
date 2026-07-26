@@ -214,6 +214,7 @@ describe("observability runtime", () => {
 					OTEL_EXPORTER_OTLP_ENDPOINT: `http://127.0.0.1:${port}`,
 					OTEL_TRACES_SAMPLER: "always_on",
 					OTEL_EXPORTER_OTLP_TIMEOUT: "1000",
+					OTEL_METRIC_EXPORT_INTERVAL: "1000",
 				},
 				overrides: { logWriter: () => undefined },
 			});

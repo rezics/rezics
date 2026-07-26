@@ -18,6 +18,10 @@ describe("observability environment configuration", () => {
 
 		expect(configuration.traces.selection).toBe("none");
 		expect(configuration.metrics.selection).toBe("none");
+		expect(configuration.metrics).toMatchObject({
+			exportIntervalMillis: 60_000,
+			exportTimeoutMillis: 30_000,
+		});
 		expect(configuration.service.name).toBe("rezics-test");
 		expect(configuration.service.instanceId).toMatch(/^[0-9a-f-]{36}$/);
 	});
@@ -29,6 +33,7 @@ describe("observability environment configuration", () => {
 			OTEL_SERVICE_NAME: "aspire-main-api",
 			OTEL_RESOURCE_ATTRIBUTES:
 				"service.instance.id=instance-1,service.namespace=rezics,deployment.environment.name=local",
+			OTEL_METRIC_EXPORT_INTERVAL: "1000",
 		});
 
 		expect(configuration.traces).toMatchObject({
@@ -38,6 +43,8 @@ describe("observability environment configuration", () => {
 		expect(configuration.metrics).toMatchObject({
 			selection: "otlp",
 			url: "http://localhost:4318/collector/v1/metrics",
+			exportIntervalMillis: 1_000,
+			exportTimeoutMillis: 1_000,
 		});
 		expect(configuration.service).toMatchObject({
 			name: "aspire-main-api",
@@ -70,5 +77,16 @@ describe("observability environment configuration", () => {
 		expect(() =>
 			resolve({ OTEL_BSP_MAX_QUEUE_SIZE: "8", OTEL_BSP_MAX_EXPORT_BATCH_SIZE: "9" }),
 		).toThrow(/between 1 and 8/);
+	});
+
+	it("rejects a metric export timeout longer than its interval", () => {
+		expect(() =>
+			resolve({
+				OTEL_METRIC_EXPORT_INTERVAL: "1000",
+				OTEL_METRIC_EXPORT_TIMEOUT: "1001",
+			}),
+		).toThrow(
+			"OTEL_METRIC_EXPORT_TIMEOUT must be less than or equal to OTEL_METRIC_EXPORT_INTERVAL",
+		);
 	});
 });
