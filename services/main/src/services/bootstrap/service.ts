@@ -1,4 +1,5 @@
 import { hashPassword } from "better-auth/crypto";
+import type { AvatarReference } from "@rezics/avatar";
 import { walkBlockTree } from "@rezics/block";
 import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
@@ -58,6 +59,7 @@ import { lockPlatformAccessGrants } from "../staff/access-service";
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import { avatarReferenceToColumns } from "../units/localization";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { listZonePageUnits } from "../zones/pages";
 import { ensureZoneDefaultExperienceInTransaction } from "../zones/default-experience";
@@ -315,7 +317,7 @@ async function ensureLocalization(
 		readonly position: string;
 		readonly title: string;
 		readonly summary?: string;
-		readonly avatarAssetId?: string | null;
+		readonly avatar?: AvatarReference | null;
 		readonly content?: unknown;
 		readonly contentStatus?: "published" | null;
 	},
@@ -323,11 +325,7 @@ async function ensureLocalization(
 	const createdAt = bootstrapEpoch();
 	const desired = {
 		summary: input.summary ?? null,
-		avatarType: input.avatarAssetId ? ("image" as const) : null,
-		avatarAssetId: input.avatarAssetId ?? null,
-		avatarEmoji: null,
-		avatarIconPrefix: null,
-		avatarIconName: null,
+		...avatarReferenceToColumns(input.avatar ?? null),
 		content: input.content ?? null,
 		contentStatus: input.contentStatus ?? null,
 	};
@@ -338,6 +336,9 @@ async function ensureLocalization(
 			summary: unitLocalization.summary,
 			avatarType: unitLocalization.avatarType,
 			avatarAssetId: unitLocalization.avatarAssetId,
+			avatarEmoji: unitLocalization.avatarEmoji,
+			avatarIconPrefix: unitLocalization.avatarIconPrefix,
+			avatarIconName: unitLocalization.avatarIconName,
 			content: unitLocalization.content,
 			contentStatus: unitLocalization.contentStatus,
 		})
@@ -355,6 +356,9 @@ async function ensureLocalization(
 		stored.summary === desired.summary &&
 		stored.avatarType === desired.avatarType &&
 		stored.avatarAssetId === desired.avatarAssetId &&
+		stored.avatarEmoji === desired.avatarEmoji &&
+		stored.avatarIconPrefix === desired.avatarIconPrefix &&
+		stored.avatarIconName === desired.avatarIconName &&
 		valuesEqual(stored.content, desired.content) &&
 		stored.contentStatus === desired.contentStatus
 	)
@@ -1194,7 +1198,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				(await ensureLocalization(tx, {
 					unitId: value.id,
 					position: fractionalPositionAt(index),
-					avatarAssetId: value.avatarAssetId,
+					avatar: value.avatar,
 					...localization,
 				})) || changed;
 		}
@@ -1358,11 +1362,7 @@ async function isBootstrapReady(): Promise<boolean> {
 			officialZone.localizations.map((localization, index) => ({
 				unitId: officialZone.id,
 				position: fractionalPositionAt(index),
-				avatarType: officialZone.avatarAssetId ? ("image" as const) : null,
-				avatarAssetId: officialZone.avatarAssetId,
-				avatarEmoji: null,
-				avatarIconPrefix: null,
-				avatarIconName: null,
+				...avatarReferenceToColumns(officialZone.avatar),
 				content: null,
 				...localization,
 			})),
@@ -1601,6 +1601,9 @@ async function isBootstrapReady(): Promise<boolean> {
 				summary: unitLocalization.summary,
 				avatarType: unitLocalization.avatarType,
 				avatarAssetId: unitLocalization.avatarAssetId,
+				avatarEmoji: unitLocalization.avatarEmoji,
+				avatarIconPrefix: unitLocalization.avatarIconPrefix,
+				avatarIconName: unitLocalization.avatarIconName,
 				content: unitLocalization.content,
 				contentStatus: unitLocalization.contentStatus,
 			})
@@ -1789,6 +1792,12 @@ async function isBootstrapReady(): Promise<boolean> {
 					actual.avatarType === ("avatarType" in expected ? expected.avatarType : null) &&
 					actual.avatarAssetId ===
 						("avatarAssetId" in expected ? expected.avatarAssetId : null) &&
+					actual.avatarEmoji ===
+						("avatarEmoji" in expected ? expected.avatarEmoji : null) &&
+					actual.avatarIconPrefix ===
+						("avatarIconPrefix" in expected ? expected.avatarIconPrefix : null) &&
+					actual.avatarIconName ===
+						("avatarIconName" in expected ? expected.avatarIconName : null) &&
 					valuesEqual(actual.content, "content" in expected ? expected.content : null) &&
 					actual.contentStatus ===
 						("contentStatus" in expected ? expected.contentStatus : null),

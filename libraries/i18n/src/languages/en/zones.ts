@@ -20,7 +20,7 @@ export default {
 	searchMode: "Search mode",
 	searchModes: { basic: "Basic", advanced: "Advanced" },
 	searchBoolean: { yes: "Yes", no: "No" },
-	searchFilters: "Search filters",
+	searchFilters: "Filters",
 	searchControl: insert("Filter: {{name}}", { name: String }),
 	searchSelect: "Select a filter",
 	searchOperator: "Match rule",

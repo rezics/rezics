@@ -29,6 +29,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
+import {
+	AvatarField,
+	avatarPresentationToInput,
+	type AvatarFieldOption,
+	type AvatarFieldValue,
+} from "@/features/media/components/avatar-field";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useZoneManagement } from "./workspace";
@@ -48,7 +54,7 @@ function toApiDateTime(value: string): string | null {
 }
 
 export function ZoneManagementOverview() {
-	const { t, locale } = useTranslation(["errors", "locale", "ui", "zones"]);
+	const { t, locale } = useTranslation(["errors", "locale", "media", "ui", "zones"]);
 	const { sections, zone, zoneId } = useZoneManagement();
 	const queryClient = useQueryClient();
 	const invalidate = () =>
@@ -64,8 +70,12 @@ export function ZoneManagementOverview() {
 			: (zone.language ?? defaultLanguage),
 	);
 	const selected = zone.localizations.find((item) => item.language === language);
+	const avatarOptions: AvatarFieldOption[] = zone.localizations.flatMap((item) =>
+		item.language !== language && item.avatar ? [{ ...item.avatar, label: item.language }] : [],
+	);
 	const [title, setTitle] = useState(selected?.title ?? "");
 	const [summary, setSummary] = useState(selected?.summary ?? "");
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(selected?.avatar ?? null);
 	const [slug, setSlug] = useState(zone.slugAddress?.slug ?? "");
 	const [startsAt, setStartsAt] = useState(toLocalDateTime(zone.startsAt));
 	const [endsAt, setEndsAt] = useState(toLocalDateTime(zone.endsAt));
@@ -77,6 +87,7 @@ export function ZoneManagementOverview() {
 		const localization = zone.localizations.find((item) => item.language === next);
 		setTitle(localization?.title ?? "");
 		setSummary(localization?.summary ?? "");
+		setAvatar(localization?.avatar ?? null);
 	}
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -89,6 +100,7 @@ export function ZoneManagementOverview() {
 						language,
 						title: title.trim(),
 						summary: summary.trim(),
+						avatar: avatarPresentationToInput(avatar),
 					},
 					themeDocument: theme,
 					startsAt: toApiDateTime(startsAt),
@@ -148,6 +160,15 @@ export function ZoneManagementOverview() {
 									maxLength={2_000}
 									onChange={(event) => setSummary(event.currentTarget.value)}
 									value={summary}
+								/>
+							</Field>
+							<Field className="sm:col-span-2">
+								<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+								<AvatarField
+									fallback={avatarOptions[0] ?? null}
+									onChange={setAvatar}
+									options={avatarOptions}
+									value={avatar}
 								/>
 							</Field>
 							<Field>

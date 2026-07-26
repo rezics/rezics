@@ -106,7 +106,7 @@ export default {
 	modes: { basic: "一般", advanced: "進階" },
 	advancedCombination: "篩選條件組合",
 	advancedCombinations: { all: "符合所有條件", any: "符合任一條件" },
-	filters: "搜尋篩選條件",
+	filters: "篩選",
 	showHiddenFilters: insert("顯示隱藏條件（{{count}}）", { count: Number }),
 	hideHiddenFilters: "隱藏額外條件",
 	selectFilter: "選擇條件",

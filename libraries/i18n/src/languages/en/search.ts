@@ -106,7 +106,7 @@ export default {
 	modes: { basic: "Standard", advanced: "Advanced" },
 	advancedCombination: "Combine filters",
 	advancedCombinations: { all: "Match all filters", any: "Match any filter" },
-	filters: "Search filters",
+	filters: "Filters",
 	showHiddenFilters: insert("Show hidden filters ({{count}})", { count: Number }),
 	hideHiddenFilters: "Hide additional filters",
 	selectFilter: "Select a filter",

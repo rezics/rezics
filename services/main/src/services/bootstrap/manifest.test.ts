@@ -140,7 +140,6 @@ describe("database bootstrap manifest", () => {
 		for (const value of OfficialZoneManifest) {
 			expect(value).not.toHaveProperty("official");
 			expect(value.homePage.document.blocks).toEqual([
-				expect.objectContaining({ _type: "post-full-view", postId: value.wikiPost.id }),
 				expect.objectContaining({
 					_type: "feed",
 					feature: { kind: "zone" },
@@ -154,6 +153,12 @@ describe("database bootstrap manifest", () => {
 				}),
 			]);
 		}
+		expect(OfficialZoneManifest.map((value) => value.avatar)).toEqual(
+			["book-open", "clapperboard", "code", "people-group", "compass"].map((name) => ({
+				type: "icon",
+				icon: { provider: "font-awesome", prefix: "fas", name },
+			})),
+		);
 		expect(OfficialZoneManifest.map((value) => value.searchTemplate)).toEqual([
 			"book",
 			"media",

@@ -10,6 +10,11 @@ import {
 	assertWikiPostPortableTextDocument,
 	ZonePageBlockHostPolicy,
 } from "@rezics/block";
+import {
+	FontAwesomeProvider,
+	type AvatarReference,
+	type FontAwesomeIconReference,
+} from "@rezics/avatar";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import type { UnitFilter } from "@rezics/filter";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
@@ -157,36 +162,26 @@ export const OfficialZoneAvatarAsset = {
 	storageKey: "bootstrap/image-objects/official-zone-avatar/original",
 } as const;
 
+function officialZoneIcon(name: string): AvatarReference {
+	const icon = {
+		provider: FontAwesomeProvider,
+		prefix: "fas",
+		name,
+	} satisfies FontAwesomeIconReference;
+	return { type: "icon", icon };
+}
+
 function createOfficialZoneContent(input: {
 	readonly postId: string;
 	readonly pageId: string;
 	readonly pagesStructureId: string;
 	readonly navigationId: string;
-	readonly keys: readonly [
-		string,
-		string,
-		string,
-		string,
-		string,
-		string,
-		string,
-		string,
-		string,
-	];
+	readonly keys: readonly [string, string, string, string, string, string, string, string];
 	readonly zh: { readonly title: string; readonly body: string };
 	readonly en: { readonly title: string; readonly body: string };
 }) {
-	const [
-		bodyKey,
-		zhBlockKey,
-		zhSpanKey,
-		enBlockKey,
-		enSpanKey,
-		pageKey,
-		fullViewKey,
-		menuKey,
-		feedKey,
-	] = input.keys;
+	const [bodyKey, zhBlockKey, zhSpanKey, enBlockKey, enSpanKey, pageKey, menuKey, feedKey] =
+		input.keys;
 	const body = (language: "zh" | "en") => {
 		const localized = input[language];
 		const blockKey = language === "zh" ? zhBlockKey : enBlockKey;
@@ -219,7 +214,6 @@ function createOfficialZoneContent(input: {
 			titleUnitId: input.postId,
 			document: createUnitReferencedBlockDocument(
 				[
-					{ _type: "post-full-view", _key: fullViewKey, postId: input.postId },
 					{
 						_type: "feed",
 						_key: feedKey,
@@ -295,7 +289,7 @@ export const OfficialZoneManifest = [
 		searchTemplate: "book",
 		boundaryDocument: createCatalogZoneBoundaryDocument("book", "b00757a70001"),
 		themeDocument: createZoneThemeDocument({ accent: "#a16207" }, "b00757a70002"),
-		avatarAssetId: OfficialZoneAvatarAsset.id,
+		avatar: officialZoneIcon("book-open"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000001",
 			pageId: "019b76da-a800-7600-8000-000000000001",
@@ -308,7 +302,6 @@ export const OfficialZoneManifest = [
 				"b00757010004",
 				"b00757010005",
 				"b00757010006",
-				"b00757010007",
 				"b00757010008",
 				"b0075701000a",
 			],
@@ -338,7 +331,7 @@ export const OfficialZoneManifest = [
 		searchTemplate: "media",
 		boundaryDocument: createCatalogZoneBoundaryDocument("media", "b00757a70004"),
 		themeDocument: createZoneThemeDocument({ accent: "#db2777" }, "b00757a70005"),
-		avatarAssetId: OfficialZoneAvatarAsset.id,
+		avatar: officialZoneIcon("clapperboard"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000002",
 			pageId: "019b76da-a800-7600-8000-000000000002",
@@ -351,7 +344,6 @@ export const OfficialZoneManifest = [
 				"b00757020004",
 				"b00757020005",
 				"b00757020006",
-				"b00757020007",
 				"b00757020008",
 				"b0075702000a",
 			],
@@ -381,7 +373,7 @@ export const OfficialZoneManifest = [
 		searchTemplate: "software",
 		boundaryDocument: createCatalogZoneBoundaryDocument("software", "b00757a70007"),
 		themeDocument: createZoneThemeDocument({ accent: "#0d9488" }, "b00757a70008"),
-		avatarAssetId: OfficialZoneAvatarAsset.id,
+		avatar: officialZoneIcon("code"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000003",
 			pageId: "019b76da-a800-7600-8000-000000000003",
@@ -394,7 +386,6 @@ export const OfficialZoneManifest = [
 				"b00757030004",
 				"b00757030005",
 				"b00757030006",
-				"b00757030007",
 				"b00757030008",
 				"b0075703000a",
 			],
@@ -424,7 +415,7 @@ export const OfficialZoneManifest = [
 		searchTemplate: "realm",
 		boundaryDocument: createZoneBoundaryDocument(["realms"], undefined, "b00757a7000a"),
 		themeDocument: createZoneThemeDocument({ accent: "#7c3aed" }, "b00757a7000b"),
-		avatarAssetId: OfficialZoneAvatarAsset.id,
+		avatar: officialZoneIcon("people-group"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000004",
 			pageId: "019b76da-a800-7600-8000-000000000004",
@@ -437,7 +428,6 @@ export const OfficialZoneManifest = [
 				"b00757040004",
 				"b00757040005",
 				"b00757040006",
-				"b00757040007",
 				"b00757040008",
 				"b0075704000a",
 			],
@@ -471,7 +461,7 @@ export const OfficialZoneManifest = [
 			"b00757a7000d",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#2563eb" }, "b00757a7000e"),
-		avatarAssetId: OfficialZoneAvatarAsset.id,
+		avatar: officialZoneIcon("compass"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000005",
 			pageId: "019b76da-a800-7600-8000-000000000005",
@@ -484,7 +474,6 @@ export const OfficialZoneManifest = [
 				"b00757050004",
 				"b00757050005",
 				"b00757050006",
-				"b00757050007",
 				"b00757050008",
 				"b0075705000a",
 			],

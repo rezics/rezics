@@ -19,7 +19,7 @@ export default {
 	searchMode: "搜尋模式",
 	searchModes: { basic: "基本", advanced: "進階" },
 	searchBoolean: { yes: "是", no: "否" },
-	searchFilters: "搜尋篩選條件",
+	searchFilters: "篩選",
 	searchControl: insert("篩選：{{name}}", { name: String }),
 	searchSelect: "選擇條件",
 	searchOperator: "比對方式",
