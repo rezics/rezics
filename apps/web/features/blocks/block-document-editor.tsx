@@ -6,7 +6,7 @@ import {
 	type UnitReferencedBlock,
 	type UnitReferencedBlockDocument,
 } from "@rezics/block";
-import { SearchTemplateIdValues, type SearchTemplateId } from "@rezics/search";
+import { SearchTemplateIdValues, type SearchTemplateId } from "@rezics/filter";
 import {
 	Button,
 	Card,

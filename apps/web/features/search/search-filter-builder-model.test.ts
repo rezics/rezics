@@ -1,4 +1,4 @@
-import type { ResolvedSearchControl, SearchControlExpression } from "@rezics/search";
+import type { ResolvedSearchControl, SearchControlExpression } from "@rezics/filter";
 import { describe, expect, it } from "vitest";
 
 import {

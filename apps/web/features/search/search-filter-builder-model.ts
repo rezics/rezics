@@ -2,11 +2,11 @@ import type { PresentedAvatar } from "@rezics/avatar";
 import type {
 	ResolvedSearchControl,
 	SearchControlExpression,
-	SearchFilter,
+	SearchControlPredicate,
 	SearchOperator,
 	SearchScalar,
 	SharedSearchQuerySelection,
-} from "@rezics/search";
+} from "@rezics/filter";
 
 export interface DraftSearchValue {
 	readonly value: SearchScalar;
@@ -48,7 +48,7 @@ export function createDraftId(): string {
 	return `search-draft-${nextDraftId}`;
 }
 
-function valuesOf(filter: SearchFilter): readonly SearchScalar[] {
+function valuesOf(filter: SearchControlPredicate): readonly SearchScalar[] {
 	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
@@ -221,7 +221,7 @@ export function compileDraftSearch(
 			return undefined;
 		}
 		const values = node.values.map((value) => value.value);
-		let filter: SearchFilter | undefined;
+		let filter: SearchControlPredicate | undefined;
 		const field = control.field;
 		if (field === "realm-tag-vote" && node.operator === "matches") {
 			const realmId = node.realmTagVote?.realm?.value;

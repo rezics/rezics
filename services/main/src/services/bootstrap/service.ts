@@ -62,7 +62,10 @@ import { recordUnitRevision } from "../units/history";
 import { avatarReferenceToColumns } from "../units/localization";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { listZonePageUnits } from "../zones/pages";
-import { ensureZoneDefaultExperienceInTransaction } from "../zones/default-experience";
+import {
+	ensureZoneDefaultExperienceInTransaction,
+	type ProvisionZoneDefaultExperienceInput,
+} from "../zones/default-experience";
 import {
 	getZoneSearchFeature,
 	putZoneSearchFeatureInTransaction,
@@ -1226,7 +1229,10 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	}
 }
 
-async function getZoneDefaultExperienceInput(tx: DatabaseTransaction, zoneId: string) {
+async function getZoneDefaultExperienceInput(
+	tx: DatabaseTransaction,
+	zoneId: string,
+): Promise<ProvisionZoneDefaultExperienceInput> {
 	const [[owner], [localization]] = await Promise.all([
 		tx
 			.select({ profileId: unitAccessBinding.profileId })
@@ -1257,6 +1263,9 @@ async function getZoneDefaultExperienceInput(tx: DatabaseTransaction, zoneId: st
 		actorProfileId: owner.profileId,
 		language: localization.language,
 		title: localization.title,
+		searchTemplate:
+			OfficialZoneManifest.find((candidate) => candidate.id === zoneId)?.searchTemplate ??
+			"global",
 	};
 }
 

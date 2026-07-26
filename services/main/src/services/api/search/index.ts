@@ -13,13 +13,9 @@ import {
 	SearchDocument,
 	SharedSearchQueryDocument,
 	SearchTemplateId,
-} from "@rezics/search";
-import {
-	createSimpleFeedFilter,
-	FilterSchemaModels,
-	SimpleFeedContentKindValues,
-	type UnitFilter,
+	type SearchFeatureSurface,
 } from "@rezics/filter";
+import { FilterSchemaModels } from "@rezics/filter";
 import { getActiveObservability } from "@rezics/observability";
 import { type Static, Type } from "@sinclair/typebox";
 import { and, eq, isNull } from "drizzle-orm";
@@ -108,12 +104,6 @@ const ZoneSearchFeatureExecutionBody = t.Pick(SearchFeatureInput, ["injections",
 const ZoneFeedBlockExecutionBody = t.Object(
 	{
 		...ZoneSearchFeatureExecutionBody.properties,
-		contentKinds: t.Optional(
-			t.Array(t.UnionEnum(SimpleFeedContentKindValues), {
-				maxItems: SimpleFeedContentKindValues.length,
-				uniqueItems: true,
-			}),
-		),
 		surface: t.Union([
 			t.Object({ kind: t.Literal("dock") }, { additionalProperties: false }),
 			t.Object(
@@ -130,7 +120,7 @@ const ZoneFeedBlockExecutionBody = t.Object(
 const SearchDocumentModel = Type.Object(
 	{
 		...SearchDocument.properties,
-		filter: Type.Optional(Type.Ref("UnitFilter")),
+		filter: Type.Optional(Type.Ref("UnitPredicate")),
 	},
 	{ additionalProperties: false, $id: "SearchDocumentV1" },
 );
@@ -209,9 +199,9 @@ async function executeZoneBlock(input: {
 	blockKey: string;
 	document: { readonly blocks: readonly Block[] };
 	body: unknown;
+	surface: SearchFeatureSurface;
 	profileId?: string;
 	source?: SearchFeatureSource;
-	additionalDomainFilter?: UnitFilter;
 }) {
 	const source = input.source ?? findSearchFeatureSource(input.document, input.blockKey);
 	const baseDocument =
@@ -230,8 +220,8 @@ async function executeZoneBlock(input: {
 			injections: request.injections,
 			state: request.state,
 		},
+		input.surface,
 		input.profileId,
-		input.additionalDomainFilter,
 	);
 }
 
@@ -243,13 +233,10 @@ async function executeZoneFeedBlock(input: {
 	profileId?: string;
 }) {
 	const block = findFeedBlock(input.document, input.blockKey);
-	const request = input.body as typeof ZoneFeedBlockExecutionBody.static;
 	const result = await executeZoneBlock({
 		...input,
 		source: block.feature,
-		additionalDomainFilter: createSimpleFeedFilter({
-			contentKinds: request.contentKinds,
-		}),
+		surface: "feed",
 	});
 	return presentSearchResultAsFeed(result, input.profileId);
 }
@@ -307,6 +294,7 @@ export default new Elysia({ prefix: "/search" })
 						document: createDefaultSearchDocument(params.template),
 						...body,
 					},
+					"search",
 					identity.authorization.profileId,
 				);
 			} catch (cause) {
@@ -337,6 +325,7 @@ export default new Elysia({ prefix: "/search" })
 						document: createDefaultSearchDocument(params.template),
 						...body,
 					},
+					"feed",
 					identity.authorization.profileId,
 				);
 				return presentSearchResultAsFeed(result, identity.authorization.profileId);
@@ -439,6 +428,7 @@ export default new Elysia({ prefix: "/search" })
 					injections: body.injections,
 					state: body.state,
 				},
+				"search",
 				identity.authorization.profileId,
 			);
 		},
@@ -542,6 +532,7 @@ export default new Elysia({ prefix: "/search" })
 					...params,
 					document: parseDocument(DockDocument, record.document),
 					body,
+					surface: "search",
 					profileId: identity.authorization.profileId,
 				});
 			} catch (cause) {
@@ -594,6 +585,7 @@ export default new Elysia({ prefix: "/search" })
 					...params,
 					document: record.document,
 					body,
+					surface: "search",
 					profileId: identity.authorization.profileId,
 				});
 			} catch (cause) {

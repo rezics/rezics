@@ -1,4 +1,4 @@
-import type { SimpleFeedContentKind } from "@rezics/filter";
+import type { SearchTemplateId, SimpleFeedContentKind } from "@rezics/filter";
 
 const CatalogPostContentKinds = [
 	"post:post",
@@ -17,8 +17,8 @@ const CatalogZoneContentKinds = {
 } as const satisfies Record<string, readonly SimpleFeedContentKind[]>;
 
 export function catalogZoneFeedContentKinds(
-	slug: string | null | undefined,
+	template: SearchTemplateId,
 ): readonly SimpleFeedContentKind[] | undefined {
-	if (!slug || !(slug in CatalogZoneContentKinds)) return undefined;
-	return CatalogZoneContentKinds[slug as keyof typeof CatalogZoneContentKinds];
+	if (!(template in CatalogZoneContentKinds)) return undefined;
+	return CatalogZoneContentKinds[template as keyof typeof CatalogZoneContentKinds];
 }

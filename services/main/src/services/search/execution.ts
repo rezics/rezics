@@ -1,204 +1,32 @@
 import { createHash } from "node:crypto";
 
 import {
-	assertSearchExpression,
-	combineSearchExpressions,
-	compileSearchRequest,
-	createSearchCursor,
-	parseSearchCursor,
-	type CompiledSearchRequest,
-	type SearchConfiguration,
-	type SearchControl,
-	type SearchFilter,
-} from "@rezics/search";
+	canonicalUnitPredicate,
+	combineUnitPredicates,
+	type SearchControlPredicate,
+	type UnitPredicate,
+} from "@rezics/filter";
 import { ZoneBoundaryDocument, parseDocument } from "@rezics/block";
-import { assertUnitFilter, canonicalUnitFilter, type UnitFilter } from "@rezics/filter";
 import { eq } from "drizzle-orm";
 
 import { database } from "../database";
 import { zone } from "../database/schema";
 import { InvalidSearch } from "./errors";
 import { getActiveSearchGeneration } from "./generation";
-import { SearchCategories, type SearchCategory } from "./schema";
+import {
+	assertSearchExpression,
+	combineSearchExpressions,
+	createSearchCursor,
+	parseSearchCursor,
+	type CompiledSearchRequest,
+} from "./query";
+import type { SearchCategory } from "./schema";
 import { searchDomain, searchDomainFacets } from "./service";
-
-const modes = ["basic", "advanced"] as const;
-
-function control(input: Omit<SearchControl, "modes"> & { modes?: SearchControl["modes"] }) {
-	return { ...input, modes: input.modes ?? [...modes] } satisfies SearchControl;
-}
-
-export const GlobalSearchConfiguration = {
-	scope: { kind: "global" },
-	categories: [...SearchCategories],
-	modes: { available: [...modes], default: "basic" },
-	query: { enabled: true },
-	constraints: [],
-	defaults: [],
-	controls: [
-		control({
-			key: "category",
-			field: "category",
-			component: "multi-select",
-			operators: ["any-of", "none-of"],
-			optionSource: {
-				kind: "static",
-				options: SearchCategories.map((value) => ({ value })),
-			},
-		}),
-		control({
-			key: "language",
-			field: "language",
-			component: "multi-select",
-			operators: ["any-of", "all-of", "none-of"],
-			optionSource: { kind: "facet" },
-		}),
-		control({
-			key: "kind",
-			field: "kind",
-			component: "multi-select",
-			operators: ["any-of", "none-of"],
-			optionSource: { kind: "facet" },
-		}),
-		control({
-			key: "content-rating",
-			field: "content-rating",
-			component: "multi-select",
-			operators: ["any-of", "none-of"],
-			optionSource: {
-				kind: "static",
-				options: ["general", "r15", "r18", "r18g"].map((value) => ({ value })),
-			},
-		}),
-		control({
-			key: "ai-disclosure",
-			field: "ai-disclosure",
-			component: "multi-select",
-			operators: ["any-of", "none-of"],
-			optionSource: {
-				kind: "static",
-				options: [
-					"unknown",
-					"none",
-					"ai_assisted",
-					"ai_originated",
-					"machine_generated",
-				].map((value) => ({ value })),
-			},
-			modes: ["advanced"],
-		}),
-		control({
-			key: "license",
-			field: "license",
-			component: "multi-select",
-			operators: ["any-of", "none-of", "exists"],
-			optionSource: { kind: "facet" },
-			modes: ["advanced"],
-		}),
-		control({
-			key: "tag",
-			field: "tag",
-			component: "multi-select",
-			operators: ["any-of", "all-of", "none-of"],
-			optionSource: { kind: "facet" },
-			modes: ["advanced"],
-		}),
-		...(["credit", "realm", "subject", "target", "root", "parent", "owner"] as const).map(
-			(field) =>
-				control({
-					key: field,
-					field,
-					component: "select",
-					operators: ["equals", "not-equals"],
-					optionSource: { kind: "facet" },
-					modes: ["advanced"],
-				}),
-		),
-		control({
-			key: "realm-tag-vote",
-			field: "realm-tag-vote",
-			component: "realm-tag-vote",
-			operators: ["matches"],
-			modes: ["advanced"],
-		}),
-		...(["created-at", "updated-at", "published-at", "closes-at"] as const).map((field) =>
-			control({
-				key: field,
-				field,
-				component: "date-range",
-				operators: ["range", "exists"],
-				modes: ["advanced"],
-			}),
-		),
-		control({
-			key: "join-policy",
-			field: "join-policy",
-			component: "multi-select",
-			operators: ["any-of", "none-of"],
-			optionSource: {
-				kind: "static",
-				options: ["open", "approval"].map((value) => ({ value })),
-			},
-			modes: ["advanced"],
-		}),
-		control({
-			key: "multiple",
-			field: "multiple",
-			component: "toggle",
-			operators: ["equals", "not-equals"],
-			modes: ["advanced"],
-		}),
-		control({
-			key: "results-visibility",
-			field: "results-visibility",
-			component: "multi-select",
-			operators: ["any-of", "none-of"],
-			optionSource: {
-				kind: "static",
-				options: ["live", "after_close"].map((value) => ({ value })),
-			},
-			modes: ["advanced"],
-		}),
-		control({
-			key: "closed",
-			field: "closed",
-			component: "toggle",
-			operators: ["equals", "not-equals"],
-			modes: ["advanced"],
-		}),
-	],
-	sort: {
-		default: "relevance",
-		options: [
-			"relevance",
-			"createdAt:asc",
-			"createdAt:desc",
-			"updatedAt:asc",
-			"updatedAt:desc",
-		],
-	},
-	results: {
-		pageSize: 20,
-		maxPageSize: 50,
-		maxResultWindow: 10_000,
-		facets: ["category", "language", "kind", "content-rating", "tag"],
-	},
-} satisfies SearchConfiguration;
-
-export function combineUnitFilters(
-	filters: readonly (UnitFilter | undefined)[],
-): UnitFilter | undefined {
-	const present = filters.filter((filter): filter is UnitFilter => filter !== undefined);
-	if (!present.length) return undefined;
-	const combined: UnitFilter = present.length === 1 ? present[0]! : { all: present };
-	assertUnitFilter(combined);
-	return combined;
-}
 
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	categories: SearchCategory[];
-	filters: SearchFilter[];
-	domainFilter?: UnitFilter;
+	filters: SearchControlPredicate[];
+	domainFilter?: UnitPredicate;
 	scopeUnitId?: string;
 	includeScopeDescendants?: boolean;
 }> {
@@ -233,28 +61,12 @@ async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	};
 }
 
-export async function executeConfiguredSearch(
-	trustedConfiguration: SearchConfiguration,
-	request: unknown,
-	profileId?: string,
-	enforcedZoneId?: string,
-) {
-	let compiled: CompiledSearchRequest;
-	try {
-		compiled = compileSearchRequest(trustedConfiguration, request);
-	} catch (cause) {
-		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search input");
-	}
-	return executeCompiledSearch(compiled, profileId, enforcedZoneId);
-}
-
-/** Executes an already proven, engine-independent Search request. */
+/** Executes an already proven, engine-independent Filter request. */
 export async function executeCompiledSearch(
 	compiled: CompiledSearchRequest,
 	profileId?: string,
 	enforcedZoneId?: string,
 	inputIdentity?: string,
-	additionalDomainFilter?: UnitFilter,
 ) {
 	const configuredScope = await resolveScope(compiled);
 	const hostScope = enforcedZoneId
@@ -279,11 +91,10 @@ export async function executeCompiledSearch(
 		...(compiled.searchExpression ? [compiled.searchExpression] : []),
 	]);
 	if (searchExpression) assertSearchExpression(searchExpression, { maxDepth: 6, maxNodes: 100 });
-	const domainFilter = combineUnitFilters([
+	const domainFilter = combineUnitPredicates([
 		compiled.domainFilter,
 		configuredScope.domainFilter,
 		hostScope?.domainFilter,
-		additionalDomainFilter,
 	]);
 	const generation = await getActiveSearchGeneration("current");
 	const requestHash = createHash("sha256")
@@ -295,7 +106,7 @@ export async function executeCompiledSearch(
 				sort: compiled.sort,
 				maxResultWindow: compiled.maxResultWindow,
 				searchExpression,
-				domainFilter: domainFilter ? canonicalUnitFilter(domainFilter) : undefined,
+				domainFilter: domainFilter ? canonicalUnitPredicate(domainFilter) : undefined,
 				facets: compiled.facets,
 				inputIdentity,
 			}),

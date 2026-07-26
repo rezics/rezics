@@ -6,7 +6,7 @@ import {
 	type SearchDocument,
 	type SearchFeatureDefinition,
 	type SearchTemplateId,
-} from "@rezics/search";
+} from "@rezics/filter";
 import {
 	getApiSearchZonesByZoneIdFeatureQueryKey,
 	getApiSearchZonesByZoneIdFeatureRevisionsQueryKey,

@@ -8,7 +8,7 @@ import type {
 	ScoreFilter,
 	ScoreValueFilter,
 	TagAssertionFilter,
-	UnitFilter,
+	UnitPredicate,
 	UnitReferenceFilter,
 	VoteSummaryFilter,
 } from "@rezics/filter";
@@ -322,15 +322,18 @@ function collectionCondition(filter: CollectionFilter): SQL {
 	return conjunction(conditions);
 }
 
-export interface CompileUnitFilterSqlInput {
+export interface CompileUnitPredicateSqlInput {
 	readonly unitId: SQL<unknown>;
 	readonly unitKind: SQL<unknown>;
 	readonly viewerProfileId?: string;
 }
 
 /** Compiles a validated domain Filter to a parameterized Feed eligibility predicate. */
-export function compileUnitFilterSql(filter: UnitFilter, input: CompileUnitFilterSqlInput): SQL {
-	const conditions = logicConditions(filter, (child) => compileUnitFilterSql(child, input));
+export function compileUnitPredicateSql(
+	filter: UnitPredicate,
+	input: CompileUnitPredicateSqlInput,
+): SQL {
+	const conditions = logicConditions(filter, (child) => compileUnitPredicateSql(child, input));
 	if (filter.id) conditions.push(valuesCondition(input.unitId, filter.id.in, true));
 	if (filter.kind) conditions.push(valuesCondition(input.unitKind, filter.kind.in));
 	if (filter.localizations) {

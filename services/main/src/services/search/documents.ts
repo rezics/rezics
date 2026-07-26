@@ -3,10 +3,10 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import {
 	parseSearchDocument,
 	type SearchDocument,
-	type SearchFilter,
+	type SearchControlPredicate,
 	type SearchScalar,
-} from "@rezics/search";
-import { collectUnitFilterReferenceIds } from "@rezics/filter";
+} from "@rezics/filter";
+import { collectUnitPredicateReferenceIds } from "@rezics/filter";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -49,7 +49,7 @@ function validateDocument(value: unknown): SearchDocument {
 	}
 }
 
-function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+function filterValues(filter: SearchControlPredicate): readonly SearchScalar[] {
 	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
@@ -81,7 +81,7 @@ async function ensureDocumentReferences(
 		} else if (filter.field === "tag")
 			for (const value of filterValues(filter))
 				if (typeof value === "string") tagIds.add(value);
-	const filterUnitIds = document.filter ? collectUnitFilterReferenceIds(document.filter) : [];
+	const filterUnitIds = document.filter ? collectUnitPredicateReferenceIds(document.filter) : [];
 	const ids = [...new Set([...labelIds, ...tagIds, ...realmIds, ...filterUnitIds])];
 	if (!ids.length) return;
 	const records = await tx

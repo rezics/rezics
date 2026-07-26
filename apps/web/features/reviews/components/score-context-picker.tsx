@@ -10,7 +10,7 @@ import {
 	ComboboxList,
 	useEntitySearch,
 } from "@rezics/ui";
-import type { SearchCategory } from "@rezics/search";
+import type { SearchCategory } from "@rezics/filter";
 import { useEffect, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";

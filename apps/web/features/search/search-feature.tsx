@@ -4,6 +4,8 @@ import { ContentLanguageValues } from "@rezics/i18n";
 import { useGetApiUsersMePreferences } from "@rezics/openapi-tanstack-query";
 import {
 	SearchCategoryValues,
+	defaultSearchSort,
+	isSearchSortAvailable,
 	type ResolvedSearchControl,
 	type SearchControlExpression,
 	type SearchControlValue,
@@ -16,7 +18,10 @@ import {
 	type SearchSort,
 	type SharedSearchQuerySelection,
 	type SharedSearchQueryState,
-} from "@rezics/search";
+	searchSortConfiguration,
+	unitFilterSearchQuery,
+	withUnitFilterSearch,
+} from "@rezics/filter";
 import {
 	Badge,
 	Button,
@@ -254,6 +259,7 @@ export function SearchFeature({
 	resolveLabel,
 	resolveOptionLabel,
 	appearance = "page",
+	toolbarFilters,
 }: {
 	readonly id: string;
 	readonly definition: SearchFeatureDefinition;
@@ -274,6 +280,7 @@ export function SearchFeature({
 		value: SearchScalar,
 	) => string | undefined;
 	readonly appearance?: "feed" | "page";
+	readonly toolbarFilters?: ReactNode;
 }) {
 	const { t } = useTranslation("search");
 	const { data: session } = useHydratedSession();
@@ -294,7 +301,9 @@ export function SearchFeature({
 			),
 		[initialSelections],
 	);
-	const [query, setQuery] = useState(initialState?.query ?? initialQuery ?? "");
+	const [query, setQuery] = useState(
+		unitFilterSearchQuery(initialState?.filter) || initialQuery || "",
+	);
 	const [category, setCategory] = useState(() =>
 		valuesOf(initial.quick.find((value) => value.filter.field === "category")).flatMap(
 			(value) => (typeof value === "string" ? [value] : []),
@@ -351,8 +360,18 @@ export function SearchFeature({
 		useState<readonly SharedSearchQuerySelection[]>(initialSelections);
 	const [builderOpen, setBuilderOpen] = useState(false);
 	const [filterOpen, setFilterOpen] = useState(false);
-	const [sort, setSort] = useState<SearchSort>(initialState?.sort ?? document.sort.default);
+	const [sortOverride, setSortOverride] = useState<SearchSort | undefined>(initialState?.sort);
 	const [shareState, setShareState] = useState<"idle" | "copied" | "failed">("idle");
+	const sortConfiguration = searchSortConfiguration(
+		document,
+		appearance === "feed" ? "feed" : "search",
+	);
+	const availableSorts = sortConfiguration.options.filter((value) =>
+		isSearchSortAvailable(value, query),
+	);
+	const activeSortOverride =
+		sortOverride && availableSorts.includes(sortOverride) ? sortOverride : undefined;
+	const sort = activeSortOverride ?? defaultSearchSort(sortConfiguration, query);
 
 	const controlByField = (field: SearchField) =>
 		controls.find((control) => control.field === field && control.modes.includes("advanced"));
@@ -435,6 +454,7 @@ export function SearchFeature({
 
 	function currentState(
 		nextAdvanced: SearchControlExpression | undefined,
+		nextSort: SearchSort | undefined = activeSortOverride,
 	): SharedSearchQueryState {
 		const clauses: SearchControlExpression[] = [];
 		if (categoryControl && category.length)
@@ -475,18 +495,22 @@ export function SearchFeature({
 				},
 			});
 		if (nextAdvanced) clauses.push(nextAdvanced);
+		const filter = withUnitFilterSearch(initialState?.filter, query);
 		return {
 			mode: "advanced",
-			query,
+			...(filter ? { filter } : {}),
 			expression: expressionFromClauses(clauses),
-			sort,
+			...(nextSort ? { sort: nextSort } : {}),
 		};
 	}
 
-	function execute(nextAdvanced: SearchControlExpression | undefined, nextSort = sort) {
+	function execute(
+		nextAdvanced: SearchControlExpression | undefined,
+		nextSort: SearchSort | undefined = activeSortOverride,
+	) {
 		onExecute({
 			injections: [...injections],
-			state: { ...currentState(nextAdvanced), sort: nextSort },
+			state: currentState(nextAdvanced, nextSort),
 		});
 	}
 
@@ -512,6 +536,7 @@ export function SearchFeature({
 						},
 					}
 				: undefined;
+		const filter = withUnitFilterSearch(initialState?.filter, defaultQuery);
 		setQuery(defaultQuery);
 		setCategory([]);
 		setLanguage(preferredLanguages);
@@ -520,21 +545,19 @@ export function SearchFeature({
 		setRealms([]);
 		setAdvanced(undefined);
 		setAdvancedSelections([]);
-		setSort(document.sort.default);
+		setSortOverride(undefined);
 		onExecute({
 			injections: [...injections],
 			state:
 				document.modes.default === "basic"
 					? {
 							mode: "basic",
-							query: defaultQuery,
-							sort: document.sort.default,
+							...(filter ? { filter } : {}),
 							values: languageDefault ? [languageDefault] : [],
 						}
 					: {
 							mode: "advanced",
-							query: defaultQuery,
-							sort: document.sort.default,
+							...(filter ? { filter } : {}),
 							...(languageDefault ? { expression: languageDefault } : {}),
 						},
 		});
@@ -554,7 +577,7 @@ export function SearchFeature({
 				t.advancedCombinations.any,
 			)
 		: "";
-	const sortOptions = document.sort.options.map((value) => ({
+	const sortOptions = availableSorts.map((value) => ({
 		value,
 		label: t.sortOptions[value],
 	}));
@@ -808,13 +831,14 @@ export function SearchFeature({
 							ariaLabel={t.sort}
 							onValueChange={([nextSort]) => {
 								if (!nextSort) return;
-								setSort(nextSort);
+								setSortOverride(nextSort);
 								execute(advanced, nextSort);
 							}}
 							options={sortOptions}
 							placeholder={t.sort}
 							value={[sort]}
 						/>
+						{toolbarFilters}
 						<Button onClick={() => setFilterOpen(true)} type="button" variant="outline">
 							<Filter aria-hidden />
 							{t.filters}
@@ -855,7 +879,7 @@ export function SearchFeature({
 							ariaLabel={t.sort}
 							onValueChange={([nextSort]) => {
 								if (!nextSort) return;
-								setSort(nextSort);
+								setSortOverride(nextSort);
 							}}
 							options={sortOptions}
 							placeholder={t.sort}

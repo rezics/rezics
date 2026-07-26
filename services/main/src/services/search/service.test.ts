@@ -1,6 +1,6 @@
 import { type SQL } from "drizzle-orm";
 import { PgDialect, type SelectedFields } from "drizzle-orm/pg-core";
-import { parseSearchCursor } from "@rezics/search";
+import { parseSearchCursor } from "./query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const execute = vi.hoisted(() => vi.fn());
@@ -183,6 +183,9 @@ describe("domain search SQL", () => {
 
 	it("rejects category-specific combinations before executing SQL", async () => {
 		await expect(searchDomain("units", { sort: "followerCount:desc" })).rejects.toBeInstanceOf(
+			InvalidSearch,
+		);
+		await expect(searchDomain("units", { sort: "relevance" })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);
 		await expect(searchDomain("tags", { multiple: true })).rejects.toBeInstanceOf(

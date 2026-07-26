@@ -1,6 +1,9 @@
-import { UnitFilter as UnitFilterSchema, type UnitFilter } from "@rezics/filter";
-import type { SearchCategory as SearchCategoryValue, SearchFilter } from "@rezics/search";
-import { SearchCategory, SearchFilter as SearchFilterSchema } from "@rezics/search";
+import { UnitPredicate as UnitPredicateSchema, type UnitPredicate } from "@rezics/filter";
+import type { SearchCategory as SearchCategoryValue, SearchControlPredicate } from "@rezics/filter";
+import {
+	SearchCategory,
+	SearchControlPredicate as SearchControlPredicateSchema,
+} from "@rezics/filter";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
@@ -52,7 +55,7 @@ export const CollectionDefinitionDocument = Type.Union(
 				_key: BlockKey,
 				source: Type.Literal("search"),
 				categories: Type.Array(SearchCategory, { minItems: 1, maxItems: 9 }),
-				filters: Type.Array(SearchFilterSchema, { maxItems: 50 }),
+				filters: Type.Array(SearchControlPredicateSchema, { maxItems: 50 }),
 			},
 			{ additionalProperties: false },
 		),
@@ -86,7 +89,7 @@ export const ZoneBoundaryDocument = Type.Object(
 		_type: Type.Literal("zone-boundary"),
 		_key: BlockKey,
 		categories: Type.Array(SearchCategory, { minItems: 1, maxItems: 9 }),
-		filter: Type.Optional(Type.Unsafe<UnitFilter>(UnitFilterSchema)),
+		filter: Type.Optional(Type.Unsafe<UnitPredicate>(UnitPredicateSchema)),
 	},
 	{ additionalProperties: false, $id: "ZoneBoundaryDocument" },
 );
@@ -160,7 +163,7 @@ export function createManualCollectionDefinitionDocument(
 
 export function createSearchCollectionDefinitionDocument(
 	categories: SearchCategoryValue[],
-	filters: SearchFilter[] = [],
+	filters: SearchControlPredicate[] = [],
 	key: BlockKey = createBlockKey(),
 ): CollectionDefinitionDocument {
 	return { _type: "collection-definition", _key: key, source: "search", categories, filters };
@@ -183,7 +186,7 @@ export function createCollectionPresentationDocument(
 
 export function createZoneBoundaryDocument(
 	categories: Static<typeof SearchCategory>[],
-	filter?: UnitFilter,
+	filter?: UnitPredicate,
 	key: BlockKey = createBlockKey(),
 ): ZoneBoundaryDocument {
 	return {

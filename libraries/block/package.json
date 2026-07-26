@@ -9,7 +9,6 @@
 	"dependencies": {
 		"@rezics/filter": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
-		"@rezics/search": "workspace:*",
 		"@sinclair/typebox": "^0.34.41"
 	},
 	"devDependencies": {

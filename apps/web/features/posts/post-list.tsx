@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetApiRecommendationsPostsByPostId } from "@rezics/openapi-tanstack-query";
-import type { SearchInjection } from "@rezics/search";
+import type { SearchInjection } from "@rezics/filter";
 import { useMemo, useState } from "react";
 
 import { CardContent, Skeleton } from "@rezics/ui";

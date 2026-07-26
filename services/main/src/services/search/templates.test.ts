@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { SearchTemplateIdValues, parseSharedSearchQueryDocument } from "@rezics/search";
+import { SearchTemplateIdValues, parseSharedSearchQueryDocument } from "@rezics/filter";
 
 import {
-	compileSearchFeatureInput,
+	compileSearchFeatureInput as compileSearchFeatureInputForSurface,
 	createDefaultSearchDocument,
 	resolveSearchDocument,
 } from "./templates";
@@ -12,11 +12,28 @@ const RealmId = "019b0000-0000-7000-8000-000000000002";
 const SecondTagId = "019b0000-0000-7000-8000-000000000003";
 const ProfileId = "019b0000-0000-7000-8000-000000000004";
 
+function compileSearchFeatureInput(input: unknown) {
+	return compileSearchFeatureInputForSurface(input, "search");
+}
+
 describe("Search Feature v1", () => {
 	it.each(SearchTemplateIdValues)("resolves the %s server template", (template) => {
 		const resolved = resolveSearchDocument(createDefaultSearchDocument(template));
 		expect(resolved.document.template.id).toBe(template);
 		expect(resolved.controls.length).toBeGreaterThan(0);
+	});
+
+	it("reports the failing path for a legacy persisted sort contract", () => {
+		const current = createDefaultSearchDocument("global");
+		expect(() =>
+			resolveSearchDocument({
+				...current,
+				sort: {
+					default: "relevance",
+					options: current.sort.search.options.filter((sort) => sort !== "best"),
+				},
+			}),
+		).toThrow(/Invalid Search document v1 at \/sort/);
 	});
 
 	it.each(["book", "media", "software"] as const)(
@@ -33,6 +50,50 @@ describe("Search Feature v1", () => {
 			expect(compiled.request.constraints).toEqual([]);
 		},
 	);
+
+	it("uses schema-controlled Search and Feed sorting profiles", () => {
+		const document = createDefaultSearchDocument("global");
+		const emptyState = { mode: "basic" as const, values: [] };
+		const textState = {
+			...emptyState,
+			filter: { search: { query: "design" } },
+		};
+		const input = { document, contexts: [], injections: [] };
+
+		expect(document.sort.search).toEqual({
+			defaults: { emptyQuery: "best", textQuery: "relevance" },
+			options: [
+				"best",
+				"relevance",
+				"createdAt:asc",
+				"createdAt:desc",
+				"updatedAt:asc",
+				"updatedAt:desc",
+			],
+		});
+		expect(document.sort.feed).toEqual({
+			defaults: { emptyQuery: "best", textQuery: "best" },
+			options: ["best", "createdAt:asc", "createdAt:desc", "updatedAt:asc", "updatedAt:desc"],
+		});
+		expect(
+			compileSearchFeatureInputForSurface({ ...input, state: emptyState }, "search").request
+				.sort,
+		).toBe("best");
+		expect(
+			compileSearchFeatureInputForSurface({ ...input, state: textState }, "search").request
+				.sort,
+		).toBe("relevance");
+		expect(
+			compileSearchFeatureInputForSurface({ ...input, state: textState }, "feed").request
+				.sort,
+		).toBe("best");
+		expect(() =>
+			compileSearchFeatureInputForSurface(
+				{ ...input, state: { ...textState, sort: "relevance" } },
+				"feed",
+			),
+		).toThrow("Search sort relevance is unavailable");
+	});
 
 	it("uses the dedicated Realms category without a redundant kind constraint", () => {
 		const compiled = compileSearchFeatureInput({
@@ -333,7 +394,10 @@ describe("Search Feature v1", () => {
 				...original,
 				sort: {
 					...original.sort,
-					options: [...original.sort.options, "publishedAt:desc"],
+					search: {
+						...original.sort.search,
+						options: [...original.sort.search.options, "publishedAt:desc"],
+					},
 				},
 			}),
 		).toThrow("sort is outside its template");
@@ -361,7 +425,7 @@ describe("Search Feature v1", () => {
 			template: "global",
 			state: {
 				mode: "advanced",
-				query: "design",
+				filter: { search: { query: "design" } },
 				expression: {
 					controlKey: "tag",
 					filter: { field: "tag", operator: "any-of", values: [TagId] },

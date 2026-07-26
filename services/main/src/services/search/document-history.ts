@@ -1,5 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm";
-import { parseSearchDocument, type SearchDocument } from "@rezics/search";
+import { parseSearchDocument, type SearchDocument } from "@rezics/filter";
 
 import type { DatabaseTransaction } from "../database";
 import {

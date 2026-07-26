@@ -34,37 +34,10 @@ import {
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
-	compileSearchRequest,
 	createSearchCursor,
 	parseSearchCursor,
-	type SearchConfiguration,
-} from "@rezics/search";
+} from "../../search/query";
 import { describe, expect, test } from "vitest";
-
-const searchConfiguration = {
-	scope: { kind: "global" },
-	categories: ["units"],
-	modes: { available: ["basic", "advanced"], default: "basic" },
-	query: { enabled: true },
-	constraints: [{ field: "content-rating", operator: "any-of", values: ["general"] }],
-	defaults: [{ field: "kind", operator: "any-of", values: ["book"] }],
-	controls: [
-		{
-			key: "kind",
-			field: "kind",
-			component: "multi-select",
-			modes: ["basic", "advanced"],
-			operators: ["any-of"],
-			optionSource: {
-				kind: "static",
-				options: [{ value: "book" }, { value: "software" }],
-			},
-			optionPolicy: { kind: "include", values: ["book", "software"] },
-		},
-	],
-	sort: { default: "relevance", options: ["relevance"] },
-	results: { pageSize: 20, maxPageSize: 50, maxResultWindow: 10_000, facets: ["kind"] },
-} satisfies SearchConfiguration;
 
 describe("Block document contracts", () => {
 	test("creates document-local twelve-character hexadecimal keys", () => {
@@ -444,43 +417,7 @@ describe("Block document contracts", () => {
 	});
 });
 
-describe("Search configuration semantics", () => {
-	test("keeps fixed constraints but lets request state replace prefilled defaults", () => {
-		const compiled = compileSearchRequest(searchConfiguration, {
-			mode: "basic",
-			filters: [{ field: "kind", operator: "any-of", values: ["software"] }],
-		});
-
-		expect(compiled.constraints).toEqual([
-			{ field: "content-rating", operator: "any-of", values: ["general"] },
-			{ field: "kind", operator: "any-of", values: ["software"] },
-		]);
-	});
-
-	test("rejects values hidden by the configured option allow-list", () => {
-		expect(() =>
-			compileSearchRequest(searchConfiguration, {
-				mode: "basic",
-				filters: [{ field: "kind", operator: "any-of", values: ["post"] }],
-			}),
-		).toThrow("hidden option");
-	});
-
-	test("supports a bounded structured advanced expression", () => {
-		const compiled = compileSearchRequest(searchConfiguration, {
-			mode: "advanced",
-			expression: {
-				operator: "any",
-				clauses: [
-					{ field: "kind", operator: "any-of", values: ["book"] },
-					{ field: "kind", operator: "any-of", values: ["software"] },
-				],
-			},
-		});
-
-		expect(compiled.searchExpression).toMatchObject({ operator: "any" });
-	});
-
+describe("Search execution primitives", () => {
 	test("validates composed searchExpression values at their runtime boundary", () => {
 		expect(() =>
 			assertSearchExpression({
@@ -516,7 +453,7 @@ describe("Search configuration semantics", () => {
 		).not.toThrow();
 	});
 
-	test("round-trips opaque cursors through the trusted request compiler", () => {
+	test("round-trips opaque cursors", () => {
 		const state = {
 			version: 2 as const,
 			generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
@@ -525,36 +462,7 @@ describe("Search configuration semantics", () => {
 			categories: { units: { offset: 720, exhausted: false } },
 		};
 		const cursor = createSearchCursor(state);
-		const compiled = compileSearchRequest(searchConfiguration, {
-			mode: "basic",
-			filters: [],
-			cursor,
-		});
-
-		expect(compiled.cursor).toBe(cursor);
-		if (!compiled.cursor) throw new Error("Compiled cursor is missing");
-		expect(parseSearchCursor(compiled.cursor)).toEqual(state);
+		expect(parseSearchCursor(cursor)).toEqual(state);
 		expect(() => parseSearchCursor("s_00")).toThrow("Invalid Search cursor");
-	});
-
-	test("enforces required controls and unique configuration identities", () => {
-		const required = {
-			...searchConfiguration,
-			defaults: [],
-			controls: [{ ...searchConfiguration.controls[0]!, required: true }],
-		} satisfies SearchConfiguration;
-
-		expect(() => compileSearchRequest(required, { mode: "basic", filters: [] })).toThrow(
-			"Required Search field kind is missing",
-		);
-		expect(() =>
-			compileSearchRequest(
-				{
-					...searchConfiguration,
-					results: { ...searchConfiguration.results, facets: ["kind", "kind"] },
-				},
-				{ mode: "basic", filters: [] },
-			),
-		).toThrow("Search facets must be unique");
 	});
 });

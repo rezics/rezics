@@ -64,11 +64,11 @@
 		"ranking.engagement24h"
 	],
 	"rankingRules": [
+		"sort",
 		"words",
 		"typo",
 		"proximity",
 		"attribute",
-		"sort",
 		"exactness",
 		"ranking.recommendationBest:desc",
 		"ranking.engagement24h:desc",

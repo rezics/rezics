@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import { CurrentSearchProjectionVersion } from "./contracts";
+import { SearchProjectionSettings } from "./settings";
 
-const generationDate = "20260725";
+const generationDate = "20260726";
 const currentIndexUid = `rezics_units_v${CurrentSearchProjectionVersion}_${generationDate}`;
 const currentSinkName = currentIndexUid.replaceAll("_", "-");
 
@@ -22,6 +23,10 @@ function taskDefinition(taskfile: string, name: string): string {
 }
 
 describe("current search generation deployment wiring", () => {
+	it("makes explicit result ordering authoritative over relevance ranking", () => {
+		expect(SearchProjectionSettings.current.rankingRules[0]).toBe("sort");
+	});
+
 	it("keeps the versioned index, sink, settings, and enrichment configuration aligned", async () => {
 		const [environment, compose, sequin, enrichment, settings, rootTaskfile, appHostTaskfile] =
 			await Promise.all([

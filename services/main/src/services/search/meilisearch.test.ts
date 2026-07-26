@@ -86,4 +86,39 @@ describe("Meilisearch expression compiler", () => {
 			throw new TypeError("Expected a JSON multi-search request body");
 		expect(JSON.parse(request.body).queries).toHaveLength(2);
 	});
+
+	it("orders matching Feed candidates by best instead of text relevance", async () => {
+		const fetchMock = vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					results: [{ hits: [], estimatedTotalHits: 0, processingTimeMs: 1 }],
+				}),
+				{ status: 200, headers: { "Content-Type": "application/json" } },
+			),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		await searchCandidates([
+			{
+				indexUid: "rezics_units_v6_20260725",
+				category: "units",
+				query: "book",
+				offset: 0,
+				limit: 20,
+				sort: "best",
+			},
+		]);
+
+		const request = fetchMock.mock.calls[0]?.[1];
+		if (!request || typeof request.body !== "string")
+			throw new TypeError("Expected a JSON multi-search request body");
+		expect(JSON.parse(request.body)).toMatchObject({
+			queries: [
+				{
+					q: "book",
+					sort: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"],
+				},
+			],
+		});
+	});
 });

@@ -1,4 +1,4 @@
-import type { SearchCategory, SearchField, SearchOperator } from "@rezics/search";
+import type { SearchCategory, SearchField, SearchOperator } from "@rezics/filter";
 
 export type SearchScalarKind =
 	"boolean" | "date" | "integer" | "string" | "uuid" | "realm-tag-vote";

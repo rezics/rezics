@@ -1,42 +1,52 @@
 import {
-	assertSearchExpression,
 	canonicalSearchFeatureInput,
-	combineSearchExpressions,
+	combineUnitPredicates,
+	defaultSearchSort,
+	isSearchSortAvailable,
 	parseSearchFeatureInput,
 	parseSearchDocument,
-	type CompiledSearchRequest,
 	type ResolvedSearchControl,
 	type SearchControlExpression,
 	type SearchControlValue,
 	type SearchDocument,
 	type SearchDocumentControl,
-	type SearchExpression,
 	type SearchFeatureContext,
 	type SearchFeatureInput,
+	type SearchFeatureSurface,
 	type SearchField,
-	type SearchFilter,
+	type SearchControlPredicate,
 	type SearchMode,
 	type SearchScalar,
+	type SearchSort,
 	type SearchTemplateId,
-} from "@rezics/search";
+	searchSortConfiguration,
+	unitFilterSearchQuery,
+} from "@rezics/filter";
 
 import { InvalidSearch } from "./errors";
 import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
+import {
+	assertSearchExpression,
+	combineSearchExpressions,
+	type CompiledSearchRequest,
+	type SearchExpression,
+} from "./query";
 import { SearchCategories } from "./schema";
 
 interface SearchTemplateDefinition {
 	readonly id: SearchTemplateId;
 	readonly categories: readonly (typeof SearchCategories)[number][];
 	readonly fields: readonly SearchField[];
-	readonly constraints: readonly SearchFilter[];
+	readonly constraints: readonly SearchControlPredicate[];
 	readonly visible: ReadonlySet<SearchField>;
 	readonly defaultFacets: readonly SearchField[];
-	readonly sorts: readonly SearchDocument["sort"]["options"][number][];
+	readonly sorts: readonly SearchSort[];
 	readonly maxPageSize: number;
 	readonly maxResultWindow: number;
 }
 
 const CommonSorts = [
+	"best",
 	"relevance",
 	"createdAt:asc",
 	"createdAt:desc",
@@ -236,8 +246,9 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 		if (control.optionPolicy && control.optionPolicy.kind !== "all")
 			for (const value of control.optionPolicy.values) validateScalar(control.field, value);
 	}
-	if (!document.sort.options.every((sort) => template.sorts.includes(sort)))
-		throw new InvalidSearch("Search document sort is outside its template");
+	for (const configuration of [document.sort.search, document.sort.feed])
+		if (!configuration.options.every((sort) => template.sorts.includes(sort)))
+			throw new InvalidSearch("Search document sort is outside its template");
 	if (document.results.maxPageSize > template.maxPageSize)
 		throw new InvalidSearch("Search document page size exceeds its template");
 	if (document.results.maxResultWindow > template.maxResultWindow)
@@ -297,8 +308,14 @@ export function createDefaultSearchDocument(templateId: SearchTemplateId): Searc
 				: []),
 		],
 		sort: {
-			default: "relevance",
-			options: [...template.sorts],
+			search: {
+				defaults: { emptyQuery: "best", textQuery: "relevance" },
+				options: [...template.sorts],
+			},
+			feed: {
+				defaults: { emptyQuery: "best", textQuery: "best" },
+				options: template.sorts.filter((sort) => sort !== "relevance"),
+			},
 		},
 		results: {
 			pageSize: 20,
@@ -347,7 +364,7 @@ export function resolveSearchDocument(documentValue: unknown) {
 	return { document, controls } as const;
 }
 
-function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+function filterValues(filter: SearchControlPredicate): readonly SearchScalar[] {
 	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
@@ -381,7 +398,7 @@ function validateScalar(field: SearchField, value: SearchScalar): void {
 	if (!valid) throw new InvalidSearch(`Search field ${field} has an invalid ${scalar} value`);
 }
 
-function validateFilterValue(filter: SearchFilter): void {
+function validateFilterValue(filter: SearchControlPredicate): void {
 	if (filter.field === "realm-tag-vote") {
 		if (filter.operator !== "matches")
 			throw new InvalidSearch("Realm Tag vote requires the matches operator");
@@ -442,14 +459,14 @@ function validateControlValue(
 		throw new InvalidSearch(`Search control ${control.key} uses a hidden option`);
 }
 
-function normalizeFilterExpression(filter: SearchFilter): SearchExpression {
+function normalizeFilterExpression(filter: SearchControlPredicate): SearchExpression {
 	if (
 		filter.operator !== "all-of" &&
 		filter.operator !== "any-of" &&
 		filter.operator !== "none-of"
 	)
 		return filter;
-	const clauses = filter.values.map((value): SearchFilter => {
+	const clauses = filter.values.map((value): SearchControlPredicate => {
 		if (filter.operator === "none-of")
 			return { field: filter.field, operator: "not-equals", value };
 		return { field: filter.field, operator: "equals", value };
@@ -557,7 +574,10 @@ export interface CompiledSearchFeature {
 	}[];
 }
 
-export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFeature {
+export function compileSearchFeatureInput(
+	inputValue: unknown,
+	surface: SearchFeatureSurface,
+): CompiledSearchFeature {
 	let input: SearchFeatureInput;
 	try {
 		input = parseSearchFeatureInput(inputValue);
@@ -570,14 +590,17 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 	const mode = input.state.mode;
 	if (!input.document.modes.available.includes(mode))
 		throw new InvalidSearch(`Search mode ${mode} is unavailable`);
-	if (!input.document.query.enabled && input.state.query)
+	const query = unitFilterSearchQuery(input.state.filter);
+	if (!input.document.query.enabled && query)
 		throw new InvalidSearch("This Search document does not accept a query");
-	const query = input.state.query ?? "";
 	if (input.document.query.required && !query.trim())
 		throw new InvalidSearch("Search query is required");
-	const sort = input.state.sort ?? input.document.sort.default;
-	if (!input.document.sort.options.includes(sort))
+	const sortConfiguration = searchSortConfiguration(input.document, surface);
+	const sort = input.state.sort ?? defaultSearchSort(sortConfiguration, query);
+	if (!sortConfiguration.options.includes(sort))
 		throw new InvalidSearch(`Search sort ${sort} is unavailable`);
+	if (!isSearchSortAvailable(sort, query))
+		throw new InvalidSearch(`Search sort ${sort} requires a text query`);
 	const pageSize = input.state.pageSize ?? input.document.results.pageSize;
 	if (pageSize > input.document.results.maxPageSize)
 		throw new InvalidSearch("Search page size exceeds the configured maximum");
@@ -641,6 +664,7 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			...(control.optionPolicy ? { optionPolicy: control.optionPolicy } : {}),
 		};
 	});
+	const domainFilter = combineUnitPredicates([input.document.filter, input.state.filter?.where]);
 	return {
 		request: {
 			scope: context.scope,
@@ -649,7 +673,7 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			query,
 			constraints: [...template.constraints, ...context.contextFilters],
 			searchExpression,
-			...(input.document.filter ? { domainFilter: input.document.filter } : {}),
+			...(domainFilter ? { domainFilter } : {}),
 			sort,
 			pageSize,
 			maxResultWindow: input.document.results.maxResultWindow,
@@ -657,7 +681,7 @@ export function compileSearchFeatureInput(inputValue: unknown): CompiledSearchFe
 			facets: [...new Set(facets.map((facet) => facet.field))],
 		},
 		...(context.enforcedZoneId ? { enforcedZoneId: context.enforcedZoneId } : {}),
-		inputIdentity: canonicalSearchFeatureInput(withoutCursor(input)),
+		inputIdentity: `${surface}:${canonicalSearchFeatureInput(withoutCursor(input))}`,
 		facetBindings: facets,
 	};
 }
@@ -688,17 +712,16 @@ export function mapSearchFeatureFacets(
 
 export async function executeSearchFeatureInput(
 	input: unknown,
+	surface: SearchFeatureSurface,
 	profileId?: string,
-	additionalDomainFilter?: CompiledSearchRequest["domainFilter"],
 ) {
-	const compiled = compileSearchFeatureInput(input);
-	const { executeCompiledSearch } = await import("./configuration");
+	const compiled = compileSearchFeatureInput(input, surface);
+	const { executeCompiledSearch } = await import("./execution");
 	const result = await executeCompiledSearch(
 		compiled.request,
 		profileId,
 		compiled.enforcedZoneId,
 		compiled.inputIdentity,
-		additionalDomainFilter,
 	);
 	return {
 		...result,

@@ -1126,7 +1126,7 @@ export type CollectionFilter = {
 		  };
 };
 
-export const UnitFilterKindInEnum = {
+export const UnitPredicateKindInEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
 	book: "book",
@@ -1147,24 +1147,25 @@ export const UnitFilterKindInEnum = {
 	realm_rule: "realm_rule",
 } as const;
 
-export type UnitFilterKindInEnum = (typeof UnitFilterKindInEnum)[keyof typeof UnitFilterKindInEnum];
+export type UnitPredicateKindInEnum =
+	(typeof UnitPredicateKindInEnum)[keyof typeof UnitPredicateKindInEnum];
 
 /**
  * @type object
  */
-export type UnitFilter = {
+export type UnitPredicate = {
 	/**
 	 * @type array | undefined
 	 */
-	all?: UnitFilter[];
+	all?: UnitPredicate[];
 	/**
 	 * @type array | undefined
 	 */
-	any?: UnitFilter[];
+	any?: UnitPredicate[];
 	/**
 	 * @type object | undefined
 	 */
-	not?: UnitFilter;
+	not?: UnitPredicate;
 	/**
 	 * @type object | undefined
 	 */
@@ -1181,7 +1182,7 @@ export type UnitFilter = {
 		/**
 		 * @type array
 		 */
-		in: UnitFilterKindInEnum[];
+		in: UnitPredicateKindInEnum[];
 	};
 	localizations?:
 		| {
@@ -2836,6 +2837,43 @@ export type UnitFilter = {
 /**
  * @type object
  */
+export type SearchMatch = {
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string
+	 */
+	query: string;
+};
+
+export type UnitFilter =
+	| {
+			/**
+			 * @type object
+			 */
+			search: {
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				query: string;
+			};
+			/**
+			 * @type object | undefined
+			 */
+			where?: UnitPredicate;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			where: UnitPredicate;
+	  };
+
+/**
+ * @type object
+ */
 export type DockDocument = {
 	/**
 	 * @type string
@@ -3740,7 +3778,7 @@ export type ZoneBoundaryDocument = {
 	/**
 	 * @type object | undefined
 	 */
-	filter?: UnitFilter;
+	filter?: UnitPredicate;
 };
 
 export const ZoneThemeDocumentColorSchemeEnum = {
@@ -3902,7 +3940,8 @@ export const SearchDocumentV1SectionsDisclosureEnum = {
 export type SearchDocumentV1SectionsDisclosureEnum =
 	(typeof SearchDocumentV1SectionsDisclosureEnum)[keyof typeof SearchDocumentV1SectionsDisclosureEnum];
 
-export const SearchDocumentV1SortDefaultEnum = {
+export const SearchDocumentV1SortSearchDefaultsEmptyQueryEnum = {
+	best: "best",
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
 	"createdAt:desc": "createdAt:desc",
@@ -3918,10 +3957,11 @@ export const SearchDocumentV1SortDefaultEnum = {
 	"closesAt:desc": "closesAt:desc",
 } as const;
 
-export type SearchDocumentV1SortDefaultEnum =
-	(typeof SearchDocumentV1SortDefaultEnum)[keyof typeof SearchDocumentV1SortDefaultEnum];
+export type SearchDocumentV1SortSearchDefaultsEmptyQueryEnum =
+	(typeof SearchDocumentV1SortSearchDefaultsEmptyQueryEnum)[keyof typeof SearchDocumentV1SortSearchDefaultsEmptyQueryEnum];
 
-export const SearchDocumentV1SortOptionsEnum = {
+export const SearchDocumentV1SortSearchDefaultsTextQueryEnum = {
+	best: "best",
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
 	"createdAt:desc": "createdAt:desc",
@@ -3937,8 +3977,88 @@ export const SearchDocumentV1SortOptionsEnum = {
 	"closesAt:desc": "closesAt:desc",
 } as const;
 
-export type SearchDocumentV1SortOptionsEnum =
-	(typeof SearchDocumentV1SortOptionsEnum)[keyof typeof SearchDocumentV1SortOptionsEnum];
+export type SearchDocumentV1SortSearchDefaultsTextQueryEnum =
+	(typeof SearchDocumentV1SortSearchDefaultsTextQueryEnum)[keyof typeof SearchDocumentV1SortSearchDefaultsTextQueryEnum];
+
+export const SearchDocumentV1SortSearchOptionsEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type SearchDocumentV1SortSearchOptionsEnum =
+	(typeof SearchDocumentV1SortSearchOptionsEnum)[keyof typeof SearchDocumentV1SortSearchOptionsEnum];
+
+export const SearchDocumentV1SortFeedDefaultsEmptyQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type SearchDocumentV1SortFeedDefaultsEmptyQueryEnum =
+	(typeof SearchDocumentV1SortFeedDefaultsEmptyQueryEnum)[keyof typeof SearchDocumentV1SortFeedDefaultsEmptyQueryEnum];
+
+export const SearchDocumentV1SortFeedDefaultsTextQueryEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type SearchDocumentV1SortFeedDefaultsTextQueryEnum =
+	(typeof SearchDocumentV1SortFeedDefaultsTextQueryEnum)[keyof typeof SearchDocumentV1SortFeedDefaultsTextQueryEnum];
+
+export const SearchDocumentV1SortFeedOptionsEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type SearchDocumentV1SortFeedOptionsEnum =
+	(typeof SearchDocumentV1SortFeedOptionsEnum)[keyof typeof SearchDocumentV1SortFeedOptionsEnum];
 
 /**
  * @type object
@@ -3995,7 +4115,7 @@ export type SearchDocumentV1 = {
 	/**
 	 * @type object | undefined
 	 */
-	filter?: UnitFilter;
+	filter?: UnitPredicate;
 	/**
 	 * @type array
 	 */
@@ -4459,13 +4579,49 @@ export type SearchDocumentV1 = {
 	 */
 	sort: {
 		/**
-		 * @type string
+		 * @type object
 		 */
-		default: SearchDocumentV1SortDefaultEnum;
+		search: {
+			/**
+			 * @type object
+			 */
+			defaults: {
+				/**
+				 * @type string
+				 */
+				emptyQuery: SearchDocumentV1SortSearchDefaultsEmptyQueryEnum;
+				/**
+				 * @type string
+				 */
+				textQuery: SearchDocumentV1SortSearchDefaultsTextQueryEnum;
+			};
+			/**
+			 * @type array
+			 */
+			options: SearchDocumentV1SortSearchOptionsEnum[];
+		};
 		/**
-		 * @type array
+		 * @type object
 		 */
-		options: SearchDocumentV1SortOptionsEnum[];
+		feed: {
+			/**
+			 * @type object
+			 */
+			defaults: {
+				/**
+				 * @type string
+				 */
+				emptyQuery: SearchDocumentV1SortFeedDefaultsEmptyQueryEnum;
+				/**
+				 * @type string
+				 */
+				textQuery: SearchDocumentV1SortFeedDefaultsTextQueryEnum;
+			};
+			/**
+			 * @type array
+			 */
+			options: SearchDocumentV1SortFeedOptionsEnum[];
+		};
 	};
 	/**
 	 * @type object
@@ -16030,7 +16186,7 @@ export type PostApiFeedQueryBody = {
 	/**
 	 * @type object | undefined
 	 */
-	filter?: UnitFilter;
+	filter?: UnitPredicate;
 	/**
 	 * @default 'best'
 	 * @type string | undefined
@@ -85750,12 +85906,9 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 	}[];
 	state:
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -86155,12 +86308,9 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 				}[];
 		  }
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -88983,12 +89133,9 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 	}[];
 	state:
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -89388,12 +89535,9 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 				}[];
 		  }
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -91039,12 +91183,9 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 	}[];
 	state:
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -91444,12 +91585,9 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 				}[];
 		  }
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -93116,12 +93254,9 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 	}[];
 	state:
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -93521,12 +93656,9 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 				}[];
 		  }
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -94784,12 +94916,9 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 	}[];
 	state:
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -95189,12 +95318,9 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 				}[];
 		  }
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -97617,31 +97743,6 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjecti
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestInjectionsSourceEnum];
 
-export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum = {
-	"unit:profile": "unit:profile",
-	"unit:book": "unit:book",
-	"unit:software": "unit:software",
-	"unit:media": "unit:media",
-	"unit:release": "unit:release",
-	"unit:entity": "unit:entity",
-	"unit:tag": "unit:tag",
-	"unit:series": "unit:series",
-	"unit:zone": "unit:zone",
-	"unit:collection": "unit:collection",
-	"unit:poll": "unit:poll",
-	"unit:realm": "unit:realm",
-	"post:post": "post:post",
-	"post:excerpt": "post:excerpt",
-	"post:review": "post:review",
-	"post:chapter": "post:chapter",
-	"post:chapter_group": "post:chapter_group",
-	"post:wiki": "post:wiki",
-	"post:picture": "post:picture",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum =
-	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum];
-
 /**
  * @type object
  */
@@ -98030,12 +98131,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 	}[];
 	state:
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -98435,12 +98533,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 				}[];
 		  }
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -98854,10 +98949,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							clause: unknown;
 					  };
 		  };
-	/**
-	 * @type array | undefined
-	 */
-	contentKinds?: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestContentKindsEnum[];
 	surface:
 		| {
 				/**
@@ -99417,12 +99508,9 @@ export type PostApiSearchSharedQueriesStatus201 = {
 		template: PostApiSearchSharedQueriesStatus201DocumentTemplateEnum;
 		state:
 			| {
-					/**
-					 * @maxLength 500
-					 * @type string | undefined
-					 */
-					query?: string;
+					filter?: UnitFilter;
 					sort?:
+						| "best"
 						| "relevance"
 						| "createdAt:asc"
 						| "createdAt:desc"
@@ -99816,12 +99904,9 @@ export type PostApiSearchSharedQueriesStatus201 = {
 					}[];
 			  }
 			| {
-					/**
-					 * @maxLength 500
-					 * @type string | undefined
-					 */
-					query?: string;
+					filter?: UnitFilter;
 					sort?:
+						| "best"
 						| "relevance"
 						| "createdAt:asc"
 						| "createdAt:desc"
@@ -100426,12 +100511,9 @@ export type PostApiSearchSharedQueriesBody = {
 	template: PostApiSearchSharedQueriesRequestTemplateEnum;
 	state:
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -100825,12 +100907,9 @@ export type PostApiSearchSharedQueriesBody = {
 				}[];
 		  }
 		| {
-				/**
-				 * @maxLength 500
-				 * @type string | undefined
-				 */
-				query?: string;
+				filter?: UnitFilter;
 				sort?:
+					| "best"
 					| "relevance"
 					| "createdAt:asc"
 					| "createdAt:desc"
@@ -101394,12 +101473,9 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 		template: GetApiSearchSharedQueriesByIdStatus200DocumentTemplateEnum;
 		state:
 			| {
-					/**
-					 * @maxLength 500
-					 * @type string | undefined
-					 */
-					query?: string;
+					filter?: UnitFilter;
 					sort?:
+						| "best"
 						| "relevance"
 						| "createdAt:asc"
 						| "createdAt:desc"
@@ -101793,12 +101869,9 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 					}[];
 			  }
 			| {
-					/**
-					 * @maxLength 500
-					 * @type string | undefined
-					 */
-					query?: string;
+					filter?: UnitFilter;
 					sort?:
+						| "best"
 						| "relevance"
 						| "createdAt:asc"
 						| "createdAt:desc"
@@ -102668,6 +102741,7 @@ export type PostApiSearchByIndexRequestLicensesEnum =
 	(typeof PostApiSearchByIndexRequestLicensesEnum)[keyof typeof PostApiSearchByIndexRequestLicensesEnum];
 
 export const PostApiSearchByIndexRequestSortEnum = {
+	best: "best",
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
 	"createdAt:desc": "createdAt:desc",

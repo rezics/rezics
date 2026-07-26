@@ -7,7 +7,7 @@ import type {
 	SearchOperator,
 	SearchScalar,
 	SharedSearchQuerySelection,
-} from "@rezics/search";
+} from "@rezics/filter";
 import {
 	Button,
 	ChoiceSelect,

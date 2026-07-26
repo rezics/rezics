@@ -50,7 +50,7 @@ functions:
       file: "history-routing.exs"
 
 sinks:
-    - name: "${MEILISEARCH_CURRENT_SINK_NAME:-rezics-units-v6-20260725}"
+    - name: "${MEILISEARCH_CURRENT_SINK_NAME:-rezics-units-v6-20260726}"
       database: "rezics-authoritative"
       source:
           include_tables:
@@ -66,7 +66,7 @@ sinks:
       transform: "rezics-unit-search-transform-v1"
       routing: "rezics-unit-search-routing-v1"
       annotations:
-          routing_index_name: &current_index_name "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v6_20260725}"
+          routing_index_name: &current_index_name "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v6_20260726}"
       load_shedding_policy: "pause_on_full"
       destination:
           type: "meilisearch"

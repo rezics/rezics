@@ -1,4 +1,4 @@
-import { parseSharedSearchQueryDocument, type SharedSearchQueryDocument } from "@rezics/search";
+import { parseSharedSearchQueryDocument, type SharedSearchQueryDocument } from "@rezics/filter";
 import { eq } from "drizzle-orm";
 
 import type { DatabaseExecutor } from "../database";
@@ -25,12 +25,15 @@ function validateDocument(value: unknown): SharedSearchQueryDocument {
 			cause instanceof Error ? cause.message : "Invalid shared Search query document",
 		);
 	}
-	compileSearchFeatureInput({
-		document: createDefaultSearchDocument(document.template),
-		contexts: [],
-		injections: [],
-		state: document.state,
-	});
+	compileSearchFeatureInput(
+		{
+			document: createDefaultSearchDocument(document.template),
+			contexts: [],
+			injections: [],
+			state: document.state,
+		},
+		"search",
+	);
 	return document;
 }
 

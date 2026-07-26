@@ -35,9 +35,6 @@
 			"path": "./libraries/filter"
 		},
 		{
-			"path": "./libraries/search"
-		},
-		{
 			"path": "./libraries/slug"
 		},
 		{

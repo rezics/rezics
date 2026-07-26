@@ -13,7 +13,8 @@ import {
 	type SearchTemplateId,
 	type SharedSearchQuerySelection,
 	type SharedSearchQueryState,
-} from "@rezics/search";
+	unitFilterSearchQuery,
+} from "@rezics/filter";
 import {
 	type PostApiSearchFeaturesByTemplateExecuteStatus200,
 	useGetApiSearchFeaturesByTemplate,
@@ -154,7 +155,7 @@ export function SearchSurface({
 	async function run(request: SearchFeatureRequest, append = false) {
 		if (!append) {
 			setLastRequest(request);
-			onQueryChange?.(request.state.query?.trim() ?? "");
+			onQueryChange?.(unitFilterSearchQuery(request.state.filter));
 		}
 		try {
 			const response =
@@ -430,7 +431,7 @@ function SharedSearchPage({ id }: { readonly id: string }) {
 	return (
 		<SearchLayout
 			id={`shared-search-${id}`}
-			initialQuery={document.state.query}
+			initialQuery={unitFilterSearchQuery(document.state.filter)}
 			initialSelections={document.selections}
 			initialState={document.state}
 			key={id}

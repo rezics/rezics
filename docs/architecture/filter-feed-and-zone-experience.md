@@ -6,12 +6,17 @@ Owner: Domain
 
 ## Decision
 
-Rezics uses `@rezics/filter` as the public, engine-independent predicate
-contract over Units. A Filter is a bounded tree with `all`, `any`, and `not`
-composition. Its typed relation predicates describe domain concepts such as
-localizations, Realm placement, Tag assertions and their authority, Scores,
-and Posts. It does not expose database table names, search-index field names,
-or an engine query language.
+Rezics uses `@rezics/filter` as the only public, engine-independent Unit
+selection contract. `UnitPredicate` is a bounded domain tree with `all`, `any`,
+and `not` composition. `UnitFilter` adds an optional positive `SearchMatch`
+alongside an optional `where: UnitPredicate`. Search is deliberately outside
+the recursive predicate: cross-engine `OR`, `NOT Search`, and multi-query score
+aggregation are not valid public states.
+
+Typed predicates describe domain concepts such as localizations, Realm
+placement, Tag assertions and their authority, Scores, and Posts. Neither
+contract exposes database table names, search-index field names, or an engine
+query language.
 
 Feed accepts this Filter through `POST /feed/query`. The standard Feed UI emits
 only content-kind, language, Realm, and Tag predicates. Content-kind selection
@@ -23,23 +28,45 @@ introducing a Review-only filtering language. Feed sorts are recommendation
 objectives (`best`, `hot`, `new`, `top`, and `rising`); Feed never exposes
 relevance.
 
-Search is a feature that combines:
+Search is a presentation and execution feature over the same `UnitFilter`. It
+combines:
 
-- optional full-text query input;
+- optional `UnitFilter.search` input executed by the Search Service;
 - a trusted SearchDocument;
 - user-facing controls, facets, and Search-only relevance sorting;
-- an optional domain Filter for fixed scope;
+- `UnitFilter.where` plus trusted domain predicates for fixed scope;
 - an internal adapter to the current search index.
 
-Full-text query text is request state. It is never stored as initial text in a
-SearchDocument, because stored query copy would bypass the localization
-ownership model. Search-index expressions remain internal implementation
-details and are not a public Filter schema.
+SearchDocument controls emit bounded `SearchControlPredicate` values. Those
+values are trusted-control state, not another general Unit Filter: only the
+Search Feature accepts them, and the server resolves them to a private
+Search-Service expression after checking the selected control and template.
 
-Zone boundaries use an optional domain Filter plus Search categories. A Feed
+SearchDocument owns separate Search and Feed sort profiles. Each profile
+selects an ordered subset of server-owned strategies and declares defaults for
+empty and non-empty text queries. Search defaults to `best` without text and
+`relevance` with text. Feed defaults to `best` in both states and may never
+include `relevance`, even when its Filter contains a Search match. `best` is a
+recommendation order; `relevance` is text-query ranking and is invalid without
+a non-empty query. A document may select strategies but cannot define raw
+index fields or engine ranking expressions.
+
+Full-text query text remains request state inside the Filter. It is never
+stored as initial text in a SearchDocument, because stored query copy would
+bypass the localization ownership model. Search-index expressions, cursor
+encoding, and engine compilation are server-internal implementation details,
+not another public Filter schema.
+
+Zone boundaries use an optional `UnitPredicate` plus Search categories. A Feed
 Block does not store a custom Filter. The standard Zone Feed Block uses the
-Zone Search Feature, while advanced Search remains a separate, subdued link or
-screen owned by the Search feature.
+Zone Search Feature. Its content-type selector emits a `UnitPredicate` and is
+rendered in the same Filter toolbar as sort and the remaining Filter controls.
+The shared toolbar keeps its product-wide order fixed as sort, schema-selected
+quick filters, then the remaining Filter action. Schema controls capabilities,
+option order, and defaults; it does not duplicate this invariant layout in
+every document.
+Advanced Search exposes the trusted `kind` control under the user-facing
+“Content type” label.
 
 ## Required Zone experience
 
@@ -51,8 +78,9 @@ Every live Zone must have:
 
 Zone creation provisions both requirements in the same database transaction as
 the Zone. The default page is published, addressed as `home`, placed in the
-Zone page structure, and owned by the Zone creator. The default SearchDocument
-uses the global template.
+Zone page structure, and owned by the Zone creator. The Search template is an
+explicit bootstrap input. Ordinary Zones use `global`; official catalog Zones
+use their Book, Media, or Software template from their bootstrap manifest.
 
 Bootstrap reconciles this invariant for every Zone, not only official Zones.
 Readiness fails when any live Zone lacks either capability. Updating or deleting
@@ -70,11 +98,20 @@ boundary. Depth, node count, set uniqueness, UUIDs, enum values, and numeric
 ranges are bounded. Feed cursors include a cryptographic hash of canonical
 Filter JSON so a cursor cannot be reused with a different Filter.
 
-Feed compiles Filter predicates to parameterized SQL. Search compiles only the
-subset represented by the current index and fails closed for unsupported
-predicates; it never silently broadens results. Viewer-relative predicates,
+Feed compiles `UnitPredicate` to parameterized SQL. When `UnitFilter.search` is
+present, the Search Service supplies matching candidate identities and applies
+query ranking only when the selected Search profile requests it. The
+authoritative domain predicate is still composed separately. Engine
+pushdown fails closed for unsupported predicates; it never silently broadens
+results. Viewer-relative predicates,
 including private Tags and viewer-authored Scores, require an authenticated
 Profile and evaluate to no match when one is unavailable.
+
+Meilisearch treats an explicit ordering strategy as authoritative. `relevance`
+therefore emits no explicit sort, while `best` and field orders emit a sort
+whose ranking rule precedes text-ranking rules. Text may still select the
+candidate set for a Feed, but it cannot silently turn that Feed into a
+relevance-ranked Search result.
 
 ## Rationale
 

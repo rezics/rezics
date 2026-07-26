@@ -5,11 +5,11 @@ import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
 import {
-	assertUnitFilter,
-	canonicalUnitFilter,
+	assertUnitPredicate,
+	canonicalUnitPredicate,
 	FilterSchemaModels,
 	readSimpleFeedFilter,
-	type UnitFilter,
+	type UnitPredicate,
 } from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
 
@@ -62,7 +62,7 @@ import { recommendationObjectiveExpression } from "../../recommendations/sql-ran
 import { createRecommendationTracking } from "../../recommendations/tracking";
 import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
-import { compileUnitFilterSql } from "../../filter/sql";
+import { compileUnitPredicateSql } from "../../filter/sql";
 import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
@@ -210,7 +210,7 @@ interface FeedEligibilityBaseScope {
 	readonly languages?: readonly ContentLanguage[];
 	readonly realmIds?: readonly string[];
 	readonly subjectId?: string;
-	readonly filter?: UnitFilter;
+	readonly filter?: UnitPredicate;
 	readonly reviewScore?: never;
 }
 
@@ -263,7 +263,7 @@ function validateCursor(
 ) {
 	if (!cursor) return;
 	const filterHash = query.filter
-		? createHash("sha256").update(canonicalUnitFilter(query.filter)).digest("hex")
+		? createHash("sha256").update(canonicalUnitPredicate(query.filter)).digest("hex")
 		: null;
 	if (
 		cursor.sort !== (query.sort ?? "best") ||
@@ -338,7 +338,7 @@ export function getFeedEligibilityCondition(
 			)`
 			: undefined,
 		scope.filter
-			? compileUnitFilterSql(scope.filter, {
+			? compileUnitPredicateSql(scope.filter, {
 					unitId: sql`${unit.id}`,
 					unitKind: sql`${unit.kind}`,
 					...(viewer.profileId ? { viewerProfileId: viewer.profileId } : {}),
@@ -1112,7 +1112,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 	async ({ body, request }) => {
 		if (body.filter)
 			try {
-				assertUnitFilter(body.filter);
+				assertUnitPredicate(body.filter);
 			} catch {
 				throw new InvalidFeedFilter();
 			}
@@ -1190,7 +1190,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 								sort,
 								filterHash: body.filter
 									? createHash("sha256")
-											.update(canonicalUnitFilter(body.filter))
+											.update(canonicalUnitPredicate(body.filter))
 											.digest("hex")
 									: null,
 								personalized: viewer.personalized,

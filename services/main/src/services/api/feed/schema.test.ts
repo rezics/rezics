@@ -1,11 +1,11 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
-import { UnitFilter } from "@rezics/filter";
+import { UnitPredicate } from "@rezics/filter";
 
 import { FeedRequest } from "./schema";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";
-const checkFeedRequest = (value: unknown) => Check(FeedRequest, [UnitFilter], value);
+const checkFeedRequest = (value: unknown) => Check(FeedRequest, [UnitPredicate], value);
 
 describe("Feed API contract", () => {
 	it("accepts the canonical domain Filter tree", () => {

@@ -16,7 +16,7 @@ import {
 	type FontAwesomeIconReference,
 } from "@rezics/avatar";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import type { UnitFilter } from "@rezics/filter";
+import type { UnitPredicate } from "@rezics/filter";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 
 import { PlatformCapabilityValues } from "../database/schema/contract-values";
@@ -265,7 +265,7 @@ function createCatalogZoneBoundaryDocument(kind: "book" | "media" | "software", 
 			{ post: { is: { subject: { is: { kind: { in: [kind] } } } } } },
 			{ collection: { is: { items: { some: { kind: { in: [kind] } } } } } },
 		],
-	} satisfies UnitFilter;
+	} satisfies UnitPredicate;
 	return createZoneBoundaryDocument([...CatalogZoneCategories], filter, key);
 }
 

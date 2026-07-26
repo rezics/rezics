@@ -21,6 +21,6 @@ describe("catalog Zone Feed content kinds", () => {
 
 	it("does not enable the catalog selector for unrelated Zones", () => {
 		expect(catalogZoneFeedContentKinds("realm")).toBeUndefined();
-		expect(catalogZoneFeedContentKinds(null)).toBeUndefined();
+		expect(catalogZoneFeedContentKinds("global")).toBeUndefined();
 	});
 });

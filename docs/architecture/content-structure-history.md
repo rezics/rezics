@@ -151,9 +151,11 @@ PostgreSQL advisory locks are transaction scoped and released automatically at t
 
 ## Search Feature
 
-`@rezics/search` defines the engine-independent Search Feature input: one versioned SearchDocument,
-server-established contexts, provenance-bearing injections, and untrusted interaction state. The
-server owns four v1 templates—global, Book, Media, and Software—and the field registry. A document
+`@rezics/filter` defines both the engine-independent `UnitFilter` and Search Feature input: one
+versioned SearchDocument, server-established contexts, provenance-bearing injections, and
+untrusted interaction state. Full-text matching is the positive `UnitFilter.search` constraint;
+structured domain selection is `UnitFilter.where`. The server owns six v1 templates—global, Book,
+Media, Software, Realm, and Zone—and the field registry. A document
 may disable or arrange template capabilities and repeat Tag controls, but cannot introduce or widen
 fields, operators, sorts, facets, page sizes, or result windows.
 
@@ -168,8 +170,12 @@ engine. Controls retain stable `controlKey` identity, including repeated Tag con
 state, compilation, facet results, and canonical input hashing. Search and Feed Blocks store only a
 stable template-or-Zone Search Feature source; Content Structure nodes never embed a query schema.
 A Feed Block adds presentation settings only and does not persist Feed-owned filter defaults.
-Search owns query, product-specific filtering, facets, and relevance; a Search Feature may then be
-presented through the Feed item renderer without widening the general Feed API.
+Search owns execution controls, facets, relevance, and the Search Service adapter; it does not own
+a second filtering language. A Search Feature may be presented through the Feed item renderer
+without widening the general Feed API. SearchDocument has distinct Search and Feed sort profiles,
+including ordered options and empty-query/text-query defaults. Relevance is query-only and may
+appear only in the Search profile. The Feed profile defaults to `best` with or without text and is
+validated not to expose relevance.
 
 The general Feed endpoint accepts the bounded domain Filter through `POST /feed/query`; its standard
 UI projects content-kind, language, Realm, and Tag selection into that Filter. Its recommendation

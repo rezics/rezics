@@ -226,17 +226,20 @@ export async function verifySeedDatabase(
 export async function verifySeedSearch(): Promise<void> {
 	for (const officialZone of OfficialZoneManifest) {
 		const fixture = SeedFixtureTitles[officialZone.searchTemplate];
-		const response = await executeSearchFeatureInput({
-			document: createDefaultSearchDocument(officialZone.searchTemplate),
-			contexts: [{ kind: "zone", zoneId: officialZone.id }],
-			injections: [],
-			state: {
-				mode: "basic",
-				query: fixture.en,
-				values: [],
-				pageSize: 5,
+		const response = await executeSearchFeatureInput(
+			{
+				document: createDefaultSearchDocument(officialZone.searchTemplate),
+				contexts: [{ kind: "zone", zoneId: officialZone.id }],
+				injections: [],
+				state: {
+					mode: "basic",
+					filter: { search: { query: fixture.en } },
+					values: [],
+					pageSize: 5,
+				},
 			},
-		});
+			"search",
+		);
 		const hits = response.groups.flatMap((group) => group.hits);
 		if (!hits.some((hit) => hit.titles.includes(fixture.en)))
 			throw new Error(

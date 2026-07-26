@@ -1,13 +1,17 @@
 import {
+	assertUnitPredicate,
 	assertUnitFilter,
-	canonicalUnitFilter,
+	canonicalUnitPredicate,
 	createSimpleFeedFilter,
 	FilterContentLanguageValues,
 	FilterPostKindValues,
 	FilterRealmUnitStatusValues,
 	FilterUnitKindValues,
+	mergeUnitFilter,
+	parseUnitFilter,
 	readSimpleFeedFilter,
 	SimpleFeedContentKindValues,
+	unitFilterSearchQuery,
 } from "@rezics/filter";
 import { describe, expect, it } from "vitest";
 import {
@@ -65,12 +69,12 @@ describe("domain Filter contract", () => {
 
 	it("canonicalizes object key order for cursor identity", () => {
 		expect(
-			canonicalUnitFilter({
+			canonicalUnitPredicate({
 				kind: { in: ["book"] },
 				id: { in: [RealmId] },
 			}),
 		).toBe(
-			canonicalUnitFilter({
+			canonicalUnitPredicate({
 				id: { in: [RealmId] },
 				kind: { in: ["book"] },
 			}),
@@ -79,7 +83,7 @@ describe("domain Filter contract", () => {
 
 	it("rejects inverted Score ranges at the runtime JSON boundary", () => {
 		expect(() =>
-			assertUnitFilter({
+			assertUnitPredicate({
 				scores: {
 					received: {
 						some: { value: { range: { minimum: 9, maximum: 3 } } },
@@ -91,7 +95,7 @@ describe("domain Filter contract", () => {
 
 	it("accepts Post subjects and Collection items as typed Unit references", () => {
 		expect(() =>
-			assertUnitFilter({
+			assertUnitPredicate({
 				any: [
 					{ post: { is: { subject: { is: { kind: { in: ["book"] } } } } } },
 					{
@@ -110,5 +114,30 @@ describe("domain Filter contract", () => {
 				any: [{ kind: { in: ["book"] } }, { kind: { in: ["media"] } }],
 			}),
 		).toBeUndefined();
+	});
+
+	it("keeps service-backed Search positive and outside recursive predicates", () => {
+		const filter = parseUnitFilter({
+			search: { query: "distributed systems" },
+			where: { kind: { in: ["book"] } },
+		});
+
+		expect(() => assertUnitFilter(filter)).not.toThrow();
+		expect(unitFilterSearchQuery(filter)).toBe("distributed systems");
+		expect(() =>
+			assertUnitFilter({
+				where: { not: { search: { query: "cannot be nested" } } },
+			}),
+		).toThrow("Invalid Unit filter");
+	});
+
+	it("composes Feed selections into the same Filter without replacing Search", () => {
+		const content = createSimpleFeedFilter({ contentKinds: ["post:review"] });
+		const filter = mergeUnitFilter({ search: { query: "architecture" } }, content);
+
+		expect(filter).toEqual({
+			search: { query: "architecture" },
+			where: { post: { is: { kind: { in: ["review"] } } } },
+		});
 	});
 });

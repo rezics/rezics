@@ -1,19 +1,23 @@
 import { type Static, Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
-import { UnitFilter as UnitFilterSchema, assertUnitFilter, type UnitFilter } from "@rezics/filter";
+import { Check, Value } from "@sinclair/typebox/value";
+import { UnitFilter, assertUnitFilter } from "./filter";
+import { UnitPredicate as UnitPredicateSchema, assertUnitPredicate } from "./unit";
 
-import type { SearchFilter as SearchFilterValue } from "./primitives";
 import {
 	SearchCategory,
 	SearchCategoryValues,
 	SearchControl,
+	SearchControlPredicate,
 	SearchField,
-	SearchFilter,
 	SearchMode,
 	SearchOptionPolicy,
 	SearchScope,
 	SearchSort,
-} from "./primitives";
+} from "./search-primitives";
+
+export const SearchFeatureSurfaceValues = ["search", "feed"] as const;
+export type SearchFeatureSurface = (typeof SearchFeatureSurfaceValues)[number];
+export const SearchFeatureSurface = Type.Union([Type.Literal("search"), Type.Literal("feed")]);
 
 const Uuid = Type.String({
 	pattern:
@@ -58,7 +62,7 @@ export const SearchDisclosure = Type.Union([Type.Literal("visible"), Type.Litera
 export const SearchControlValue = Type.Object(
 	{
 		controlKey: SearchControlKey,
-		filter: SearchFilter,
+		filter: SearchControlPredicate,
 	},
 	{ additionalProperties: false, $id: "SearchControlValue" },
 );
@@ -110,6 +114,21 @@ export const SearchDocumentSection = Type.Object(
 );
 export type SearchDocumentSection = Static<typeof SearchDocumentSection>;
 
+export const SearchSortConfiguration = Type.Object(
+	{
+		defaults: Type.Object(
+			{
+				emptyQuery: SearchSort,
+				textQuery: SearchSort,
+			},
+			{ additionalProperties: false },
+		),
+		options: Type.Array(SearchSort, { minItems: 1, maxItems: 14 }),
+	},
+	{ additionalProperties: false, $id: "SearchSortConfiguration" },
+);
+export type SearchSortConfiguration = Static<typeof SearchSortConfiguration>;
+
 /**
  * Versioned, engine-independent Search Feature document.
  *
@@ -146,14 +165,14 @@ export const SearchDocument = Type.Object(
 			{ additionalProperties: false },
 		),
 		/** Fixed document predicates; context predicates are composed separately. */
-		filter: Type.Optional(Type.Unsafe<UnitFilter>(UnitFilterSchema)),
+		filter: Type.Optional(Type.Ref(UnitPredicateSchema)),
 		defaults: Type.Array(SearchControlValue, { maxItems: 50 }),
 		controls: Type.Array(SearchDocumentControl, { maxItems: 50 }),
 		sections: Type.Array(SearchDocumentSection, { maxItems: 20 }),
 		sort: Type.Object(
 			{
-				default: SearchSort,
-				options: Type.Array(SearchSort, { minItems: 1, maxItems: 13 }),
+				search: SearchSortConfiguration,
+				feed: SearchSortConfiguration,
 			},
 			{ additionalProperties: false },
 		),
@@ -206,7 +225,7 @@ export const SearchInjection = Type.Object(
 export type SearchInjection = Static<typeof SearchInjection>;
 
 const SearchExecutionBase = {
-	query: Type.Optional(Type.String({ maxLength: 500 })),
+	filter: Type.Optional(Type.Ref(UnitFilter)),
 	sort: Type.Optional(SearchSort),
 	pageSize: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
 };
@@ -330,11 +349,22 @@ export interface ResolvedSearchDocument {
 	readonly controls: readonly ResolvedSearchControl[];
 }
 
+export function searchSortConfiguration(
+	document: SearchDocument,
+	surface: SearchFeatureSurface,
+): SearchSortConfiguration {
+	return document.sort[surface];
+}
+
+export function defaultSearchSort(configuration: SearchSortConfiguration, query: string) {
+	return query.trim() ? configuration.defaults.textQuery : configuration.defaults.emptyQuery;
+}
+
 function unique(values: readonly unknown[]): boolean {
 	return new Set(values.map((value) => JSON.stringify(value))).size === values.length;
 }
 
-function assertFilterShape(filter: SearchFilterValue, path: string): void {
+function assertFilterShape(filter: SearchControlPredicate, path: string): void {
 	if (filter.field === "realm-tag-vote") {
 		for (const [name, range] of [
 			["score", filter.score],
@@ -391,7 +421,14 @@ function assertControlValue(
 }
 
 export function assertSearchDocument(value: unknown): asserts value is SearchDocument {
-	if (!Check(SearchDocument, value)) throw new TypeError("Invalid Search document v1");
+	if (!Check(SearchDocument, [UnitPredicateSchema], value)) {
+		const error = Value.Errors(SearchDocument, [UnitPredicateSchema], value).First();
+		throw new TypeError(
+			error
+				? `Invalid Search document v1 at ${error.path || "/"}: ${error.message}`
+				: "Invalid Search document v1",
+		);
+	}
 	if (!unique(value.categories)) throw new TypeError("Search document categories must be unique");
 	if (!unique(value.modes.available)) throw new TypeError("Search document modes must be unique");
 	if (!value.modes.available.includes(value.modes.default))
@@ -402,9 +439,19 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 		throw new TypeError("Search document control keys must be unique");
 	if (!unique(value.sections.map((section) => section.key)))
 		throw new TypeError("Search document section keys must be unique");
-	if (!unique(value.sort.options)) throw new TypeError("Search document sorts must be unique");
-	if (!value.sort.options.includes(value.sort.default))
-		throw new TypeError("Search document default sort is unavailable");
+	for (const surface of SearchFeatureSurfaceValues) {
+		const configuration = value.sort[surface];
+		if (!unique(configuration.options))
+			throw new TypeError(`Search document ${surface} sorts must be unique`);
+		if (!configuration.options.includes(configuration.defaults.emptyQuery))
+			throw new TypeError(`Search document ${surface} empty-query sort is unavailable`);
+		if (!configuration.options.includes(configuration.defaults.textQuery))
+			throw new TypeError(`Search document ${surface} text-query sort is unavailable`);
+		if (configuration.defaults.emptyQuery === "relevance")
+			throw new TypeError(`Search document ${surface} cannot use relevance without a query`);
+	}
+	if (value.sort.feed.options.includes("relevance"))
+		throw new TypeError("Search document Feed sorts cannot include relevance");
 	if (value.results.pageSize > value.results.maxPageSize)
 		throw new TypeError("Search document page size exceeds its configured maximum");
 	if (value.results.maxPageSize > value.results.maxResultWindow)
@@ -437,7 +484,7 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 		if (!control || !control.enabled)
 			throw new TypeError(`Facet control ${controlKey} is unavailable`);
 	}
-	if (value.filter) assertUnitFilter(value.filter);
+	if (value.filter) assertUnitPredicate(value.filter);
 	if (!unique(value.defaults.map((item) => item.controlKey)))
 		throw new TypeError("Search defaults must target unique controls");
 	value.defaults.forEach((item, index) =>
@@ -446,8 +493,10 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 }
 
 export function assertSearchFeatureInput(value: unknown): asserts value is SearchFeatureInput {
-	if (!Check(SearchFeatureInput, value)) throw new TypeError("Invalid Search Feature input v1");
+	if (!Check(SearchFeatureInput, [UnitPredicateSchema, UnitFilter], value))
+		throw new TypeError("Invalid Search Feature input v1");
 	assertSearchDocument(value.document);
+	if (value.state.filter) assertUnitFilter(value.state.filter);
 	const controls = new Map(value.document.controls.map((control) => [control.key, control]));
 	if (!unique(value.contexts.map((context) => context.kind)))
 		throw new TypeError("Search Feature contexts must have unique kinds");
@@ -484,14 +533,14 @@ export function parseSearchFeatureInput(value: unknown): SearchFeatureInput {
 }
 
 export function parseSearchFeatureDefinition(value: unknown): SearchFeatureDefinition {
-	if (!Check(SearchFeatureDefinition, value))
+	if (!Check(SearchFeatureDefinition, [UnitPredicateSchema], value))
 		throw new TypeError("Invalid Search Feature definition v1");
 	assertSearchDocument(value.document);
 	return value;
 }
 
 export function parseSharedSearchQueryDocument(value: unknown): SharedSearchQueryDocument {
-	if (!Check(SharedSearchQueryDocument, value))
+	if (!Check(SharedSearchQueryDocument, [UnitPredicateSchema, UnitFilter], value))
 		throw new TypeError("Invalid shared Search query document v1");
 	if (
 		!unique(
@@ -499,6 +548,7 @@ export function parseSharedSearchQueryDocument(value: unknown): SharedSearchQuer
 		)
 	)
 		throw new TypeError("Shared Search query selections must be unique");
+	if (value.state.filter) assertUnitFilter(value.state.filter);
 	const referenced = new Set<string>();
 	const remember = (controlValue: SearchControlValue) => {
 		const { filter } = controlValue;

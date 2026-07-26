@@ -13,9 +13,6 @@ includes:
     filter:
         taskfile: ./filter/Taskfile.yml
         dir: ./filter
-    search:
-        taskfile: ./search/Taskfile.yml
-        dir: ./search
     slug:
         taskfile: ./slug/Taskfile.yml
         dir: ./slug
@@ -65,7 +62,6 @@ tasks:
             - task: observability:typecheck
             - task: block:typecheck
             - task: filter:typecheck
-            - task: search:typecheck
             - task: slug:typecheck
             - task: license:typecheck
             - task: i18n:check

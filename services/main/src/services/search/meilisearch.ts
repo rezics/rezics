@@ -1,4 +1,4 @@
-import type { SearchExpression, SearchFilter, SearchScalar } from "@rezics/search";
+import type { SearchControlPredicate, SearchScalar } from "@rezics/filter";
 import { getActiveObservability } from "@rezics/observability";
 import { sql } from "drizzle-orm";
 
@@ -6,6 +6,7 @@ import { env } from "../config";
 import { database } from "../database";
 import { InvalidSearch, SearchUnavailable } from "./errors";
 import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
+import type { SearchExpression } from "./query";
 import type { SearchCategory, SearchSort } from "./schema";
 
 const { metrics } = getActiveObservability();
@@ -47,7 +48,7 @@ function literal(value: SearchScalar, definition: SearchFieldDefinition): string
 	return String(value);
 }
 
-function valuesOf(filter: SearchFilter): readonly SearchScalar[] {
+function valuesOf(filter: SearchControlPredicate): readonly SearchScalar[] {
 	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
@@ -56,7 +57,10 @@ function valuesOf(filter: SearchFilter): readonly SearchScalar[] {
 	);
 }
 
-function compileOneFilter(category: SearchCategory, filter: SearchFilter): string | undefined {
+function compileOneFilter(
+	category: SearchCategory,
+	filter: SearchControlPredicate,
+): string | undefined {
 	const definition = CurrentSearchFieldRegistry[filter.field];
 	if (!definition || !definition.categories.includes(category))
 		throw new InvalidSearch(`${filter.field} is not supported by the ${category} category`);
@@ -136,11 +140,10 @@ async function coarseAccessFilter(profileId: string | undefined): Promise<string
 	return `(${terms.join(" OR ")})`;
 }
 
-function meilisearchSort(sort: SearchSort, hasQuery: boolean): string[] {
-	if (sort === "relevance")
-		return hasQuery
-			? []
-			: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"];
+function meilisearchSort(sort: SearchSort): string[] {
+	if (sort === "relevance") return [];
+	if (sort === "best")
+		return ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"];
 	const separator = sort.lastIndexOf(":");
 	const field = sort.slice(0, separator);
 	const direction = sort.endsWith(":desc") ? "desc" : "asc";
@@ -218,7 +221,7 @@ async function executeCandidateSearch(
 				indexUid: query.indexUid,
 				q: query.query,
 				filter: filters,
-				sort: meilisearchSort(query.sort, Boolean(query.query.trim())),
+				sort: meilisearchSort(query.sort),
 				offset: query.offset,
 				limit: query.limit,
 				attributesToRetrieve: ["id", "revision", "category", "unitType"],

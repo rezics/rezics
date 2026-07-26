@@ -39,6 +39,7 @@ export type SearchMode = (typeof SearchModeValues)[number];
 export const SearchMode = stringEnum(SearchModeValues);
 
 export const SearchSortValues = [
+	"best",
 	"relevance",
 	"createdAt:asc",
 	"createdAt:desc",
@@ -55,6 +56,11 @@ export const SearchSortValues = [
 ] as const;
 export type SearchSort = (typeof SearchSortValues)[number];
 export const SearchSort = stringEnum(SearchSortValues);
+
+/** Text relevance has no meaning until a non-empty full-text query exists. */
+export function isSearchSortAvailable(sort: SearchSort, query: string): boolean {
+	return sort !== "relevance" || query.trim().length > 0;
+}
 
 /** Engine-independent scalar fields that a product surface may expose. */
 export const SearchScalarFieldValues = [
@@ -173,7 +179,7 @@ export const SearchRealmTagVoteFilter = Type.Object(
 );
 export type SearchRealmTagVoteFilter = Static<typeof SearchRealmTagVoteFilter>;
 
-export const SearchFilter = Type.Union(
+export const SearchControlPredicate = Type.Union(
 	[
 		Type.Object(
 			{ field: SearchScalarField, operator: Type.Literal("equals"), value: SearchScalar },
@@ -221,9 +227,9 @@ export const SearchFilter = Type.Union(
 		),
 		SearchRealmTagVoteFilter,
 	],
-	{ $id: "SearchFilter" },
+	{ $id: "SearchControlPredicate" },
 );
-export type SearchFilter = Static<typeof SearchFilter>;
+export type SearchControlPredicate = Static<typeof SearchControlPredicate>;
 
 export const SearchScope = Type.Union(
 	[

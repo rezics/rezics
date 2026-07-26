@@ -3,14 +3,11 @@ import { createHash } from "node:crypto";
 import { and, eq, exists, inArray, not, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
-	createSearchCursor,
-	parseSearchCursor,
-	type SearchExpression,
-	type SearchFilter,
+	type SearchControlPredicate,
 	type SearchScalarField,
 	type SearchScalar,
-} from "@rezics/search";
-import { canonicalUnitFilter } from "@rezics/filter";
+} from "@rezics/filter";
+import { canonicalUnitPredicate } from "@rezics/filter";
 import { FontAwesomeProvider } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
@@ -53,15 +50,15 @@ import { firstUnitLocalizationCoverAssetId, primaryUnitTitle } from "../units/lo
 import { InvalidSearch } from "./errors";
 import { getActiveSearchGeneration } from "./generation";
 import { searchCandidates } from "./meilisearch";
+import { createSearchCursor, parseSearchCursor, type SearchExpression } from "./query";
 import {
 	SearchCategoryRules,
 	type DomainSearchRequest,
 	type SearchCategory,
 	type SearchHit,
-	type SearchSort,
 } from "./schema";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
-import { compileUnitFilterSql } from "../filter/sql";
+import { compileUnitPredicateSql } from "../filter/sql";
 
 const subjectUnit = alias(unit, "subject_unit");
 const searchVariantRelationship = alias(unitVariant, "search_variant_relationship");
@@ -168,9 +165,11 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 		if (present && !supportsFilter(category, attribute))
 			throw new InvalidSearch(`${key} is not supported by the ${category} category`);
 
-	const sort = request.sort ?? "relevance";
+	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
+	if (sort === "relevance" && !request.query?.trim())
+		throw new InvalidSearch("Search relevance requires a text query");
 	const attribute = sort.split(":", 1)[0]!;
-	if (sort !== "relevance" && !supportsSort(category, attribute))
+	if (sort !== "relevance" && sort !== "best" && !supportsSort(category, attribute))
 		throw new InvalidSearch(`${sort} is not supported by the ${category} category`);
 }
 
@@ -183,7 +182,7 @@ function scalarStrings(values: readonly SearchScalar[], field: string): string[]
 	return strings;
 }
 
-function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+function filterValues(filter: SearchControlPredicate): readonly SearchScalar[] {
 	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
@@ -192,7 +191,7 @@ function filterValues(filter: SearchFilter): readonly SearchScalar[] {
 	);
 }
 
-function scalarColumnCondition(column: SQL, filter: SearchFilter): SQL {
+function scalarColumnCondition(column: SQL, filter: SearchControlPredicate): SQL {
 	if (filter.operator === "exists")
 		return filter.value ? sql`${column} is not null` : sql`${column} is null`;
 	if (filter.operator === "range") {
@@ -214,7 +213,7 @@ function scalarColumnCondition(column: SQL, filter: SearchFilter): SQL {
 		: match;
 }
 
-function numericColumnCondition(column: SQL, filter: SearchFilter): SQL {
+function numericColumnCondition(column: SQL, filter: SearchControlPredicate): SQL {
 	if (filter.operator === "exists")
 		return filter.value ? sql`${column} is not null` : sql`${column} is null`;
 	if (filter.operator !== "range")
@@ -233,14 +232,14 @@ function numericColumnCondition(column: SQL, filter: SearchFilter): SQL {
 	return sql`(${sql.join(bounds, sql` and `)})`;
 }
 
-function booleanColumnCondition(column: SQL, filter: SearchFilter): SQL {
+function booleanColumnCondition(column: SQL, filter: SearchControlPredicate): SQL {
 	if (!("value" in filter) || typeof filter.value !== "boolean")
 		throw new InvalidSearch(`${filter.field} requires a boolean value`);
 	const match = sql`${column} = ${filter.value}`;
 	return filter.operator === "not-equals" ? sql`not (${match})` : match;
 }
 
-function softwareRequirementCondition(filter: SearchFilter, column: SQL): SQL {
+function softwareRequirementCondition(filter: SearchControlPredicate, column: SQL): SQL {
 	const values = scalarStrings(filterValues(filter), filter.field);
 	const candidates =
 		filter.field === "software-platform" ? toUuidArray(values) : toTextArray(values);
@@ -263,7 +262,7 @@ function softwareRequirementCondition(filter: SearchFilter, column: SQL): SQL {
 		: oneMatches;
 }
 
-function softwareRequirementRowCondition(filter: SearchFilter, column: SQL): SQL {
+function softwareRequirementRowCondition(filter: SearchControlPredicate, column: SQL): SQL {
 	const values = scalarStrings(filterValues(filter), filter.field);
 	const candidates =
 		filter.field === "software-platform" ? toUuidArray(values) : toTextArray(values);
@@ -274,7 +273,7 @@ function softwareRequirementRowCondition(filter: SearchFilter, column: SQL): SQL
 		: matches;
 }
 
-function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
+function compileFilter(category: SearchCategory, filter: SearchControlPredicate): SQL {
 	if (filter.field === "realm-tag-vote") {
 		const conditions: SQL[] = [
 			sql`${realmTagContext.unitId} = ${unit.id}`,
@@ -329,7 +328,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 			filter,
 		)}`;
 	const catalogScalar: Partial<
-		Record<SearchFilter["field"], { readonly kind: string; readonly column: SQL }>
+		Record<SearchControlPredicate["field"], { readonly kind: string; readonly column: SQL }>
 	> = {
 		"book-isbn13": { kind: "book", column: sql`${book.isbn13}` },
 		"book-publication-date": { kind: "book", column: sql`${book.publicationDate}` },
@@ -346,7 +345,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 			filter,
 		)}`;
 	const catalogNumeric: Partial<
-		Record<SearchFilter["field"], { readonly kind: string; readonly column: SQL }>
+		Record<SearchControlPredicate["field"], { readonly kind: string; readonly column: SQL }>
 	> = {
 		"book-page-count": { kind: "book", column: sql`${book.pageCount}` },
 		"book-word-count": { kind: "book", column: sql`${book.wordCount}` },
@@ -371,7 +370,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 			sql`${softwareRequirement.tier}`,
 		)}`;
 
-	const fieldAttribute: Partial<Record<SearchFilter["field"], string>> = {
+	const fieldAttribute: Partial<Record<SearchControlPredicate["field"], string>> = {
 		language: "Languages",
 		kind: "kind",
 		"content-rating": "contentRating",
@@ -506,7 +505,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		return filter.operator === "not-equals" ? sql`not (${match})` : match;
 	}
 
-	const columnByField: Partial<Record<SearchFilter["field"], SQL>> = {
+	const columnByField: Partial<Record<SearchControlPredicate["field"], SQL>> = {
 		kind:
 			category === "entity"
 				? sql`${entity.kind}`
@@ -540,7 +539,7 @@ function compileExpression(category: SearchCategory, expression: SearchExpressio
 		return sql`not (${compileExpression(category, expression.clause)})`;
 	if (expression.operator === "all") {
 		const requirementFilters = expression.clauses.filter(
-			(clause): clause is SearchFilter =>
+			(clause): clause is SearchControlPredicate =>
 				"field" in clause &&
 				(clause.field === "software-platform" ||
 					clause.field === "software-requirement-tier"),
@@ -570,25 +569,6 @@ function compileExpression(category: SearchCategory, expression: SearchExpressio
 	}
 	const clauses = expression.clauses.map((clause) => compileExpression(category, clause));
 	return sql`(${sql.join(clauses, expression.operator === "all" ? sql` and ` : sql` or `)})`;
-}
-
-function getSort(category: SearchCategory, sort: SearchSort): SQL {
-	if (sort === "relevance") return sql`${unit.updatedAt} DESC`;
-	const ascending = sort.endsWith(":asc");
-	const direction = ascending ? sql`ASC` : sql`DESC`;
-	if (sort.startsWith("createdAt:")) return sql`${unit.createdAt} ${direction}`;
-	if (sort.startsWith("updatedAt:")) return sql`${unit.updatedAt} ${direction}`;
-	if (sort.startsWith("publishedAt:")) return sql`${unit.publishedAt} ${direction} NULLS LAST`;
-	if (sort.startsWith("closesAt:")) return sql`${poll.closesAt} ${direction} NULLS LAST`;
-	if (sort.startsWith("replyCount:"))
-		return sql`coalesce(case when ${post.kind} = 'post'::post_kind
-			then ${postReplyStat.undeletedDescendantCount}
-			else ${postReplyStat.undeletedDirectCount} end, 0) ${direction}`;
-	if (sort.startsWith("followerCount:") && category === "users")
-		return sql`coalesce(${unitFollowStat.followerCount}, 0) ${direction}`;
-	if (sort.startsWith("followerCount:") && category === "realms")
-		return sql`coalesce(${unitFollowStat.followerCount}, 0) ${direction}`;
-	throw new InvalidSearch(`${sort} is not supported by the ${category} category`);
 }
 
 function buildSearchConditions(category: SearchCategory, request: DomainSearchRequest): SQL[] {
@@ -731,7 +711,7 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 		conditions.push(compileExpression(category, request.searchExpression));
 	if (request.domainFilter)
 		conditions.push(
-			compileUnitFilterSql(request.domainFilter, {
+			compileUnitPredicateSql(request.domainFilter, {
 				unitId: sql`${unit.id}`,
 				unitKind: sql`${unit.kind}`,
 				viewerProfileId: request.profileId,
@@ -751,7 +731,7 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 }
 
 function buildCandidateExpression(request: DomainSearchRequest): SearchExpression | undefined {
-	const filters: SearchFilter[] = [];
+	const filters: SearchControlPredicate[] = [];
 	const addValues = (field: SearchScalarField, values: readonly string[] | undefined) => {
 		if (values?.length) filters.push({ field, operator: "any-of", values: [...values] });
 	};
@@ -792,8 +772,7 @@ function buildCandidateExpression(request: DomainSearchRequest): SearchExpressio
 export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
 	const startedAt = performance.now();
 	const conditions = buildSearchConditions(category, request);
-	const sort = request.sort ?? "relevance";
-	getSort(category, sort);
+	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
 	const generation = await getActiveSearchGeneration("current");
 	const candidateExpression = buildCandidateExpression(request);
 	const limit = request.limit ?? 20;
@@ -823,7 +802,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				sort,
 				expression: candidateExpression,
 				domainFilter: request.domainFilter
-					? canonicalUnitFilter(request.domainFilter)
+					? canonicalUnitPredicate(request.domainFilter)
 					: undefined,
 				scopeUnitId: request.scopeUnitId,
 				includeScopeDescendants: request.includeScopeDescendants,
@@ -1192,7 +1171,7 @@ export async function searchDomainFacets(
 				limit: batchLimit,
 				profileId: request.profileId,
 				expression: candidateExpression,
-				sort: request.sort ?? "relevance",
+				sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
 			},
 		]);
 		if (!candidateResult) throw new Error("Meilisearch omitted a facet candidate result");

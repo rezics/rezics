@@ -83,6 +83,7 @@ export default {
 	scope: "Search scope",
 	sort: "Sort",
 	sortOptions: {
+		best: "Best",
 		relevance: "Relevance",
 		"createdAt:asc": "Oldest created",
 		"createdAt:desc": "Newest created",
@@ -145,7 +146,7 @@ export default {
 	injectionSources: { tag: "Tag", realm: realmTerms.label, link: "Link" },
 	fields: {
 		category: "Content category",
-		kind: "Content subtype",
+		kind: "Content type",
 		language: "Content language",
 		"content-rating": "Content rating",
 		"ai-disclosure": `${verbatimTerms.ai.value} use disclosure`,

@@ -6,6 +6,7 @@ import {
 	walkBlockTree,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
+import type { SearchTemplateId } from "@rezics/filter";
 import { ZoneHomePageSlug } from "@rezics/slug";
 import { sql } from "drizzle-orm";
 
@@ -25,6 +26,7 @@ export interface ProvisionZoneDefaultExperienceInput {
 	readonly actorProfileId: string;
 	readonly language: ContentLanguage;
 	readonly title: string;
+	readonly searchTemplate: SearchTemplateId;
 }
 
 async function createDefaultFeedPage(
@@ -118,7 +120,7 @@ export async function provisionZoneDefaultExperienceInTransaction(
 	const searchFeature = await putZoneSearchFeatureInTransaction(tx, {
 		zoneId: input.zoneId,
 		enabled: true,
-		document: createDefaultSearchDocument("global"),
+		document: createDefaultSearchDocument(input.searchTemplate),
 		actorProfileId: input.actorProfileId,
 		message: "Create default Zone Search Feature",
 	});
@@ -139,7 +141,7 @@ export async function ensureZoneDefaultExperienceInTransaction(
 		await putZoneSearchFeatureInTransaction(tx, {
 			zoneId: input.zoneId,
 			enabled: true,
-			document: searchFeature?.document ?? createDefaultSearchDocument("global"),
+			document: searchFeature?.document ?? createDefaultSearchDocument(input.searchTemplate),
 			...(searchFeature ? { baseRevisionId: searchFeature.latestRevisionId } : {}),
 			actorProfileId: input.actorProfileId,
 			message: "Repair required Zone Search Feature",

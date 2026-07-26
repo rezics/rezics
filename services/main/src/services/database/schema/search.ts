@@ -14,7 +14,7 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
-import type { SearchDocument, SharedSearchQueryDocument } from "@rezics/search";
+import type { SearchDocument, SharedSearchQueryDocument } from "@rezics/filter";
 
 import { pgTable } from "./base";
 import {

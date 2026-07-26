@@ -2,14 +2,15 @@ import {
 	SearchCategoryValues,
 	SearchSortValues,
 	type SearchCategory,
-	type SearchExpression,
 	type SearchSort,
-} from "@rezics/search";
-import type { UnitFilter } from "@rezics/filter";
+} from "@rezics/filter";
+import type { UnitPredicate } from "@rezics/filter";
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 import type { PublicationLicenseId } from "@rezics/license";
 import type { PublicSlugAddressValue } from "@rezics/slug";
+
+import type { SearchExpression } from "./query";
 
 export const SearchCategories = SearchCategoryValues;
 export type { SearchCategory };
@@ -66,7 +67,7 @@ export interface DomainSearchRequest {
 	scopeUnitId?: string;
 	includeScopeDescendants?: boolean;
 	searchExpression?: SearchExpression;
-	domainFilter?: UnitFilter;
+	domainFilter?: UnitPredicate;
 }
 
 const CommonSortableAttributes = ["createdAt", "updatedAt"];

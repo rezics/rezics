@@ -1,6 +1,6 @@
 import { ContentLanguageValues } from "@rezics/i18n";
 import { PostApiSearchByIndexIndex } from "@rezics/openapi-tanstack-query";
-import { SearchTemplateIdValues } from "@rezics/search";
+import { SearchTemplateIdValues } from "@rezics/filter";
 import { parseAsArrayOf, parseAsString, parseAsStringLiteral } from "nuqs/server";
 import { AuthPortalModes } from "./auth-redirect";
 

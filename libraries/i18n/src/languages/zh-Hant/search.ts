@@ -83,6 +83,7 @@ export default {
 	scope: "搜尋範圍",
 	sort: "排序",
 	sortOptions: {
+		best: "最佳",
 		relevance: "相關性",
 		"createdAt:asc": "建立時間最早",
 		"createdAt:desc": "建立時間最新",
@@ -144,7 +145,7 @@ export default {
 	injectionSources: { tag: "標籤", realm: realmTerms.label, link: "連結" },
 	fields: {
 		category: "內容類別",
-		kind: "內容子類型",
+		kind: "內容類型",
 		language: "內容語言",
 		"content-rating": "內容分級",
 		"ai-disclosure": `${verbatimTerms.ai.value} 使用揭露`,

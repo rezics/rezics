@@ -2127,8 +2127,8 @@
 					}
 				}
 			},
-			"UnitFilter": {
-				"$id": "UnitFilter",
+			"UnitPredicate": {
+				"$id": "UnitPredicate",
 				"minProperties": 1,
 				"additionalProperties": false,
 				"type": "object",
@@ -2137,15 +2137,15 @@
 						"minItems": 1,
 						"maxItems": 20,
 						"type": "array",
-						"items": { "$ref": "#/components/schemas/UnitFilter" }
+						"items": { "$ref": "#/components/schemas/UnitPredicate" }
 					},
 					"any": {
 						"minItems": 1,
 						"maxItems": 20,
 						"type": "array",
-						"items": { "$ref": "#/components/schemas/UnitFilter" }
+						"items": { "$ref": "#/components/schemas/UnitPredicate" }
 					},
-					"not": { "$ref": "#/components/schemas/UnitFilter" },
+					"not": { "$ref": "#/components/schemas/UnitPredicate" },
 					"id": {
 						"additionalProperties": false,
 						"type": "object",
@@ -6021,6 +6021,41 @@
 					}
 				}
 			},
+			"SearchMatch": {
+				"additionalProperties": false,
+				"$id": "SearchMatch",
+				"type": "object",
+				"required": ["query"],
+				"properties": { "query": { "minLength": 1, "maxLength": 500, "type": "string" } }
+			},
+			"UnitFilter": {
+				"$id": "UnitFilter",
+				"anyOf": [
+					{
+						"additionalProperties": false,
+						"type": "object",
+						"required": ["search"],
+						"properties": {
+							"search": {
+								"additionalProperties": false,
+								"$id": "SearchMatch",
+								"type": "object",
+								"required": ["query"],
+								"properties": {
+									"query": { "minLength": 1, "maxLength": 500, "type": "string" }
+								}
+							},
+							"where": { "$ref": "#/components/schemas/UnitPredicate" }
+						}
+					},
+					{
+						"additionalProperties": false,
+						"type": "object",
+						"required": ["where"],
+						"properties": { "where": { "$ref": "#/components/schemas/UnitPredicate" } }
+					}
+				]
+			},
 			"DockDocument": {
 				"additionalProperties": false,
 				"$id": "DockDocument",
@@ -7450,7 +7485,7 @@
 							]
 						}
 					},
-					"filter": { "$ref": "#/components/schemas/UnitFilter" }
+					"filter": { "$ref": "#/components/schemas/UnitPredicate" }
 				}
 			},
 			"ZoneThemeDocument": {
@@ -7539,7 +7574,7 @@
 							"required": { "default": false, "type": "boolean" }
 						}
 					},
-					"filter": { "$ref": "#/components/schemas/UnitFilter" },
+					"filter": { "$ref": "#/components/schemas/UnitPredicate" },
 					"defaults": {
 						"maxItems": 50,
 						"type": "array",
@@ -7556,7 +7591,7 @@
 									"type": "string"
 								},
 								"filter": {
-									"$id": "SearchFilter",
+									"$id": "SearchControlPredicate",
 									"anyOf": [
 										{
 											"additionalProperties": false,
@@ -8698,47 +8733,160 @@
 					"sort": {
 						"additionalProperties": false,
 						"type": "object",
-						"required": ["default", "options"],
+						"required": ["search", "feed"],
 						"properties": {
-							"default": {
-								"type": "string",
-								"enum": [
-									"relevance",
-									"createdAt:asc",
-									"createdAt:desc",
-									"updatedAt:asc",
-									"updatedAt:desc",
-									"publishedAt:asc",
-									"publishedAt:desc",
-									"followerCount:asc",
-									"followerCount:desc",
-									"replyCount:asc",
-									"replyCount:desc",
-									"closesAt:asc",
-									"closesAt:desc"
-								]
+							"search": {
+								"additionalProperties": false,
+								"$id": "SearchSortConfiguration",
+								"type": "object",
+								"required": ["defaults", "options"],
+								"properties": {
+									"defaults": {
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["emptyQuery", "textQuery"],
+										"properties": {
+											"emptyQuery": {
+												"type": "string",
+												"enum": [
+													"best",
+													"relevance",
+													"createdAt:asc",
+													"createdAt:desc",
+													"updatedAt:asc",
+													"updatedAt:desc",
+													"publishedAt:asc",
+													"publishedAt:desc",
+													"followerCount:asc",
+													"followerCount:desc",
+													"replyCount:asc",
+													"replyCount:desc",
+													"closesAt:asc",
+													"closesAt:desc"
+												]
+											},
+											"textQuery": {
+												"type": "string",
+												"enum": [
+													"best",
+													"relevance",
+													"createdAt:asc",
+													"createdAt:desc",
+													"updatedAt:asc",
+													"updatedAt:desc",
+													"publishedAt:asc",
+													"publishedAt:desc",
+													"followerCount:asc",
+													"followerCount:desc",
+													"replyCount:asc",
+													"replyCount:desc",
+													"closesAt:asc",
+													"closesAt:desc"
+												]
+											}
+										}
+									},
+									"options": {
+										"minItems": 1,
+										"maxItems": 14,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": [
+												"best",
+												"relevance",
+												"createdAt:asc",
+												"createdAt:desc",
+												"updatedAt:asc",
+												"updatedAt:desc",
+												"publishedAt:asc",
+												"publishedAt:desc",
+												"followerCount:asc",
+												"followerCount:desc",
+												"replyCount:asc",
+												"replyCount:desc",
+												"closesAt:asc",
+												"closesAt:desc"
+											]
+										}
+									}
+								}
 							},
-							"options": {
-								"minItems": 1,
-								"maxItems": 13,
-								"type": "array",
-								"items": {
-									"type": "string",
-									"enum": [
-										"relevance",
-										"createdAt:asc",
-										"createdAt:desc",
-										"updatedAt:asc",
-										"updatedAt:desc",
-										"publishedAt:asc",
-										"publishedAt:desc",
-										"followerCount:asc",
-										"followerCount:desc",
-										"replyCount:asc",
-										"replyCount:desc",
-										"closesAt:asc",
-										"closesAt:desc"
-									]
+							"feed": {
+								"additionalProperties": false,
+								"$id": "SearchSortConfiguration",
+								"type": "object",
+								"required": ["defaults", "options"],
+								"properties": {
+									"defaults": {
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["emptyQuery", "textQuery"],
+										"properties": {
+											"emptyQuery": {
+												"type": "string",
+												"enum": [
+													"best",
+													"relevance",
+													"createdAt:asc",
+													"createdAt:desc",
+													"updatedAt:asc",
+													"updatedAt:desc",
+													"publishedAt:asc",
+													"publishedAt:desc",
+													"followerCount:asc",
+													"followerCount:desc",
+													"replyCount:asc",
+													"replyCount:desc",
+													"closesAt:asc",
+													"closesAt:desc"
+												]
+											},
+											"textQuery": {
+												"type": "string",
+												"enum": [
+													"best",
+													"relevance",
+													"createdAt:asc",
+													"createdAt:desc",
+													"updatedAt:asc",
+													"updatedAt:desc",
+													"publishedAt:asc",
+													"publishedAt:desc",
+													"followerCount:asc",
+													"followerCount:desc",
+													"replyCount:asc",
+													"replyCount:desc",
+													"closesAt:asc",
+													"closesAt:desc"
+												]
+											}
+										}
+									},
+									"options": {
+										"minItems": 1,
+										"maxItems": 14,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": [
+												"best",
+												"relevance",
+												"createdAt:asc",
+												"createdAt:desc",
+												"updatedAt:asc",
+												"updatedAt:desc",
+												"publishedAt:asc",
+												"publishedAt:desc",
+												"followerCount:asc",
+												"followerCount:desc",
+												"replyCount:asc",
+												"replyCount:desc",
+												"closesAt:asc",
+												"closesAt:desc"
+											]
+										}
+									}
 								}
 							}
 						}
@@ -21376,7 +21524,7 @@
 								"additionalProperties": false,
 								"type": "object",
 								"properties": {
-									"filter": { "$ref": "#/components/schemas/UnitFilter" },
+									"filter": { "$ref": "#/components/schemas/UnitPredicate" },
 									"sort": {
 										"default": "best",
 										"type": "string",
@@ -84441,7 +84589,7 @@
 														"maxItems": 50,
 														"type": "array",
 														"items": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -85932,7 +86080,7 @@
 															"maxItems": 50,
 															"type": "array",
 															"items": {
-																"$id": "SearchFilter",
+																"$id": "SearchControlPredicate",
 																"anyOf": [
 																	{
 																		"additionalProperties": false,
@@ -87781,7 +87929,7 @@
 															"maxItems": 50,
 															"type": "array",
 															"items": {
-																"$id": "SearchFilter",
+																"$id": "SearchControlPredicate",
 																"anyOf": [
 																	{
 																		"additionalProperties": false,
@@ -89618,7 +89766,7 @@
 															"maxItems": 50,
 															"type": "array",
 															"items": {
-																"$id": "SearchFilter",
+																"$id": "SearchControlPredicate",
 																"anyOf": [
 																	{
 																		"additionalProperties": false,
@@ -91786,7 +91934,7 @@
 														"maxItems": 50,
 														"type": "array",
 														"items": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -93277,7 +93425,7 @@
 															"maxItems": 50,
 															"type": "array",
 															"items": {
-																"$id": "SearchFilter",
+																"$id": "SearchControlPredicate",
 																"anyOf": [
 																	{
 																		"additionalProperties": false,
@@ -114209,7 +114357,7 @@
 															"type": "string"
 														},
 														"filter": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -115507,9 +115655,12 @@
 												"type": "object",
 												"required": ["mode", "values"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -115591,7 +115742,7 @@
 																	"type": "string"
 																},
 																"filter": {
-																	"$id": "SearchFilter",
+																	"$id": "SearchControlPredicate",
 																	"anyOf": [
 																		{
 																			"additionalProperties": false,
@@ -116885,9 +117036,12 @@
 												"type": "object",
 												"required": ["mode"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -116975,7 +117129,7 @@
 																		"type": "string"
 																	},
 																	"filter": {
-																		"$id": "SearchFilter",
+																		"$id": "SearchControlPredicate",
 																		"anyOf": [
 																			{
 																				"additionalProperties": false,
@@ -118921,7 +119075,7 @@
 															"type": "string"
 														},
 														"filter": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -120219,9 +120373,12 @@
 												"type": "object",
 												"required": ["mode", "values"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -120303,7 +120460,7 @@
 																	"type": "string"
 																},
 																"filter": {
-																	"$id": "SearchFilter",
+																	"$id": "SearchControlPredicate",
 																	"anyOf": [
 																		{
 																			"additionalProperties": false,
@@ -121597,9 +121754,12 @@
 												"type": "object",
 												"required": ["mode"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -121687,7 +121847,7 @@
 																		"type": "string"
 																	},
 																	"filter": {
-																		"$id": "SearchFilter",
+																		"$id": "SearchControlPredicate",
 																		"anyOf": [
 																			{
 																				"additionalProperties": false,
@@ -127218,7 +127378,7 @@
 															"type": "string"
 														},
 														"filter": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -128516,9 +128676,12 @@
 												"type": "object",
 												"required": ["mode", "values"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -128600,7 +128763,7 @@
 																	"type": "string"
 																},
 																"filter": {
-																	"$id": "SearchFilter",
+																	"$id": "SearchControlPredicate",
 																	"anyOf": [
 																		{
 																			"additionalProperties": false,
@@ -129894,9 +130057,12 @@
 												"type": "object",
 												"required": ["mode"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -129984,7 +130150,7 @@
 																		"type": "string"
 																	},
 																	"filter": {
-																		"$id": "SearchFilter",
+																		"$id": "SearchControlPredicate",
 																		"anyOf": [
 																			{
 																				"additionalProperties": false,
@@ -132257,7 +132423,7 @@
 															"type": "string"
 														},
 														"filter": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -133555,9 +133721,12 @@
 												"type": "object",
 												"required": ["mode", "values"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -133639,7 +133808,7 @@
 																	"type": "string"
 																},
 																"filter": {
-																	"$id": "SearchFilter",
+																	"$id": "SearchControlPredicate",
 																	"anyOf": [
 																		{
 																			"additionalProperties": false,
@@ -134933,9 +135102,12 @@
 												"type": "object",
 												"required": ["mode"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -135023,7 +135195,7 @@
 																		"type": "string"
 																	},
 																	"filter": {
-																		"$id": "SearchFilter",
+																		"$id": "SearchControlPredicate",
 																		"anyOf": [
 																			{
 																				"additionalProperties": false,
@@ -136936,7 +137108,7 @@
 															"type": "string"
 														},
 														"filter": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -138234,9 +138406,12 @@
 												"type": "object",
 												"required": ["mode", "values"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -138318,7 +138493,7 @@
 																	"type": "string"
 																},
 																"filter": {
-																	"$id": "SearchFilter",
+																	"$id": "SearchControlPredicate",
 																	"anyOf": [
 																		{
 																			"additionalProperties": false,
@@ -139612,9 +139787,12 @@
 												"type": "object",
 												"required": ["mode"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -139702,7 +139880,7 @@
 																		"type": "string"
 																	},
 																	"filter": {
-																		"$id": "SearchFilter",
+																		"$id": "SearchControlPredicate",
 																		"anyOf": [
 																			{
 																				"additionalProperties": false,
@@ -141609,7 +141787,7 @@
 															"type": "string"
 														},
 														"filter": {
-															"$id": "SearchFilter",
+															"$id": "SearchControlPredicate",
 															"anyOf": [
 																{
 																	"additionalProperties": false,
@@ -142907,9 +143085,12 @@
 												"type": "object",
 												"required": ["mode", "values"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -142991,7 +143172,7 @@
 																	"type": "string"
 																},
 																"filter": {
-																	"$id": "SearchFilter",
+																	"$id": "SearchControlPredicate",
 																	"anyOf": [
 																		{
 																			"additionalProperties": false,
@@ -144285,9 +144466,12 @@
 												"type": "object",
 												"required": ["mode"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -144375,7 +144559,7 @@
 																		"type": "string"
 																	},
 																	"filter": {
-																		"$id": "SearchFilter",
+																		"$id": "SearchControlPredicate",
 																		"anyOf": [
 																			{
 																				"additionalProperties": false,
@@ -145707,36 +145891,6 @@
 												}
 											}
 										]
-									},
-									"contentKinds": {
-										"maxItems": 19,
-										"uniqueItems": true,
-										"type": "array",
-										"items": {
-											"default": "unit:profile",
-											"type": "string",
-											"enum": [
-												"unit:profile",
-												"unit:book",
-												"unit:software",
-												"unit:media",
-												"unit:release",
-												"unit:entity",
-												"unit:tag",
-												"unit:series",
-												"unit:zone",
-												"unit:collection",
-												"unit:poll",
-												"unit:realm",
-												"post:post",
-												"post:excerpt",
-												"post:review",
-												"post:chapter",
-												"post:chapter_group",
-												"post:wiki",
-												"post:picture"
-											]
-										}
 									},
 									"surface": {
 										"anyOf": [
@@ -150195,9 +150349,12 @@
 												"type": "object",
 												"required": ["mode", "values"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -150274,7 +150431,7 @@
 																	"type": "string"
 																},
 																"filter": {
-																	"$id": "SearchFilter",
+																	"$id": "SearchControlPredicate",
 																	"anyOf": [
 																		{
 																			"additionalProperties": false,
@@ -151568,9 +151725,12 @@
 												"type": "object",
 												"required": ["mode"],
 												"properties": {
-													"query": { "maxLength": 500, "type": "string" },
+													"filter": {
+														"$ref": "#/components/schemas/UnitFilter"
+													},
 													"sort": {
 														"anyOf": [
+															{ "const": "best", "type": "string" },
 															{
 																"const": "relevance",
 																"type": "string"
@@ -151653,7 +151813,7 @@
 																		"type": "string"
 																	},
 																	"filter": {
-																		"$id": "SearchFilter",
+																		"$id": "SearchControlPredicate",
 																		"anyOf": [
 																			{
 																				"additionalProperties": false,
@@ -153105,12 +153265,15 @@
 															"type": "object",
 															"required": ["mode", "values"],
 															"properties": {
-																"query": {
-																	"maxLength": 500,
-																	"type": "string"
+																"filter": {
+																	"$ref": "#/components/schemas/UnitFilter"
 																},
 																"sort": {
 																	"anyOf": [
+																		{
+																			"const": "best",
+																			"type": "string"
+																		},
 																		{
 																			"const": "relevance",
 																			"type": "string"
@@ -153193,7 +153356,7 @@
 																				"type": "string"
 																			},
 																			"filter": {
-																				"$id": "SearchFilter",
+																				"$id": "SearchControlPredicate",
 																				"anyOf": [
 																					{
 																						"additionalProperties": false,
@@ -154487,12 +154650,15 @@
 															"type": "object",
 															"required": ["mode"],
 															"properties": {
-																"query": {
-																	"maxLength": 500,
-																	"type": "string"
+																"filter": {
+																	"$ref": "#/components/schemas/UnitFilter"
 																},
 																"sort": {
 																	"anyOf": [
+																		{
+																			"const": "best",
+																			"type": "string"
+																		},
 																		{
 																			"const": "relevance",
 																			"type": "string"
@@ -154575,7 +154741,7 @@
 																					"type": "string"
 																				},
 																				"filter": {
-																					"$id": "SearchFilter",
+																					"$id": "SearchControlPredicate",
 																					"anyOf": [
 																						{
 																							"additionalProperties": false,
@@ -156167,12 +156333,15 @@
 															"type": "object",
 															"required": ["mode", "values"],
 															"properties": {
-																"query": {
-																	"maxLength": 500,
-																	"type": "string"
+																"filter": {
+																	"$ref": "#/components/schemas/UnitFilter"
 																},
 																"sort": {
 																	"anyOf": [
+																		{
+																			"const": "best",
+																			"type": "string"
+																		},
 																		{
 																			"const": "relevance",
 																			"type": "string"
@@ -156255,7 +156424,7 @@
 																				"type": "string"
 																			},
 																			"filter": {
-																				"$id": "SearchFilter",
+																				"$id": "SearchControlPredicate",
 																				"anyOf": [
 																					{
 																						"additionalProperties": false,
@@ -157549,12 +157718,15 @@
 															"type": "object",
 															"required": ["mode"],
 															"properties": {
-																"query": {
-																	"maxLength": 500,
-																	"type": "string"
+																"filter": {
+																	"$ref": "#/components/schemas/UnitFilter"
 																},
 																"sort": {
 																	"anyOf": [
+																		{
+																			"const": "best",
+																			"type": "string"
+																		},
 																		{
 																			"const": "relevance",
 																			"type": "string"
@@ -157637,7 +157809,7 @@
 																					"type": "string"
 																				},
 																				"filter": {
-																					"$id": "SearchFilter",
+																					"$id": "SearchControlPredicate",
 																					"anyOf": [
 																						{
 																							"additionalProperties": false,
@@ -159245,6 +159417,7 @@
 									"sort": {
 										"type": "string",
 										"enum": [
+											"best",
 											"relevance",
 											"createdAt:asc",
 											"createdAt:desc",

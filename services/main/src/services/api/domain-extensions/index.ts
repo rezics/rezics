@@ -28,7 +28,7 @@ import {
 	type Block,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import { assertUnitFilter, FilterSchemaModels } from "@rezics/filter";
+import { assertUnitPredicate, FilterSchemaModels } from "@rezics/filter";
 import { ZoneHomePageSlug } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -439,7 +439,7 @@ async function ensureZoneNavigationReferences(
 const ZoneBoundaryDocumentModel = t.Object(
 	{
 		...ZoneBoundaryDocument.properties,
-		filter: t.Optional(t.Ref("UnitFilter")),
+		filter: t.Optional(t.Ref("UnitPredicate")),
 	},
 	{ additionalProperties: false, $id: "ZoneBoundaryDocument" },
 );
@@ -807,7 +807,7 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					if (body.boundaryDocument?.filter)
 						try {
-							assertUnitFilter(body.boundaryDocument.filter);
+							assertUnitPredicate(body.boundaryDocument.filter);
 						} catch {
 							throw new ZoneDocumentInvalid();
 						}
@@ -1581,7 +1581,7 @@ export default new Elysia()
 			async ({ profile, body }) => {
 				if (body.boundaryDocument.filter)
 					try {
-						assertUnitFilter(body.boundaryDocument.filter);
+						assertUnitPredicate(body.boundaryDocument.filter);
 					} catch {
 						throw new ZoneDocumentInvalid();
 					}
@@ -1611,6 +1611,7 @@ export default new Elysia()
 						actorProfileId: profile.unitId,
 						language: body.localization.language,
 						title: body.localization.title,
+						searchTemplate: "global",
 					});
 					return unitId;
 				});

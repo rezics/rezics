@@ -28,7 +28,6 @@
 		"@rezics/license": "workspace:*",
 		"@rezics/observability": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
-		"@rezics/search": "workspace:*",
 		"@rezics/slug": "workspace:*",
 		"@sinclair/typebox": "^0.34.41",
 		"@t3-oss/env-core": "^0.13.11",
