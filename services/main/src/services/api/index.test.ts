@@ -116,6 +116,20 @@ describe("API root", () => {
 		expect(document.paths["/api/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
 	});
 
+	it("documents untracked progress as a successful state", () => {
+		const document = toOpenAPISchema(api);
+		const responses = document.paths["/api/progress/{unitId}"]?.get?.responses;
+		if (!responses) throw new Error("Expected progress lookup responses");
+
+		const success = JSON.stringify(responses[StatusCodes.OK]);
+		const notFound = JSON.stringify(responses[StatusCodes.NOT_FOUND]);
+
+		expect(success).toContain('"untracked"');
+		expect(success).toContain('"tracked"');
+		expect(notFound).toContain("UnitNotFound");
+		expect(notFound).not.toContain("ProgressNotFound");
+	});
+
 	it("documents JSON only for routes that declare a request body", () => {
 		const document = toOpenAPISchema(api);
 

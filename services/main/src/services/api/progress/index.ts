@@ -15,10 +15,10 @@ import {
 	unitProgress,
 } from "../../database/schema";
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
-import { ProgressNotFound } from "./errors";
 import {
 	CompleteProgressBody,
 	ListProgressQuery,
+	ProgressLookupResponse,
 	ProgressNodeParams,
 	ProgressUnitParams,
 	UpsertProgressBody,
@@ -107,17 +107,20 @@ export default new Elysia({ prefix: "/progress" })
 					),
 				)
 				.limit(1);
-			if (!result) throw new ProgressNotFound();
-			return toProgressResponse(result);
+			if (!result) return { state: "untracked" } satisfies ProgressLookupResponse;
+			return {
+				state: "tracked",
+				record: toProgressResponse(result),
+			} satisfies ProgressLookupResponse;
 		},
 		{
 			access: "interaction:read",
 			params: ProgressUnitParams,
 			response: {
-				[StatusCodes.OK]: ProgressResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProgressNotFound"]),
+				[StatusCodes.OK]: ProgressLookupResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "Get progress", tags: ["Progress"] },
+			detail: { summary: "Get progress state", tags: ["Progress"] },
 		},
 	)
 	.get(

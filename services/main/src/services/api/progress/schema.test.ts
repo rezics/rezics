@@ -1,9 +1,32 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CompleteProgressBody, UpsertProgressBody } from "./schema";
+import { CompleteProgressBody, ProgressLookupResponse, UpsertProgressBody } from "./schema";
 
 describe("progress API contract", () => {
+	it("represents untracked and tracked progress as distinct successful states", () => {
+		const progress = {
+			profileId: "00000000-0000-7000-8000-000000000001",
+			unitId: "00000000-0000-7000-8000-000000000002",
+			status: "active",
+			progress: 0.4,
+			isDeleted: false,
+			completedCount: 1,
+			totalTimeMs: 3_600_000,
+			firstSeenAt: "2026-07-26T00:00:00.000Z",
+			lastSeenAt: "2026-07-26T01:00:00.000Z",
+			lastContentStructureNodeId: null,
+			lastReadAnchor: null,
+			createdAt: "2026-07-26T00:00:00.000Z",
+			updatedAt: "2026-07-26T01:00:00.000Z",
+		};
+
+		expect(Check(ProgressLookupResponse, { state: "untracked" })).toBe(true);
+		expect(Check(ProgressLookupResponse, { state: "tracked", record: progress })).toBe(true);
+		expect(Check(ProgressLookupResponse, { state: "tracked" })).toBe(false);
+		expect(Check(ProgressLookupResponse, { state: "untracked", record: progress })).toBe(false);
+	});
+
 	it("keeps completion count outside ordinary progress updates", () => {
 		expect(
 			Check(UpsertProgressBody, {

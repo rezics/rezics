@@ -24,7 +24,6 @@ import { MessageErrors } from "./messages/errors";
 import { NotificationErrors } from "./notifications/errors";
 import { PollErrors } from "./polls/errors";
 import { PostErrors } from "./posts/errors";
-import { ProgressErrors } from "./progress/errors";
 import { RealmErrors } from "./realms/errors";
 import { ReviewErrors } from "./reviews/errors";
 import { TagErrors } from "./tags/errors";
@@ -76,7 +75,6 @@ export const ApiErrors = [
 	...DomainExtensionErrors,
 	...DockErrors,
 	...PollErrors,
-	...ProgressErrors,
 	...ContentStructureErrors,
 	...ReviewErrors,
 	...GovernanceErrors,

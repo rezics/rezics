@@ -2,6 +2,7 @@
 
 import {
 	getApiProgressByUnitIdQueryKey,
+	type GetApiProgressByUnitIdStatus200,
 	useDeleteApiProgressByUnitId,
 	useGetApiProgressByUnitId,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
@@ -21,7 +22,6 @@ import {
 } from "react";
 
 import { useTranslation } from "@/i18n/client";
-import { hasErrorCode } from "@/i18n/errors";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { invalidateProgressQueries } from "../data/progress-cache";
@@ -108,10 +108,11 @@ export function UnitProgressProvider({
 		() => getApiProgressByUnitIdQueryKey({ path: { unitId: domain.unitId } }),
 		[domain.unitId],
 	);
-	const recordMissing =
-		recordQuery.isError && hasErrorCode(recordQuery.error, "ProgressNotFound");
 	const confirmedRecord = useMemo(
-		() => (recordQuery.data ? toUnitProgressRecord(recordQuery.data) : null),
+		() =>
+			recordQuery.data?.state === "tracked"
+				? toUnitProgressRecord(recordQuery.data.record)
+				: null,
 		[recordQuery.data],
 	);
 	const displayedRecord = completionPreview ?? confirmedRecord;
@@ -122,14 +123,12 @@ export function UnitProgressProvider({
 				record: displayedRecord,
 				recordError: recordQuery.error,
 				recordFailed: recordQuery.isError,
-				recordMissing,
 				recordPending: recordQuery.isPending,
 				sessionPending: session.isPending,
 			}),
 		[
 			authenticated,
 			displayedRecord,
-			recordMissing,
 			recordQuery.error,
 			recordQuery.isError,
 			recordQuery.isPending,
@@ -170,7 +169,10 @@ export function UnitProgressProvider({
 					path: { unitId: domain.unitId },
 					body: update,
 				});
-				queryClient.setQueryData(progressQueryKey, updated);
+				queryClient.setQueryData(progressQueryKey, {
+					state: "tracked",
+					record: updated,
+				} satisfies GetApiProgressByUnitIdStatus200);
 				setEditorOpen(false);
 				refreshProgress();
 				return true;
@@ -195,7 +197,10 @@ export function UnitProgressProvider({
 							? {}
 							: { totalTimeMs: update.totalTimeMs },
 				});
-				queryClient.setQueryData(progressQueryKey, updated);
+				queryClient.setQueryData(progressQueryKey, {
+					state: "tracked",
+					record: updated,
+				} satisfies GetApiProgressByUnitIdStatus200);
 				setCompletionFeedbackCount(toNonNegativeApiInteger(updated.completedCount));
 				setEditorOpen(false);
 				refreshProgress();
@@ -222,7 +227,9 @@ export function UnitProgressProvider({
 			await removeMutation.mutateAsync({ path: { unitId: domain.unitId } });
 			setEditorOpen(false);
 			setCompletionFeedbackCount(undefined);
-			queryClient.removeQueries({ exact: true, queryKey: progressQueryKey });
+			queryClient.setQueryData(progressQueryKey, {
+				state: "untracked",
+			} satisfies GetApiProgressByUnitIdStatus200);
 			refreshProgress();
 			return true;
 		} catch {

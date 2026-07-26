@@ -2,6 +2,7 @@ import { type Static, t } from "elysia";
 
 import { ProgressStatusValues } from "../../database/schema/contract-values";
 import { Uuid } from "../schema";
+import { ProgressResponse } from "../schema/response";
 
 const ProgressStatus = t.Union(ProgressStatusValues.map((value) => t.Literal(value)));
 
@@ -13,6 +14,18 @@ export type ListProgressQuery = Static<typeof ListProgressQuery>;
 
 export const ProgressUnitParams = t.Object({ unitId: Uuid });
 export type ProgressUnitParams = Static<typeof ProgressUnitParams>;
+
+export const ProgressLookupResponse = t.Union([
+	t.Object({ state: t.Literal("untracked") }, { additionalProperties: false }),
+	t.Object(
+		{
+			state: t.Literal("tracked"),
+			record: ProgressResponse,
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type ProgressLookupResponse = Static<typeof ProgressLookupResponse>;
 
 export const UpsertProgressBody = t.Object(
 	{

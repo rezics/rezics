@@ -70,7 +70,6 @@ export default {
 	PollSingleChoiceInvalid: "Choose exactly one option for this poll.",
 	PollOptionInvalid: "The selected poll option is invalid.",
 	PollAlreadyClosed: "This poll is already closed.",
-	ProgressNotFound: "No progress record was found.",
 	ContentStructureInvalid: "This Content Structure does not satisfy its purpose rules.",
 	ContentStructureNotFound: "This Content Structure could not be found.",
 	ContentStructureNodeNotFound: "This Content Structure node could not be found.",

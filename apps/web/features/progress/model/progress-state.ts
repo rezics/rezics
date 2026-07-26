@@ -19,7 +19,6 @@ export function deriveUnitProgressState({
 	record,
 	recordError,
 	recordFailed,
-	recordMissing,
 	recordPending,
 	sessionPending,
 }: {
@@ -27,14 +26,13 @@ export function deriveUnitProgressState({
 	readonly record: UnitProgressRecord | null;
 	readonly recordError: unknown;
 	readonly recordFailed: boolean;
-	readonly recordMissing: boolean;
 	readonly recordPending: boolean;
 	readonly sessionPending: boolean;
 }): UnitProgressState {
 	if (!authenticated && sessionPending) return { kind: "loading" };
 	if (!authenticated) return { kind: "signed-out" };
 	if (recordPending) return { kind: "loading" };
-	if (recordFailed && !recordMissing) return { kind: "error", error: recordError };
+	if (recordFailed) return { kind: "error", error: recordError };
 	return record ? toTrackedUnitProgressState(record) : { kind: "untracked" };
 }
 
