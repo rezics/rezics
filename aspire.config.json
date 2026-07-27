@@ -4,6 +4,16 @@
 		"path": "aspire-apphost/apphost.mts",
 		"language": "typescript/nodejs"
 	},
+	"profiles": {
+		"https": {
+			"applicationUrl": "https://localhost:18888",
+			"environmentVariables": {
+				"ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
+				"ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL": "http://localhost:18890",
+				"ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:18891"
+			}
+		}
+	},
 	"sdk": {
 		"version": "13.4.6"
 	},

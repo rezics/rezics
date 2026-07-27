@@ -176,7 +176,6 @@ let api = builder
 		successThreshold: 1,
 	})
 	.withEnvironment("HOST", "0.0.0.0")
-	.withEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
 	.withEnvironment("DATABASE_URL", database)
 	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
 	.withEnvironment("EMAIL_MODE", emailMode)
@@ -240,7 +239,6 @@ let worker = builder
 		successThreshold: 1,
 	})
 	.withEnvironment("WORKER_HEALTH_HOST", "0.0.0.0")
-	.withEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
 	.withEnvironment("DATABASE_URL", database)
 	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
 	.withEnvironment("BETTER_AUTH_URL", apiEndpoint)

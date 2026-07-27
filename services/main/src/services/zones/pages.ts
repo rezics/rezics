@@ -158,42 +158,40 @@ export async function listZonePageUnits(
 	if (!pages.length) return [];
 
 	const pageIds = pages.map((page) => page.id);
-	const [addresses, localizationRows, revisionHeads, structures] = await Promise.all([
-		tx
-			.select({ targetUnitId: unitSlugAddress.targetUnitId, slug: unitSlugAddress.slug })
-			.from(unitSlugAddress)
-			.where(
-				and(
-					eq(unitSlugAddress.kind, "canonical"),
-					eq(unitSlugAddress.scopeUnitId, zoneId),
-					inArray(unitSlugAddress.targetUnitId, pageIds),
-				),
+	const addresses = await tx
+		.select({ targetUnitId: unitSlugAddress.targetUnitId, slug: unitSlugAddress.slug })
+		.from(unitSlugAddress)
+		.where(
+			and(
+				eq(unitSlugAddress.kind, "canonical"),
+				eq(unitSlugAddress.scopeUnitId, zoneId),
+				inArray(unitSlugAddress.targetUnitId, pageIds),
 			),
-		tx
-			.select({
-				unitId: unitLocalization.unitId,
-				language: unitLocalization.language,
-				position: unitLocalization.position,
-				title: unitLocalization.title,
-				content: unitLocalization.content,
-				contentStatus: unitLocalization.contentStatus,
-			})
-			.from(unitLocalization)
-			.where(inArray(unitLocalization.unitId, pageIds))
-			.orderBy(
-				asc(unitLocalization.unitId),
-				asc(unitLocalization.position),
-				asc(unitLocalization.language),
-			),
-		tx
-			.select({
-				unitId: unitRevisionHead.unitId,
-				revisionId: unitRevisionHead.revisionId,
-			})
-			.from(unitRevisionHead)
-			.where(inArray(unitRevisionHead.unitId, pageIds)),
-		listContentStructures(tx, zoneId, "page-structure"),
-	]);
+		);
+	const localizationRows = await tx
+		.select({
+			unitId: unitLocalization.unitId,
+			language: unitLocalization.language,
+			position: unitLocalization.position,
+			title: unitLocalization.title,
+			content: unitLocalization.content,
+			contentStatus: unitLocalization.contentStatus,
+		})
+		.from(unitLocalization)
+		.where(inArray(unitLocalization.unitId, pageIds))
+		.orderBy(
+			asc(unitLocalization.unitId),
+			asc(unitLocalization.position),
+			asc(unitLocalization.language),
+		);
+	const revisionHeads = await tx
+		.select({
+			unitId: unitRevisionHead.unitId,
+			revisionId: unitRevisionHead.revisionId,
+		})
+		.from(unitRevisionHead)
+		.where(inArray(unitRevisionHead.unitId, pageIds));
+	const structures = await listContentStructures(tx, zoneId, "page-structure");
 
 	const [structure] = structures;
 	const nodes = structure
@@ -391,33 +389,31 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 				event: "create",
 			});
 		} else {
-			const [[currentAddress], [currentLocalization]] = await Promise.all([
-				tx
-					.select({ slug: unitSlugAddress.slug })
-					.from(unitSlugAddress)
-					.where(
-						and(
-							eq(unitSlugAddress.kind, "canonical"),
-							eq(unitSlugAddress.scopeUnitId, input.zoneId),
-							eq(unitSlugAddress.targetUnitId, pageId),
-						),
-					)
-					.limit(1),
-				tx
-					.select({
-						title: unitLocalization.title,
-						content: unitLocalization.content,
-						contentStatus: unitLocalization.contentStatus,
-					})
-					.from(unitLocalization)
-					.where(
-						and(
-							eq(unitLocalization.unitId, pageId),
-							eq(unitLocalization.language, input.localization.language),
-						),
-					)
-					.limit(1),
-			]);
+			const [currentAddress] = await tx
+				.select({ slug: unitSlugAddress.slug })
+				.from(unitSlugAddress)
+				.where(
+					and(
+						eq(unitSlugAddress.kind, "canonical"),
+						eq(unitSlugAddress.scopeUnitId, input.zoneId),
+						eq(unitSlugAddress.targetUnitId, pageId),
+					),
+				)
+				.limit(1);
+			const [currentLocalization] = await tx
+				.select({
+					title: unitLocalization.title,
+					content: unitLocalization.content,
+					contentStatus: unitLocalization.contentStatus,
+				})
+				.from(unitLocalization)
+				.where(
+					and(
+						eq(unitLocalization.unitId, pageId),
+						eq(unitLocalization.language, input.localization.language),
+					),
+				)
+				.limit(1);
 			const slugChanged =
 				input.slug !== undefined && (currentAddress?.slug ?? null) !== input.slug;
 			const localizationChanged =

@@ -9,6 +9,12 @@ const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
 const startupTimeoutMs = 5 * 60 * 1000;
+const forbiddenRuntimeDiagnostics = [
+	"TelemetryExporterUnhealthy",
+	"OTLPExporterError",
+	"Concurrent export limit reached",
+	"Calling client.query() when the client is already executing a query is deprecated",
+] as const;
 
 type ManagedChildProcess = ChildProcessByStdio<null, Readable, Readable>;
 
@@ -224,6 +230,13 @@ function captureOutput(child: ManagedChildProcess) {
 	return () => output;
 }
 
+async function verifyRuntimeDiagnostics(getOutput: () => string) {
+	await delay(3_000);
+	const output = getOutput();
+	const diagnostic = forbiddenRuntimeDiagnostics.find((candidate) => output.includes(candidate));
+	if (diagnostic) throw new Error(`Aspire emitted a forbidden runtime diagnostic: ${diagnostic}`);
+}
+
 async function waitForExit(child: ManagedChildProcess, timeoutMs: number) {
 	if (child.exitCode !== null) return true;
 	return Promise.race([
@@ -284,6 +297,7 @@ async function main() {
 	try {
 		const resources = await waitForReady(child);
 		await verifySmoke(resources);
+		await verifyRuntimeDiagnostics(getOutput);
 		console.table(summarize(resources));
 	} catch (error) {
 		const output = getOutput();

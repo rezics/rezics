@@ -1221,29 +1221,27 @@ async function getZoneDefaultExperienceInput(
 	tx: DatabaseTransaction,
 	zoneId: string,
 ): Promise<ProvisionZoneDefaultExperienceInput> {
-	const [[owner], [localization]] = await Promise.all([
-		tx
-			.select({ profileId: unitAccessBinding.profileId })
-			.from(unitAccessBinding)
-			.where(
-				and(
-					eq(unitAccessBinding.unitId, zoneId),
-					eq(unitAccessBinding.subjectKind, "profile"),
-					eq(unitAccessBinding.role, "owner"),
-					isNull(unitAccessBinding.revokedAt),
-				),
-			)
-			.limit(1),
-		tx
-			.select({
-				language: unitLocalization.language,
-				title: unitLocalization.title,
-			})
-			.from(unitLocalization)
-			.where(eq(unitLocalization.unitId, zoneId))
-			.orderBy(unitLocalization.position, unitLocalization.language)
-			.limit(1),
-	]);
+	const [owner] = await tx
+		.select({ profileId: unitAccessBinding.profileId })
+		.from(unitAccessBinding)
+		.where(
+			and(
+				eq(unitAccessBinding.unitId, zoneId),
+				eq(unitAccessBinding.subjectKind, "profile"),
+				eq(unitAccessBinding.role, "owner"),
+				isNull(unitAccessBinding.revokedAt),
+			),
+		)
+		.limit(1);
+	const [localization] = await tx
+		.select({
+			language: unitLocalization.language,
+			title: unitLocalization.title,
+		})
+		.from(unitLocalization)
+		.where(eq(unitLocalization.unitId, zoneId))
+		.orderBy(unitLocalization.position, unitLocalization.language)
+		.limit(1);
 	if (!owner?.profileId || !localization?.title)
 		throw new Error(`Zone ${zoneId} cannot be provisioned without an owner and localization`);
 	return {

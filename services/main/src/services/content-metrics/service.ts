@@ -66,26 +66,24 @@ export async function syncUnitLocalizationContentMetrics(
 	tx: DatabaseTransaction,
 	unitId: string,
 ): Promise<void> {
-	const [localizations, storedMetrics] = await Promise.all([
-		tx
-			.select({
-				language: unitLocalization.language,
-				content: unitLocalization.content,
-			})
-			.from(unitLocalization)
-			.where(eq(unitLocalization.unitId, unitId))
-			.orderBy(unitLocalization.language),
-		tx
-			.select({
-				language: unitLocalizationContentMetric.language,
-				wordCount: unitLocalizationContentMetric.wordCount,
-				characterCount: unitLocalizationContentMetric.characterCount,
-				algorithmVersion: unitLocalizationContentMetric.algorithmVersion,
-				sourceSha256: unitLocalizationContentMetric.sourceSha256,
-			})
-			.from(unitLocalizationContentMetric)
-			.where(eq(unitLocalizationContentMetric.unitId, unitId)),
-	]);
+	const localizations = await tx
+		.select({
+			language: unitLocalization.language,
+			content: unitLocalization.content,
+		})
+		.from(unitLocalization)
+		.where(eq(unitLocalization.unitId, unitId))
+		.orderBy(unitLocalization.language);
+	const storedMetrics = await tx
+		.select({
+			language: unitLocalizationContentMetric.language,
+			wordCount: unitLocalizationContentMetric.wordCount,
+			characterCount: unitLocalizationContentMetric.characterCount,
+			algorithmVersion: unitLocalizationContentMetric.algorithmVersion,
+			sourceSha256: unitLocalizationContentMetric.sourceSha256,
+		})
+		.from(unitLocalizationContentMetric)
+		.where(eq(unitLocalizationContentMetric.unitId, unitId));
 	const storedByLanguage = new Map(
 		storedMetrics.map((metric) => [metric.language, metric] as const),
 	);
