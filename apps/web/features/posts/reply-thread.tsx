@@ -12,7 +12,14 @@ import type { PortableTextValue } from "@rezics/portable-text";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDownIcon, MessageCircleIcon, MessagesSquareIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ComponentProps, type FormEvent } from "react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+	type ComponentProps,
+	type FormEvent,
+} from "react";
 
 import {
 	Button,
@@ -37,7 +44,12 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
-import { buildReplyPostTree, type ReplyPostTreeNode } from "./reply-tree";
+import {
+	buildReplyPostTree,
+	flattenReplyPostTree,
+	type ReplyPost,
+	type ReplyPostTreeNode,
+} from "./reply-tree";
 import { PostOverflowMenu } from "./components/post-overflow-menu";
 import { invalidatePostQueries } from "./query";
 import { AttributionLinks } from "./attribution-list";
@@ -93,9 +105,17 @@ export function ReplyPostThread({
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
 	const { data: session } = useHydratedSession();
+	const [createdReplies, setCreatedReplies] = useState<ReplyPost[]>([]);
+	const addCreatedReply = useCallback((reply: ReplyPost) => {
+		setCreatedReplies((current) => [...current.filter(({ id }) => id !== reply.id), reply]);
+	}, []);
 	const visibleTree = useMemo(
-		() => buildReplyPostTree(replies.data?.pages.flatMap((page) => page.items) ?? []),
-		[replies.data?.pages],
+		() =>
+			buildReplyPostTree([
+				...(replies.data?.pages.flatMap((page) => page.items) ?? []),
+				...createdReplies.filter((reply) => reply.parentPostId === (parentPostId ?? null)),
+			]),
+		[createdReplies, parentPostId, replies.data?.pages],
 	);
 
 	return (
@@ -110,6 +130,7 @@ export function ReplyPostThread({
 					realmId={realmId}
 					action={t.ui.postReply}
 					initiallyExpanded={false}
+					onReplyCreated={addCreatedReply}
 				/>
 			) : (
 				<SignInButton
@@ -149,6 +170,9 @@ export function ReplyPostThread({
 							realmId={realmId}
 							signedIn={Boolean(session)}
 							topLevel
+							createdReplies={createdReplies}
+							localizationLanguages={localizationLanguages}
+							onReplyCreated={addCreatedReply}
 						/>
 					))}
 					{replies.isFetchNextPageError ? (
@@ -187,16 +211,53 @@ function ReplyPostNode({
 	realmId,
 	signedIn,
 	topLevel = false,
+	createdReplies,
+	localizationLanguages,
+	onReplyCreated,
 }: {
 	reply: ReplyPostTreeNode;
 	rootPostId: string;
 	realmId?: string;
 	signedIn: boolean;
 	topLevel?: boolean;
+	createdReplies: readonly ReplyPost[];
+	localizationLanguages: ReturnType<typeof useLocalizationLanguages>;
+	onReplyCreated: (reply: ReplyPost) => void;
 }) {
 	const { locale, t } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
+	const childBaseQuery = {
+		limit: 25,
+		localizationLanguages,
+		...(realmId ? { realmId } : {}),
+		parentPostId: reply.id,
+	};
+	const childReplies = useInfiniteQuery({
+		queryKey: [
+			...getApiPostsByPostIdRepliesQueryKey({
+				path: { postId: rootPostId },
+				query: childBaseQuery,
+			}),
+			"infinite",
+			"continuation",
+			reply.childEndCursor ?? "start",
+		] as const,
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await getApiPostsByPostIdReplies({
+				path: { postId: rootPostId },
+				query: {
+					...childBaseQuery,
+					...(pageParam ? { cursor: pageParam } : {}),
+				},
+				signal,
+			});
+			return data;
+		},
+		initialPageParam: reply.childEndCursor ?? "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		enabled: false,
+	});
 	const [editing, setEditing] = useState(false);
 	const [replying, setReplying] = useState(false);
 	const [descendantsVisible, setDescendantsVisible] = useState(true);
@@ -208,7 +269,17 @@ function ReplyPostNode({
 		reply.attributions[0];
 	const primaryName = primaryAttribution?.creditedUnit.title ?? t.posts.unknownAttribution;
 	const primaryInitials = Array.from(primaryName.trim())[0]?.toLocaleUpperCase() ?? primaryName;
-	const hasDescendants = reply.children.length > 0 || reply.hasMoreChildren;
+	const childTree = useMemo(
+		() =>
+			buildReplyPostTree([
+				...flattenReplyPostTree(reply.children),
+				...(childReplies.data?.pages.flatMap((page) => page.items) ?? []),
+				...createdReplies.filter((created) => created.parentPostId === reply.id),
+			]),
+		[childReplies.data?.pages, createdReplies, reply.children, reply.id],
+	);
+	const hasMoreChildren = childReplies.data ? childReplies.hasNextPage : reply.hasMoreChildren;
+	const hasDescendants = childTree.length > 0 || hasMoreChildren;
 
 	function save(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -244,33 +315,45 @@ function ReplyPostNode({
 							collapseDescendantsLabel: t.posts.hideChildReplies,
 							descendants: (
 								<>
-									{reply.children.map((child) => (
+									{childTree.map((child) => (
 										<ReplyPostNode
 											key={child.id}
 											reply={child}
 											rootPostId={rootPostId}
 											realmId={realmId}
 											signedIn={signedIn}
+											createdReplies={createdReplies}
+											localizationLanguages={localizationLanguages}
+											onReplyCreated={onReplyCreated}
 										/>
 									))}
-									{reply.hasMoreChildren ? (
+									{childReplies.isError ? (
+										<RequestFailure error={childReplies.error} />
+									) : null}
+									{hasMoreChildren ? (
 										<Button
 											className="mt-1 w-fit"
+											disabled={childReplies.isFetching}
+											onClick={() =>
+												void (childReplies.data
+													? childReplies.fetchNextPage()
+													: childReplies.refetch())
+											}
 											size="xs"
 											variant="outline"
-											asChild
 										>
-											<Link href={postHref(reply.id, realmId, "replies")}>
+											{childReplies.isFetching ? (
+												<Spinner data-icon="inline-start" />
+											) : (
 												<MessagesSquareIcon
 													aria-hidden
 													data-icon="inline-start"
 												/>
-												{t.actions.loadMore}
-												<ChevronDownIcon
-													aria-hidden
-													data-icon="inline-end"
-												/>
-											</Link>
+											)}
+											{childReplies.isError
+												? t.actions.retry
+												: t.actions.loadMore}
+											<ChevronDownIcon aria-hidden data-icon="inline-end" />
 										</Button>
 									) : null}
 								</>
@@ -388,6 +471,7 @@ function ReplyPostNode({
 								initiallyExpanded
 								onComplete={() => setReplying(false)}
 								onCancel={() => setReplying(false)}
+								onReplyCreated={onReplyCreated}
 							/>
 						)}
 					</div>
@@ -429,6 +513,7 @@ function ReplyPostComposer({
 	initiallyExpanded,
 	onComplete,
 	onCancel,
+	onReplyCreated,
 }: {
 	rootPostId: string;
 	parentPostId?: string;
@@ -437,6 +522,7 @@ function ReplyPostComposer({
 	initiallyExpanded: boolean;
 	onComplete?: () => void;
 	onCancel?: () => void;
+	onReplyCreated: (reply: ReplyPost) => void;
 }) {
 	const { t, locale } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
@@ -471,7 +557,8 @@ function ReplyPostComposer({
 				},
 			},
 			{
-				onSuccess: async () => {
+				onSuccess: async (createdReply) => {
+					onReplyCreated(createdReply);
 					await invalidatePostQueries(queryClient, rootPostId);
 					setBody([]);
 					setEditorKey((value) => value + 1);

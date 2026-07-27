@@ -2,7 +2,7 @@ import type { GetApiPostsByPostIdRepliesStatus200 } from "@rezics/openapi-tansta
 import { createPortableTextDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
-import { buildReplyPostTree } from "./reply-tree";
+import { buildReplyPostTree, flattenReplyPostTree } from "./reply-tree";
 
 type ApiReplyPost = GetApiPostsByPostIdRepliesStatus200["items"][number];
 
@@ -64,5 +64,24 @@ describe("reply-post tree", () => {
 
 		expect(tree.map((node) => node.id)).toEqual(["orphan", "self", "first", "second"]);
 		expect(tree.every((node) => node.children.length === 0)).toBe(true);
+	});
+
+	it("deduplicates replies while preserving their first tree position and latest data", () => {
+		const first = createReplyPost("reply");
+		const latest = { ...first, status: "removed" };
+
+		const tree = buildReplyPostTree([first, latest]);
+
+		expect(tree).toHaveLength(1);
+		expect(tree[0]?.status).toBe("removed");
+	});
+
+	it("flattens an assembled tree for merging additional child pages", () => {
+		const tree = buildReplyPostTree([
+			createReplyPost("parent"),
+			createReplyPost("child", "parent"),
+		]);
+
+		expect(flattenReplyPostTree(tree).map(({ id }) => id)).toEqual(["parent", "child"]);
 	});
 });

@@ -46,6 +46,7 @@ import {
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import {
 	ReplyListResponse,
+	ReplyResponse,
 	toPortableTextResponse,
 	PostDetailResponse,
 	PostListResponse,
@@ -805,7 +806,7 @@ export default new Elysia()
 								unitId: created.id,
 							});
 						}
-						await recordUnitRevision(tx, {
+						const revision = await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
 							event: "create",
@@ -828,16 +829,46 @@ export default new Elysia()
 								subjectUnitId: created.id,
 							});
 						}
-						return { id: created.id };
+						return {
+							id: created.id,
+							language: body.language,
+							rootPostId: params.postId,
+							parentPostId: body.parentPostId ?? null,
+							depth,
+							body: body.body,
+							moderationStatus: created.moderationStatus,
+							deletedAt: created.deletedAt,
+							latestRevisionId: revision.revisionId,
+							createdAt: created.createdAt,
+							updatedAt: created.updatedAt,
+						};
 					});
-					return { id: createdReply.id };
+					const [attributions, canEdit, lockedTargetIds] = await Promise.all([
+						getAttributionSummariesByUnitIds([createdReply.id]),
+						authorization.unit.canUpdate(createdReply.id),
+						getPostTargetingLockedUnitIds(database, {
+							targetUnitIds: [params.postId, createdReply.id],
+							...(body.realmId ? { realmId: body.realmId } : {}),
+						}),
+					]);
+					return {
+						...toReplyResponse(createdReply, attributions.get(createdReply.id) ?? []),
+						hasMoreChildren: false,
+						childEndCursor: null,
+						capabilities: {
+							canEdit,
+							canReply:
+								!lockedTargetIds.has(params.postId) &&
+								!lockedTargetIds.has(createdReply.id),
+						},
+					};
 				},
 				{
 					access: "contribute:interaction:write",
 					params: RootPostParams,
 					body: CreateReplyBody,
 					response: {
-						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.OK]: ReplyResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"ReplyDepthExceeded",

@@ -78951,6 +78951,70 @@ export type PostApiPostsByPostIdRepliesPath = {
 	postId: string;
 };
 
+export const PostApiPostsByPostIdRepliesStatus200LanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus200LanguageEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus200LanguageEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus200LanguageEnum];
+
+export const PostApiPostsByPostIdRepliesStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus200AttributionsRoleEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus200AttributionsRoleEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus200AttributionsRoleEnum];
+
+export const PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum];
+
+export const PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -78961,6 +79025,314 @@ export type PostApiPostsByPostIdRepliesStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	/**
+	 * @type string
+	 */
+	postKind: "reply";
+	/**
+	 * @type string
+	 */
+	language: PostApiPostsByPostIdRepliesStatus200LanguageEnum;
+	/**
+	 * @type array
+	 */
+	attributions: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'author'
+		 * @type string
+		 */
+		role: PostApiPostsByPostIdRepliesStatus200AttributionsRoleEnum;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @type object
+		 */
+		creditedUnit: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
+	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	rootPostId: string;
+	parentPostId: (string | null) | null;
+	depth: string | number;
+	/**
+	 * @type object
+	 */
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	/**
+	 * @type string
+	 */
+	status: string;
+	latestRevisionId: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	hasMoreChildren: boolean;
+	childEndCursor: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canReply: boolean;
+	};
 };
 
 /**

@@ -1,18 +1,21 @@
 import type { GetApiPostsByPostIdRepliesStatus200 } from "@rezics/openapi-tanstack-query";
 
-type ApiReplyPost = GetApiPostsByPostIdRepliesStatus200["items"][number];
+export type ReplyPost = GetApiPostsByPostIdRepliesStatus200["items"][number];
 
-export type ReplyPostTreeNode = ApiReplyPost & {
+export type ReplyPostTreeNode = ReplyPost & {
 	children: ReplyPostTreeNode[];
 };
 
 /** Keep every reply renderable even if stored parent links are incomplete. */
-export function buildReplyPostTree(replies: readonly ApiReplyPost[]): ReplyPostTreeNode[] {
+export function buildReplyPostTree(replies: readonly ReplyPost[]): ReplyPostTreeNode[] {
+	const uniqueReplies = new Map<string, ReplyPost>();
+	for (const reply of replies) uniqueReplies.set(reply.id, reply);
+
 	const nodes = new Map<string, ReplyPostTreeNode>();
-	for (const reply of replies) nodes.set(reply.id, { ...reply, children: [] });
+	for (const reply of uniqueReplies.values()) nodes.set(reply.id, { ...reply, children: [] });
 	const roots: ReplyPostTreeNode[] = [];
 
-	for (const reply of replies) {
+	for (const reply of uniqueReplies.values()) {
 		const node = nodes.get(reply.id);
 		if (!node) continue;
 		const parent = reply.parentPostId ? nodes.get(reply.parentPostId) : undefined;
@@ -24,6 +27,10 @@ export function buildReplyPostTree(replies: readonly ApiReplyPost[]): ReplyPostT
 	}
 
 	return roots;
+}
+
+export function flattenReplyPostTree(nodes: readonly ReplyPostTreeNode[]): ReplyPost[] {
+	return nodes.flatMap(({ children, ...reply }) => [reply, ...flattenReplyPostTree(children)]);
 }
 
 export function findReplyPost(

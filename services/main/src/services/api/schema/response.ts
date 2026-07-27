@@ -1030,26 +1030,26 @@ export const ChapterDetailResponse = t.Object({
 	previousChapterId: t.Nullable(Uuid),
 	nextChapterId: t.Nullable(Uuid),
 });
+export const ReplyResponse = t.Object({
+	id: Uuid,
+	postKind: t.Literal("reply"),
+	language: ContentLanguage,
+	attributions: t.Array(UnitAttributionSummaryResponse),
+	rootPostId: Uuid,
+	parentPostId: t.Nullable(Uuid),
+	depth: t.Integer(),
+	body: PortableTextDocument,
+	status: t.String(),
+	latestRevisionId: t.Nullable(Uuid),
+	hasMoreChildren: t.Boolean(),
+	childEndCursor: NullableText,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+	capabilities: t.Object({ canEdit: t.Boolean(), canReply: t.Boolean() }),
+});
+
 export const ReplyListResponse = t.Object({
-	items: t.Array(
-		t.Object({
-			id: Uuid,
-			postKind: t.Literal("reply"),
-			language: ContentLanguage,
-			attributions: t.Array(UnitAttributionSummaryResponse),
-			rootPostId: Uuid,
-			parentPostId: t.Nullable(Uuid),
-			depth: t.Integer(),
-			body: PortableTextDocument,
-			status: t.String(),
-			latestRevisionId: t.Nullable(Uuid),
-			hasMoreChildren: t.Boolean(),
-			childEndCursor: NullableText,
-			createdAt: DateTime,
-			updatedAt: DateTime,
-			capabilities: t.Object({ canEdit: t.Boolean(), canReply: t.Boolean() }),
-		}),
-	),
+	items: t.Array(ReplyResponse),
 	nextCursor: NullableText,
 });
 
