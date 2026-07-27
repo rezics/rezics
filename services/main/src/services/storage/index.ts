@@ -2,15 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
-	GetObjectTaggingCommand,
 	HeadBucketCommand,
 	HeadObjectCommand,
 	PutObjectCommand,
 	S3Client,
-	type DeleteObjectCommandInput,
-	type GetObjectCommandInput,
-	type GetObjectTaggingCommandInput,
-	type HeadObjectCommandInput,
 	type PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -18,12 +13,19 @@ import { withDependencySpan } from "@rezics/observability";
 
 import { env } from "../config";
 
-type WithoutBucket<T> = Omit<T, "Bucket">;
+type StorageObjectInput = Readonly<Pick<PutObjectCommandInput, "Key">>;
+type StoragePutInput = Readonly<
+	Pick<
+		PutObjectCommandInput,
+		"Body" | "CacheControl" | "ContentLength" | "ContentType" | "Key" | "Metadata"
+	>
+>;
 
 const storageClient = new S3Client({
 	endpoint: env.S3_ENDPOINT,
 	region: env.S3_REGION,
 	forcePathStyle: env.S3_FORCE_PATH_STYLE,
+	requestChecksumCalculation: "WHEN_REQUIRED",
 	credentials: {
 		accessKeyId: env.S3_ACCESS_KEY_ID,
 		secretAccessKey: env.S3_SECRET_ACCESS_KEY,
@@ -38,41 +40,34 @@ export const storage = {
 			}),
 		);
 	},
-	put(input: WithoutBucket<PutObjectCommandInput>) {
+	put(input: StoragePutInput) {
 		return withDependencySpan({ dependency: "s3", operation: "put" }, () =>
 			storageClient.send(new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
 		);
 	},
 
-	get(input: WithoutBucket<GetObjectCommandInput>) {
+	get(input: StorageObjectInput) {
 		return withDependencySpan({ dependency: "s3", operation: "get" }, () =>
 			storageClient.send(new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
 		);
 	},
 
-	getTags(input: WithoutBucket<GetObjectTaggingCommandInput>) {
-		return withDependencySpan({ dependency: "s3", operation: "get_tags" }, () =>
-			storageClient.send(new GetObjectTaggingCommand({ ...input, Bucket: env.S3_BUCKET })),
-		);
-	},
-
-	head(input: WithoutBucket<HeadObjectCommandInput>) {
+	head(input: StorageObjectInput) {
 		return withDependencySpan({ dependency: "s3", operation: "head" }, () =>
 			storageClient.send(new HeadObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
 		);
 	},
 
-	delete(input: WithoutBucket<DeleteObjectCommandInput>) {
+	delete(input: StorageObjectInput) {
 		return withDependencySpan({ dependency: "s3", operation: "delete" }, () =>
 			storageClient.send(new DeleteObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
 		);
 	},
 
-	presignPut(input: WithoutBucket<PutObjectCommandInput>, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {
-		const unhoistableHeaders = new Set([
-			...(input.Tagging ? ["x-amz-tagging"] : []),
-			...Object.keys(input.Metadata ?? {}).map((key) => `x-amz-meta-${key.toLowerCase()}`),
-		]);
+	presignPut(input: StoragePutInput, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {
+		const unhoistableHeaders = new Set(
+			Object.keys(input.Metadata ?? {}).map((key) => `x-amz-meta-${key.toLowerCase()}`),
+		);
 		return getSignedUrl(
 			storageClient,
 			new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET }),
@@ -80,7 +75,7 @@ export const storage = {
 		);
 	},
 
-	presignGet(input: WithoutBucket<GetObjectCommandInput>, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {
+	presignGet(input: StorageObjectInput, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {
 		return getSignedUrl(
 			storageClient,
 			new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET }),

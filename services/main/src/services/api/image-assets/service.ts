@@ -64,7 +64,6 @@ export function imageObjectUploadHeaders(
 		"x-amz-meta-image_asset_id": tracking.image_asset_id,
 		"x-amz-meta-image_object_id": tracking.image_object_id,
 		"x-amz-meta-uploader_profile_id": tracking.uploader_profile_id,
-		"x-amz-tagging": new URLSearchParams(tracking).toString(),
 	};
 }
 
@@ -222,7 +221,6 @@ export async function createImageAsset(profileId: string, input: CreateImageAsse
 			ContentType: input.contentType,
 			ContentLength: input.size,
 			Metadata: tracking,
-			Tagging: headers["x-amz-tagging"],
 		},
 		env.S3_PRESIGN_EXPIRES_IN,
 	);
@@ -303,15 +301,7 @@ export async function completeImageAsset(
 		objectId: asset.objectId,
 		uploaderProfileId: profileId,
 	});
-	const tags = await storage.getTags({ Key: asset.storageKey });
-	const actualTags = Object.fromEntries(
-		(tags.TagSet ?? []).flatMap(({ Key, Value }) => (Key && Value ? [[Key, Value]] : [])),
-	);
-	if (
-		Object.entries(expectedTracking).some(
-			([key, value]) => head.Metadata?.[key] !== value || actualTags[key] !== value,
-		)
-	) {
+	if (Object.entries(expectedTracking).some(([key, value]) => head.Metadata?.[key] !== value)) {
 		await markFailed(asset.id, asset.storageKey);
 		throw new ImageAssetContentMismatch();
 	}

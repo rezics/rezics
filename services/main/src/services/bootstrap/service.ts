@@ -821,7 +821,6 @@ async function ensureOfficialZoneAvatar(tx: DatabaseTransaction): Promise<void> 
 		ContentType: "image/png",
 		ContentLength: bytes.byteLength,
 		Metadata: tracking,
-		Tagging: new URLSearchParams(tracking).toString(),
 	});
 	await tx
 		.insert(imageAsset)

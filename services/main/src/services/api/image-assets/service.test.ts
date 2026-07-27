@@ -37,8 +37,6 @@ describe("image asset identity", () => {
 			"x-amz-meta-image_asset_id": "asset-id",
 			"x-amz-meta-image_object_id": "object-id",
 			"x-amz-meta-uploader_profile_id": "profile-id",
-			"x-amz-tagging":
-				"image_asset_id=asset-id&image_object_id=object-id&uploader_profile_id=profile-id",
 		});
 	});
 });

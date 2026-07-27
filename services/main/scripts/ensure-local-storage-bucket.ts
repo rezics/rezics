@@ -37,6 +37,7 @@ const client = new S3Client({
 	endpoint: env.S3_ENDPOINT,
 	region: env.S3_REGION,
 	forcePathStyle: env.S3_FORCE_PATH_STYLE,
+	requestChecksumCalculation: "WHEN_REQUIRED",
 	credentials: {
 		accessKeyId: env.S3_ACCESS_KEY_ID,
 		secretAccessKey: env.S3_SECRET_ACCESS_KEY,
@@ -73,7 +74,6 @@ await client.send(
 						"x-amz-meta-image_asset_id",
 						"x-amz-meta-image_object_id",
 						"x-amz-meta-uploader_profile_id",
-						"x-amz-tagging",
 					],
 					AllowedMethods: ["PUT"],
 					AllowedOrigins: [frontendUrl.origin],
