@@ -16,9 +16,17 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { measurePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftIcon, HistoryIcon, ListTreeIcon, SettingsIcon } from "lucide-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import {
+	ArrowLeftIcon,
+	ChevronRightIcon,
+	HistoryIcon,
+	LanguagesIcon,
+	ListTreeIcon,
+	SettingsIcon,
+} from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
@@ -32,25 +40,14 @@ import {
 	MenuContent,
 	MenuRadioGroup,
 	MenuRadioItem,
-	MenuSeparator,
+	MenuSub,
+	MenuSubContent,
+	MenuSubTrigger,
 	MenuTrigger,
 } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTrigger } from "@rezics/ui";
-import {
-	createTreeCollection,
-	type TreeNodeType,
-	TreeView,
-	TreeViewBranch,
-	TreeViewBranchContent,
-	TreeViewBranchItem,
-	TreeViewContent,
-	TreeViewItem,
-	TreeViewLabel,
-	TreeViewNode,
-	TreeViewTree,
-} from "@rezics/ui";
 import { cn } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
@@ -61,14 +58,17 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { hasErrorCode } from "@/i18n/errors";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { buildContentStructureTree, type ContentStructureTreeNode } from "./content-structure-tree";
+import {
+	collectBookStructureLabelIds,
+	flattenVisibleBookStructureTree,
+	isBookStructureDisplayLabel,
+} from "./model/book-content-structure-view";
+import { catalogDetailHref } from "./routing/catalog-detail-routes";
 import { invalidateChapterContent } from "./unit-cache";
 import { chapterHistoryHref, unitManagementSectionHref } from "./routing/unit-management-routes";
 
-interface ReadTreeNode extends Omit<TreeNodeType, "children"> {
-	contentKind: "chapter" | "label" | null;
-	contentUnitId: string | null;
-	children?: ReadTreeNode[];
-}
+const ReaderOutlineRowHeight = 36;
+const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
 
 function ContentReadTree({
 	bookId,
@@ -83,119 +83,217 @@ function ContentReadTree({
 	currentChapterId?: string;
 	className?: string;
 }) {
-	const rootNode = {
-		children: toReadTreeNodes(nodes),
-		contentKind: null,
-		contentUnitId: null,
-		id: "root",
-		name: "",
-	};
-	const collection = createTreeCollection<ReadTreeNode>({ rootNode });
-	return (
-		<TreeView
-			className={cn("overflow-hidden rounded-lg border", className)}
-			collection={collection}
-			defaultExpandedValue={getExpandedNodeIds(rootNode.children)}
-		>
-			<TreeViewLabel className="sr-only">{label}</TreeViewLabel>
-			<TreeViewTree>
-				{collection.rootNode.children?.map((node, index) => (
-					<ContentReadTreeNode
-						bookId={bookId}
-						currentChapterId={currentChapterId}
-						indexPath={[index]}
-						key={node.id}
-						node={node}
-					/>
-				))}
-			</TreeViewTree>
-		</TreeView>
+	const scrollRef = useRef<HTMLDivElement>(null);
+	const labelIds = useMemo(() => collectBookStructureLabelIds(nodes), [nodes]);
+	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(labelIds));
+	const activeAncestorLabelIds = useMemo(
+		() => findChapterAncestorLabelIds(nodes, currentChapterId),
+		[nodes, currentChapterId],
 	);
-}
 
-function ContentReadTreeNode({
-	bookId,
-	indexPath,
-	node,
-	currentChapterId,
-}: {
-	bookId: string;
-	indexPath: number[];
-	node: ReadTreeNode;
-	currentChapterId?: string;
-}) {
+	useEffect(() => {
+		if (!activeAncestorLabelIds.length) return;
+		setExpandedIds((current) => {
+			if (activeAncestorLabelIds.every((id) => current.has(id))) return current;
+			return new Set([...current, ...activeAncestorLabelIds]);
+		});
+	}, [activeAncestorLabelIds]);
+
+	const entries = useMemo(
+		() => flattenVisibleBookStructureTree(nodes, expandedIds),
+		[nodes, expandedIds],
+	);
+	const activeIndex = useMemo(
+		() =>
+			currentChapterId
+				? entries.findIndex(
+						({ entry }) =>
+							entry.node.contentKind === "chapter" &&
+							entry.node.contentUnitId === currentChapterId,
+					)
+				: -1,
+		[entries, currentChapterId],
+	);
+	const getItemKey = useCallback(
+		(index: number) => entries[index]?.entry.node.id ?? index,
+		[entries],
+	);
+	const virtualizer = useVirtualizer<HTMLDivElement, HTMLDivElement>({
+		count: entries.length,
+		estimateSize: () => ReaderOutlineRowHeight,
+		getItemKey,
+		getScrollElement: () => scrollRef.current,
+		overscan: 8,
+	});
+
+	useEffect(() => {
+		if (activeIndex < 0) return;
+		const frame = requestAnimationFrame(() => {
+			virtualizer.scrollToIndex(activeIndex, { align: "center" });
+		});
+		return () => cancelAnimationFrame(frame);
+	}, [activeIndex, virtualizer]);
+
+	const toggleLabel = useCallback((nodeId: string) => {
+		setExpandedIds((current) => {
+			const next = new Set(current);
+			if (next.has(nodeId)) next.delete(nodeId);
+			else next.add(nodeId);
+			return next;
+		});
+	}, []);
+
 	return (
-		<TreeViewNode indexPath={indexPath} node={node}>
-			{node.children?.length ? (
-				<TreeViewBranch>
-					<TreeViewBranchItem expandedIcon={null} icon={null}>
-						{node.name}
-					</TreeViewBranchItem>
-					<TreeViewBranchContent>
-						{node.children.map((child, index) => (
-							<ContentReadTreeNode
-								bookId={bookId}
-								currentChapterId={currentChapterId}
-								indexPath={[...indexPath, index]}
-								key={child.id}
-								node={child}
-							/>
-						))}
-					</TreeViewBranchContent>
-				</TreeViewBranch>
-			) : node.contentKind === "chapter" && node.contentUnitId ? (
-				<TreeViewContent asChild>
-					<Link
-						aria-current={node.contentUnitId === currentChapterId ? "page" : undefined}
-						className={cn(
-							node.contentUnitId === currentChapterId &&
-								"bg-surface-selected text-foreground",
-						)}
-						href={`/units/book/${bookId}/read/${node.contentUnitId}`}
-					>
-						<TreeViewItem>{node.name}</TreeViewItem>
-					</Link>
-				</TreeViewContent>
-			) : (
-				<TreeViewContent>
-					<TreeViewItem>{node.name}</TreeViewItem>
-				</TreeViewContent>
+		<nav
+			aria-label={label}
+			className={cn(
+				"min-h-0 overflow-y-auto overscroll-contain rounded-lg border",
+				className,
 			)}
-		</TreeViewNode>
+			ref={scrollRef}
+		>
+			<div
+				className="relative w-full"
+				role="list"
+				style={{ height: virtualizer.getTotalSize() }}
+			>
+				{virtualizer.getVirtualItems().map((virtualRow) => {
+					const visibleEntry = entries[virtualRow.index];
+					if (!visibleEntry) return null;
+					const { depth, entry, positionInSet, setSize } = visibleEntry;
+					const { node } = entry;
+					const labelNode = isBookStructureDisplayLabel(entry);
+					const expanded = expandedIds.has(node.id);
+					const current =
+						node.contentKind === "chapter" && node.contentUnitId === currentChapterId;
+					const rowClassName = cn(
+						"absolute start-0 top-0 flex h-9 w-full items-center gap-1 rounded-md pe-2 text-sm outline-none",
+						labelNode
+							? "font-medium text-foreground"
+							: "text-muted-foreground hover:bg-muted hover:text-foreground",
+						current && "bg-surface-selected text-foreground",
+					);
+					const rowStyle = {
+						paddingInlineStart: `${0.5 + depth * 1.125}rem`,
+						transform: `translateY(${virtualRow.start}px)`,
+					};
+
+					return (
+						<div
+							aria-posinset={positionInSet}
+							aria-setsize={setSize}
+							data-content-kind={node.contentKind}
+							data-current={current ? "" : undefined}
+							key={virtualRow.key}
+							role="listitem"
+						>
+							{labelNode ? (
+								<button
+									aria-expanded={expanded}
+									className={cn(
+										rowClassName,
+										"hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+									)}
+									onClick={() => toggleLabel(node.id)}
+									style={rowStyle}
+									type="button"
+								>
+									<ChevronRightIcon
+										aria-hidden
+										className={cn(
+											"size-3.5 shrink-0 transition-transform motion-reduce:transition-none",
+											expanded && "rotate-90",
+										)}
+									/>
+									<span className="truncate">{node.title}</span>
+								</button>
+							) : (
+								<Link
+									aria-current={current ? "page" : undefined}
+									className={rowClassName}
+									href={`/units/book/${bookId}/read/${node.contentUnitId}`}
+									style={rowStyle}
+								>
+									<span className="truncate">{node.title}</span>
+								</Link>
+							)}
+						</div>
+					);
+				})}
+			</div>
+		</nav>
 	);
 }
 
-function toReadTreeNodes(nodes: readonly ContentStructureTreeNode[]): ReadTreeNode[] {
-	return nodes.map(({ node, children }) => ({
-		...(children.length ? { children: toReadTreeNodes(children) } : {}),
-		contentKind: node.contentKind,
-		contentUnitId: node.contentUnitId,
-		id: node.id,
-		name: node.title,
-	}));
+function findChapterAncestorLabelIds(
+	nodes: readonly ContentStructureTreeNode[],
+	chapterId?: string,
+): string[] {
+	if (!chapterId) return [];
+	for (const entry of nodes) {
+		if (entry.node.contentKind === "chapter" && entry.node.contentUnitId === chapterId)
+			return [];
+		const descendants = findChapterAncestorLabelIds(entry.children, chapterId);
+		if (
+			descendants.length ||
+			entry.children.some(
+				({ node }) => node.contentKind === "chapter" && node.contentUnitId === chapterId,
+			)
+		)
+			return entry.node.contentKind === "label"
+				? [entry.node.id, ...descendants]
+				: descendants;
+	}
+	return [];
 }
 
-function getExpandedNodeIds(nodes: readonly ReadTreeNode[]): string[] {
-	return nodes.flatMap((node) =>
-		node.children?.length ? [node.id, ...getExpandedNodeIds(node.children)] : [],
-	);
+const ReaderFontSizeOptions = [
+	{ value: "12", className: "text-[12px]!" },
+	{ value: "14", className: "text-[14px]!" },
+	{ value: "16", className: "text-[16px]!" },
+	{ value: "18", className: "text-[18px]!" },
+	{ value: "20", className: "text-[20px]!" },
+	{ value: "22", className: "text-[22px]!" },
+	{ value: "24", className: "text-[24px]!" },
+	{ value: "26", className: "text-[26px]!" },
+	{ value: "28", className: "text-[28px]!" },
+	{ value: "30", className: "text-[30px]!" },
+	{ value: "32", className: "text-[32px]!" },
+] as const;
+
+type ReaderFontSizeOption = (typeof ReaderFontSizeOptions)[number];
+const DefaultReaderFontSize = ReaderFontSizeOptions[3];
+const ReaderFontSizeStorageKey = "rezics:reader-font-size:v1";
+
+function findReaderFontSizeOption(value: string): ReaderFontSizeOption | undefined {
+	return ReaderFontSizeOptions.find((option) => option.value === value);
 }
 
-type ReaderFontSize = "small" | "default" | "large";
-const ReaderFontSizeClasses = {
-	small: "text-base sm:text-[1.05rem]",
-	default: "text-lg",
-	large: "text-xl",
-} satisfies Record<ReaderFontSize, string>;
+function loadReaderFontSize(): ReaderFontSizeOption | undefined {
+	try {
+		const storedValue = localStorage.getItem(ReaderFontSizeStorageKey);
+		return storedValue ? findReaderFontSizeOption(storedValue) : undefined;
+	} catch {
+		return undefined;
+	}
+}
 
-function isReaderFontSize(value: string): value is ReaderFontSize {
-	return value === "small" || value === "default" || value === "large";
+function saveReaderFontSize(fontSize: ReaderFontSizeOption): void {
+	try {
+		localStorage.setItem(ReaderFontSizeStorageKey, fontSize.value);
+	} catch {
+		// The in-memory setting still works when browser storage is unavailable.
+	}
 }
 
 export function Reader({ bookId, chapterId }: { bookId: string; chapterId: string }) {
 	const { t } = useTranslation(["actions", "brand", "errors", "locale", "state", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const [fontSize, setFontSize] = useState<ReaderFontSize>("default");
+	const [fontSize, setFontSize] = useState<ReaderFontSizeOption>(DefaultReaderFontSize);
+	useEffect(() => {
+		const storedFontSize = loadReaderFontSize();
+		if (storedFontSize) setFontSize(storedFontSize);
+	}, []);
 	const [languageSelection, setLanguageSelection] = useState<{
 		readonly chapterId: string;
 		readonly language: ContentLanguage;
@@ -218,12 +316,20 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		path: { unitId: bookId },
 		query: { localizationLanguages },
 	});
+	const tree = useMemo(
+		() => (outline.data?.items.length ? buildContentStructureTree(outline.data.items) : []),
+		[outline.data?.items],
+	);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
-	const tree = outline.data?.items.length ? buildContentStructureTree(outline.data.items) : [];
-	const fontSizeClass = ReaderFontSizeClasses[fontSize];
+	const selectedLanguageLabel =
+		selectedLanguage === "zh"
+			? t.locale.zh
+			: selectedLanguage === "en"
+				? t.locale.en
+				: t.units.reader.automaticLanguage;
 	return (
 		<main
 			className="fixed inset-0 z-50 grid grid-rows-[3.75rem_minmax(0,1fr)] overflow-hidden bg-background"
@@ -231,7 +337,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		>
 			<header className="flex min-w-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:px-5">
 				<Button asChild className="size-11 sm:size-10" size="icon-xl" variant="quiet">
-					<Link aria-label={t.ui.backToUnit} href={`/units/book/${bookId}`}>
+					<Link
+						aria-label={t.units.reader.backToContents}
+						href={catalogDetailHref("book", bookId, "contents")}
+					>
 						<ArrowLeftIcon aria-hidden />
 					</Link>
 				</Button>
@@ -254,10 +363,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 					</SheetTrigger>
 					<SheetContent placement="left">
 						<SheetHeader title={t.units.content.title} />
-						<SheetBody>
+						<SheetBody className="h-full min-h-0 overflow-hidden p-4">
 							<ReaderOutline
 								bookId={bookId}
-								className="border-0"
+								className="h-[calc(100svh-7.75rem)] border-0"
 								currentChapterId={chapterId}
 								outline={outline}
 								tree={tree}
@@ -278,58 +387,74 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						</Button>
 					</MenuTrigger>
 					<MenuContent className="w-64 p-1.5">
-						<MenuRadioGroup
-							heading={t.units.reader.fontSize}
-							onValueChange={({ value }) => {
-								if (isReaderFontSize(value)) setFontSize(value);
-							}}
-							value={fontSize}
-						>
-							<MenuRadioItem closeOnSelect={false} value="small">
-								{t.units.reader.fontSizeSmall}
-							</MenuRadioItem>
-							<MenuRadioItem closeOnSelect={false} value="default">
-								{t.units.reader.fontSizeDefault}
-							</MenuRadioItem>
-							<MenuRadioItem closeOnSelect={false} value="large">
-								{t.units.reader.fontSizeLarge}
-							</MenuRadioItem>
-						</MenuRadioGroup>
-						<MenuSeparator />
-						<MenuRadioGroup
-							heading={t.units.reader.chapterLanguage}
-							onValueChange={({ value }) => {
-								if (value === "automatic") setLanguageSelection(null);
-								else if (isContentLanguage(value))
-									setLanguageSelection({ chapterId, language: value });
-							}}
-							value={selectedLanguage ?? "automatic"}
-						>
-							<MenuRadioItem closeOnSelect={false} value="automatic">
-								{t.units.reader.automaticLanguage}
-							</MenuRadioItem>
-							{query.data.availableLanguages.map((language) => (
-								<MenuRadioItem
-									closeOnSelect={false}
-									key={language}
-									value={language}
+						<Field className="gap-1.5 p-2">
+							<FieldLabel htmlFor="reader-font-size">
+								{t.units.reader.fontSize}
+							</FieldLabel>
+							<NativeSelect
+								id="reader-font-size"
+								onChange={(event) => {
+									const value = event.currentTarget.value;
+									const option = findReaderFontSizeOption(value);
+									if (option) {
+										setFontSize(option);
+										saveReaderFontSize(option);
+									}
+								}}
+								value={fontSize.value}
+							>
+								{ReaderFontSizeOptions.map((option) => (
+									<NativeSelectOption key={option.value} value={option.value}>
+										{option.value}
+									</NativeSelectOption>
+								))}
+							</NativeSelect>
+						</Field>
+						<MenuSub positioning={NestedMenuPositioning}>
+							<MenuSubTrigger>
+								<LanguagesIcon aria-hidden />
+								<span>{t.units.reader.chapterLanguage}</span>
+								<span className="ms-auto max-w-24 truncate text-muted-foreground">
+									{selectedLanguageLabel}
+								</span>
+							</MenuSubTrigger>
+							<MenuSubContent className="w-56">
+								<MenuRadioGroup
+									heading={t.units.reader.chapterLanguage}
+									onValueChange={({ value }) => {
+										if (value === "automatic") setLanguageSelection(null);
+										else if (isContentLanguage(value))
+											setLanguageSelection({ chapterId, language: value });
+									}}
+									value={selectedLanguage ?? "automatic"}
 								>
-									{language === "zh" ? t.locale.zh : t.locale.en}
-								</MenuRadioItem>
-							))}
-						</MenuRadioGroup>
+									<MenuRadioItem closeOnSelect={false} value="automatic">
+										{t.units.reader.automaticLanguage}
+									</MenuRadioItem>
+									{query.data.availableLanguages.map((language) => (
+										<MenuRadioItem
+											closeOnSelect={false}
+											key={language}
+											value={language}
+										>
+											{language === "zh" ? t.locale.zh : t.locale.en}
+										</MenuRadioItem>
+									))}
+								</MenuRadioGroup>
+							</MenuSubContent>
+						</MenuSub>
 					</MenuContent>
 				</Menu>
 			</header>
 
 			<div className="grid min-h-0 md:grid-cols-[17rem_minmax(0,1fr)]">
-				<aside className="hidden min-h-0 overflow-y-auto border-e bg-card/45 p-4 md:block">
+				<aside className="hidden min-h-0 flex-col overflow-hidden border-e bg-card/45 p-4 md:flex">
 					<p className="mb-3 px-2 font-serif font-semibold text-lg">
 						{t.units.content.title}
 					</p>
 					<ReaderOutline
 						bookId={bookId}
-						className="border-0 bg-transparent"
+						className="min-h-0 flex-1 border-0 bg-transparent"
 						currentChapterId={chapterId}
 						outline={outline}
 						tree={tree}
@@ -346,11 +471,13 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								{query.data.title}
 							</h1>
 						</header>
-						<article
-							className={cn("flex-1 py-8 leading-8 sm:leading-9", fontSizeClass)}
-						>
+						<article className="flex-1 py-8">
 							{query.data.content ? (
 								<PortableTextContent
+									className={cn(
+										fontSize.className,
+										"prose-p:leading-[1.8]! prose-li:leading-[1.8]!",
+									)}
 									value={readPortableText(query.data.content)}
 									variant="article"
 								/>

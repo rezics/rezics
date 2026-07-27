@@ -30,7 +30,7 @@ export const EmptyBookStructureContentMetrics: BookStructureContentMetrics = {
 export function isBookStructureDisplayLabel<Node extends BookStructureViewNode>(
 	entry: BookStructureViewTreeNode<Node>,
 ): boolean {
-	return entry.node.contentKind === "label" || entry.children.length > 0;
+	return entry.node.contentKind === "label";
 }
 
 export function collectBookStructureLabelIds<Node extends BookStructureViewNode>(

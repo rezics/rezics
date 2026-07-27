@@ -292,11 +292,9 @@ export default {
 		characterCount: insert("{{count}} characters", { count: Number }),
 	},
 	reader: {
+		backToContents: "Back to contents",
 		settings: "Reader settings",
 		fontSize: "Font size",
-		fontSizeSmall: "Small",
-		fontSizeDefault: "Default",
-		fontSizeLarge: "Large",
 		chapterLanguage: "Chapter language",
 		automaticLanguage: "Automatic",
 		markChapterComplete: "Mark chapter complete",
