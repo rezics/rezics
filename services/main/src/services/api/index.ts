@@ -52,7 +52,22 @@ import { classifyValidationFailure } from "./validation-failure";
 
 const { logger } = getActiveObservability();
 
-export default new Elysia()
+/**
+ * Main API application boundary.
+ *
+ * @remarks
+ * Elysia 1.4's exact-mirror 0.x normalizer cannot compile the recursive and
+ * nested TypeBox references used by the API models. Use TypeBox normalization
+ * until the Elysia 2 migration moves this boundary to TypeBox 1 and
+ * exact-mirror 1.x.
+ *
+ * @todo Remove the `normalize: "typebox"` override after migrating to Elysia 2
+ * and verifying the recursive JSON value, filter, navigation, and block schema
+ * contracts without an exact-mirror cleaner fallback.
+ *
+ * @see {@link https://github.com/elysiajs/exact-mirror/blob/main/CHANGELOG.md}
+ */
+export default new Elysia({ normalize: "typebox" })
 	.use(createElysiaObservability())
 	.model({ JsonValue })
 	.parser("empty-body", ({ request }) => {
