@@ -190,6 +190,7 @@ tasks:
         desc: Run the independent Seed service and rebuild every derived database projection.
         cmds:
             - yarn exec tsx scripts/seed.ts {{.CLI_ARGS}}
+            - task: db:bootstrap
             - task: content-metrics:rebuild
             - task: studio:rebuild
             - task: recommendations:refresh

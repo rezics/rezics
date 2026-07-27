@@ -689,35 +689,6 @@ export async function restoreUnitSnapshot(
 	const subjectAssociations = snapshot.owned.subjectAssociations.map((row) =>
 		subjectAssociationRowSchema.parse(row),
 	);
-	for (const targetUnitId of credits
-		.map(({ creditedUnitId }) => creditedUnitId)
-		.sort((left, right) => left.localeCompare(right)))
-		await ensureDirectCreditAttributionAllowed(authorization, tx, targetUnitId);
-	for (const targetEntityId of subjectAssociations
-		.map(({ entityId }) => entityId)
-		.sort((left, right) => left.localeCompare(right)))
-		await authorization.entity.ensureAssociationAllowed(tx, targetEntityId, "subject");
-	for (const contextPostId of [
-		...new Set(
-			subjectAssociations.flatMap(({ contextPostId }) =>
-				contextPostId ? [contextPostId] : [],
-			),
-		),
-	].sort((left, right) => left.localeCompare(right))) {
-		await authorization.unit.ensureCanRead(
-			contextPostId,
-			() => new AssociationContextPostInvalid(),
-		);
-		await ensureWikiAssociationContextPost(tx, contextPostId);
-	}
-	if (snapshot.kind === "post" && snapshot.extension) {
-		const postState = postStateSchema.parse(snapshot.extension);
-		if (postState.subjectUnitId)
-			await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
-				tx,
-				postState.subjectUnitId,
-			);
-	}
 	await lockUnitHistory(tx, unitId);
 	const [current] = await tx
 		.select({ kind: unit.kind, subjectUnitId: post.subjectUnitId })
@@ -726,6 +697,59 @@ export async function restoreUnitSnapshot(
 		.where(eq(unit.id, unitId))
 		.limit(1);
 	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
+	const currentCredits = await tx
+		.select({ creditedUnitId: creditAttribution.creditedUnitId })
+		.from(creditAttribution)
+		.where(eq(creditAttribution.sourceUnitId, unitId));
+	const currentSubjectAssociations = await tx
+		.select({
+			entityId: subjectAssociation.entityId,
+			contextPostId: subjectAssociation.contextPostId,
+		})
+		.from(subjectAssociation)
+		.where(eq(subjectAssociation.unitId, unitId));
+	const currentCreditTargetIds = new Set(currentCredits.map(({ creditedUnitId }) => creditedUnitId));
+	const currentSubjectTargetIds = new Set(
+		currentSubjectAssociations.map(({ entityId }) => entityId),
+	);
+	const currentContextPostIds = new Set(
+		currentSubjectAssociations.flatMap(({ contextPostId }) =>
+			contextPostId ? [contextPostId] : [],
+		),
+	);
+	for (const targetUnitId of credits
+		.map(({ creditedUnitId }) => creditedUnitId)
+		.filter((targetUnitId) => !currentCreditTargetIds.has(targetUnitId))
+		.sort((left, right) => left.localeCompare(right)))
+		await ensureDirectCreditAttributionAllowed(authorization, tx, targetUnitId);
+	for (const targetEntityId of subjectAssociations
+		.map(({ entityId }) => entityId)
+		.filter((targetEntityId) => !currentSubjectTargetIds.has(targetEntityId))
+		.sort((left, right) => left.localeCompare(right)))
+		await authorization.entity.ensureAssociationAllowed(tx, targetEntityId, "subject");
+	for (const contextPostId of [
+		...new Set(
+			subjectAssociations.flatMap(({ contextPostId }) =>
+				contextPostId ? [contextPostId] : [],
+			),
+		),
+	]
+		.filter((contextPostId) => !currentContextPostIds.has(contextPostId))
+		.sort((left, right) => left.localeCompare(right))) {
+		await authorization.unit.ensureCanRead(
+			contextPostId,
+			() => new AssociationContextPostInvalid(),
+		);
+		await ensureWikiAssociationContextPost(tx, contextPostId);
+	}
+	if (snapshot.kind === "post" && snapshot.extension) {
+		const postState = postStateSchema.parse(snapshot.extension);
+		if (postState.subjectUnitId !== current.subjectUnitId && postState.subjectUnitId)
+			await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
+				tx,
+				postState.subjectUnitId,
+			);
+	}
 	if (snapshot.kind === "structure")
 		await authorization.platform.ensureCapability("unit.edit", tx);
 	if (snapshot.kind === "post" && snapshot.extension) {

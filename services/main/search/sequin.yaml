@@ -87,7 +87,7 @@ sinks:
       tables:
           - name: "public.search_revision_projection_source"
             group_column_names: ["revision_id"]
-      initial_backfill: true
+      initial_backfill: false
       enrichment: "rezics-revision-search-document-v1"
       transform: "rezics-revision-search-transform-v1"
       routing: "rezics-revision-search-routing-v1"

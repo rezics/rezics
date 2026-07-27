@@ -719,6 +719,15 @@ async function seedCatalog(
 		...collections,
 		...polls,
 	];
+	await writeBatches(
+		realms.map((value, index) => ({
+			id: value.id,
+			joinPolicy: index % 3 === 0 ? ("approval" as const) : ("open" as const),
+			createdAt: value.createdAt,
+			updatedAt: value.updatedAt,
+		})),
+		(batch) => tx.insert(realm).values(batch),
+	);
 	await insertUnitDetails(tx, data, allUnits, OfficialProfileIds.community);
 	const [fixtureBook, fixtureMedia, fixtureSoftware] = [
 		books[0],
@@ -820,15 +829,6 @@ async function seedCatalog(
 			updatedAt: value.updatedAt,
 		})),
 		(batch) => tx.insert(series).values(batch),
-	);
-	await writeBatches(
-		realms.map((value, index) => ({
-			id: value.id,
-			joinPolicy: index % 3 === 0 ? ("approval" as const) : ("open" as const),
-			createdAt: value.createdAt,
-			updatedAt: value.updatedAt,
-		})),
-		(batch) => tx.insert(realm).values(batch),
 	);
 	await writeBatches(
 		realms.map((value) => ({
