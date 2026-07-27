@@ -248,7 +248,7 @@ export const ContentStructureKindPolicies = {
 		targets: ["content"],
 		progress: "node_completion",
 		acceptsContent: (kind, postKind) =>
-			kind === "post" && (postKind === "chapter" || postKind === "chapter_group"),
+			kind === "label" || (kind === "post" && postKind === "chapter"),
 	},
 	"post.contents": {
 		ownerKinds: ["post"],

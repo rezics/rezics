@@ -18,7 +18,7 @@ type BookDraftNodeBase = {
 export type ExistingBookDraftNode = BookDraftNodeBase & {
 	readonly state: "existing";
 	readonly contentUnitId: string;
-	readonly contentKind: "chapter" | "chapter_group";
+	readonly contentKind: "chapter" | "label";
 	readonly language: "zh" | "en";
 };
 
@@ -27,7 +27,7 @@ export type NewBookDraftNode = BookDraftNodeBase &
 		| (Extract<NewBookContentStructureSaveNode, { contentKind: "chapter" }> & {
 				readonly state: "new";
 		  })
-		| (Extract<NewBookContentStructureSaveNode, { contentKind: "chapter_group" }> & {
+		| (Extract<NewBookContentStructureSaveNode, { contentKind: "label" }> & {
 				readonly state: "new";
 		  })
 	);
@@ -63,7 +63,7 @@ export type BookDraftDropTarget =
  * non-leaf chapters are still accepted and rendered as labels by the frontend.
  */
 export function isBookDraftParentTarget(node: BookDraftNode): boolean {
-	return node.contentKind === "chapter_group";
+	return node.contentKind === "label";
 }
 
 function compareRemoteNodes(left: RemoteBookNode, right: RemoteBookNode): number {
@@ -397,7 +397,7 @@ export function toBookContentStructureSaveNodes(
 				order: node.order,
 				title: node.title,
 				language: node.language,
-				contentKind: "chapter_group",
+				contentKind: "label",
 			};
 		});
 }

@@ -178,7 +178,6 @@ const FeedContentDefinitions = {
 	"post:excerpt": { itemType: "post", postKind: "excerpt" },
 	"post:review": { itemType: "post", postKind: "review" },
 	"post:chapter": { itemType: "post", postKind: "chapter" },
-	"post:chapter_group": { itemType: "post", postKind: "chapter_group" },
 	"post:wiki": { itemType: "post", postKind: "wiki" },
 	"post:picture": { itemType: "post", postKind: "picture" },
 } as const satisfies Record<FeedContentKind, FeedContentDefinition>;

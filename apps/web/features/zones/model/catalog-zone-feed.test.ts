@@ -11,7 +11,6 @@ describe("catalog Zone Feed content kinds", () => {
 			"post:excerpt",
 			"post:review",
 			"post:chapter",
-			"post:chapter_group",
 			"post:wiki",
 			"post:picture",
 		]);

@@ -249,7 +249,7 @@ export function BookContentStructureEditor({
 						content: writePortableText([]),
 						status: "draft",
 					}
-				: { ...common, contentKind: "chapter_group" };
+				: { ...common, contentKind: "label" };
 		setDocument((current) => ({
 			...current,
 			draft: placement.insertAfterId

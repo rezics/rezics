@@ -118,12 +118,12 @@ const ExistingBookContentStructureDraftNode = t.Object(
 	{ additionalProperties: false },
 );
 
-const NewBookContentStructureGroupDraftNode = t.Object(
+const NewBookContentStructureLabelDraftNode = t.Object(
 	{
 		state: t.Literal("new"),
 		...BookContentStructureDraftNodeBase,
 		language: ContentLanguage,
-		contentKind: t.Literal("chapter_group"),
+		contentKind: t.Literal("label"),
 	},
 	{ additionalProperties: false },
 );
@@ -146,7 +146,7 @@ export const SaveBookContentStructureDraftBody = t.Object(
 		nodes: t.Array(
 			t.Union([
 				ExistingBookContentStructureDraftNode,
-				NewBookContentStructureGroupDraftNode,
+				NewBookContentStructureLabelDraftNode,
 				NewBookContentStructureChapterDraftNode,
 			]),
 			{ maxItems: 10_000 },
@@ -159,9 +159,13 @@ export type SaveBookContentStructureDraftBody = Static<typeof SaveBookContentStr
 export const ChapterParams = t.Object({ chapterId: Uuid });
 export type ChapterParams = Static<typeof ChapterParams>;
 
-export const ReadChapterQuery = t.Object(LocalizationLanguageQuery, {
-	additionalProperties: false,
-});
+export const ReadChapterQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		language: t.Optional(ContentLanguage),
+	},
+	{ additionalProperties: false },
+);
 export type ReadChapterQuery = Static<typeof ReadChapterQuery>;
 
 export const ChapterLocalizationParams = t.Object({

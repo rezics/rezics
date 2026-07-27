@@ -14,7 +14,7 @@ const part: ContentStructureNode = {
 	contentUnitId: "part-unit",
 	language: "en",
 	title: "Part",
-	contentKind: "chapter_group",
+	contentKind: "label",
 	position: "a0",
 };
 
@@ -35,7 +35,7 @@ const nodes: ContentStructureNode[] = [
 		contentUnitId: "appendix-unit",
 		language: "en",
 		title: "Appendix",
-		contentKind: "chapter_group",
+		contentKind: "label",
 		position: "a1",
 	},
 ];

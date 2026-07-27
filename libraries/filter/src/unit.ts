@@ -38,7 +38,6 @@ export const FilterPostKindValues = [
 	"excerpt",
 	"review",
 	"chapter",
-	"chapter_group",
 	"wiki",
 	"picture",
 	"governance_note",
@@ -63,7 +62,6 @@ const SimpleFeedContentDefinitions = {
 	"post:excerpt": { group: "post", kind: "excerpt" },
 	"post:review": { group: "post", kind: "review" },
 	"post:chapter": { group: "post", kind: "chapter" },
-	"post:chapter_group": { group: "post", kind: "chapter_group" },
 	"post:wiki": { group: "post", kind: "wiki" },
 	"post:picture": { group: "post", kind: "picture" },
 } as const satisfies Record<
@@ -89,7 +87,6 @@ export const SimpleFeedContentKindValues = [
 	"post:excerpt",
 	"post:review",
 	"post:chapter",
-	"post:chapter_group",
 	"post:wiki",
 	"post:picture",
 ] as const satisfies readonly (keyof typeof SimpleFeedContentDefinitions)[];

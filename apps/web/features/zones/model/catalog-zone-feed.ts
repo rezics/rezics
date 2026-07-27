@@ -5,7 +5,6 @@ const CatalogPostContentKinds = [
 	"post:excerpt",
 	"post:review",
 	"post:chapter",
-	"post:chapter_group",
 	"post:wiki",
 	"post:picture",
 ] as const satisfies readonly SimpleFeedContentKind[];

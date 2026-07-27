@@ -4,7 +4,9 @@ import type { DatabaseTransaction } from "../database";
 import {
 	contentStructure,
 	contentStructureNode,
+	label,
 	post,
+	unit,
 	unitAccessBinding,
 	unitLocalization,
 } from "../database/schema";
@@ -42,29 +44,33 @@ async function createBookDraftContentUnit(
 	const isChapter = input.node.contentKind === "chapter";
 	const published = isChapter ? input.node.status === "published" : true;
 	const created = await insertUnit(tx, {
-		kind: "post",
+		kind: isChapter ? "post" : "label",
 		status: published ? "published" : "draft",
 		visibility: "public",
 		publishedAt: published ? new Date() : null,
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});
-	await ensureSubjectPostTargetingAllowed(tx, {
-		sourcePostId: created.id,
-		subjectUnitId: input.bookId,
-	});
-	await tx.insert(post).values({
-		id: created.id,
-		subjectUnitId: input.bookId,
-		kind: input.node.contentKind,
-	});
+	if (isChapter) {
+		await ensureSubjectPostTargetingAllowed(tx, {
+			sourcePostId: created.id,
+			subjectUnitId: input.bookId,
+		});
+		await tx.insert(post).values({
+			id: created.id,
+			subjectUnitId: input.bookId,
+			kind: "chapter",
+		});
+	} else {
+		await tx.insert(label).values({ id: created.id });
+	}
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,
 		language: input.node.language,
 		title: input.node.title,
-		content: input.node.content,
+		content: isChapter ? input.node.content : undefined,
 		contentStatus: isChapter ? input.node.status : undefined,
 	});
-	if (input.node.contentKind === "chapter")
+	if (isChapter)
 		await applyNewPostTagMentionVotes(tx, {
 			postId: created.id,
 			profileId: input.actorProfileId,
@@ -78,10 +84,11 @@ async function createBookDraftContentUnit(
 		scope: [],
 		grantedByProfileId: input.actorProfileId,
 	});
-	await createProfilePublisherAttribution(tx, {
-		sourceUnitId: created.id,
-		profileId: input.actorProfileId,
-	});
+	if (isChapter)
+		await createProfilePublisherAttribution(tx, {
+			sourceUnitId: created.id,
+			profileId: input.actorProfileId,
+		});
 	await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.actorProfileId,
@@ -137,10 +144,14 @@ export async function saveBookContentStructureDraft(
 					parentId: contentStructureNode.parentId,
 					position: contentStructureNode.position,
 					title: unitLocalization.title,
-					contentKind: post.kind,
+					unitKind: unit.kind,
+					postKind: post.kind,
+					labelId: label.id,
 				})
 				.from(contentStructureNode)
-				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+				.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
 				.innerJoin(
 					unitLocalization,
 					and(
@@ -159,7 +170,10 @@ export async function saveBookContentStructureDraft(
 				currentRows.some(
 					(row) =>
 						row.title === null ||
-						(row.contentKind !== "chapter" && row.contentKind !== "chapter_group"),
+						!(
+							(row.unitKind === "post" && row.postKind === "chapter") ||
+							(row.unitKind === "label" && row.labelId !== null)
+						),
 				)
 			)
 				throw new ContentStructureInvalid("Book structure contains invalid content nodes");

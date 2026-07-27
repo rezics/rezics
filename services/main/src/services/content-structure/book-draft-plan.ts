@@ -25,7 +25,7 @@ export type NewBookDraftNode =
 			readonly status: "draft" | "published";
 	  })
 	| (NewBookDraftNodeBase & {
-			readonly contentKind: "chapter_group";
+			readonly contentKind: "label";
 			readonly content?: never;
 			readonly status?: never;
 	  });

@@ -61,7 +61,6 @@ export default {
 			"post:excerpt": "Excerpts",
 			"post:review": "Reviews",
 			"post:chapter": "Chapters",
-			"post:chapter_group": "Chapter groups",
 			"post:wiki": "Wiki articles",
 			"post:picture": `Picture ${postTerms.plural}`,
 		},

@@ -1534,12 +1534,16 @@ async function seedContent(
 	const replies = [...createdFirstLevelReplies, ...createdNestedReplies];
 	const reviews = await insertUnits(tx, descriptors(SeedPlan.reviews, "review", "post"));
 	const chapters = await insertUnits(tx, descriptors(SeedPlan.chapters, "chapter", "post"));
-	const chapterGroups = await insertUnits(
+	const chapterLabels = await insertUnits(
 		tx,
-		descriptors(SeedPlan.contentStructureNodes - SeedPlan.chapters, "chapter-group", "title"),
+		descriptors(
+			SeedPlan.contentStructureNodes - SeedPlan.chapters,
+			"chapter-label",
+			"title",
+		).map((value): UnitDescriptor => ({ ...value, kind: "label" })),
 	);
-	const allPosts = [...rootPosts, ...replies, ...reviews, ...chapters, ...chapterGroups];
-	await insertUnitDetails(tx, data, allPosts);
+	const allPosts = [...rootPosts, ...replies, ...reviews, ...chapters];
+	await insertUnitDetails(tx, data, [...allPosts, ...chapterLabels]);
 	await writeBatches(
 		allPosts.map((value) => ({
 			sourceUnitId: value.id,
@@ -1580,14 +1584,12 @@ async function seedContent(
 		(batch) => tx.insert(post).values(batch),
 	);
 	await writeBatches(
-		chapterGroups.map((value, index) => ({
+		chapterLabels.map((value) => ({
 			id: value.id,
-			subjectUnitId: itemAt(catalog.books, index).id,
-			kind: "chapter_group" as const,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(post).values(batch),
+		(batch) => tx.insert(label).values(batch),
 	);
 	await writeBatches(
 		replies.map((value) => ({
@@ -1623,8 +1625,8 @@ async function seedContent(
 		(batch) => tx.insert(postReply).values(batch),
 	);
 
-	const rootGroups = chapterGroups.slice(0, catalog.books.length);
-	const childGroups = chapterGroups.slice(catalog.books.length);
+	const rootGroups = chapterLabels.slice(0, catalog.books.length);
+	const childGroups = chapterLabels.slice(catalog.books.length);
 	const structures = await tx
 		.insert(contentStructure)
 		.values(

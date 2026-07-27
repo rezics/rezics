@@ -2,7 +2,7 @@ export type BookStructureViewNode = {
 	readonly id: string;
 	readonly title: string;
 	readonly language: "zh" | "en";
-	readonly contentKind: "chapter" | "chapter_group";
+	readonly contentKind: "chapter" | "label";
 };
 
 export type BookStructureViewTreeNode<Node extends BookStructureViewNode> = {
@@ -30,7 +30,7 @@ export const EmptyBookStructureContentMetrics: BookStructureContentMetrics = {
 export function isBookStructureDisplayLabel<Node extends BookStructureViewNode>(
 	entry: BookStructureViewTreeNode<Node>,
 ): boolean {
-	return entry.node.contentKind === "chapter_group" || entry.children.length > 0;
+	return entry.node.contentKind === "label" || entry.children.length > 0;
 }
 
 export function collectBookStructureLabelIds<Node extends BookStructureViewNode>(

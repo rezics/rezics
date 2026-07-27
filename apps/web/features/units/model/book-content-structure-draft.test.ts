@@ -17,7 +17,7 @@ const nodes: BookDraftNode[] = [
 		order: 0,
 		title: "A",
 		contentUnitId: "ua",
-		contentKind: "chapter_group",
+		contentKind: "label",
 		language: "en",
 	},
 	{
@@ -37,7 +37,7 @@ const nodes: BookDraftNode[] = [
 		order: 1,
 		title: "C",
 		contentUnitId: "uc",
-		contentKind: "chapter_group",
+		contentKind: "label",
 		language: "en",
 	},
 ];

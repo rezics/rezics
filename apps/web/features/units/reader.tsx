@@ -16,7 +16,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { measurePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftIcon, HistoryIcon, ListTreeIcon, MinusIcon, PlusIcon } from "lucide-react";
+import { ArrowLeftIcon, HistoryIcon, ListTreeIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 
@@ -27,6 +27,14 @@ import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
+import {
+	Menu,
+	MenuContent,
+	MenuRadioGroup,
+	MenuRadioItem,
+	MenuSeparator,
+	MenuTrigger,
+} from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTrigger } from "@rezics/ui";
@@ -57,6 +65,7 @@ import { invalidateChapterContent } from "./unit-cache";
 import { chapterHistoryHref, unitManagementSectionHref } from "./routing/unit-management-routes";
 
 interface ReadTreeNode extends Omit<TreeNodeType, "children"> {
+	contentKind: "chapter" | "label" | null;
 	contentUnitId: string | null;
 	children?: ReadTreeNode[];
 }
@@ -76,6 +85,7 @@ function ContentReadTree({
 }) {
 	const rootNode = {
 		children: toReadTreeNodes(nodes),
+		contentKind: null,
 		contentUnitId: null,
 		id: "root",
 		name: "",
@@ -133,7 +143,7 @@ function ContentReadTreeNode({
 						))}
 					</TreeViewBranchContent>
 				</TreeViewBranch>
-			) : node.contentUnitId ? (
+			) : node.contentKind === "chapter" && node.contentUnitId ? (
 				<TreeViewContent asChild>
 					<Link
 						aria-current={node.contentUnitId === currentChapterId ? "page" : undefined}
@@ -158,6 +168,7 @@ function ContentReadTreeNode({
 function toReadTreeNodes(nodes: readonly ContentStructureTreeNode[]): ReadTreeNode[] {
 	return nodes.map(({ node, children }) => ({
 		...(children.length ? { children: toReadTreeNodes(children) } : {}),
+		contentKind: node.contentKind,
 		contentUnitId: node.contentUnitId,
 		id: node.id,
 		name: node.title,
@@ -170,16 +181,36 @@ function getExpandedNodeIds(nodes: readonly ReadTreeNode[]): string[] {
 	);
 }
 
+type ReaderFontSize = "small" | "default" | "large";
+const ReaderFontSizeClasses = {
+	small: "text-base sm:text-[1.05rem]",
+	default: "text-lg",
+	large: "text-xl",
+} satisfies Record<ReaderFontSize, string>;
+
+function isReaderFontSize(value: string): value is ReaderFontSize {
+	return value === "small" || value === "default" || value === "large";
+}
+
 export function Reader({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t } = useTranslation(["actions", "brand", "errors", "state", "ui", "units"]);
+	const { t } = useTranslation(["actions", "brand", "errors", "locale", "state", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const [fontSize, setFontSize] = useState(1);
+	const [fontSize, setFontSize] = useState<ReaderFontSize>("default");
+	const [languageSelection, setLanguageSelection] = useState<{
+		readonly chapterId: string;
+		readonly language: ContentLanguage;
+	} | null>(null);
+	const selectedLanguage =
+		languageSelection?.chapterId === chapterId ? languageSelection.language : undefined;
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
-		query: { localizationLanguages },
+		query: {
+			localizationLanguages,
+			...(selectedLanguage ? { language: selectedLanguage } : {}),
+		},
 	});
 	useLocalizationFallbackToast({
-		actualLanguage: query.data?.language ?? null,
+		actualLanguage: selectedLanguage ? null : (query.data?.language ?? null),
 		localizationLanguages,
 		unitId: chapterId,
 	});
@@ -192,7 +223,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const tree = outline.data?.items.length ? buildContentStructureTree(outline.data.items) : [];
-	const fontSizeClass = ["text-base sm:text-[1.05rem]", "text-lg", "text-xl"][fontSize];
+	const fontSizeClass = ReaderFontSizeClasses[fontSize];
 	return (
 		<main
 			className="fixed inset-0 z-50 grid grid-rows-[3.75rem_minmax(0,1fr)] overflow-hidden bg-background"
@@ -235,31 +266,60 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 					</SheetContent>
 				</Sheet>
 
-				<div className="flex items-center rounded-lg border bg-card">
-					<Button
-						aria-label={t.units.reader.decreaseFontSize}
-						className="size-11 sm:size-10"
-						disabled={fontSize === 0}
-						onClick={() => setFontSize((value) => Math.max(0, value - 1))}
-						size="icon-xl"
-						variant="quiet"
-					>
-						<MinusIcon aria-hidden />
-					</Button>
-					<span className="min-w-8 text-center font-serif font-semibold text-sm">
-						{t.units.reader.fontSize}
-					</span>
-					<Button
-						aria-label={t.units.reader.increaseFontSize}
-						className="size-11 sm:size-10"
-						disabled={fontSize === 2}
-						onClick={() => setFontSize((value) => Math.min(2, value + 1))}
-						size="icon-xl"
-						variant="quiet"
-					>
-						<PlusIcon aria-hidden />
-					</Button>
-				</div>
+				<Menu positioning={{ placement: "bottom-end", gutter: 8 }}>
+					<MenuTrigger asChild>
+						<Button
+							aria-label={t.units.reader.settings}
+							className="size-11 sm:size-10"
+							size="icon-xl"
+							variant="quiet"
+						>
+							<SettingsIcon aria-hidden />
+						</Button>
+					</MenuTrigger>
+					<MenuContent className="w-64 p-1.5">
+						<MenuRadioGroup
+							heading={t.units.reader.fontSize}
+							onValueChange={({ value }) => {
+								if (isReaderFontSize(value)) setFontSize(value);
+							}}
+							value={fontSize}
+						>
+							<MenuRadioItem closeOnSelect={false} value="small">
+								{t.units.reader.fontSizeSmall}
+							</MenuRadioItem>
+							<MenuRadioItem closeOnSelect={false} value="default">
+								{t.units.reader.fontSizeDefault}
+							</MenuRadioItem>
+							<MenuRadioItem closeOnSelect={false} value="large">
+								{t.units.reader.fontSizeLarge}
+							</MenuRadioItem>
+						</MenuRadioGroup>
+						<MenuSeparator />
+						<MenuRadioGroup
+							heading={t.units.reader.chapterLanguage}
+							onValueChange={({ value }) => {
+								if (value === "automatic") setLanguageSelection(null);
+								else if (isContentLanguage(value))
+									setLanguageSelection({ chapterId, language: value });
+							}}
+							value={selectedLanguage ?? "automatic"}
+						>
+							<MenuRadioItem closeOnSelect={false} value="automatic">
+								{t.units.reader.automaticLanguage}
+							</MenuRadioItem>
+							{query.data.availableLanguages.map((language) => (
+								<MenuRadioItem
+									closeOnSelect={false}
+									key={language}
+									value={language}
+								>
+									{language === "zh" ? t.locale.zh : t.locale.en}
+								</MenuRadioItem>
+							))}
+						</MenuRadioGroup>
+					</MenuContent>
+				</Menu>
 			</header>
 
 			<div className="grid min-h-0 md:grid-cols-[17rem_minmax(0,1fr)]">
@@ -289,10 +349,12 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						<article
 							className={cn("flex-1 py-8 leading-8 sm:leading-9", fontSizeClass)}
 						>
-							<PortableTextContent
-								value={readPortableText(query.data.content)}
-								variant="article"
-							/>
+							{query.data.content ? (
+								<PortableTextContent
+									value={readPortableText(query.data.content)}
+									variant="article"
+								/>
+							) : null}
 						</article>
 						<footer className="flex flex-wrap items-center justify-between gap-3 border-t pt-6">
 							{query.data.previousChapterId ? (
@@ -406,7 +468,7 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
-		query: { localizationLanguages: [language] },
+		query: { localizationLanguages: [language], language },
 	});
 	const missingLocalization =
 		query.isError && hasErrorCode(query.error, "ChapterLanguageNotFound");

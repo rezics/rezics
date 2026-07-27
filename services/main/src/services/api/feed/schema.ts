@@ -55,7 +55,6 @@ export const FeedPostKindValues = [
 	"excerpt",
 	"review",
 	"chapter",
-	"chapter_group",
 	"wiki",
 	"picture",
 ] as const satisfies readonly PostKind[];
@@ -66,7 +65,6 @@ export const FeedNonReviewPostKindValues = [
 	"reply",
 	"excerpt",
 	"chapter",
-	"chapter_group",
 	"wiki",
 	"picture",
 ] as const satisfies readonly Exclude<FeedPostKind, "review">[];
@@ -89,7 +87,6 @@ export const FeedContentKindValues = [
 	"post:excerpt",
 	"post:review",
 	"post:chapter",
-	"post:chapter_group",
 	"post:wiki",
 	"post:picture",
 ] as const;

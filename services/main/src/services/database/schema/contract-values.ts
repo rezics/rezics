@@ -181,7 +181,6 @@ export const PostKindValues = [
 	"excerpt",
 	"review",
 	"chapter",
-	"chapter_group",
 	"wiki",
 	"picture",
 	"governance_note",

@@ -61,7 +61,6 @@ export default {
 			"post:excerpt": "摘錄",
 			"post:review": "評論",
 			"post:chapter": "章節",
-			"post:chapter_group": "章節群組",
 			"post:wiki": "百科文章",
 			"post:picture": `圖片${postTerms.pluralLabel}`,
 		},

@@ -34,7 +34,7 @@ export function bookStructureDestinationForNode(node: BookDraftNode): BookStruct
 	return {
 		kind: "node",
 		nodeId: node.id,
-		placement: node.contentKind === "chapter_group" ? "inside" : "after",
+		placement: node.contentKind === "label" ? "inside" : "after",
 	};
 }
 
@@ -168,7 +168,7 @@ function DestinationTreeRow({
 	const destination = bookStructureDestinationForNode(node);
 	const selected = sameDestination(selectedDestination, destination);
 	const selectable = validTargetIds?.has(node.id) ?? true;
-	const isLabel = node.contentKind === "chapter_group";
+	const isLabel = node.contentKind === "label";
 
 	return (
 		<li className="m-0 list-none p-0">

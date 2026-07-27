@@ -601,7 +601,6 @@ export const PostFilterKindInEnum = {
 	excerpt: "excerpt",
 	review: "review",
 	chapter: "chapter",
-	chapter_group: "chapter_group",
 	wiki: "wiki",
 	picture: "picture",
 	governance_note: "governance_note",
@@ -2320,7 +2319,6 @@ export type UnitPredicate = {
 							| "excerpt"
 							| "review"
 							| "chapter"
-							| "chapter_group"
 							| "wiki"
 							| "picture"
 							| "governance_note"
@@ -9028,7 +9026,6 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum = {
 	reply: "reply",
 	excerpt: "excerpt",
 	chapter: "chapter",
-	chapter_group: "chapter_group",
 	wiki: "wiki",
 	picture: "picture",
 } as const;
@@ -14648,7 +14645,6 @@ export const PostApiFeedQueryStatus200ItemsPostKindEnum = {
 	reply: "reply",
 	excerpt: "excerpt",
 	chapter: "chapter",
-	chapter_group: "chapter_group",
 	wiki: "wiki",
 	picture: "picture",
 } as const;
@@ -63336,7 +63332,7 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesQuery = {
 
 export const GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum = {
 	chapter: "chapter",
-	chapter_group: "chapter_group",
+	label: "label",
 } as const;
 
 export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum =
@@ -63484,7 +63480,7 @@ export type PutApiUnitsBookByUnitIdContentStructurePath = {
 
 export const PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum = {
 	chapter: "chapter",
-	chapter_group: "chapter_group",
+	label: "label",
 } as const;
 
 export type PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum =
@@ -63784,7 +63780,7 @@ export type PutApiUnitsBookByUnitIdContentStructureBody = {
 				/**
 				 * @type string
 				 */
-				contentKind: "chapter_group";
+				contentKind: "label";
 		  }
 		| {
 				/**
@@ -64002,6 +63998,14 @@ export const GetApiChaptersByChapterIdLocalizationLanguagesEnum = {
 export type GetApiChaptersByChapterIdLocalizationLanguagesEnum =
 	(typeof GetApiChaptersByChapterIdLocalizationLanguagesEnum)[keyof typeof GetApiChaptersByChapterIdLocalizationLanguagesEnum];
 
+export const GetApiChaptersByChapterIdLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiChaptersByChapterIdLanguage =
+	(typeof GetApiChaptersByChapterIdLanguage)[keyof typeof GetApiChaptersByChapterIdLanguage];
+
 /**
  * @type object
  */
@@ -64010,6 +64014,10 @@ export type GetApiChaptersByChapterIdQuery = {
 	 * @type array | undefined
 	 */
 	localizationLanguages?: GetApiChaptersByChapterIdLocalizationLanguagesEnum[];
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiChaptersByChapterIdLanguage;
 };
 
 export const GetApiChaptersByChapterIdStatus200LanguageEnum = {
@@ -64019,6 +64027,14 @@ export const GetApiChaptersByChapterIdStatus200LanguageEnum = {
 
 export type GetApiChaptersByChapterIdStatus200LanguageEnum =
 	(typeof GetApiChaptersByChapterIdStatus200LanguageEnum)[keyof typeof GetApiChaptersByChapterIdStatus200LanguageEnum];
+
+export const GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum =
+	(typeof GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum)[keyof typeof GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum];
 
 /**
  * @type object
@@ -64059,36 +64075,75 @@ export type GetApiChaptersByChapterIdStatus200 = {
 	 */
 	language: GetApiChaptersByChapterIdStatus200LanguageEnum;
 	/**
-	 * @type object
+	 * @type array
 	 */
-	content: {
-		/**
-		 * @type string
-		 */
-		_type: "portable-text";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		content: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
+	availableLanguages: GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum[];
+	content:
+		| ({
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
 								/**
 								 * @type string
 								 */
@@ -64096,109 +64151,69 @@ export type GetApiChaptersByChapterIdStatus200 = {
 								/**
 								 * @type string
 								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "unit-mention";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								unitId: string;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "image";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					assetId: string;
-					/**
-					 * @type string | undefined
-					 */
-					alt?: string;
-					/**
-					 * @type string | undefined
-					 */
-					caption?: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @pattern ^(?!(?:block|image)$).+
-					 * @type string
-					 */
-					_type: string;
-					[key: string]: unknown;
-			  }
-		)[];
-	};
-	/**
-	 * @type object
-	 */
-	contentMetrics: {
-		wordCount: string | number;
-		characterCount: string | number;
-	};
-	/**
-	 * @type string
-	 */
-	status: string;
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+		  } | null)
+		| null;
+	contentMetrics:
+		| ({
+				wordCount: string | number;
+				characterCount: string | number;
+		  } | null)
+		| null;
+	status: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -84445,7 +84460,6 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsPostKindEnum = {
 	reply: "reply",
 	excerpt: "excerpt",
 	chapter: "chapter",
-	chapter_group: "chapter_group",
 	wiki: "wiki",
 	picture: "picture",
 } as const;
@@ -91289,7 +91303,6 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum = {
 	reply: "reply",
 	excerpt: "excerpt",
 	chapter: "chapter",
-	chapter_group: "chapter_group",
 	wiki: "wiki",
 	picture: "picture",
 } as const;
@@ -98898,7 +98911,6 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 	reply: "reply",
 	excerpt: "excerpt",
 	chapter: "chapter",
-	chapter_group: "chapter_group",
 	wiki: "wiki",
 	picture: "picture",
 } as const;

@@ -1,7 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, asc, eq, exists, inArray, isNotNull, isNull, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
@@ -10,10 +9,7 @@ import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { PlatformCapabilityRequired } from "../../authorization/errors";
 import { database, type DatabaseTransaction } from "../../database";
-import {
-	localizationLanguageOrder,
-	resolvedUnitLocalizationLanguage,
-} from "../../units/localization";
+import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	contentStructure,
 	contentStructureNode,
@@ -82,6 +78,10 @@ import {
 import { toApiErrorResponse } from "../schema/response";
 import { getUnitLocalizationContentMetric } from "../../content-metrics/service";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
+import {
+	orderReaderChapterIds,
+	selectReaderChapterLocalization,
+} from "../../content-structure/book-reading";
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden", "UnitProtected"]);
 const ContentStructureForbiddenResponse = toApiErrorResponse([
@@ -90,6 +90,15 @@ const ContentStructureForbiddenResponse = toApiErrorResponse([
 	"PlatformCapabilityRequired",
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
+
+function resolveBookContentKind(
+	unitKind: string,
+	postKind: string | null,
+): "chapter" | "label" | null {
+	if (unitKind === "label") return "label";
+	if (unitKind === "post" && postKind === "chapter") return "chapter";
+	return null;
+}
 
 async function presentGenericContentStructureNode(node: typeof contentStructureNode.$inferSelect) {
 	const storedTarget = contentStructureTargetFromRow(node);
@@ -177,9 +186,11 @@ async function readBookContentStructure(
 			id: contentStructureNode.id,
 			parentId: contentStructureNode.parentId,
 			contentUnitId: contentStructureNode.contentUnitId,
-			contentKind: post.kind,
+			unitKind: unit.kind,
+			postKind: post.kind,
 			language: unitLocalization.language,
 			title: unitLocalization.title,
+			content: unitLocalization.content,
 			position: contentStructureNode.position,
 			wordCount: unitLocalizationContentMetric.wordCount,
 			characterCount: unitLocalizationContentMetric.characterCount,
@@ -189,7 +200,7 @@ async function readBookContentStructure(
 		})
 		.from(contentStructureNode)
 		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-		.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 		.innerJoin(
 			unitLocalization,
 			and(
@@ -222,42 +233,40 @@ async function readBookContentStructure(
 		latestRevisionId: await getContentStructureRevision(tx, bookId, structure.id),
 		items: rows
 			.filter((row) =>
-				isContentStructureNodeReadable(
-					canEditBook,
-					row.unitStatus,
-					row.unitVisibility,
-					row.contentStatus,
-				),
+				isContentStructureNodeReadable(canEditBook, row.unitStatus, row.unitVisibility),
 			)
-			.map(
-				({
-					unitStatus: _status,
-					unitVisibility: _visibility,
-					contentStatus: _contentStatus,
-					...node
-				}) => {
-					if (
-						node.contentKind === "chapter" &&
-						(node.wordCount === null || node.characterCount === null)
-					)
-						throw new Error(
-							`Missing content metric for chapter ${node.contentUnitId} localization ${node.language}`,
-						);
-					const { wordCount, characterCount, ...contentNode } = node;
-					return {
-						...contentNode,
-						contentKind:
-							contentNode.contentKind === "chapter"
-								? ("chapter" as const)
-								: ("chapter_group" as const),
-						title: contentNode.title ?? "",
-						contentMetrics: {
-							wordCount: wordCount ?? 0,
-							characterCount: characterCount ?? 0,
-						},
-					};
-				},
-			),
+			.map((row) => {
+				const contentKind = resolveBookContentKind(row.unitKind, row.postKind);
+				if (!contentKind)
+					throw new Error(
+						`Invalid Book content node ${row.id} unit ${row.contentUnitId}`,
+					);
+				const hasReadableContent =
+					contentKind === "chapter" &&
+					row.content !== null &&
+					(canEditBook || row.contentStatus === "published");
+				if (
+					contentKind === "chapter" &&
+					hasReadableContent &&
+					(row.wordCount === null || row.characterCount === null)
+				)
+					throw new Error(
+						`Missing content metric for chapter ${row.contentUnitId} localization ${row.language}`,
+					);
+				return {
+					id: row.id,
+					parentId: row.parentId,
+					contentUnitId: row.contentUnitId,
+					contentKind,
+					language: row.language,
+					title: row.title ?? "",
+					position: row.position,
+					contentMetrics: {
+						wordCount: hasReadableContent ? (row.wordCount ?? 0) : 0,
+						characterCount: hasReadableContent ? (row.characterCount ?? 0) : 0,
+					},
+				};
+			}),
 	};
 }
 
@@ -722,82 +731,8 @@ export default new Elysia()
 					bookId: contentStructureNode.ownerUnitId,
 					chapterId: contentStructureNode.contentUnitId,
 					position: contentStructureNode.position,
-				})
-				.from(contentStructureNode)
-				.innerJoin(
-					contentStructure,
-					eq(contentStructure.id, contentStructureNode.structureId),
-				)
-				.where(
-					and(
-						eq(contentStructureNode.contentUnitId, params.chapterId),
-						eq(contentStructure.kind, "book.contents"),
-						isNull(contentStructure.deletedAt),
-						isNull(contentStructureNode.deletedAt),
-					),
-				)
-				.limit(1);
-			if (!node?.chapterId || !(await authorization.unit.canRead(node.bookId)))
-				throw new ChapterNotFound();
-			const canEditBook = await authorization.unit.canUpdate(node.bookId);
-			const localizationLanguages = query.localizationLanguages ?? [];
-			const [content] = await database
-				.select({
-					language: unitLocalization.language,
-					position: unitLocalization.position,
-					title: unitLocalization.title,
-					content: unitLocalization.content,
-					status: unitLocalization.contentStatus,
-					updatedAt: unitLocalization.updatedAt,
 					unitStatus: unit.status,
 					unitVisibility: unit.visibility,
-				})
-				.from(unitLocalization)
-				.innerJoin(unit, eq(unit.id, unitLocalization.unitId))
-				.where(
-					and(
-						eq(unitLocalization.unitId, params.chapterId),
-						isNotNull(unitLocalization.content),
-						canEditBook
-							? undefined
-							: and(
-									eq(unit.status, "published"),
-									inArray(unit.visibility, ["public", "unlisted"]),
-									eq(unitLocalization.contentStatus, "published"),
-								),
-					),
-				)
-				.orderBy(
-					localizationLanguageOrder(unitLocalization.language, localizationLanguages),
-					unitLocalization.position,
-					unitLocalization.language,
-				)
-				.limit(1);
-			if (
-				!content?.content ||
-				!content.status ||
-				!isContentStructureNodeReadable(
-					canEditBook,
-					content.unitStatus,
-					content.unitVisibility,
-					content.status,
-				)
-			)
-				throw new ChapterLanguageNotFound();
-			const contentMetrics = await getUnitLocalizationContentMetric(
-				database,
-				params.chapterId,
-				content.language,
-			);
-			if (!contentMetrics)
-				throw new Error(
-					`Missing content metric for chapter ${params.chapterId} localization ${content.language}`,
-				);
-			const siblingLocalization = alias(unitLocalization, "readable_sibling_localization");
-			const siblings = await database
-				.select({
-					id: contentStructureNode.contentUnitId,
-					position: contentStructureNode.position,
 				})
 				.from(contentStructureNode)
 				.innerJoin(
@@ -808,50 +743,106 @@ export default new Elysia()
 				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
 					and(
+						eq(contentStructureNode.contentUnitId, params.chapterId),
+						eq(contentStructure.kind, "book.contents"),
+						eq(post.kind, "chapter"),
+						isNull(contentStructure.deletedAt),
+						isNull(contentStructureNode.deletedAt),
+						isNull(unit.deletedAt),
+					),
+				)
+				.limit(1);
+			if (!node?.chapterId || !(await authorization.unit.canRead(node.bookId)))
+				throw new ChapterNotFound();
+			const canEditBook = await authorization.unit.canUpdate(node.bookId);
+			if (!isContentStructureNodeReadable(canEditBook, node.unitStatus, node.unitVisibility))
+				throw new ChapterNotFound();
+			const localizationLanguages = query.localizationLanguages ?? [];
+			const localizations = await database
+				.select({
+					language: unitLocalization.language,
+					position: unitLocalization.position,
+					title: unitLocalization.title,
+					content: unitLocalization.content,
+					contentStatus: unitLocalization.contentStatus,
+					updatedAt: unitLocalization.updatedAt,
+				})
+				.from(unitLocalization)
+				.where(eq(unitLocalization.unitId, params.chapterId))
+				.orderBy(unitLocalization.position, unitLocalization.language);
+			const selected = selectReaderChapterLocalization(localizations, {
+				canEditBook,
+				exactLanguage: query.language,
+				localizationLanguages,
+			});
+			if (!selected) throw new ChapterLanguageNotFound();
+			const canPresentContent =
+				selected.content !== null &&
+				(canEditBook || selected.contentStatus === "published");
+			const contentMetrics = canPresentContent
+				? await getUnitLocalizationContentMetric(
+						database,
+						params.chapterId,
+						selected.language,
+					)
+				: null;
+			if (canPresentContent && !contentMetrics)
+				throw new Error(
+					`Missing content metric for chapter ${params.chapterId} localization ${selected.language}`,
+				);
+			const siblingRows = await database
+				.select({
+					id: contentStructureNode.id,
+					parentId: contentStructureNode.parentId,
+					contentUnitId: contentStructureNode.contentUnitId,
+					position: contentStructureNode.position,
+					unitKind: unit.kind,
+					postKind: post.kind,
+				})
+				.from(contentStructureNode)
+				.innerJoin(
+					contentStructure,
+					eq(contentStructure.id, contentStructureNode.structureId),
+				)
+				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+				.where(
+					and(
 						eq(contentStructureNode.ownerUnitId, node.bookId),
 						eq(contentStructure.kind, "book.contents"),
 						isNull(contentStructure.deletedAt),
-						eq(post.kind, "chapter"),
 						isNull(contentStructureNode.deletedAt),
+						isNull(unit.deletedAt),
 						canEditBook
 							? undefined
 							: and(
 									eq(unit.status, "published"),
 									inArray(unit.visibility, ["public", "unlisted"]),
 								),
-						exists(
-							database
-								.select({ value: sql`1` })
-								.from(siblingLocalization)
-								.where(
-									and(
-										eq(
-											siblingLocalization.unitId,
-											contentStructureNode.contentUnitId,
-										),
-										isNotNull(siblingLocalization.content),
-										canEditBook
-											? undefined
-											: eq(siblingLocalization.contentStatus, "published"),
-									),
-								),
-						),
 					),
 				)
 				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
-			const readable = siblings;
-			const index = readable.findIndex((item) => item.id === params.chapterId);
+			const chapterIds = orderReaderChapterIds(
+				siblingRows.flatMap((sibling) => {
+					const contentKind = resolveBookContentKind(sibling.unitKind, sibling.postKind);
+					return contentKind ? [{ ...sibling, contentKind }] : [];
+				}),
+			);
+			const index = chapterIds.indexOf(params.chapterId);
 			return {
-				...node,
+				nodeId: node.nodeId,
+				bookId: node.bookId,
 				chapterId: node.chapterId,
-				title: content.title ?? "",
-				language: content.language,
-				content: toPortableTextResponse(content.content),
+				position: node.position,
+				title: selected.title ?? "",
+				language: selected.language,
+				availableLanguages: localizations.map(({ language }) => language),
+				content: canPresentContent ? toPortableTextResponse(selected.content) : null,
 				contentMetrics,
-				status: content.status,
-				updatedAt: content.updatedAt,
-				previousChapterId: index > 0 ? (readable[index - 1]?.id ?? null) : null,
-				nextChapterId: index >= 0 ? (readable[index + 1]?.id ?? null) : null,
+				status: canPresentContent ? selected.contentStatus : null,
+				updatedAt: selected.updatedAt,
+				previousChapterId: index > 0 ? (chapterIds[index - 1] ?? null) : null,
+				nextChapterId: index >= 0 ? (chapterIds[index + 1] ?? null) : null,
 			};
 		},
 		{
