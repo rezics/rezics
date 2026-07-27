@@ -1,0 +1,94 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
+const { forms: dockTerms } = enTerminology.dock;
+const { forms: postTerms } = enTerminology.post;
+const { forms: realmTerms } = enTerminology.realm;
+const { forms: zoneTerms } = enTerminology.zone;
+
+export default {
+	title: dockTerms.pluralLabel,
+	description: `Compose and maintain the shared content shown in this content's ${dockTerms.plural}.`,
+	kinds: {
+		navigation: `${dockTerms.label} kind`,
+		main: {
+			label: `Main ${dockTerms.label}`,
+			description: "Shared content for the primary public surface.",
+		},
+		wiki: {
+			label: `Wiki ${dockTerms.label}`,
+			description: `Shared content for this ${realmTerms.inline}'s Wiki surface.`,
+		},
+	},
+	notConfigured: `This ${dockTerms.inline} has not been configured. Saving will create it.`,
+	deleted: `This ${dockTerms.inline} is deleted. Restore an earlier revision to publish it again.`,
+	invalidDocument: `The stored ${dockTerms.inline} document is invalid and cannot be edited.`,
+	invalidDraft: `Complete every required ${verbatimTerms.id.value} field before saving.`,
+	unsaved: "Unsaved changes",
+	save: `Save ${dockTerms.inline}`,
+	reload: "Reload latest revision",
+	history: `${dockTerms.label} revision history`,
+	restore: "Restore this revision",
+	remove: `Delete ${dockTerms.inline}`,
+	removeTitle: `Delete this ${dockTerms.inline}?`,
+	removeDescription: `The ${dockTerms.inline} will no longer appear publicly. Its revision history remains available for restoration.`,
+	cancel: "Cancel",
+	confirmRemove: "Delete",
+	revisionKinds: {
+		create: "Created",
+		update: "Updated",
+		delete: "Deleted",
+		restore: "Restored",
+	},
+	blocks: {
+		add: "Add content block",
+		remove: "Remove content block",
+		moveUp: "Move up",
+		moveDown: "Move down",
+		type: "Content block type",
+		identifier: `Content ${verbatimTerms.id.value}`,
+		appearance: "Appearance",
+		searchSource: "Search source",
+		zoneSearch: `${zoneTerms.label} search configuration`,
+		menuNavigation: `Navigation ${verbatimTerms.id.value}`,
+		results: "Result layout",
+		showResultCount: "Show result count",
+		orientation: "Orientation",
+		style: "Style",
+		sources: {
+			global: "Global template",
+			book: "Book template",
+			media: "Media template",
+			software: "Software template",
+			realm: `${realmTerms.label} template`,
+			zone: `${zoneTerms.label} template`,
+		},
+		appearances: {
+			inline: "Inline",
+			card: "Card",
+			cover: "Cover",
+			links: "Links",
+			buttons: "Buttons",
+			tabs: "Tabs",
+			drawer: "Drawer",
+		},
+		orientations: { horizontal: "Horizontal", vertical: "Vertical" },
+		resultsLayouts: { list: "List", grid: "Grid", compact: "Compact" },
+		styles: { line: "Line", space: "Space", section: "Section" },
+		types: {
+			"post-full-view": `Full ${postTerms.inline}`,
+			"unit-ref": "Unit reference",
+			search: "Search",
+			feed: "Feed",
+			menu: "Navigation menu",
+			divider: "Divider",
+			media: "Media",
+			"unit-list": "Unit list",
+			"portable-text": "Rich text",
+			columns: "Columns",
+			group: "Group",
+			callout: "Callout",
+			tabs: "Tabs",
+		},
+	},
+} satisfies typeof import("../zh-Hant/docks").default;

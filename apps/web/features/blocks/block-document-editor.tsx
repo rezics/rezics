@@ -20,6 +20,7 @@ import {
 	NativeSelectOption,
 } from "@rezics/ui";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 export interface BlockEditorLabels {
 	readonly add: string;
@@ -47,17 +48,45 @@ export interface BlockEditorLabels {
 	readonly types: Record<string, string>;
 }
 
-type EditableDocument = UnitReferencedBlockDocument | DockDocument;
-type AddableBlockType = "post-full-view" | "unit-ref" | "feed" | "menu" | "divider";
-const AddableBlockTypes: readonly AddableBlockType[] = [
+export type BlockEditorDocument = UnitReferencedBlockDocument | DockDocument;
+export type BlockEditorAddableType = "post-full-view" | "unit-ref" | "feed" | "menu" | "divider";
+const DefaultAddableBlockTypes: readonly BlockEditorAddableType[] = [
 	"post-full-view",
 	"unit-ref",
 	"feed",
 	"menu",
 	"divider",
 ];
+const UnitRefAppearances = ["inline", "card", "cover"] as const;
+const MenuOrientations = ["horizontal", "vertical"] as const;
+const MenuAppearances = ["links", "buttons", "tabs", "drawer"] as const;
+const DividerStyles = ["line", "space", "section"] as const;
 
-function createBlock(type: AddableBlockType): UnitReferencedBlock {
+function isAddableBlockType(value: string): value is BlockEditorAddableType {
+	return DefaultAddableBlockTypes.some((type) => type === value);
+}
+
+function isSearchTemplateId(value: string): value is SearchTemplateId {
+	return SearchTemplateIdValues.some((template) => template === value);
+}
+
+function isUnitRefAppearance(value: string): value is (typeof UnitRefAppearances)[number] {
+	return UnitRefAppearances.some((appearance) => appearance === value);
+}
+
+function isMenuOrientation(value: string): value is (typeof MenuOrientations)[number] {
+	return MenuOrientations.some((orientation) => orientation === value);
+}
+
+function isMenuAppearance(value: string): value is (typeof MenuAppearances)[number] {
+	return MenuAppearances.some((appearance) => appearance === value);
+}
+
+function isDividerStyle(value: string): value is (typeof DividerStyles)[number] {
+	return DividerStyles.some((style) => style === value);
+}
+
+function createBlock(type: BlockEditorAddableType): UnitReferencedBlock {
 	const _key = createBlockKey();
 	switch (type) {
 		case "post-full-view":
@@ -85,23 +114,34 @@ function createBlock(type: AddableBlockType): UnitReferencedBlock {
 }
 
 export function BlockDocumentEditor({
+	addableTypes = DefaultAddableBlockTypes,
+	allowZoneSearchSource = true,
 	document,
 	labels,
 	onChange,
 }: {
-	readonly document: EditableDocument;
+	readonly addableTypes?: readonly BlockEditorAddableType[];
+	readonly allowZoneSearchSource?: boolean;
+	readonly document: BlockEditorDocument;
 	readonly labels: BlockEditorLabels;
-	readonly onChange: (document: EditableDocument) => void;
+	readonly onChange: (document: BlockEditorDocument) => void;
 }) {
+	const firstAddableType = addableTypes[0];
+	const [selectedType, setSelectedType] = useState<BlockEditorAddableType | undefined>(
+		firstAddableType,
+	);
+	const activeType =
+		selectedType && addableTypes.includes(selectedType) ? selectedType : firstAddableType;
+
 	function replace(index: number, block: UnitReferencedBlock) {
-		onChange({ ...document, blocks: document.blocks.with(index, block) } as EditableDocument);
+		onChange({ ...document, blocks: document.blocks.with(index, block) });
 	}
 	function move(index: number, direction: -1 | 1) {
 		const target = index + direction;
 		if (target < 0 || target >= document.blocks.length) return;
 		const blocks = [...document.blocks];
 		[blocks[index], blocks[target]] = [blocks[target]!, blocks[index]!];
-		onChange({ ...document, blocks } as EditableDocument);
+		onChange({ ...document, blocks });
 	}
 	return (
 		<div className="grid gap-4">
@@ -139,7 +179,7 @@ export function BlockDocumentEditor({
 											blocks: document.blocks.filter(
 												(_, candidate) => candidate !== index,
 											),
-										} as EditableDocument)
+										})
 									}
 									size="icon-sm"
 									type="button"
@@ -151,51 +191,56 @@ export function BlockDocumentEditor({
 						</div>
 						<BlockFields
 							block={block}
+							allowZoneSearchSource={allowZoneSearchSource}
 							labels={labels}
 							onChange={(next) => replace(index, next)}
 						/>
 					</CardContent>
 				</Card>
 			))}
-			<FieldGroup className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-				<Field>
-					<FieldLabel>{labels.type}</FieldLabel>
-					<NativeSelect defaultValue="search" id={`${document._key}-new-block`}>
-						{AddableBlockTypes.map((type) => (
-							<NativeSelectOption key={type} value={type}>
-								{labels.types[type] ?? type}
-							</NativeSelectOption>
-						))}
-					</NativeSelect>
-				</Field>
-				<Button
-					onClick={() => {
-						const select = window.document.getElementById(
-							`${document._key}-new-block`,
-						) as HTMLSelectElement | null;
-						const type = AddableBlockTypes.find(
-							(candidate) => candidate === select?.value,
-						);
-						if (type)
+			{activeType ? (
+				<FieldGroup className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+					<Field>
+						<FieldLabel>{labels.type}</FieldLabel>
+						<NativeSelect
+							onChange={(event) => {
+								const value = event.currentTarget.value;
+								if (isAddableBlockType(value) && addableTypes.includes(value))
+									setSelectedType(value);
+							}}
+							value={activeType}
+						>
+							{addableTypes.map((type) => (
+								<NativeSelectOption key={type} value={type}>
+									{labels.types[type] ?? type}
+								</NativeSelectOption>
+							))}
+						</NativeSelect>
+					</Field>
+					<Button
+						onClick={() =>
 							onChange({
 								...document,
-								blocks: [...document.blocks, createBlock(type)],
-							} as EditableDocument);
-					}}
-					type="button"
-				>
-					<Plus aria-hidden /> {labels.add}
-				</Button>
-			</FieldGroup>
+								blocks: [...document.blocks, createBlock(activeType)],
+							})
+						}
+						type="button"
+					>
+						<Plus aria-hidden /> {labels.add}
+					</Button>
+				</FieldGroup>
+			) : null}
 		</div>
 	);
 }
 
 function BlockFields({
+	allowZoneSearchSource,
 	block,
 	labels,
 	onChange,
 }: {
+	readonly allowZoneSearchSource: boolean;
 	readonly block: UnitReferencedBlock;
 	readonly labels: BlockEditorLabels;
 	readonly onChange: (block: UnitReferencedBlock) => void;
@@ -222,16 +267,14 @@ function BlockFields({
 					<Field>
 						<FieldLabel>{labels.appearance}</FieldLabel>
 						<NativeSelect
-							onChange={(event) =>
-								onChange({
-									...block,
-									appearance: event.currentTarget
-										.value as typeof block.appearance,
-								})
-							}
+							onChange={(event) => {
+								const { value } = event.currentTarget;
+								if (isUnitRefAppearance(value))
+									onChange({ ...block, appearance: value });
+							}}
 							value={block.appearance}
 						>
-							{(["inline", "card", "cover"] as const).map((value) => (
+							{UnitRefAppearances.map((value) => (
 								<NativeSelectOption key={value} value={value}>
 									{labels.appearances[value]}
 								</NativeSelectOption>
@@ -248,26 +291,28 @@ function BlockFields({
 				<Field>
 					<FieldLabel>{labels.searchSource}</FieldLabel>
 					<NativeSelect
-						onChange={(event) =>
-							onChange({
-								...block,
-								feature:
-									event.currentTarget.value === "zone-feature"
-										? { kind: "zone" }
-										: {
-												kind: "template",
-												template: event.currentTarget
-													.value as SearchTemplateId,
-											},
-							})
-						}
+						onChange={(event) => {
+							const value = event.currentTarget.value;
+							if (value === "zone-feature" && allowZoneSearchSource)
+								onChange({ ...block, feature: { kind: "zone" } });
+							else if (isSearchTemplateId(value))
+								onChange({
+									...block,
+									feature: { kind: "template", template: value },
+								});
+						}}
 						value={
 							block.feature.kind === "zone" ? "zone-feature" : block.feature.template
 						}
 					>
-						<NativeSelectOption value="zone-feature">
-							{labels.zoneSearch}
-						</NativeSelectOption>
+						{allowZoneSearchSource || block.feature.kind === "zone" ? (
+							<NativeSelectOption
+								disabled={!allowZoneSearchSource}
+								value="zone-feature"
+							>
+								{labels.zoneSearch}
+							</NativeSelectOption>
+						) : null}
 						{SearchTemplateIdValues.map((value) => (
 							<NativeSelectOption key={value} value={value}>
 								{labels.sources[value]}
@@ -308,15 +353,14 @@ function BlockFields({
 				<Field>
 					<FieldLabel>{labels.orientation}</FieldLabel>
 					<NativeSelect
-						onChange={(event) =>
-							onChange({
-								...block,
-								orientation: event.currentTarget.value as typeof block.orientation,
-							})
-						}
+						onChange={(event) => {
+							const { value } = event.currentTarget;
+							if (isMenuOrientation(value))
+								onChange({ ...block, orientation: value });
+						}}
 						value={block.orientation}
 					>
-						{(["horizontal", "vertical"] as const).map((value) => (
+						{MenuOrientations.map((value) => (
 							<NativeSelectOption key={value} value={value}>
 								{labels.orientations[value]}
 							</NativeSelectOption>
@@ -326,15 +370,13 @@ function BlockFields({
 				<Field>
 					<FieldLabel>{labels.appearance}</FieldLabel>
 					<NativeSelect
-						onChange={(event) =>
-							onChange({
-								...block,
-								appearance: event.currentTarget.value as typeof block.appearance,
-							})
-						}
+						onChange={(event) => {
+							const { value } = event.currentTarget;
+							if (isMenuAppearance(value)) onChange({ ...block, appearance: value });
+						}}
 						value={block.appearance}
 					>
-						{(["links", "buttons", "tabs", "drawer"] as const).map((value) => (
+						{MenuAppearances.map((value) => (
 							<NativeSelectOption key={value} value={value}>
 								{labels.appearances[value]}
 							</NativeSelectOption>
@@ -348,15 +390,13 @@ function BlockFields({
 			<Field>
 				<FieldLabel>{labels.style}</FieldLabel>
 				<NativeSelect
-					onChange={(event) =>
-						onChange({
-							...block,
-							style: event.currentTarget.value as typeof block.style,
-						})
-					}
+					onChange={(event) => {
+						const { value } = event.currentTarget;
+						if (isDividerStyle(value)) onChange({ ...block, style: value });
+					}}
 					value={block.style}
 				>
-					{(["line", "space", "section"] as const).map((value) => (
+					{DividerStyles.map((value) => (
 						<NativeSelectOption key={value} value={value}>
 							{labels.styles[value]}
 						</NativeSelectOption>

@@ -21,6 +21,7 @@ import {
 	LibraryBig,
 	Link2,
 	ListTree,
+	PanelRight,
 	ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +29,7 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { useDockManagementAccess, type DockKind } from "@/features/docks";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
@@ -48,6 +50,7 @@ interface UnitManagementContextValue {
 	type: UnitType;
 	unit: GetApiUnitsByTypeByUnitIdStatus200;
 	sections: readonly ManagementWorkspaceSection<UnitManagementSectionId>[];
+	dockKinds: readonly DockKind[];
 }
 
 const UnitManagementContext = createContext<UnitManagementContextValue | undefined>(undefined);
@@ -86,8 +89,9 @@ function UnitManagementWorkspaceContent({
 	children: ReactNode;
 }) {
 	const pathname = usePathname();
-	const { t, locale } = useTranslation(["errors", "units"]);
+	const { t, locale } = useTranslation(["docks", "errors", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
+	const dockAccess = useDockManagementAccess(unitId, type);
 	const query = useGetApiUnitsByTypeByUnitId({
 		path: { type, unitId },
 		query: { localizationLanguages },
@@ -95,8 +99,12 @@ function UnitManagementWorkspaceContent({
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (dockAccess.pending) return <QueryPending />;
+	if (dockAccess.error)
+		return <QueryFailure error={dockAccess.error} retry={() => void dockAccess.refetch()} />;
 	const { capabilities } = query.data;
-	if (!canOpenUnitManagement(capabilities))
+	const canManageDocks = dockAccess.allowedKinds.length > 0;
+	if (!canOpenUnitManagement(capabilities, canManageDocks))
 		return (
 			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
 				<p className="text-sm text-destructive">{t.errors.forbidden}</p>
@@ -146,6 +154,13 @@ function UnitManagementWorkspaceContent({
 			icon: LibraryBig,
 		},
 		{
+			id: "docks",
+			href: unitManagementSectionHref(type, unitId, "docks"),
+			label: t.docks.title,
+			description: t.docks.description,
+			icon: PanelRight,
+		},
+		{
 			id: "access",
 			href: unitManagementSectionHref(type, unitId, "access"),
 			label: labels.access.label,
@@ -160,7 +175,9 @@ function UnitManagementWorkspaceContent({
 			icon: History,
 		},
 	];
-	const visibleSectionIds = new Set(getUnitManagementSectionIds(type, capabilities));
+	const visibleSectionIds = new Set(
+		getUnitManagementSectionIds(type, capabilities, canManageDocks),
+	);
 	const candidates = allSections.filter((section) => visibleSectionIds.has(section.id));
 	const localization = selectLocalization(
 		query.data.localizations,
@@ -171,7 +188,14 @@ function UnitManagementWorkspaceContent({
 	const requestedSection = allSections.find((section) => section.id === currentSectionId);
 	const sectionAllowed = !currentSectionId || visibleSectionIds.has(currentSectionId);
 	return (
-		<UnitManagementContext.Provider value={{ type, unit: query.data, sections: candidates }}>
+		<UnitManagementContext.Provider
+			value={{
+				type,
+				unit: query.data,
+				sections: candidates,
+				dockKinds: dockAccess.allowedKinds,
+			}}
+		>
 			<ManagementWorkspace
 				header={
 					<ManagementWorkspaceHeader

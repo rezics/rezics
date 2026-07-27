@@ -33,6 +33,7 @@ export function parseUnitManagementSection(
 	)
 		return "content-structure";
 	if (pathname === `${base}/releases`) return "releases";
+	if (pathname === `${base}/docks`) return "docks";
 	if (pathname === `${base}/access`) return "access";
 	if (pathname === `${base}/history` || pathname.startsWith(`${base}/history/`)) return "history";
 	return undefined;

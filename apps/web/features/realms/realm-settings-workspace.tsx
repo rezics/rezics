@@ -19,6 +19,7 @@ import {
 import {
 	History,
 	KeyRound,
+	PanelRight,
 	Pin,
 	ScrollText,
 	ShieldCheck,
@@ -30,6 +31,7 @@ import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { UnitDockSettings, useDockManagementAccess } from "@/features/docks";
 import { UnitAccessManager } from "@/features/governance/components/unit-access-manager";
 import { UnitRevisionCompare } from "@/features/history/components/unit-revision-compare";
 import { UnitRevisionHistory } from "@/features/history/components/unit-revision-history";
@@ -87,8 +89,9 @@ function RealmSettingsWorkspaceContent({
 	comparison?: { from: string | null; to: string | null };
 	memberProfileId?: string;
 }) {
-	const { t } = useTranslation(["errors", "history", "realms"]);
+	const { t } = useTranslation(["docks", "errors", "history", "realms"]);
 	const localizationLanguages = useLocalizationLanguages();
+	const dockAccess = useDockManagementAccess(realmId, "realm");
 	const realm = useGetApiRealmsByRealmId({
 		path: { realmId },
 		query: { localizationLanguages },
@@ -96,8 +99,12 @@ function RealmSettingsWorkspaceContent({
 	if (realm.isPending) return <QueryPending />;
 	if (realm.isError || !realm.data)
 		return <QueryFailure error={realm.error} retry={() => void realm.refetch()} />;
+	if (dockAccess.pending) return <QueryPending />;
+	if (dockAccess.error)
+		return <QueryFailure error={dockAccess.error} retry={() => void dockAccess.refetch()} />;
 	const capabilities = realm.data.capabilities;
-	if (!canOpenRealmSettings(capabilities))
+	const canManageDocks = dockAccess.allowedKinds.length > 0;
+	if (!canOpenRealmSettings(capabilities, canManageDocks))
 		return (
 			<p className="mx-auto max-w-4xl px-4 py-10 text-sm text-destructive">
 				{t.errors.forbidden}
@@ -134,6 +141,13 @@ function RealmSettingsWorkspaceContent({
 			icon: Pin,
 		},
 		{
+			id: "docks",
+			href: realmSettingsSectionHref(baseHref, "docks"),
+			label: t.docks.title,
+			description: t.docks.description,
+			icon: PanelRight,
+		},
+		{
 			id: "access",
 			href: realmSettingsSectionHref(baseHref, "access"),
 			label: labels.access.label,
@@ -155,7 +169,7 @@ function RealmSettingsWorkspaceContent({
 			icon: History,
 		},
 	];
-	const visibleSectionIds = new Set(getRealmSettingsSectionIds(capabilities));
+	const visibleSectionIds = new Set(getRealmSettingsSectionIds(capabilities, canManageDocks));
 	const sections = allSections.filter((candidate) => visibleSectionIds.has(candidate.id));
 	const sectionAllowed =
 		(!section || visibleSectionIds.has(section)) &&
@@ -215,6 +229,14 @@ function RealmSettingsWorkspaceContent({
 				<RealmRulesSection baseHref={baseHref} realmId={realmId} />
 			) : section === "pins" ? (
 				<RealmPinsSection baseHref={baseHref} realmId={realmId} />
+			) : section === "docks" ? (
+				<RealmSettingsSection baseHref={baseHref} section="docks">
+					<UnitDockSettings
+						allowedKinds={dockAccess.allowedKinds}
+						ownerKind="realm"
+						ownerUnitId={realmId}
+					/>
+				</RealmSettingsSection>
 			) : section === "access" ? (
 				<RealmSettingsSection baseHref={baseHref} section="access">
 					{capabilities.canManageAccess ? (
@@ -272,8 +294,11 @@ function RealmSettingsSection({
 	section: RealmSettingsSectionId;
 	children: ReactNode;
 }) {
-	const { t } = useTranslation(["realms"]);
-	const copy = t.realms.settingsWorkspace.sections[section];
+	const { t } = useTranslation(["docks", "realms"]);
+	const copy =
+		section === "docks"
+			? { label: t.docks.title, description: t.docks.description }
+			: t.realms.settingsWorkspace.sections[section];
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader

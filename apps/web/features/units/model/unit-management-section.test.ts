@@ -29,4 +29,10 @@ describe("unit management section manifest", () => {
 		expect(canOpenUnitManagement(denied)).toBe(false);
 		expect(getUnitManagementSectionIds("book", denied)).toEqual([]);
 	});
+
+	it("opens only Dock management for a Dock-scoped editor", () => {
+		expect(canOpenUnitManagement(denied, true)).toBe(true);
+		expect(getUnitManagementSectionIds("book", denied, true)).toEqual(["docks"]);
+		expect(getUnitManagementSectionIds("series", denied, true)).toEqual([]);
+	});
 });

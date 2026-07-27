@@ -47,7 +47,7 @@ export default {
 	after: "修改後",
 	realm: `所屬${realmTerms.label}`,
 	selectRealmContext: `選擇${realmTerms.label}脈絡`,
-	realmMainDock: `${realmTerms.label}資訊`,
+	realmContextCard: `${realmTerms.label}資訊`,
 	subject: "討論對象",
 	clearRealm: `移除${realmTerms.label}`,
 	clearSubject: "移除對象",

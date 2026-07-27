@@ -31,6 +31,7 @@ import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { realmHref, realmSettingsHref } from "@/features/slugs/unit-route";
 import {
@@ -233,6 +234,8 @@ export function RealmDetailPage({ id }: { id: string }) {
 		"ui",
 	]);
 	const localizationLanguages = useLocalizationLanguages();
+	const { data: session } = useHydratedSession();
+	const dockAccess = useDockManagementAccess(id, "realm", Boolean(session));
 	const query = useGetApiRealmsByRealmId({
 		path: { realmId: id },
 		query: { localizationLanguages },
@@ -275,7 +278,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 	if (!query.data) return <QueryPending />;
 	const realm = query.data;
 	const localization = selectLocalization(realm.localizations, realm.language);
-	const canManage = canOpenRealmSettings(realm.capabilities);
+	const canManage = canOpenRealmSettings(realm.capabilities, dockAccess.allowedKinds.length > 0);
 	const canPost = realm.viewerMembership?.state === "active";
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">
@@ -368,6 +371,10 @@ export function RealmDetailPage({ id }: { id: string }) {
 				</div>
 
 				<aside className="grid min-w-0 max-w-full gap-5 overflow-hidden lg:sticky lg:top-20">
+					<UnitDockRenderer
+						ownerUnitId={realm.id}
+						target={{ ownerKind: "realm", dockKind: "main" }}
+					/>
 					{rules.isError ? (
 						<RequestFailure error={rules.error} />
 					) : rules.data?.items.length ? (

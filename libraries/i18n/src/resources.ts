@@ -12,6 +12,7 @@ export const resources = defineResources({
 			catalog: () => import("./languages/zh-Hant/catalog").then((module) => module.default),
 			cover: () => import("./languages/zh-Hant/cover").then((module) => module.default),
 			create: () => import("./languages/zh-Hant/create").then((module) => module.default),
+			docks: () => import("./languages/zh-Hant/docks").then((module) => module.default),
 			previewAccess: () =>
 				import("./languages/zh-Hant/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/zh-Hant/editor").then((module) => module.default),
@@ -54,6 +55,7 @@ export const resources = defineResources({
 			catalog: () => import("./languages/en/catalog").then((module) => module.default),
 			cover: () => import("./languages/en/cover").then((module) => module.default),
 			create: () => import("./languages/en/create").then((module) => module.default),
+			docks: () => import("./languages/en/docks").then((module) => module.default),
 			previewAccess: () =>
 				import("./languages/en/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/en/editor").then((module) => module.default),

@@ -37,6 +37,21 @@ describe("realm membership permissions", () => {
 		).toBe(false);
 	});
 
+	it("opens only the Dock section for a Dock-scoped editor", () => {
+		const capabilities = {
+			canUpdateSettings: false,
+			canReadMembers: false,
+			canManageMembers: false,
+			canPublishRules: false,
+			canManagePins: false,
+			canModerateUnits: false,
+			canManageAccess: false,
+			canRestoreHistory: false,
+		};
+		expect(canOpenRealmSettings(capabilities, true)).toBe(true);
+		expect(getRealmSettingsSectionIds(capabilities, true)).toEqual(["docks"]);
+	});
+
 	it("keeps member capabilities inside the members section", () => {
 		expect(
 			getRealmSettingsSectionIds({

@@ -21,10 +21,13 @@ import { publicUnitHref } from "./routing/public-unit-route";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { FavoriteButton } from "@/features/collections/components/favorite-button";
+import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { UnitShelf } from "@/features/explore/unit-shelf";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { BookContents } from "./components/book-contents";
 import type { UnitType } from "./unit-types";
 import { CatalogSubjectGroups } from "./components/catalog-subject-groups";
+import { canOpenUnitManagement } from "./model/unit-management-section";
 
 const Icons = { book: BookOpen, software: Gamepad2, media: PlaySquare, series: LibraryBig };
 
@@ -51,6 +54,8 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 
 export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	const localizationLanguages = useLocalizationLanguages();
+	const { data: session } = useHydratedSession();
+	const dockAccess = useDockManagementAccess(unit, type, Boolean(session));
 	const { t, locale } = useTranslation([
 		"engagement",
 		"feed",
@@ -77,6 +82,10 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	if (!query.data) return <QueryPending />;
 
 	const item = query.data;
+	const canOpenManagement = canOpenUnitManagement(
+		item.capabilities,
+		dockAccess.allowedKinds.length > 0,
+	);
 	const localization = selectLocalization(item.localizations, item.language ?? "");
 	const Icon = Icons[type];
 	const rating =
@@ -163,11 +172,13 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					)}
 					<div className="flex flex-wrap gap-2">
 						<FavoriteButton targetId={item.id} />
+						{canOpenManagement ? (
+							<Button variant="solid" asChild>
+								<Link href={`/units/${type}/${item.id}/edit`}>{t.ui.edit}</Link>
+							</Button>
+						) : null}
 						{item.capabilities.canEdit && (
 							<>
-								<Button variant="solid" asChild>
-									<Link href={`/units/${type}/${item.id}/edit`}>{t.ui.edit}</Link>
-								</Button>
 								{type === "book" && (
 									<Button variant="outline" asChild>
 										<Link
@@ -243,6 +254,12 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				</div>
 
 				<aside className="flex min-w-0 flex-col gap-6">
+					{type !== "series" ? (
+						<UnitDockRenderer
+							ownerUnitId={item.id}
+							target={{ ownerKind: type, dockKind: "main" }}
+						/>
+					) : null}
 					<DetailSection title={t.units.detail.information}>
 						<Card>
 							<CardContent className="p-5">

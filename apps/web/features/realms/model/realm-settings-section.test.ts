@@ -21,6 +21,7 @@ describe("Realm settings paths", () => {
 			{ section: "members", comparison: false, memberProfileId: profileId },
 		],
 		[["access"], { section: "access", comparison: false }],
+		[["docks"], { section: "docks", comparison: false }],
 		[["history", "compare"], { section: "history", comparison: true }],
 	] as const)("parses %j", (segments, expected) => {
 		expect(parseRealmSettingsPath(segments)).toEqual(expected);

@@ -4,6 +4,7 @@ import { useGetApiPostsByPostId } from "@rezics/openapi-tanstack-query";
 import { useRouter } from "next/navigation";
 
 import { cn, QueryFailure, QueryPending } from "@rezics/ui";
+import { UnitDockRenderer } from "@/features/docks";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -11,8 +12,8 @@ import { PostDetailArticle } from "../components/post-detail-article";
 import { PostOverflowMenu } from "../components/post-overflow-menu";
 import {
 	PostRealmContextLink,
+	PostRealmContextCard,
 	PostRealmContextSelector,
-	PostRealmMainDock,
 } from "../components/post-realm-context";
 import { PostSubjectHero } from "../components/post-subject-hero";
 import { usePostDetailContext } from "../data/post-detail-context";
@@ -98,6 +99,10 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 								value={selectedRealm.id}
 							/>
 							<PostRealmContextLink realm={selectedRealm} />
+							<UnitDockRenderer
+								ownerUnitId={selectedRealm.id}
+								target={{ ownerKind: "realm", dockKind: "main" }}
+							/>
 						</div>
 					) : null}
 					<ReplyPostThread
@@ -115,7 +120,11 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 							realms={realms}
 							value={selectedRealm.id}
 						/>
-						<PostRealmMainDock realm={selectedRealm} />
+						<PostRealmContextCard realm={selectedRealm} />
+						<UnitDockRenderer
+							ownerUnitId={selectedRealm.id}
+							target={{ ownerKind: "realm", dockKind: "main" }}
+						/>
 					</aside>
 				) : null}
 			</div>

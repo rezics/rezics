@@ -25,6 +25,12 @@ describe("unit management routes", () => {
 		).toBe("history");
 	});
 
+	it("maps Dock management to the Dock section", () => {
+		expect(
+			parseUnitManagementSection("/units/media/unit-1/edit/docks", "media", "unit-1"),
+		).toBe("docks");
+	});
+
 	it("keeps nested content-structure history in the content section", () => {
 		expect(
 			parseUnitManagementSection(

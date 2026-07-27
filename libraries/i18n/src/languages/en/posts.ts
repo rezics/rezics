@@ -47,7 +47,7 @@ export default {
 	after: "After",
 	realm: realmTerms.label,
 	selectRealmContext: `Select ${realmTerms.inline} context`,
-	realmMainDock: `${realmTerms.label} information`,
+	realmContextCard: `${realmTerms.label} information`,
 	subject: "Subject",
 	clearRealm: `Remove ${realmTerms.inline}`,
 	clearSubject: "Remove subject",

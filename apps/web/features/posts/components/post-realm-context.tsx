@@ -95,22 +95,22 @@ export function PostRealmContextLink({
 }
 
 /**
- * Renders only the selected Realm's primary contextual dock.
+ * Renders the selected Realm's stable identity and navigation context.
  *
  * @remarks
- * This deliberately does not own the Realm selector. Future context-specific
- * docks remain separate siblings so their order can follow the selector and
- * this Realm dock without coupling their lifecycles.
+ * This system-owned card is deliberately separate from authored Unit Docks.
+ * It does not own the Realm selector, and product routes may place a configured
+ * Realm main Dock after it without coupling either lifecycle.
  *
  * @alpha
  */
-export function PostRealmMainDock({ realm }: { readonly realm: PostRealmContext }) {
+export function PostRealmContextCard({ realm }: { readonly realm: PostRealmContext }) {
 	const { t } = useTranslation(["posts", "ui"]);
 	const name = realmName(realm, t.ui.unnamed);
 
 	return (
 		<Card asChild className="gap-0 rounded-xl py-0">
-			<section aria-label={t.posts.realmMainDock}>
+			<section aria-label={t.posts.realmContextCard}>
 				<CardContent className="grid gap-4 p-4">
 					<RealmInfoCard
 						realm={{
