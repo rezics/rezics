@@ -1,42 +1,17 @@
 "use client";
 
-import {
-	postApiSearchByIndex,
-	type PostApiSearchByIndexBody,
-	type PostApiSearchByIndexStatus200,
-} from "@rezics/openapi-tanstack-query";
 import { Button, UnitList } from "@rezics/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import {
+	fetchProfileContentPage,
+	ProfileContentCategories,
+	type ProfileContentCategory,
+	type ProfileContentHit,
+} from "./profile-content-query";
 import { useProfileContext } from "./profile-layout";
-
-const ProfileContentCategories = ["entity", "posts", "reviews", "collections"] as const;
-const ProfileContentPageSize = 10;
-
-type ProfileContentCategory = (typeof ProfileContentCategories)[number];
-type ProfileContentHit = PostApiSearchByIndexStatus200["hits"][number];
-type ProfileContentPageParam = {
-	category: ProfileContentCategory;
-	cursor?: string;
-}[];
-
-function profileContentRequest(
-	category: ProfileContentCategory,
-	profileId: string,
-	cursor?: string,
-): PostApiSearchByIndexBody {
-	const common = {
-		query: "",
-		limit: ProfileContentPageSize,
-		sort: "updatedAt:desc" as const,
-		...(cursor ? { cursor } : {}),
-	};
-	return category === "collections" || category === "entity"
-		? { ...common, ownerId: profileId }
-		: { ...common, creditedUnitId: profileId };
-}
 
 function profileContentHref(category: ProfileContentCategory, hit: ProfileContentHit): string {
 	switch (category) {
@@ -54,39 +29,23 @@ function profileContentHref(category: ProfileContentCategory, hit: ProfileConten
 export function ProfileContentPage() {
 	const { t } = useTranslation(["actions", "profiles"]);
 	const { profile } = useProfileContext();
-	const initialPageParam: ProfileContentPageParam = ProfileContentCategories.map((category) => ({
-		category,
-	}));
 	const query = useInfiniteQuery({
 		queryKey: ["profile-content", profile.id],
-		queryFn: async ({ pageParam, signal }) => {
-			const groups = await Promise.all(
-				pageParam.map(async ({ category, cursor }) => {
-					const { data } = await postApiSearchByIndex({
-						body: profileContentRequest(category, profile.id, cursor),
-						path: { index: category },
-						signal,
-						throwOnError: true,
-					});
-					return { category, ...data };
-				}),
-			);
-			return { groups };
-		},
-		initialPageParam,
-		getNextPageParam: (page): ProfileContentPageParam | undefined => {
-			const nextPage = page.groups.flatMap(({ category, nextCursor }) =>
-				nextCursor ? [{ category, cursor: nextCursor }] : [],
-			);
-			return nextPage.length ? nextPage : undefined;
-		},
+		queryFn: ({ pageParam, signal }) =>
+			fetchProfileContentPage({
+				...(pageParam ? { cursor: pageParam } : {}),
+				profileId: profile.id,
+				signal,
+			}),
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
 	const sections = ProfileContentCategories.map((category) => ({
 		category,
 		items:
 			query.data?.pages.flatMap((page) =>
 				page.groups
-					.filter((group) => group.category === category)
+					.filter((group) => group.index === category)
 					.flatMap((group) =>
 						group.hits.map((hit) => ({
 							id: hit.id,

@@ -53,8 +53,10 @@ import { searchCandidates } from "./meilisearch";
 import { createSearchCursor, parseSearchCursor, type SearchExpression } from "./query";
 import {
 	SearchCategoryRules,
+	SearchFieldByFilterableAttribute,
 	type DomainSearchRequest,
 	type SearchCategory,
+	type SearchFilterableAttribute,
 	type SearchHit,
 } from "./schema";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
@@ -160,7 +162,7 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 		["multiple", "multiple", request.multiple !== undefined],
 		["resultsVisibilities", "resultsVisibility", Boolean(request.resultsVisibilities?.length)],
 		["closed", "closesAt", request.closed !== undefined],
-	] as const;
+	] as const satisfies readonly (readonly [string, SearchFilterableAttribute, boolean])[];
 	for (const [key, attribute, present] of filters)
 		if (present && !supportsFilter(category, attribute))
 			throw new InvalidSearch(`${key} is not supported by the ${category} category`);
@@ -370,7 +372,9 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 			sql`${softwareRequirement.tier}`,
 		)}`;
 
-	const fieldAttribute: Partial<Record<SearchControlPredicate["field"], string>> = {
+	const fieldAttribute: Partial<
+		Record<SearchControlPredicate["field"], SearchFilterableAttribute>
+	> = {
 		language: "Languages",
 		kind: "kind",
 		"content-rating": "contentRating",
@@ -732,26 +736,26 @@ function buildCandidateExpression(request: DomainSearchRequest): SearchExpressio
 	const addValue = (field: SearchScalarField, value: string | undefined) => {
 		if (value) filters.push({ field, operator: "equals", value });
 	};
-	addValues("language", request.Languages);
-	addValues("kind", request.kinds);
-	addValues("content-rating", request.contentRatings);
-	addValues("ai-disclosure", request.aiDisclosures);
-	addValues("license", request.licenses);
+	addValues(SearchFieldByFilterableAttribute.Languages, request.Languages);
+	addValues(SearchFieldByFilterableAttribute.kind, request.kinds);
+	addValues(SearchFieldByFilterableAttribute.contentRating, request.contentRatings);
+	addValues(SearchFieldByFilterableAttribute.aiDisclosure, request.aiDisclosures);
+	addValues(SearchFieldByFilterableAttribute.license, request.licenses);
 	if (request.contentLicensed !== undefined)
 		filters.push({
-			field: "catalog-licensed",
+			field: SearchFieldByFilterableAttribute.contentLicensed,
 			operator: "equals",
 			value: request.contentLicensed,
 		});
-	addValue("credit", request.creditedUnitId);
-	addValue("realm", request.realmId);
-	addValue("subject", request.subjectId);
-	addValue("target", request.targetId);
-	addValue("root", request.rootId);
-	addValue("parent", request.parentId);
-	addValue("owner", request.ownerId);
-	addValues("join-policy", request.joinPolicies);
-	addValues("results-visibility", request.resultsVisibilities);
+	addValue(SearchFieldByFilterableAttribute.creditedUnitId, request.creditedUnitId);
+	addValue(SearchFieldByFilterableAttribute.realmId, request.realmId);
+	addValue(SearchFieldByFilterableAttribute.subjectId, request.subjectId);
+	addValue(SearchFieldByFilterableAttribute.targetId, request.targetId);
+	addValue(SearchFieldByFilterableAttribute.rootId, request.rootId);
+	addValue(SearchFieldByFilterableAttribute.parentId, request.parentId);
+	addValue(SearchFieldByFilterableAttribute.ownerId, request.ownerId);
+	addValues(SearchFieldByFilterableAttribute.joinPolicy, request.joinPolicies);
+	addValues(SearchFieldByFilterableAttribute.resultsVisibility, request.resultsVisibilities);
 	const simple =
 		filters.length === 0
 			? undefined

@@ -66,6 +66,85 @@ export function combineSearchExpressions(
 	return build(clauses);
 }
 
+export type CategorySearchExpression =
+	| { readonly state: "match-all" }
+	| { readonly state: "match-none" }
+	| { readonly state: "expression"; readonly expression: SearchExpression };
+
+const MatchAllCategoryDocuments = { state: "match-all" } as const;
+const MatchNoCategoryDocuments = { state: "match-none" } as const;
+
+function specializeCategoryFilter(
+	category: SearchCategory,
+	filter: SearchControlPredicate,
+): CategorySearchExpression {
+	if (filter.field !== "category") return { state: "expression", expression: filter };
+	let matches: boolean;
+	switch (filter.operator) {
+		case "equals":
+			matches = filter.value === category;
+			break;
+		case "not-equals":
+			matches = filter.value !== category;
+			break;
+		case "any-of":
+			matches = filter.values.includes(category);
+			break;
+		case "all-of":
+			matches = filter.values.every((value) => value === category);
+			break;
+		case "none-of":
+			matches = !filter.values.includes(category);
+			break;
+		default:
+			return { state: "expression", expression: filter };
+	}
+	return matches ? MatchAllCategoryDocuments : MatchNoCategoryDocuments;
+}
+
+/**
+ * Resolves category predicates before an expression reaches a category-specific engine compiler.
+ *
+ * A Search Feature expression can intentionally contain branches for several categories. Once
+ * execution selects one category, impossible branches must be removed before their fields are
+ * checked against that category's capabilities.
+ */
+export function specializeSearchExpressionForCategory(
+	category: SearchCategory,
+	expression: SearchExpression,
+): CategorySearchExpression {
+	if ("field" in expression) return specializeCategoryFilter(category, expression);
+	if (expression.operator === "not") {
+		const clause = specializeSearchExpressionForCategory(category, expression.clause);
+		switch (clause.state) {
+			case "match-all":
+				return MatchNoCategoryDocuments;
+			case "match-none":
+				return MatchAllCategoryDocuments;
+			case "expression":
+				return {
+					state: "expression",
+					expression: { operator: "not", clause: clause.expression },
+				};
+		}
+	}
+
+	const identity =
+		expression.operator === "all" ? MatchAllCategoryDocuments : MatchNoCategoryDocuments;
+	const annihilator = expression.operator === "all" ? "match-none" : "match-all";
+	const clauses: SearchExpression[] = [];
+	for (const clause of expression.clauses) {
+		const specialized = specializeSearchExpressionForCategory(category, clause);
+		if (specialized.state === annihilator)
+			return expression.operator === "all"
+				? MatchNoCategoryDocuments
+				: MatchAllCategoryDocuments;
+		if (specialized.state === "expression") clauses.push(specialized.expression);
+	}
+	const combined = combineSearchExpressions(expression.operator, clauses);
+	return combined ? { state: "expression", expression: combined } : identity;
+}
+
 export interface CompiledSearchRequest {
 	readonly scope: SearchScope;
 	readonly categories: readonly SearchCategory[];

@@ -184,7 +184,7 @@ export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchField
 		residual: false,
 	},
 	owner: {
-		categories: ["collections"],
+		categories: ["entity", "collections"],
 		scalar: "uuid",
 		operators: equality,
 		facet: "postgres-authorized",

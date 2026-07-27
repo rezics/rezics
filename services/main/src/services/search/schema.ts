@@ -2,6 +2,7 @@ import {
 	SearchCategoryValues,
 	SearchSortValues,
 	type SearchCategory,
+	type SearchScalarField,
 	type SearchSort,
 } from "@rezics/filter";
 import type { UnitPredicate } from "@rezics/filter";
@@ -70,7 +71,7 @@ export interface DomainSearchRequest {
 	domainFilter?: UnitPredicate;
 }
 
-const CommonSortableAttributes = ["createdAt", "updatedAt"];
+const CommonSortableAttributes = ["createdAt", "updatedAt"] as const;
 const CommonFilterableAttributes = [
 	"Languages",
 	"realmId",
@@ -78,7 +79,30 @@ const CommonFilterableAttributes = [
 	"contentRating",
 	"aiDisclosure",
 	"license",
-];
+] as const;
+
+export const SearchFieldByFilterableAttribute = {
+	Languages: "language",
+	kind: "kind",
+	contentRating: "content-rating",
+	aiDisclosure: "ai-disclosure",
+	license: "license",
+	contentLicensed: "catalog-licensed",
+	creditedUnitId: "credit",
+	realmId: "realm",
+	tagId: "tag",
+	subjectId: "subject",
+	targetId: "target",
+	rootId: "root",
+	parentId: "parent",
+	ownerId: "owner",
+	joinPolicy: "join-policy",
+	multiple: "multiple",
+	resultsVisibility: "results-visibility",
+	closesAt: "closed",
+} as const satisfies Record<string, SearchScalarField>;
+
+export type SearchFilterableAttribute = keyof typeof SearchFieldByFilterableAttribute;
 
 export const SearchCategoryRules = {
 	units: {
@@ -133,4 +157,10 @@ export const SearchCategoryRules = {
 		],
 		sortableAttributes: [...CommonSortableAttributes, "closesAt"],
 	},
-};
+} as const satisfies Record<
+	SearchCategory,
+	{
+		readonly filterableAttributes: readonly SearchFilterableAttribute[];
+		readonly sortableAttributes: readonly string[];
+	}
+>;

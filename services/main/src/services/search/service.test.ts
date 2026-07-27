@@ -127,6 +127,21 @@ describe("domain search SQL", () => {
 		await searchDomain("entity", { kinds: ["person"] });
 		expect(lastQuery()).toContain('("entity"."kind")::text');
 
+		await searchDomain("entity", {
+			ownerId: "11111111-1111-1111-1111-111111111111",
+		});
+		expect(lastQuery()).toContain('"unit_ownership"."revoked_at" is null');
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({
+				category: "entity",
+				expression: {
+					field: "owner",
+					operator: "equals",
+					value: "11111111-1111-1111-1111-111111111111",
+				},
+			}),
+		]);
+
 		await searchDomain("posts", {
 			creditedUnitId: "11111111-1111-1111-1111-111111111111",
 			realmId: "22222222-2222-2222-2222-222222222222",

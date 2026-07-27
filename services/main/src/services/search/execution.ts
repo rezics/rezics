@@ -18,6 +18,7 @@ import {
 	combineSearchExpressions,
 	createSearchCursor,
 	parseSearchCursor,
+	specializeSearchExpressionForCategory,
 	type CompiledSearchRequest,
 } from "./query";
 import type { SearchCategory } from "./schema";
@@ -139,13 +140,19 @@ export async function executeCompiledSearch(
 		await Promise.all(
 			scope.categories.map(async (category) => {
 				try {
+					const specializedExpression = searchExpression
+						? specializeSearchExpressionForCategory(category, searchExpression)
+						: undefined;
+					if (specializedExpression?.state === "match-none") return null;
 					const domainRequest = {
 						profileId,
 						query: compiled.query,
 						offset: cursor?.categories[category]?.offset ?? 0,
 						limit: compiled.pageSize,
 						sort: compiled.sort,
-						searchExpression,
+						...(specializedExpression?.state === "expression"
+							? { searchExpression: specializedExpression.expression }
+							: {}),
 						domainFilter,
 						scopeUnitId: scope.scopeUnitId,
 						includeScopeDescendants: scope.includeScopeDescendants,

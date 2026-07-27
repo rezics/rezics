@@ -47,6 +47,16 @@ describe("Meilisearch expression compiler", () => {
 		).toBeUndefined();
 	});
 
+	it("pushes Entity ownership through the indexed owner profile IDs", () => {
+		expect(
+			compileMeilisearchExpression("entity", {
+				field: "owner",
+				operator: "equals",
+				value: "019b0000-0000-7000-8000-000000000004",
+			}),
+		).toBe('(filters.ownerProfileIds = "019b0000-0000-7000-8000-000000000004")');
+	});
+
 	it("omits a whole Boolean tree when a residual-only leaf cannot be pushed safely", () => {
 		expect(
 			compileMeilisearchExpression("polls", {

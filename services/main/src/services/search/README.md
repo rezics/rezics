@@ -33,6 +33,11 @@ empty successful search.
 
 ## Filter semantics
 
+- Search Feature expressions are specialized for each target category before engine compilation.
+  Category predicates become constants, impossible Boolean branches are removed, and only fields
+  reachable for that category are checked against `field-registry.ts`. Domain Search filter
+  mappings must remain a supported subset of that registry; the capability contract test enforces
+  this boundary.
 - `kind` is the searchable content subtype, not the Unit storage type. It maps to the Unit kind
   for catalog Units, the Entity kind for Entities, the Post kind for Posts, and the reviewed
   subject's Unit kind for Reviews. Categories without a meaningful subtype do not expose this
