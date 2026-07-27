@@ -1,4 +1,4 @@
-import { PlatformCapabilityValues, ZonePreviewCapability } from "@rezics/access";
+import { DevelopmentPreviewCapability, PlatformCapabilityValues } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { and, eq, or } from "drizzle-orm";
 import Elysia from "elysia";
@@ -125,7 +125,7 @@ export default new Elysia({ prefix: "/users" })
 		"/me/studio",
 		async ({ authorization, profile, query }) => {
 			if (query.section === "zone")
-				await authorization.platform.ensureCapability(ZonePreviewCapability);
+				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			return listStudioContent({
 				profileId: profile.unitId,
 				authorization: authorization.unit,

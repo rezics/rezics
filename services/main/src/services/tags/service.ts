@@ -408,16 +408,19 @@ export async function getUnitTagLandscape(input: {
 	readonly viewerProfileId?: string;
 	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly globalLimit: number;
+	readonly includeStructures: boolean;
 	readonly structureLimit: number;
 	readonly sourceLimit: number;
 	readonly perRealmLimit: number;
 }) {
 	if (!input.viewerProfileId) {
-		const structures = await listVisibleUnitTagStructures({
-			unitId: input.unitId,
-			localizationLanguages: input.localizationLanguages,
-			limit: input.structureLimit,
-		});
+		const structures = input.includeStructures
+			? await listVisibleUnitTagStructures({
+					unitId: input.unitId,
+					localizationLanguages: input.localizationLanguages,
+					limit: input.structureLimit,
+				})
+			: [];
 		return {
 			structures,
 			global: await listGlobalUnitTags({
@@ -432,12 +435,14 @@ export async function getUnitTagLandscape(input: {
 		};
 	}
 	const [structures, allSubscriptions] = await Promise.all([
-		listVisibleUnitTagStructures({
-			unitId: input.unitId,
-			viewerProfileId: input.viewerProfileId,
-			localizationLanguages: input.localizationLanguages,
-			limit: input.structureLimit,
-		}),
+		input.includeStructures
+			? listVisibleUnitTagStructures({
+					unitId: input.unitId,
+					viewerProfileId: input.viewerProfileId,
+					localizationLanguages: input.localizationLanguages,
+					limit: input.structureLimit,
+				})
+			: Promise.resolve([]),
 		listRealmTagSubscriptions({
 			profileId: input.viewerProfileId,
 			localizationLanguages: input.localizationLanguages,

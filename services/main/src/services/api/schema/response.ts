@@ -360,7 +360,7 @@ export const UnitDetailResponse = t.Object({
 		canEdit: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageAssociations: t.Boolean(),
-		canPreviewContentStructure: t.Boolean(),
+		hasDevelopmentPreviewAccess: t.Boolean(),
 	}),
 });
 

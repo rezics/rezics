@@ -247,6 +247,8 @@ export async function verifySeedSearch(): Promise<void> {
 				},
 			},
 			"search",
+			undefined,
+			true,
 		);
 		const hits = response.groups.flatMap((group) => group.hits);
 		if (!hits.some((hit) => hit.titles.includes(fixture.en)))

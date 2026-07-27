@@ -207,8 +207,12 @@ function componentFor(definition: SearchFieldDefinition): ResolvedSearchControl[
 function optionSourceFor(
 	field: SearchField,
 	definition: SearchFieldDefinition,
+	categories: readonly (typeof SearchCategories)[number][],
 ): ResolvedSearchControl["optionSource"] {
-	const options = StaticOptions[field];
+	const options =
+		field === "category"
+			? SearchCategories.filter((category) => categories.includes(category))
+			: StaticOptions[field];
 	if (options)
 		return {
 			kind: "static",
@@ -322,8 +326,17 @@ export function createDefaultSearchDocument(templateId: SearchTemplateId): Searc
 	});
 }
 
-export function resolveSearchDocument(documentValue: unknown) {
-	const document = parseSearchDocument(documentValue);
+export function resolveSearchDocument(
+	documentValue: unknown,
+	hasDevelopmentPreviewAccess: boolean,
+) {
+	const parsed = parseSearchDocument(documentValue);
+	const document = hasDevelopmentPreviewAccess
+		? parsed
+		: {
+				...parsed,
+				categories: parsed.categories.filter((category) => category !== "tag-structures"),
+			};
 	validateTemplateDocument(document);
 	const sectionByControl = new Map(
 		document.sections.flatMap((section) =>
@@ -339,8 +352,14 @@ export function resolveSearchDocument(documentValue: unknown) {
 				field: control.field,
 				component: componentFor(definition),
 				operators: [...definition.operators],
-				...(optionSourceFor(control.field, definition)
-					? { optionSource: optionSourceFor(control.field, definition) }
+				...(optionSourceFor(control.field, definition, document.categories)
+					? {
+							optionSource: optionSourceFor(
+								control.field,
+								definition,
+								document.categories,
+							),
+						}
 					: {}),
 				...(control.optionPolicy ? { optionPolicy: control.optionPolicy } : {}),
 				...(control.labelUnitId ? { labelUnitId: control.labelUnitId } : {}),
@@ -566,6 +585,7 @@ export interface CompiledSearchFeature {
 export function compileSearchFeatureInput(
 	inputValue: unknown,
 	surface: SearchFeatureSurface,
+	hasDevelopmentPreviewAccess = true,
 ): CompiledSearchFeature {
 	let input: SearchFeatureInput;
 	try {
@@ -573,8 +593,20 @@ export function compileSearchFeatureInput(
 	} catch (cause) {
 		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search input");
 	}
+	if (!hasDevelopmentPreviewAccess)
+		input = {
+			...input,
+			document: {
+				...input.document,
+				categories: input.document.categories.filter(
+					(category) => category !== "tag-structures",
+				),
+			},
+		};
+	if (input.document.categories.length === 0)
+		throw new InvalidSearch("Search document has no available categories");
 	const template = validateTemplateDocument(input.document);
-	const resolved = resolveSearchDocument(input.document);
+	const resolved = resolveSearchDocument(input.document, true);
 	const controls = new Map(resolved.controls.map((control) => [control.key, control]));
 	const query = unitFilterSearchQuery(input.state.filter);
 	if (!input.document.query.enabled && query)
@@ -692,9 +724,10 @@ export function mapSearchFeatureFacets(
 export async function executeSearchFeatureInput(
 	input: unknown,
 	surface: SearchFeatureSurface,
-	profileId?: string,
+	profileId: string | undefined,
+	hasDevelopmentPreviewAccess: boolean,
 ) {
-	const compiled = compileSearchFeatureInput(input, surface);
+	const compiled = compileSearchFeatureInput(input, surface, hasDevelopmentPreviewAccess);
 	const { executeCompiledSearch } = await import("./execution");
 	const result = await executeCompiledSearch(
 		compiled.request,

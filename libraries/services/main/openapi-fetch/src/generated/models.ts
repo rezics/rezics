@@ -24613,8 +24613,7 @@ export type PostApiGovernanceGrantsStatus500 = InternalError;
 export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
-	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.zone.preview": "unit.zone.preview",
+	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -33384,8 +33383,7 @@ export type GetApiUsersMeStatus200AvatarIconPrefixEnum =
 export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
-	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.zone.preview": "unit.zone.preview",
+	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -37351,8 +37349,7 @@ export type DeleteApiUsersByIdBlockResponse =
 export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
-	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.zone.preview": "unit.zone.preview",
+	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -37464,8 +37461,7 @@ export type GetApiStaffProfilesQuery = {
 export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
-	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.zone.preview": "unit.zone.preview",
+	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -37603,8 +37599,7 @@ export type GetApiStaffProfilesResponse =
 export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
-	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.zone.preview": "unit.zone.preview",
+	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -37745,8 +37740,7 @@ export type PutApiStaffMembersByProfileIdPath = {
 export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
-	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.zone.preview": "unit.zone.preview",
+	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -37941,8 +37935,7 @@ export type PutApiStaffMembersByProfileIdStatus500 = InternalError;
 export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
-	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.zone.preview": "unit.zone.preview",
+	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
@@ -38216,6 +38209,34 @@ export type GetApiTagsByTagIdStatus200 = {
 /**
  * @type object
  */
+export type GetApiTagsByTagIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiTagsByTagIdStatus404 = {
 	/**
 	 * @type object
@@ -38266,6 +38287,7 @@ export type GetApiTagsByTagIdOptions = {
  */
 export type GetApiTagsByTagIdResponses = {
 	"200": GetApiTagsByTagIdStatus200;
+	"403": GetApiTagsByTagIdStatus403;
 	"404": GetApiTagsByTagIdStatus404;
 	"422": GetApiTagsByTagIdStatus422;
 	"500": GetApiTagsByTagIdStatus500;
@@ -38276,6 +38298,7 @@ export type GetApiTagsByTagIdResponses = {
  */
 export type GetApiTagsByTagIdResponse =
 	| GetApiTagsByTagIdStatus200
+	| GetApiTagsByTagIdStatus403
 	| GetApiTagsByTagIdStatus404
 	| GetApiTagsByTagIdStatus422
 	| GetApiTagsByTagIdStatus500;
@@ -38300,6 +38323,34 @@ export type PostApiTagStructuresStatus200 = {
  * @type object
  */
 export type PostApiTagStructuresStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiTagStructuresStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -38411,6 +38462,7 @@ export type PostApiTagStructuresOptions = {
 export type PostApiTagStructuresResponses = {
 	"200": PostApiTagStructuresStatus200;
 	"400": PostApiTagStructuresStatus400;
+	"403": PostApiTagStructuresStatus403;
 	"404": PostApiTagStructuresStatus404;
 	"422": PostApiTagStructuresStatus422;
 	"429": PostApiTagStructuresStatus429;
@@ -38423,6 +38475,7 @@ export type PostApiTagStructuresResponses = {
 export type PostApiTagStructuresResponse =
 	| PostApiTagStructuresStatus200
 	| PostApiTagStructuresStatus400
+	| PostApiTagStructuresStatus403
 	| PostApiTagStructuresStatus404
 	| PostApiTagStructuresStatus422
 	| PostApiTagStructuresStatus429
@@ -38517,6 +38570,34 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 /**
  * @type object
  */
+export type GetApiTagStructuresByStructureIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiTagStructuresByStructureIdStatus404 = {
 	/**
 	 * @type object
@@ -38567,6 +38648,7 @@ export type GetApiTagStructuresByStructureIdOptions = {
  */
 export type GetApiTagStructuresByStructureIdResponses = {
 	"200": GetApiTagStructuresByStructureIdStatus200;
+	"403": GetApiTagStructuresByStructureIdStatus403;
 	"404": GetApiTagStructuresByStructureIdStatus404;
 	"422": GetApiTagStructuresByStructureIdStatus422;
 	"500": GetApiTagStructuresByStructureIdStatus500;
@@ -38577,6 +38659,7 @@ export type GetApiTagStructuresByStructureIdResponses = {
  */
 export type GetApiTagStructuresByStructureIdResponse =
 	| GetApiTagStructuresByStructureIdStatus200
+	| GetApiTagStructuresByStructureIdStatus403
 	| GetApiTagStructuresByStructureIdStatus404
 	| GetApiTagStructuresByStructureIdStatus422
 	| GetApiTagStructuresByStructureIdStatus500;
@@ -38916,6 +38999,34 @@ export type PutApiTagStructuresByStructureIdVoteStatus400 = MalformedRequestBody
 /**
  * @type object
  */
+export type PutApiTagStructuresByStructureIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiTagStructuresByStructureIdVoteStatus404 = {
 	/**
 	 * @type object
@@ -39009,6 +39120,7 @@ export type PutApiTagStructuresByStructureIdVoteOptions = {
 export type PutApiTagStructuresByStructureIdVoteResponses = {
 	"200": PutApiTagStructuresByStructureIdVoteStatus200;
 	"400": PutApiTagStructuresByStructureIdVoteStatus400;
+	"403": PutApiTagStructuresByStructureIdVoteStatus403;
 	"404": PutApiTagStructuresByStructureIdVoteStatus404;
 	"422": PutApiTagStructuresByStructureIdVoteStatus422;
 	"429": PutApiTagStructuresByStructureIdVoteStatus429;
@@ -39021,6 +39133,7 @@ export type PutApiTagStructuresByStructureIdVoteResponses = {
 export type PutApiTagStructuresByStructureIdVoteResponse =
 	| PutApiTagStructuresByStructureIdVoteStatus200
 	| PutApiTagStructuresByStructureIdVoteStatus400
+	| PutApiTagStructuresByStructureIdVoteStatus403
 	| PutApiTagStructuresByStructureIdVoteStatus404
 	| PutApiTagStructuresByStructureIdVoteStatus422
 	| PutApiTagStructuresByStructureIdVoteStatus429
@@ -39045,6 +39158,34 @@ export type DeleteApiTagStructuresByStructureIdVoteStatus200 = {
 	score: string | number;
 	voteCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagStructuresByStructureIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -39124,6 +39265,7 @@ export type DeleteApiTagStructuresByStructureIdVoteOptions = {
  */
 export type DeleteApiTagStructuresByStructureIdVoteResponses = {
 	"200": DeleteApiTagStructuresByStructureIdVoteStatus200;
+	"403": DeleteApiTagStructuresByStructureIdVoteStatus403;
 	"404": DeleteApiTagStructuresByStructureIdVoteStatus404;
 	"422": DeleteApiTagStructuresByStructureIdVoteStatus422;
 	"429": DeleteApiTagStructuresByStructureIdVoteStatus429;
@@ -39135,6 +39277,7 @@ export type DeleteApiTagStructuresByStructureIdVoteResponses = {
  */
 export type DeleteApiTagStructuresByStructureIdVoteResponse =
 	| DeleteApiTagStructuresByStructureIdVoteStatus200
+	| DeleteApiTagStructuresByStructureIdVoteStatus403
 	| DeleteApiTagStructuresByStructureIdVoteStatus404
 	| DeleteApiTagStructuresByStructureIdVoteStatus422
 	| DeleteApiTagStructuresByStructureIdVoteStatus429
@@ -39501,6 +39644,34 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200 = {
 	viewerVote: ((-1 | 1) | null) | null;
 };
 
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	TagStructureNotFound: "TagStructureNotFound",
@@ -39608,6 +39779,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200;
+	"403": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
 	"429": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429;
@@ -39619,6 +39791,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -39647,6 +39820,34 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
  * @type void
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204 = void;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -39733,6 +39934,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
 	"204": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204;
+	"403": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
 	"429": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429;
@@ -39744,6 +39946,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -39793,6 +39996,34 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 = {
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
@@ -39920,6 +40151,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = {
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200;
 	"400": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400;
+	"403": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422;
 	"429": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429;
@@ -39932,6 +40164,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -39975,6 +40208,34 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 
 	score: string | number;
 	voteCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum = {
@@ -40062,6 +40323,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = 
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
 	"200": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200;
+	"403": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422;
 	"429": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429;
@@ -40073,6 +40335,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses 
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -44244,7 +44507,7 @@ export type PostApiUnitsByTypeStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canPreviewContentStructure: boolean;
+		hasDevelopmentPreviewAccess: boolean;
 	};
 };
 
@@ -45753,7 +46016,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canPreviewContentStructure: boolean;
+		hasDevelopmentPreviewAccess: boolean;
 	};
 };
 
@@ -46843,7 +47106,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canPreviewContentStructure: boolean;
+		hasDevelopmentPreviewAccess: boolean;
 	};
 };
 
@@ -48411,7 +48674,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canPreviewContentStructure: boolean;
+		hasDevelopmentPreviewAccess: boolean;
 	};
 };
 
@@ -49670,7 +49933,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canPreviewContentStructure: boolean;
+		hasDevelopmentPreviewAccess: boolean;
 	};
 };
 
@@ -50934,7 +51197,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canPreviewContentStructure: boolean;
+		hasDevelopmentPreviewAccess: boolean;
 	};
 };
 
@@ -106657,6 +106920,34 @@ export type PostApiSearchByIndexStatus200 = {
  */
 export type PostApiSearchByIndexStatus400 = MalformedRequestBody;
 
+/**
+ * @type object
+ */
+export type PostApiSearchByIndexStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export type PostApiSearchByIndexStatus422 =
 	| {
 			/**
@@ -106874,6 +107165,7 @@ export type PostApiSearchByIndexOptions = {
 export type PostApiSearchByIndexResponses = {
 	"200": PostApiSearchByIndexStatus200;
 	"400": PostApiSearchByIndexStatus400;
+	"403": PostApiSearchByIndexStatus403;
 	"422": PostApiSearchByIndexStatus422;
 	"500": PostApiSearchByIndexStatus500;
 	"503": PostApiSearchByIndexStatus503;
@@ -106885,6 +107177,7 @@ export type PostApiSearchByIndexResponses = {
 export type PostApiSearchByIndexResponse =
 	| PostApiSearchByIndexStatus200
 	| PostApiSearchByIndexStatus400
+	| PostApiSearchByIndexStatus403
 	| PostApiSearchByIndexStatus422
 	| PostApiSearchByIndexStatus500
 	| PostApiSearchByIndexStatus503;

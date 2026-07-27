@@ -1,3 +1,4 @@
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
 import {
@@ -180,12 +181,15 @@ function presentSharedSearchQuery(record: SharedSearchQueryProjection) {
 	} satisfies typeof SharedSearchQueryResponse.static;
 }
 
-function presentZoneSearchFeature(record: ZoneSearchFeatureProjection) {
+function presentZoneSearchFeature(
+	record: ZoneSearchFeatureProjection,
+	hasDevelopmentPreviewAccess: boolean,
+) {
 	return {
 		zoneId: record.zoneId,
 		searchDocumentId: record.searchDocumentId,
 		enabled: record.enabled,
-		definition: resolveSearchDocument(record.document),
+		definition: resolveSearchDocument(record.document, hasDevelopmentPreviewAccess),
 		latestRevisionId: record.latestRevisionId,
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
@@ -199,6 +203,7 @@ async function executeZoneBlock(input: {
 	body: unknown;
 	surface: SearchFeatureSurface;
 	profileId?: string;
+	hasDevelopmentPreviewAccess: boolean;
 	source?: SearchFeatureSource;
 }) {
 	const source = input.source ?? findSearchFeatureSource(input.document, input.blockKey);
@@ -220,6 +225,7 @@ async function executeZoneBlock(input: {
 		},
 		input.surface,
 		input.profileId,
+		input.hasDevelopmentPreviewAccess,
 	);
 }
 
@@ -229,6 +235,7 @@ async function executeZoneFeedBlock(input: {
 	document: { readonly blocks: readonly Block[] };
 	body: unknown;
 	profileId?: string;
+	hasDevelopmentPreviewAccess: boolean;
 }) {
 	const block = findFeedBlock(input.document, input.blockKey);
 	const result = await executeZoneBlock({
@@ -271,7 +278,16 @@ export default new Elysia({ prefix: "/search" })
 	})
 	.get(
 		"/features/:template",
-		({ params }) => resolveSearchDocument(createDefaultSearchDocument(params.template)),
+		async ({ params, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+				DevelopmentPreviewCapability,
+			);
+			return resolveSearchDocument(
+				createDefaultSearchDocument(params.template),
+				hasDevelopmentPreviewAccess,
+			);
+		},
 		{
 			params: SearchFeatureTemplateParams,
 			response: { [StatusCodes.OK]: SearchFeatureDefinitionResponse },
@@ -283,6 +299,10 @@ export default new Elysia({ prefix: "/search" })
 		async ({ params, body, request }) => {
 			try {
 				const identity = await resolveIdentity(request.headers, "unit:read");
+				const hasDevelopmentPreviewAccess =
+					await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
 				return await executeSearchFeatureInput(
 					{
 						document: createDefaultSearchDocument(params.template),
@@ -290,6 +310,7 @@ export default new Elysia({ prefix: "/search" })
 					},
 					"search",
 					identity.authorization.profileId,
+					hasDevelopmentPreviewAccess,
 				);
 			} catch (cause) {
 				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
@@ -314,6 +335,10 @@ export default new Elysia({ prefix: "/search" })
 		async ({ params, body, request }) => {
 			try {
 				const identity = await resolveIdentity(request.headers, "unit:read");
+				const hasDevelopmentPreviewAccess =
+					await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
 				const result = await executeSearchFeatureInput(
 					{
 						document: createDefaultSearchDocument(params.template),
@@ -321,6 +346,7 @@ export default new Elysia({ prefix: "/search" })
 					},
 					"feed",
 					identity.authorization.profileId,
+					hasDevelopmentPreviewAccess,
 				);
 				return presentSearchResultAsFeed(result, identity.authorization.profileId);
 			} catch (cause) {
@@ -357,7 +383,10 @@ export default new Elysia({ prefix: "/search" })
 				getZoneSearchFeature(tx, params.zoneId),
 			);
 			if (!feature) throw new ZoneSearchFeatureNotFound();
-			return presentZoneSearchFeature(feature);
+			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+				DevelopmentPreviewCapability,
+			);
+			return presentZoneSearchFeature(feature, hasDevelopmentPreviewAccess);
 		},
 		{
 			params: ZoneSearchFeatureParams,
@@ -379,6 +408,9 @@ export default new Elysia({ prefix: "/search" })
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const actorProfileId = identity.authorization.profileId;
 			if (!actorProfileId) throw new UnitNotFound("Profile");
+			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+				DevelopmentPreviewCapability,
+			);
 			return presentZoneSearchFeature(
 				await putZoneSearchFeature({
 					zoneId: params.zoneId,
@@ -388,6 +420,7 @@ export default new Elysia({ prefix: "/search" })
 					actorProfileId,
 					message: body.message,
 				}),
+				hasDevelopmentPreviewAccess,
 			);
 		},
 		{
@@ -415,6 +448,9 @@ export default new Elysia({ prefix: "/search" })
 				getZoneSearchFeature(tx, params.zoneId),
 			);
 			if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
+			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+				DevelopmentPreviewCapability,
+			);
 			return executeSearchFeatureInput(
 				{
 					document: feature.document,
@@ -424,6 +460,7 @@ export default new Elysia({ prefix: "/search" })
 				},
 				"search",
 				identity.authorization.profileId,
+				hasDevelopmentPreviewAccess,
 			);
 		},
 		{
@@ -454,6 +491,10 @@ export default new Elysia({ prefix: "/search" })
 					getZoneSearchFeature(tx, params.zoneId),
 				);
 				if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
+				const hasDevelopmentPreviewAccess =
+					await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
 				const result = await executeSearchFeatureInput(
 					{
 						document: feature.document,
@@ -463,6 +504,7 @@ export default new Elysia({ prefix: "/search" })
 					},
 					"feed",
 					identity.authorization.profileId,
+					hasDevelopmentPreviewAccess,
 				);
 				return presentSearchResultAsFeed(result, identity.authorization.profileId);
 			} catch (cause) {
@@ -530,6 +572,9 @@ export default new Elysia({ prefix: "/search" })
 			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
 			const actorProfileId = identity.authorization.profileId;
 			if (!actorProfileId) throw new UnitNotFound("Profile");
+			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+				DevelopmentPreviewCapability,
+			);
 			return presentZoneSearchFeature(
 				await restoreZoneSearchFeature({
 					zoneId: params.zoneId,
@@ -538,6 +583,7 @@ export default new Elysia({ prefix: "/search" })
 					actorProfileId,
 					message: body.message,
 				}),
+				hasDevelopmentPreviewAccess,
 			);
 		},
 		{
@@ -580,12 +626,17 @@ export default new Elysia({ prefix: "/search" })
 				.limit(1);
 			if (!record) throw new DockNotFound();
 			try {
+				const hasDevelopmentPreviewAccess =
+					await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
 				return await executeZoneBlock({
 					...params,
 					document: parseDocument(DockDocument, record.document),
 					body,
 					surface: "search",
 					profileId: identity.authorization.profileId,
+					hasDevelopmentPreviewAccess,
 				});
 			} catch (cause) {
 				if (
@@ -633,12 +684,17 @@ export default new Elysia({ prefix: "/search" })
 			);
 			if (!record) throw new ZonePageNotFound();
 			try {
+				const hasDevelopmentPreviewAccess =
+					await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
 				return await executeZoneBlock({
 					...params,
 					document: record.document,
 					body,
 					surface: "search",
 					profileId: identity.authorization.profileId,
+					hasDevelopmentPreviewAccess,
 				});
 			} catch (cause) {
 				if (
@@ -709,11 +765,16 @@ export default new Elysia({ prefix: "/search" })
 								if (!record) throw new ZonePageNotFound();
 								return record.document;
 							});
+				const hasDevelopmentPreviewAccess =
+					await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
 				return await executeZoneFeedBlock({
 					...params,
 					document,
 					body,
 					profileId: identity.authorization.profileId,
+					hasDevelopmentPreviewAccess,
 				});
 			} catch (cause) {
 				if (
@@ -755,10 +816,17 @@ export default new Elysia({ prefix: "/search" })
 		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request.headers, "unit:read");
+				const hasDevelopmentPreviewAccess =
+					await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
+				const indexes = (body.indexes ?? [...SearchCategories]).filter(
+					(index) => hasDevelopmentPreviewAccess || index !== "tag-structures",
+				);
 				return await searchGrouped({
 					...body,
 					profileId: identity.authorization.profileId,
-					indexes: body.indexes ?? [...SearchCategories],
+					indexes,
 				});
 			} catch (error) {
 				if (error instanceof InvalidSearch || error instanceof SearchUnavailable)
@@ -820,8 +888,12 @@ export default new Elysia({ prefix: "/search" })
 	.post(
 		"/:index",
 		async ({ params, body, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			if (params.index === "tag-structures")
+				await identity.authorization.platform.ensureCapability(
+					DevelopmentPreviewCapability,
+				);
 			try {
-				const identity = await resolveIdentity(request.headers, "unit:read");
 				return await searchDomain(params.index, {
 					...body,
 					profileId: identity.authorization.profileId,
@@ -838,6 +910,7 @@ export default new Elysia({ prefix: "/search" })
 			body: DomainSearchBody,
 			response: {
 				[StatusCodes.OK]: DomainSearchResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},

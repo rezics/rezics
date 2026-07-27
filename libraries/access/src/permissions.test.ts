@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
 	AuthenticatedGrantableUnitPermissionValues,
+	DevelopmentPreviewCapability,
 	expandUnitPermissions,
 	isUnitPermissionApplicable,
 	isUnitPermissionGrantableToAuthenticated,
+	PlatformCapabilityValues,
 	StandardPermissionActionValues,
 	UnitPermissionDefinitions,
 	UnitPermissionImplications,
@@ -87,6 +89,13 @@ describe("permission schema", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("realm.units.create")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("realm.post.replies.create")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.access.manage")).toBe(false);
+	});
+
+	it("uses one platform release gate for every development preview", () => {
+		expect(DevelopmentPreviewCapability).toBe("platform.development_preview.access");
+		expect(
+			PlatformCapabilityValues.filter((capability) => capability.includes("preview")),
+		).toEqual([DevelopmentPreviewCapability]);
 	});
 });
 

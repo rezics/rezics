@@ -62,29 +62,26 @@ export const UnitPermissionValues = [
 export type UnitPermission = (typeof UnitPermissionValues)[number];
 
 /**
- * Grants access to unreleased Content Structure APIs whose editors are under development.
+ * Grants access to product surfaces and APIs that have not been released.
+ *
+ * @remarks
+ * This is a release gate, not authority to perform domain operations. Callers
+ * must still satisfy every permission and resource policy required by the
+ * requested operation.
  *
  * @alpha
  */
-export const ContentStructurePreviewCapability = "unit.content_structure.preview" as const;
+export const DevelopmentPreviewCapability = "platform.development_preview.access" as const;
 
 /**
- * Grants access to the unreleased Zone product and Zone-owned APIs.
- *
- * @alpha
- */
-export const ZonePreviewCapability = "unit.zone.preview" as const;
-
-/**
- * Platform-wide capabilities assignable to staff Profiles.
+ * Platform-wide capabilities assignable to Profiles.
  *
  * @alpha
  */
 export const PlatformCapabilityValues = [
 	"entity.associations.override",
 	"unit.edit",
-	ContentStructurePreviewCapability,
-	ZonePreviewCapability,
+	DevelopmentPreviewCapability,
 	"unit.ownership.transfer",
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",

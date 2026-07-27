@@ -63,9 +63,8 @@ describe("database bootstrap manifest", () => {
 		expect(BootstrapSuperAdminProfile.capabilities).toEqual(
 			expect.arrayContaining([
 				"platform.grants.manage",
+				"platform.development_preview.access",
 				"unit.edit",
-				"unit.content_structure.preview",
-				"unit.zone.preview",
 			]),
 		);
 		expect(new Set(BootstrapSuperAdminProfile.capabilities).size).toBe(

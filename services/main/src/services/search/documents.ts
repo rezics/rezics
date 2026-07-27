@@ -41,7 +41,7 @@ export interface ZoneSearchFeatureProjection {
 function validateDocument(value: unknown): SearchDocument {
 	try {
 		const document = parseSearchDocument(value);
-		resolveSearchDocument(document);
+		resolveSearchDocument(document, true);
 		return document;
 	} catch (cause) {
 		if (cause instanceof InvalidSearch) throw cause;

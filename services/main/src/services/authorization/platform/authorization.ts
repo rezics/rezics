@@ -67,7 +67,6 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 	}
 
 	async ensureCapability(
-		this: PlatformAuthorization<string>,
 		capability: PlatformCapability,
 		executor: DatabaseExecutor = database,
 	): Promise<void> {

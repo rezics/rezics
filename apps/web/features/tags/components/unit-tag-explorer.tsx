@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useReducer } from "react";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import { useDevelopmentPreviewAccess } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -56,6 +57,8 @@ export function UnitTagExplorer({
 	readonly unitId: string;
 }) {
 	const { data: session } = useHydratedSession();
+	const developmentPreview = useDevelopmentPreviewAccess();
+	const hasDevelopmentPreviewAccess = developmentPreview.state === "allowed";
 	const { locale, t } = useTranslation(["tags", "ui"]);
 	const queryClient = useQueryClient();
 	const [selection, dispatchSelection] = useReducer(
@@ -114,9 +117,10 @@ export function UnitTagExplorer({
 	const realmGroups = presentRealmTagGroups({ data: query.data, unitId });
 	const identities = new Map<string, TagIdentity>();
 	for (const item of globalTags) identities.set(item.identity.tagId, item.identity);
-	for (const structure of query.data.structures)
-		for (const item of presentStructureMembers(structure))
-			identities.set(item.identity.tagId, item.identity);
+	if (hasDevelopmentPreviewAccess)
+		for (const structure of query.data.structures)
+			for (const item of presentStructureMembers(structure))
+				identities.set(item.identity.tagId, item.identity);
 	for (const group of realmGroups)
 		for (const item of group.tags) identities.set(item.identity.tagId, item.identity);
 	const selectedTagIds = new Set(selection.selectedTagIds);
@@ -174,6 +178,7 @@ export function UnitTagExplorer({
 					addPending={add.isPending}
 					addStructureError={addStructure.error}
 					addStructurePending={addStructure.isPending}
+					hasDevelopmentPreviewAccess={hasDevelopmentPreviewAccess}
 					onAddStructure={(structureId) =>
 						addStructure
 							.mutateAsync({
@@ -204,7 +209,7 @@ export function UnitTagExplorer({
 						{t.tags.basic.description}
 					</p>
 				) : null}
-				{query.data.structures.length ? (
+				{hasDevelopmentPreviewAccess && query.data.structures.length ? (
 					<div className="grid gap-3">
 						{surface === "page" ? (
 							<h3 className="font-semibold">{t.tags.structures.title}</h3>

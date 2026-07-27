@@ -135,6 +135,62 @@ describe("API root", () => {
 		expect(previewProtectedZoneOperations).toEqual(["POST /api/zones"]);
 	});
 
+	it("denies anonymous Tag hierarchy reads at the development preview boundary", async () => {
+		const response = await api.handle(
+			new Request("http://localhost/api/tags/00000000-0000-7000-8000-000000000001"),
+		);
+
+		expect(response.status).toBe(StatusCodes.FORBIDDEN);
+		expect((await readErrorBody(response)).error).toEqual({
+			code: "PlatformCapabilityRequired",
+			message: "Platform capability required",
+		});
+	});
+
+	it("documents the development preview gate on every dedicated Tag-path operation", () => {
+		const document = toOpenAPISchema(api);
+		const methods = ["delete", "get", "post", "put"] as const;
+		const previewProtectedOperations = Object.entries(document.paths).flatMap(([path, item]) =>
+			path === "/api/tags/{tagId}" ||
+			path.startsWith("/api/tag-structures") ||
+			path.includes("/tag-structures/")
+				? methods.flatMap((method) => {
+						const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
+						return forbidden &&
+							JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
+							? [`${method.toUpperCase()} ${path}`]
+							: [];
+					})
+				: [],
+		);
+
+		expect(previewProtectedOperations).toEqual([
+			"GET /api/tags/{tagId}",
+			"POST /api/tag-structures",
+			"GET /api/tag-structures/{structureId}",
+			"PUT /api/tag-structures/{structureId}",
+			"DELETE /api/tag-structures/{structureId}/vote",
+			"PUT /api/tag-structures/{structureId}/vote",
+			"DELETE /api/units/{type}/{unitId}/tag-structures/{structureId}",
+			"PUT /api/units/{type}/{unitId}/tag-structures/{structureId}",
+			"DELETE /api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+			"PUT /api/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+		]);
+	});
+
+	it("denies the Tag-path search category outside development preview", async () => {
+		const response = await api.handle(
+			new Request("http://localhost/api/search/tag-structures", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: "{}",
+			}),
+		);
+
+		expect(response.status).toBe(StatusCodes.FORBIDDEN);
+		expect((await readErrorBody(response)).error.code).toBe("PlatformCapabilityRequired");
+	});
+
 	it("documents untracked progress as a successful state", () => {
 		const document = toOpenAPISchema(api);
 		const responses = document.paths["/api/progress/{unitId}"]?.get?.responses;

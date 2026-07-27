@@ -6,7 +6,7 @@ import type { UnitKind } from "../../database/schema";
  */
 export function canAccessContentStructureApi(
 	unitKind: UnitKind,
-	hasPreviewCapability: boolean,
+	hasDevelopmentPreviewAccess: boolean,
 ): boolean {
-	return (unitKind !== "media" && unitKind !== "software") || hasPreviewCapability;
+	return (unitKind !== "media" && unitKind !== "software") || hasDevelopmentPreviewAccess;
 }

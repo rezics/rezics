@@ -6,7 +6,6 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: postTerms } = zhHantTerminology.post;
-const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
 	title: "條目治理",
@@ -42,8 +41,7 @@ export default {
 	capabilities: {
 		"entity.associations.override": "略過目錄實體關聯權限",
 		"unit.edit": "編輯所有條目",
-		"unit.content_structure.preview": "預覽開發中的內容結構功能",
-		"unit.zone.preview": `預覽開發中的${zoneTerms.label}功能`,
+		"platform.development_preview.access": "使用尚未發布的開發預覽功能",
 		"unit.ownership.transfer": "移轉條目擁有權",
 		"unit.slug.manage": "管理條目公開網址",
 		"unit.slug.namespace.manage": "管理網址命名空間",

@@ -6,7 +6,7 @@ const denied = {
 	canEdit: false,
 	canManageAccess: false,
 	canManageAssociations: false,
-	canPreviewContentStructure: false,
+	hasDevelopmentPreviewAccess: false,
 };
 
 describe("unit management section manifest", () => {
@@ -21,8 +21,15 @@ describe("unit management section manifest", () => {
 		const editable = { ...denied, canEdit: true };
 		expect(getUnitManagementSectionIds("book", editable)).toContain("content-structure");
 		expect(getUnitManagementSectionIds("series", editable)).toContain("releases");
-		expect(getUnitManagementSectionIds("software", editable)).toContain("content-structure");
-		expect(getUnitManagementSectionIds("media", editable)).toContain("content-structure");
+		expect(getUnitManagementSectionIds("software", editable)).not.toContain(
+			"content-structure",
+		);
+		expect(getUnitManagementSectionIds("media", editable)).not.toContain("content-structure");
+		const previewEditor = { ...editable, hasDevelopmentPreviewAccess: true };
+		expect(getUnitManagementSectionIds("software", previewEditor)).toContain(
+			"content-structure",
+		);
+		expect(getUnitManagementSectionIds("media", previewEditor)).toContain("content-structure");
 	});
 
 	it("does not expose a management workspace without a server capability", () => {

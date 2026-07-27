@@ -1,3 +1,4 @@
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -57,18 +58,24 @@ export default new Elysia()
 	.group("/tags", (app) =>
 		app.get(
 			"/:tagId",
-			async ({ params, query }) =>
-				getTagHierarchy({
+			async ({ params, query, request }) => {
+				const identity = await resolveIdentity(request.headers, "unit:read");
+				await identity.authorization.platform.ensureCapability(
+					DevelopmentPreviewCapability,
+				);
+				return getTagHierarchy({
 					tagId: params.tagId,
 					localizationLanguages: query.localizationLanguages,
 					childLimit: query.childLimit ?? 30,
 					grandchildLimit: query.grandchildLimit ?? 12,
-				}),
+				});
+			},
 			{
 				params: TagIdParams,
 				query: TagHierarchyQuery,
 				response: {
 					[StatusCodes.OK]: TagHierarchyResponse,
+					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
 				},
 				detail: {
@@ -82,16 +89,19 @@ export default new Elysia()
 		app
 			.post(
 				"",
-				async ({ body, profile }) =>
-					createTagStructure({
+				async ({ authorization, body, profile }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+					return createTagStructure({
 						memberTagIds: body.memberTagIds,
 						profileId: profile.unitId,
-					}),
+					});
+				},
 				{
 					access: "contribute:unit:create",
 					body: CreateTagStructureBody,
 					response: {
 						[StatusCodes.OK]: CreateTagStructureResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 							"InvalidTagStructure",
@@ -107,6 +117,9 @@ export default new Elysia()
 				"/:structureId",
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request.headers, "unit:read");
+					await identity.authorization.platform.ensureCapability(
+						DevelopmentPreviewCapability,
+					);
 					return getTagStructure({
 						structureId: params.structureId,
 						viewerProfileId: identity.profile?.unitId,
@@ -118,6 +131,7 @@ export default new Elysia()
 					query: TagStructureQuery,
 					response: {
 						[StatusCodes.OK]: TagStructureResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
 					},
 					detail: { summary: "Get a Tag structure", tags: ["Tags"] },
@@ -126,6 +140,7 @@ export default new Elysia()
 			.put(
 				"/:structureId",
 				async ({ params, query, body, profile, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await updateTagStructureDefinition({
 						structureId: params.structureId,
 						memberTagIds: body.memberTagIds,
@@ -168,18 +183,21 @@ export default new Elysia()
 			)
 			.put(
 				"/:structureId/vote",
-				async ({ params, body, profile }) =>
-					voteTagStructure({
+				async ({ params, body, profile, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+					return voteTagStructure({
 						structureId: params.structureId,
 						profileId: profile.unitId,
 						value: body.value,
-					}),
+					});
+				},
 				{
 					access: "contribute:interaction:write",
 					params: TagStructureParams,
 					body: VoteBody,
 					response: {
 						[StatusCodes.OK]: VoteSummaryResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
 					},
 					detail: { summary: "Vote on a Tag structure", tags: ["Tags"] },
@@ -187,16 +205,19 @@ export default new Elysia()
 			)
 			.delete(
 				"/:structureId/vote",
-				async ({ params, profile }) =>
-					deleteTagStructureVote({
+				async ({ params, profile, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+					return deleteTagStructureVote({
 						structureId: params.structureId,
 						profileId: profile.unitId,
-					}),
+					});
+				},
 				{
 					access: "write:interaction:write",
 					params: TagStructureParams,
 					response: {
 						[StatusCodes.OK]: VoteSummaryResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
 					},
 					detail: { summary: "Remove a Tag structure vote", tags: ["Tags"] },
@@ -214,11 +235,15 @@ export default new Elysia()
 						params.unitId,
 						() => new UnitNotFound(),
 					);
+					const includeStructures = await identity.authorization.platform.hasCapability(
+						DevelopmentPreviewCapability,
+					);
 					return getUnitTagLandscape({
 						unitId: params.unitId,
 						viewerProfileId: identity.profile?.unitId,
 						localizationLanguages: query.localizationLanguages,
 						globalLimit: query.globalLimit ?? 50,
+						includeStructures,
 						structureLimit: query.structureLimit ?? 20,
 						sourceLimit: query.sourceLimit ?? 10,
 						perRealmLimit: query.perRealmLimit ?? 12,
@@ -240,6 +265,7 @@ export default new Elysia()
 			.put(
 				"/:type/:unitId/tag-structures/:structureId",
 				async ({ params, profile, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return applyTagStructure({
@@ -253,6 +279,7 @@ export default new Elysia()
 					params: UnitTagStructureParams,
 					response: {
 						[StatusCodes.OK]: TagStructureApplicationResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 							"InvalidTagStructure",
 						]),
@@ -267,6 +294,7 @@ export default new Elysia()
 			.delete(
 				"/:type/:unitId/tag-structures/:structureId",
 				async ({ params, profile, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanUpdate(params.unitId, [["tags"]]);
 					await removeTagStructureApplication({
@@ -281,6 +309,7 @@ export default new Elysia()
 					params: UnitTagStructureParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagStructureApplicationNotFound",
@@ -292,6 +321,7 @@ export default new Elysia()
 			.put(
 				"/:type/:unitId/tag-structures/:structureId/vote",
 				async ({ params, body, profile, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return voteTagStructureApplication({
@@ -307,6 +337,7 @@ export default new Elysia()
 					body: VoteBody,
 					response: {
 						[StatusCodes.OK]: TagStructureApplicationResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 							"InvalidTagStructure",
 						]),
@@ -321,6 +352,7 @@ export default new Elysia()
 			.delete(
 				"/:type/:unitId/tag-structures/:structureId/vote",
 				async ({ params, profile, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return deleteTagStructureApplicationVote({
@@ -334,6 +366,7 @@ export default new Elysia()
 					params: UnitTagStructureParams,
 					response: {
 						[StatusCodes.OK]: TagStructureApplicationResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagStructureApplicationNotFound",

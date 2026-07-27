@@ -22,7 +22,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 
-import { PreviewCapabilityBoundary } from "@/features/preview-access/components/preview-capability-boundary";
+import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
@@ -261,9 +261,9 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 export function StudioSectionPage({ sectionId }: { readonly sectionId: StudioSectionId }) {
 	if (sectionId === "zone")
 		return (
-			<PreviewCapabilityBoundary capability="unit.zone.preview">
+			<DevelopmentPreviewBoundary>
 				<StudioSectionContent sectionId={sectionId} />
-			</PreviewCapabilityBoundary>
+			</DevelopmentPreviewBoundary>
 		);
 	return <StudioSectionContent sectionId={sectionId} />;
 }

@@ -1,4 +1,4 @@
-import { ContentStructurePreviewCapability } from "@rezics/access";
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
 import {
@@ -356,12 +356,12 @@ export async function getUnit(
 		kind === "series"
 			? { role: "standalone" }
 			: await getUnitVariantContext(base.id, authorization.profileId);
-	const [canEdit, accessDecision, associationDecision, canPreviewContentStructure] =
+	const [canEdit, accessDecision, associationDecision, hasDevelopmentPreviewAccess] =
 		await Promise.all([
 			authorization.unit.canUpdate(base.id),
 			authorization.unit.decide(base.id, "unit.access.manage"),
 			authorization.unit.decide(base.id, "unit.association.manage"),
-			authorization.platform.hasCapability(ContentStructurePreviewCapability),
+			authorization.platform.hasCapability(DevelopmentPreviewCapability),
 		]);
 	const details = await getUnitDetails(kind, base.id);
 	return {
@@ -443,7 +443,7 @@ export async function getUnit(
 			canEdit,
 			canManageAccess: accessDecision.allowed,
 			canManageAssociations: associationDecision.allowed,
-			canPreviewContentStructure,
+			hasDevelopmentPreviewAccess,
 		},
 	};
 }

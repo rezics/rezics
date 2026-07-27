@@ -772,18 +772,21 @@ import type {
 	GetApiStaffAuditStatus500,
 	GetApiTagsByTagIdOptions,
 	GetApiTagsByTagIdStatus200,
+	GetApiTagsByTagIdStatus403,
 	GetApiTagsByTagIdStatus404,
 	GetApiTagsByTagIdStatus422,
 	GetApiTagsByTagIdStatus500,
 	PostApiTagStructuresOptions,
 	PostApiTagStructuresStatus200,
 	PostApiTagStructuresStatus400,
+	PostApiTagStructuresStatus403,
 	PostApiTagStructuresStatus404,
 	PostApiTagStructuresStatus422,
 	PostApiTagStructuresStatus429,
 	PostApiTagStructuresStatus500,
 	GetApiTagStructuresByStructureIdOptions,
 	GetApiTagStructuresByStructureIdStatus200,
+	GetApiTagStructuresByStructureIdStatus403,
 	GetApiTagStructuresByStructureIdStatus404,
 	GetApiTagStructuresByStructureIdStatus422,
 	GetApiTagStructuresByStructureIdStatus500,
@@ -799,12 +802,14 @@ import type {
 	PutApiTagStructuresByStructureIdVoteOptions,
 	PutApiTagStructuresByStructureIdVoteStatus200,
 	PutApiTagStructuresByStructureIdVoteStatus400,
+	PutApiTagStructuresByStructureIdVoteStatus403,
 	PutApiTagStructuresByStructureIdVoteStatus404,
 	PutApiTagStructuresByStructureIdVoteStatus422,
 	PutApiTagStructuresByStructureIdVoteStatus429,
 	PutApiTagStructuresByStructureIdVoteStatus500,
 	DeleteApiTagStructuresByStructureIdVoteOptions,
 	DeleteApiTagStructuresByStructureIdVoteStatus200,
+	DeleteApiTagStructuresByStructureIdVoteStatus403,
 	DeleteApiTagStructuresByStructureIdVoteStatus404,
 	DeleteApiTagStructuresByStructureIdVoteStatus422,
 	DeleteApiTagStructuresByStructureIdVoteStatus429,
@@ -816,12 +821,14 @@ import type {
 	GetApiUnitsByTypeByUnitIdTagsStatus500,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
+	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429,
@@ -829,12 +836,14 @@ import type {
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
+	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429,
@@ -1914,6 +1923,7 @@ import type {
 	PostApiSearchByIndexOptions,
 	PostApiSearchByIndexStatus200,
 	PostApiSearchByIndexStatus400,
+	PostApiSearchByIndexStatus403,
 	PostApiSearchByIndexStatus422,
 	PostApiSearchByIndexStatus500,
 	PostApiSearchByIndexStatus503,
@@ -14094,7 +14104,10 @@ export function getApiTagsByTagIdQueryOptions(
 	return queryOptions<
 		GetApiTagsByTagIdStatus200,
 		ResponseErrorConfig<
-			GetApiTagsByTagIdStatus404 | GetApiTagsByTagIdStatus422 | GetApiTagsByTagIdStatus500
+			| GetApiTagsByTagIdStatus403
+			| GetApiTagsByTagIdStatus404
+			| GetApiTagsByTagIdStatus422
+			| GetApiTagsByTagIdStatus500
 		>,
 		GetApiTagsByTagIdStatus200,
 		typeof queryKey
@@ -14134,6 +14147,7 @@ export function useGetApiTagsByTagId<
 			QueryObserverOptions<
 				GetApiTagsByTagIdStatus200,
 				ResponseErrorConfig<
+					| GetApiTagsByTagIdStatus403
 					| GetApiTagsByTagIdStatus404
 					| GetApiTagsByTagIdStatus422
 					| GetApiTagsByTagIdStatus500
@@ -14164,7 +14178,10 @@ export function useGetApiTagsByTagId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiTagsByTagIdStatus404 | GetApiTagsByTagIdStatus422 | GetApiTagsByTagIdStatus500
+			| GetApiTagsByTagIdStatus403
+			| GetApiTagsByTagIdStatus404
+			| GetApiTagsByTagIdStatus422
+			| GetApiTagsByTagIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -14183,6 +14200,7 @@ export function postApiTagStructuresMutationOptions<TContext = unknown>(
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
 			| PostApiTagStructuresStatus400
+			| PostApiTagStructuresStatus403
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -14209,6 +14227,7 @@ export function usePostApiTagStructures<TContext>(
 			PostApiTagStructuresStatus200,
 			ResponseErrorConfig<
 				| PostApiTagStructuresStatus400
+				| PostApiTagStructuresStatus403
 				| PostApiTagStructuresStatus404
 				| PostApiTagStructuresStatus422
 				| PostApiTagStructuresStatus429
@@ -14228,6 +14247,7 @@ export function usePostApiTagStructures<TContext>(
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
 			| PostApiTagStructuresStatus400
+			| PostApiTagStructuresStatus403
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -14241,6 +14261,7 @@ export function usePostApiTagStructures<TContext>(
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
 			| PostApiTagStructuresStatus400
+			| PostApiTagStructuresStatus403
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -14259,6 +14280,7 @@ export function usePostApiTagStructures<TContext>(
 		PostApiTagStructuresStatus200,
 		ResponseErrorConfig<
 			| PostApiTagStructuresStatus400
+			| PostApiTagStructuresStatus403
 			| PostApiTagStructuresStatus404
 			| PostApiTagStructuresStatus422
 			| PostApiTagStructuresStatus429
@@ -14287,6 +14309,7 @@ export function getApiTagStructuresByStructureIdQueryOptions(
 	return queryOptions<
 		GetApiTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| GetApiTagStructuresByStructureIdStatus403
 			| GetApiTagStructuresByStructureIdStatus404
 			| GetApiTagStructuresByStructureIdStatus422
 			| GetApiTagStructuresByStructureIdStatus500
@@ -14333,6 +14356,7 @@ export function useGetApiTagStructuresByStructureId<
 			QueryObserverOptions<
 				GetApiTagStructuresByStructureIdStatus200,
 				ResponseErrorConfig<
+					| GetApiTagStructuresByStructureIdStatus403
 					| GetApiTagStructuresByStructureIdStatus404
 					| GetApiTagStructuresByStructureIdStatus422
 					| GetApiTagStructuresByStructureIdStatus500
@@ -14364,6 +14388,7 @@ export function useGetApiTagStructuresByStructureId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiTagStructuresByStructureIdStatus403
 			| GetApiTagStructuresByStructureIdStatus404
 			| GetApiTagStructuresByStructureIdStatus422
 			| GetApiTagStructuresByStructureIdStatus500
@@ -14502,6 +14527,7 @@ export function putApiTagStructuresByStructureIdVoteMutationOptions<TContext = u
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiTagStructuresByStructureIdVoteStatus400
+			| PutApiTagStructuresByStructureIdVoteStatus403
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14533,6 +14559,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 			PutApiTagStructuresByStructureIdVoteStatus200,
 			ResponseErrorConfig<
 				| PutApiTagStructuresByStructureIdVoteStatus400
+				| PutApiTagStructuresByStructureIdVoteStatus403
 				| PutApiTagStructuresByStructureIdVoteStatus404
 				| PutApiTagStructuresByStructureIdVoteStatus422
 				| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14555,6 +14582,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiTagStructuresByStructureIdVoteStatus400
+			| PutApiTagStructuresByStructureIdVoteStatus403
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14568,6 +14596,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiTagStructuresByStructureIdVoteStatus400
+			| PutApiTagStructuresByStructureIdVoteStatus403
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14586,6 +14615,7 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 		PutApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiTagStructuresByStructureIdVoteStatus400
+			| PutApiTagStructuresByStructureIdVoteStatus403
 			| PutApiTagStructuresByStructureIdVoteStatus404
 			| PutApiTagStructuresByStructureIdVoteStatus422
 			| PutApiTagStructuresByStructureIdVoteStatus429
@@ -14606,6 +14636,7 @@ export function deleteApiTagStructuresByStructureIdVoteMutationOptions<TContext 
 	return mutationOptions<
 		DeleteApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiTagStructuresByStructureIdVoteStatus403
 			| DeleteApiTagStructuresByStructureIdVoteStatus404
 			| DeleteApiTagStructuresByStructureIdVoteStatus422
 			| DeleteApiTagStructuresByStructureIdVoteStatus429
@@ -14635,6 +14666,7 @@ export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiTagStructuresByStructureIdVoteStatus200,
 			ResponseErrorConfig<
+				| DeleteApiTagStructuresByStructureIdVoteStatus403
 				| DeleteApiTagStructuresByStructureIdVoteStatus404
 				| DeleteApiTagStructuresByStructureIdVoteStatus422
 				| DeleteApiTagStructuresByStructureIdVoteStatus429
@@ -14656,6 +14688,7 @@ export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
 	) as UseMutationOptions<
 		DeleteApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiTagStructuresByStructureIdVoteStatus403
 			| DeleteApiTagStructuresByStructureIdVoteStatus404
 			| DeleteApiTagStructuresByStructureIdVoteStatus422
 			| DeleteApiTagStructuresByStructureIdVoteStatus429
@@ -14668,6 +14701,7 @@ export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
 	return useMutation<
 		DeleteApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiTagStructuresByStructureIdVoteStatus403
 			| DeleteApiTagStructuresByStructureIdVoteStatus404
 			| DeleteApiTagStructuresByStructureIdVoteStatus422
 			| DeleteApiTagStructuresByStructureIdVoteStatus429
@@ -14685,6 +14719,7 @@ export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
 	) as UseMutationResult<
 		DeleteApiTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiTagStructuresByStructureIdVoteStatus403
 			| DeleteApiTagStructuresByStructureIdVoteStatus404
 			| DeleteApiTagStructuresByStructureIdVoteStatus422
 			| DeleteApiTagStructuresByStructureIdVoteStatus429
@@ -14811,6 +14846,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptio
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14840,6 +14876,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14862,6 +14899,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14874,6 +14912,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14891,6 +14930,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14911,6 +14951,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOp
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14940,6 +14981,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14962,6 +15004,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14974,6 +15017,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -14991,6 +15035,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
@@ -15012,6 +15057,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationO
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15043,6 +15089,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 			ResponseErrorConfig<
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
+				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15066,6 +15113,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15079,6 +15127,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15097,6 +15146,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TCont
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15117,6 +15167,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutati
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15146,6 +15197,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TC
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15168,6 +15220,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TC
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15180,6 +15233,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TC
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -15197,6 +15251,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TC
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
@@ -31663,6 +31718,7 @@ export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
@@ -31693,6 +31749,7 @@ export function usePostApiSearchByIndex<TContext>(
 			PostApiSearchByIndexStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchByIndexStatus400
+				| PostApiSearchByIndexStatus403
 				| PostApiSearchByIndexStatus422
 				| PostApiSearchByIndexStatus500
 				| PostApiSearchByIndexStatus503
@@ -31711,6 +31768,7 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
@@ -31723,6 +31781,7 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
@@ -31740,6 +31799,7 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503

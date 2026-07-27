@@ -18,6 +18,7 @@ export function UnitTagManagement({
 	addPending,
 	addStructureError,
 	addStructurePending,
+	hasDevelopmentPreviewAccess,
 	signedIn,
 	onAddStructure,
 	onAddTag,
@@ -26,6 +27,7 @@ export function UnitTagManagement({
 	readonly addPending: boolean;
 	readonly addStructureError: unknown;
 	readonly addStructurePending: boolean;
+	readonly hasDevelopmentPreviewAccess: boolean;
 	readonly signedIn: boolean;
 	readonly onAddStructure: (structureId: string) => Promise<void>;
 	readonly onAddTag: (tagId: string) => Promise<void>;
@@ -36,46 +38,54 @@ export function UnitTagManagement({
 	return (
 		<Card>
 			<CardContent className="grid gap-6 p-4 sm:p-5">
-				<div className="grid gap-3">
-					<div className="flex flex-wrap items-start justify-between gap-3">
-						<div className="grid gap-1">
-							<h2 className="font-semibold">{t.tags.structures.addTitle}</h2>
-							<p className="text-sm text-muted-foreground">
-								{t.tags.structures.addDescription}
-							</p>
-						</div>
-						<Button asChild variant="outline">
-							<Link href="/tag-structures/new">{t.tags.structures.create}</Link>
-						</Button>
-					</div>
-					{signedIn ? (
-						<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-							<EntityPicker
-								index="tag-structures"
-								onChange={setSelectedStructure}
-								value={selectedStructure}
-							/>
-							<Button
-								disabled={!selectedStructure}
-								isLoading={addStructurePending}
-								onClick={() => {
-									if (!selectedStructure) return;
-									void onAddStructure(selectedStructure.id)
-										.then(() => setSelectedStructure(undefined))
-										.catch(() => undefined);
-								}}
-							>
-								{t.tags.structures.add}
+				{hasDevelopmentPreviewAccess ? (
+					<div className="grid gap-3">
+						<div className="flex flex-wrap items-start justify-between gap-3">
+							<div className="grid gap-1">
+								<h2 className="font-semibold">{t.tags.structures.addTitle}</h2>
+								<p className="text-sm text-muted-foreground">
+									{t.tags.structures.addDescription}
+								</p>
+							</div>
+							<Button asChild variant="outline">
+								<Link href="/tag-structures/new">{t.tags.structures.create}</Link>
 							</Button>
 						</div>
-					) : (
-						<SignInButton className="w-fit" variant="outline">
-							{t.tags.structures.add}
-						</SignInButton>
-					)}
-					<RequestFailure error={addStructureError} fallback={t.ui.retryLater} />
-				</div>
-				<div className="grid gap-3 border-t border-border-weak pt-6">
+						{signedIn ? (
+							<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+								<EntityPicker
+									index="tag-structures"
+									onChange={setSelectedStructure}
+									value={selectedStructure}
+								/>
+								<Button
+									disabled={!selectedStructure}
+									isLoading={addStructurePending}
+									onClick={() => {
+										if (!selectedStructure) return;
+										void onAddStructure(selectedStructure.id)
+											.then(() => setSelectedStructure(undefined))
+											.catch(() => undefined);
+									}}
+								>
+									{t.tags.structures.add}
+								</Button>
+							</div>
+						) : (
+							<SignInButton className="w-fit" variant="outline">
+								{t.tags.structures.add}
+							</SignInButton>
+						)}
+						<RequestFailure error={addStructureError} fallback={t.ui.retryLater} />
+					</div>
+				) : null}
+				<div
+					className={
+						hasDevelopmentPreviewAccess
+							? "grid gap-3 border-t border-border-weak pt-6"
+							: "grid gap-3"
+					}
+				>
 					<div className="grid gap-1">
 						<h2 className="font-semibold">{t.tags.global.addTitle}</h2>
 						<p className="text-sm text-muted-foreground">

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { canAccessContentStructureApi } from "./release";
 
 describe("Content Structure API release policy", () => {
-	it("requires the staff preview capability for Media and Software", () => {
+	it("requires development preview access for Media and Software", () => {
 		expect(canAccessContentStructureApi("media", false)).toBe(false);
 		expect(canAccessContentStructureApi("software", false)).toBe(false);
 		expect(canAccessContentStructureApi("media", true)).toBe(true);

@@ -1,4 +1,4 @@
-import { ContentStructurePreviewCapability } from "@rezics/access";
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
@@ -155,10 +155,10 @@ async function ensureReleasedContentStructureApi(
 		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
 		.limit(1);
 	const previewRequired = owner?.kind === "media" || owner?.kind === "software";
-	const hasPreviewCapability =
+	const hasDevelopmentPreviewAccess =
 		previewRequired &&
-		(await authorization.platform.hasCapability(ContentStructurePreviewCapability, tx));
-	if (owner && !canAccessContentStructureApi(owner.kind, hasPreviewCapability))
+		(await authorization.platform.hasCapability(DevelopmentPreviewCapability, tx));
+	if (owner && !canAccessContentStructureApi(owner.kind, hasDevelopmentPreviewAccess))
 		throw new PlatformCapabilityRequired();
 }
 

@@ -36263,8 +36263,7 @@
 										"enum": [
 											"entity.associations.override",
 											"unit.edit",
-											"unit.content_structure.preview",
-											"unit.zone.preview",
+											"platform.development_preview.access",
 											"unit.ownership.transfer",
 											"unit.slug.manage",
 											"unit.slug.namespace.manage",
@@ -46076,8 +46075,7 @@
 														"enum": [
 															"entity.associations.override",
 															"unit.edit",
-															"unit.content_structure.preview",
-															"unit.zone.preview",
+															"platform.development_preview.access",
 															"unit.ownership.transfer",
 															"unit.slug.manage",
 															"unit.slug.namespace.manage",
@@ -50125,8 +50123,7 @@
 												"enum": [
 													"entity.associations.override",
 													"unit.edit",
-													"unit.content_structure.preview",
-													"unit.zone.preview",
+													"platform.development_preview.access",
 													"unit.ownership.transfer",
 													"unit.slug.manage",
 													"unit.slug.namespace.manage",
@@ -50271,8 +50268,7 @@
 																	"enum": [
 																		"entity.associations.override",
 																		"unit.edit",
-																		"unit.content_structure.preview",
-																		"unit.zone.preview",
+																		"platform.development_preview.access",
 																		"unit.ownership.transfer",
 																		"unit.slug.manage",
 																		"unit.slug.namespace.manage",
@@ -50423,8 +50419,7 @@
 																	"enum": [
 																		"entity.associations.override",
 																		"unit.edit",
-																		"unit.content_structure.preview",
-																		"unit.zone.preview",
+																		"platform.development_preview.access",
 																		"unit.ownership.transfer",
 																		"unit.slug.manage",
 																		"unit.slug.namespace.manage",
@@ -50532,7 +50527,7 @@
 								"required": ["capabilities", "expiresAt"],
 								"properties": {
 									"capabilities": {
-										"maxItems": 21,
+										"maxItems": 20,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -50541,8 +50536,7 @@
 											"enum": [
 												"entity.associations.override",
 												"unit.edit",
-												"unit.content_structure.preview",
-												"unit.zone.preview",
+												"platform.development_preview.access",
 												"unit.ownership.transfer",
 												"unit.slug.manage",
 												"unit.slug.namespace.manage",
@@ -50613,8 +50607,7 @@
 														"enum": [
 															"entity.associations.override",
 															"unit.edit",
-															"unit.content_structure.preview",
-															"unit.zone.preview",
+															"platform.development_preview.access",
 															"unit.ownership.transfer",
 															"unit.slug.manage",
 															"unit.slug.namespace.manage",
@@ -51183,6 +51176,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -51278,6 +51298,33 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
 							}
 						}
 					},
@@ -51533,6 +51580,33 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -52011,6 +52085,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -52146,6 +52247,33 @@
 												{ "type": "null" }
 											]
 										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -53021,6 +53149,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -53165,6 +53320,33 @@
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
 					},
 					"404": {
 						"description": "Response for status 404",
@@ -53363,6 +53545,33 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -53556,6 +53765,33 @@
 												{ "type": "null" }
 											]
 										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -59132,13 +59368,13 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canPreviewContentStructure"
+												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canPreviewContentStructure": { "type": "boolean" }
+												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
 									}
@@ -61090,13 +61326,13 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canPreviewContentStructure"
+												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canPreviewContentStructure": { "type": "boolean" }
+												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
 									}
@@ -63121,13 +63357,13 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canPreviewContentStructure"
+												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canPreviewContentStructure": { "type": "boolean" }
+												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
 									}
@@ -65311,13 +65547,13 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canPreviewContentStructure"
+												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canPreviewContentStructure": { "type": "boolean" }
+												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
 									}
@@ -67296,13 +67532,13 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canPreviewContentStructure"
+												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canPreviewContentStructure": { "type": "boolean" }
+												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
 									}
@@ -69627,13 +69863,13 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canPreviewContentStructure"
+												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canPreviewContentStructure": { "type": "boolean" }
+												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
 									}
@@ -162815,6 +163051,33 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
 							}
 						}
 					},

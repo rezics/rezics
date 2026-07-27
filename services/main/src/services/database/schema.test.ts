@@ -545,7 +545,7 @@ describe("database schema contracts", () => {
 				"unit.slug.redirect.release",
 				"entity.associations.override",
 				"unit.ownership.transfer",
-				"unit.zone.preview",
+				"platform.development_preview.access",
 				"platform.api_token_policy.manage",
 			]),
 		);

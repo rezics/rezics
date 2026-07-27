@@ -5,6 +5,19 @@ generic `structure` Unit. The first semantic structure kind is
 `tag.hierarchy_path`: an ordered path of two to sixteen Tag Units from broader
 to more specific.
 
+## Development preview boundary
+
+Tag paths are not released to ordinary users. Dedicated hierarchy, structure,
+application, vote, and `tag-structures` search operations require
+`platform.development_preview.access` in addition to their ordinary API scope
+and domain authorization. Mixed Unit Tag responses omit structures before
+querying them when the caller lacks the capability, while continuing to return
+released flat and Realm Tag data.
+
+The frontend mirrors this decision by removing path routes, search controls,
+management controls, and rendered paths. That client behavior is presentation
+only; the backend remains authoritative on every request.
+
 ## Identity and immutability
 
 The exact ordered member UUID array, structure kind, and definition version
@@ -104,7 +117,7 @@ Let `L` be path length, bounded at 16.
   vote are `O(L)`.
 - An administrative correction is `O(L + A×L)`, where `A` is the number of
   positive application votes whose support provenance must be rebuilt. It is a
-  rare staff operation and does not add cost to ordinary reads or votes.
+  rare platform-authorized operation and does not add cost to ordinary reads or votes.
 - Projection locking is partitioned by logical key; a vote contends only with
   another change that can affect the same effective fact or aggregate.
 - Exact-path deduplication is a B-tree lookup on the bounded UUID array.

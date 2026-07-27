@@ -3,6 +3,7 @@
 import { useGetApiUnitsBookByUnitIdContentStructureNodes } from "@rezics/openapi-tanstack-query";
 import { Card, CardContent, QueryFailure, QueryPending } from "@rezics/ui";
 
+import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { BookContentStructureEditor } from "../components/book-content-structure-editor";
@@ -19,7 +20,9 @@ export function ContentStructurePage({
 	return type === "book" ? (
 		<BookContentStructurePage bookId={unitId} />
 	) : (
-		<UnreleasedContentStructurePage />
+		<DevelopmentPreviewBoundary>
+			<UnreleasedContentStructurePage />
+		</DevelopmentPreviewBoundary>
 	);
 }
 
@@ -66,7 +69,7 @@ function BookContentStructurePage({ bookId }: { bookId: string }) {
  * @alpha
  * @remarks
  * Media and Software remain visibly unavailable in the product. Their generic
- * API surface is independently protected by the staff preview capability.
+ * API surface is independently protected by the development preview capability.
  */
 export function UnreleasedContentStructurePage() {
 	const { t } = useTranslation(["units"]);

@@ -17,6 +17,9 @@ belong to the backend authorization engine and the owning product surfaces.
   into a decision.
 - An **API scope** controls whether a credential may enter an API surface. It does not prove access
   to a particular domain object.
+- The platform **development preview** capability controls eligibility to enter unreleased product
+  surfaces. It never replaces the API scope, operation permission, ownership check, or resource
+  policy that the same request would require after release.
 
 Keep these layers distinct. An API operation may require multiple permissions, and an API method,
 HTTP verb, button label, audit event, or persistence strategy does not determine a permission key.
@@ -99,6 +102,18 @@ visibility changes do not silently recreate grants that a Realm owner deliberate
 
 New resource kinds and new permission keys require an explicit access review. Do not use wildcard
 or fallback classification that grants future resources authority merely because they compile.
+
+## Development preview release gate
+
+Use `platform.development_preview.access` as the single Profile eligibility gate for unreleased
+features. Do not create feature-specific preview capabilities. A preview request is allowed only
+when the caller has this platform capability and passes the feature's ordinary authorization
+checks. The backend enforces both on every request; frontend gating only removes unavailable
+navigation and controls.
+
+When a feature is released, remove its preview check without changing its domain permissions.
+This keeps temporary release state out of the durable permission vocabulary and prevents preview
+eligibility from becoming broad mutation authority.
 
 ## Design references
 

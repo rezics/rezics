@@ -4,7 +4,9 @@ import { TranslationBoundary } from "@/i18n/translation-boundary";
 
 export default function TagsLayout({ children }: { children: ReactNode }) {
 	return (
-		<TranslationBoundary namespaces={["catalog", "governance", "media", "tags"]}>
+		<TranslationBoundary
+			namespaces={["catalog", "governance", "media", "previewAccess", "tags"]}
+		>
 			{children}
 		</TranslationBoundary>
 	);

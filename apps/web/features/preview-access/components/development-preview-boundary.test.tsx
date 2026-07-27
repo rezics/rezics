@@ -28,9 +28,9 @@ vi.mock("@rezics/ui", () => ({
 	QueryPending: () => <div>query-pending</div>,
 }));
 
-import { PreviewCapabilityBoundary } from "./preview-capability-boundary";
+import { DevelopmentPreviewBoundary } from "./development-preview-boundary";
 
-describe("PreviewCapabilityBoundary", () => {
+describe("DevelopmentPreviewBoundary", () => {
 	afterEach(cleanup);
 
 	beforeEach(() => {
@@ -44,9 +44,9 @@ describe("PreviewCapabilityBoundary", () => {
 
 	it("shows the development notice without the required capability", () => {
 		render(
-			<PreviewCapabilityBoundary capability="unit.zone.preview">
+			<DevelopmentPreviewBoundary>
 				<div>zone-content</div>
-			</PreviewCapabilityBoundary>,
+			</DevelopmentPreviewBoundary>,
 		);
 
 		expect(screen.getByText("preview-access-notice")).toBeTruthy();
@@ -54,11 +54,11 @@ describe("PreviewCapabilityBoundary", () => {
 	});
 
 	it("renders protected content when the capability is present", () => {
-		mocks.profile.data.platformCapabilities = ["unit.zone.preview"];
+		mocks.profile.data.platformCapabilities = ["platform.development_preview.access"];
 		render(
-			<PreviewCapabilityBoundary capability="unit.zone.preview">
+			<DevelopmentPreviewBoundary>
 				<div>zone-content</div>
-			</PreviewCapabilityBoundary>,
+			</DevelopmentPreviewBoundary>,
 		);
 
 		expect(screen.getByText("zone-content")).toBeTruthy();

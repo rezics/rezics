@@ -18,11 +18,55 @@ function compileSearchFeatureInput(input: unknown) {
 
 describe("Search Feature v1", () => {
 	it.each(SearchTemplateIdValues)("resolves the %s server template", (template) => {
-		const resolved = resolveSearchDocument(createDefaultSearchDocument(template));
+		const resolved = resolveSearchDocument(createDefaultSearchDocument(template), true);
 		expect(resolved.document.template.id).toBe(template);
 		expect(resolved.document).not.toHaveProperty("modes");
 		expect(resolved.document.controls.every((control) => !("modes" in control))).toBe(true);
 		expect(resolved.controls.length).toBeGreaterThan(0);
+	});
+
+	it("removes the Tag-path category and control option outside development preview", () => {
+		const resolved = resolveSearchDocument(createDefaultSearchDocument("global"), false);
+		const categoryControl = resolved.controls.find((control) => control.field === "category");
+
+		expect(resolved.document.categories).not.toContain("tag-structures");
+		expect(categoryControl?.optionSource).toEqual(
+			expect.objectContaining({
+				kind: "static",
+				options: expect.not.arrayContaining([{ value: "tag-structures" }]),
+			}),
+		);
+	});
+
+	it("removes the Tag-path category before compiling an ordinary user's request", () => {
+		const document = createDefaultSearchDocument("global");
+		const compiled = compileSearchFeatureInputForSurface(
+			{ document, contexts: [], injections: [], state: { pageSize: 19 } },
+			"feed",
+			false,
+		);
+
+		expect(compiled.request.categories).not.toContain("tag-structures");
+		expect(compiled.request.pageSize).toBe(
+			Math.floor(
+				19 / document.categories.filter((category) => category !== "tag-structures").length,
+			),
+		);
+	});
+
+	it("rejects a Tag-path-only Search document outside development preview", () => {
+		const document = {
+			...createDefaultSearchDocument("global"),
+			categories: ["tag-structures"],
+		} as const;
+
+		expect(() =>
+			compileSearchFeatureInputForSurface(
+				{ document, contexts: [], injections: [], state: {} },
+				"search",
+				false,
+			),
+		).toThrow("no available categories");
 	});
 
 	it("rejects frontend editor modes at the execution boundary", () => {
@@ -39,13 +83,16 @@ describe("Search Feature v1", () => {
 	it("reports the failing path for a legacy persisted sort contract", () => {
 		const current = createDefaultSearchDocument("global");
 		expect(() =>
-			resolveSearchDocument({
-				...current,
-				sort: {
-					default: "relevance",
-					options: current.sort.search.options.filter((sort) => sort !== "best"),
+			resolveSearchDocument(
+				{
+					...current,
+					sort: {
+						default: "relevance",
+						options: current.sort.search.options.filter((sort) => sort !== "best"),
+					},
 				},
-			}),
+				true,
+			),
 		).toThrow(/Invalid Search document v1 at \/sort/);
 	});
 
@@ -167,7 +214,7 @@ describe("Search Feature v1", () => {
 		};
 
 		expect(
-			resolveSearchDocument(document).controls.some(
+			resolveSearchDocument(document, true).controls.some(
 				(control) => control.field === "book-page-count",
 			),
 		).toBe(false);
@@ -411,7 +458,7 @@ describe("Search Feature v1", () => {
 				},
 			},
 		} as const;
-		expect(resolveSearchDocument(document).document.filter).toEqual(document.filter);
+		expect(resolveSearchDocument(document, true).document.filter).toEqual(document.filter);
 		const compiled = compileSearchFeatureInput({
 			document,
 			contexts: [],
@@ -425,22 +472,28 @@ describe("Search Feature v1", () => {
 	it("does not let a Zone document widen template sorts or result limits", () => {
 		const original = createDefaultSearchDocument("global");
 		expect(() =>
-			resolveSearchDocument({
-				...original,
-				sort: {
-					...original.sort,
-					search: {
-						...original.sort.search,
-						options: [...original.sort.search.options, "publishedAt:desc"],
+			resolveSearchDocument(
+				{
+					...original,
+					sort: {
+						...original.sort,
+						search: {
+							...original.sort.search,
+							options: [...original.sort.search.options, "publishedAt:desc"],
+						},
 					},
 				},
-			}),
+				true,
+			),
 		).toThrow("sort is outside its template");
 		expect(() =>
-			resolveSearchDocument({
-				...original,
-				results: { ...original.results, maxResultWindow: 10_001 },
-			}),
+			resolveSearchDocument(
+				{
+					...original,
+					results: { ...original.results, maxResultWindow: 10_001 },
+				},
+				true,
+			),
 		).toThrow("result window exceeds its template");
 	});
 

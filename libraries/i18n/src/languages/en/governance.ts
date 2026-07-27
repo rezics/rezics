@@ -6,7 +6,6 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: postTerms } = enTerminology.post;
-const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
 	title: "Unit governance",
@@ -43,8 +42,7 @@ export default {
 	capabilities: {
 		"entity.associations.override": "Bypass catalog Entity association permissions",
 		"unit.edit": "Edit every Unit",
-		"unit.content_structure.preview": "Preview unreleased content structure features",
-		"unit.zone.preview": `Preview unreleased ${zoneTerms.label} features`,
+		"platform.development_preview.access": "Access unreleased development previews",
 		"unit.ownership.transfer": "Transfer Unit ownership",
 		"unit.slug.manage": "Manage Unit public addresses",
 		"unit.slug.namespace.manage": "Manage address namespaces",

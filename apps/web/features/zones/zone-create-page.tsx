@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
-import { PreviewCapabilityBoundary } from "@/features/preview-access/components/preview-capability-boundary";
+import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toApiDateTime } from "./model/zone-form";
@@ -193,8 +193,8 @@ function ZoneCreateContent() {
 
 export function ZoneCreatePage() {
 	return (
-		<PreviewCapabilityBoundary capability="unit.zone.preview">
+		<DevelopmentPreviewBoundary>
 			<ZoneCreateContent />
-		</PreviewCapabilityBoundary>
+		</DevelopmentPreviewBoundary>
 	);
 }

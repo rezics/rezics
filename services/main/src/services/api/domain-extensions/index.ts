@@ -1,4 +1,4 @@
-import { ZonePreviewCapability } from "@rezics/access";
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -1578,7 +1578,7 @@ export default new Elysia()
 		app.post(
 			"",
 			async ({ profile, authorization, body }) => {
-				await authorization.platform.ensureCapability(ZonePreviewCapability);
+				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 				if (body.boundaryDocument.filter)
 					try {
 						assertUnitPredicate(body.boundaryDocument.filter);
