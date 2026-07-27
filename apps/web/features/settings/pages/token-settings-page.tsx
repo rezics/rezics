@@ -36,7 +36,6 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-	Checkbox,
 	Clipboard,
 	ClipboardIndicator,
 	ClipboardInput,
@@ -55,6 +54,9 @@ import {
 	ManagementWorkspaceSectionHeader,
 	NativeSelect,
 	NativeSelectOption,
+	PermissionMatrix,
+	type PermissionMatrixLabels,
+	type PermissionMatrixResource,
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
@@ -75,48 +77,96 @@ import { SettingsOverviewHref } from "../routing/settings-routes";
 type TokenRecord = GetApiApiTokensStatus200["items"][number];
 type ApiTokenPermission =
 	(typeof PostApiApiTokensRequestPermissionsEnum)[keyof typeof PostApiApiTokensRequestPermissionsEnum];
-type PermissionLabel =
-	| "unitRead"
-	| "unitCreate"
-	| "unitUpdate"
-	| "unitDelete"
-	| "profileRead"
-	| "profileUpdate"
-	| "interactionRead"
-	| "interactionWrite"
-	| "realmRead"
-	| "realmManage"
-	| "messageRead"
-	| "messageWrite"
-	| "notificationRead"
-	| "notificationWrite"
-	| "recommendationRead"
-	| "recommendationWrite"
-	| "uploadRead"
-	| "uploadWrite"
-	| "feedbackWrite";
+type PermissionCategory = "content" | "identity" | "communication" | "platform";
+type PermissionResource =
+	| "unit"
+	| "profile"
+	| "interaction"
+	| "realm"
+	| "message"
+	| "notification"
+	| "recommendation"
+	| "upload"
+	| "feedback";
+type PermissionAction = "read" | "create" | "update" | "delete" | "write" | "manage";
 
-const PermissionDefinitions = [
-	{ value: "unit:read", label: "unitRead" },
-	{ value: "unit:create", label: "unitCreate" },
-	{ value: "unit:update", label: "unitUpdate" },
-	{ value: "unit:delete", label: "unitDelete" },
-	{ value: "profile:read", label: "profileRead" },
-	{ value: "profile:update", label: "profileUpdate" },
-	{ value: "interaction:read", label: "interactionRead" },
-	{ value: "interaction:write", label: "interactionWrite" },
-	{ value: "realm:read", label: "realmRead" },
-	{ value: "realm:manage", label: "realmManage" },
-	{ value: "message:read", label: "messageRead" },
-	{ value: "message:write", label: "messageWrite" },
-	{ value: "notification:read", label: "notificationRead" },
-	{ value: "notification:write", label: "notificationWrite" },
-	{ value: "recommendation:read", label: "recommendationRead" },
-	{ value: "recommendation:write", label: "recommendationWrite" },
-	{ value: "upload:read", label: "uploadRead" },
-	{ value: "upload:write", label: "uploadWrite" },
-	{ value: "feedback:write", label: "feedbackWrite" },
-] as const satisfies readonly { value: ApiTokenPermission; label: PermissionLabel }[];
+const PermissionGroups = [
+	{
+		id: "unit",
+		category: "content",
+		actions: [
+			["unit:read", "read"],
+			["unit:create", "create"],
+			["unit:update", "update"],
+			["unit:delete", "delete"],
+		],
+	},
+	{
+		id: "profile",
+		category: "identity",
+		actions: [
+			["profile:read", "read"],
+			["profile:update", "update"],
+		],
+	},
+	{
+		id: "interaction",
+		category: "content",
+		actions: [
+			["interaction:read", "read"],
+			["interaction:write", "write"],
+		],
+	},
+	{
+		id: "realm",
+		category: "content",
+		actions: [
+			["realm:read", "read"],
+			["realm:manage", "manage"],
+		],
+	},
+	{
+		id: "message",
+		category: "communication",
+		actions: [
+			["message:read", "read"],
+			["message:write", "write"],
+		],
+	},
+	{
+		id: "notification",
+		category: "communication",
+		actions: [
+			["notification:read", "read"],
+			["notification:write", "write"],
+		],
+	},
+	{
+		id: "recommendation",
+		category: "content",
+		actions: [
+			["recommendation:read", "read"],
+			["recommendation:write", "write"],
+		],
+	},
+	{
+		id: "upload",
+		category: "content",
+		actions: [
+			["upload:read", "read"],
+			["upload:write", "write"],
+		],
+	},
+	{
+		id: "feedback",
+		category: "platform",
+		actions: [["feedback:write", "write"]],
+	},
+] as const satisfies readonly {
+	id: PermissionResource;
+	category: PermissionCategory;
+	actions: readonly (readonly [ApiTokenPermission, PermissionAction])[];
+}[];
 
 const ReadOnlyPermissions = [
 	"unit:read",
@@ -145,15 +195,6 @@ function formatDate(value: string, locale: string) {
 	}).format(new Date(value));
 }
 
-function togglePermission(
-	current: readonly ApiTokenPermission[],
-	permission: ApiTokenPermission,
-	checked: boolean,
-): ApiTokenPermission[] {
-	if (checked) return current.includes(permission) ? [...current] : [...current, permission];
-	return current.filter((candidate) => candidate !== permission);
-}
-
 function PermissionFields({
 	selected,
 	onChange,
@@ -162,22 +203,81 @@ function PermissionFields({
 	onChange: (permissions: ApiTokenPermission[]) => void;
 }) {
 	const { t } = useTranslation(["settings"]);
+	const resources: PermissionMatrixResource<ApiTokenPermission>[] = PermissionGroups.map(
+		(group) => ({
+			id: group.id,
+			category: t.settings.tokens.permissionCategories[group.category],
+			label: t.settings.tokens.permissionResources[group.id],
+			keywords: group.actions.map(([permission]) => permission),
+			actions: group.actions.map(([value, action]) => ({
+				value,
+				label: t.settings.tokens.permissionActions[action],
+				description:
+					t.settings.tokens.permissionLabels[
+						(
+							{
+								"unit:read": "unitRead",
+								"unit:create": "unitCreate",
+								"unit:update": "unitUpdate",
+								"unit:delete": "unitDelete",
+								"profile:read": "profileRead",
+								"profile:update": "profileUpdate",
+								"interaction:read": "interactionRead",
+								"interaction:write": "interactionWrite",
+								"realm:read": "realmRead",
+								"realm:manage": "realmManage",
+								"message:read": "messageRead",
+								"message:write": "messageWrite",
+								"notification:read": "notificationRead",
+								"notification:write": "notificationWrite",
+								"recommendation:read": "recommendationRead",
+								"recommendation:write": "recommendationWrite",
+								"upload:read": "uploadRead",
+								"upload:write": "uploadWrite",
+								"feedback:write": "feedbackWrite",
+							} as const
+						)[value]
+					],
+			})),
+		}),
+	);
+	const labels: PermissionMatrixLabels = {
+		templates: t.settings.tokens.matrix.templates,
+		permissions: t.settings.tokens.permissions,
+		searchPlaceholder: t.settings.tokens.matrix.searchPlaceholder,
+		clear: t.settings.tokens.matrix.clear,
+		selected: (selectedCount, total) =>
+			t.settings.tokens.matrix.selected({ selected: selectedCount, total }),
+		categorySelected: (selectedCount) =>
+			t.settings.tokens.matrix.categorySelected({ selected: selectedCount }),
+		required: t.settings.tokens.matrix.required,
+		empty: t.settings.tokens.matrix.empty,
+	};
 	return (
-		<div className="grid gap-2 sm:grid-cols-2">
-			{PermissionDefinitions.map(({ value, label }) => (
-				<Field key={value} orientation="horizontal">
-					<Checkbox
-						checked={selected.includes(value)}
-						onCheckedChange={({ checked }) =>
-							onChange(togglePermission(selected, value, checked === true))
-						}
-					/>
-					<FieldLabel className="font-normal">
-						{t.settings.tokens.permissionLabels[label]}
-					</FieldLabel>
-				</Field>
-			))}
-		</div>
+		<PermissionMatrix
+			labels={labels}
+			onValueChange={(values) =>
+				onChange(
+					PermissionGroups.flatMap((group) =>
+						group.actions.map(([permission]) => permission),
+					).filter((permission) => values.has(permission)),
+				)
+			}
+			resources={resources}
+			templates={[
+				{
+					id: "content-agent",
+					label: t.settings.tokens.selectContentAgent,
+					values: new Set(ContentAgentPermissions),
+				},
+				{
+					id: "read-only",
+					label: t.settings.tokens.selectReadOnly,
+					values: new Set(ReadOnlyPermissions),
+				},
+			]}
+			value={new Set(selected)}
+		/>
 	);
 }
 
@@ -392,24 +492,6 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 							<p className="text-sm text-muted-foreground">
 								{t.settings.tokens.permissionsDescription}
 							</p>
-							<div className="flex flex-wrap gap-2">
-								<Button
-									onClick={() => setPermissions([...ContentAgentPermissions])}
-									size="sm"
-									type="button"
-									variant="outline"
-								>
-									{t.settings.tokens.selectContentAgent}
-								</Button>
-								<Button
-									onClick={() => setPermissions([...ReadOnlyPermissions])}
-									size="sm"
-									type="button"
-									variant="outline"
-								>
-									{t.settings.tokens.selectReadOnly}
-								</Button>
-							</div>
 							<PermissionFields selected={permissions} onChange={setPermissions} />
 							{permissionsInvalid ? (
 								<p className="text-sm text-destructive" role="alert">

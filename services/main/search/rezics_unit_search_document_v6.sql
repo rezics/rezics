@@ -262,17 +262,16 @@ LEFT JOIN LATERAL (
 		bool_or(subject_kind = 'authenticated') FILTER (WHERE revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS authenticated,
 		jsonb_agg(DISTINCT profile_id ORDER BY profile_id) FILTER (WHERE profile_id IS NOT NULL AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS profile_ids,
 		jsonb_agg(DISTINCT realm_id ORDER BY realm_id) FILTER (WHERE realm_id IS NOT NULL AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS realm_ids
-	FROM public.unit_access_binding WHERE unit_id = source.unit_id
+	FROM public.unit_access_grant
+	WHERE unit_id = source.unit_id
+		AND permission = 'unit.read'
+		AND scope = array[]::text[]
 ) AS access_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(DISTINCT profile_id ORDER BY profile_id) AS profile_ids
-	FROM public.unit_access_binding
+	FROM public.unit_ownership
 	WHERE unit_id = source.unit_id
-		AND subject_kind = 'profile'
-		AND role = 'owner'
-		AND profile_id IS NOT NULL
 		AND revoked_at IS NULL
-		AND (expires_at IS NULL OR expires_at > now())
 ) AS owner_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(DISTINCT platform_entity_id ORDER BY platform_entity_id) FILTER (WHERE platform_entity_id IS NOT NULL) AS platform_ids,

@@ -31,19 +31,6 @@ export class UnitAccessRestricted extends Data.TaggedError("UnitAccessRestricted
 	readonly message = "Your access to this Unit scope is restricted";
 }
 
-export class UnitProtected extends Data.TaggedError("UnitProtected") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitProtected.status;
-	readonly message: string;
-	readonly details: { readonly scope: string[]; readonly mode: string };
-
-	constructor(scope: readonly string[], mode: string) {
-		super();
-		this.message = `Unit scope is protected: ${scope.join("/") || "root"}`;
-		this.details = { scope: [...scope], mode };
-	}
-}
-
 export class UnitChanged extends Data.TaggedError("UnitChanged") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitChanged.status;
@@ -219,7 +206,6 @@ export const UnitErrors = [
 	UnitNotFound,
 	UnitPermissionForbidden,
 	UnitAccessRestricted,
-	UnitProtected,
 	UnitChanged,
 	UnitRevisionConflict,
 	UnitPrimaryLanguageMissing,

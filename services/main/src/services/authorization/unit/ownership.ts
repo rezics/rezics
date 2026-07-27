@@ -1,50 +1,64 @@
 import type { DatabaseTransaction } from "../../database";
-import { unitAccessBinding } from "../../database/schema";
+import { unitAccessGrant, unitOwnership } from "../../database/schema";
 import { OfficialProfileIds } from "../../bootstrap/manifest";
+import { expandUnitPermissions, type UnitPermission } from "./policy";
 
 export async function createProfileOwnedUnitAccess(
 	tx: DatabaseTransaction,
 	unitId: string,
 	ownerProfileId: string,
 ): Promise<void> {
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId,
-		subjectKind: "profile",
 		profileId: ownerProfileId,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: ownerProfileId,
+		assignedByProfileId: ownerProfileId,
 	});
+}
+
+async function grantProfilePermissions(
+	tx: DatabaseTransaction,
+	input: {
+		readonly unitId: string;
+		readonly profileId: string;
+		readonly permissions: readonly UnitPermission[];
+		readonly grantedByProfileId: string;
+	},
+) {
+	const permissions = expandUnitPermissions(input.permissions);
+	if (!permissions.length) return;
+	await tx.insert(unitAccessGrant).values(
+		permissions.map((permission) => ({
+			unitId: input.unitId,
+			subjectKind: "profile" as const,
+			profileId: input.profileId,
+			permission,
+			scope: [],
+			grantedByProfileId: input.grantedByProfileId,
+		})),
+	);
 }
 
 /**
  * Community catalog entries are stewarded by the ordinary Rezics Community Profile,
- * while their submitter receives editing access without acquiring governance ownership.
+ * while their submitter receives explicit editing permissions without ownership.
  */
 export async function createCommunityCatalogAccess(
 	tx: DatabaseTransaction,
 	unitId: string,
 	contributorProfileId: string,
-	contributorRole: "editor" | "publishing_editor" = "editor",
+	contributorPermissions: readonly UnitPermission[] = ["unit.update"],
 ): Promise<void> {
-	await tx.insert(unitAccessBinding).values([
-		{
-			unitId,
-			subjectKind: "profile",
-			profileId: OfficialProfileIds.community,
-			role: "owner",
-			scope: [],
-			grantedByProfileId: OfficialProfileIds.community,
-		},
-		{
-			unitId,
-			subjectKind: "profile",
-			profileId: contributorProfileId,
-			role: contributorRole,
-			scope: [],
-			grantedByProfileId: OfficialProfileIds.community,
-		},
-	]);
+	await tx.insert(unitOwnership).values({
+		unitId,
+		profileId: OfficialProfileIds.community,
+		assignedByProfileId: OfficialProfileIds.community,
+	});
+	await grantProfilePermissions(tx, {
+		unitId,
+		profileId: contributorProfileId,
+		permissions: contributorPermissions,
+		grantedByProfileId: OfficialProfileIds.community,
+	});
 }
 
 /**
@@ -57,12 +71,9 @@ export async function createCommunityOwnedUnitAccess(
 	tx: DatabaseTransaction,
 	unitId: string,
 ): Promise<void> {
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId,
-		subjectKind: "profile",
 		profileId: OfficialProfileIds.community,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: OfficialProfileIds.community,
+		assignedByProfileId: OfficialProfileIds.community,
 	});
 }

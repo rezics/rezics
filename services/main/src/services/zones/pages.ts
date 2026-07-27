@@ -15,7 +15,7 @@ import { database, type DatabaseTransaction } from "../database";
 import {
 	contentStructureNode,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	unitRevisionHead,
 	unitSlugAddress,
@@ -373,13 +373,10 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 				content: input.localization.document,
 				contentStatus: "published",
 			});
-			await tx.insert(unitAccessBinding).values({
+			await tx.insert(unitOwnership).values({
 				unitId: pageId,
-				subjectKind: "profile",
 				profileId: input.actorProfileId,
-				role: "owner",
-				scope: [],
-				grantedByProfileId: input.actorProfileId,
+				assignedByProfileId: input.actorProfileId,
 			});
 			await recordUnitRevision(tx, {
 				unitId: pageId,

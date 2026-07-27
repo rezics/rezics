@@ -19,7 +19,7 @@ import {
 	collectionItem,
 	post,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
@@ -64,7 +64,6 @@ const CollectionMutationNotFoundResponse = toApiErrorResponse([
 const CollectionMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitAccessRestricted",
-	"UnitProtected",
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const FavoritesEditResponse = toApiErrorResponse(["FavoritesEditForbidden"]);
@@ -224,13 +223,10 @@ export default new Elysia({ prefix: "/collections" })
 					unitId: created.id,
 					...toUnitLocalizationStorage(body.localization),
 				});
-				await tx.insert(unitAccessBinding).values({
+				await tx.insert(unitOwnership).values({
 					unitId: created.id,
-					subjectKind: "profile",
 					profileId: profile.unitId,
-					role: "owner",
-					scope: [],
-					grantedByProfileId: profile.unitId,
+					assignedByProfileId: profile.unitId,
 				});
 				await recordUnitRevision(tx, {
 					unitId: created.id,

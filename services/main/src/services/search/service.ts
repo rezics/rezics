@@ -37,7 +37,7 @@ import {
 	softwareRequirement,
 	searchUnitProjectionSource,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	unitEffectiveTag,
 	unitStructureMember,
@@ -67,7 +67,7 @@ const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 const facetCreditAttribution = alias(creditAttribution, "facet_credit_attribution");
-const facetOwnerBinding = alias(unitAccessBinding, "facet_owner_binding");
+const facetOwnership = alias(unitOwnership, "facet_ownership");
 const { metrics } = getActiveObservability();
 type SearchHitWithoutSlugAddress = Omit<SearchHit, "slugAddress">;
 
@@ -437,13 +437,10 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 	}
 	if (filter.field === "owner") {
 		const owners = sql`array(
-			select distinct ${unitAccessBinding.profileId}
-			from ${unitAccessBinding}
-			where ${unitAccessBinding.unitId} = ${unit.id}
-				and ${unitAccessBinding.subjectKind} = 'profile'
-				and ${unitAccessBinding.role} = 'owner'
-				and ${unitAccessBinding.revokedAt} is null
-				and (${unitAccessBinding.expiresAt} is null or ${unitAccessBinding.expiresAt} > now())
+			select distinct ${unitOwnership.profileId}
+			from ${unitOwnership}
+			where ${unitOwnership.unitId} = ${unit.id}
+				and ${unitOwnership.revokedAt} is null
 		)`;
 		if (filter.operator === "exists")
 			return filter.value ? sql`cardinality(${owners}) > 0` : sql`cardinality(${owners}) = 0`;
@@ -673,13 +670,10 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 	}
 	if (request.ownerId)
 		conditions.push(sql`exists (
-			select 1 from ${unitAccessBinding}
-			where ${unitAccessBinding.unitId} = ${unit.id}
-				and ${unitAccessBinding.subjectKind} = 'profile'
-				and ${unitAccessBinding.profileId} = ${request.ownerId}::uuid
-				and ${unitAccessBinding.role} = 'owner'
-				and ${unitAccessBinding.revokedAt} is null
-				and (${unitAccessBinding.expiresAt} is null or ${unitAccessBinding.expiresAt} > now())
+			select 1 from ${unitOwnership}
+			where ${unitOwnership.unitId} = ${unit.id}
+				and ${unitOwnership.profileId} = ${request.ownerId}::uuid
+				and ${unitOwnership.revokedAt} is null
 		)`);
 	if (request.realmId) {
 		conditions.push(sql`EXISTS (
@@ -1097,13 +1091,10 @@ function facetSpec(
 		};
 	if (field === "owner")
 		return {
-			value: sql`${facetOwnerBinding.profileId}`,
-			join: sql`join ${unitAccessBinding} as ${facetOwnerBinding}
-				on ${facetOwnerBinding.unitId} = ${unit.id}
-				and ${facetOwnerBinding.subjectKind} = 'profile'
-				and ${facetOwnerBinding.role} = 'owner'
-				and ${facetOwnerBinding.revokedAt} is null
-				and (${facetOwnerBinding.expiresAt} is null or ${facetOwnerBinding.expiresAt} > now())`,
+			value: sql`${facetOwnership.profileId}`,
+			join: sql`join ${unitOwnership} as ${facetOwnership}
+				on ${facetOwnership.unitId} = ${unit.id}
+				and ${facetOwnership.revokedAt} is null`,
 		};
 	if (
 		field === "kind" &&

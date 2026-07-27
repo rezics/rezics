@@ -2,7 +2,6 @@ import { and, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { UnitAuthorization, UnitAccessDecision } from "../authorization/unit/authorization";
-import type { UnitAccessRole } from "../authorization/unit/policy";
 import type { UnitScope } from "../authorization/unit/scope";
 import { database } from "../database";
 import {
@@ -13,7 +12,8 @@ import {
 	studioResourceVisit,
 	studioWorkRelation,
 	unit,
-	unitAccessBinding,
+	unitAccessGrant,
+	unitOwnership,
 	type StudioWorkRelation,
 } from "../database/schema";
 import type {
@@ -33,18 +33,10 @@ import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { decodeStudioCursor, encodeStudioCursor, type StudioCursorBoundary } from "./cursor";
 import { resolveStudioResourceUnitId } from "./projection";
 
-const StudioAssignableRoles = [
-	"editor",
-	"publishing_editor",
-	"maintainer",
-	"owner",
-] as const satisfies readonly UnitAccessRole[];
-
 const StudioPermissions = [
 	"unit.update",
 	"unit.publish",
 	"unit.access.manage",
-	"unit.protection.manage",
 ] as const satisfies readonly StudioPermission[];
 
 type CandidateRow = {
@@ -55,12 +47,11 @@ type CandidateRow = {
 	readonly sortAt: Date;
 };
 
-type StudioBindingRow = {
+type StudioAssignmentRow = {
 	readonly id: string;
 	readonly resourceUnitId: string;
 	readonly authorizationUnitId: string;
 	readonly relation: "assigned" | "delegated";
-	readonly role: UnitAccessRole;
 	readonly scope: string[];
 	readonly createdAt: Date;
 };
@@ -87,7 +78,7 @@ type ResolvedPermission = {
 
 type StudioListAuthorization = Pick<
 	UnitAuthorization<string>,
-	"canRead" | "decide" | "findAllowedScope" | "matchesActiveBinding"
+	"canRead" | "decide" | "findAllowedScope"
 >;
 
 type PresentedCandidate = {
@@ -98,7 +89,6 @@ type PresentedCandidate = {
 	readonly status: "draft" | "published" | "archived";
 	readonly visibility: "public" | "unlisted" | "private";
 	readonly relations: StudioRelation[];
-	readonly roles: UnitAccessRole[];
 	readonly workState: StudioWorkState;
 	readonly permissions: StudioPermission[];
 	readonly accessSources: StudioAccessSource[];
@@ -179,25 +169,33 @@ function directAssignmentSource(profileId: string, view: StudioView): SQL | unde
 	if (view === "created" || view === "contributed" || view === "delegated") return undefined;
 	return sql`
 		select
-			coalesce(book_owner.owner_unit_id, binding.unit_id) as resource_unit_id,
-			binding.created_at as relevant_at
-		from ${unitAccessBinding} binding
+			coalesce(book_owner.owner_unit_id, assignment.unit_id) as resource_unit_id,
+			assignment.created_at as relevant_at
+		from (
+			select ownership.unit_id, ownership.created_at
+			from ${unitOwnership} ownership
+			where ownership.profile_id = ${profileId}
+				and ownership.revoked_at is null
+			union all
+			select access_grant.unit_id, access_grant.created_at
+			from ${unitAccessGrant} access_grant
+			where access_grant.subject_kind = 'profile'
+				and access_grant.profile_id = ${profileId}
+				and access_grant.permission in ('unit.update', 'unit.publish', 'unit.access.manage')
+				and access_grant.revoked_at is null
+				and (access_grant.expires_at is null or access_grant.expires_at > now())
+		) assignment
 		left join lateral (
 			select distinct structure.owner_unit_id
 			from ${contentStructureNode} node
 			join ${contentStructure} structure
 				on structure.id = node.structure_id
 				and structure.owner_unit_id = node.owner_unit_id
-			where node.content_unit_id = binding.unit_id
+			where node.content_unit_id = assignment.unit_id
 				and node.deleted_at is null
 				and structure.kind = 'book.contents'
 				and structure.deleted_at is null
 		) book_owner on true
-		where binding.subject_kind = 'profile'
-			and binding.profile_id = ${profileId}
-			and binding.role in ('editor', 'publishing_editor', 'maintainer', 'owner')
-			and binding.revoked_at is null
-			and (binding.expires_at is null or binding.expires_at > now())
 	`;
 }
 
@@ -205,11 +203,11 @@ function delegatedAssignmentSource(profileId: string, view: StudioView): SQL | u
 	if (view !== "delegated") return undefined;
 	return sql`
 		select
-			coalesce(book_owner.owner_unit_id, binding.unit_id) as resource_unit_id,
-			binding.created_at as relevant_at
-		from ${unitAccessBinding} binding
+			coalesce(book_owner.owner_unit_id, access_grant.unit_id) as resource_unit_id,
+			access_grant.created_at as relevant_at
+		from ${unitAccessGrant} access_grant
 		join ${realmMember} member
-			on member.realm_id = binding.realm_id
+			on member.realm_id = access_grant.realm_id
 			and member.profile_id = ${profileId}
 			and member.state = 'active'
 		left join lateral (
@@ -218,15 +216,15 @@ function delegatedAssignmentSource(profileId: string, view: StudioView): SQL | u
 			join ${contentStructure} structure
 				on structure.id = node.structure_id
 				and structure.owner_unit_id = node.owner_unit_id
-			where node.content_unit_id = binding.unit_id
+			where node.content_unit_id = access_grant.unit_id
 				and node.deleted_at is null
 				and structure.kind = 'book.contents'
 				and structure.deleted_at is null
 		) book_owner on true
-		where binding.subject_kind = 'realm'
-			and binding.role in ('editor', 'publishing_editor', 'maintainer')
-			and binding.revoked_at is null
-			and (binding.expires_at is null or binding.expires_at > now())
+		where access_grant.subject_kind = 'realm'
+			and access_grant.permission in ('unit.update', 'unit.publish', 'unit.access.manage')
+			and access_grant.revoked_at is null
+			and (access_grant.expires_at is null or access_grant.expires_at > now())
 	`;
 }
 
@@ -325,26 +323,52 @@ async function selectCandidateBatch(input: {
 	return result.rows;
 }
 
-async function loadBindings(
+async function loadAssignments(
 	profileId: string,
 	resourceUnitIds: readonly string[],
-): Promise<StudioBindingRow[]> {
+): Promise<StudioAssignmentRow[]> {
 	if (!resourceUnitIds.length) return [];
-	const result = await database.execute<StudioBindingRow>(sql`
+	const result = await database.execute<StudioAssignmentRow>(sql`
 		select
-			binding.id,
-			coalesce(book_owner.owner_unit_id, binding.unit_id) as "resourceUnitId",
-			binding.unit_id as "authorizationUnitId",
+			assignment.id,
+			coalesce(book_owner.owner_unit_id, assignment.unit_id) as "resourceUnitId",
+			assignment.unit_id as "authorizationUnitId",
 			case
-				when binding.subject_kind = 'profile' then 'assigned'
+				when assignment.subject_kind in ('profile', 'owner') then 'assigned'
 				else 'delegated'
 			end as relation,
-			binding.role,
-			binding.scope,
-			binding.created_at as "createdAt"
-		from ${unitAccessBinding} binding
+			assignment.scope,
+			assignment.created_at as "createdAt"
+		from (
+			select
+				ownership.id,
+				ownership.unit_id,
+				'owner'::text as subject_kind,
+				null::uuid as realm_id,
+				array[]::text[] as scope,
+				ownership.created_at
+			from ${unitOwnership} ownership
+			where ownership.profile_id = ${profileId}
+				and ownership.revoked_at is null
+			union all
+			select
+				access_grant.id,
+				access_grant.unit_id,
+				access_grant.subject_kind::text,
+				access_grant.realm_id,
+				access_grant.scope,
+				access_grant.created_at
+			from ${unitAccessGrant} access_grant
+			where (
+					(access_grant.subject_kind = 'profile' and access_grant.profile_id = ${profileId})
+					or access_grant.subject_kind = 'realm'
+				)
+				and access_grant.permission in ('unit.update', 'unit.publish', 'unit.access.manage')
+				and access_grant.revoked_at is null
+				and (access_grant.expires_at is null or access_grant.expires_at > now())
+		) assignment
 		left join ${realmMember} member
-			on member.realm_id = binding.realm_id
+			on member.realm_id = assignment.realm_id
 			and member.profile_id = ${profileId}
 			and member.state = 'active'
 		left join lateral (
@@ -353,24 +377,20 @@ async function loadBindings(
 			join ${contentStructure} structure
 				on structure.id = node.structure_id
 				and structure.owner_unit_id = node.owner_unit_id
-			where node.content_unit_id = binding.unit_id
+			where node.content_unit_id = assignment.unit_id
 				and node.deleted_at is null
 				and structure.kind = 'book.contents'
 				and structure.deleted_at is null
 		) book_owner on true
 		where (
 				(
-					binding.subject_kind = 'profile'
-					and binding.profile_id = ${profileId}
+					assignment.subject_kind in ('profile', 'owner')
 				) or (
-					binding.subject_kind = 'realm'
+					assignment.subject_kind = 'realm'
 					and member.profile_id is not null
 				)
 			)
-			and binding.role in ('editor', 'publishing_editor', 'maintainer', 'owner')
-			and binding.revoked_at is null
-			and (binding.expires_at is null or binding.expires_at > now())
-			and coalesce(book_owner.owner_unit_id, binding.unit_id) = any(
+			and coalesce(book_owner.owner_unit_id, assignment.unit_id) = any(
 				${toUuidArray(resourceUnitIds)}
 			)
 	`);
@@ -397,20 +417,16 @@ async function resolvePermission(
 	return decision.allowed ? { permission, decision } : undefined;
 }
 
-function permissionSource(
-	decision: ResolvedPermission["decision"],
-	bindings: readonly StudioBindingRow[],
-): StudioAccessSource {
-	if (decision.source !== "binding") {
-		if (decision.source === "platform") return "platform";
-		throw new Error("Studio write permission cannot be public");
-	}
-	const binding = bindings.find((candidate) => candidate.id === decision.bindingId);
-	return binding?.relation === "assigned"
-		? "direct"
-		: binding?.relation === "delegated"
-			? "realm"
-			: "authenticated";
+function permissionSource(decision: ResolvedPermission["decision"]): StudioAccessSource {
+	if (decision.source === "platform") return "platform";
+	if (decision.source === "owner") return "direct";
+	if (decision.source === "grant")
+		return decision.subjectKind === "profile"
+			? "direct"
+			: decision.subjectKind === "realm"
+				? "realm"
+				: "authenticated";
+	throw new Error("Studio write permission cannot be public");
 }
 
 function relationMatchesView(relations: readonly StudioRelation[], view: StudioView): boolean {
@@ -427,7 +443,7 @@ async function presentCandidate(input: {
 	readonly query: StudioContentListQuery;
 	readonly candidate: CandidateRow;
 	readonly activities: readonly ActivityRow[];
-	readonly bindings: readonly StudioBindingRow[];
+	readonly assignments: readonly StudioAssignmentRow[];
 }): Promise<PresentedCandidate | undefined> {
 	if (!(await input.authorization.canRead(input.candidate.id))) return undefined;
 	const localizationLanguages = input.query.localizationLanguages ?? [];
@@ -446,19 +462,11 @@ async function presentCandidate(input: {
 		.limit(1);
 	if (!resource || !resource.language) return undefined;
 
-	const matchedBindings: StudioBindingRow[] = [];
-	for (const binding of input.bindings)
-		if (
-			binding.relation === "assigned" ||
-			(await input.authorization.matchesActiveBinding(binding.id, "unit.update"))
-		)
-			matchedBindings.push(binding);
-
 	const relations = new Set<StudioRelation>();
 	for (const activity of input.activities) relations.add(activity.relation);
-	if (matchedBindings.some((binding) => binding.relation === "assigned"))
+	if (input.assignments.some((assignment) => assignment.relation === "assigned"))
 		relations.add("assigned");
-	if (matchedBindings.some((binding) => binding.relation === "delegated"))
+	if (input.assignments.some((assignment) => assignment.relation === "delegated"))
 		relations.add("delegated");
 	const relationValues = [...relations];
 	const view = input.query.view ?? "all";
@@ -472,10 +480,10 @@ async function presentCandidate(input: {
 			authorizationScope: activity.authorizationScope,
 		});
 	}
-	for (const binding of matchedBindings)
-		targets.set(`${binding.authorizationUnitId}:${binding.scope.join("/")}`, {
-			authorizationUnitId: binding.authorizationUnitId,
-			authorizationScope: binding.scope,
+	for (const assignment of input.assignments)
+		targets.set(`${assignment.authorizationUnitId}:${assignment.scope.join("/")}`, {
+			authorizationUnitId: assignment.authorizationUnitId,
+			authorizationScope: assignment.scope,
 		});
 
 	const resolvedPermissions: ResolvedPermission[] = [];
@@ -494,16 +502,13 @@ async function presentCandidate(input: {
 	if (input.query.workState && input.query.workState !== workState) return undefined;
 
 	const contributed = input.activities.filter((activity) => activity.relation === "contributed");
-	const assigned = matchedBindings.filter((binding) => binding.relation === "assigned");
+	const assigned = input.assignments.filter((assignment) => assignment.relation === "assigned");
 	const accessSources = new Set<StudioAccessSource>();
 	if (assigned.length) accessSources.add("direct");
-	if (matchedBindings.some((binding) => binding.relation === "delegated"))
+	if (input.assignments.some((assignment) => assignment.relation === "delegated"))
 		accessSources.add("realm");
 	for (const permission of resolvedPermissions)
-		accessSources.add(permissionSource(permission.decision, matchedBindings));
-	const roles = new Set<UnitAccessRole>(matchedBindings.map(({ role }) => role));
-	for (const permission of resolvedPermissions)
-		if (permission.decision.source === "binding") roles.add(permission.decision.role);
+		accessSources.add(permissionSource(permission.decision));
 
 	return {
 		id: resource.id,
@@ -513,7 +518,6 @@ async function presentCandidate(input: {
 		status: resource.status,
 		visibility: resource.visibility,
 		relations: relationValues,
-		roles: StudioAssignableRoles.filter((role) => roles.has(role)),
 		workState,
 		permissions,
 		accessSources: [...accessSources],
@@ -564,7 +568,7 @@ export async function listStudioContent(input: {
 		});
 		if (!candidates.length) break;
 		const candidateIds = candidates.map(({ id }) => id);
-		const [activities, bindings] = await Promise.all([
+		const [activities, assignments] = await Promise.all([
 			database
 				.select({
 					resourceUnitId: studioWorkRelation.resourceUnitId,
@@ -582,17 +586,17 @@ export async function listStudioContent(input: {
 						inArray(studioWorkRelation.resourceUnitId, candidateIds),
 					),
 				),
-			loadBindings(input.profileId, candidateIds),
+			loadAssignments(input.profileId, candidateIds),
 		]);
 		const activityByResource = groupBy(activities, ({ resourceUnitId }) => resourceUnitId);
-		const bindingByResource = groupBy(bindings, ({ resourceUnitId }) => resourceUnitId);
+		const assignmentByResource = groupBy(assignments, ({ resourceUnitId }) => resourceUnitId);
 		for (const candidate of candidates) {
 			const item = await presentCandidate({
 				authorization: input.authorization,
 				query: input.query,
 				candidate,
 				activities: activityByResource.get(candidate.id) ?? [],
-				bindings: bindingByResource.get(candidate.id) ?? [],
+				assignments: assignmentByResource.get(candidate.id) ?? [],
 			});
 			if (item) items.push(item);
 			if (items.length >= limit + 1) break;

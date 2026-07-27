@@ -227,20 +227,21 @@ export const EnforcementKindValues = [
 export const CapabilityAuthorityValues = ["platform", "realm"] as const;
 export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
 export const UnitAccessRestrictionSubjectKindValues = ["profile", "realm"] as const;
-export const UnitAccessRealmRelationValues = ["member", "content_editor", "governor"] as const;
 export const UnitAccessInvitationResolutionValues = ["accepted", "declined", "cancelled"] as const;
-export const UnitAccessRoleValues = [
-	"viewer",
-	"editor",
-	"publishing_editor",
-	"maintainer",
-	"owner",
+export const RealmCapabilityValues = [
+	"realm.contribute",
+	"realm.settings.update",
+	"realm.members.read",
+	"realm.members.manage",
+	"realm.rules.publish",
+	"realm.pins.manage",
+	"realm.units.moderate",
 ] as const;
-export const UnitDelegableAccessRoleValues = [
-	"viewer",
-	"editor",
-	"publishing_editor",
-	"maintainer",
+export const EntityAssociationPermissionValues = [
+	"entity.association.credit.request",
+	"entity.association.credit.direct",
+	"entity.association.subject.request",
+	"entity.association.subject.direct",
 ] as const;
 export const UnitPermissionValues = [
 	"unit.read",
@@ -249,12 +250,30 @@ export const UnitPermissionValues = [
 	"unit.history.restore",
 	"unit.access.manage",
 	"unit.association.manage",
-	"unit.protection.manage",
 	"unit.delete",
+	...RealmCapabilityValues,
+	...EntityAssociationPermissionValues,
 ] as const;
-export const UnitProtectionModeValues = ["frozen", "owner_only"] as const;
 export const RealmJoinPolicyValues = ["open", "approval"] as const;
-export const RealmMemberRoleValues = ["owner", "admin", "moderator", "member"] as const;
+
+/**
+ * Runtime states for a roleless Realm membership.
+ *
+ * @remarks
+ * Realm membership intentionally carries no authorization role. Unit ownership
+ * is the recovery boundary, while every other Realm capability is granted
+ * directly through the Unit access policy.
+ *
+ * A future role system may introduce a localized `realm_role` Unit, a typed
+ * role-to-permission relation, Profile/Realm-to-role bindings, assignment
+ * constraints that prevent privilege escalation, immutable ownership
+ * separation, effective-access provenance, audit history, and deterministic
+ * behavior for role updates and deletion. No current API accepts a role
+ * identifier, so that future design can be introduced without preserving a
+ * premature contract.
+ *
+ * @tag low-priority
+ */
 export const RealmMemberStateValues = ["active", "pending", "muted", "removed", "banned"] as const;
 export const RealmPinKindValues = ["pinned", "highlight"] as const;
 export const RealmUnitStatusValues = ["pending", "visible", "hidden", "removed"] as const;
@@ -287,7 +306,6 @@ export const GovernanceNoteSubjectKindValues = [
 	"moderation_case",
 	"moderation_action",
 	"unit_access_restriction",
-	"unit_protection",
 	"realm_unit_status_event",
 ] as const;
 export const ModerationTargetKindValues = [
@@ -305,8 +323,6 @@ export const ModerationActionKindValues = [
 	"restore",
 	"lock_post_targeting",
 	"unlock_post_targeting",
-	"protect",
-	"unprotect",
 	...EnforcementKindValues,
 	"revoke_enforcement",
 	"mute_member",
@@ -366,23 +382,8 @@ export const ModerationCaseStateValues = [
 	"reviewing",
 ] as const;
 
-export const RealmCapabilityValues = [
-	"realm.contribute",
-	"realm.settings.update",
-	"realm.members.read",
-	"realm.members.manage",
-	"realm.rules.publish",
-	"realm.pins.manage",
-	"realm.units.moderate",
-] as const;
 export const AssociationKindValues = ["credit", "subject"] as const;
 export type AssociationKind = (typeof AssociationKindValues)[number];
-export const EntityAssociationPolicyModeValues = [
-	"open",
-	"approval",
-	"invite_only",
-	"closed",
-] as const;
 export const AssociationProposalDirectionValues = ["request", "invitation"] as const;
 export const AssociationProposalResolutionValues = ["accepted", "declined", "cancelled"] as const;
 

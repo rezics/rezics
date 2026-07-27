@@ -31,8 +31,9 @@ export default {
 					"Manage the name, summary, images, lifecycle, join policy, and public address.",
 			},
 			members: {
-				label: "Members and roles",
-				description: "Manage member roles, states, and participation eligibility.",
+				label: "Members",
+				description:
+					"Manage member states and participation eligibility, with Unit ownership marked.",
 			},
 			rules: {
 				label: "Rules",
@@ -44,8 +45,7 @@ export default {
 			},
 			access: {
 				label: "Access",
-				description:
-					"Manage role grants, invitations, restrictions, protections, and effective access.",
+				description: "Manage authorization subjects, public permissions, and restrictions.",
 			},
 			moderation: {
 				label: "Content moderation",
@@ -80,13 +80,10 @@ export default {
 	members: "Members",
 	memberCount: insert("{{count}} members", { count: Number }),
 	unknownMember: "Unknown member",
-	memberRole: "Role",
 	memberState: "State",
 	membersView: {
 		searchLabel: "Search members",
 		searchPlaceholder: `Search by name or ${verbatimTerms.profileSlugPrefix.value}${unitSlugTerms.inline}`,
-		roleFilter: "Filter by role",
-		allRoles: "All roles",
 		stateFilter: "Filter by status",
 		allStates: "All statuses",
 		resultCount: insert("{{visible}} of {{total}} members", {
@@ -96,33 +93,11 @@ export default {
 		selectAll: "Select all visible members",
 		selectMember: insert("Select {{member}}", { member: String }),
 		selectedCount: insert("{{count}} selected", { count: Number }),
-		bulkRole: "Change role",
 		bulkState: "Change status",
-		roleFor: insert("Role for {{member}}", { member: String }),
 		stateFor: insert("Status for {{member}}", { member: String }),
-		actionsFor: insert("Actions for {{member}}", { member: String }),
-		editPermissions: "Edit member permissions",
 		noMatches: "No members match these filters.",
-	},
-	memberAccess: {
-		title: insert("Permissions for {{member}}", { member: String }),
-		description: `Review inherited access and manage direct ${realmTerms.label} grants. Changes are saved automatically.`,
-		backToMembers: "Back to members and roles",
-		directAccess: `Direct ${realmTerms.label} grants`,
-		effectiveSources: "Effective sources",
-		expiry: "Direct-grant bundle expiry",
-		noExpiry: "No expiry",
-		mixedExpiry:
-			"These direct grants have different expiries. Choose a new shared expiry before editing permissions.",
-		saving: "Saving changes…",
-		autoSaveHint: "Role, status, and permission changes are saved automatically.",
-		noDirectAccess: `This member currently has no direct ${realmTerms.label} grants.`,
-	},
-	roles: {
-		owner: "Owner",
-		admin: "Administrator",
-		moderator: "Moderator",
-		member: "Member",
+		ownerMarker: "Ownership",
+		unitOwner: "Unit owner",
 	},
 	memberStates: {
 		active: "Active",
@@ -188,8 +163,6 @@ export default {
 		restore: "Restore",
 		lock_post_targeting: `Block new ${postTerms.pluralLabel} targeting this Unit`,
 		unlock_post_targeting: `Allow new ${postTerms.pluralLabel} targeting this Unit`,
-		protect: "Protect",
-		unprotect: "Remove protection",
 		warning: "Warning",
 		silence: "Silence",
 		suspension: "Suspend",

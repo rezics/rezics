@@ -48,7 +48,6 @@ import {
 	conversation,
 	conversationRead,
 	entity,
-	entityAssociationPolicy,
 	EnforcementKindValues,
 	feedback,
 	label,
@@ -94,12 +93,12 @@ import {
 	unitAccessInvitation,
 	unitAlias,
 	unitAliasVote,
-	unitAccessBinding,
+	unitAccessGrant,
 	unitAccessRestriction,
 	unitAssociationProposal,
 	creditAttribution,
 	CommunityCatalogUnitKindValues,
-	unitProtection,
+	unitOwnership,
 	unitLink,
 	unitLocalization,
 	unitDock,
@@ -341,52 +340,78 @@ async function insertUnitDetails(
 		values.flatMap((value) => localizationRows(data, value)),
 		(batch) => tx.insert(unitLocalization).values(batch),
 	);
-	const accessRows: (typeof unitAccessBinding.$inferInsert)[] = [];
+	const ownershipRows: (typeof unitOwnership.$inferInsert)[] = [];
+	const grantRows: (typeof unitAccessGrant.$inferInsert)[] = [];
 	const communityCatalogKinds: ReadonlySet<string> = new Set(CommunityCatalogUnitKindValues);
 	for (const value of values) {
-		const common = {
+		const ownershipCommon = {
 			unitId: value.id,
-			scope: [],
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		};
 		if (value.kind === "entity") {
-			accessRows.push({
-				...common,
-				subjectKind: "profile",
+			ownershipRows.push({
+				...ownershipCommon,
 				profileId: value.ownerProfileId,
-				role: "owner",
-				grantedByProfileId: value.ownerProfileId,
+				assignedByProfileId: value.ownerProfileId,
 			});
+			for (const permission of [
+				"entity.association.credit.request",
+				"entity.association.subject.request",
+				"entity.association.subject.direct",
+			] as const)
+				grantRows.push({
+					unitId: value.id,
+					subjectKind: "authenticated",
+					permission,
+					scope: [],
+					grantedByProfileId: value.ownerProfileId,
+					createdAt: value.createdAt,
+					updatedAt: value.updatedAt,
+				});
 		} else if (communityCatalogKinds.has(value.kind)) {
-			const contributorRole = value.kind === "tag" ? "editor" : "publishing_editor";
-			accessRows.push(
-				{
-					...common,
-					subjectKind: "profile",
-					profileId: communityOwnerProfileId,
-					role: "owner",
-					grantedByProfileId: communityOwnerProfileId,
-				},
-				{
-					...common,
+			ownershipRows.push({
+				...ownershipCommon,
+				profileId: communityOwnerProfileId,
+				assignedByProfileId: communityOwnerProfileId,
+			});
+			for (const permission of [
+				"unit.read",
+				"unit.update",
+				...(value.kind === "tag" ? [] : (["unit.publish"] as const)),
+			] as const)
+				grantRows.push({
+					unitId: value.id,
 					subjectKind: "profile",
 					profileId: value.ownerProfileId,
-					role: contributorRole,
+					permission,
+					scope: [],
 					grantedByProfileId: communityOwnerProfileId,
-				},
-			);
+					createdAt: value.createdAt,
+					updatedAt: value.updatedAt,
+				});
 		} else {
-			accessRows.push({
-				...common,
-				subjectKind: "profile",
+			ownershipRows.push({
+				...ownershipCommon,
 				profileId: value.ownerProfileId,
-				role: "owner",
-				grantedByProfileId: value.ownerProfileId,
+				assignedByProfileId: value.ownerProfileId,
 			});
+			if (value.kind === "realm")
+				for (const permission of ["unit.read", "realm.contribute"] as const)
+					grantRows.push({
+						unitId: value.id,
+						subjectKind: "realm",
+						realmId: value.id,
+						permission,
+						scope: [],
+						grantedByProfileId: value.ownerProfileId,
+						createdAt: value.createdAt,
+						updatedAt: value.updatedAt,
+					});
 		}
 	}
-	await writeBatches(accessRows, (batch) => tx.insert(unitAccessBinding).values(batch));
+	await writeBatches(ownershipRows, (batch) => tx.insert(unitOwnership).values(batch));
+	await writeBatches(grantRows, (batch) => tx.insert(unitAccessGrant).values(batch));
 }
 
 async function seedProfiles(
@@ -452,15 +477,12 @@ async function seedProfiles(
 	await writeBatches(
 		profiles.map((value) => ({
 			unitId: value.id,
-			subjectKind: "profile" as const,
 			profileId: value.id,
-			role: "owner" as const,
-			scope: [],
-			grantedByProfileId: value.id,
+			assignedByProfileId: value.id,
 			createdAt: value.createdAt,
 			updatedAt: value.createdAt,
 		})),
-		(batch) => tx.insert(unitAccessBinding).values(batch),
+		(batch) => tx.insert(unitOwnership).values(batch),
 	);
 	await writeBatches(
 		profiles.map((value, index) => {
@@ -506,7 +528,6 @@ async function seedProfiles(
 		profiles.map((value) => ({
 			realmId: OfficialRealmUnitIds.score,
 			profileId: value.id,
-			role: "member" as const,
 			state: "active" as const,
 			joinedAt: value.createdAt,
 			updatedAt: value.createdAt,
@@ -1273,14 +1294,11 @@ async function seedToaruWiki(
 			})),
 		),
 	);
-	await tx.insert(unitAccessBinding).values(
+	await tx.insert(unitOwnership).values(
 		labelUnits.map((label) => ({
 			unitId: label.id,
-			subjectKind: "profile" as const,
 			profileId: OfficialProfileIds.community,
-			role: "owner" as const,
-			scope: [],
-			grantedByProfileId: OfficialProfileIds.community,
+			assignedByProfileId: OfficialProfileIds.community,
 			createdAt: label.createdAt,
 			updatedAt: label.updatedAt,
 		})),
@@ -1318,13 +1336,10 @@ async function seedToaruWiki(
 			updatedAt: wikiPost.updatedAt,
 		})),
 	);
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId: wikiPost.id,
-		subjectKind: "profile",
 		profileId: owner.id,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: owner.id,
+		assignedByProfileId: owner.id,
 		createdAt: wikiPost.createdAt,
 		updatedAt: wikiPost.updatedAt,
 	});
@@ -1378,13 +1393,10 @@ async function seedToaruWiki(
 			updatedAt: pageUnit.updatedAt,
 		})),
 	);
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId: pageUnit.id,
-		subjectKind: "profile",
 		profileId: owner.id,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: owner.id,
+		assignedByProfileId: owner.id,
 		createdAt: pageUnit.createdAt,
 		updatedAt: pageUnit.updatedAt,
 	});
@@ -1765,26 +1777,14 @@ async function seedStructure(
 				unitId: target.id,
 				subjectKind: "profile" as const,
 				profileId: editor.id,
-				role: "editor" as const,
+				permission: "unit.update" as const,
 				scope: [],
 				grantedByProfileId: target.ownerProfileId,
 				createdAt: target.createdAt,
 				updatedAt: target.updatedAt,
 			};
 		}),
-		(batch) => tx.insert(unitAccessBinding).values(batch),
-	);
-	await writeBatches(
-		Array.from({ length: SeedPlan.unitProtections }, (_, index) => ({
-			unitId: itemAt(catalog.works, index).id,
-			scope: ["localizations", itemAt(data.languages(index), 0), "title"],
-			mode: "frozen" as const,
-			createdByProfileId: itemAt(profiles, index * 11).id,
-			reasonCode: "administrative" as const,
-			createdAt: data.pastDate(180),
-			updatedAt: data.pastDate(30),
-		})),
-		(batch) => tx.insert(unitProtection).values(batch),
+		(batch) => tx.insert(unitAccessGrant).values(batch),
 	);
 
 	const memberRows = catalog.realms.flatMap((realmUnit, realmIndex) => {
@@ -1799,14 +1799,6 @@ async function seedStructure(
 			return {
 				realmId: realmUnit.id,
 				profileId: member.id,
-				role:
-					index === 0
-						? ("owner" as const)
-						: index < 3
-							? ("admin" as const)
-							: index < 6
-								? ("moderator" as const)
-								: ("member" as const),
 				state: itemAt(["active", "active", "active", "pending", "muted"] as const, index),
 				joinedAt,
 				updatedAt: joinedAt,
@@ -2503,8 +2495,6 @@ async function seedGovernance(
 		"restore",
 		"lock_post_targeting",
 		"unlock_post_targeting",
-		"protect",
-		"unprotect",
 		"warning",
 		"silence",
 		"suspension",
@@ -2770,14 +2760,6 @@ async function seedCoverageContracts(
 		},
 	});
 
-	await tx.insert(entityAssociationPolicy).values({
-		entityId: targetEntity.id,
-		kind: "subject",
-		mode: "approval",
-		updatedByProfileId: targetEntity.ownerProfileId,
-		createdAt,
-		updatedAt: createdAt,
-	});
 	await tx.insert(subjectAssociation).values({
 		unitId: target.id,
 		entityId: targetEntity.id,
@@ -2802,7 +2784,7 @@ async function seedCoverageContracts(
 	await tx.insert(unitAccessInvitation).values({
 		unitId: target.id,
 		invitedProfileId: collaborator.id,
-		role: "editor",
+		permissions: ["unit.read", "unit.update"],
 		scope: ["localizations"],
 		invitedByProfileId: target.ownerProfileId,
 		expiresAt,

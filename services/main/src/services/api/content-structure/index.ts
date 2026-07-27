@@ -16,7 +16,7 @@ import {
 	label,
 	post,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	unitLocalizationContentMetric,
 	ContentStructurePreviewCapability,
@@ -83,10 +83,9 @@ import {
 	selectReaderChapterLocalization,
 } from "../../content-structure/book-reading";
 
-const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden", "UnitProtected"]);
+const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ContentStructureForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
-	"UnitProtected",
 	"PlatformCapabilityRequired",
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -471,13 +470,10 @@ export default new Elysia()
 						language: body.content.language,
 						title: body.content.title,
 					});
-					await tx.insert(unitAccessBinding).values({
+					await tx.insert(unitOwnership).values({
 						unitId: created.id,
-						subjectKind: "profile",
 						profileId: profile.unitId,
-						role: "owner",
-						scope: [],
-						grantedByProfileId: profile.unitId,
+						assignedByProfileId: profile.unitId,
 					});
 					await recordUnitRevision(tx, {
 						unitId: created.id,

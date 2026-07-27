@@ -78,7 +78,7 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 	"ProfileNotFound",
 	"ImageAssetNotFound",
 ]);
-const UnitForbiddenResponse = toApiErrorResponse(["UnitProtected"]);
+const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 
 function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 	return {
@@ -323,7 +323,7 @@ export default new Elysia({ prefix: "/users" })
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitProtected",
+					"UnitPermissionForbidden",
 					"RealmCapabilityRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),

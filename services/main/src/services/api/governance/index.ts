@@ -13,8 +13,6 @@ import {
 	moderationAction,
 	moderationCase,
 	profile as profileTable,
-	realmMember,
-	RealmCapabilityValues,
 	unitLocalization,
 } from "../../database/schema";
 import {
@@ -29,7 +27,6 @@ import { makePrimaryUnitLocalization } from "../../units/localization";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import { FeedbackAlreadyResolved, FeedbackNotFound } from "../feedback/errors";
-import { RealmMemberNotFound } from "../realms/errors";
 import { ProfileNotFound } from "../users/errors";
 import {
 	AccountEnforcementParams,
@@ -64,9 +61,6 @@ import {
 	GovernanceNoteNotFound,
 	ModerationCaseNotFound,
 	ModerationNoteRoleDuplicate,
-	PlatformGrantRealmForbidden,
-	RealmGrantCapabilityInvalid,
-	RealmGrantRealmRequired,
 } from "./errors";
 import unitAccessRoutes from "./unit-access";
 import unitAccessInvitationRoutes from "./unit-access-invitations";
@@ -119,8 +113,6 @@ const enforcementSelection = {
 
 const grantSelection = {
 	id: capabilityGrant.id,
-	authority: capabilityGrant.authority,
-	realmId: capabilityGrant.realmId,
 	profileId: capabilityGrant.profileId,
 	capability: capabilityGrant.capability,
 	grantedByProfileId: capabilityGrant.grantedByProfileId,
@@ -260,10 +252,7 @@ export default new Elysia({ prefix: "/governance" })
 			body: UpdateGovernanceNoteBody,
 			response: {
 				[StatusCodes.OK]: GovernanceNoteResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitPermissionForbidden",
-					"UnitProtected",
-				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"GovernanceNoteNotFound",
@@ -732,24 +721,16 @@ export default new Elysia({ prefix: "/governance" })
 	)
 	.get(
 		"/grants",
-		async ({ authorization, query }) => {
-			if (query.authority === "platform") {
-				if (query.realmId) throw new PlatformGrantRealmForbidden();
-				await authorization.platform.ensureCapability("platform.grants.manage");
-			} else {
-				if (!query.realmId) throw new RealmGrantRealmRequired();
-				await authorization.realm.ensureCapability(query.realmId, "realm.members.manage");
-			}
+		async ({ authorization }) => {
+			await authorization.platform.ensureCapability("platform.grants.manage");
 			return {
 				items: await database
 					.select(grantSelection)
 					.from(capabilityGrant)
 					.where(
 						and(
-							eq(capabilityGrant.authority, query.authority),
-							query.realmId
-								? eq(capabilityGrant.realmId, query.realmId)
-								: isNull(capabilityGrant.realmId),
+							eq(capabilityGrant.authority, "platform"),
+							isNull(capabilityGrant.realmId),
 						),
 					)
 					.orderBy(desc(capabilityGrant.createdAt), desc(capabilityGrant.id)),
@@ -760,10 +741,6 @@ export default new Elysia({ prefix: "/governance" })
 			query: ListGrantsQuery,
 			response: {
 				[StatusCodes.OK]: GrantListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"PlatformGrantRealmForbidden",
-					"RealmGrantRealmRequired",
-				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 			},
 			detail: { summary: "List capability grants", tags: ["Governance"] },
@@ -772,46 +749,22 @@ export default new Elysia({ prefix: "/governance" })
 	.post(
 		"/grants",
 		async ({ authorization, profile, body }) => {
-			let realmId: string | undefined;
-			if (body.authority === "platform") {
-				if (body.realmId) throw new PlatformGrantRealmForbidden();
-				await authorization.platform.ensureCapability("platform.grants.manage");
-			} else {
-				if (!body.realmId) throw new RealmGrantRealmRequired();
-				realmId = body.realmId;
-				await authorization.realm.ensureCapability(realmId, "realm.members.manage");
-				if (!RealmCapabilityValues.some((capability) => capability === body.capability))
-					throw new RealmGrantCapabilityInvalid();
-				const [member] = await database
-					.select({ profileId: realmMember.profileId })
-					.from(realmMember)
-					.where(
-						and(
-							eq(realmMember.realmId, realmId),
-							eq(realmMember.profileId, body.profileId),
-							eq(realmMember.state, "active"),
-						),
-					)
-					.limit(1);
-				if (!member) throw new RealmMemberNotFound(true);
-			}
+			await authorization.platform.ensureCapability("platform.grants.manage");
 			const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
 			if (expiresAt && expiresAt <= new Date()) throw new CapabilityGrantExpiryInvalid();
 			return database.transaction(async (tx) => {
-				if (body.authority === "platform") {
-					await lockPlatformAccessGrants(tx);
-					await ensurePlatformGrantMutationContinuity(tx, {
-						profileId: body.profileId,
-						capability: body.capability,
-						active: true,
-						expiresAt: expiresAt ?? null,
-					});
-				}
+				await lockPlatformAccessGrants(tx);
+				await ensurePlatformGrantMutationContinuity(tx, {
+					profileId: body.profileId,
+					capability: body.capability,
+					active: true,
+					expiresAt: expiresAt ?? null,
+				});
 				const [created] = await tx
 					.insert(capabilityGrant)
 					.values({
-						authority: body.authority,
-						realmId,
+						authority: "platform",
+						realmId: null,
 						profileId: body.profileId,
 						capability: body.capability,
 						grantedByProfileId: profile.unitId,
@@ -840,8 +793,7 @@ export default new Elysia({ prefix: "/governance" })
 					subjectKind: "profile",
 					subjectId: body.profileId,
 					metadata: {
-						authority: body.authority,
-						realmId,
+						authority: "platform",
 						capability: body.capability,
 					},
 				});
@@ -853,14 +805,8 @@ export default new Elysia({ prefix: "/governance" })
 			body: CreateGrantBody,
 			response: {
 				[StatusCodes.OK]: GrantResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"PlatformGrantRealmForbidden",
-					"RealmGrantRealmRequired",
-					"RealmGrantCapabilityInvalid",
-					"CapabilityGrantExpiryInvalid",
-				]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["CapabilityGrantExpiryInvalid"]),
 				[StatusCodes.FORBIDDEN]: GrantMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["PlatformGrantManagerRequired"]),
 			},
 			detail: { summary: "Create capability grant", tags: ["Governance"] },
@@ -872,26 +818,24 @@ export default new Elysia({ prefix: "/governance" })
 			const [current] = await database
 				.select()
 				.from(capabilityGrant)
-				.where(eq(capabilityGrant.id, params.grantId))
+				.where(
+					and(
+						eq(capabilityGrant.id, params.grantId),
+						eq(capabilityGrant.authority, "platform"),
+						isNull(capabilityGrant.realmId),
+					),
+				)
 				.limit(1);
 			if (!current || current.revokedAt) throw new CapabilityGrantNotFound();
-			if (current.authority === "platform") {
-				await authorization.platform.ensureCapability("platform.grants.manage");
-			} else {
-				if (!current.realmId)
-					throw new Error("Realm capability grant is missing its Realm");
-				await authorization.realm.ensureCapability(current.realmId, "realm.members.manage");
-			}
+			await authorization.platform.ensureCapability("platform.grants.manage");
 			await database.transaction(async (tx) => {
-				if (current.authority === "platform") {
-					await lockPlatformAccessGrants(tx);
-					await ensurePlatformGrantMutationContinuity(tx, {
-						profileId: current.profileId,
-						capability: current.capability,
-						active: false,
-						expiresAt: null,
-					});
-				}
+				await lockPlatformAccessGrants(tx);
+				await ensurePlatformGrantMutationContinuity(tx, {
+					profileId: current.profileId,
+					capability: current.capability,
+					active: false,
+					expiresAt: null,
+				});
 				const [updated] = await tx
 					.update(capabilityGrant)
 					.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })

@@ -80,10 +80,7 @@ function logSearchFailure(message: string, eventName: string, error: unknown): v
 
 const SearchUnavailableResponse = toApiErrorResponse(["SearchUnavailable"]);
 const InvalidSearchResponse = toApiErrorResponse(["InvalidSearch"]);
-const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitProtected",
-]);
+const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 
 const ZoneDockSearchParams = t.Object({ zoneId: Uuid, blockKey: BlockKey });
 const ZoneFeedBlockParams = ZoneDockSearchParams;

@@ -1,7 +1,7 @@
 "use client";
 
 import {
-	getApiEntitiesByUnitIdQueryKey,
+	type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum,
 	getApiGovernanceUnitAccessInvitationsQueryKey,
 	getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey,
 	getApiUnitByUnitIdAssociationProposalsQueryKey,
@@ -9,9 +9,9 @@ import {
 	useDeleteApiUnitByUnitIdAssociationProposalsByProposalId,
 	useGetApiEntitiesByUnitId,
 	useGetApiGovernanceUnitAccessInvitations,
+	useGetApiGovernanceUnitByUnitIdAccess,
 	useGetApiGovernanceUnitByUnitIdAccessInvitations,
 	useGetApiUnitByUnitIdAssociationProposals,
-	usePatchApiEntitiesByUnitIdAssociationPolicy,
 	usePostApiGovernanceUnitByUnitIdAccessInvitations,
 	usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept,
 	usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline,
@@ -24,7 +24,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 
-import { Badge, EntityPicker, UnitPicker } from "@rezics/ui";
+import {
+	Badge,
+	EntityPicker,
+	PermissionMatrix,
+	type PermissionMatrixLabels,
+	type PermissionMatrixResource,
+	UnitPicker,
+} from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -37,6 +44,7 @@ import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
+import { UnitAccessManager } from "./components/unit-access-manager";
 import {
 	CreditAttributionRoles,
 	isKnownAttributionRole,
@@ -44,10 +52,8 @@ import {
 	SubjectAssociationRoles,
 } from "@/features/units/attribution-role";
 
-type AccessRole = "viewer" | "editor" | "publishing_editor" | "maintainer";
 type AssociationKind = "credit" | "subject";
 type AssociationSide = "source" | "target";
-type PolicyMode = "open" | "approval" | "invite_only" | "closed";
 
 function futureLocalDate(days: number) {
 	const date = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
@@ -82,6 +88,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 	const queryClient = useQueryClient();
 	const queryOptions = { path: { unitId }, query: { includeResolved: true } } as const;
 	const invitations = useGetApiGovernanceUnitByUnitIdAccessInvitations(queryOptions);
+	const access = useGetApiGovernanceUnitByUnitIdAccess({ path: { unitId } });
 	const refresh = () =>
 		queryClient.invalidateQueries({
 			queryKey: getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey(queryOptions),
@@ -93,30 +100,26 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 		mutation: { onSuccess: refresh },
 	});
 	const [invitedProfileId, setInvitedProfileId] = useState<string>();
+	const [permissions, setPermissions] = useState<
+		ReadonlySet<GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum>
+	>(() => new Set(["unit.read"]));
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
-		const roleValue = String(form.get("role"));
-		const role: AccessRole =
-			roleValue === "editor" ||
-			roleValue === "publishing_editor" ||
-			roleValue === "maintainer"
-				? roleValue
-				: "viewer";
 		const scope = String(form.get("scope") ?? "")
 			.split("/")
 			.map((segment) => segment.trim())
 			.filter(Boolean);
 		const accessExpiry = String(form.get("accessExpiresAt") ?? "");
-		if (!invitedProfileId) return;
+		if (!invitedProfileId || permissions.size === 0) return;
 		try {
 			await create.mutateAsync({
 				path: { unitId },
 				body: {
 					invitedProfileId,
-					role,
+					permissions: [...permissions],
 					scope,
 					invitationExpiresAt: toIsoDate(form.get("invitationExpiresAt")),
 					...(accessExpiry ? { accessExpiresAt: toIsoDate(accessExpiry) } : {}),
@@ -124,6 +127,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 			});
 			formElement.reset();
 			setInvitedProfileId(undefined);
+			setPermissions(new Set(["unit.read"]));
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -147,29 +151,56 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 								value={invitedProfileId}
 							/>
 						</Field>
-						<div className="grid gap-4 sm:grid-cols-2">
-							<Field required>
-								<FieldLabel>{t.governance.role}</FieldLabel>
-								<NativeSelect defaultValue="viewer" name="role">
-									{(
-										[
-											"viewer",
-											"editor",
-											"publishing_editor",
-											"maintainer",
-										] as const
-									).map((role) => (
-										<NativeSelectOption key={role} value={role}>
-											{t.governance.roles[role]}
-										</NativeSelectOption>
-									))}
-								</NativeSelect>
-							</Field>
-							<Field>
-								<FieldLabel>{t.governance.scope}</FieldLabel>
-								<Input name="scope" placeholder={t.governance.scopeHint} />
-							</Field>
-						</div>
+						<Field>
+							<FieldLabel>{t.governance.scope}</FieldLabel>
+							<Input name="scope" placeholder={t.governance.scopeHint} />
+						</Field>
+						{access.data ? (
+							<PermissionMatrix
+								labels={
+									{
+										templates: t.governance.access.matrix.templates,
+										permissions: t.governance.access.matrix.permissions,
+										searchPlaceholder:
+											t.governance.access.matrix.searchPlaceholder,
+										clear: t.governance.access.matrix.clear,
+										selected: (selected, total) =>
+											t.governance.access.matrix.selected({
+												selected,
+												total,
+											}),
+										categorySelected: (selected) =>
+											t.governance.access.matrix.categorySelected({
+												selected,
+											}),
+										required: t.governance.access.matrix.required,
+										empty: t.governance.access.matrix.empty,
+									} satisfies PermissionMatrixLabels
+								}
+								onValueChange={setPermissions}
+								resources={access.data.permissions.map(
+									(
+										permission,
+									): PermissionMatrixResource<GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum> => ({
+										id: permission,
+										category: permission.startsWith("realm.")
+											? t.governance.access.permissionCategories.realm
+											: permission.startsWith("entity.")
+												? t.governance.access.permissionCategories.entity
+												: t.governance.access.permissionCategories.unit,
+										label: t.governance.access.permissions[permission],
+										keywords: [permission],
+										actions: [
+											{
+												value: permission,
+												label: t.governance.access.matrix.grant,
+											},
+										],
+									}),
+								)}
+								value={permissions}
+							/>
+						) : null}
 						<div className="grid gap-4 sm:grid-cols-2">
 							<Field required>
 								<FieldLabel>{t.governance.invitationExpiry}</FieldLabel>
@@ -207,8 +238,13 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 										{invitation.invitedProfileId}
 									</Link>
 									<span className="text-muted-foreground">
-										{t.governance.roles[invitation.role]} ·{" "}
-										{invitation.scope.join("/") || "/"} ·{" "}
+										{invitation.permissions
+											.map(
+												(permission) =>
+													t.governance.access.permissions[permission],
+											)
+											.join(", ")}{" "}
+										· {invitation.scope.join("/") || "/"} ·{" "}
 										{formatDate(invitation.expiresAt, locale.current)}
 									</span>
 								</div>
@@ -277,8 +313,12 @@ export function ReceivedAccessInvitations() {
 								{t.governance.unitId}: {invitation.unitId}
 							</span>
 							<span className="text-muted-foreground">
-								{t.governance.roles[invitation.role]} ·{" "}
-								{invitation.scope.join("/") || "/"} ·{" "}
+								{invitation.permissions
+									.map(
+										(permission) => t.governance.access.permissions[permission],
+									)
+									.join(", ")}{" "}
+								· {invitation.scope.join("/") || "/"} ·{" "}
 								{formatDate(invitation.expiresAt, locale.current)}
 							</span>
 							<span className="text-muted-foreground">
@@ -639,110 +679,6 @@ export function ProfileAttributionProposalManager({ profileId }: { profileId: st
 	return <AssociationProposalManager kind="credit" side="target" unitId={profileId} />;
 }
 
-function EntityAssociationPolicy({
-	unitId,
-	creditAttribution,
-	subjectAssociation,
-	canManageCredit,
-	canManageSubject,
-}: {
-	unitId: string;
-	creditAttribution: PolicyMode;
-	subjectAssociation: PolicyMode;
-	canManageCredit: boolean;
-	canManageSubject: boolean;
-}) {
-	const { t } = useTranslation(["errors", "governance", "ui"]);
-	const queryClient = useQueryClient();
-	const update = usePatchApiEntitiesByUnitIdAssociationPolicy({
-		mutation: {
-			onSuccess: () =>
-				queryClient.invalidateQueries({
-					queryKey: getApiEntitiesByUnitIdQueryKey({ path: { unitId } }),
-				}),
-		},
-	});
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		const form = new FormData(event.currentTarget);
-		const policy = (name: string): PolicyMode => {
-			const value = String(form.get(name));
-			return value === "approval" || value === "invite_only" || value === "closed"
-				? value
-				: "open";
-		};
-		try {
-			await update.mutateAsync({
-				path: { unitId },
-				body: {
-					...(canManageCredit ? { creditAttribution: policy("creditAttribution") } : {}),
-					...(canManageSubject
-						? { subjectAssociation: policy("subjectAssociation") }
-						: {}),
-				},
-			});
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>{t.governance.associationPolicy}</CardTitle>
-				<CardDescription>{t.governance.associationPolicyDescription}</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<form onSubmit={submit}>
-					<FieldGroup>
-						{canManageCredit ? (
-							<PolicyField
-								defaultValue={creditAttribution}
-								label={t.governance.creditAssociations}
-								name="creditAttribution"
-							/>
-						) : null}
-						{canManageSubject ? (
-							<PolicyField
-								defaultValue={subjectAssociation}
-								label={t.governance.subjectAssociations}
-								name="subjectAssociation"
-							/>
-						) : null}
-						<RequestFailure error={update.error} />
-						<Button variant="solid" isLoading={update.isPending} type="submit">
-							{t.ui.save}
-						</Button>
-					</FieldGroup>
-				</form>
-			</CardContent>
-		</Card>
-	);
-}
-
-function PolicyField({
-	name,
-	label,
-	defaultValue,
-}: {
-	name: string;
-	label: string;
-	defaultValue: PolicyMode;
-}) {
-	const { t } = useTranslation(["errors", "governance", "ui"]);
-	return (
-		<Field>
-			<FieldLabel>{label}</FieldLabel>
-			<NativeSelect defaultValue={defaultValue} name={name}>
-				{(["open", "approval", "invite_only", "closed"] as const).map((mode) => (
-					<NativeSelectOption key={mode} value={mode}>
-						{t.governance.policyModes[mode]}
-					</NativeSelectOption>
-				))}
-			</NativeSelect>
-		</Field>
-	);
-}
-
 export function ReceivedAccessInvitationsPage() {
 	const { t } = useTranslation(["errors", "governance", "ui"]);
 	return (
@@ -773,16 +709,7 @@ export function EntityGovernancePage({ id }: { id: string }) {
 		);
 	return (
 		<WorkflowFrame title={t.governance.title}>
-			{capabilities.canManageAccess ? <AccessInvitationManager unitId={id} /> : null}
-			{canManageAssociations ? (
-				<EntityAssociationPolicy
-					canManageCredit={capabilities.canManageCreditAssociations}
-					canManageSubject={capabilities.canManageSubjectAssociations}
-					creditAttribution={entity.data.associationPolicy.creditAttribution}
-					subjectAssociation={entity.data.associationPolicy.subjectAssociation}
-					unitId={id}
-				/>
-			) : null}
+			{capabilities.canManageAccess ? <UnitAccessManager unitId={id} /> : null}
 			{capabilities.canManageCreditAssociations ? (
 				<AssociationProposalManager kind="credit" side="target" unitId={id} />
 			) : null}

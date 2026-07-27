@@ -42,7 +42,7 @@ import {
 	softwareRequirement,
 	series,
 	seriesRelease,
-	unitAccessBinding,
+	unitOwnership,
 	unit,
 	unitLink,
 	unitLocalization,
@@ -142,10 +142,7 @@ import {
 	ZoneTimeRangeInvalid,
 } from "./errors";
 
-const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitProtected",
-]);
+const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 function presentSystemRequirement<Requirement extends { hardware: Record<string, unknown> }>(
@@ -202,13 +199,10 @@ async function createBaseUnit(
 	await tx
 		.insert(unitLocalization)
 		.values({ unitId: created.id, ...toUnitLocalizationStorage(input.localization) });
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId: created.id,
-		subjectKind: "profile",
 		profileId: input.ownerId,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: input.ownerId,
+		assignedByProfileId: input.ownerId,
 	});
 	return created.id;
 }

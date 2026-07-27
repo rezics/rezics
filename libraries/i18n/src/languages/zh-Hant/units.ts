@@ -65,7 +65,7 @@ export default {
 				developmentBadge: "開發中",
 			},
 			releases: { label: "系列內容", description: "管理系列內的作品、順序與發布日期。" },
-			access: { label: "權限", description: "管理角色、限制、保護、邀請與實際生效權限。" },
+			access: { label: "權限", description: "管理授權對象、公共權限與明確限制。" },
 			history: { label: "修訂歷史", description: "檢視、比較、撤銷或還原內容修訂。" },
 		},
 	},

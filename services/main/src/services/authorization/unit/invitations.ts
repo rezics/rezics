@@ -1,36 +1,24 @@
-import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../../database";
+import { auditEvent, profile, unitAccessGrant, unitAccessInvitation } from "../../database/schema";
 import {
-	auditEvent,
-	profile,
-	unitAccessBinding,
-	unitAccessInvitation,
-	UnitDelegableAccessRoleValues,
-} from "../../database/schema";
-import {
-	UnitAccessBindingConflict,
+	UnitAccessConfigurationInvalid,
 	UnitAccessInvitationConflict,
 	UnitAccessInvitationExpired,
 	UnitAccessInvitationNotFound,
 	UnitAccessInvitationSelfForbidden,
-	UnitAccessRoleDelegationForbidden,
 } from "../../api/governance/errors";
 import { ProfileNotFound } from "../../api/users/errors";
-import type { UnitAuthorization } from "./authorization";
-import type { UnitScope } from "./scope";
 import { createNotification } from "../../notifications/service";
+import type { UnitAuthorization } from "./authorization";
+import { expandUnitPermissions, type UnitPermission } from "./policy";
+import type { UnitScope } from "./scope";
 
-export type UnitDelegableAccessRole = (typeof UnitDelegableAccessRoleValues)[number];
 export type UnitAccessInvitationState =
 	"pending" | "expired" | "accepted" | "declined" | "cancelled";
 
 type InvitationRecord = typeof unitAccessInvitation.$inferSelect;
-const DelegableAccessRoles: ReadonlySet<string> = new Set(UnitDelegableAccessRoleValues);
-
-function isDelegableAccessRole(value: string): value is UnitDelegableAccessRole {
-	return DelegableAccessRoles.has(value);
-}
 
 export function unitAccessInvitationState(
 	record: Pick<InvitationRecord, "resolution" | "expiresAt">,
@@ -40,9 +28,7 @@ export function unitAccessInvitationState(
 }
 
 export function presentUnitAccessInvitation(record: InvitationRecord, now = new Date()) {
-	if (!isDelegableAccessRole(record.role))
-		throw new Error(`Unit access invitation has non-delegable role: ${record.role}`);
-	return { ...record, role: record.role, state: unitAccessInvitationState(record, now) };
+	return { ...record, state: unitAccessInvitationState(record, now) };
 }
 
 export async function lockUnitAccessState(
@@ -53,17 +39,6 @@ export async function lockUnitAccessState(
 		await tx.execute(
 			sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${unitId}`}::text, 0))`,
 		);
-}
-
-function activeBinding(unitId: string, profileId: string, scope: UnitScope) {
-	return and(
-		eq(unitAccessBinding.unitId, unitId),
-		eq(unitAccessBinding.subjectKind, "profile"),
-		eq(unitAccessBinding.profileId, profileId),
-		eq(unitAccessBinding.scope, [...scope]),
-		isNull(unitAccessBinding.revokedAt),
-		or(isNull(unitAccessBinding.expiresAt), sql`${unitAccessBinding.expiresAt} > now()`),
-	);
 }
 
 async function recordInvitationAudit(
@@ -93,47 +68,34 @@ export async function createUnitAccessInvitation(
 	input: {
 		readonly unitId: string;
 		readonly invitedProfileId: string;
-		readonly role: UnitDelegableAccessRole;
+		readonly permissions: readonly UnitPermission[];
 		readonly scope: UnitScope;
 		readonly expiresAt: Date;
 		readonly accessExpiresAt?: Date | null;
 	},
 ) {
 	if (input.invitedProfileId === actorProfileId) throw new UnitAccessInvitationSelfForbidden();
+	const permissions = expandUnitPermissions(input.permissions);
+	if (!permissions.length) throw new UnitAccessConfigurationInvalid();
+
 	return database.transaction(async (tx) => {
 		await lockUnitAccessState(tx, [input.unitId]);
-		const decision = await authorization.decideInTransaction(
+		await authorization.ensureInTransaction(
 			tx,
 			input.unitId,
 			"unit.access.manage",
 			input.scope,
 		);
-		if (!decision.allowed)
-			await authorization.ensureInTransaction(
-				tx,
-				input.unitId,
-				"unit.access.manage",
-				input.scope,
-			);
-		if (
-			input.role === "maintainer" &&
-			decision.allowed &&
-			decision.source !== "platform" &&
-			!(decision.source === "binding" && decision.role === "owner")
-		)
-			throw new UnitAccessRoleDelegationForbidden();
+		for (const permission of permissions)
+			await authorization.ensureInTransaction(tx, input.unitId, permission, input.scope);
+
 		const [invitee] = await tx
 			.select({ id: profile.id })
 			.from(profile)
 			.where(eq(profile.id, input.invitedProfileId))
 			.limit(1);
 		if (!invitee) throw new ProfileNotFound();
-		const [binding] = await tx
-			.select({ id: unitAccessBinding.id })
-			.from(unitAccessBinding)
-			.where(activeBinding(input.unitId, input.invitedProfileId, input.scope))
-			.limit(1);
-		if (binding) throw new UnitAccessBindingConflict();
+
 		const [duplicate] = await tx
 			.select({ id: unitAccessInvitation.id })
 			.from(unitAccessInvitation)
@@ -148,12 +110,13 @@ export async function createUnitAccessInvitation(
 			)
 			.limit(1);
 		if (duplicate) throw new UnitAccessInvitationConflict();
+
 		const [created] = await tx
 			.insert(unitAccessInvitation)
 			.values({
 				unitId: input.unitId,
 				invitedProfileId: input.invitedProfileId,
-				role: input.role,
+				permissions,
 				scope: [...input.scope],
 				invitedByProfileId: actorProfileId,
 				expiresAt: input.expiresAt,
@@ -168,7 +131,7 @@ export async function createUnitAccessInvitation(
 			invitationId: created.id,
 			metadata: {
 				invitedProfileId: input.invitedProfileId,
-				role: input.role,
+				permissions,
 				scope: input.scope,
 			},
 		});
@@ -254,40 +217,60 @@ export async function acceptUnitAccessInvitation(
 		if (invitation.invitedProfileId !== profileId) throw new UnitAccessInvitationNotFound();
 		if (invitation.accessExpiresAt && invitation.accessExpiresAt <= new Date())
 			throw new UnitAccessInvitationExpired();
+
 		const now = new Date();
-		const supersededExpiredBindings = await tx
-			.update(unitAccessBinding)
+		const supersededExpiredGrants = await tx
+			.update(unitAccessGrant)
 			.set({ revokedAt: now, revokedByProfileId: profileId })
 			.where(
 				and(
-					eq(unitAccessBinding.unitId, unitId),
-					eq(unitAccessBinding.subjectKind, "profile"),
-					eq(unitAccessBinding.profileId, profileId),
-					eq(unitAccessBinding.scope, invitation.scope),
-					isNull(unitAccessBinding.revokedAt),
-					sql`${unitAccessBinding.expiresAt} <= ${now}`,
+					eq(unitAccessGrant.unitId, unitId),
+					eq(unitAccessGrant.subjectKind, "profile"),
+					eq(unitAccessGrant.profileId, profileId),
+					eq(unitAccessGrant.scope, invitation.scope),
+					inArray(unitAccessGrant.permission, invitation.permissions),
+					isNull(unitAccessGrant.revokedAt),
+					sql`${unitAccessGrant.expiresAt} <= ${now}`,
 				),
 			)
-			.returning({ id: unitAccessBinding.id });
-		const [duplicate] = await tx
-			.select({ id: unitAccessBinding.id })
-			.from(unitAccessBinding)
-			.where(activeBinding(unitId, profileId, invitation.scope))
-			.limit(1);
-		if (duplicate) throw new UnitAccessBindingConflict();
-		const [binding] = await tx
-			.insert(unitAccessBinding)
-			.values({
-				unitId,
-				subjectKind: "profile",
-				profileId,
-				role: invitation.role,
-				scope: invitation.scope,
-				grantedByProfileId: invitation.invitedByProfileId,
-				expiresAt: invitation.accessExpiresAt,
-			})
-			.returning();
-		if (!binding) throw new Error("Accepted Unit access invitation returned no binding");
+			.returning({ id: unitAccessGrant.id });
+		const existing = await tx
+			.select({ permission: unitAccessGrant.permission })
+			.from(unitAccessGrant)
+			.where(
+				and(
+					eq(unitAccessGrant.unitId, unitId),
+					eq(unitAccessGrant.subjectKind, "profile"),
+					eq(unitAccessGrant.profileId, profileId),
+					eq(unitAccessGrant.scope, invitation.scope),
+					inArray(unitAccessGrant.permission, invitation.permissions),
+					isNull(unitAccessGrant.revokedAt),
+					or(
+						isNull(unitAccessGrant.expiresAt),
+						sql`${unitAccessGrant.expiresAt} > ${now}`,
+					),
+				),
+			);
+		const existingPermissions = new Set(existing.map(({ permission }) => permission));
+		const missingPermissions = invitation.permissions.filter(
+			(permission) => !existingPermissions.has(permission),
+		);
+		const grants = missingPermissions.length
+			? await tx
+					.insert(unitAccessGrant)
+					.values(
+						missingPermissions.map((permission) => ({
+							unitId,
+							subjectKind: "profile" as const,
+							profileId,
+							permission,
+							scope: invitation.scope,
+							grantedByProfileId: invitation.invitedByProfileId,
+							expiresAt: invitation.accessExpiresAt,
+						})),
+					)
+					.returning()
+			: [];
 		const resolvedAt = new Date();
 		const [resolved] = await tx
 			.update(unitAccessInvitation)
@@ -295,7 +278,6 @@ export async function acceptUnitAccessInvitation(
 				resolution: "accepted",
 				resolvedAt,
 				resolvedByProfileId: profileId,
-				acceptedBindingId: binding.id,
 			})
 			.where(
 				and(
@@ -311,11 +293,12 @@ export async function acceptUnitAccessInvitation(
 			unitId,
 			invitationId,
 			metadata: {
-				bindingId: binding.id,
-				supersededExpiredBindingIds: supersededExpiredBindings.map(({ id }) => id),
+				grantIds: grants.map(({ id }) => id),
+				preexistingPermissions: [...existingPermissions],
+				supersededExpiredGrantIds: supersededExpiredGrants.map(({ id }) => id),
 			},
 		});
-		return { invitation: presentUnitAccessInvitation(resolved), binding };
+		return { invitation: presentUnitAccessInvitation(resolved), grants };
 	});
 }
 

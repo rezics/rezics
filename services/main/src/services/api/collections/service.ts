@@ -20,7 +20,7 @@ import {
 	collection as collectionTable,
 	collectionItem,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
@@ -104,13 +104,10 @@ export async function ensureFavorites(ownerId: string) {
 				language: DefaultContentLanguage,
 				title: "Favorites",
 			});
-			await tx.insert(unitAccessBinding).values({
+			await tx.insert(unitOwnership).values({
 				unitId: created.id,
-				subjectKind: "profile",
 				profileId: ownerId,
-				role: "owner",
-				scope: [],
-				grantedByProfileId: ownerId,
+				assignedByProfileId: ownerId,
 			});
 			await recordUnitRevision(tx, {
 				unitId: created.id,

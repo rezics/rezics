@@ -62,7 +62,6 @@ function deniedAuthorization() {
 		canRead: vi.fn(async () => true),
 		decide: vi.fn(async () => ({ allowed: false as const, reason: "ungranted" as const })),
 		findAllowedScope: vi.fn(async () => undefined),
-		matchesActiveBinding: vi.fn(async () => true),
 	};
 }
 
@@ -108,7 +107,7 @@ describe("Studio work presentation", () => {
 		});
 	});
 
-	it("keeps a direct management assignment visible when protections block its actions", async () => {
+	it("keeps a direct permission assignment visible when effective actions are denied", async () => {
 		execute.mockResolvedValueOnce({ rows: [candidate()] }).mockResolvedValueOnce({
 			rows: [
 				{
@@ -116,7 +115,6 @@ describe("Studio work presentation", () => {
 					resourceUnitId: UnitId,
 					authorizationUnitId: UnitId,
 					relation: "assigned",
-					role: "editor",
 					scope: [],
 					createdAt: RelevantAt,
 				},
@@ -136,7 +134,6 @@ describe("Studio work presentation", () => {
 		expect(result.items[0]).toMatchObject({
 			id: UnitId,
 			relations: ["assigned"],
-			roles: ["editor"],
 			workState: "blocked",
 			permissions: [],
 		});

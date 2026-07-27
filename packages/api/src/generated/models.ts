@@ -4811,14 +4811,12 @@ export const ApiErrorCode = {
 	AccountRestricted: "AccountRestricted",
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
-	RealmRoleManagementForbidden: "RealmRoleManagementForbidden",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	PlatformGrantManagerRequired: "PlatformGrantManagerRequired",
 	CollectionOwnershipRequired: "CollectionOwnershipRequired",
 	UnitNotFound: "UnitNotFound",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 	UnitChanged: "UnitChanged",
 	UnitRevisionConflict: "UnitRevisionConflict",
 	UnitPrimaryLanguageMissing: "UnitPrimaryLanguageMissing",
@@ -4910,7 +4908,6 @@ export const ApiErrorCode = {
 	GovernanceNoteNotFound: "GovernanceNoteNotFound",
 	ModerationTargetNotFound: "ModerationTargetNotFound",
 	ModerationRealmMissing: "ModerationRealmMissing",
-	ModerationTargetScopeRequired: "ModerationTargetScopeRequired",
 	ModerationCaseNotFound: "ModerationCaseNotFound",
 	ModerationReversalInvalid: "ModerationReversalInvalid",
 	ModerationReversedActionInvalid: "ModerationReversedActionInvalid",
@@ -4924,25 +4921,14 @@ export const ApiErrorCode = {
 	EnforcementNotFound: "EnforcementNotFound",
 	EnforcementAlreadyRevoked: "EnforcementAlreadyRevoked",
 	EnforcementChanged: "EnforcementChanged",
-	PlatformGrantRealmForbidden: "PlatformGrantRealmForbidden",
-	RealmGrantRealmRequired: "RealmGrantRealmRequired",
-	RealmGrantCapabilityInvalid: "RealmGrantCapabilityInvalid",
 	CapabilityGrantExpiryInvalid: "CapabilityGrantExpiryInvalid",
 	CapabilityGrantNotFound: "CapabilityGrantNotFound",
-	UnitAccessBindingNotFound: "UnitAccessBindingNotFound",
-	UnitOwnerRequired: "UnitOwnerRequired",
-	UnitOwnershipClaimUnavailable: "UnitOwnershipClaimUnavailable",
-	UnitAccessRestrictionNotFound: "UnitAccessRestrictionNotFound",
-	UnitProtectionNotFound: "UnitProtectionNotFound",
 	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
-	UnitAccessBindingConflict: "UnitAccessBindingConflict",
 	UnitAccessInvitationNotFound: "UnitAccessInvitationNotFound",
 	UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
 	UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
 	UnitAccessInvitationSelfForbidden: "UnitAccessInvitationSelfForbidden",
-	UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
-	UnitAccessSubjectRoleInvalid: "UnitAccessSubjectRoleInvalid",
-	UnitAccessRestrictionConflict: "UnitAccessRestrictionConflict",
+	UnitAccessConfigurationInvalid: "UnitAccessConfigurationInvalid",
 	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
 	FeedbackRealmMismatch: "FeedbackRealmMismatch",
 	FeedbackNotFound: "FeedbackNotFound",
@@ -5425,7 +5411,6 @@ export type GetApiUnitByUnitIdAssociationProposalsStatus200 = {
 export const GetApiUnitByUnitIdAssociationProposalsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -5718,7 +5703,6 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400 =
 export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -6137,7 +6121,6 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400 =
 export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -6532,7 +6515,6 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400 =
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -6846,7 +6828,6 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus400 
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -7030,7 +7011,6 @@ export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204 = voi
 export const DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -7600,8 +7580,6 @@ export const GetApiNotificationsStatus200ItemsPayloadActionKindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	protect: "protect",
-	unprotect: "unprotect",
 	warning: "warning",
 	silence: "silence",
 	suspension: "suspension",
@@ -8152,34 +8130,6 @@ export type PutApiNotificationsReadAllStatus400 =
 /**
  * @type object
  */
-export type PutApiNotificationsReadAllStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitProtected'
-		 * @type string
-		 */
-		code: "UnitProtected";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type PutApiNotificationsReadAllStatus422 = ValidationError;
 
 /**
@@ -8238,7 +8188,6 @@ export type PutApiNotificationsReadAllOptions = {
 export type PutApiNotificationsReadAllResponses = {
 	"200": PutApiNotificationsReadAllStatus200;
 	"400": PutApiNotificationsReadAllStatus400;
-	"403": PutApiNotificationsReadAllStatus403;
 	"422": PutApiNotificationsReadAllStatus422;
 	"429": PutApiNotificationsReadAllStatus429;
 	"500": PutApiNotificationsReadAllStatus500;
@@ -8250,7 +8199,6 @@ export type PutApiNotificationsReadAllResponses = {
 export type PutApiNotificationsReadAllResponse =
 	| PutApiNotificationsReadAllStatus200
 	| PutApiNotificationsReadAllStatus400
-	| PutApiNotificationsReadAllStatus403
 	| PutApiNotificationsReadAllStatus422
 	| PutApiNotificationsReadAllStatus429
 	| PutApiNotificationsReadAllStatus500;
@@ -17633,6 +17581,965 @@ export type PostApiFeedbackResponse =
 /**
  * @type object
  */
+export type GetApiGovernanceUnitByUnitIdAccessPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	scope?: string[];
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum];
+
+export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum];
+
+export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum];
+
+export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @type string
+	 */
+	unitKind: string;
+	/**
+	 * @type array
+	 */
+	permissions: GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum[];
+	owner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+				label: (string | null) | null;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	subjects: {
+		subject:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "profile";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					profileId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "realm";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					realmId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "authenticated";
+			  };
+		label: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		grants: GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum[];
+		/**
+		 * @type array
+		 */
+		restrictions: GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum[];
+		/**
+		 * @type array
+		 */
+		inherited: GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum[];
+		expiresAt: (string | null) | null;
+	}[];
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdAccessPath;
+	query?: GetApiGovernanceUnitByUnitIdAccessQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessResponses = {
+	"200": GetApiGovernanceUnitByUnitIdAccessStatus200;
+	"403": GetApiGovernanceUnitByUnitIdAccessStatus403;
+	"404": GetApiGovernanceUnitByUnitIdAccessStatus404;
+	"422": GetApiGovernanceUnitByUnitIdAccessStatus422;
+	"500": GetApiGovernanceUnitByUnitIdAccessStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdAccessResponse =
+	| GetApiGovernanceUnitByUnitIdAccessStatus200
+	| GetApiGovernanceUnitByUnitIdAccessStatus403
+	| GetApiGovernanceUnitByUnitIdAccessStatus404
+	| GetApiGovernanceUnitByUnitIdAccessStatus422
+	| GetApiGovernanceUnitByUnitIdAccessStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum];
+
+export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum];
+
+export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum];
+
+export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum];
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @type string
+	 */
+	unitKind: string;
+	/**
+	 * @type array
+	 */
+	permissions: PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum[];
+	owner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+				label: (string | null) | null;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	subjects: {
+		subject:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "profile";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					profileId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "realm";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					realmId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "authenticated";
+			  };
+		label: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		grants: PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum[];
+		/**
+		 * @type array
+		 */
+		restrictions: PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum[];
+		/**
+		 * @type array
+		 */
+		inherited: PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum[];
+		expiresAt: (string | null) | null;
+	}[];
+};
+
+export const PutApiGovernanceUnitByUnitIdAccessStatus400ErrorCodeEnum = {
+	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
+	UnitAccessConfigurationInvalid: "UnitAccessConfigurationInvalid",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus400ErrorCodeEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus400ErrorCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus400ErrorCodeEnum];
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitAccessExpiryInvalid'
+				 * @type string
+				 */
+				code: PutApiGovernanceUnitByUnitIdAccessStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PutApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiGovernanceUnitByUnitIdAccessStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiGovernanceUnitByUnitIdAccessStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ProfileNotFound: "ProfileNotFound",
+	RealmNotFound: "RealmNotFound",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus404ErrorCodeEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus404ErrorCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiGovernanceUnitByUnitIdAccessStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnerRestrictionForbidden'
+		 * @type string
+		 */
+		code: "UnitOwnerRestrictionForbidden";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessStatus500 = InternalError;
+
+export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum];
+
+export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum];
+
+export const PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessBody = {
+	subject:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "profile";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				realmId: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "authenticated";
+		  };
+	/**
+	 * @type array
+	 */
+	grants: PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum[];
+	/**
+	 * @type array
+	 */
+	restrictions: PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum[];
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @type string | undefined
+	 */
+	reasonCode?: PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	expiresAt?: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessOptions = {
+	body: PutApiGovernanceUnitByUnitIdAccessBody;
+	path: PutApiGovernanceUnitByUnitIdAccessPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiGovernanceUnitByUnitIdAccessResponses = {
+	"200": PutApiGovernanceUnitByUnitIdAccessStatus200;
+	"400": PutApiGovernanceUnitByUnitIdAccessStatus400;
+	"403": PutApiGovernanceUnitByUnitIdAccessStatus403;
+	"404": PutApiGovernanceUnitByUnitIdAccessStatus404;
+	"409": PutApiGovernanceUnitByUnitIdAccessStatus409;
+	"422": PutApiGovernanceUnitByUnitIdAccessStatus422;
+	"500": PutApiGovernanceUnitByUnitIdAccessStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiGovernanceUnitByUnitIdAccessResponse =
+	| PutApiGovernanceUnitByUnitIdAccessStatus200
+	| PutApiGovernanceUnitByUnitIdAccessStatus400
+	| PutApiGovernanceUnitByUnitIdAccessStatus403
+	| PutApiGovernanceUnitByUnitIdAccessStatus404
+	| PutApiGovernanceUnitByUnitIdAccessStatus409
+	| PutApiGovernanceUnitByUnitIdAccessStatus422
+	| PutApiGovernanceUnitByUnitIdAccessStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessCandidatesKind = {
+	profile: "profile",
+	realm: "realm",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesKind =
+	(typeof GetApiGovernanceUnitByUnitIdAccessCandidatesKind)[keyof typeof GetApiGovernanceUnitByUnitIdAccessCandidatesKind];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesQuery = {
+	/**
+	 * @type string
+	 */
+	kind: GetApiGovernanceUnitByUnitIdAccessCandidatesKind;
+	/**
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	query?: string;
+	/**
+	 * @default 20
+	 */
+	limit?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		subject:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "profile";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					profileId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "realm";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					realmId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "authenticated";
+			  };
+		label: (string | null) | null;
+	}[];
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403ErrorCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdAccessCandidatesPath;
+	query: GetApiGovernanceUnitByUnitIdAccessCandidatesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesResponses = {
+	"200": GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200;
+	"403": GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403;
+	"422": GetApiGovernanceUnitByUnitIdAccessCandidatesStatus422;
+	"500": GetApiGovernanceUnitByUnitIdAccessCandidatesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdAccessCandidatesResponse =
+	| GetApiGovernanceUnitByUnitIdAccessCandidatesStatus200
+	| GetApiGovernanceUnitByUnitIdAccessCandidatesStatus403
+	| GetApiGovernanceUnitByUnitIdAccessCandidatesStatus422
+	| GetApiGovernanceUnitByUnitIdAccessCandidatesStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiGovernanceUnitByUnitIdAccessEffectivePath = {
 	/**
 	 * @description
@@ -17659,31 +18566,22 @@ export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermis
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
-	"unit.protection.manage": "unit.protection.manage",
 	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
 } as const;
 
 export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum =
 	(typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum];
-
-export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
-	owner: "owner",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum =
-	(typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum];
-
-export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum = {
-	frozen: "frozen",
-	owner_only: "owner_only",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum =
-	(typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum];
 
 /**
  * @type object
@@ -17715,7 +18613,7 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200 = {
 							 * @type boolean
 							 */
 							allowed: true;
-							source: "public" | "platform";
+							source: "public" | "platform" | "owner";
 					  }
 					| {
 							/**
@@ -17725,18 +18623,14 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200 = {
 							/**
 							 * @type string
 							 */
-							source: "binding";
+							source: "grant";
 							/**
 							 * @description
 							 * Format: `uuid`
 							 * @type string
 							 */
-							bindingId: string;
-							/**
-							 * @default 'viewer'
-							 * @type string
-							 */
-							role: GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum;
+							grantId: string;
+							subjectKind: "profile" | "realm" | "authenticated";
 					  }
 			  )
 			| (
@@ -17763,21 +18657,6 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200 = {
 							 */
 							restrictionId: string;
 							subjectKind: "profile" | "realm";
-					  }
-					| {
-							/**
-							 * @type boolean
-							 */
-							allowed: false;
-							/**
-							 * @type string
-							 */
-							reason: "protected";
-							/**
-							 * @default 'frozen'
-							 * @type string
-							 */
-							mode: GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum;
 					  }
 			  );
 	}[];
@@ -17832,73 +18711,37 @@ export type PutApiGovernanceUnitByUnitIdOwnershipPath = {
 	unitId: string;
 };
 
-export const PutApiGovernanceUnitByUnitIdOwnershipStatus200SubjectKindEnum = {
-	profile: "profile",
-	realm: "realm",
-	authenticated: "authenticated",
-} as const;
-
-export type PutApiGovernanceUnitByUnitIdOwnershipStatus200SubjectKindEnum =
-	(typeof PutApiGovernanceUnitByUnitIdOwnershipStatus200SubjectKindEnum)[keyof typeof PutApiGovernanceUnitByUnitIdOwnershipStatus200SubjectKindEnum];
-
 /**
  * @type object
  */
 export type PutApiGovernanceUnitByUnitIdOwnershipStatus200 = {
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @type object
 	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @default 'profile'
-	 * @type string
-	 */
-	subjectKind: PutApiGovernanceUnitByUnitIdOwnershipStatus200SubjectKindEnum;
-	profileId: (string | null) | null;
-	realmId: (string | null) | null;
-	realmRelation: (string | null) | null;
-	/**
-	 * @type string
-	 */
-	role: string;
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	grantedByProfileId: string;
-	expiresAt: (string | null) | null;
-	revokedAt: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
+	owner: {
+		/**
+		 * @type string
+		 */
+		kind: "profile";
+		/**
+		 * @type string
+		 */
+		profileId: string;
+	};
 };
 
 /**
  * @type object
  */
 export type PutApiGovernanceUnitByUnitIdOwnershipStatus400 = MalformedRequestBody;
+
+export const PutApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum =
+	(typeof PutApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum];
 
 /**
  * @type object
@@ -17912,7 +18755,7 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "PlatformCapabilityRequired";
+		code: PutApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -18031,847 +18874,41 @@ export type PutApiGovernanceUnitByUnitIdOwnershipResponse =
 /**
  * @type object
  */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimPath = {
+export type DeleteApiGovernanceUnitByUnitIdOwnershipPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
 	unitId: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum = {
-	profile: "profile",
-	realm: "realm",
-	authenticated: "authenticated",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum =
-	(typeof PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum)[keyof typeof PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @default 'profile'
-	 * @type string
-	 */
-	subjectKind: PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum;
-	profileId: (string | null) | null;
-	realmId: (string | null) | null;
-	realmRelation: (string | null) | null;
-	/**
-	 * @type string
-	 */
-	role: string;
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	grantedByProfileId: string;
-	expiresAt: (string | null) | null;
-	revokedAt: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'InteractiveSessionRequired'
-		 * @type string
-		 */
-		code: "InteractiveSessionRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FreshSessionRequired'
-		 * @type string
-		 */
-		code: "FreshSessionRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitOwnershipClaimUnavailable'
-		 * @type string
-		 */
-		code: "UnitOwnershipClaimUnavailable";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimBody = object;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimOptions = {
-	body: PostApiGovernanceUnitByUnitIdOwnershipClaimBody;
-	path: PostApiGovernanceUnitByUnitIdOwnershipClaimPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimResponses = {
-	"200": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200;
-	"400": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400;
-	"401": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401;
-	"403": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403;
-	"404": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404;
-	"409": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409;
-	"422": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422;
-	"500": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiGovernanceUnitByUnitIdOwnershipClaimResponse =
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus400
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422
-	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum = {
-	profile: "profile",
-	realm: "realm",
-	authenticated: "authenticated",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum =
-	(typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum];
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @default 'profile'
-		 * @type string
-		 */
-		subjectKind: GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum;
-		profileId: (string | null) | null;
-		realmId: (string | null) | null;
-		realmRelation: (string | null) | null;
-		/**
-		 * @type string
-		 */
-		role: string;
-		/**
-		 * @type array
-		 */
-		scope: string[];
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		grantedByProfileId: string;
-		expiresAt: (string | null) | null;
-		revokedAt: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-export const GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum =
-	(typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsOptions = {
-	body?: never;
-	path: GetApiGovernanceUnitByUnitIdAccessBindingsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsResponses = {
-	"200": GetApiGovernanceUnitByUnitIdAccessBindingsStatus200;
-	"403": GetApiGovernanceUnitByUnitIdAccessBindingsStatus403;
-	"404": GetApiGovernanceUnitByUnitIdAccessBindingsStatus404;
-	"422": GetApiGovernanceUnitByUnitIdAccessBindingsStatus422;
-	"500": GetApiGovernanceUnitByUnitIdAccessBindingsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiGovernanceUnitByUnitIdAccessBindingsResponse =
-	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus200
-	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus403
-	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus404
-	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus422
-	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus500;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum = {
-	profile: "profile",
-	realm: "realm",
-	authenticated: "authenticated",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @default 'profile'
-	 * @type string
-	 */
-	subjectKind: PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum;
-	profileId: (string | null) | null;
-	realmId: (string | null) | null;
-	realmRelation: (string | null) | null;
-	/**
-	 * @type string
-	 */
-	role: string;
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	grantedByProfileId: string;
-	expiresAt: (string | null) | null;
-	revokedAt: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum = {
-	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
-	UnitAccessSubjectRoleInvalid: "UnitAccessSubjectRoleInvalid",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum];
-
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'UnitAccessExpiryInvalid'
-				 * @type string
-				 */
-				code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ProfileNotFound: "ProfileNotFound",
-	RealmNotFound: "RealmNotFound",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitAccessBindingConflict'
-		 * @type string
-		 */
-		code: "UnitAccessBindingConflict";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus500 = InternalError;
-
-export const PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum = {
-	member: "member",
-	content_editor: "content_editor",
-	governor: "governor",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum];
-
-export const PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsBody = {
-	subject:
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "profile";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				profileId: string;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "realm";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				realmId: string;
-				/**
-				 * @default 'member'
-				 * @type string
-				 */
-				relation: PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "authenticated";
-		  };
-	/**
-	 * @default 'viewer'
-	 * @type string
-	 */
-	role: PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum;
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string | undefined
-	 */
-	expiresAt?: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsOptions = {
-	body: PostApiGovernanceUnitByUnitIdAccessBindingsBody;
-	path: PostApiGovernanceUnitByUnitIdAccessBindingsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsResponses = {
-	"200": PostApiGovernanceUnitByUnitIdAccessBindingsStatus200;
-	"400": PostApiGovernanceUnitByUnitIdAccessBindingsStatus400;
-	"403": PostApiGovernanceUnitByUnitIdAccessBindingsStatus403;
-	"404": PostApiGovernanceUnitByUnitIdAccessBindingsStatus404;
-	"409": PostApiGovernanceUnitByUnitIdAccessBindingsStatus409;
-	"422": PostApiGovernanceUnitByUnitIdAccessBindingsStatus422;
-	"500": PostApiGovernanceUnitByUnitIdAccessBindingsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiGovernanceUnitByUnitIdAccessBindingsResponse =
-	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus200
-	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus400
-	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus403
-	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus404
-	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus409
-	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus422
-	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	bindingId: string;
 };
 
 /**
  * @type void
  */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus204 = void;
+export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus204 = void;
 
-export const DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
+export const DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum = {
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
 } as const;
 
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum];
+export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403 = {
+export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus403 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	UnitAccessBindingNotFound: "UnitAccessBindingNotFound",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum;
+		code: DeleteApiGovernanceUnitByUnitIdOwnershipStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -18890,226 +18927,7 @@ export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404 = 
 /**
  * @type object
  */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitOwnerRequired'
-		 * @type string
-		 */
-		code: "UnitOwnerRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdOptions = {
-	body?: never;
-	path: DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses = {
-	"204": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus204;
-	"403": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403;
-	"404": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404;
-	"409": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus409;
-	"422": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus422;
-	"500": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponse =
-	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus204
-	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403
-	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404
-	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus409
-	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus422
-	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum =
-	(typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		subject:
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "profile";
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					profileId: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "realm";
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					realmId: string;
-			  };
-		/**
-		 * @type string
-		 */
-		permission: string;
-		/**
-		 * @type array
-		 */
-		scope: string[];
-		/**
-		 * @type string
-		 */
-		reasonCode: GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum;
-		internalNotePostId: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		createdByProfileId: string;
-		expiresAt: (string | null) | null;
-		revokedAt: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-export const GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum =
-	(typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus404 = {
+export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -19137,19 +18955,19 @@ export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus404 = {
 /**
  * @type object
  */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus422 = ValidationError;
+export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus500 = InternalError;
+export type DeleteApiGovernanceUnitByUnitIdOwnershipStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsOptions = {
+export type DeleteApiGovernanceUnitByUnitIdOwnershipOptions = {
 	body?: never;
-	path: GetApiGovernanceUnitByUnitIdAccessRestrictionsPath;
+	path: DeleteApiGovernanceUnitByUnitIdOwnershipPath;
 	query?: never;
 	headers?: never;
 };
@@ -19157,1424 +18975,23 @@ export type GetApiGovernanceUnitByUnitIdAccessRestrictionsOptions = {
 /**
  * @type object
  */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses = {
-	"200": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200;
-	"403": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403;
-	"404": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus404;
-	"422": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus422;
-	"500": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
+export type DeleteApiGovernanceUnitByUnitIdOwnershipResponses = {
+	"204": DeleteApiGovernanceUnitByUnitIdOwnershipStatus204;
+	"403": DeleteApiGovernanceUnitByUnitIdOwnershipStatus403;
+	"404": DeleteApiGovernanceUnitByUnitIdOwnershipStatus404;
+	"422": DeleteApiGovernanceUnitByUnitIdOwnershipStatus422;
+	"500": DeleteApiGovernanceUnitByUnitIdOwnershipStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiGovernanceUnitByUnitIdAccessRestrictionsResponse =
-	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200
-	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403
-	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus404
-	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus422
-	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	subject:
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "profile";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				profileId: string;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "realm";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				realmId: string;
-		  };
-	/**
-	 * @type string
-	 */
-	permission: string;
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @type string
-	 */
-	reasonCode: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum;
-	internalNotePostId: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	createdByProfileId: string;
-	expiresAt: (string | null) | null;
-	revokedAt: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'UnitAccessExpiryInvalid'
-				 * @type string
-				 */
-				code: "UnitAccessExpiryInvalid";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ProfileNotFound: "ProfileNotFound",
-	RealmNotFound: "RealmNotFound",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum = {
-	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
-	UnitAccessRestrictionConflict: "UnitAccessRestrictionConflict",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitOwnerRestrictionForbidden'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus500 = InternalError;
-
-export const PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum = {
-	"unit.read": "unit.read",
-	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
-	"unit.history.restore": "unit.history.restore",
-	"unit.access.manage": "unit.access.manage",
-	"unit.association.manage": "unit.association.manage",
-	"unit.protection.manage": "unit.protection.manage",
-	"unit.delete": "unit.delete",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum];
-
-export const PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum];
-
-export const PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestInternalNoteLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestInternalNoteLanguageEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestInternalNoteLanguageEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestInternalNoteLanguageEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsBody = {
-	subject:
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "profile";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				profileId: string;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "realm";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				realmId: string;
-		  };
-	/**
-	 * @default 'unit.read'
-	 * @type string
-	 */
-	permission: PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum;
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @type string
-	 */
-	reasonCode: PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum;
-	/**
-	 * @type object | undefined
-	 */
-	internalNote?: {
-		/**
-		 * @type string
-		 */
-		language: PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestInternalNoteLanguageEnum;
-		/**
-		 * @type object
-		 */
-		content: {
-			/**
-			 * @type string
-			 */
-			_type: "portable-text";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			content: (
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "block";
-						/**
-						 * @type array
-						 */
-						children: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "unit-mention";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									unitId: string;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
-		};
-	};
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string | undefined
-	 */
-	expiresAt?: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsOptions = {
-	body: PostApiGovernanceUnitByUnitIdAccessRestrictionsBody;
-	path: PostApiGovernanceUnitByUnitIdAccessRestrictionsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses = {
-	"200": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200;
-	"400": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400;
-	"403": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403;
-	"404": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404;
-	"409": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409;
-	"422": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus422;
-	"500": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiGovernanceUnitByUnitIdAccessRestrictionsResponse =
-	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200
-	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400
-	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403
-	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404
-	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409
-	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus422
-	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	restrictionId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus204 = void;
-
-export const DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum =
-	{
-		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitAccessRestricted: "UnitAccessRestricted",
-		PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum =
-	{
-		UnitNotFound: "UnitNotFound",
-		UnitAccessRestrictionNotFound: "UnitAccessRestrictionNotFound",
-	} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus422 =
-	ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus500 =
-	InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdOptions = {
-	body?: never;
-	path: DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses = {
-	"204": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus204;
-	"403": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403;
-	"404": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404;
-	"422": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus422;
-	"500": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponse =
-	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus204
-	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403
-	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404
-	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus422
-	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum =
-	(typeof GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @type array
-		 */
-		scope: string[];
-		/**
-		 * @type string
-		 */
-		mode: string;
-		/**
-		 * @type string
-		 */
-		reasonCode: GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum;
-		internalNotePostId: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		createdByProfileId: string;
-		expiresAt: (string | null) | null;
-		revokedAt: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-export const GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum =
-	(typeof GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsOptions = {
-	body?: never;
-	path: GetApiGovernanceUnitByUnitIdProtectionsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsResponses = {
-	"200": GetApiGovernanceUnitByUnitIdProtectionsStatus200;
-	"403": GetApiGovernanceUnitByUnitIdProtectionsStatus403;
-	"404": GetApiGovernanceUnitByUnitIdProtectionsStatus404;
-	"422": GetApiGovernanceUnitByUnitIdProtectionsStatus422;
-	"500": GetApiGovernanceUnitByUnitIdProtectionsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiGovernanceUnitByUnitIdProtectionsResponse =
-	| GetApiGovernanceUnitByUnitIdProtectionsStatus200
-	| GetApiGovernanceUnitByUnitIdProtectionsStatus403
-	| GetApiGovernanceUnitByUnitIdProtectionsStatus404
-	| GetApiGovernanceUnitByUnitIdProtectionsStatus422
-	| GetApiGovernanceUnitByUnitIdProtectionsStatus500;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @type string
-	 */
-	mode: string;
-	/**
-	 * @type string
-	 */
-	reasonCode: PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum;
-	internalNotePostId: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	createdByProfileId: string;
-	expiresAt: (string | null) | null;
-	revokedAt: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'UnitAccessExpiryInvalid'
-				 * @type string
-				 */
-				code: "UnitAccessExpiryInvalid";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-export const PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsStatus500 = InternalError;
-
-export const PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum = {
-	frozen: "frozen",
-	owner_only: "owner_only",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum];
-
-export const PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum];
-
-export const PostApiGovernanceUnitByUnitIdProtectionsRequestInternalNoteLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdProtectionsRequestInternalNoteLanguageEnum =
-	(typeof PostApiGovernanceUnitByUnitIdProtectionsRequestInternalNoteLanguageEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsRequestInternalNoteLanguageEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsBody = {
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @default 'frozen'
-	 * @type string
-	 */
-	mode: PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum;
-	/**
-	 * @type string
-	 */
-	reasonCode: PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum;
-	/**
-	 * @type object | undefined
-	 */
-	internalNote?: {
-		/**
-		 * @type string
-		 */
-		language: PostApiGovernanceUnitByUnitIdProtectionsRequestInternalNoteLanguageEnum;
-		/**
-		 * @type object
-		 */
-		content: {
-			/**
-			 * @type string
-			 */
-			_type: "portable-text";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			content: (
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "block";
-						/**
-						 * @type array
-						 */
-						children: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "unit-mention";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									unitId: string;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
-		};
-	};
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string | undefined
-	 */
-	expiresAt?: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsOptions = {
-	body: PostApiGovernanceUnitByUnitIdProtectionsBody;
-	path: PostApiGovernanceUnitByUnitIdProtectionsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsResponses = {
-	"200": PostApiGovernanceUnitByUnitIdProtectionsStatus200;
-	"400": PostApiGovernanceUnitByUnitIdProtectionsStatus400;
-	"403": PostApiGovernanceUnitByUnitIdProtectionsStatus403;
-	"404": PostApiGovernanceUnitByUnitIdProtectionsStatus404;
-	"422": PostApiGovernanceUnitByUnitIdProtectionsStatus422;
-	"500": PostApiGovernanceUnitByUnitIdProtectionsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiGovernanceUnitByUnitIdProtectionsResponse =
-	| PostApiGovernanceUnitByUnitIdProtectionsStatus200
-	| PostApiGovernanceUnitByUnitIdProtectionsStatus400
-	| PostApiGovernanceUnitByUnitIdProtectionsStatus403
-	| PostApiGovernanceUnitByUnitIdProtectionsStatus404
-	| PostApiGovernanceUnitByUnitIdProtectionsStatus422
-	| PostApiGovernanceUnitByUnitIdProtectionsStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	protectionId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus204 = void;
-
-export const DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	UnitProtectionNotFound: "UnitProtectionNotFound",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions = {
-	body?: never;
-	path: DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses = {
-	"204": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus204;
-	"403": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403;
-	"404": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404;
-	"422": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422;
-	"500": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponse =
-	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus204
-	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403
-	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404
-	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422
-	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500;
+export type DeleteApiGovernanceUnitByUnitIdOwnershipResponse =
+	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus204
+	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus403
+	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus404
+	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus422
+	| DeleteApiGovernanceUnitByUnitIdOwnershipStatus500;
 
 /**
  * @type object
@@ -20586,15 +19003,29 @@ export type GetApiGovernanceUnitAccessInvitationsQuery = {
 	includeResolved?: boolean;
 };
 
-export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
+export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
 } as const;
 
-export type GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum =
-	(typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum)[keyof typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum];
+export type GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum =
+	(typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum)[keyof typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum];
 
 export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsStateEnum = {
 	pending: "pending",
@@ -20634,10 +19065,9 @@ export type GetApiGovernanceUnitAccessInvitationsStatus200 = {
 		 */
 		invitedProfileId: string;
 		/**
-		 * @default 'viewer'
-		 * @type string
+		 * @type array
 		 */
-		role: GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum;
+		permissions: GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum[];
 		/**
 		 * @type array
 		 */
@@ -20662,7 +19092,6 @@ export type GetApiGovernanceUnitAccessInvitationsStatus200 = {
 		resolution: (("accepted" | "declined" | "cancelled") | null) | null;
 		resolvedAt: (string | null) | null;
 		resolvedByProfileId: (string | null) | null;
-		acceptedBindingId: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -20737,15 +19166,29 @@ export type GetApiGovernanceUnitByUnitIdAccessInvitationsQuery = {
 	includeResolved?: boolean;
 };
 
-export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
+export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
 } as const;
 
-export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum =
-	(typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum];
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissionsEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissionsEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissionsEnum];
 
 export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsStateEnum = {
 	pending: "pending",
@@ -20785,10 +19228,9 @@ export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200 = {
 		 */
 		invitedProfileId: string;
 		/**
-		 * @default 'viewer'
-		 * @type string
+		 * @type array
 		 */
-		role: GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum;
+		permissions: GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissionsEnum[];
 		/**
 		 * @type array
 		 */
@@ -20813,7 +19255,6 @@ export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200 = {
 		resolution: (("accepted" | "declined" | "cancelled") | null) | null;
 		resolvedAt: (string | null) | null;
 		resolvedByProfileId: (string | null) | null;
-		acceptedBindingId: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -20832,8 +19273,6 @@ export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200 = {
 export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
-	UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
 } as const;
 
 export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum =
@@ -20948,15 +19387,29 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsPath = {
 	unitId: string;
 };
 
-export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
 } as const;
 
-export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum];
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsEnum];
 
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200StateEnum = {
 	pending: "pending",
@@ -20992,10 +19445,9 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200 = {
 	 */
 	invitedProfileId: string;
 	/**
-	 * @default 'viewer'
-	 * @type string
+	 * @type array
 	 */
-	role: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum;
+	permissions: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsEnum[];
 	/**
 	 * @type array
 	 */
@@ -21020,7 +19472,6 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200 = {
 	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
 	resolvedAt: (string | null) | null;
 	resolvedByProfileId: (string | null) | null;
-	acceptedBindingId: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -21073,8 +19524,6 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400 =
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
-	UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
 } as const;
 
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum =
@@ -21147,7 +19596,6 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404 = {
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409ErrorCodeEnum = {
 	UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
 	UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
-	UnitAccessBindingConflict: "UnitAccessBindingConflict",
 } as const;
 
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409ErrorCodeEnum =
@@ -21191,15 +19639,29 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422 = Validation
  */
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500 = InternalError;
 
-export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
+	"unit.delete": "unit.delete",
+	"realm.contribute": "realm.contribute",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.publish": "realm.rules.publish",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
 } as const;
 
-export type PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum];
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnum];
 
 /**
  * @type object
@@ -21212,10 +19674,9 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsBody = {
 	 */
 	invitedProfileId: string;
 	/**
-	 * @default 'viewer'
-	 * @type string
+	 * @type array
 	 */
-	role: PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum;
+	permissions: PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnum[];
 	/**
 	 * @type array
 	 */
@@ -21287,15 +19748,30 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptPa
 	invitationId: string;
 };
 
-export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
-} as const;
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200PermissionsEnum =
+	{
+		"unit.read": "unit.read",
+		"unit.update": "unit.update",
+		"unit.publish": "unit.publish",
+		"unit.history.restore": "unit.history.restore",
+		"unit.access.manage": "unit.access.manage",
+		"unit.association.manage": "unit.association.manage",
+		"unit.delete": "unit.delete",
+		"realm.contribute": "realm.contribute",
+		"realm.settings.update": "realm.settings.update",
+		"realm.members.read": "realm.members.read",
+		"realm.members.manage": "realm.members.manage",
+		"realm.rules.publish": "realm.rules.publish",
+		"realm.pins.manage": "realm.pins.manage",
+		"realm.units.moderate": "realm.units.moderate",
+		"entity.association.credit.request": "entity.association.credit.request",
+		"entity.association.credit.direct": "entity.association.credit.direct",
+		"entity.association.subject.request": "entity.association.subject.request",
+		"entity.association.subject.direct": "entity.association.subject.direct",
+	} as const;
 
-export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum];
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200PermissionsEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200PermissionsEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200PermissionsEnum];
 
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200StateEnum =
 	{
@@ -21332,10 +19808,9 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptSt
 	 */
 	invitedProfileId: string;
 	/**
-	 * @default 'viewer'
-	 * @type string
+	 * @type array
 	 */
-	role: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum;
+	permissions: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200PermissionsEnum[];
 	/**
 	 * @type array
 	 */
@@ -21360,7 +19835,6 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptSt
 	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
 	resolvedAt: (string | null) | null;
 	resolvedByProfileId: (string | null) | null;
-	acceptedBindingId: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -21413,7 +19887,6 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 	{
 		UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
 		UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
-		UnitAccessBindingConflict: "UnitAccessBindingConflict",
 	} as const;
 
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409ErrorCodeEnum =
@@ -21515,16 +19988,30 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineP
 	invitationId: string;
 };
 
-export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum =
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200PermissionsEnum =
 	{
-		viewer: "viewer",
-		editor: "editor",
-		publishing_editor: "publishing_editor",
-		maintainer: "maintainer",
+		"unit.read": "unit.read",
+		"unit.update": "unit.update",
+		"unit.publish": "unit.publish",
+		"unit.history.restore": "unit.history.restore",
+		"unit.access.manage": "unit.access.manage",
+		"unit.association.manage": "unit.association.manage",
+		"unit.delete": "unit.delete",
+		"realm.contribute": "realm.contribute",
+		"realm.settings.update": "realm.settings.update",
+		"realm.members.read": "realm.members.read",
+		"realm.members.manage": "realm.members.manage",
+		"realm.rules.publish": "realm.rules.publish",
+		"realm.pins.manage": "realm.pins.manage",
+		"realm.units.moderate": "realm.units.moderate",
+		"entity.association.credit.request": "entity.association.credit.request",
+		"entity.association.credit.direct": "entity.association.credit.direct",
+		"entity.association.subject.request": "entity.association.subject.request",
+		"entity.association.subject.direct": "entity.association.subject.direct",
 	} as const;
 
-export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum =
-	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum];
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200PermissionsEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200PermissionsEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200PermissionsEnum];
 
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200StateEnum =
 	{
@@ -21561,10 +20048,9 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineS
 	 */
 	invitedProfileId: string;
 	/**
-	 * @default 'viewer'
-	 * @type string
+	 * @type array
 	 */
-	role: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum;
+	permissions: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200PermissionsEnum[];
 	/**
 	 * @type array
 	 */
@@ -21589,7 +20075,6 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineS
 	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
 	resolvedAt: (string | null) | null;
 	resolvedByProfileId: (string | null) | null;
-	acceptedBindingId: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -21642,7 +20127,6 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 	{
 		UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
 		UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
-		UnitAccessBindingConflict: "UnitAccessBindingConflict",
 	} as const;
 
 export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409ErrorCodeEnum =
@@ -21753,8 +20237,6 @@ export const DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatu
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
 		UnitAccessRestricted: "UnitAccessRestricted",
-		UnitProtected: "UnitProtected",
-		UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
 	} as const;
 
 export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403ErrorCodeEnum =
@@ -21829,7 +20311,6 @@ export const DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatu
 	{
 		UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
 		UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
-		UnitAccessBindingConflict: "UnitAccessBindingConflict",
 	} as const;
 
 export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409ErrorCodeEnum =
@@ -22363,14 +20844,6 @@ export type PatchApiGovernanceNotesByPostIdStatus200 = {
  */
 export type PatchApiGovernanceNotesByPostIdStatus400 = MalformedRequestBody;
 
-export const PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum =
-	(typeof PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum)[keyof typeof PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -22383,7 +20856,7 @@ export type PatchApiGovernanceNotesByPostIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -24149,14 +22622,6 @@ export const PostApiGovernanceModerationActionsRequestReasonCodeEnum = {
 export type PostApiGovernanceModerationActionsRequestReasonCodeEnum =
 	(typeof PostApiGovernanceModerationActionsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceModerationActionsRequestReasonCodeEnum];
 
-export const PostApiGovernanceModerationActionsRequestProtectionModeEnum = {
-	frozen: "frozen",
-	owner_only: "owner_only",
-} as const;
-
-export type PostApiGovernanceModerationActionsRequestProtectionModeEnum =
-	(typeof PostApiGovernanceModerationActionsRequestProtectionModeEnum)[keyof typeof PostApiGovernanceModerationActionsRequestProtectionModeEnum];
-
 export type PostApiGovernanceModerationActionsBody =
 	| {
 			/**
@@ -24324,337 +22789,6 @@ export type PostApiGovernanceModerationActionsBody =
 				| "ban_member"
 				| "restore_member"
 				| "escalate";
-	  }
-	| {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			caseId: string;
-			/**
-			 * @type string
-			 */
-			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
-			/**
-			 * @type array | undefined
-			 */
-			notes?: {
-				role: "internal_note" | "public_notice";
-				language: "zh" | "en";
-				/**
-				 * @type object
-				 */
-				content: {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "unit-mention";
-											/**
-											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-											 * @type string
-											 */
-											unitId: string;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "image";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								assetId: string;
-								/**
-								 * @type string | undefined
-								 */
-								alt?: string;
-								/**
-								 * @type string | undefined
-								 */
-								caption?: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!(?:block|image)$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-				};
-			}[];
-			/**
-			 * @minLength 1
-			 * @maxLength 256
-			 * @type string | undefined
-			 */
-			idempotencyKey?: string;
-			/**
-			 * @type string
-			 */
-			kind: "protect";
-			/**
-			 * @type array
-			 */
-			scope: string[];
-			/**
-			 * @default 'frozen'
-			 * @type string
-			 */
-			protectionMode: PostApiGovernanceModerationActionsRequestProtectionModeEnum;
-	  }
-	| {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			caseId: string;
-			/**
-			 * @type string
-			 */
-			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
-			/**
-			 * @type array | undefined
-			 */
-			notes?: {
-				role: "internal_note" | "public_notice";
-				language: "zh" | "en";
-				/**
-				 * @type object
-				 */
-				content: {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "unit-mention";
-											/**
-											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-											 * @type string
-											 */
-											unitId: string;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "image";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								assetId: string;
-								/**
-								 * @type string | undefined
-								 */
-								alt?: string;
-								/**
-								 * @type string | undefined
-								 */
-								caption?: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!(?:block|image)$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-				};
-			}[];
-			/**
-			 * @minLength 1
-			 * @maxLength 256
-			 * @type string | undefined
-			 */
-			idempotencyKey?: string;
-			/**
-			 * @type string
-			 */
-			kind: "unprotect";
-			/**
-			 * @type array
-			 */
-			scope: string[];
 	  }
 	| {
 			/**
@@ -26183,30 +24317,6 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponse
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus422
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus500;
 
-export const GetApiGovernanceGrantsAuthority = {
-	platform: "platform",
-	realm: "realm",
-} as const;
-
-export type GetApiGovernanceGrantsAuthority =
-	(typeof GetApiGovernanceGrantsAuthority)[keyof typeof GetApiGovernanceGrantsAuthority];
-
-/**
- * @type object
- */
-export type GetApiGovernanceGrantsQuery = {
-	/**
-	 * @type string
-	 */
-	authority: GetApiGovernanceGrantsAuthority;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	realmId?: string;
-};
-
 /**
  * @type object
  */
@@ -26221,11 +24331,6 @@ export type GetApiGovernanceGrantsStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		/**
-		 * @type string
-		 */
-		authority: string;
-		realmId: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -26257,42 +24362,6 @@ export type GetApiGovernanceGrantsStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-};
-
-export const GetApiGovernanceGrantsStatus400ErrorCodeEnum = {
-	PlatformGrantRealmForbidden: "PlatformGrantRealmForbidden",
-	RealmGrantRealmRequired: "RealmGrantRealmRequired",
-} as const;
-
-export type GetApiGovernanceGrantsStatus400ErrorCodeEnum =
-	(typeof GetApiGovernanceGrantsStatus400ErrorCodeEnum)[keyof typeof GetApiGovernanceGrantsStatus400ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiGovernanceGrantsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformGrantRealmForbidden'
-		 * @type string
-		 */
-		code: GetApiGovernanceGrantsStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
 };
 
 export const GetApiGovernanceGrantsStatus403ErrorCodeEnum = {
@@ -26334,11 +24403,6 @@ export type GetApiGovernanceGrantsStatus403 = {
 /**
  * @type object
  */
-export type GetApiGovernanceGrantsStatus422 = ValidationError;
-
-/**
- * @type object
- */
 export type GetApiGovernanceGrantsStatus500 = InternalError;
 
 /**
@@ -26347,7 +24411,7 @@ export type GetApiGovernanceGrantsStatus500 = InternalError;
 export type GetApiGovernanceGrantsOptions = {
 	body?: never;
 	path?: never;
-	query: GetApiGovernanceGrantsQuery;
+	query?: never;
 	headers?: never;
 };
 
@@ -26356,9 +24420,7 @@ export type GetApiGovernanceGrantsOptions = {
  */
 export type GetApiGovernanceGrantsResponses = {
 	"200": GetApiGovernanceGrantsStatus200;
-	"400": GetApiGovernanceGrantsStatus400;
 	"403": GetApiGovernanceGrantsStatus403;
-	"422": GetApiGovernanceGrantsStatus422;
 	"500": GetApiGovernanceGrantsStatus500;
 };
 
@@ -26367,9 +24429,7 @@ export type GetApiGovernanceGrantsResponses = {
  */
 export type GetApiGovernanceGrantsResponse =
 	| GetApiGovernanceGrantsStatus200
-	| GetApiGovernanceGrantsStatus400
 	| GetApiGovernanceGrantsStatus403
-	| GetApiGovernanceGrantsStatus422
 	| GetApiGovernanceGrantsStatus500;
 
 /**
@@ -26382,11 +24442,6 @@ export type PostApiGovernanceGrantsStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	/**
-	 * @type string
-	 */
-	authority: string;
-	realmId: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -26419,16 +24474,6 @@ export type PostApiGovernanceGrantsStatus200 = {
 	updatedAt: string;
 };
 
-export const PostApiGovernanceGrantsStatus400ErrorCodeEnum = {
-	PlatformGrantRealmForbidden: "PlatformGrantRealmForbidden",
-	RealmGrantRealmRequired: "RealmGrantRealmRequired",
-	RealmGrantCapabilityInvalid: "RealmGrantCapabilityInvalid",
-	CapabilityGrantExpiryInvalid: "CapabilityGrantExpiryInvalid",
-} as const;
-
-export type PostApiGovernanceGrantsStatus400ErrorCodeEnum =
-	(typeof PostApiGovernanceGrantsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceGrantsStatus400ErrorCodeEnum];
-
 export type PostApiGovernanceGrantsStatus400 =
 	| {
 			/**
@@ -26436,10 +24481,10 @@ export type PostApiGovernanceGrantsStatus400 =
 			 */
 			error: {
 				/**
-				 * @default 'PlatformGrantRealmForbidden'
+				 * @default 'CapabilityGrantExpiryInvalid'
 				 * @type string
 				 */
-				code: PostApiGovernanceGrantsStatus400ErrorCodeEnum;
+				code: "CapabilityGrantExpiryInvalid";
 				/**
 				 * @type string
 				 */
@@ -26496,34 +24541,6 @@ export type PostApiGovernanceGrantsStatus403 = {
 /**
  * @type object
  */
-export type PostApiGovernanceGrantsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmMemberNotFound'
-		 * @type string
-		 */
-		code: "RealmMemberNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type PostApiGovernanceGrantsStatus409 = {
 	/**
 	 * @type object
@@ -26559,14 +24576,6 @@ export type PostApiGovernanceGrantsStatus422 = ValidationError;
  */
 export type PostApiGovernanceGrantsStatus500 = InternalError;
 
-export const PostApiGovernanceGrantsRequestAuthorityEnum = {
-	platform: "platform",
-	realm: "realm",
-} as const;
-
-export type PostApiGovernanceGrantsRequestAuthorityEnum =
-	(typeof PostApiGovernanceGrantsRequestAuthorityEnum)[keyof typeof PostApiGovernanceGrantsRequestAuthorityEnum];
-
 export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
@@ -26596,16 +24605,6 @@ export type PostApiGovernanceGrantsRequestCapabilityEnum =
  * @type object
  */
 export type PostApiGovernanceGrantsBody = {
-	/**
-	 * @type string
-	 */
-	authority: PostApiGovernanceGrantsRequestAuthorityEnum;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	realmId?: string;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -26641,7 +24640,6 @@ export type PostApiGovernanceGrantsResponses = {
 	"200": PostApiGovernanceGrantsStatus200;
 	"400": PostApiGovernanceGrantsStatus400;
 	"403": PostApiGovernanceGrantsStatus403;
-	"404": PostApiGovernanceGrantsStatus404;
 	"409": PostApiGovernanceGrantsStatus409;
 	"422": PostApiGovernanceGrantsStatus422;
 	"500": PostApiGovernanceGrantsStatus500;
@@ -26654,7 +24652,6 @@ export type PostApiGovernanceGrantsResponse =
 	| PostApiGovernanceGrantsStatus200
 	| PostApiGovernanceGrantsStatus400
 	| PostApiGovernanceGrantsStatus403
-	| PostApiGovernanceGrantsStatus404
 	| PostApiGovernanceGrantsStatus409
 	| PostApiGovernanceGrantsStatus422
 	| PostApiGovernanceGrantsStatus500;
@@ -27406,14 +25403,6 @@ export type ReplaceZoneSlugAddressStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const ReplaceZoneSlugAddressStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type ReplaceZoneSlugAddressStatus403ErrorCodeEnum =
-	(typeof ReplaceZoneSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceZoneSlugAddressStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -27426,7 +25415,7 @@ export type ReplaceZoneSlugAddressStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: ReplaceZoneSlugAddressStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -28325,14 +26314,6 @@ export type PatchApiZonesByZoneIdStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PatchApiZonesByZoneIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiZonesByZoneIdStatus403ErrorCodeEnum =
-	(typeof PatchApiZonesByZoneIdStatus403ErrorCodeEnum)[keyof typeof PatchApiZonesByZoneIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -28345,7 +26326,7 @@ export type PatchApiZonesByZoneIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PatchApiZonesByZoneIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -29954,14 +27935,6 @@ export type PostApiZonesByZoneIdPagesStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum =
-	(typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -29974,7 +27947,7 @@ export type PostApiZonesByZoneIdPagesStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -30581,14 +28554,6 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -30601,7 +28566,7 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -30823,14 +28788,6 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPath = {
  */
 export type DeleteApiZonesByZoneIdPagesByPageIdStatus204 = void;
 
-export const DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -30843,7 +28800,7 @@ export type DeleteApiZonesByZoneIdPagesByPageIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -31146,14 +29103,6 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200 = {
  */
 export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus400 = MalformedRequestBody;
 
-export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -31166,7 +29115,7 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -31388,14 +29337,6 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus204 = void;
  */
 export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400 = MalformedRequestBody;
 
-export const DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -31408,7 +29349,7 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -31782,14 +29723,6 @@ export type PostApiZonesByZoneIdNavigationStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum =
-	(typeof PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -31802,7 +29735,7 @@ export type PostApiZonesByZoneIdNavigationStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiZonesByZoneIdNavigationStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -32143,14 +30076,6 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -32163,7 +30088,7 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -32358,14 +30283,6 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204 = void;
  */
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400 = MalformedRequestBody;
 
-export const DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -32378,7 +30295,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -32611,14 +30528,6 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
  */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400 = MalformedRequestBody;
 
-export const PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum =
-	(typeof PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum)[keyof typeof PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -32631,7 +30540,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -32782,14 +30691,6 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdPath = {
  */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204 = void;
 
-export const DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -32802,7 +30703,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -33562,14 +31463,6 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum =
-	(typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum)[keyof typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -33582,7 +31475,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -33826,14 +31719,6 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 	  }
 	| MalformedRequestBody;
 
-export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
-	(typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum)[keyof typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -33846,7 +31731,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -34018,15 +31903,6 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdPath =
  */
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204 = void;
 
-export const DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
-	{
-		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitProtected: "UnitProtected",
-	} as const;
-
-export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -34039,7 +31915,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -34618,14 +32494,6 @@ export type PutApiUnitsByIdByUnitIdDocksByKindStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PutApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum =
-	(typeof PutApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -34638,7 +32506,7 @@ export type PutApiUnitsByIdByUnitIdDocksByKindStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -34853,14 +32721,6 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const DeleteApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -34873,7 +32733,7 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByIdByUnitIdDocksByKindStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -35299,15 +33159,6 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatu
 	  }
 	| MalformedRequestBody;
 
-export const PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
-	{
-		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitProtected: "UnitProtected",
-	} as const;
-
-export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -35320,7 +33171,7 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatu
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -36186,10 +34037,10 @@ export type PatchApiUsersMeStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitProtected'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitProtected";
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -36597,7 +34448,6 @@ export const ListCurrentUserStudioContentPermission = {
 	"unit.update": "unit.update",
 	"unit.publish": "unit.publish",
 	"unit.access.manage": "unit.access.manage",
-	"unit.protection.manage": "unit.protection.manage",
 } as const;
 
 export type ListCurrentUserStudioContentPermission =
@@ -36750,17 +34600,6 @@ export const ListCurrentUserStudioContentStatus200ItemsRelationsEnum = {
 export type ListCurrentUserStudioContentStatus200ItemsRelationsEnum =
 	(typeof ListCurrentUserStudioContentStatus200ItemsRelationsEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsRelationsEnum];
 
-export const ListCurrentUserStudioContentStatus200ItemsRolesEnum = {
-	viewer: "viewer",
-	editor: "editor",
-	publishing_editor: "publishing_editor",
-	maintainer: "maintainer",
-	owner: "owner",
-} as const;
-
-export type ListCurrentUserStudioContentStatus200ItemsRolesEnum =
-	(typeof ListCurrentUserStudioContentStatus200ItemsRolesEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsRolesEnum];
-
 export const ListCurrentUserStudioContentStatus200ItemsWorkStateEnum = {
 	actionable: "actionable",
 	blocked: "blocked",
@@ -36773,7 +34612,6 @@ export const ListCurrentUserStudioContentStatus200ItemsPermissionsEnum = {
 	"unit.update": "unit.update",
 	"unit.publish": "unit.publish",
 	"unit.access.manage": "unit.access.manage",
-	"unit.protection.manage": "unit.protection.manage",
 } as const;
 
 export type ListCurrentUserStudioContentStatus200ItemsPermissionsEnum =
@@ -36847,10 +34685,6 @@ export type ListCurrentUserStudioContentStatus200 = {
 		 * @type array
 		 */
 		relations: ListCurrentUserStudioContentStatus200ItemsRelationsEnum[];
-		/**
-		 * @type array
-		 */
-		roles: ListCurrentUserStudioContentStatus200ItemsRolesEnum[];
 		/**
 		 * @type string
 		 */
@@ -37634,7 +35468,7 @@ export type PutApiUsersMePreferencesStatus200 = {
 export type PutApiUsersMePreferencesStatus400 = MalformedRequestBody;
 
 export const PutApiUsersMePreferencesStatus403ErrorCodeEnum = {
-	UnitProtected: "UnitProtected",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 } as const;
 
@@ -37650,7 +35484,7 @@ export type PutApiUsersMePreferencesStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitProtected'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PutApiUsersMePreferencesStatus403ErrorCodeEnum;
@@ -48995,7 +46829,6 @@ export const PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum =
@@ -49338,7 +47171,6 @@ export const DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum =
@@ -50543,7 +48375,6 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus403ErrorCodeEnum = {
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus403ErrorCodeEnum =
@@ -51803,7 +49634,6 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403ErrorCodeEn
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403ErrorCodeEnum =
@@ -53068,7 +50898,6 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403ErrorCodeE
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum =
@@ -55691,26 +53520,6 @@ export const GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum = 
 export type GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum];
 
-export const GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum =
-	(typeof GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum];
-
-export const GetApiEntitiesByUnitIdStatus200AssociationPolicySubjectAssociationEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type GetApiEntitiesByUnitIdStatus200AssociationPolicySubjectAssociationEnum =
-	(typeof GetApiEntitiesByUnitIdStatus200AssociationPolicySubjectAssociationEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200AssociationPolicySubjectAssociationEnum];
-
 export const GetApiEntitiesByUnitIdStatus200OwnerKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -56162,21 +53971,6 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-	/**
-	 * @type object
-	 */
-	associationPolicy: {
-		/**
-		 * @default 'open'
-		 * @type string
-		 */
-		creditAttribution: GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum;
-		/**
-		 * @default 'open'
-		 * @type string
-		 */
-		subjectAssociation: GetApiEntitiesByUnitIdStatus200AssociationPolicySubjectAssociationEnum;
-	};
 	owner:
 		| ({
 				/**
@@ -56484,14 +54278,6 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200 = {
  */
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
 
-export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum =
-	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -56504,7 +54290,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -56843,318 +54629,6 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponse =
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500;
-
-/**
- * @type object
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const GetApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type GetApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum =
-	(typeof GetApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum)[keyof typeof GetApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum];
-
-export const GetApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type GetApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum =
-	(typeof GetApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum)[keyof typeof GetApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum];
-
-/**
- * @type object
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyStatus200 = {
-	/**
-	 * @default 'open'
-	 * @type string
-	 */
-	creditAttribution: GetApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum;
-	/**
-	 * @default 'open'
-	 * @type string
-	 */
-	subjectAssociation: GetApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum;
-};
-
-/**
- * @type object
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'EntityEntryNotFound'
-		 * @type string
-		 */
-		code: "EntityEntryNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyOptions = {
-	body?: never;
-	path: GetApiEntitiesByUnitIdAssociationPolicyPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyResponses = {
-	"200": GetApiEntitiesByUnitIdAssociationPolicyStatus200;
-	"404": GetApiEntitiesByUnitIdAssociationPolicyStatus404;
-	"422": GetApiEntitiesByUnitIdAssociationPolicyStatus422;
-	"500": GetApiEntitiesByUnitIdAssociationPolicyStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiEntitiesByUnitIdAssociationPolicyResponse =
-	| GetApiEntitiesByUnitIdAssociationPolicyStatus200
-	| GetApiEntitiesByUnitIdAssociationPolicyStatus404
-	| GetApiEntitiesByUnitIdAssociationPolicyStatus422
-	| GetApiEntitiesByUnitIdAssociationPolicyStatus500;
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const PatchApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum =
-	(typeof PatchApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum)[keyof typeof PatchApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum];
-
-export const PatchApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum =
-	(typeof PatchApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum)[keyof typeof PatchApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum];
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus200 = {
-	/**
-	 * @default 'open'
-	 * @type string
-	 */
-	creditAttribution: PatchApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum;
-	/**
-	 * @default 'open'
-	 * @type string
-	 */
-	subjectAssociation: PatchApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum;
-};
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus400 = MalformedRequestBody;
-
-export const PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum =
-	(typeof PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum)[keyof typeof PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'EntityEntryNotFound'
-		 * @type string
-		 */
-		code: "EntityEntryNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyStatus500 = InternalError;
-
-export const PatchApiEntitiesByUnitIdAssociationPolicyRequestCreditAttributionEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type PatchApiEntitiesByUnitIdAssociationPolicyRequestCreditAttributionEnum =
-	(typeof PatchApiEntitiesByUnitIdAssociationPolicyRequestCreditAttributionEnum)[keyof typeof PatchApiEntitiesByUnitIdAssociationPolicyRequestCreditAttributionEnum];
-
-export const PatchApiEntitiesByUnitIdAssociationPolicyRequestSubjectAssociationEnum = {
-	open: "open",
-	approval: "approval",
-	invite_only: "invite_only",
-	closed: "closed",
-} as const;
-
-export type PatchApiEntitiesByUnitIdAssociationPolicyRequestSubjectAssociationEnum =
-	(typeof PatchApiEntitiesByUnitIdAssociationPolicyRequestSubjectAssociationEnum)[keyof typeof PatchApiEntitiesByUnitIdAssociationPolicyRequestSubjectAssociationEnum];
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyBody = {
-	/**
-	 * @default 'open'
-	 * @type string | undefined
-	 */
-	creditAttribution?: PatchApiEntitiesByUnitIdAssociationPolicyRequestCreditAttributionEnum;
-	/**
-	 * @default 'open'
-	 * @type string | undefined
-	 */
-	subjectAssociation?: PatchApiEntitiesByUnitIdAssociationPolicyRequestSubjectAssociationEnum;
-};
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyOptions = {
-	body: PatchApiEntitiesByUnitIdAssociationPolicyBody;
-	path: PatchApiEntitiesByUnitIdAssociationPolicyPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyResponses = {
-	"200": PatchApiEntitiesByUnitIdAssociationPolicyStatus200;
-	"400": PatchApiEntitiesByUnitIdAssociationPolicyStatus400;
-	"403": PatchApiEntitiesByUnitIdAssociationPolicyStatus403;
-	"404": PatchApiEntitiesByUnitIdAssociationPolicyStatus404;
-	"422": PatchApiEntitiesByUnitIdAssociationPolicyStatus422;
-	"500": PatchApiEntitiesByUnitIdAssociationPolicyStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PatchApiEntitiesByUnitIdAssociationPolicyResponse =
-	| PatchApiEntitiesByUnitIdAssociationPolicyStatus200
-	| PatchApiEntitiesByUnitIdAssociationPolicyStatus400
-	| PatchApiEntitiesByUnitIdAssociationPolicyStatus403
-	| PatchApiEntitiesByUnitIdAssociationPolicyStatus404
-	| PatchApiEntitiesByUnitIdAssociationPolicyStatus422
-	| PatchApiEntitiesByUnitIdAssociationPolicyStatus500;
 
 export const GetApiTagsLocalizationLanguagesEnum = {
 	zh: "zh",
@@ -57820,14 +55294,6 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
  */
 export type PostApiUnitsByTypeByUnitIdAliasesStatus400 = MalformedRequestBody;
 
-export const PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -57840,7 +55306,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -58045,14 +55511,6 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdPath = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204 = void;
 
-export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -58065,7 +55523,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -58748,7 +56206,6 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400 =
 
 export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -58961,14 +56418,6 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdPath = 
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204 = void;
 
-export const DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -58981,7 +56430,7 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus4
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -59207,7 +56656,6 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 =
 
 export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
@@ -59416,15 +56864,6 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdPath =
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204 = void;
 
-export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum =
-	{
-		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitProtected: "UnitProtected",
-	} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -59437,7 +56876,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -59636,14 +57075,6 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
  */
 export type PostApiUnitsByTypeByUnitIdLinksStatus400 = MalformedRequestBody;
 
-export const PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -59656,7 +57087,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -60034,14 +57465,6 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdPath = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204 = void;
 
-export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -60054,7 +57477,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -60615,14 +58038,6 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200 = {
 	updatedAt: string;
 };
 
-export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -60635,7 +58050,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -60864,7 +58279,6 @@ export type GetApiUnitsByIdByUnitIdContentStructuresStatus200 = {
 
 export const GetApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
@@ -61045,7 +58459,6 @@ export type PostApiUnitsByIdByUnitIdContentStructuresStatus400 = MalformedReques
 
 export const PostApiUnitsByIdByUnitIdContentStructuresStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
@@ -61384,7 +58797,6 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200 = {
 
 export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
@@ -61542,7 +58954,6 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus400 =
 
 export const DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
@@ -61826,7 +59237,6 @@ export type GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus
 export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus403ErrorCodeEnum =
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitProtected: "UnitProtected",
 		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	} as const;
 
@@ -61995,7 +59405,6 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitProtected: "UnitProtected",
 		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	} as const;
 
@@ -62338,7 +59747,6 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400
 
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 } as const;
 
@@ -62789,7 +60197,6 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
 export const PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403ErrorCodeEnum =
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitProtected: "UnitProtected",
 		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	} as const;
 
@@ -63116,7 +60523,6 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
 export const DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus403ErrorCodeEnum =
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
-		UnitProtected: "UnitProtected",
 		PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	} as const;
 
@@ -63567,14 +60973,6 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
  */
 export type PutApiUnitsBookByUnitIdContentStructureStatus400 = MalformedRequestBody;
 
-export const PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum =
-	(typeof PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -63587,7 +60985,7 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiUnitsBookByUnitIdContentStructureStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -64339,14 +61737,6 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200 = {
  */
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400 = MalformedRequestBody;
 
-export const PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum =
-	(typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum)[keyof typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -64359,7 +61749,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -68469,6 +65859,7 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEn
 	release: "release",
 	entity: "entity",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -71973,7 +69364,6 @@ export type PatchApiCollectionsByCollectionIdStatus400 = MalformedRequestBody;
 export const PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum =
@@ -72922,7 +70312,6 @@ export type DeleteApiCollectionsByCollectionIdStatus400 = MalformedRequestBody;
 export const DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum =
@@ -73137,7 +70526,6 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus400 = MalformedReque
 export const PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum =
@@ -73415,7 +70803,6 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus400 = MalformedR
 export const PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum =
@@ -73704,7 +71091,6 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400 = Malform
 export const DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum =
@@ -76137,14 +73523,6 @@ export type PatchApiReviewsByReviewIdStatus200 = {
  */
 export type PatchApiReviewsByReviewIdStatus400 = MalformedRequestBody;
 
-export const PatchApiReviewsByReviewIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiReviewsByReviewIdStatus403ErrorCodeEnum =
-	(typeof PatchApiReviewsByReviewIdStatus403ErrorCodeEnum)[keyof typeof PatchApiReviewsByReviewIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -76157,7 +73535,7 @@ export type PatchApiReviewsByReviewIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PatchApiReviewsByReviewIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -78524,14 +75902,6 @@ export type PostApiPollsByPollIdCloseStatus200 = {
 	id: string;
 };
 
-export const PostApiPollsByPollIdCloseStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiPollsByPollIdCloseStatus403ErrorCodeEnum =
-	(typeof PostApiPollsByPollIdCloseStatus403ErrorCodeEnum)[keyof typeof PostApiPollsByPollIdCloseStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -78544,7 +75914,7 @@ export type PostApiPollsByPollIdCloseStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiPollsByPollIdCloseStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -78881,14 +76251,6 @@ export type PutApiPostsByPostIdScoresStatus200 = {
  */
 export type PutApiPostsByPostIdScoresStatus400 = MalformedRequestBody;
 
-export const PutApiPostsByPostIdScoresStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiPostsByPostIdScoresStatus403ErrorCodeEnum =
-	(typeof PutApiPostsByPostIdScoresStatus403ErrorCodeEnum)[keyof typeof PutApiPostsByPostIdScoresStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -78901,7 +76263,7 @@ export type PutApiPostsByPostIdScoresStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiPostsByPostIdScoresStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -80439,14 +77801,6 @@ export type PatchApiPostsByPostIdStatus200 = {
  */
 export type PatchApiPostsByPostIdStatus400 = MalformedRequestBody;
 
-export const PatchApiPostsByPostIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiPostsByPostIdStatus403ErrorCodeEnum =
-	(typeof PatchApiPostsByPostIdStatus403ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -80459,7 +77813,7 @@ export type PatchApiPostsByPostIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PatchApiPostsByPostIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -82247,14 +79601,6 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus200 = {
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus400 = MalformedRequestBody;
 
-export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum =
-	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -82267,7 +79613,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -83400,14 +80746,6 @@ export type ReplaceRealmSlugAddressStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const ReplaceRealmSlugAddressStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type ReplaceRealmSlugAddressStatus403ErrorCodeEnum =
-	(typeof ReplaceRealmSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceRealmSlugAddressStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -83420,7 +80758,7 @@ export type ReplaceRealmSlugAddressStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: ReplaceRealmSlugAddressStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -83930,9 +81268,9 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 */
 	viewerMembership?: {
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		role: string;
+		isOwner: boolean;
 		/**
 		 * @type string
 		 */
@@ -84073,14 +81411,6 @@ export type PatchApiRealmsByRealmIdStatus200 = {
  */
 export type PatchApiRealmsByRealmIdStatus400 = MalformedRequestBody;
 
-export const PatchApiRealmsByRealmIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PatchApiRealmsByRealmIdStatus403ErrorCodeEnum =
-	(typeof PatchApiRealmsByRealmIdStatus403ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -84093,7 +81423,7 @@ export type PatchApiRealmsByRealmIdStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: PatchApiRealmsByRealmIdStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -84606,14 +81936,6 @@ export type PutApiRealmsByRealmIdScoreContextStatus200 = {
  */
 export type PutApiRealmsByRealmIdScoreContextStatus400 = MalformedRequestBody;
 
-export const PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -84626,7 +81948,7 @@ export type PutApiRealmsByRealmIdScoreContextStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -84764,14 +82086,6 @@ export type DeleteApiRealmsByRealmIdScoreContextPath = {
  */
 export type DeleteApiRealmsByRealmIdScoreContextStatus204 = void;
 
-export const DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -84784,7 +82098,7 @@ export type DeleteApiRealmsByRealmIdScoreContextStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -84865,34 +82179,6 @@ export type PutApiRealmsByRealmIdMembershipStatus200 = {
  * @type object
  */
 export type PutApiRealmsByRealmIdMembershipStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembershipStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitProtected'
-		 * @type string
-		 */
-		code: "UnitProtected";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
 
 /**
  * @type object
@@ -85024,7 +82310,6 @@ export type PutApiRealmsByRealmIdMembershipOptions = {
 export type PutApiRealmsByRealmIdMembershipResponses = {
 	"200": PutApiRealmsByRealmIdMembershipStatus200;
 	"400": PutApiRealmsByRealmIdMembershipStatus400;
-	"403": PutApiRealmsByRealmIdMembershipStatus403;
 	"404": PutApiRealmsByRealmIdMembershipStatus404;
 	"409": PutApiRealmsByRealmIdMembershipStatus409;
 	"422": PutApiRealmsByRealmIdMembershipStatus422;
@@ -85038,7 +82323,6 @@ export type PutApiRealmsByRealmIdMembershipResponses = {
 export type PutApiRealmsByRealmIdMembershipResponse =
 	| PutApiRealmsByRealmIdMembershipStatus200
 	| PutApiRealmsByRealmIdMembershipStatus400
-	| PutApiRealmsByRealmIdMembershipStatus403
 	| PutApiRealmsByRealmIdMembershipStatus404
 	| PutApiRealmsByRealmIdMembershipStatus409
 	| PutApiRealmsByRealmIdMembershipStatus422
@@ -85061,34 +82345,6 @@ export type DeleteApiRealmsByRealmIdMembershipPath = {
  * @type void
  */
 export type DeleteApiRealmsByRealmIdMembershipStatus204 = void;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdMembershipStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitProtected'
-		 * @type string
-		 */
-		code: "UnitProtected";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
 
 /**
  * @type object
@@ -85195,7 +82451,6 @@ export type DeleteApiRealmsByRealmIdMembershipOptions = {
  */
 export type DeleteApiRealmsByRealmIdMembershipResponses = {
 	"204": DeleteApiRealmsByRealmIdMembershipStatus204;
-	"403": DeleteApiRealmsByRealmIdMembershipStatus403;
 	"404": DeleteApiRealmsByRealmIdMembershipStatus404;
 	"409": DeleteApiRealmsByRealmIdMembershipStatus409;
 	"422": DeleteApiRealmsByRealmIdMembershipStatus422;
@@ -85208,7 +82463,6 @@ export type DeleteApiRealmsByRealmIdMembershipResponses = {
  */
 export type DeleteApiRealmsByRealmIdMembershipResponse =
 	| DeleteApiRealmsByRealmIdMembershipStatus204
-	| DeleteApiRealmsByRealmIdMembershipStatus403
 	| DeleteApiRealmsByRealmIdMembershipStatus404
 	| DeleteApiRealmsByRealmIdMembershipStatus409
 	| DeleteApiRealmsByRealmIdMembershipStatus422
@@ -85285,16 +82539,6 @@ export const GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum = {
 
 export type GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum =
 	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum];
-
-export const GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum = {
-	owner: "owner",
-	admin: "admin",
-	moderator: "moderator",
-	member: "member",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum =
-	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum];
 
 export const GetApiRealmsByRealmIdMembersStatus200ItemsStateEnum = {
 	active: "active",
@@ -85412,10 +82656,9 @@ export type GetApiRealmsByRealmIdMembersStatus200 = {
 			  )
 			| null;
 		/**
-		 * @default 'owner'
-		 * @type string
+		 * @type boolean
 		 */
-		role: GetApiRealmsByRealmIdMembersStatus200ItemsRoleEnum;
+		isOwner: boolean;
 		/**
 		 * @default 'active'
 		 * @type string
@@ -85541,16 +82784,6 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdPath = {
 	profileId: string;
 };
 
-export const PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum = {
-	owner: "owner",
-	admin: "admin",
-	moderator: "moderator",
-	member: "member",
-} as const;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum =
-	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum];
-
 export const PatchApiRealmsByRealmIdMembersByProfileIdStatus200StateEnum = {
 	active: "active",
 	pending: "pending",
@@ -85579,10 +82812,9 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200 = {
 	 */
 	profileId: string;
 	/**
-	 * @default 'owner'
-	 * @type string
+	 * @type boolean
 	 */
-	role: PatchApiRealmsByRealmIdMembersByProfileIdStatus200RoleEnum;
+	isOwner: boolean;
 	/**
 	 * @default 'active'
 	 * @type string
@@ -85607,15 +82839,6 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200 = {
  */
 export type PatchApiRealmsByRealmIdMembersByProfileIdStatus400 = MalformedRequestBody;
 
-export const PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-	RealmRoleManagementForbidden: "RealmRoleManagementForbidden",
-} as const;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum =
-	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -85628,7 +82851,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -85657,6 +82880,34 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus404 = {
 		 * @type string
 		 */
 		code: "RealmMemberNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdMembersByProfileIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmOwnerLeaveForbidden'
+		 * @type string
+		 */
+		code: "RealmOwnerLeaveForbidden";
 		/**
 		 * @type string
 		 */
@@ -85706,16 +82957,6 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus429 = {
  */
 export type PatchApiRealmsByRealmIdMembersByProfileIdStatus500 = InternalError;
 
-export const PatchApiRealmsByRealmIdMembersByProfileIdRequestRoleEnum = {
-	owner: "owner",
-	admin: "admin",
-	moderator: "moderator",
-	member: "member",
-} as const;
-
-export type PatchApiRealmsByRealmIdMembersByProfileIdRequestRoleEnum =
-	(typeof PatchApiRealmsByRealmIdMembersByProfileIdRequestRoleEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdRequestRoleEnum];
-
 export const PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum = {
 	active: "active",
 	pending: "pending",
@@ -85732,13 +82973,9 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum =
  */
 export type PatchApiRealmsByRealmIdMembersByProfileIdBody = {
 	/**
-	 * @type string | undefined
+	 * @type string
 	 */
-	role?: PatchApiRealmsByRealmIdMembersByProfileIdRequestRoleEnum;
-	/**
-	 * @type string | undefined
-	 */
-	state?: PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum;
+	state: PatchApiRealmsByRealmIdMembersByProfileIdRequestStateEnum;
 };
 
 /**
@@ -85759,6 +82996,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdResponses = {
 	"400": PatchApiRealmsByRealmIdMembersByProfileIdStatus400;
 	"403": PatchApiRealmsByRealmIdMembersByProfileIdStatus403;
 	"404": PatchApiRealmsByRealmIdMembersByProfileIdStatus404;
+	"409": PatchApiRealmsByRealmIdMembersByProfileIdStatus409;
 	"422": PatchApiRealmsByRealmIdMembersByProfileIdStatus422;
 	"429": PatchApiRealmsByRealmIdMembersByProfileIdStatus429;
 	"500": PatchApiRealmsByRealmIdMembersByProfileIdStatus500;
@@ -85772,441 +83010,10 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdResponse =
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus400
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
+	| PatchApiRealmsByRealmIdMembersByProfileIdStatus409
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-};
-
-export const GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
-	{
-		"realm.contribute": "realm.contribute",
-		"realm.settings.update": "realm.settings.update",
-		"realm.members.read": "realm.members.read",
-		"realm.members.manage": "realm.members.manage",
-		"realm.rules.publish": "realm.rules.publish",
-		"realm.pins.manage": "realm.pins.manage",
-		"realm.units.moderate": "realm.units.moderate",
-	} as const;
-
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
-	(typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum)[keyof typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum];
-
-export const GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum = {
-	role: "role",
-	realm_grant: "realm_grant",
-	platform: "platform",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum =
-	(typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum)[keyof typeof GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum];
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	/**
-	 * @type string
-	 */
-	role: string;
-	/**
-	 * @type array
-	 */
-	capabilities: {
-		/**
-		 * @default 'realm.contribute'
-		 * @type string
-		 */
-		capability: GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum;
-		/**
-		 * @type array
-		 */
-		sources: GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum[];
-		directGrant:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					grantedByProfileId: string;
-					expiresAt: (string | null) | null;
-			  } | null)
-			| null;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: "RealmCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmMemberNotFound'
-		 * @type string
-		 */
-		code: "RealmMemberNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions = {
-	body?: never;
-	path: GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses = {
-	"200": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200;
-	"403": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403;
-	"404": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404;
-	"422": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422;
-	"500": GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponse =
-	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200
-	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
-	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
-	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
-	| GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-};
-
-export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
-	{
-		"realm.contribute": "realm.contribute",
-		"realm.settings.update": "realm.settings.update",
-		"realm.members.read": "realm.members.read",
-		"realm.members.manage": "realm.members.manage",
-		"realm.rules.publish": "realm.rules.publish",
-		"realm.pins.manage": "realm.pins.manage",
-		"realm.units.moderate": "realm.units.moderate",
-	} as const;
-
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum =
-	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum];
-
-export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum = {
-	role: "role",
-	realm_grant: "realm_grant",
-	platform: "platform",
-} as const;
-
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum =
-	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum];
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	/**
-	 * @type string
-	 */
-	role: string;
-	/**
-	 * @type array
-	 */
-	capabilities: {
-		/**
-		 * @default 'realm.contribute'
-		 * @type string
-		 */
-		capability: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesCapabilityEnum;
-		/**
-		 * @type array
-		 */
-		sources: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200CapabilitiesSourcesEnum[];
-		directGrant:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					grantedByProfileId: string;
-					expiresAt: (string | null) | null;
-			  } | null)
-			| null;
-	}[];
-};
-
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'CapabilityGrantExpiryInvalid'
-				 * @type string
-				 */
-				code: "CapabilityGrantExpiryInvalid";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-	FreshSessionRequired: "FreshSessionRequired",
-} as const;
-
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmMemberNotFound'
-		 * @type string
-		 */
-		code: "RealmMemberNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500 = InternalError;
-
-export const PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum = {
-	"realm.contribute": "realm.contribute",
-	"realm.settings.update": "realm.settings.update",
-	"realm.members.read": "realm.members.read",
-	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
-	"realm.pins.manage": "realm.pins.manage",
-	"realm.units.moderate": "realm.units.moderate",
-} as const;
-
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum =
-	(typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum)[keyof typeof PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum];
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesBody = {
-	/**
-	 * @type array
-	 */
-	capabilities: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesRequestCapabilitiesEnum[];
-	expiresAt: (string | null) | null;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions = {
-	body: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesBody;
-	path: PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses = {
-	"200": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200;
-	"400": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400;
-	"403": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403;
-	"404": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404;
-	"422": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422;
-	"500": PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponse =
-	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus200
-	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus400
-	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus403
-	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus404
-	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus422
-	| PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesStatus500;
 
 /**
  * @type object
@@ -86238,14 +83045,6 @@ export type PutApiRealmsByRealmIdRulesStatus200 = {
  */
 export type PutApiRealmsByRealmIdRulesStatus400 = MalformedRequestBody;
 
-export const PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -86258,7 +83057,7 @@ export type PutApiRealmsByRealmIdRulesStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -88941,14 +85740,6 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus200 = {
  */
 export type PutApiRealmsByRealmIdPinsByUnitIdStatus400 = MalformedRequestBody;
 
-export const PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -88961,7 +85752,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -89141,14 +85932,6 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdQuery = {
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus204 = void;
 
-export const DeleteApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -89161,7 +85944,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: DeleteApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum;
+		code: "RealmCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -90309,8 +87092,6 @@ export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	protect: "protect",
-	unprotect: "unprotect",
 	warning: "warning",
 	silence: "silence",
 	suspension: "suspension",
@@ -91518,14 +88299,6 @@ export type PostApiRealmsByRealmIdNavigationStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PostApiRealmsByRealmIdNavigationStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiRealmsByRealmIdNavigationStatus403ErrorCodeEnum =
-	(typeof PostApiRealmsByRealmIdNavigationStatus403ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdNavigationStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -91538,7 +88311,7 @@ export type PostApiRealmsByRealmIdNavigationStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiRealmsByRealmIdNavigationStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -91879,14 +88652,6 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus400 =
 	  }
 	| MalformedRequestBody;
 
-export const PutApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -91899,7 +88664,7 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -92094,14 +88859,6 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204 = void;
  */
 export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400 = MalformedRequestBody;
 
-export const DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -92114,7 +88871,7 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -96687,14 +93444,6 @@ export type GetApiSearchZonesByZoneIdFeatureStatus200 = {
 	updatedAt: string;
 };
 
-export const GetApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -96707,7 +93456,7 @@ export type GetApiSearchZonesByZoneIdFeatureStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: GetApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -96861,14 +93610,6 @@ export type PutApiSearchZonesByZoneIdFeatureStatus200 = {
  */
 export type PutApiSearchZonesByZoneIdFeatureStatus400 = MalformedRequestBody;
 
-export const PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum =
-	(typeof PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum)[keyof typeof PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -96881,7 +93622,7 @@ export type PutApiSearchZonesByZoneIdFeatureStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PutApiSearchZonesByZoneIdFeatureStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -101325,14 +98066,6 @@ export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus200 = {
 	}[];
 };
 
-export const GetApiSearchZonesByZoneIdFeatureRevisionsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus403ErrorCodeEnum =
-	(typeof GetApiSearchZonesByZoneIdFeatureRevisionsStatus403ErrorCodeEnum)[keyof typeof GetApiSearchZonesByZoneIdFeatureRevisionsStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -101345,7 +98078,7 @@ export type GetApiSearchZonesByZoneIdFeatureRevisionsStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: GetApiSearchZonesByZoneIdFeatureRevisionsStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -101499,14 +98232,6 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200 = {
  */
 export type PostApiSearchZonesByZoneIdFeatureRestoreStatus400 = MalformedRequestBody;
 
-export const PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitProtected: "UnitProtected",
-} as const;
-
-export type PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum =
-	(typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -101519,7 +98244,7 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: PostApiSearchZonesByZoneIdFeatureRestoreStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */

@@ -3,7 +3,6 @@ import { type Static, t } from "elysia";
 import {
 	AliasKindValues,
 	CreditAttributionRoleValues,
-	EntityAssociationPolicyModeValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
@@ -69,16 +68,6 @@ export const AddUnitSubjectAssociationBody = t.Object(
 	{ additionalProperties: false },
 );
 export type AddUnitSubjectAssociationBody = Static<typeof AddUnitSubjectAssociationBody>;
-
-const EntityAssociationPolicyMode = t.UnionEnum(EntityAssociationPolicyModeValues);
-export const UpdateEntityAssociationPolicyBody = t.Object(
-	{
-		creditAttribution: t.Optional(EntityAssociationPolicyMode),
-		subjectAssociation: t.Optional(EntityAssociationPolicyMode),
-	},
-	{ additionalProperties: false, minProperties: 1 },
-);
-export type UpdateEntityAssociationPolicyBody = Static<typeof UpdateEntityAssociationPolicyBody>;
 
 export const AddUnitLinkBody = t.Object({
 	url: t.String({ format: "uri" }),

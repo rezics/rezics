@@ -20,7 +20,7 @@ import {
 	realmUnit,
 	score,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
@@ -78,10 +78,7 @@ import {
 import { selectReplyTree } from "./reply-tree-query";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 
-const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitProtected",
-]);
+const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 
 const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'post'::post_kind
@@ -327,13 +324,10 @@ export default new Elysia()
 							profileId: profile.unitId,
 							nextBody: body.body,
 						});
-						await tx.insert(unitAccessBinding).values({
+						await tx.insert(unitOwnership).values({
 							unitId: created.id,
-							subjectKind: "profile",
 							profileId: profile.unitId,
-							role: "owner",
-							scope: [],
-							grantedByProfileId: profile.unitId,
+							assignedByProfileId: profile.unitId,
 						});
 						await createProfilePublisherAttribution(tx, {
 							sourceUnitId: created.id,
@@ -784,13 +778,10 @@ export default new Elysia()
 							profileId: profile.unitId,
 							nextBody: body.body,
 						});
-						await tx.insert(unitAccessBinding).values({
+						await tx.insert(unitOwnership).values({
 							unitId: created.id,
-							subjectKind: "profile",
 							profileId: profile.unitId,
-							role: "owner",
-							scope: [],
-							grantedByProfileId: profile.unitId,
+							assignedByProfileId: profile.unitId,
 						});
 						await createProfilePublisherAttribution(tx, {
 							sourceUnitId: created.id,
@@ -893,9 +884,6 @@ export default new Elysia()
 					await authorization.unit.ensureCanUpdate(params.replyPostId, [
 						["localizations"],
 					]);
-					await authorization.unit.ensureOperationAllowed(params.replyPostId, [
-						"localizations",
-					]);
 					await database.transaction(async (tx) => {
 						const [current] = await tx
 							.select({ content: unitLocalization.content })
@@ -941,10 +929,7 @@ export default new Elysia()
 					body: UpdateReplyBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitPermissionForbidden",
-							"UnitProtected",
-						]),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"ReplyPostNotFound",
 							"UnitNotFound",
@@ -962,7 +947,6 @@ export default new Elysia()
 				async ({ params, profile, authorization }) => {
 					await getReplyPost(params.postId, params.replyPostId);
 					await authorization.unit.ensure(params.replyPostId, "unit.delete");
-					await authorization.unit.ensureOperationAllowed(params.replyPostId, ["unit"]);
 					await database.transaction(async (tx) => {
 						await tx
 							.update(unit)

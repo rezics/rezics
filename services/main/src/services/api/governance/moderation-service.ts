@@ -13,14 +13,12 @@ import {
 	realmUnit,
 	realmUnitStatusEvent,
 	unit,
-	unitAccessBinding,
-	unitProtection,
+	unitOwnership,
 } from "../../database/schema";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
 import {
 	ModerationActionIncompatible,
-	ModerationActionNoEffect,
 	ModerationIdempotencyConflict,
 	ModerationNoteRoleDuplicate,
 	ModerationRealmMissing,
@@ -91,16 +89,7 @@ type LockActionPlan = {
 	resultingPostTargetingLocked: boolean;
 };
 
-type ProtectionActionPlan =
-	| {
-			type: "protect";
-			scope: string[];
-			mode: "frozen" | "owner_only";
-	  }
-	| { type: "unprotect"; scope: string[] };
-
-type ModerationActionPlan =
-	StateActionPlan | LockActionPlan | ProtectionActionPlan | { type: "case_only" };
+type ModerationActionPlan = StateActionPlan | LockActionPlan | { type: "case_only" };
 
 function canonicalize(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(canonicalize);
@@ -164,15 +153,9 @@ async function getModerationTargetContext(
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
 		const owners = await tx
-			.select({ profileId: unitAccessBinding.profileId })
-			.from(unitAccessBinding)
-			.where(
-				and(
-					eq(unitAccessBinding.unitId, target.id),
-					eq(unitAccessBinding.role, "owner"),
-					isNull(unitAccessBinding.revokedAt),
-				),
-			);
+			.select({ profileId: unitOwnership.profileId })
+			.from(unitOwnership)
+			.where(and(eq(unitOwnership.unitId, target.id), isNull(unitOwnership.revokedAt)));
 		return { recipientProfileIds: presentProfileIds(owners), subjectUnitId: target.id };
 	}
 	if (row.targetKind === "profile") {
@@ -193,15 +176,9 @@ async function getModerationTargetContext(
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
 		const owners = await tx
-			.select({ profileId: unitAccessBinding.profileId })
-			.from(unitAccessBinding)
-			.where(
-				and(
-					eq(unitAccessBinding.unitId, target.unitId),
-					eq(unitAccessBinding.role, "owner"),
-					isNull(unitAccessBinding.revokedAt),
-				),
-			);
+			.select({ profileId: unitOwnership.profileId })
+			.from(unitOwnership)
+			.where(and(eq(unitOwnership.unitId, target.unitId), isNull(unitOwnership.revokedAt)));
 		return {
 			recipientProfileIds: presentProfileIds(owners),
 			subjectUnitId: target.unitId,
@@ -335,35 +312,6 @@ async function loadPostTargetingLockPlan(
 			current.postTargetingLocked,
 			action,
 		),
-	};
-}
-
-async function loadProtectionPlan(
-	tx: DatabaseTransaction,
-	body: Extract<CreateModerationActionBody, { kind: "protect" | "unprotect" }>,
-	row: ModerationCaseRecord,
-): Promise<ProtectionActionPlan> {
-	const [active] = await tx
-		.select({ mode: unitProtection.mode })
-		.from(unitProtection)
-		.where(
-			and(
-				eq(unitProtection.unitId, row.targetId),
-				eq(unitProtection.scope, body.scope),
-				isNull(unitProtection.revokedAt),
-			),
-		)
-		.for("update")
-		.limit(1);
-	if (body.kind === "unprotect") {
-		if (!active) throw new ModerationActionNoEffect();
-		return { type: "unprotect", scope: body.scope };
-	}
-	if (active?.mode === body.protectionMode) throw new ModerationActionNoEffect();
-	return {
-		type: "protect",
-		scope: body.scope,
-		mode: body.protectionMode,
 	};
 }
 
@@ -536,8 +484,6 @@ async function deriveActionPlan(
 		body.kind === "restore_member"
 	)
 		return loadMemberStatePlan(tx, row, body.kind);
-	if (body.kind === "protect" || body.kind === "unprotect")
-		return loadProtectionPlan(tx, body, row);
 	resolveModerationCaseState(row.state, body.kind);
 	return { type: "case_only" };
 }
@@ -630,40 +576,6 @@ async function executeActionPlan(
 			.returning({ unitId: realmUnit.unitId });
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
-	}
-	if (plan.type === "protect") {
-		await tx
-			.update(unitProtection)
-			.set({ revokedAt: new Date(), revokedByProfileId: input.actorProfileId })
-			.where(
-				and(
-					eq(unitProtection.unitId, row.targetId),
-					eq(unitProtection.scope, plan.scope),
-					isNull(unitProtection.revokedAt),
-				),
-			);
-		await tx.insert(unitProtection).values({
-			unitId: row.targetId,
-			scope: plan.scope,
-			mode: plan.mode,
-			createdByProfileId: input.actorProfileId,
-			reasonCode: input.reasonCode,
-		});
-		return;
-	}
-	if (plan.type === "unprotect") {
-		const rows = await tx
-			.update(unitProtection)
-			.set({ revokedAt: new Date(), revokedByProfileId: input.actorProfileId })
-			.where(
-				and(
-					eq(unitProtection.unitId, row.targetId),
-					eq(unitProtection.scope, plan.scope),
-					isNull(unitProtection.revokedAt),
-				),
-			)
-			.returning({ id: unitProtection.id });
-		if (!rows.length) throw new ModerationActionNoEffect();
 	}
 }
 

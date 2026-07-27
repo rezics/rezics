@@ -102,6 +102,7 @@ export * from "./custom/logo";
 export * from "./custom/management-workspace";
 export * from "./custom/menu";
 export * from "./custom/page-heading";
+export * from "./custom/permission-matrix";
 export * from "./custom/portable-text-content";
 export * from "./custom/query-state";
 export * from "./custom/show-more-content";

@@ -9,7 +9,6 @@ export async function findRealmMembership(realmId: string, profileId: string) {
 			.select({
 				realmId: realmMember.realmId,
 				profileId: realmMember.profileId,
-				role: realmMember.role,
 				state: realmMember.state,
 				joinedAt: realmMember.joinedAt,
 				updatedAt: realmMember.updatedAt,

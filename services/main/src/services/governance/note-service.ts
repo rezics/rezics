@@ -10,8 +10,9 @@ import type { DatabaseTransaction } from "../database";
 import {
 	governancePostBinding,
 	post,
-	unitAccessBinding,
+	unitAccessGrant,
 	unitLocalization,
+	unitOwnership,
 	unitRevisionHead,
 	type GovernanceNoteRoleValues,
 	type GovernanceNoteSubjectKindValues,
@@ -76,13 +77,10 @@ export async function createGovernanceNotePost(
 		content: input.note.content,
 		contentStatus: "published",
 	});
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId: created.id,
-		subjectKind: "profile",
 		profileId: input.actorProfileId,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: input.actorProfileId,
+		assignedByProfileId: input.actorProfileId,
 	});
 	await createProfilePublisherAttribution(tx, {
 		sourceUnitId: created.id,
@@ -93,23 +91,22 @@ export async function createGovernanceNotePost(
 		for (const profileId of input.publicRecipientProfileIds ?? []) viewerIds.add(profileId);
 	viewerIds.delete(input.actorProfileId);
 	if (viewerIds.size)
-		await tx.insert(unitAccessBinding).values(
+		await tx.insert(unitAccessGrant).values(
 			[...viewerIds].map((profileId) => ({
 				unitId: created.id,
 				subjectKind: "profile" as const,
 				profileId,
-				role: "viewer" as const,
+				permission: "unit.read" as const,
 				scope: [] as string[],
 				grantedByProfileId: input.actorProfileId,
 			})),
 		);
 	if (input.realmId)
-		await tx.insert(unitAccessBinding).values({
+		await tx.insert(unitAccessGrant).values({
 			unitId: created.id,
 			subjectKind: "realm",
 			realmId: input.realmId,
-			realmRelation: "governor",
-			role: "viewer",
+			permission: "unit.read",
 			scope: [],
 			grantedByProfileId: input.actorProfileId,
 		});

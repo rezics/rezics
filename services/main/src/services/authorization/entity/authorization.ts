@@ -1,17 +1,15 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../../database";
-import { entity, entityAssociationPolicy, unit } from "../../database/schema";
+import { entity, unit } from "../../database/schema";
 import { EntityAssociationRestricted, EntityEntryNotFound } from "../../entities/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import type { UnitAuthorization } from "../unit/authorization";
 import { associationTargetScope } from "../unit/scope";
 import {
-	resolveEntityAssociationPolicy,
-	resolveEntityAssociationAdmission,
-	type EntityAssociationCommand,
+	entityAssociationPermission,
 	type AssociationKind,
-	type EntityAssociationPolicyMode,
+	type EntityAssociationCommand,
 } from "./policy";
 
 export async function lockEntityAssociationState(
@@ -20,19 +18,6 @@ export async function lockEntityAssociationState(
 ): Promise<void> {
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`entity-association:${entityId}`}::text, 0))`,
-	);
-}
-
-export async function getEntityAssociationPolicy(entityId: string) {
-	if (!(await entityExists(database, entityId))) throw new EntityEntryNotFound();
-	return resolveEntityAssociationPolicy(
-		await database
-			.select({
-				kind: entityAssociationPolicy.kind,
-				mode: entityAssociationPolicy.mode,
-			})
-			.from(entityAssociationPolicy)
-			.where(eq(entityAssociationPolicy.entityId, entityId)),
 	);
 }
 
@@ -56,45 +41,6 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		private readonly unitAuthorization: UnitAuthorization<ProfileId>,
 	) {}
 
-	async getAssociationPolicy(entityId: string) {
-		return getEntityAssociationPolicy(entityId);
-	}
-
-	async ensureCanManageAssociationPolicy(
-		this: EntityAuthorization<string>,
-		tx: DatabaseTransaction,
-		entityId: string,
-		kinds: readonly AssociationKind[],
-	): Promise<void> {
-		await lockEntityAssociationState(tx, entityId);
-		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
-		for (const kind of kinds)
-			await this.unitAuthorization.ensureInTransaction(
-				tx,
-				entityId,
-				"unit.association.manage",
-				associationTargetScope(kind),
-			);
-	}
-
-	private async associationMode(
-		tx: DatabaseTransaction,
-		entityId: string,
-		kind: AssociationKind,
-	): Promise<EntityAssociationPolicyMode> {
-		const [row] = await tx
-			.select({ mode: entityAssociationPolicy.mode })
-			.from(entityAssociationPolicy)
-			.where(
-				and(
-					eq(entityAssociationPolicy.entityId, entityId),
-					eq(entityAssociationPolicy.kind, kind),
-				),
-			)
-			.limit(1);
-		return row?.mode ?? "open";
-	}
-
 	private async ensureAssociationCommandAllowedForExistingEntity(
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
@@ -102,28 +48,25 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		kind: AssociationKind,
 		command: EntityAssociationCommand,
 	): Promise<void> {
-		// A PostgreSQL transaction is pinned to one client. Keep its queries
-		// sequential instead of relying on node-postgres' deprecated query queue.
-		const mode = await this.associationMode(tx, entityId, kind);
-		const platformOverride = await this.platform.hasCapability(
-			"entity.associations.override",
-			tx,
-		);
-		const targetDecision = await this.unitAuthorization.decideInTransaction(
+		if (await this.platform.hasCapability("entity.associations.override", tx)) return;
+
+		const managerDecision = await this.unitAuthorization.decideInTransaction(
 			tx,
 			entityId,
 			"unit.association.manage",
 			associationTargetScope(kind),
 		);
-		if (
-			resolveEntityAssociationAdmission({
-				mode,
-				command,
-				targetManager: targetDecision.allowed,
-				platformOverride,
-			}).kind === "forbidden"
-		)
-			throw new EntityAssociationRestricted(kind, mode);
+		if (managerDecision.allowed) return;
+		if (command !== "invitation") {
+			const decision = await this.unitAuthorization.decideInTransaction(
+				tx,
+				entityId,
+				entityAssociationPermission(kind, command),
+				associationTargetScope(kind),
+			);
+			if (decision.allowed) return;
+		}
+		throw new EntityAssociationRestricted(kind, command);
 	}
 
 	async ensureAssociationAllowed(
@@ -156,17 +99,6 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 	): Promise<void> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
-		const platformOverride = await this.platform.hasCapability(
-			"entity.associations.override",
-			tx,
-		);
-		if (!platformOverride)
-			await this.unitAuthorization.ensureInTransaction(
-				tx,
-				entityId,
-				"unit.association.manage",
-				associationTargetScope(kind),
-			);
 		await this.ensureAssociationCommandAllowedForExistingEntity(
 			tx,
 			entityId,

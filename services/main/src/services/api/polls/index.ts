@@ -10,7 +10,7 @@ import {
 	pollOption,
 	poll,
 	pollVote,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	unit,
 } from "../../database/schema";
@@ -89,13 +89,10 @@ export default new Elysia({ prefix: "/polls" })
 					),
 					contentStatus: "published",
 				});
-				await tx.insert(unitAccessBinding).values({
+				await tx.insert(unitOwnership).values({
 					unitId: pollUnit.id,
-					subjectKind: "profile",
 					profileId: profile.unitId,
-					role: "owner",
-					scope: [],
-					grantedByProfileId: profile.unitId,
+					assignedByProfileId: profile.unitId,
 				});
 				await recordUnitRevision(tx, {
 					unitId: pollUnit.id,
@@ -361,10 +358,7 @@ export default new Elysia({ prefix: "/polls" })
 			params: PollParams,
 			response: {
 				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitPermissionForbidden",
-					"UnitProtected",
-				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["PollAlreadyClosed"]),
 			},

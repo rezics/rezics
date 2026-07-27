@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import type { JsonValue } from "@rezics/portable-text";
 import * as Data from "effect/Data";
 
-import type { AssociationKind, EntityAssociationPolicyMode } from "../authorization/entity/policy";
+import type { AssociationKind, EntityAssociationCommand } from "../authorization/entity/policy";
 
 export class EntityEntryNotFound extends Data.TaggedError("EntityEntryNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
@@ -16,9 +16,9 @@ export class EntityAssociationRestricted extends Data.TaggedError("EntityAssocia
 	readonly message = "This Entity does not accept that association";
 	readonly details: JsonValue;
 
-	constructor(kind: AssociationKind, mode: EntityAssociationPolicyMode) {
+	constructor(kind: AssociationKind, command: EntityAssociationCommand) {
 		super();
-		this.details = { kind, mode };
+		this.details = { kind, command };
 	}
 }
 

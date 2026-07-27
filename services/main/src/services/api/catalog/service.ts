@@ -1,13 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { database } from "../../database";
-import {
-	entity,
-	entityAssociationPolicy,
-	tag,
-	unit,
-	unitLocalization,
-} from "../../database/schema";
+import { entity, tag, unit, unitAccessGrant, unitLocalization } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import {
@@ -42,20 +36,22 @@ export async function createCatalogUnit(
 		});
 		if (type === "entity") {
 			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
-			await tx.insert(entityAssociationPolicy).values([
-				{
-					entityId: created.id,
-					kind: "credit",
-					mode: "approval",
-					updatedByProfileId: ownerId,
-				},
-				{
-					entityId: created.id,
-					kind: "subject",
-					mode: "open",
-					updatedByProfileId: ownerId,
-				},
-			]);
+			await tx.insert(unitAccessGrant).values(
+				(
+					[
+						"unit.read",
+						"entity.association.credit.request",
+						"entity.association.subject.request",
+						"entity.association.subject.direct",
+					] as const
+				).map((permission) => ({
+					unitId: created.id,
+					subjectKind: "authenticated" as const,
+					permission,
+					scope: [],
+					grantedByProfileId: ownerId,
+				})),
+			);
 		} else await tx.insert(tag).values({ id: created.id });
 		await tx
 			.insert(unitLocalization)

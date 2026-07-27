@@ -786,7 +786,6 @@ export async function replaceRealmSlugAddress(
 	input: { readonly realmId: string; readonly slug: string },
 ): Promise<UnitAddressMutationResult> {
 	await authorization.realm.ensureCapability(input.realmId, "realm.settings.update");
-	await authorization.unit.ensureOperationAllowed(input.realmId, ["slug-address"]);
 	return replacePublicUnitSlugAddress(authorization, {
 		unitId: input.realmId,
 		kind: "realm",

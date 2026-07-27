@@ -19,14 +19,6 @@ export class ModerationRealmMissing extends Data.TaggedError("ModerationRealmMis
 	readonly message = "Realm moderation case is missing its Realm";
 }
 
-export class ModerationTargetScopeRequired extends Data.TaggedError(
-	"ModerationTargetScopeRequired",
-) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ModerationTargetScopeRequired.status;
-	readonly message = "Unit protection moderation requires a scope and mode";
-}
-
 export class ModerationCaseNotFound extends Data.TaggedError("ModerationCaseNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = ModerationCaseNotFound.status;
@@ -111,24 +103,6 @@ export class EnforcementChanged extends Data.TaggedError("EnforcementChanged") {
 	readonly message = "Enforcement was already changed";
 }
 
-export class PlatformGrantRealmForbidden extends Data.TaggedError("PlatformGrantRealmForbidden") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = PlatformGrantRealmForbidden.status;
-	readonly message = "Platform grants cannot have a Realm";
-}
-
-export class RealmGrantRealmRequired extends Data.TaggedError("RealmGrantRealmRequired") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = RealmGrantRealmRequired.status;
-	readonly message = "Realm grants require realmId";
-}
-
-export class RealmGrantCapabilityInvalid extends Data.TaggedError("RealmGrantCapabilityInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = RealmGrantCapabilityInvalid.status;
-	readonly message = "Capability is not valid for a Realm grant";
-}
-
 export class CapabilityGrantExpiryInvalid extends Data.TaggedError("CapabilityGrantExpiryInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = CapabilityGrantExpiryInvalid.status;
@@ -141,50 +115,10 @@ export class CapabilityGrantNotFound extends Data.TaggedError("CapabilityGrantNo
 	readonly message = "Active capability grant not found";
 }
 
-export class UnitAccessBindingNotFound extends Data.TaggedError("UnitAccessBindingNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitAccessBindingNotFound.status;
-	readonly message = "Unit access binding not found";
-}
-
-export class UnitOwnerRequired extends Data.TaggedError("UnitOwnerRequired") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitOwnerRequired.status;
-	readonly message = "A Unit must keep at least one owner";
-}
-
-export class UnitOwnershipClaimUnavailable extends Data.TaggedError(
-	"UnitOwnershipClaimUnavailable",
-) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitOwnershipClaimUnavailable.status;
-	readonly message = "This Unit is not eligible for ownership claim by the current Profile";
-}
-
-export class UnitAccessRestrictionNotFound extends Data.TaggedError(
-	"UnitAccessRestrictionNotFound",
-) {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitAccessRestrictionNotFound.status;
-	readonly message = "Unit access restriction not found";
-}
-
-export class UnitProtectionNotFound extends Data.TaggedError("UnitProtectionNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitProtectionNotFound.status;
-	readonly message = "Unit protection not found";
-}
-
 export class UnitAccessExpiryInvalid extends Data.TaggedError("UnitAccessExpiryInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = UnitAccessExpiryInvalid.status;
 	readonly message = "Unit access expiry must be in the future";
-}
-
-export class UnitAccessBindingConflict extends Data.TaggedError("UnitAccessBindingConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitAccessBindingConflict.status;
-	readonly message = "An active binding already exists for this subject and scope";
 }
 
 export class UnitAccessInvitationNotFound extends Data.TaggedError("UnitAccessInvitationNotFound") {
@@ -213,28 +147,13 @@ export class UnitAccessInvitationSelfForbidden extends Data.TaggedError(
 	readonly message = "A Profile cannot invite itself to Unit access";
 }
 
-export class UnitAccessRoleDelegationForbidden extends Data.TaggedError(
-	"UnitAccessRoleDelegationForbidden",
+export class UnitAccessConfigurationInvalid extends Data.TaggedError(
+	"UnitAccessConfigurationInvalid",
 ) {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitAccessRoleDelegationForbidden.status;
-	readonly message = "The current Unit access role cannot delegate the requested role";
-}
-
-export class UnitAccessSubjectRoleInvalid extends Data.TaggedError("UnitAccessSubjectRoleInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitAccessSubjectRoleInvalid.status;
+	readonly status = UnitAccessConfigurationInvalid.status;
 	readonly message =
-		"Authenticated access can only receive viewer or editor roles, and Realm access cannot own a Unit";
-}
-
-export class UnitAccessRestrictionConflict extends Data.TaggedError(
-	"UnitAccessRestrictionConflict",
-) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitAccessRestrictionConflict.status;
-	readonly message =
-		"An active restriction already exists for this subject, permission, and scope";
+		"The selected permissions are not valid for this Unit or authorization subject";
 }
 
 export class UnitOwnerRestrictionForbidden extends Data.TaggedError(
@@ -242,14 +161,13 @@ export class UnitOwnerRestrictionForbidden extends Data.TaggedError(
 ) {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitOwnerRestrictionForbidden.status;
-	readonly message = "A Unit owner cannot be restricted";
+	readonly message = "Owner access is governed by ownership and cannot have direct overrides";
 }
 
 export const GovernanceErrors = [
 	GovernanceNoteNotFound,
 	ModerationTargetNotFound,
 	ModerationRealmMissing,
-	ModerationTargetScopeRequired,
 	ModerationCaseNotFound,
 	ModerationReversalInvalid,
 	ModerationReversedActionInvalid,
@@ -263,24 +181,13 @@ export const GovernanceErrors = [
 	EnforcementNotFound,
 	EnforcementAlreadyRevoked,
 	EnforcementChanged,
-	PlatformGrantRealmForbidden,
-	RealmGrantRealmRequired,
-	RealmGrantCapabilityInvalid,
 	CapabilityGrantExpiryInvalid,
 	CapabilityGrantNotFound,
-	UnitAccessBindingNotFound,
-	UnitOwnerRequired,
-	UnitOwnershipClaimUnavailable,
-	UnitAccessRestrictionNotFound,
-	UnitProtectionNotFound,
 	UnitAccessExpiryInvalid,
-	UnitAccessBindingConflict,
 	UnitAccessInvitationNotFound,
 	UnitAccessInvitationConflict,
 	UnitAccessInvitationExpired,
 	UnitAccessInvitationSelfForbidden,
-	UnitAccessRoleDelegationForbidden,
-	UnitAccessSubjectRoleInvalid,
-	UnitAccessRestrictionConflict,
+	UnitAccessConfigurationInvalid,
 	UnitOwnerRestrictionForbidden,
 ] as const;

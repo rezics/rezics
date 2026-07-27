@@ -55,7 +55,6 @@ export default {
 			"unit.update": "可編輯",
 			"unit.publish": "可發布",
 			"unit.access.manage": "可管理存取權",
-			"unit.protection.manage": "可管理保護設定",
 		},
 		workStates: { actionable: "可操作", blocked: "目前受阻" },
 		statuses: { draft: "草稿", published: "已發布", archived: "已封存" },

@@ -7,7 +7,7 @@ import {
 	label,
 	post,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 } from "../database/schema";
 import { isPrimaryUnitLocalization } from "../units/localization";
@@ -76,13 +76,10 @@ async function createBookDraftContentUnit(
 			profileId: input.actorProfileId,
 			nextBody: input.node.content,
 		});
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId: created.id,
-		subjectKind: "profile",
 		profileId: input.actorProfileId,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: input.actorProfileId,
+		assignedByProfileId: input.actorProfileId,
 	});
 	if (isChapter)
 		await createProfilePublisherAttribution(tx, {

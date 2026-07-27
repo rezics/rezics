@@ -5,7 +5,6 @@ import { PortableTextDocument } from "@rezics/block";
 import {
 	ContentLanguageValues,
 	ContentRatingValues,
-	UnitAccessRoleValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
@@ -47,7 +46,6 @@ export const StudioPermissionValues = [
 	"unit.update",
 	"unit.publish",
 	"unit.access.manage",
-	"unit.protection.manage",
 ] as const;
 export const StudioPermission = t.UnionEnum(StudioPermissionValues, { default: undefined });
 export type StudioPermission = Static<typeof StudioPermission>;
@@ -98,7 +96,6 @@ export const StudioContentListResponse = t.Object({
 			status: t.UnionEnum(UnitStatusValues),
 			visibility: t.UnionEnum(UnitVisibilityValues),
 			relations: t.Array(StudioRelation, { minItems: 1, uniqueItems: true }),
-			roles: t.Array(t.UnionEnum(UnitAccessRoleValues), { uniqueItems: true }),
 			workState: StudioWorkState,
 			permissions: t.Array(StudioPermission, { uniqueItems: true }),
 			accessSources: t.Array(StudioAccessSource, { uniqueItems: true }),

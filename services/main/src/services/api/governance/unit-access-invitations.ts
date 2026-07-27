@@ -31,13 +31,10 @@ function futureDate(value: string): Date {
 const InvitationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitAccessRestricted",
-	"UnitProtected",
-	"UnitAccessRoleDelegationForbidden",
 ]);
 const InvitationConflictResponse = toApiErrorResponse([
 	"UnitAccessInvitationConflict",
 	"UnitAccessInvitationExpired",
-	"UnitAccessBindingConflict",
 ]);
 
 export default new Elysia({ prefix: "/unit" })
@@ -84,7 +81,7 @@ export default new Elysia({ prefix: "/unit" })
 			const result = await createUnitAccessInvitation(authorization.unit, profile.unitId, {
 				unitId: params.unitId,
 				invitedProfileId: body.invitedProfileId,
-				role: body.role,
+				permissions: body.permissions,
 				scope: body.scope,
 				expiresAt: futureDate(body.invitationExpiresAt),
 				accessExpiresAt: body.accessExpiresAt ? futureDate(body.accessExpiresAt) : null,

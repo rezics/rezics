@@ -11,7 +11,7 @@ import { ZoneHomePageSlug } from "@rezics/slug";
 import { sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { unitAccessBinding, unitLocalization, zonePage } from "../database/schema";
+import { unitLocalization, unitOwnership, zonePage } from "../database/schema";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import { fractionalPositionAt } from "../ordering/position";
 import { getZoneSearchFeature, putZoneSearchFeatureInTransaction } from "../search/documents";
@@ -64,13 +64,10 @@ async function createDefaultFeedPage(
 		content: pageDocument,
 		contentStatus: "published",
 	});
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId: page.id,
-		subjectKind: "profile",
 		profileId: input.actorProfileId,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: input.actorProfileId,
+		assignedByProfileId: input.actorProfileId,
 	});
 	await recordUnitRevision(tx, {
 		unitId: page.id,

@@ -24,20 +24,6 @@ export class RealmRulesAcceptanceRequired extends Data.TaggedError("RealmRulesAc
 	}
 }
 
-export class RealmRoleManagementForbidden extends Data.TaggedError("RealmRoleManagementForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = RealmRoleManagementForbidden.status;
-	readonly message: string;
-
-	constructor(readonly operation: "manage" | "grant") {
-		super();
-		this.message =
-			operation === "manage"
-				? "Cannot manage an equal or higher role"
-				: "Cannot grant an equal or higher role";
-	}
-}
-
 export class PlatformCapabilityRequired extends Data.TaggedError("PlatformCapabilityRequired") {
 	static readonly status = StatusCodes.FORBIDDEN as const;
 	readonly status = PlatformCapabilityRequired.status;
@@ -60,7 +46,6 @@ export const AuthorizationErrors = [
 	AccountRestricted,
 	RealmCapabilityRequired,
 	RealmRulesAcceptanceRequired,
-	RealmRoleManagementForbidden,
 	PlatformCapabilityRequired,
 	PlatformGrantManagerRequired,
 	CollectionOwnershipRequired,

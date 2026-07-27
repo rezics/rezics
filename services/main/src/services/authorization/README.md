@@ -8,10 +8,10 @@ its own directory; `authorization.ts` performs actor-bound decisions, while
 `policy.ts` and `query.ts` hold reusable rules with no request-bound authority.
 
 - `account` owns account enforcement for writes and contributions.
-- `unit` owns Unit visibility, role-to-permission decisions, scoped bindings, Profile restrictions,
-  protections, publishing, restoration, and deletion.
+- `unit` owns Unit visibility, ownership, atomic permission grants and restrictions, publishing,
+  restoration, and deletion.
 - `collection` owns collection ownership.
-- `realm` owns membership, role capabilities, Realm grants, rules, and hierarchy.
+- `realm` owns membership state, rules, hierarchy, and maps Realm operations to Unit permissions.
 - `platform` owns global capability grants.
 - `upload` owns profile-scoped object keys.
 
@@ -20,31 +20,31 @@ must not instantiate them separately or call their database decisions around the
 root. Pure policy and query-condition exports remain available where no actor is
 being authorized.
 
-Unit access is one mechanism for ordinary Units including Zones, Books, Posts, Wikis, and
-Collections. A binding subject is a Profile, a Realm relationship (`member`, `content_editor`, or
-`governor`), or every authenticated Profile. Roles expand into permissions; an empty scope is the
-Unit root and an ancestor scope covers descendants. Profile restrictions and restrictions on the
-active members of a Realm override non-platform grants, which supports open editing plus a targeted
-deny-list. A direct Profile owner bypasses Realm-derived restrictions so a later membership change
-cannot remove the Unit's recovery path; direct Profile restrictions remain authoritative. Dynamic
-Realm subjects cannot own Units. Protections are independent guardrails (`frozen` or `owner_only`)
-and do not grant access by themselves.
+Unit access is one mechanism for every Unit kind, including Realms, Entities, Zones, Books, Posts,
+Wikis, and Collections. A grant assigns one atomic permission to a Profile, all active members of a
+Realm, or every authenticated Profile. A restriction denies one atomic permission to a Profile or
+all active members of a Realm. An empty scope is the Unit root and an ancestor scope covers
+descendants. Permission implications are expanded by policy; clients never infer authority from
+labels or roles. Profile invitations contain an explicit permission list and have no effect until
+accepted.
 
-For an existing Unit, access precedence is platform `unit.edit`, direct Profile restriction, Realm
-restriction unless the actor is a direct Profile owner, public or binding access, then protection.
-Platform authority is the recovery boundary and deliberately overrides every access restriction and
-protection. Missing or deleted Units are rejected before this precedence is evaluated. The policy
-tests are the executable contract for this order.
+For an existing Unit, access precedence is platform `unit.edit`, current direct Profile ownership,
+matching Profile or Realm restriction, then matching authenticated, Realm, or Profile grants.
+Platform authority and ownership are recovery boundaries and deliberately override restrictions.
+Realm subjects cannot own Units. Missing or deleted Units are rejected before this precedence is
+evaluated. The policy tests are the executable contract for this order.
 
-Governance mutation is itself scope-aware: a maintainer delegated to `zone/page/welcome` may grant,
-restrict, or protect that subtree but cannot manage a sibling or the Unit root. Owner and
-maintainer assignment additionally requires a root owner or platform authority. Dock surfaces use
-`dock/{surface}`. Zone resources use `zone/boundary`, `zone/theme`, `zone/settings`,
-`zone/page/{slug}`, and `zone/navigation/{navigationId}`; Realm Navigation uses
-`realm/navigation/{navigationId}`. The effective-access endpoint returns permission decisions and their
-source so clients never infer capabilities from role names.
+Governance mutation is scope-aware: an actor delegated `unit.access.manage` at
+`zone/page/welcome` may change grants or restrictions for that subtree but cannot manage a sibling
+or the Unit root, and may delegate only permissions the actor holds for the same scope. Ownership
+transfer requires the current owner or platform authority. Dock surfaces use `dock/{surface}`.
+Zone resources use `zone/boundary`, `zone/theme`, `zone/settings`, `zone/page/{slug}`, and
+`zone/navigation/{navigationId}`; Realm Navigation uses `realm/navigation/{navigationId}`. The
+effective-access endpoint returns permission decisions and their provenance so clients do not
+duplicate policy.
 
 Decisions are memoized per request and expiry is checked at decision time. Visibility fails closed:
 deleted or moderation-removed Units are invisible, configured Search exposes only discoverable
 public Units plus Units explicitly readable by the actor, and denied direct reads are reported as
-not found. Access mutation uses revocation records and preserves a last-owner invariant.
+not found. Ownership, grants, and restrictions use append-only revocation records, and the database
+enforces one active owner per Unit.

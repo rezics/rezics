@@ -1,12 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, asc, desc, eq, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
-import { getEntityAssociationPolicy } from "../../authorization/entity/authorization";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
@@ -16,17 +15,15 @@ import {
 } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
-	auditEvent,
 	creditAttribution,
 	entity,
-	entityAssociationPolicy,
 	subjectAssociation,
 	tag,
 	unit,
 	unitAlias,
 	unitAliasVote,
 	unitAliasVoteStat,
-	unitAccessBinding,
+	unitOwnership,
 	unitTagVote,
 	unitLink,
 	unitTag,
@@ -53,7 +50,6 @@ import {
 	UnitUnitParams,
 	UnitTagParams,
 	UnitVersionParams,
-	UpdateEntityAssociationPolicyBody,
 	VoteBody,
 } from "./schema";
 import { checkUnitType, createCatalogUnit } from "./service";
@@ -79,7 +75,6 @@ import {
 	AliasResponse,
 	AliasListResponse,
 	CreditAttributionResponse,
-	EntityAssociationPolicyResponse,
 	EntityDetailResponse,
 	EntityListResponse,
 	ExternalLinkResponse,
@@ -98,7 +93,6 @@ import {
 	EntityEntryNotFound,
 	SubjectAssociationNotFound,
 } from "../../entities/errors";
-import { resolveEntityAssociationPolicy } from "../../authorization/entity/policy";
 import { AssociationContextPostInvalid } from "../../units/errors";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -107,18 +101,10 @@ const CatalogUnitMutationNotFoundResponse = toApiErrorResponse([
 	"UnitNotFound",
 	"ImageAssetNotFound",
 ]);
-const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitProtected",
-]);
+const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const UnitInteractionForbiddenResponse = toApiErrorResponse([
 	"UnitAccessRestricted",
 	"UnitPermissionForbidden",
-]);
-const EntityPolicyForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitAccessRestricted",
-	"UnitProtected",
 ]);
 const UnitVariantConflictResponse = toApiErrorResponse([
 	"UnitVariantKindMismatch",
@@ -351,18 +337,12 @@ export default new Elysia()
 						contextPost: contextPosts.get(association.id) ?? null,
 					}));
 					const [owner] = await database
-						.select({ profileId: unitAccessBinding.profileId })
-						.from(unitAccessBinding)
+						.select({ profileId: unitOwnership.profileId })
+						.from(unitOwnership)
 						.where(
 							and(
-								eq(unitAccessBinding.unitId, params.unitId),
-								eq(unitAccessBinding.subjectKind, "profile"),
-								eq(unitAccessBinding.role, "owner"),
-								isNull(unitAccessBinding.revokedAt),
-								or(
-									isNull(unitAccessBinding.expiresAt),
-									sql`${unitAccessBinding.expiresAt} > now()`,
-								),
+								eq(unitOwnership.unitId, params.unitId),
+								isNull(unitOwnership.revokedAt),
 							),
 						)
 						.limit(1);
@@ -395,7 +375,6 @@ export default new Elysia()
 						banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
 						cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
 						localizations,
-						associationPolicy: await getEntityAssociationPolicy(params.unitId),
 						owner: ownerSummary,
 						capabilities: {
 							canEdit,
@@ -437,84 +416,6 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: CatalogUnitMutationNotFoundResponse,
 					},
 					detail: { summary: "Create or replace entity localization", tags: ["Entity"] },
-				},
-			)
-			.get(
-				"/:unitId/association-policy",
-				async ({ params }) => getEntityAssociationPolicy(params.unitId),
-				{
-					params: UnitIdParams,
-					response: {
-						[StatusCodes.OK]: EntityAssociationPolicyResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
-					},
-					detail: { summary: "Get Entity association policy", tags: ["Entity"] },
-				},
-			)
-			.patch(
-				"/:unitId/association-policy",
-				async ({ params, body, profile, authorization }) => {
-					const changes = [
-						body.creditAttribution === undefined
-							? undefined
-							: { kind: "credit" as const, mode: body.creditAttribution },
-						body.subjectAssociation === undefined
-							? undefined
-							: { kind: "subject" as const, mode: body.subjectAssociation },
-					].filter((change) => change !== undefined);
-					return database.transaction(async (tx) => {
-						await authorization.entity.ensureCanManageAssociationPolicy(
-							tx,
-							params.unitId,
-							changes.map((change) => change.kind),
-						);
-						for (const change of changes)
-							await tx
-								.insert(entityAssociationPolicy)
-								.values({
-									entityId: params.unitId,
-									...change,
-									updatedByProfileId: profile.unitId,
-								})
-								.onConflictDoUpdate({
-									target: [
-										entityAssociationPolicy.entityId,
-										entityAssociationPolicy.kind,
-									],
-									set: {
-										mode: change.mode,
-										updatedByProfileId: profile.unitId,
-									},
-								});
-						await tx.insert(auditEvent).values({
-							actorProfileId: profile.unitId,
-							action: "entity.association_policy.update",
-							decisionCode: "allowed",
-							subjectKind: "entity",
-							subjectId: params.unitId,
-							metadata: { changes },
-						});
-						return resolveEntityAssociationPolicy(
-							await tx
-								.select({
-									kind: entityAssociationPolicy.kind,
-									mode: entityAssociationPolicy.mode,
-								})
-								.from(entityAssociationPolicy)
-								.where(eq(entityAssociationPolicy.entityId, params.unitId)),
-						);
-					});
-				},
-				{
-					access: "session-only",
-					params: UnitIdParams,
-					body: UpdateEntityAssociationPolicyBody,
-					response: {
-						[StatusCodes.OK]: EntityAssociationPolicyResponse,
-						[StatusCodes.FORBIDDEN]: EntityPolicyForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
-					},
-					detail: { summary: "Update Entity association policy", tags: ["Entity"] },
 				},
 			),
 	)
@@ -860,7 +761,6 @@ export default new Elysia()
 						]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
-							"UnitProtected",
 							"EntityAssociationRestricted",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -978,7 +878,6 @@ export default new Elysia()
 						]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
-							"UnitProtected",
 							"EntityAssociationRestricted",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([

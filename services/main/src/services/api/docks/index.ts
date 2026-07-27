@@ -48,10 +48,7 @@ import {
 } from "./history";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
-const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitProtected",
-]);
+const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 
 async function getDockOwner(unitId: string) {
 	const [owner] = await database

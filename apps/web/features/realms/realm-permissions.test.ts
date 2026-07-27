@@ -68,9 +68,9 @@ describe("realm membership permissions", () => {
 	});
 
 	it.each([
-		[{ role: "owner", state: "active" }, true],
-		[{ role: "owner", state: "banned" }, false],
-		[{ role: "admin", state: "active" }, false],
+		[{ isOwner: true, state: "active" }, true],
+		[{ isOwner: true, state: "banned" }, false],
+		[{ isOwner: false, state: "active" }, false],
 		[undefined, false],
 	] as const)("identifies ownership state from %o", (membership, expected) => {
 		expect(isRealmOwner(membership)).toBe(expected);

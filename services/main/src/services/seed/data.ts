@@ -61,7 +61,6 @@ export const SeedPlan = {
 	softwareRequirements: 120,
 	contentStructureNodes: 300,
 	pollOptions: 120,
-	unitProtections: 40,
 	profileUnitFollows: 300,
 	profileBlocks: 50,
 	collectionItems: 1_500,

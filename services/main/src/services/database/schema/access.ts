@@ -12,12 +12,9 @@ import {
 import { pgTable } from "./base";
 import {
 	UnitAccessInvitationResolutionValues,
-	UnitAccessRealmRelationValues,
 	UnitAccessRestrictionSubjectKindValues,
-	UnitAccessRoleValues,
 	UnitAccessSubjectKindValues,
 	UnitPermissionValues,
-	UnitProtectionModeValues,
 	toEnumValues,
 } from "./contract-values";
 import {
@@ -34,10 +31,6 @@ export const unitAccessSubjectKind = pgEnum(
 	"unit_access_subject_kind",
 	toEnumValues(UnitAccessSubjectKindValues),
 );
-export const unitAccessRealmRelation = pgEnum(
-	"unit_access_realm_relation",
-	toEnumValues(UnitAccessRealmRelationValues),
-);
 export const unitAccessInvitationResolution = pgEnum(
 	"unit_access_invitation_resolution",
 	toEnumValues(UnitAccessInvitationResolutionValues),
@@ -46,12 +39,7 @@ export const unitAccessRestrictionSubjectKind = pgEnum(
 	"unit_access_restriction_subject_kind",
 	toEnumValues(UnitAccessRestrictionSubjectKindValues),
 );
-export const unitAccessRole = pgEnum("unit_access_role", toEnumValues(UnitAccessRoleValues));
 export const unitPermission = pgEnum("unit_permission", toEnumValues(UnitPermissionValues));
-export const unitProtectionMode = pgEnum(
-	"unit_protection_mode",
-	toEnumValues(UnitProtectionModeValues),
-);
 
 const scopeCheck = (scope: AnyPgColumn) =>
 	sql`cardinality(${scope}) <= 8 and (
@@ -59,12 +47,47 @@ const scopeCheck = (scope: AnyPgColumn) =>
 		array_to_string(${scope}, '/') ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'
 	)`;
 
+/** Append-only Unit ownership. At most one non-revoked owner exists for a Unit. */
+export const unitOwnership = pgTable(
+	"unit_ownership",
+	{
+		id: createUuidv7PrimaryKey(),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		profileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		assignedByProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		revokedAt: createTimestampMsColumn(),
+		revokedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		uniqueIndex("unit_ownership_active_unit_key")
+			.on(table.unitId)
+			.where(sql`${table.revokedAt} is null`),
+		index("unit_ownership_profile_active_idx")
+			.on(table.profileId, table.unitId)
+			.where(sql`${table.revokedAt} is null`),
+		index("unit_ownership_assigned_by_idx").on(table.assignedByProfileId),
+		index("unit_ownership_revoked_by_idx").on(table.revokedByProfileId),
+		check(
+			"unit_ownership_revocation_shape_check",
+			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,
+		),
+	],
+);
+
 /**
- * Grant to a Profile, a Realm relationship, or every authenticated Profile.
- * Empty scope is the Unit root; a grant covers that scope and descendants.
+ * An atomic permission grant to a Profile, all active members of a Realm, or
+ * every authenticated Profile. Empty scope is the Unit root.
  */
-export const unitAccessBinding = pgTable(
-	"unit_access_binding",
+export const unitAccessGrant = pgTable(
+	"unit_access_grant",
 	{
 		id: createUuidv7PrimaryKey(),
 		unitId: uuid()
@@ -73,8 +96,7 @@ export const unitAccessBinding = pgTable(
 		subjectKind: unitAccessSubjectKind().notNull(),
 		profileId: uuid().references(() => profile.id, { onDelete: "cascade" }),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
-		realmRelation: unitAccessRealmRelation(),
-		role: unitAccessRole().notNull(),
+		permission: unitPermission().notNull(),
 		scope: text()
 			.array()
 			.default(sql`array[]::text[]`)
@@ -89,60 +111,45 @@ export const unitAccessBinding = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("unit_access_binding_active_profile_scope_key")
-			.on(table.unitId, table.profileId, table.scope)
+		uniqueIndex("unit_access_grant_active_profile_scope_key")
+			.on(table.unitId, table.profileId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'profile'`),
-		uniqueIndex("unit_access_binding_active_realm_scope_key")
-			.on(table.unitId, table.realmId, table.realmRelation, table.scope)
+		uniqueIndex("unit_access_grant_active_realm_scope_key")
+			.on(table.unitId, table.realmId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
-		uniqueIndex("unit_access_binding_active_authenticated_scope_key")
-			.on(table.unitId, table.scope)
+		uniqueIndex("unit_access_grant_active_authenticated_scope_key")
+			.on(table.unitId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'authenticated'`),
-		uniqueIndex("unit_access_binding_active_owner_key")
-			.on(table.unitId)
-			.where(sql`${table.revokedAt} is null and ${table.role} = 'owner'`),
-		index("unit_access_binding_profile_active_idx")
-			.on(table.profileId, table.unitId, table.role)
+		index("unit_access_grant_profile_active_idx")
+			.on(table.profileId, table.unitId, table.permission)
 			.where(sql`${table.revokedAt} is null`),
-		index("unit_access_binding_realm_active_idx")
-			.on(table.realmId, table.unitId, table.realmRelation, table.role)
+		index("unit_access_grant_realm_active_idx")
+			.on(table.realmId, table.unitId, table.permission)
 			.where(sql`${table.revokedAt} is null`),
-		index("unit_access_binding_granted_by_idx").on(table.grantedByProfileId),
+		index("unit_access_grant_granted_by_idx").on(table.grantedByProfileId),
 		check(
-			"unit_access_binding_subject_shape_check",
+			"unit_access_grant_subject_shape_check",
 			sql`(
-				${table.subjectKind} = 'profile' and ${table.profileId} is not null and ${table.realmId} is null and ${table.realmRelation} is null
+				${table.subjectKind} = 'profile' and ${table.profileId} is not null and ${table.realmId} is null
 			) or (
-				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null and ${table.realmRelation} is not null
+				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null
 			) or (
-				${table.subjectKind} = 'authenticated' and ${table.profileId} is null and ${table.realmId} is null and ${table.realmRelation} is null
+				${table.subjectKind} = 'authenticated' and ${table.profileId} is null and ${table.realmId} is null
 			)`,
 		),
+		check("unit_access_grant_scope_check", scopeCheck(table.scope)),
 		check(
-			"unit_access_binding_subject_role_check",
-			sql`(
-				${table.subjectKind} = 'profile' or ${table.role} <> 'owner'
-			) and (
-				${table.subjectKind} <> 'authenticated' or ${table.role} in ('viewer', 'editor')
-			)`,
-		),
-		check(
-			"unit_access_binding_owner_scope_check",
-			sql`${table.role} <> 'owner' or cardinality(${table.scope}) = 0`,
-		),
-		check("unit_access_binding_scope_check", scopeCheck(table.scope)),
-		check(
-			"unit_access_binding_expiry_check",
+			"unit_access_grant_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,
 		),
 		check(
-			"unit_access_binding_revocation_shape_check",
+			"unit_access_grant_revocation_shape_check",
 			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,
 		),
 	],
 );
 
-/** A Profile-mediated offer that has no access effect until the invitee accepts it. */
+/** A Profile-mediated offer whose permissions have no effect until accepted. */
 export const unitAccessInvitation = pgTable(
 	"unit_access_invitation",
 	{
@@ -153,7 +160,7 @@ export const unitAccessInvitation = pgTable(
 		invitedProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		role: unitAccessRole().notNull(),
+		permissions: unitPermission().array().notNull(),
 		scope: text()
 			.array()
 			.default(sql`array[]::text[]`)
@@ -166,7 +173,6 @@ export const unitAccessInvitation = pgTable(
 		resolution: unitAccessInvitationResolution(),
 		resolvedAt: createTimestampMsColumn(),
 		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
-		acceptedBindingId: uuid().references(() => unitAccessBinding.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -177,17 +183,17 @@ export const unitAccessInvitation = pgTable(
 		index("unit_access_invitation_profile_unresolved_idx")
 			.on(table.invitedProfileId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.resolution} is null`),
-		uniqueIndex("unit_access_invitation_accepted_binding_key")
-			.on(table.acceptedBindingId)
-			.where(sql`${table.acceptedBindingId} is not null`),
 		index("unit_access_invitation_invited_by_idx").on(table.invitedByProfileId),
 		index("unit_access_invitation_resolved_by_idx").on(table.resolvedByProfileId),
 		check("unit_access_invitation_scope_check", scopeCheck(table.scope)),
 		check(
+			"unit_access_invitation_permissions_check",
+			sql`cardinality(${table.permissions}) between 1 and ${UnitPermissionValues.length}`,
+		),
+		check(
 			"unit_access_invitation_profiles_differ_check",
 			sql`${table.invitedProfileId} <> ${table.invitedByProfileId}`,
 		),
-		check("unit_access_invitation_role_check", sql`${table.role} <> 'owner'::unit_access_role`),
 		check(
 			"unit_access_invitation_expiry_check",
 			sql`${table.expiresAt} > ${table.createdAt} and (${table.accessExpiresAt} is null or ${table.accessExpiresAt} > ${table.createdAt})`,
@@ -195,11 +201,9 @@ export const unitAccessInvitation = pgTable(
 		check(
 			"unit_access_invitation_resolution_shape_check",
 			sql`(
-				${table.resolution} is null and ${table.resolvedAt} is null and ${table.resolvedByProfileId} is null and ${table.acceptedBindingId} is null
+				${table.resolution} is null and ${table.resolvedAt} is null and ${table.resolvedByProfileId} is null
 			) or (
-				${table.resolution} = 'accepted'::unit_access_invitation_resolution and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and ${table.acceptedBindingId} is not null
-			) or (
-				${table.resolution} in ('declined'::unit_access_invitation_resolution, 'cancelled'::unit_access_invitation_resolution) and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and ${table.acceptedBindingId} is null
+				${table.resolution} is not null and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null
 			)`,
 		),
 	],
@@ -260,46 +264,6 @@ export const unitAccessRestriction = pgTable(
 		),
 		check(
 			"unit_access_restriction_revocation_shape_check",
-			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,
-		),
-	],
-);
-
-/** Guardrail on a Unit subtree; separate from the subject grant. */
-export const unitProtection = pgTable(
-	"unit_protection",
-	{
-		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		scope: text()
-			.array()
-			.default(sql`array[]::text[]`)
-			.notNull(),
-		mode: unitProtectionMode().notNull(),
-		reasonCode: governanceReasonCode().notNull(),
-		createdByProfileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		expiresAt: createTimestampMsColumn(),
-		revokedAt: createTimestampMsColumn(),
-		revokedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		uniqueIndex("unit_protection_active_scope_key")
-			.on(table.unitId, table.scope)
-			.where(sql`${table.revokedAt} is null`),
-		index("unit_protection_created_by_idx").on(table.createdByProfileId),
-		check("unit_protection_scope_check", scopeCheck(table.scope)),
-		check(
-			"unit_protection_expiry_check",
-			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,
-		),
-		check(
-			"unit_protection_revocation_shape_check",
 			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,
 		),
 	],

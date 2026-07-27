@@ -72,8 +72,7 @@ export default {
 			},
 			access: {
 				label: "Access",
-				description:
-					"Manage roles, restrictions, protections, invitations, and effective access.",
+				description: "Manage authorization subjects, public permissions, and restrictions.",
 			},
 			history: {
 				label: "Revision history",

@@ -31,5 +31,5 @@ export function getRealmSettingsSectionIds(
 }
 
 export function isRealmOwner(membership: RealmMembership) {
-	return membership?.state === "active" && membership.role === "owner";
+	return membership?.state === "active" && membership.isOwner;
 }

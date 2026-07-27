@@ -183,7 +183,10 @@ export async function createUnit(
 			unitId: created.id,
 			...toUnitLocalizationStorage(input.localization),
 		});
-		await createCommunityCatalogAccess(tx, created.id, ownerId, "publishing_editor");
+		await createCommunityCatalogAccess(tx, created.id, ownerId, [
+			"unit.update",
+			"unit.publish",
+		]);
 		const bookStructureSnapshot = bookStructure
 			? ContentStructureSnapshotSchema.parse({
 					version: 1,

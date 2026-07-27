@@ -23,7 +23,8 @@ import {
 	realmMember,
 	realmUnit,
 	unit,
-	unitAccessBinding,
+	unitAccessGrant,
+	unitOwnership,
 	unitLocalization,
 	unitDock,
 	unitFollow,
@@ -527,7 +528,7 @@ async function ensureBootstrapProfiles(
 			.onConflictDoNothing()
 			.returning({ profileId: profilePreference.profileId });
 		changed ||= insertedPreference.length > 0;
-		changed = (await ensureOwnerBinding(tx, value.profileId, value.profileId)) || changed;
+		changed = (await ensureOwnership(tx, value.profileId, value.profileId)) || changed;
 		if (changed)
 			await recordUnitRevision(tx, {
 				unitId: value.profileId,
@@ -613,46 +614,28 @@ async function prepareCredential(): Promise<PreparedCredential> {
 	return { password, passwordHash: await hashPassword(password) };
 }
 
-async function ensureOwnerBinding(
+async function ensureOwnership(
 	tx: DatabaseTransaction,
 	unitId: string,
 	ownerProfileId: string,
 ): Promise<boolean> {
 	const [owner] = await tx
 		.select({
-			id: unitAccessBinding.id,
-			subjectKind: unitAccessBinding.subjectKind,
-			profileId: unitAccessBinding.profileId,
-			role: unitAccessBinding.role,
-			scope: unitAccessBinding.scope,
-			expiresAt: unitAccessBinding.expiresAt,
+			id: unitOwnership.id,
+			profileId: unitOwnership.profileId,
 		})
-		.from(unitAccessBinding)
-		.where(
-			and(
-				eq(unitAccessBinding.unitId, unitId),
-				eq(unitAccessBinding.role, "owner"),
-				isNull(unitAccessBinding.revokedAt),
-			),
-		)
+		.from(unitOwnership)
+		.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
 		.limit(1);
 	if (owner) {
-		if (
-			owner.subjectKind !== "profile" ||
-			owner.profileId !== ownerProfileId ||
-			owner.scope.length !== 0 ||
-			owner.expiresAt !== null
-		)
+		if (owner.profileId !== ownerProfileId)
 			throw new Error(`Bootstrap Unit ${unitId} has an unexpected active owner`);
 		return false;
 	}
-	await tx.insert(unitAccessBinding).values({
+	await tx.insert(unitOwnership).values({
 		unitId,
-		subjectKind: "profile",
 		profileId: ownerProfileId,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: ownerProfileId,
+		assignedByProfileId: ownerProfileId,
 		createdAt: bootstrapEpoch(),
 		updatedAt: bootstrapEpoch(),
 	});
@@ -704,14 +687,70 @@ async function ensureBootstrapRealm(
 				...localization,
 			})) || changed;
 	}
-	changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
-	for (const member of value.members) {
+	changed = (await ensureOwnership(tx, value.id, value.ownerProfileId)) || changed;
+	for (const permission of ["unit.read", "realm.contribute"] as const) {
+		const [stored] = await tx
+			.select({ id: unitAccessGrant.id })
+			.from(unitAccessGrant)
+			.where(
+				and(
+					eq(unitAccessGrant.unitId, value.id),
+					eq(unitAccessGrant.subjectKind, "realm"),
+					eq(unitAccessGrant.realmId, value.id),
+					eq(unitAccessGrant.permission, permission),
+					isNull(unitAccessGrant.revokedAt),
+				),
+			)
+			.limit(1);
+		if (!stored) {
+			await tx.insert(unitAccessGrant).values({
+				unitId: value.id,
+				subjectKind: "realm",
+				realmId: value.id,
+				permission,
+				scope: [],
+				grantedByProfileId: value.ownerProfileId,
+				createdAt,
+				updatedAt: createdAt,
+			});
+			changed = true;
+		}
+	}
+	for (const access of value.access)
+		for (const permission of access.permissions) {
+			const [stored] = await tx
+				.select({ id: unitAccessGrant.id })
+				.from(unitAccessGrant)
+				.where(
+					and(
+						eq(unitAccessGrant.unitId, value.id),
+						eq(unitAccessGrant.subjectKind, "profile"),
+						eq(unitAccessGrant.profileId, access.profileId),
+						eq(unitAccessGrant.permission, permission),
+						isNull(unitAccessGrant.revokedAt),
+					),
+				)
+				.limit(1);
+			if (!stored) {
+				await tx.insert(unitAccessGrant).values({
+					unitId: value.id,
+					subjectKind: "profile",
+					profileId: access.profileId,
+					permission,
+					scope: [],
+					grantedByProfileId: value.ownerProfileId,
+					createdAt,
+					updatedAt: createdAt,
+				});
+				changed = true;
+			}
+		}
+	for (const memberProfileId of value.members) {
 		const insertedMember = await tx
 			.insert(realmMember)
 			.values({
 				realmId: value.id,
-				profileId: member.profileId,
-				role: member.role,
+				profileId: memberProfileId,
 				state: "active",
 				joinedAt: createdAt,
 				updatedAt: createdAt,
@@ -720,14 +759,13 @@ async function ensureBootstrapRealm(
 			.returning({ profileId: realmMember.profileId });
 		changed ||= insertedMember.length > 0;
 		const [stored] = await tx
-			.select({ role: realmMember.role, state: realmMember.state })
+			.select({ state: realmMember.state })
 			.from(realmMember)
 			.where(
-				and(eq(realmMember.realmId, value.id), eq(realmMember.profileId, member.profileId)),
+				and(eq(realmMember.realmId, value.id), eq(realmMember.profileId, memberProfileId)),
 			)
 			.limit(1);
-		assertFields(`Realm member ${member.profileId}`, stored, {
-			role: member.role,
+		assertFields(`Realm member ${memberProfileId}`, stored, {
 			state: "active",
 		});
 	}
@@ -749,7 +787,6 @@ async function ensureScoreContextProfileDefaults(tx: DatabaseTransaction): Promi
 				profiles.map(({ id }) => ({
 					realmId: RezicsScoreRealmManifest.id,
 					profileId: id,
-					role: "member" as const,
 					state: "active" as const,
 				})),
 			)
@@ -869,7 +906,7 @@ async function ensureOfficialWikiPost(
 				contentStatus: "published",
 			})) || changed;
 	}
-	changed = (await ensureOwnerBinding(tx, value.wikiPost.id, value.ownerProfileId)) || changed;
+	changed = (await ensureOwnership(tx, value.wikiPost.id, value.ownerProfileId)) || changed;
 	await tx
 		.insert(realmUnit)
 		.values({
@@ -929,7 +966,7 @@ async function ensureOfficialZonePage(
 				contentStatus: "published",
 			})) || changed;
 	}
-	changed = (await ensureOwnerBinding(tx, value.homePage.id, value.ownerProfileId)) || changed;
+	changed = (await ensureOwnership(tx, value.homePage.id, value.ownerProfileId)) || changed;
 	const [address] = await tx
 		.select({ slug: unitSlugAddress.slug, scopeUnitId: unitSlugAddress.scopeUnitId })
 		.from(unitSlugAddress)
@@ -1193,7 +1230,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 					...localization,
 				})) || changed;
 		}
-		changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
+		changed = (await ensureOwnership(tx, value.id, value.ownerProfileId)) || changed;
 		const insertedRealmUnit = await tx
 			.insert(realmUnit)
 			.values({
@@ -1222,16 +1259,9 @@ async function getZoneDefaultExperienceInput(
 	zoneId: string,
 ): Promise<ProvisionZoneDefaultExperienceInput> {
 	const [owner] = await tx
-		.select({ profileId: unitAccessBinding.profileId })
-		.from(unitAccessBinding)
-		.where(
-			and(
-				eq(unitAccessBinding.unitId, zoneId),
-				eq(unitAccessBinding.subjectKind, "profile"),
-				eq(unitAccessBinding.role, "owner"),
-				isNull(unitAccessBinding.revokedAt),
-			),
-		)
+		.select({ profileId: unitOwnership.profileId })
+		.from(unitOwnership)
+		.where(and(eq(unitOwnership.unitId, zoneId), isNull(unitOwnership.revokedAt)))
 		.limit(1);
 	const [localization] = await tx
 		.select({
@@ -1450,18 +1480,14 @@ async function isBootstrapReady(): Promise<boolean> {
 			.where(inArray(profile.id, BootstrapProfileIdValues)),
 		database
 			.select({
-				unitId: unitAccessBinding.unitId,
-				profileId: unitAccessBinding.profileId,
-				scope: unitAccessBinding.scope,
-				expiresAt: unitAccessBinding.expiresAt,
+				unitId: unitOwnership.unitId,
+				profileId: unitOwnership.profileId,
 			})
-			.from(unitAccessBinding)
+			.from(unitOwnership)
 			.where(
 				and(
-					inArray(unitAccessBinding.unitId, BootstrapProfileIdValues),
-					eq(unitAccessBinding.subjectKind, "profile"),
-					eq(unitAccessBinding.role, "owner"),
-					isNull(unitAccessBinding.revokedAt),
+					inArray(unitOwnership.unitId, BootstrapProfileIdValues),
+					isNull(unitOwnership.revokedAt),
 				),
 			),
 		database
@@ -1663,12 +1689,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		accountCount[0]?.value === BootstrapAccountIds.length &&
 		profileCount[0]?.value === BootstrapProfileIdValues.length &&
 		bootstrapProfileOwners.length === BootstrapProfileIdValues.length &&
-		bootstrapProfileOwners.every(
-			(owner) =>
-				owner.profileId === owner.unitId &&
-				owner.scope.length === 0 &&
-				owner.expiresAt === null,
-		) &&
+		bootstrapProfileOwners.every((owner) => owner.profileId === owner.unitId) &&
 		bootstrapSuperAdminGrants.length === BootstrapSuperAdminProfile.capabilities.length &&
 		BootstrapSuperAdminProfile.capabilities.every((capability) =>
 			bootstrapSuperAdminGrants.some(

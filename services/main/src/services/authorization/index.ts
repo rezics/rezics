@@ -20,6 +20,6 @@ export class Authorization<ProfileId extends string | undefined = string | undef
 		this.platform = new PlatformAuthorization(profileId);
 		this.unit = new UnitAuthorization(profileId, this.platform);
 		this.entity = new EntityAuthorization(profileId, this.platform, this.unit);
-		this.realm = new RealmAuthorization(profileId, this.platform);
+		this.realm = new RealmAuthorization(profileId, this.platform, this.unit);
 	}
 }

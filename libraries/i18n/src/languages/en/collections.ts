@@ -59,7 +59,7 @@ export default {
 			},
 			access: {
 				label: "Access",
-				description: "Manage collaborators, restrictions, and protections.",
+				description: "Manage authorization subjects, permissions, and restrictions.",
 			},
 			history: {
 				label: "History",

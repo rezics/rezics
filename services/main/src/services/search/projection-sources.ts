@@ -29,8 +29,9 @@ export const CurrentProjectionSources = {
 	release: ["id"],
 	series: ["id"],
 	series_release: ["series_id", "release_unit_id"],
-	unit_access_binding: ["unit_id"],
+	unit_access_grant: ["unit_id"],
 	unit_access_restriction: ["unit_id"],
+	unit_ownership: ["unit_id"],
 } as const;
 
 export const HistoryProjectionSources = {

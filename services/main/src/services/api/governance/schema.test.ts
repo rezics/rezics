@@ -3,12 +3,9 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
-	ClaimUnitOwnershipBody,
 	CreateAccountEnforcementBody,
-	CreateUnitAccessRestrictionBody,
 	CreateUnitAccessInvitationBody,
-	CreateUnitAccessBindingBody,
-	CreateUnitProtectionBody,
+	ReplaceUnitSubjectAccessBody,
 	ResolveFeedbackBody,
 	RevokeAccountEnforcementBody,
 	TransferUnitOwnershipBody,
@@ -36,58 +33,49 @@ describe("adjacent governance API contracts", () => {
 		expect(Check(ResolveFeedbackBody, { resolution: "copied resolution" })).toBe(false);
 	});
 
-	it("uses codes and optional internal notes for Unit access decisions", () => {
+	it("replaces grants and restrictions for one Unit authorization subject", () => {
 		expect(
-			Check(CreateUnitAccessRestrictionBody, {
+			Check(ReplaceUnitSubjectAccessBody, {
 				subject: { kind: "profile", profileId },
-				permission: "unit.update",
+				grants: ["unit.read"],
+				restrictions: ["unit.update"],
 				scope: [],
 				reasonCode: "account_security",
-				internalNote,
 			}),
 		).toBe(true);
 		expect(
-			Check(CreateUnitProtectionBody, {
+			Check(ReplaceUnitSubjectAccessBody, {
+				subject: { kind: "authenticated" },
+				grants: ["unit.read"],
+				restrictions: [],
 				scope: [],
-				mode: "frozen",
-				reasonCode: "administrative",
-				internalNote,
 			}),
 		).toBe(true);
 		expect(
-			Check(CreateUnitProtectionBody, {
+			Check(ReplaceUnitSubjectAccessBody, {
+				subject: { kind: "profile", profileId },
+				grants: [],
+				restrictions: [],
 				scope: [],
-				mode: "frozen",
 				reason: "copied rationale",
 			}),
 		).toBe(false);
 	});
 
-	it("keeps governance ownership transfer separate from delegable access", () => {
-		expect(
-			Check(CreateUnitAccessBindingBody, {
-				subject: { kind: "profile", profileId },
-				role: "owner",
-				scope: [],
-			}),
-		).toBe(false);
+	it("keeps governance ownership transfer separate from access grants", () => {
 		expect(
 			Check(TransferUnitOwnershipBody, {
 				owner: { kind: "profile", profileId },
 			}),
 		).toBe(true);
 		expect(Check(TransferUnitOwnershipBody, { owner: { kind: "system" } })).toBe(false);
-		expect(Check(ClaimUnitOwnershipBody, {})).toBe(true);
-		expect(Check(ClaimUnitOwnershipBody, { owner: { kind: "profile", profileId } })).toBe(
-			false,
-		);
 	});
 
-	it("keeps pending access invitations separate from active bindings", () => {
+	it("keeps pending access invitations permission-based", () => {
 		expect(
 			Check(CreateUnitAccessInvitationBody, {
 				invitedProfileId: profileId,
-				role: "publishing_editor",
+				permissions: ["unit.update", "unit.publish"],
 				scope: [],
 				invitationExpiresAt: "2026-08-01T00:00:00.000Z",
 			}),
@@ -95,7 +83,7 @@ describe("adjacent governance API contracts", () => {
 		expect(
 			Check(CreateUnitAccessInvitationBody, {
 				invitedProfileId: profileId,
-				role: "owner",
+				permissions: [],
 				scope: [],
 				invitationExpiresAt: "2026-08-01T00:00:00.000Z",
 			}),

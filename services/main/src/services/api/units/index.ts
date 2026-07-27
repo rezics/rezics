@@ -60,14 +60,12 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UnitPermissionForbidden",
-	"UnitProtected",
 ]);
 const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UnitPermissionForbidden",
-	"UnitProtected",
 ]);
 const UnitChangedResponse = toApiErrorResponse(["UnitChanged"]);
 const UnitVariantConflictResponse = toApiErrorResponse([

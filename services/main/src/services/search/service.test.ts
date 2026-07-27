@@ -159,7 +159,7 @@ describe("domain search SQL", () => {
 		await searchDomain("collections", {
 			ownerId: "11111111-1111-1111-1111-111111111111",
 		});
-		expect(lastQuery()).toContain('"unit_access_binding"."role" = \'owner\'');
+		expect(lastQuery()).toContain('"unit_ownership"."revoked_at" is null');
 
 		await searchDomain("reviews", {
 			targetId: "11111111-1111-1111-1111-111111111111",
@@ -370,7 +370,7 @@ describe("domain search SQL", () => {
 		expect(query).toContain('join "unit_effective_tag" as "facet_unit_tag"');
 		expect(query).toContain('join "realm_unit" as "facet_realm_unit"');
 		expect(query).toContain('join "credit_attribution" as "facet_credit_attribution"');
-		expect(query).toContain('join "unit_access_binding" as "facet_owner_binding"');
+		expect(query).toContain('join "unit_ownership" as "facet_ownership"');
 		expect(query.match(/limit 100/g)).toHaveLength(6);
 
 		execute.mockClear();

@@ -281,7 +281,6 @@ export default new Elysia({ prefix: "/notifications" })
 			response: {
 				[StatusCodes.OK]: t.Object({ updated: t.Boolean() }),
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidNotificationCursor"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitProtected"]),
 			},
 			detail: { summary: "Mark notifications read", tags: ["Notifications"] },
 		},

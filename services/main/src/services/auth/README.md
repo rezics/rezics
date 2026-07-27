@@ -36,10 +36,10 @@ Catalog objects use `unit:read`, `unit:create`, `unit:update`, and `unit:delete`
 there is intentionally no parallel `catalog:*` namespace.
 
 API-key permission is only an API entry capability. It does not prove that the
-actor may edit a particular object. Unit access bindings, scoped restrictions and protections,
-Profile ownership, Realm membership and capabilities, bans, and visibility all
-remain domain authorization decisions. Those checks are identical for session
-and API-key identities.
+actor may edit a particular object. Unit ownership, scoped permission grants
+and restrictions, active Realm membership, bans, and visibility all remain
+domain authorization decisions. Those checks are identical for session and
+API-key identities.
 
 API keys use the `rz_api_` prefix, are SHA-256 hashed by Better Auth, expire
 after 90 days by default (maximum 365 days), and are limited to 300 requests per

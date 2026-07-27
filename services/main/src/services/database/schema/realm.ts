@@ -16,7 +16,6 @@ import {
 	CapabilityAuthorityValues,
 	type ContentLanguage,
 	RealmJoinPolicyValues,
-	RealmMemberRoleValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
 	RealmUnitStatusValues,
@@ -33,7 +32,6 @@ import {
 import { profile, unit } from "./core";
 
 export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoinPolicyValues));
-export const realmMemberRole = pgEnum("realm_member_role", toEnumValues(RealmMemberRoleValues));
 export const realmMemberState = pgEnum("realm_member_state", toEnumValues(RealmMemberStateValues));
 export const realmPinKind = pgEnum("realm_pin_kind", toEnumValues(RealmPinKindValues));
 export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
@@ -60,14 +58,13 @@ export const realmMember = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		role: realmMemberRole().default("member").notNull(),
 		state: realmMemberState().default("active").notNull(),
 		joinedAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
 		primaryKey({ columns: [table.realmId, table.profileId] }),
-		index("realm_member_realm_state_role_idx").on(table.realmId, table.state, table.role),
+		index("realm_member_realm_state_idx").on(table.realmId, table.state),
 		index("realm_member_profile_idx").on(table.profileId),
 	],
 );

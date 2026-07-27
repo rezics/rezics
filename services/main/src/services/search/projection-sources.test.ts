@@ -6,6 +6,9 @@ import { describe, expect, it } from "vitest";
 import { CurrentProjectionSources, HistoryProjectionSources } from "./projection-sources";
 
 const migrationDirectory = fileURLToPath(new URL("../database/migrations", import.meta.url));
+const currentEnrichment = fileURLToPath(
+	new URL("../../../search/rezics_unit_search_document_v6.sql", import.meta.url),
+);
 
 describe("search projection source registry", () => {
 	it("installs a trigger for every declared current and history source", async () => {
@@ -27,5 +30,17 @@ describe("search projection source registry", () => {
 		for (const table of Object.keys(HistoryProjectionSources))
 			expect(sql, `missing history source ${table}`).toContain(`'${table}'`);
 		expect(sql).not.toContain("FOR EACH ROW EXECUTE FUNCTION search_touch");
+	});
+
+	it("projects root read grants and current ownership from the access v2 tables", async () => {
+		const sql = await readFile(currentEnrichment, "utf8");
+		expect(CurrentProjectionSources).toHaveProperty("unit_access_grant");
+		expect(CurrentProjectionSources).toHaveProperty("unit_ownership");
+		expect(CurrentProjectionSources).not.toHaveProperty("unit_access_binding");
+		expect(sql).toContain("FROM public.unit_access_grant");
+		expect(sql).toContain("permission = 'unit.read'");
+		expect(sql).toContain("scope = array[]::text[]");
+		expect(sql).toContain("FROM public.unit_ownership");
+		expect(sql).not.toContain("FROM public.unit_access_binding");
 	});
 });

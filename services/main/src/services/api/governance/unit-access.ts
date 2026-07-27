@@ -3,81 +3,55 @@ import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
-import type { Authorization } from "../../authorization";
-import { cancelPendingUnitAccessInvitations } from "../../authorization/unit/invitations";
-import { lockEntityAssociationState } from "../../authorization/entity/authorization";
-import { database } from "../../database";
-import type { DatabaseTransaction } from "../../database";
-import { OfficialProfileIdValues } from "../../bootstrap/manifest";
+import { lockUnitAccessState } from "../../authorization/unit/invitations";
+import {
+	expandUnitPermissions,
+	isUnitPermissionApplicable,
+	isUnitPermissionGrantableToAuthenticated,
+	unitPermissionsForKind,
+	type UnitPermission,
+} from "../../authorization/unit/policy";
+import { database, type DatabaseTransaction } from "../../database";
 import {
 	auditEvent,
-	entity,
 	profile as profileTable,
 	realm,
 	unit,
-	unitAccessBinding,
+	unitAccessGrant,
 	unitAccessRestriction,
-	unitProtection,
+	unitOwnership,
 } from "../../database/schema";
-import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
-import { NoContentResponse } from "../schema/action-response";
+import { primaryUnitTitle } from "../../units/localization";
+import { UnitNotFound } from "../../units/errors";
 import { toApiErrorResponse } from "../schema/response";
 import { RealmNotFound } from "../realms/errors";
 import { ProfileNotFound } from "../users/errors";
 import {
-	ClaimUnitOwnershipBody,
-	CreateUnitAccessBindingBody,
-	CreateUnitAccessRestrictionBody,
-	CreateUnitProtectionBody,
+	ListUnitAccessCandidatesQuery,
+	ReplaceUnitSubjectAccessBody,
 	TransferUnitOwnershipBody,
+	UnitAccessCandidateListResponse,
+	UnitAccessSnapshotResponse,
 	UnitEffectiveAccessQuery,
 	UnitEffectiveAccessResponse,
-	UnitAccessBindingListResponse,
-	UnitAccessBindingParams,
-	UnitAccessBindingResponse,
-	UnitAccessRestrictionListResponse,
-	UnitAccessRestrictionParams,
-	UnitAccessRestrictionResponse,
 	UnitGovernanceParams,
-	UnitProtectionListResponse,
-	UnitProtectionParams,
-	UnitProtectionResponse,
 } from "./schema";
 import {
-	UnitAccessBindingConflict,
-	UnitAccessBindingNotFound,
 	UnitAccessExpiryInvalid,
-	UnitAccessRestrictionConflict,
-	UnitAccessRestrictionNotFound,
-	UnitAccessSubjectRoleInvalid,
-	UnitOwnerRequired,
-	UnitOwnershipClaimUnavailable,
+	UnitAccessConfigurationInvalid,
 	UnitOwnerRestrictionForbidden,
-	UnitProtectionNotFound,
 } from "./errors";
-import {
-	CommunityCatalogUnitKindValues,
-	UnitPermissionValues,
-} from "../../database/schema/contract-values";
-import { UnitNotFound } from "../../units/errors";
+
+type AccessSubject =
+	| { readonly kind: "profile"; readonly profileId: string }
+	| { readonly kind: "realm"; readonly realmId: string }
+	| { readonly kind: "authenticated" };
 
 const UnitGovernanceForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitAccessRestricted",
 	"PlatformCapabilityRequired",
 ]);
-const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
-const InteractiveSessionRequiredResponse = toApiErrorResponse(["InteractiveSessionRequired"]);
-const FreshSessionRequiredResponse = toApiErrorResponse(["FreshSessionRequired"]);
-const OfficialProfileIdSet: ReadonlySet<string> = new Set(OfficialProfileIdValues);
-const CommunityCatalogUnitKindSet: ReadonlySet<string> = new Set(CommunityCatalogUnitKindValues);
-
-function active(
-	revokedAt: typeof unitAccessBinding.revokedAt,
-	expiresAt: typeof unitAccessBinding.expiresAt,
-) {
-	return and(isNull(revokedAt), or(isNull(expiresAt), sql`${expiresAt} > now()`));
-}
 
 function parseExpiry(value: string | undefined): Date | null {
 	if (!value) return null;
@@ -86,78 +60,73 @@ function parseExpiry(value: string | undefined): Date | null {
 	return expiresAt;
 }
 
-function toUnitAccessRestrictionResponse(
-	record: typeof unitAccessRestriction.$inferSelect,
-	internalNotePostId: string | null,
+function subjectKey(subject: AccessSubject): string {
+	if (subject.kind === "profile") return `profile:${subject.profileId}`;
+	if (subject.kind === "realm") return `realm:${subject.realmId}`;
+	return "authenticated";
+}
+
+function grantSubject(record: typeof unitAccessGrant.$inferSelect): AccessSubject {
+	if (record.subjectKind === "profile" && record.profileId && !record.realmId)
+		return { kind: "profile", profileId: record.profileId };
+	if (record.subjectKind === "realm" && record.realmId && !record.profileId)
+		return { kind: "realm", realmId: record.realmId };
+	if (record.subjectKind === "authenticated" && !record.profileId && !record.realmId)
+		return { kind: "authenticated" };
+	throw new Error(`Invalid Unit access grant subject shape: ${record.id}`);
+}
+
+function restrictionSubject(record: typeof unitAccessRestriction.$inferSelect): AccessSubject {
+	if (record.subjectKind === "profile" && record.profileId && !record.realmId)
+		return { kind: "profile", profileId: record.profileId };
+	if (record.subjectKind === "realm" && record.realmId && !record.profileId)
+		return { kind: "realm", realmId: record.realmId };
+	throw new Error(`Invalid Unit access restriction subject shape: ${record.id}`);
+}
+
+function subjectGrantCondition(subject: AccessSubject, scope: readonly string[]) {
+	return and(
+		eq(unitAccessGrant.scope, [...scope]),
+		subject.kind === "profile"
+			? and(
+					eq(unitAccessGrant.subjectKind, "profile"),
+					eq(unitAccessGrant.profileId, subject.profileId),
+				)
+			: subject.kind === "realm"
+				? and(
+						eq(unitAccessGrant.subjectKind, "realm"),
+						eq(unitAccessGrant.realmId, subject.realmId),
+					)
+				: eq(unitAccessGrant.subjectKind, "authenticated"),
+	);
+}
+
+function subjectRestrictionCondition(
+	subject: Exclude<AccessSubject, { kind: "authenticated" }>,
+	scope: readonly string[],
 ) {
-	const subject =
-		record.subjectKind === "profile" && record.profileId && record.realmId === null
-			? { kind: "profile" as const, profileId: record.profileId }
-			: record.subjectKind === "realm" && record.realmId && record.profileId === null
-				? { kind: "realm" as const, realmId: record.realmId }
-				: undefined;
-	if (!subject) throw new Error(`Invalid Unit access restriction subject shape: ${record.id}`);
-	return {
-		id: record.id,
-		unitId: record.unitId,
-		subject,
-		permission: record.permission,
-		scope: record.scope,
-		reasonCode: record.reasonCode,
-		internalNotePostId,
-		createdByProfileId: record.createdByProfileId,
-		expiresAt: record.expiresAt,
-		revokedAt: record.revokedAt,
-		createdAt: record.createdAt,
-		updatedAt: record.updatedAt,
-	};
+	return and(
+		eq(unitAccessRestriction.scope, [...scope]),
+		subject.kind === "profile"
+			? and(
+					eq(unitAccessRestriction.subjectKind, "profile"),
+					eq(unitAccessRestriction.profileId, subject.profileId),
+				)
+			: and(
+					eq(unitAccessRestriction.subjectKind, "realm"),
+					eq(unitAccessRestriction.realmId, subject.realmId),
+				),
+	);
 }
 
-function toUnitProtectionResponse(
-	record: typeof unitProtection.$inferSelect,
-	internalNotePostId: string | null,
-) {
-	return { ...record, internalNotePostId };
-}
-
-async function activeOwnerProfileIds(tx: DatabaseTransaction, unitId: string): Promise<string[]> {
-	const owners = await tx
-		.select({ profileId: unitAccessBinding.profileId })
-		.from(unitAccessBinding)
-		.where(
-			and(
-				eq(unitAccessBinding.unitId, unitId),
-				eq(unitAccessBinding.subjectKind, "profile"),
-				eq(unitAccessBinding.role, "owner"),
-				active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
-			),
-		);
-	return owners.flatMap((owner) => (owner.profileId ? [owner.profileId] : []));
-}
-
-async function ensureOwnerOrPlatform(
-	authorization: Authorization<string>,
-	unitId: string,
-): Promise<void> {
-	const decision = await authorization.unit.decide(unitId, "unit.access.manage");
-	if (decision.allowed && decision.source === "platform") return;
-	if (decision.allowed && decision.source === "binding" && decision.role === "owner") return;
-	await authorization.platform.ensureCapability("unit.edit");
-}
-
-async function ensureSubjectExists(
-	subject:
-		| { readonly kind: "profile"; readonly profileId: string }
-		| { readonly kind: "realm"; readonly realmId: string }
-		| { readonly kind: "authenticated" },
-): Promise<void> {
+async function ensureSubjectExists(subject: AccessSubject): Promise<void> {
 	if (subject.kind === "profile") {
-		const [profile] = await database
+		const [record] = await database
 			.select({ id: profileTable.id })
 			.from(profileTable)
 			.where(eq(profileTable.id, subject.profileId))
 			.limit(1);
-		if (!profile) throw new ProfileNotFound();
+		if (!record) throw new ProfileNotFound();
 	}
 	if (subject.kind === "realm") {
 		const [record] = await database
@@ -172,34 +141,416 @@ async function ensureSubjectExists(
 async function recordAccessAudit(
 	tx: DatabaseTransaction,
 	input: {
-		actorProfileId: string;
-		action: string;
-		unitId: string;
-		decisionCode?: string;
-		metadata?: Record<string, unknown>;
+		readonly actorProfileId: string;
+		readonly action: string;
+		readonly unitId: string;
+		readonly metadata?: Record<string, unknown>;
 	},
 ) {
 	await tx.insert(auditEvent).values({
 		actorProfileId: input.actorProfileId,
 		action: input.action,
-		decisionCode: input.decisionCode ?? "allowed",
+		decisionCode: "allowed",
 		subjectKind: "unit",
 		subjectId: input.unitId,
 		metadata: input.metadata,
 	});
 }
 
+async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
+	const [target] = await database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			status: unit.status,
+			visibility: unit.visibility,
+			moderationStatus: unit.moderationStatus,
+		})
+		.from(unit)
+		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
+		.limit(1);
+	if (!target) throw new UnitNotFound();
+
+	const [ownership, grants, restrictions] = await Promise.all([
+		database
+			.select({
+				profileId: unitOwnership.profileId,
+				label: primaryUnitTitle(unitOwnership.profileId),
+			})
+			.from(unitOwnership)
+			.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
+			.limit(1),
+		database
+			.select()
+			.from(unitAccessGrant)
+			.where(
+				and(
+					eq(unitAccessGrant.unitId, unitId),
+					eq(unitAccessGrant.scope, [...scope]),
+					isNull(unitAccessGrant.revokedAt),
+					or(
+						isNull(unitAccessGrant.expiresAt),
+						sql`${unitAccessGrant.expiresAt} > now()`,
+					),
+				),
+			),
+		database
+			.select()
+			.from(unitAccessRestriction)
+			.where(
+				and(
+					eq(unitAccessRestriction.unitId, unitId),
+					eq(unitAccessRestriction.scope, [...scope]),
+					isNull(unitAccessRestriction.revokedAt),
+					or(
+						isNull(unitAccessRestriction.expiresAt),
+						sql`${unitAccessRestriction.expiresAt} > now()`,
+					),
+				),
+			),
+	]);
+
+	const subjects = new Map<
+		string,
+		{
+			subject: AccessSubject;
+			grants: Set<UnitPermission>;
+			restrictions: Set<UnitPermission>;
+			expiries: Set<number | null>;
+		}
+	>();
+	const ensureSubject = (subject: AccessSubject) => {
+		const key = subjectKey(subject);
+		const current = subjects.get(key);
+		if (current) return current;
+		const created = {
+			subject,
+			grants: new Set<UnitPermission>(),
+			restrictions: new Set<UnitPermission>(),
+			expiries: new Set<number | null>(),
+		};
+		subjects.set(key, created);
+		return created;
+	};
+	ensureSubject({ kind: "authenticated" });
+	if (ownership[0]) ensureSubject({ kind: "profile", profileId: ownership[0].profileId });
+	for (const grant of grants) {
+		const row = ensureSubject(grantSubject(grant));
+		row.grants.add(grant.permission);
+		row.expiries.add(grant.expiresAt?.getTime() ?? null);
+	}
+	for (const restriction of restrictions) {
+		const row = ensureSubject(restrictionSubject(restriction));
+		row.restrictions.add(restriction.permission);
+		row.expiries.add(restriction.expiresAt?.getTime() ?? null);
+	}
+
+	const ids = [...subjects.values()].flatMap(({ subject }) =>
+		subject.kind === "profile"
+			? [subject.profileId]
+			: subject.kind === "realm"
+				? [subject.realmId]
+				: [],
+	);
+	const labels = ids.length
+		? await database
+				.select({ id: unit.id, label: primaryUnitTitle(unit.id) })
+				.from(unit)
+				.where(inArray(unit.id, ids))
+		: [];
+	const labelById = new Map(labels.map(({ id, label }) => [id, label]));
+	const authenticated = subjects.get("authenticated");
+	const publicRead =
+		target.status === "published" &&
+		target.moderationStatus === "approved" &&
+		(target.visibility === "public" || target.visibility === "unlisted");
+	const inheritedBase = new Set<UnitPermission>([
+		...(publicRead ? (["unit.read"] as const) : []),
+		...(authenticated?.grants ?? []),
+	]);
+	const orderedPermissions = unitPermissionsForKind(target.kind);
+
+	return {
+		unitId,
+		unitKind: target.kind,
+		permissions: orderedPermissions,
+		owner: ownership[0] ?? null,
+		subjects: [...subjects.values()]
+			.map((row) => {
+				const id =
+					row.subject.kind === "profile"
+						? row.subject.profileId
+						: row.subject.kind === "realm"
+							? row.subject.realmId
+							: undefined;
+				const inherited =
+					row.subject.kind === "authenticated"
+						? publicRead
+							? ["unit.read" as const]
+							: []
+						: orderedPermissions.filter((permission) => inheritedBase.has(permission));
+				const expiryValues = [...row.expiries];
+				return {
+					subject: row.subject,
+					label: id ? (labelById.get(id) ?? null) : null,
+					grants: orderedPermissions.filter((permission) => row.grants.has(permission)),
+					restrictions: orderedPermissions.filter((permission) =>
+						row.restrictions.has(permission),
+					),
+					inherited,
+					expiresAt:
+						expiryValues.length === 1 && expiryValues[0] != null
+							? new Date(expiryValues[0])
+							: null,
+				};
+			})
+			.sort((left, right) => {
+				if (left.subject.kind === "authenticated") return -1;
+				if (right.subject.kind === "authenticated") return 1;
+				return (left.label ?? subjectKey(left.subject)).localeCompare(
+					right.label ?? subjectKey(right.subject),
+				);
+			}),
+	};
+}
+
 export default new Elysia({ prefix: "/unit" })
 	.use(session)
+	.get(
+		"/:unitId/access",
+		async ({ authorization, params, query }) => {
+			await authorization.unit.ensure(params.unitId, "unit.access.manage", query.scope ?? []);
+			return getAccessSnapshot(params.unitId, query.scope ?? []);
+		},
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			query: UnitEffectiveAccessQuery,
+			response: {
+				[StatusCodes.OK]: UnitAccessSnapshotResponse,
+				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Get Unit access configuration", tags: ["Governance"] },
+		},
+	)
+	.put(
+		"/:unitId/access",
+		async ({ authorization, profile, params, body }) => {
+			const expiresAt = parseExpiry(body.expiresAt);
+			await ensureSubjectExists(body.subject);
+			await database.transaction(async (tx) => {
+				await lockUnitAccessState(tx, [params.unitId]);
+				const [target] = await tx
+					.select({ kind: unit.kind })
+					.from(unit)
+					.where(and(eq(unit.id, params.unitId), isNull(unit.deletedAt)))
+					.limit(1);
+				if (!target) throw new UnitNotFound();
+				await authorization.unit.ensureInTransaction(
+					tx,
+					params.unitId,
+					"unit.access.manage",
+					body.scope,
+				);
+				const requestedGrants = expandUnitPermissions(body.grants);
+				const requestedRestrictions = [...body.restrictions];
+				for (const permission of [...requestedGrants, ...requestedRestrictions]) {
+					if (!isUnitPermissionApplicable(target.kind, permission))
+						throw new UnitAccessConfigurationInvalid();
+					await authorization.unit.ensureInTransaction(
+						tx,
+						params.unitId,
+						permission,
+						body.scope,
+					);
+				}
+				if (
+					body.subject.kind === "authenticated" &&
+					(requestedRestrictions.length ||
+						requestedGrants.some(
+							(permission) => !isUnitPermissionGrantableToAuthenticated(permission),
+						))
+				)
+					throw new UnitAccessConfigurationInvalid();
+				const grantSet = new Set(requestedGrants);
+				if (requestedRestrictions.some((permission) => grantSet.has(permission)))
+					throw new UnitAccessConfigurationInvalid();
+
+				if (body.subject.kind === "profile") {
+					const [ownership] = await tx
+						.select({ id: unitOwnership.id })
+						.from(unitOwnership)
+						.where(
+							and(
+								eq(unitOwnership.unitId, params.unitId),
+								eq(unitOwnership.profileId, body.subject.profileId),
+								isNull(unitOwnership.revokedAt),
+							),
+						)
+						.limit(1);
+					if (ownership) throw new UnitOwnerRestrictionForbidden();
+				}
+
+				const now = new Date();
+				await tx
+					.update(unitAccessGrant)
+					.set({
+						revokedAt: now,
+						revokedByProfileId: profile.unitId,
+						updatedAt: now,
+					})
+					.where(
+						and(
+							eq(unitAccessGrant.unitId, params.unitId),
+							subjectGrantCondition(body.subject, body.scope),
+							isNull(unitAccessGrant.revokedAt),
+						),
+					);
+				if (requestedGrants.length)
+					await tx.insert(unitAccessGrant).values(
+						requestedGrants.map((permission) => ({
+							unitId: params.unitId,
+							subjectKind: body.subject.kind,
+							profileId:
+								body.subject.kind === "profile" ? body.subject.profileId : null,
+							realmId: body.subject.kind === "realm" ? body.subject.realmId : null,
+							permission,
+							scope: body.scope,
+							grantedByProfileId: profile.unitId,
+							expiresAt,
+						})),
+					);
+
+				if (body.subject.kind !== "authenticated") {
+					await tx
+						.update(unitAccessRestriction)
+						.set({
+							revokedAt: now,
+							revokedByProfileId: profile.unitId,
+							updatedAt: now,
+						})
+						.where(
+							and(
+								eq(unitAccessRestriction.unitId, params.unitId),
+								subjectRestrictionCondition(body.subject, body.scope),
+								isNull(unitAccessRestriction.revokedAt),
+							),
+						);
+					if (requestedRestrictions.length) {
+						const restrictionSubjectKind = body.subject.kind;
+						await tx.insert(unitAccessRestriction).values(
+							requestedRestrictions.map((permission) => ({
+								unitId: params.unitId,
+								subjectKind: restrictionSubjectKind,
+								profileId:
+									body.subject.kind === "profile" ? body.subject.profileId : null,
+								realmId:
+									body.subject.kind === "realm" ? body.subject.realmId : null,
+								permission,
+								scope: body.scope,
+								reasonCode: body.reasonCode ?? "administrative",
+								createdByProfileId: profile.unitId,
+								expiresAt,
+							})),
+						);
+					}
+				}
+				await recordAccessAudit(tx, {
+					actorProfileId: profile.unitId,
+					action: "unit.access.replace",
+					unitId: params.unitId,
+					metadata: {
+						subject: body.subject,
+						grants: requestedGrants,
+						restrictions: requestedRestrictions,
+						scope: body.scope,
+						expiresAt,
+					},
+				});
+			});
+			return getAccessSnapshot(params.unitId, body.scope);
+		},
+		{
+			access: "fresh-session-only",
+			params: UnitGovernanceParams,
+			body: ReplaceUnitSubjectAccessBody,
+			response: {
+				[StatusCodes.OK]: UnitAccessSnapshotResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitAccessExpiryInvalid",
+					"UnitAccessConfigurationInvalid",
+				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitPermissionForbidden",
+					"UnitAccessRestricted",
+					"FreshSessionRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ProfileNotFound",
+					"RealmNotFound",
+				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitOwnerRestrictionForbidden"]),
+			},
+			detail: { summary: "Replace Unit subject access", tags: ["Governance"] },
+		},
+	)
+	.get(
+		"/:unitId/access-candidates",
+		async ({ authorization, params, query }) => {
+			await authorization.unit.ensure(params.unitId, "unit.access.manage");
+			const search = query.query?.trim();
+			const rows = await database
+				.select({ id: unit.id, label: primaryUnitTitle(unit.id) })
+				.from(unit)
+				.where(
+					and(
+						eq(unit.kind, query.kind),
+						isNull(unit.deletedAt),
+						search
+							? sql`coalesce(${primaryUnitTitle(unit.id)}, '') ilike ${`%${search}%`}`
+							: undefined,
+					),
+				)
+				.orderBy(primaryUnitTitle(unit.id), unit.id)
+				.limit(query.limit ?? 20);
+			return {
+				items: rows.map(({ id, label }) => ({
+					subject:
+						query.kind === "profile"
+							? ({ kind: "profile", profileId: id } as const)
+							: ({ kind: "realm", realmId: id } as const),
+					label,
+				})),
+			};
+		},
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			query: ListUnitAccessCandidatesQuery,
+			response: {
+				[StatusCodes.OK]: UnitAccessCandidateListResponse,
+				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
+			},
+			detail: { summary: "Search Unit access candidates", tags: ["Governance"] },
+		},
+	)
 	.get(
 		"/:unitId/access/effective",
 		async ({ authorization, params, query }) => {
 			const scope = query.scope ?? [];
+			const [target] = await database
+				.select({ kind: unit.kind })
+				.from(unit)
+				.where(eq(unit.id, params.unitId))
+				.limit(1);
+			if (!target) throw new UnitNotFound();
 			return {
 				unitId: params.unitId,
 				scope,
 				decisions: await Promise.all(
-					UnitPermissionValues.map(async (permission) => ({
+					unitPermissionsForKind(target.kind).map(async (permission) => ({
 						permission,
 						decision: await authorization.unit.decide(params.unitId, permission, scope),
 					})),
@@ -221,804 +572,99 @@ export default new Elysia({ prefix: "/unit" })
 		"/:unitId/ownership",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("unit.ownership.transfer");
+			await ensureSubjectExists(body.owner);
 			return database.transaction(async (tx) => {
-				const [targetUnit] = await tx
-					.select({ kind: unit.kind })
+				await lockUnitAccessState(tx, [params.unitId]);
+				const [target] = await tx
+					.select({ id: unit.id })
 					.from(unit)
 					.where(and(eq(unit.id, params.unitId), isNull(unit.deletedAt)))
 					.limit(1);
-				if (!targetUnit) throw new UnitNotFound();
-				const [targetProfile] = await tx
-					.select({ id: profileTable.id })
-					.from(profileTable)
-					.where(eq(profileTable.id, body.owner.profileId))
-					.limit(1);
-				if (!targetProfile) throw new ProfileNotFound();
-				if (targetUnit.kind === "entity")
-					await lockEntityAssociationState(tx, params.unitId);
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
-				);
-				const cancelledInvitationIds = await cancelPendingUnitAccessInvitations(
-					tx,
-					params.unitId,
-					profile.unitId,
-				);
-				const superseded = await tx
-					.select({ id: unitAccessBinding.id })
-					.from(unitAccessBinding)
+				if (!target) throw new UnitNotFound();
+				const now = new Date();
+				await tx
+					.update(unitOwnership)
+					.set({
+						revokedAt: now,
+						revokedByProfileId: profile.unitId,
+						updatedAt: now,
+					})
 					.where(
 						and(
-							eq(unitAccessBinding.unitId, params.unitId),
-							isNull(unitAccessBinding.revokedAt),
-							or(
-								eq(unitAccessBinding.role, "owner"),
-								and(
-									eq(unitAccessBinding.subjectKind, "profile"),
-									eq(unitAccessBinding.profileId, body.owner.profileId),
-									eq(unitAccessBinding.scope, []),
-								),
-							),
+							eq(unitOwnership.unitId, params.unitId),
+							isNull(unitOwnership.revokedAt),
 						),
 					);
-				if (superseded.length)
-					await tx
-						.update(unitAccessBinding)
-						.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
-						.where(
-							and(
-								eq(unitAccessBinding.unitId, params.unitId),
-								isNull(unitAccessBinding.revokedAt),
-								or(
-									eq(unitAccessBinding.role, "owner"),
-									and(
-										eq(unitAccessBinding.subjectKind, "profile"),
-										eq(unitAccessBinding.profileId, body.owner.profileId),
-										eq(unitAccessBinding.scope, []),
-									),
-								),
-							),
-						);
-				const [created] = await tx
-					.insert(unitAccessBinding)
-					.values({
-						unitId: params.unitId,
-						subjectKind: "profile",
-						profileId: body.owner.profileId,
-						role: "owner",
-						scope: [],
-						grantedByProfileId: profile.unitId,
-					})
-					.returning();
-				if (!created) throw new Error("Unit owner transfer returned no binding");
-				if (targetUnit.kind === "entity")
-					await tx
-						.update(entity)
-						.set({ verified: true })
-						.where(eq(entity.id, params.unitId));
+				await tx.insert(unitOwnership).values({
+					unitId: params.unitId,
+					profileId: body.owner.profileId,
+					assignedByProfileId: profile.unitId,
+				});
 				await recordAccessAudit(tx, {
 					actorProfileId: profile.unitId,
-					action: "unit.owner.transfer",
+					action: "unit.ownership.transfer",
 					unitId: params.unitId,
-					metadata: {
-						newOwner: body.owner,
-						supersededBindingIds: superseded.map((binding) => binding.id),
-						cancelledInvitationIds,
-					},
+					metadata: { ownerProfileId: body.owner.profileId },
 				});
-				return created;
+				return { owner: body.owner };
 			});
 		},
 		{
-			access: "session-only",
+			access: "fresh-session-only",
 			params: UnitGovernanceParams,
 			body: TransferUnitOwnershipBody,
 			response: {
-				[StatusCodes.OK]: UnitAccessBindingResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+				[StatusCodes.OK]: t.Object({
+					owner: t.Object({ kind: t.Literal("profile"), profileId: t.String() }),
+				}),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"PlatformCapabilityRequired",
+					"FreshSessionRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProfileNotFound"]),
 			},
 			detail: { summary: "Transfer Unit ownership", tags: ["Governance"] },
 		},
 	)
-	.post(
-		"/:unitId/ownership/claim",
-		async ({ profile, params }) =>
-			database.transaction(async (tx) => {
-				const [targetUnit] = await tx
-					.select({ kind: unit.kind })
-					.from(unit)
-					.where(and(eq(unit.id, params.unitId), isNull(unit.deletedAt)))
-					.limit(1);
-				if (!targetUnit) throw new UnitNotFound();
-				if (!CommunityCatalogUnitKindSet.has(targetUnit.kind))
-					throw new UnitOwnershipClaimUnavailable();
-				if (targetUnit.kind === "entity")
-					await lockEntityAssociationState(tx, params.unitId);
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
-				);
-				const cancelledInvitationIds = await cancelPendingUnitAccessInvitations(
-					tx,
-					params.unitId,
-					profile.unitId,
-				);
-
-				const [currentOwner] = await tx
-					.select({ id: unitAccessBinding.id, profileId: unitAccessBinding.profileId })
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.unitId, params.unitId),
-							eq(unitAccessBinding.subjectKind, "profile"),
-							eq(unitAccessBinding.role, "owner"),
-							eq(unitAccessBinding.scope, []),
-							active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
-						),
-					)
-					.limit(1);
-				const [claimantBinding] = await tx
-					.select({ id: unitAccessBinding.id })
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.unitId, params.unitId),
-							eq(unitAccessBinding.subjectKind, "profile"),
-							eq(unitAccessBinding.profileId, profile.unitId),
-							inArray(unitAccessBinding.role, ["editor", "publishing_editor"]),
-							eq(unitAccessBinding.scope, []),
-							active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
-						),
-					)
-					.limit(1);
-				if (
-					!currentOwner?.profileId ||
-					!OfficialProfileIdSet.has(currentOwner.profileId) ||
-					!claimantBinding
-				)
-					throw new UnitOwnershipClaimUnavailable();
-
-				const revokedAt = new Date();
-				const supersededBindingIds = [currentOwner.id, claimantBinding.id];
-				await tx
-					.update(unitAccessBinding)
-					.set({ revokedAt, revokedByProfileId: profile.unitId })
-					.where(
-						and(
-							inArray(unitAccessBinding.id, supersededBindingIds),
-							isNull(unitAccessBinding.revokedAt),
-						),
-					);
-				const [created] = await tx
-					.insert(unitAccessBinding)
-					.values({
-						unitId: params.unitId,
-						subjectKind: "profile",
-						profileId: profile.unitId,
-						role: "owner",
-						scope: [],
-						grantedByProfileId: profile.unitId,
+	.delete(
+		"/:unitId/ownership",
+		async ({ authorization, profile, params }) => {
+			await authorization.platform.ensureCapability("unit.ownership.transfer");
+			await database.transaction(async (tx) => {
+				await lockUnitAccessState(tx, [params.unitId]);
+				const rows = await tx
+					.update(unitOwnership)
+					.set({
+						revokedAt: new Date(),
+						revokedByProfileId: profile.unitId,
 					})
-					.returning();
-				if (!created) throw new Error("Unit ownership claim returned no binding");
-				if (targetUnit.kind === "entity")
-					await tx
-						.update(entity)
-						.set({ verified: true })
-						.where(eq(entity.id, params.unitId));
+					.where(
+						and(
+							eq(unitOwnership.unitId, params.unitId),
+							isNull(unitOwnership.revokedAt),
+						),
+					)
+					.returning({ id: unitOwnership.id });
+				if (!rows.length) throw new UnitNotFound();
 				await recordAccessAudit(tx, {
 					actorProfileId: profile.unitId,
-					action: "unit.owner.claim",
+					action: "unit.ownership.revoke",
 					unitId: params.unitId,
-					metadata: {
-						previousOwnerProfileId: currentOwner.profileId,
-						supersededBindingIds,
-						cancelledInvitationIds,
-					},
 				});
-				return created;
-			}),
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
-			body: ClaimUnitOwnershipBody,
-			response: {
-				[StatusCodes.OK]: UnitAccessBindingResponse,
-				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
-				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitOwnershipClaimUnavailable"]),
-			},
-			detail: { summary: "Claim community Unit ownership", tags: ["Governance"] },
-		},
-	)
-	.get(
-		"/:unitId/access-bindings",
-		async ({ authorization, params }) => {
-			await authorization.unit.ensure(params.unitId, "unit.access.manage");
-			return {
-				items: await database
-					.select()
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.unitId, params.unitId),
-							isNull(unitAccessBinding.revokedAt),
-						),
-					)
-					.orderBy(unitAccessBinding.scope, unitAccessBinding.role, unitAccessBinding.id),
-			};
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			response: {
-				[StatusCodes.OK]: UnitAccessBindingListResponse,
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "List Unit access bindings", tags: ["Governance"] },
-		},
-	)
-	.post(
-		"/:unitId/access-bindings",
-		async ({ authorization, profile, params, body }) => {
-			await authorization.unit.ensure(params.unitId, "unit.access.manage", body.scope);
-			if (
-				body.subject.kind === "authenticated" &&
-				body.role !== "viewer" &&
-				body.role !== "editor"
-			)
-				throw new UnitAccessSubjectRoleInvalid();
-			if (body.role === "maintainer")
-				await ensureOwnerOrPlatform(authorization, params.unitId);
-			await ensureSubjectExists(body.subject);
-			const expiresAt = parseExpiry(body.expiresAt);
-			const created = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
-				);
-				const subjectCondition =
-					body.subject.kind === "profile"
-						? and(
-								eq(unitAccessBinding.subjectKind, "profile"),
-								eq(unitAccessBinding.profileId, body.subject.profileId),
-							)
-						: body.subject.kind === "realm"
-							? and(
-									eq(unitAccessBinding.subjectKind, "realm"),
-									eq(unitAccessBinding.realmId, body.subject.realmId),
-									eq(unitAccessBinding.realmRelation, body.subject.relation),
-								)
-							: eq(unitAccessBinding.subjectKind, "authenticated");
-				const [duplicate] = await tx
-					.select({ id: unitAccessBinding.id })
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.unitId, params.unitId),
-							subjectCondition,
-							eq(unitAccessBinding.scope, body.scope),
-							isNull(unitAccessBinding.revokedAt),
-						),
-					)
-					.limit(1);
-				if (duplicate) throw new UnitAccessBindingConflict();
-				const subjectColumns =
-					body.subject.kind === "profile"
-						? { subjectKind: "profile" as const, profileId: body.subject.profileId }
-						: body.subject.kind === "realm"
-							? {
-									subjectKind: "realm" as const,
-									realmId: body.subject.realmId,
-									realmRelation: body.subject.relation,
-								}
-							: { subjectKind: "authenticated" as const };
-				const [created] = await tx
-					.insert(unitAccessBinding)
-					.values({
-						unitId: params.unitId,
-						...subjectColumns,
-						role: body.role,
-						scope: body.scope,
-						expiresAt,
-						grantedByProfileId: profile.unitId,
-					})
-					.returning();
-				if (!created) throw new Error("Unit access binding insertion returned no row");
-				await recordAccessAudit(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.access_binding.create",
-					unitId: params.unitId,
-					metadata: {
-						bindingId: created.id,
-						subjectKind: body.subject.kind,
-						role: body.role,
-						scope: body.scope,
-					},
-				});
-				return created;
-			});
-			/** TODO: Deliver a best-effort access-granted notification after this commit boundary. */
-			return created;
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			body: CreateUnitAccessBindingBody,
-			response: {
-				[StatusCodes.OK]: UnitAccessBindingResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"UnitAccessExpiryInvalid",
-					"UnitAccessSubjectRoleInvalid",
-				]),
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ProfileNotFound",
-					"RealmNotFound",
-				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitAccessBindingConflict"]),
-			},
-			detail: { summary: "Create Unit access binding", tags: ["Governance"] },
-		},
-	)
-	.delete(
-		"/:unitId/access-bindings/:bindingId",
-		async ({ authorization, profile, params }) => {
-			await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
-				);
-				const [target] = await tx
-					.select({
-						id: unitAccessBinding.id,
-						role: unitAccessBinding.role,
-						scope: unitAccessBinding.scope,
-						expiresAt: unitAccessBinding.expiresAt,
-					})
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.id, params.bindingId),
-							eq(unitAccessBinding.unitId, params.unitId),
-							isNull(unitAccessBinding.revokedAt),
-						),
-					)
-					.limit(1);
-				if (!target) throw new UnitAccessBindingNotFound();
-				await authorization.unit.ensure(params.unitId, "unit.access.manage", target.scope);
-				if (
-					target.role === "owner" &&
-					(!target.expiresAt || target.expiresAt > new Date())
-				) {
-					await ensureOwnerOrPlatform(authorization, params.unitId);
-					const owners = await tx
-						.select({ id: unitAccessBinding.id })
-						.from(unitAccessBinding)
-						.where(
-							and(
-								eq(unitAccessBinding.unitId, params.unitId),
-								eq(unitAccessBinding.role, "owner"),
-								active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
-							),
-						);
-					if (owners.length <= 1) throw new UnitOwnerRequired();
-				}
-				await tx
-					.update(unitAccessBinding)
-					.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
-					.where(eq(unitAccessBinding.id, target.id));
-				await recordAccessAudit(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.access_binding.revoke",
-					unitId: params.unitId,
-					metadata: { bindingId: target.id },
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "session-only",
-			params: UnitAccessBindingParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"UnitAccessBindingNotFound",
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"PlatformCapabilityRequired",
+					"FreshSessionRequired",
 				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitOwnerRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: {
-				summary: "Revoke Unit access binding",
-				tags: ["Governance"],
-				responses: NoContentResponse,
-			},
-		},
-	)
-	.get(
-		"/:unitId/access-restrictions",
-		async ({ authorization, params }) => {
-			await authorization.unit.ensure(params.unitId, "unit.access.manage");
-			return database.transaction(async (tx) => {
-				const rows = await tx
-					.select()
-					.from(unitAccessRestriction)
-					.where(
-						and(
-							eq(unitAccessRestriction.unitId, params.unitId),
-							isNull(unitAccessRestriction.revokedAt),
-						),
-					)
-					.orderBy(
-						unitAccessRestriction.scope,
-						unitAccessRestriction.permission,
-						unitAccessRestriction.subjectKind,
-						unitAccessRestriction.id,
-					);
-				const notes = await listGovernanceNotes(tx, {
-					subjectKind: "unit_access_restriction",
-					subjectIds: rows.map((row) => row.id),
-					roles: ["internal_note"],
-				});
-				return {
-					items: rows.map((row) =>
-						toUnitAccessRestrictionResponse(
-							row,
-							notes.find((note) => note.subjectId === row.id)?.postId ?? null,
-						),
-					),
-				};
-			});
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			response: {
-				[StatusCodes.OK]: UnitAccessRestrictionListResponse,
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "List Unit access restrictions", tags: ["Governance"] },
-		},
-	)
-	.post(
-		"/:unitId/access-restrictions",
-		async ({ authorization, profile, params, body }) => {
-			await authorization.unit.ensure(params.unitId, "unit.access.manage", body.scope);
-			const expiresAt = parseExpiry(body.expiresAt);
-			await ensureSubjectExists(body.subject);
-			const created = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
-				);
-				if (body.subject.kind === "profile") {
-					const [owner] = await tx
-						.select({ id: unitAccessBinding.id })
-						.from(unitAccessBinding)
-						.where(
-							and(
-								eq(unitAccessBinding.unitId, params.unitId),
-								eq(unitAccessBinding.subjectKind, "profile"),
-								eq(unitAccessBinding.profileId, body.subject.profileId),
-								eq(unitAccessBinding.role, "owner"),
-								active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
-							),
-						)
-						.limit(1);
-					if (owner) throw new UnitOwnerRestrictionForbidden();
-				}
-				const subjectCondition =
-					body.subject.kind === "profile"
-						? and(
-								eq(unitAccessRestriction.subjectKind, "profile"),
-								eq(unitAccessRestriction.profileId, body.subject.profileId),
-							)
-						: and(
-								eq(unitAccessRestriction.subjectKind, "realm"),
-								eq(unitAccessRestriction.realmId, body.subject.realmId),
-							);
-				const [duplicate] = await tx
-					.select({ id: unitAccessRestriction.id })
-					.from(unitAccessRestriction)
-					.where(
-						and(
-							eq(unitAccessRestriction.unitId, params.unitId),
-							subjectCondition,
-							eq(unitAccessRestriction.permission, body.permission),
-							eq(unitAccessRestriction.scope, body.scope),
-							isNull(unitAccessRestriction.revokedAt),
-						),
-					)
-					.limit(1);
-				if (duplicate) throw new UnitAccessRestrictionConflict();
-				const subjectColumns =
-					body.subject.kind === "profile"
-						? {
-								subjectKind: "profile" as const,
-								profileId: body.subject.profileId,
-							}
-						: {
-								subjectKind: "realm" as const,
-								realmId: body.subject.realmId,
-							};
-				const [row] = await tx
-					.insert(unitAccessRestriction)
-					.values({
-						unitId: params.unitId,
-						...subjectColumns,
-						permission: body.permission,
-						scope: body.scope,
-						reasonCode: body.reasonCode,
-						expiresAt,
-						createdByProfileId: profile.unitId,
-					})
-					.returning();
-				if (!row) throw new Error("Unit access restriction insertion returned no row");
-				const internalNote = body.internalNote
-					? await createGovernanceNotePost(tx, {
-							actorProfileId: profile.unitId,
-							subjectKind: "unit_access_restriction",
-							subjectId: row.id,
-							subjectUnitId: params.unitId,
-							viewerProfileIds: await activeOwnerProfileIds(tx, params.unitId),
-							note: { role: "internal_note", ...body.internalNote },
-						})
-					: undefined;
-				await recordAccessAudit(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.access_restriction.create",
-					unitId: params.unitId,
-					decisionCode: body.reasonCode,
-					metadata: {
-						restrictionId: row.id,
-						subject: body.subject,
-						permission: body.permission,
-						scope: body.scope,
-						internalNotePostId: internalNote?.postId,
-					},
-				});
-				return { row, internalNotePostId: internalNote?.postId ?? null };
-			});
-			return toUnitAccessRestrictionResponse(created.row, created.internalNotePostId);
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			body: CreateUnitAccessRestrictionBody,
-			response: {
-				[StatusCodes.OK]: UnitAccessRestrictionResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitAccessExpiryInvalid"]),
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ProfileNotFound",
-					"RealmNotFound",
-				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UnitOwnerRestrictionForbidden",
-					"UnitAccessRestrictionConflict",
-				]),
-			},
-			detail: { summary: "Restrict subject access to a Unit scope", tags: ["Governance"] },
-		},
-	)
-	.delete(
-		"/:unitId/access-restrictions/:restrictionId",
-		async ({ authorization, profile, params }) => {
-			await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
-				);
-				const [target] = await tx
-					.select({ id: unitAccessRestriction.id, scope: unitAccessRestriction.scope })
-					.from(unitAccessRestriction)
-					.where(
-						and(
-							eq(unitAccessRestriction.id, params.restrictionId),
-							eq(unitAccessRestriction.unitId, params.unitId),
-							isNull(unitAccessRestriction.revokedAt),
-						),
-					)
-					.limit(1);
-				if (!target) throw new UnitAccessRestrictionNotFound();
-				await authorization.unit.ensure(params.unitId, "unit.access.manage", target.scope);
-				await tx
-					.update(unitAccessRestriction)
-					.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
-					.where(eq(unitAccessRestriction.id, target.id));
-				await recordAccessAudit(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.access_restriction.revoke",
-					unitId: params.unitId,
-					decisionCode: "administrative",
-					metadata: { restrictionId: target.id },
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "session-only",
-			params: UnitAccessRestrictionParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"UnitAccessRestrictionNotFound",
-				]),
-			},
-			detail: {
-				summary: "Revoke Unit access restriction",
-				tags: ["Governance"],
-				responses: NoContentResponse,
-			},
-		},
-	)
-	.get(
-		"/:unitId/protections",
-		async ({ authorization, params }) => {
-			await authorization.unit.ensure(params.unitId, "unit.protection.manage");
-			return database.transaction(async (tx) => {
-				const rows = await tx
-					.select()
-					.from(unitProtection)
-					.where(
-						and(
-							eq(unitProtection.unitId, params.unitId),
-							isNull(unitProtection.revokedAt),
-						),
-					)
-					.orderBy(unitProtection.scope, unitProtection.id);
-				const notes = await listGovernanceNotes(tx, {
-					subjectKind: "unit_protection",
-					subjectIds: rows.map((row) => row.id),
-					roles: ["internal_note"],
-				});
-				return {
-					items: rows.map((row) =>
-						toUnitProtectionResponse(
-							row,
-							notes.find((note) => note.subjectId === row.id)?.postId ?? null,
-						),
-					),
-				};
-			});
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			response: {
-				[StatusCodes.OK]: UnitProtectionListResponse,
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "List Unit protections", tags: ["Governance"] },
-		},
-	)
-	.post(
-		"/:unitId/protections",
-		async ({ authorization, profile, params, body }) => {
-			await authorization.unit.ensure(params.unitId, "unit.protection.manage", body.scope);
-			const expiresAt = parseExpiry(body.expiresAt);
-			return database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-protection:${params.unitId}`}::text, 0))`,
-				);
-				await tx
-					.update(unitProtection)
-					.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
-					.where(
-						and(
-							eq(unitProtection.unitId, params.unitId),
-							eq(unitProtection.scope, body.scope),
-							isNull(unitProtection.revokedAt),
-						),
-					);
-				const [created] = await tx
-					.insert(unitProtection)
-					.values({
-						unitId: params.unitId,
-						scope: body.scope,
-						mode: body.mode,
-						reasonCode: body.reasonCode,
-						expiresAt,
-						createdByProfileId: profile.unitId,
-					})
-					.returning();
-				if (!created) throw new Error("Unit protection insertion returned no row");
-				const internalNote = body.internalNote
-					? await createGovernanceNotePost(tx, {
-							actorProfileId: profile.unitId,
-							subjectKind: "unit_protection",
-							subjectId: created.id,
-							subjectUnitId: params.unitId,
-							viewerProfileIds: await activeOwnerProfileIds(tx, params.unitId),
-							note: { role: "internal_note", ...body.internalNote },
-						})
-					: undefined;
-				await recordAccessAudit(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.protection.create",
-					unitId: params.unitId,
-					decisionCode: body.reasonCode,
-					metadata: {
-						protectionId: created.id,
-						mode: body.mode,
-						scope: body.scope,
-						internalNotePostId: internalNote?.postId,
-					},
-				});
-				return toUnitProtectionResponse(created, internalNote?.postId ?? null);
-			});
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			body: CreateUnitProtectionBody,
-			response: {
-				[StatusCodes.OK]: UnitProtectionResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitAccessExpiryInvalid"]),
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "Protect Unit scope", tags: ["Governance"] },
-		},
-	)
-	.delete(
-		"/:unitId/protections/:protectionId",
-		async ({ authorization, profile, params }) => {
-			await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-protection:${params.unitId}`}::text, 0))`,
-				);
-				const [target] = await tx
-					.select({ id: unitProtection.id, scope: unitProtection.scope })
-					.from(unitProtection)
-					.where(
-						and(
-							eq(unitProtection.id, params.protectionId),
-							eq(unitProtection.unitId, params.unitId),
-							isNull(unitProtection.revokedAt),
-						),
-					)
-					.limit(1);
-				if (!target) throw new UnitProtectionNotFound();
-				await authorization.unit.ensure(
-					params.unitId,
-					"unit.protection.manage",
-					target.scope,
-				);
-				await tx
-					.update(unitProtection)
-					.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
-					.where(eq(unitProtection.id, target.id));
-				await recordAccessAudit(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.protection.revoke",
-					unitId: params.unitId,
-					decisionCode: "administrative",
-					metadata: { protectionId: target.id },
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "session-only",
-			params: UnitProtectionParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"UnitProtectionNotFound",
-				]),
-			},
-			detail: {
-				summary: "Revoke Unit protection",
-				tags: ["Governance"],
-				responses: NoContentResponse,
-			},
+			detail: { summary: "Revoke Unit ownership", tags: ["Governance"] },
 		},
 	);

@@ -13,7 +13,7 @@ const members: Parameters<typeof filterRealmMembers>[0] = [
 			canonicalPath: ["users", "edge"],
 		},
 		avatar: null,
-		role: "owner",
+		isOwner: true,
 		state: "active",
 		joinedAt: "2026-07-27T00:00:00.000Z",
 	},
@@ -27,7 +27,7 @@ const members: Parameters<typeof filterRealmMembers>[0] = [
 			canonicalPath: ["users", "jetywolf"],
 		},
 		avatar: null,
-		role: "member",
+		isOwner: false,
 		state: "muted",
 		joinedAt: "2026-07-26T00:00:00.000Z",
 	},
@@ -35,12 +35,12 @@ const members: Parameters<typeof filterRealmMembers>[0] = [
 
 describe("Realm member filters", () => {
 	it("searches ordinary names and displayed u/slug values", () => {
-		expect(filterRealmMembers(members, "coordinates", "all", "all")).toEqual([members[0]]);
-		expect(filterRealmMembers(members, "u/JETYwolf", "all", "all")).toEqual([members[1]]);
+		expect(filterRealmMembers(members, "coordinates", "all")).toEqual([members[0]]);
+		expect(filterRealmMembers(members, "u/JETYwolf", "all")).toEqual([members[1]]);
 	});
 
-	it("combines role and status filters", () => {
-		expect(filterRealmMembers(members, "", "member", "muted")).toEqual([members[1]]);
-		expect(filterRealmMembers(members, "", "owner", "muted")).toEqual([]);
+	it("combines search and status filters", () => {
+		expect(filterRealmMembers(members, "", "muted")).toEqual([members[1]]);
+		expect(filterRealmMembers(members, "edge", "muted")).toEqual([]);
 	});
 });

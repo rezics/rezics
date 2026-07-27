@@ -45,10 +45,7 @@ import {
 	RealmNavigationRevisionBody,
 } from "./schema";
 
-const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitProtected",
-]);
+const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 
 async function ensureRealm(realmId: string): Promise<void> {
 	const [record] = await database

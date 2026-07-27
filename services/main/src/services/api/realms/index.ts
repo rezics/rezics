@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, max, notInArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, max, notInArray, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -47,16 +47,13 @@ import {
 	tag,
 	unitFollow,
 	unit,
-	unitAccessBinding,
+	unitAccessGrant,
+	unitOwnership,
 	unitLocalization,
 } from "../../database/schema";
 import { listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
-import {
-	getRealmMemberCapabilityAccess,
-	replaceRealmMemberCapabilityAccess,
-} from "../../realms/member-access";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
@@ -104,7 +101,6 @@ import {
 	RealmUnitHistoryQuery,
 	RealmUnitModerationHistoryResponse,
 	RealmMemberParams,
-	RealmMemberCapabilityAccessResponse,
 	RealmParams,
 	RealmDetailQuery,
 	RealmRulesQuery,
@@ -113,7 +109,6 @@ import {
 	RemoveRealmPinQuery,
 	UpdateRealmBody,
 	UpdateRealmMemberBody,
-	ReplaceRealmMemberCapabilityAccessBody,
 } from "./schema";
 import {
 	executeAuthorizedModerationAction,
@@ -148,10 +143,7 @@ import { FeedContentKindValues } from "../feed/schema";
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
 const RealmMutationNotFoundResponse = toApiErrorResponse(["RealmNotFound", "ImageAssetNotFound"]);
-const RealmMutationForbiddenResponse = toApiErrorResponse([
-	"RealmCapabilityRequired",
-	"UnitProtected",
-]);
+const RealmMutationForbiddenResponse = toApiErrorResponse(["RealmCapabilityRequired"]);
 
 function presentRealmUnitStatus(value: string | null) {
 	if (value === null) return null;
@@ -170,10 +162,9 @@ async function ensureRealmFieldsAuthorized(
 	authorization: Authorization<string>,
 	realmId: string,
 	capability: RealmCapability,
-	scope: readonly string[],
+	_scope: readonly string[],
 ): Promise<void> {
 	await authorization.realm.ensureCapability(realmId, capability);
-	await authorization.unit.ensureOperationAllowed(realmId, scope);
 }
 
 async function ensureRealmVisible(realmId: string, headers: Headers) {
@@ -378,19 +369,25 @@ export default new Elysia({ prefix: "/realms" })
 					unitId: created.id,
 					...toUnitLocalizationStorage(body.localization),
 				});
-				await tx.insert(unitAccessBinding).values({
+				await tx.insert(unitOwnership).values({
 					unitId: created.id,
-					subjectKind: "profile",
 					profileId: profile.unitId,
-					role: "owner",
-					scope: [],
-					grantedByProfileId: profile.unitId,
+					assignedByProfileId: profile.unitId,
 				});
 				await tx.insert(realmMember).values({
 					realmId: created.id,
 					profileId: profile.unitId,
-					role: "owner",
 				});
+				await tx.insert(unitAccessGrant).values(
+					(["unit.read", "realm.contribute"] as const).map((permission) => ({
+						unitId: created.id,
+						subjectKind: "realm" as const,
+						realmId: created.id,
+						permission,
+						scope: [],
+						grantedByProfileId: profile.unitId,
+					})),
+				);
 				await tx.insert(unitFollow).values({
 					followerProfileId: profile.unitId,
 					unitId: created.id,
@@ -522,6 +519,13 @@ export default new Elysia({ prefix: "/realms" })
 							),
 					])
 				: [undefined, []];
+			const [ownership] = await database
+				.select({ profileId: unitOwnership.profileId })
+				.from(unitOwnership)
+				.where(
+					and(eq(unitOwnership.unitId, params.realmId), isNull(unitOwnership.revokedAt)),
+				)
+				.limit(1);
 			const [realmCapabilities, accessDecision, historyDecision] = await Promise.all([
 				authorization.realm.decideCapabilities(params.realmId, [
 					"realm.settings.update",
@@ -569,7 +573,10 @@ export default new Elysia({ prefix: "/realms" })
 					}),
 				),
 				viewerMembership: viewerMembership
-					? { role: viewerMembership.role, state: viewerMembership.state }
+					? {
+							isOwner: ownership?.profileId === viewerMembership.profileId,
+							state: viewerMembership.state,
+						}
 					: undefined,
 				viewerFollowing: following.length > 0,
 				capabilities: {
@@ -625,10 +632,6 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/score-context",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
-			await authorization.unit.ensureOperationAllowed(params.realmId, [
-				"realm",
-				"score-context",
-			]);
 			await authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound());
 			const [mountedPost] = await database
 				.select({ id: post.id })
@@ -672,10 +675,6 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/score-context",
 		async ({ params, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
-			await authorization.unit.ensureOperationAllowed(params.realmId, [
-				"realm",
-				"score-context",
-			]);
 			await database
 				.delete(realmScoreContext)
 				.where(eq(realmScoreContext.realmId, params.realmId));
@@ -699,8 +698,6 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
-			for (const scope of [["unit"], ["realm"], ["localizations"]] as const)
-				await authorization.unit.ensureOperationAllowed(params.realmId, scope);
 			const publishDecision = body.status
 				? await authorization.unit.decide(params.realmId, "unit.publish", ["unit"])
 				: undefined;
@@ -779,8 +776,7 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.put(
 		"/:realmId/membership",
-		async ({ params, profile, authorization, body }) => {
-			await authorization.unit.ensureOperationAllowed(params.realmId, ["members"]);
+		async ({ params, profile, body }) => {
 			const [record] = await database
 				.select({
 					status: unit.status,
@@ -840,7 +836,6 @@ export default new Elysia({ prefix: "/realms" })
 			body: JoinRealmBody,
 			response: {
 				[StatusCodes.OK]: MembershipResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitProtected"]),
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRulesAcceptanceRequired"]),
 			},
@@ -849,11 +844,10 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.delete(
 		"/:realmId/membership",
-		async ({ params, profile, authorization }) => {
-			await authorization.unit.ensureOperationAllowed(params.realmId, ["members"]);
+		async ({ params, profile }) => {
 			await database.transaction(async (tx) => {
 				const [membership] = await tx
-					.select({ role: realmMember.role })
+					.select({ profileId: realmMember.profileId })
 					.from(realmMember)
 					.where(
 						and(
@@ -863,7 +857,18 @@ export default new Elysia({ prefix: "/realms" })
 					)
 					.limit(1);
 				if (!membership) throw new RealmMembershipNotFound();
-				if (membership.role === "owner") throw new RealmOwnerLeaveForbidden();
+				const [ownership] = await tx
+					.select({ id: unitOwnership.id })
+					.from(unitOwnership)
+					.where(
+						and(
+							eq(unitOwnership.unitId, params.realmId),
+							eq(unitOwnership.profileId, profile.unitId),
+							isNull(unitOwnership.revokedAt),
+						),
+					)
+					.limit(1);
+				if (ownership) throw new RealmOwnerLeaveForbidden();
 				await tx
 					.delete(realmMember)
 					.where(
@@ -900,7 +905,6 @@ export default new Elysia({ prefix: "/realms" })
 			params: RealmParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitProtected"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMembershipNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
 			},
@@ -915,6 +919,13 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/members",
 		async ({ params, authorization, query }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.members.read");
+			const [ownership] = await database
+				.select({ profileId: unitOwnership.profileId })
+				.from(unitOwnership)
+				.where(
+					and(eq(unitOwnership.unitId, params.realmId), isNull(unitOwnership.revokedAt)),
+				)
+				.limit(1);
 			const members = await database
 				.select({
 					profileId: realmMember.profileId,
@@ -930,7 +941,6 @@ export default new Elysia({ prefix: "/realms" })
 						profileTable.id,
 						query.localizationLanguages,
 					),
-					role: realmMember.role,
 					state: realmMember.state,
 					joinedAt: realmMember.joinedAt,
 				})
@@ -954,6 +964,7 @@ export default new Elysia({ prefix: "/realms" })
 						throw new Error(`Realm member ${member.profileId} has no localization`);
 					return {
 						...member,
+						isOwner: ownership?.profileId === member.profileId,
 						language: member.language,
 						slugAddress: slugAddresses.get(member.profileId) ?? null,
 						avatar: presentAvatar(avatar),
@@ -976,22 +987,25 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/members/:profileId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
-			await authorization.unit.ensureOperationAllowed(params.realmId, ["members"]);
-			const [actor, hasPlatformAuthority] = await Promise.all([
-				findRealmMembership(params.realmId, profile.unitId),
-				authorization.platform.hasCapability("realm.members.manage"),
-			]);
 			const target = await findRealmMembership(params.realmId, params.profileId);
 			if (!target) throw new RealmMemberNotFound();
-			authorization.realm.ensureCanManageMember(
-				hasPlatformAuthority ? "owner" : (actor?.role ?? ""),
-				target.role,
-				body.role,
-			);
 			const result = await database.transaction(async (tx) => {
+				const [targetOwnership] = await tx
+					.select({ id: unitOwnership.id })
+					.from(unitOwnership)
+					.where(
+						and(
+							eq(unitOwnership.unitId, params.realmId),
+							eq(unitOwnership.profileId, params.profileId),
+							isNull(unitOwnership.revokedAt),
+						),
+					)
+					.limit(1);
+				if (targetOwnership && body.state !== "active")
+					throw new RealmOwnerLeaveForbidden();
 				const [row] = await tx
 					.update(realmMember)
-					.set({ role: body.role, state: body.state })
+					.set({ state: body.state })
 					.where(
 						and(
 							eq(realmMember.realmId, params.realmId),
@@ -1010,7 +1024,7 @@ export default new Elysia({ prefix: "/realms" })
 				await recordAuditEvent(tx, profile.unitId, "realm.members.update", params.realmId, {
 					profileId: params.profileId,
 				});
-				return row;
+				return { ...row, isOwner: Boolean(targetOwnership) };
 			});
 			return result;
 		},
@@ -1020,66 +1034,11 @@ export default new Elysia({ prefix: "/realms" })
 			body: UpdateRealmMemberBody,
 			response: {
 				[StatusCodes.OK]: RealmMemberResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"UnitProtected",
-					"RealmRoleManagementForbidden",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
-			},
-			detail: { summary: "Update Realm member", tags: ["Realms"] },
-		},
-	)
-	.get(
-		"/:realmId/members/:profileId/capabilities",
-		async ({ params, authorization }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
-			return getRealmMemberCapabilityAccess(database, params.realmId, params.profileId);
-		},
-		{
-			access: "session-only",
-			params: RealmMemberParams,
-			response: {
-				[StatusCodes.OK]: RealmMemberCapabilityAccessResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
 			},
-			detail: { summary: "Get Realm member capability access", tags: ["Realms"] },
-		},
-	)
-	.put(
-		"/:realmId/members/:profileId/capabilities",
-		async ({ params, profile, authorization, body }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
-			await authorization.unit.ensureOperationAllowed(params.realmId, ["members"]);
-			return database.transaction((tx) =>
-				replaceRealmMemberCapabilityAccess(tx, {
-					actorProfileId: profile.unitId,
-					realmId: params.realmId,
-					targetProfileId: params.profileId,
-					capabilities: body.capabilities,
-					expiresAt: body.expiresAt,
-				}),
-			);
-		},
-		{
-			access: "fresh-session-only",
-			params: RealmMemberParams,
-			body: ReplaceRealmMemberCapabilityAccessBody,
-			response: {
-				[StatusCodes.OK]: RealmMemberCapabilityAccessResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["CapabilityGrantExpiryInvalid"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"UnitProtected",
-					"FreshSessionRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
-			},
-			detail: {
-				summary: "Replace Realm member capability access",
-				tags: ["Realms"],
-			},
+			detail: { summary: "Update Realm member", tags: ["Realms"] },
 		},
 	)
 	.put(
@@ -1126,13 +1085,10 @@ export default new Elysia({ prefix: "/realms" })
 						content: rule.content,
 						contentStatus: "published",
 					});
-					await tx.insert(unitAccessBinding).values({
+					await tx.insert(unitOwnership).values({
 						unitId: ruleUnit.id,
-						subjectKind: "profile",
 						profileId: profile.unitId,
-						role: "owner",
-						scope: [],
-						grantedByProfileId: profile.unitId,
+						assignedByProfileId: profile.unitId,
 					});
 					await tx.insert(realmRule).values({
 						id: ruleUnit.id,

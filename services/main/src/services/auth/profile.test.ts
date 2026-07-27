@@ -39,7 +39,7 @@ vi.mock("../units/create", () => ({ insertUnit }));
 vi.mock("../units/history", () => ({ recordUnitRevision }));
 
 import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
-import { profilePreference, realmMember, unitAccessBinding, unitFollow } from "../database/schema";
+import { profilePreference, realmMember, unitFollow, unitOwnership } from "../database/schema";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 import { fractionalPositionBetween } from "../ordering/position";
 import { ensureProfile } from "./profile";
@@ -105,13 +105,10 @@ describe("Profile registration defaults", () => {
 			image: null,
 		});
 
-		expect(valuesByTable.get(unitAccessBinding)).toEqual({
+		expect(valuesByTable.get(unitOwnership)).toEqual({
 			unitId: ProfileId,
-			subjectKind: "profile",
 			profileId: ProfileId,
-			role: "owner",
-			scope: [],
-			grantedByProfileId: ProfileId,
+			assignedByProfileId: ProfileId,
 		});
 	});
 
@@ -131,7 +128,6 @@ describe("Profile registration defaults", () => {
 		expect(valuesByTable.get(realmMember)).toEqual({
 			realmId: OfficialRealmUnitIds.score,
 			profileId: ProfileId,
-			role: "member",
 			state: "active",
 		});
 	});

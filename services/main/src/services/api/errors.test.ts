@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { describe, expect, it } from "vitest";
 
 import { SearchUnavailable } from "../search/errors";
-import { UnitProtected } from "../units/errors";
+import { UnitPermissionForbidden } from "../units/errors";
 import {
 	ApiErrorCodes,
 	ApiErrorRegistry,
@@ -15,17 +15,17 @@ import {
 
 describe("API errors", () => {
 	it("serializes typed failures without exposing their cause", () => {
-		const failure = new UnitProtected(["title"], "frozen");
+		const failure = new UnitPermissionForbidden("unit.update", ["title"]);
 
 		expect(failure).toBeInstanceOf(Error);
-		expect(failure._tag).toBe("UnitProtected");
+		expect(failure._tag).toBe("UnitPermissionForbidden");
 		expect(isApiError(failure)).toBe(true);
 		expect(failure.status).toBe(StatusCodes.FORBIDDEN);
 		expect(toApiErrorBody(failure, "request-1")).toEqual({
 			error: {
-				code: "UnitProtected",
-				message: "Unit scope is protected: title",
-				details: { scope: ["title"], mode: "frozen" },
+				code: "UnitPermissionForbidden",
+				message: "Unit permission required: unit.update",
+				details: { permission: "unit.update", scope: ["title"] },
 			},
 			requestId: "request-1",
 		});

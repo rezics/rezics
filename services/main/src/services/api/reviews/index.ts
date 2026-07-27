@@ -19,7 +19,7 @@ import {
 	score,
 	scoreStat,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -85,10 +85,7 @@ import { ValidationError } from "../errors";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
-const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"UnitPermissionForbidden",
-	"UnitProtected",
-]);
+const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 
 const ReviewListCursor = t.Object(
 	{
@@ -377,13 +374,10 @@ export default new Elysia()
 							profileId: profile.unitId,
 							nextBody: body.body,
 						});
-						await tx.insert(unitAccessBinding).values({
+						await tx.insert(unitOwnership).values({
 							unitId: created.id,
-							subjectKind: "profile",
 							profileId: profile.unitId,
-							role: "owner",
-							scope: [],
-							grantedByProfileId: profile.unitId,
+							assignedByProfileId: profile.unitId,
 						});
 						await createProfilePublisherAttribution(tx, {
 							sourceUnitId: created.id,

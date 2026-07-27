@@ -24,7 +24,6 @@ import {
 	ContentRatingValues,
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
-	EntityAssociationPolicyModeValues,
 	PlatformCapabilityValues,
 	ProgressStatusValues,
 	SubjectAssociationRoleValues,
@@ -42,12 +41,6 @@ export { toApiErrorResponse } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
 const OrdinaryPostKindResponse = t.Union([t.Literal("post"), t.Literal("reply")]);
-const EntityAssociationPolicyModeResponse = t.UnionEnum(EntityAssociationPolicyModeValues);
-export const EntityAssociationPolicyResponse = t.Object({
-	creditAttribution: EntityAssociationPolicyModeResponse,
-	subjectAssociation: EntityAssociationPolicyModeResponse,
-});
-
 export function toPortableTextResponse(value: unknown): PortableTextDocumentValue {
 	return parseDocument(PortableTextDocument, value);
 }
@@ -796,7 +789,6 @@ export const EntityDetailResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	localizations: t.Array(LocalizationResponse),
-	associationPolicy: EntityAssociationPolicyResponse,
 	owner: t.Nullable(UnitSummaryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
@@ -876,7 +868,7 @@ export const RealmDetailResponse = t.Object({
 	cover: ImageAssetResponse,
 	localizations: t.Array(LocalizationSummary),
 	viewerFollowing: t.Boolean(),
-	viewerMembership: t.Optional(t.Object({ role: t.String(), state: t.String() })),
+	viewerMembership: t.Optional(t.Object({ isOwner: t.Boolean(), state: t.String() })),
 	capabilities: t.Object({
 		canUpdateSettings: t.Boolean(),
 		canReadMembers: t.Boolean(),

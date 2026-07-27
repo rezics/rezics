@@ -2,17 +2,11 @@ import { PortableTextDocument } from "@rezics/block";
 import { type Static, t } from "elysia";
 
 import {
-	CapabilityAuthorityValues,
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
 	ModerationCaseStateValues,
 	PlatformCapabilityValues,
-	UnitAccessRealmRelationValues,
-	UnitAccessRoleValues,
-	UnitDelegableAccessRoleValues,
-	UnitAccessSubjectKindValues,
 	UnitPermissionValues,
-	UnitProtectionModeValues,
 } from "../../database/schema/contract-values";
 import { DateTime, ContentLanguage, Uuid } from "../schema";
 
@@ -109,23 +103,6 @@ export const CreateModerationActionBody = t.Union([
 	t.Object(
 		{
 			...ModerationActionCommon,
-			kind: t.Literal("protect"),
-			scope: UnitScope,
-			protectionMode: t.UnionEnum(UnitProtectionModeValues),
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			...ModerationActionCommon,
-			kind: t.Literal("unprotect"),
-			scope: UnitScope,
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			...ModerationActionCommon,
 			kind: t.Literal("reverse"),
 			reversesActionId: Uuid,
 		},
@@ -180,15 +157,9 @@ export const RevokeAccountEnforcementBody = t.Object(
 );
 
 const Capability = t.Union(PlatformCapabilityValues.map((value) => t.Literal(value)));
-const GrantAuthority = t.Union(CapabilityAuthorityValues.map((value) => t.Literal(value)));
-export const ListGrantsQuery = t.Object({
-	authority: GrantAuthority,
-	realmId: t.Optional(Uuid),
-});
+export const ListGrantsQuery = t.Object({}, { additionalProperties: false });
 export const CreateGrantBody = t.Object(
 	{
-		authority: GrantAuthority,
-		realmId: t.Optional(Uuid),
 		profileId: Uuid,
 		capability: Capability,
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
@@ -198,8 +169,6 @@ export const CreateGrantBody = t.Object(
 export const GrantParams = t.Object({ grantId: Uuid });
 
 export const UnitGovernanceParams = t.Object({ unitId: Uuid });
-export const ClaimUnitOwnershipBody = t.Object({}, { additionalProperties: false });
-export const UnitAccessBindingParams = t.Object({ unitId: Uuid, bindingId: Uuid });
 export const UnitAccessInvitationParams = t.Object({ unitId: Uuid, invitationId: Uuid });
 export const ListUnitAccessInvitationsQuery = t.Object(
 	{ includeResolved: t.Optional(t.Boolean()) },
@@ -211,21 +180,23 @@ export const UnitEffectiveAccessQuery = t.Object(
 );
 const UnitAccessSubject = t.Union([
 	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
-	t.Object(
-		{
-			kind: t.Literal("realm"),
-			realmId: Uuid,
-			relation: t.UnionEnum(UnitAccessRealmRelationValues),
-		},
-		{ additionalProperties: false },
-	),
+	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("authenticated") }, { additionalProperties: false }),
 ]);
-export const CreateUnitAccessBindingBody = t.Object(
+const UnitPermission = t.UnionEnum(UnitPermissionValues);
+export const ReplaceUnitSubjectAccessBody = t.Object(
 	{
 		subject: UnitAccessSubject,
-		role: t.UnionEnum(UnitDelegableAccessRoleValues),
+		grants: t.Array(UnitPermission, {
+			maxItems: UnitPermissionValues.length,
+			uniqueItems: true,
+		}),
+		restrictions: t.Array(UnitPermission, {
+			maxItems: UnitPermissionValues.length,
+			uniqueItems: true,
+		}),
 		scope: UnitScope,
+		reasonCode: t.Optional(GovernanceReasonCode),
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
@@ -233,14 +204,17 @@ export const CreateUnitAccessBindingBody = t.Object(
 export const CreateUnitAccessInvitationBody = t.Object(
 	{
 		invitedProfileId: Uuid,
-		role: t.UnionEnum(UnitDelegableAccessRoleValues),
+		permissions: t.Array(UnitPermission, {
+			minItems: 1,
+			maxItems: UnitPermissionValues.length,
+			uniqueItems: true,
+		}),
 		scope: UnitScope,
 		invitationExpiresAt: t.String({ format: "date-time" }),
 		accessExpiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
 );
-export const UnitAccessRestrictionParams = t.Object({ unitId: Uuid, restrictionId: Uuid });
 export const TransferUnitOwnershipBody = t.Object(
 	{
 		owner: t.Object(
@@ -254,25 +228,11 @@ export const UnitAccessRestrictionSubject = t.Union([
 	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
 ]);
-export const CreateUnitAccessRestrictionBody = t.Object(
+export const ListUnitAccessCandidatesQuery = t.Object(
 	{
-		subject: UnitAccessRestrictionSubject,
-		permission: t.UnionEnum(UnitPermissionValues),
-		scope: UnitScope,
-		reasonCode: GovernanceReasonCode,
-		internalNote: t.Optional(GovernanceInternalNote),
-		expiresAt: t.Optional(t.String({ format: "date-time" })),
-	},
-	{ additionalProperties: false },
-);
-export const UnitProtectionParams = t.Object({ unitId: Uuid, protectionId: Uuid });
-export const CreateUnitProtectionBody = t.Object(
-	{
-		scope: UnitScope,
-		mode: t.UnionEnum(UnitProtectionModeValues),
-		reasonCode: GovernanceReasonCode,
-		internalNote: t.Optional(GovernanceInternalNote),
-		expiresAt: t.Optional(t.String({ format: "date-time" })),
+		kind: t.Union([t.Literal("profile"), t.Literal("realm")]),
+		query: t.Optional(t.String({ maxLength: 200 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	},
 	{ additionalProperties: false },
 );
@@ -325,8 +285,6 @@ export const EnforcementResponse = t.Object({
 
 export const GrantResponse = t.Object({
 	id: Uuid,
-	authority: t.String(),
-	realmId: t.Nullable(Uuid),
 	profileId: Uuid,
 	capability: t.String(),
 	grantedByProfileId: Uuid,
@@ -337,29 +295,11 @@ export const GrantResponse = t.Object({
 });
 export const GrantListResponse = t.Object({ items: t.Array(GrantResponse) });
 
-export const UnitAccessBindingResponse = t.Object({
-	id: Uuid,
-	unitId: Uuid,
-	subjectKind: t.UnionEnum(UnitAccessSubjectKindValues),
-	profileId: t.Nullable(Uuid),
-	realmId: t.Nullable(Uuid),
-	realmRelation: t.Nullable(t.String()),
-	role: t.String(),
-	scope: UnitScope,
-	grantedByProfileId: Uuid,
-	expiresAt: t.Nullable(DateTime),
-	revokedAt: t.Nullable(DateTime),
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
-export const UnitAccessBindingListResponse = t.Object({
-	items: t.Array(UnitAccessBindingResponse),
-});
 export const UnitAccessInvitationResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
 	invitedProfileId: Uuid,
-	role: t.UnionEnum(UnitDelegableAccessRoleValues),
+	permissions: t.Array(UnitPermission),
 	scope: UnitScope,
 	invitedByProfileId: Uuid,
 	expiresAt: DateTime,
@@ -376,56 +316,54 @@ export const UnitAccessInvitationResponse = t.Object({
 	),
 	resolvedAt: t.Nullable(DateTime),
 	resolvedByProfileId: t.Nullable(Uuid),
-	acceptedBindingId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
 export const UnitAccessInvitationListResponse = t.Object({
 	items: t.Array(UnitAccessInvitationResponse),
 });
-export const UnitAccessRestrictionResponse = t.Object({
-	id: Uuid,
-	unitId: Uuid,
-	subject: UnitAccessRestrictionSubject,
-	permission: t.String(),
-	scope: UnitScope,
-	reasonCode: GovernanceReasonCode,
-	internalNotePostId: t.Nullable(Uuid),
-	createdByProfileId: Uuid,
+const UnitAccessSubjectRow = t.Object({
+	subject: UnitAccessSubject,
+	label: t.Nullable(t.String()),
+	grants: t.Array(UnitPermission),
+	restrictions: t.Array(UnitPermission),
+	inherited: t.Array(UnitPermission),
 	expiresAt: t.Nullable(DateTime),
-	revokedAt: t.Nullable(DateTime),
-	createdAt: DateTime,
-	updatedAt: DateTime,
 });
-export const UnitAccessRestrictionListResponse = t.Object({
-	items: t.Array(UnitAccessRestrictionResponse),
-});
-export const UnitProtectionResponse = t.Object({
-	id: Uuid,
+export const UnitAccessSnapshotResponse = t.Object({
 	unitId: Uuid,
-	scope: UnitScope,
-	mode: t.String(),
-	reasonCode: GovernanceReasonCode,
-	internalNotePostId: t.Nullable(Uuid),
-	createdByProfileId: Uuid,
-	expiresAt: t.Nullable(DateTime),
-	revokedAt: t.Nullable(DateTime),
-	createdAt: DateTime,
-	updatedAt: DateTime,
+	unitKind: t.String(),
+	permissions: t.Array(UnitPermission),
+	owner: t.Nullable(t.Object({ profileId: Uuid, label: t.Nullable(t.String()) })),
+	subjects: t.Array(UnitAccessSubjectRow),
 });
-export const UnitProtectionListResponse = t.Object({ items: t.Array(UnitProtectionResponse) });
+export const UnitAccessCandidateListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			subject: UnitAccessSubject,
+			label: t.Nullable(t.String()),
+		}),
+	),
+});
 
 const UnitAllowedDecisionResponse = t.Union([
 	t.Object(
-		{ allowed: t.Literal(true), source: t.Union([t.Literal("public"), t.Literal("platform")]) },
+		{
+			allowed: t.Literal(true),
+			source: t.Union([t.Literal("public"), t.Literal("platform"), t.Literal("owner")]),
+		},
 		{ additionalProperties: false },
 	),
 	t.Object(
 		{
 			allowed: t.Literal(true),
-			source: t.Literal("binding"),
-			bindingId: Uuid,
-			role: t.UnionEnum(UnitAccessRoleValues),
+			source: t.Literal("grant"),
+			grantId: Uuid,
+			subjectKind: t.Union([
+				t.Literal("profile"),
+				t.Literal("realm"),
+				t.Literal("authenticated"),
+			]),
 		},
 		{ additionalProperties: false },
 	),
@@ -444,14 +382,6 @@ const UnitDeniedDecisionResponse = t.Union([
 			reason: t.Literal("restricted"),
 			restrictionId: Uuid,
 			subjectKind: t.Union([t.Literal("profile"), t.Literal("realm")]),
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			allowed: t.Literal(false),
-			reason: t.Literal("protected"),
-			mode: t.UnionEnum(UnitProtectionModeValues),
 		},
 		{ additionalProperties: false },
 	),

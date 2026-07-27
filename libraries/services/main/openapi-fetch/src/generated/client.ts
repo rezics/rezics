@@ -91,30 +91,18 @@ import type {
 	GetApiFeedbackMeResponses,
 	PostApiFeedbackOptions,
 	PostApiFeedbackResponses,
+	GetApiGovernanceUnitByUnitIdAccessOptions,
+	GetApiGovernanceUnitByUnitIdAccessResponses,
+	PutApiGovernanceUnitByUnitIdAccessOptions,
+	PutApiGovernanceUnitByUnitIdAccessResponses,
+	GetApiGovernanceUnitByUnitIdAccessCandidatesOptions,
+	GetApiGovernanceUnitByUnitIdAccessCandidatesResponses,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveOptions,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveResponses,
 	PutApiGovernanceUnitByUnitIdOwnershipOptions,
 	PutApiGovernanceUnitByUnitIdOwnershipResponses,
-	PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
-	PostApiGovernanceUnitByUnitIdOwnershipClaimResponses,
-	GetApiGovernanceUnitByUnitIdAccessBindingsOptions,
-	GetApiGovernanceUnitByUnitIdAccessBindingsResponses,
-	PostApiGovernanceUnitByUnitIdAccessBindingsOptions,
-	PostApiGovernanceUnitByUnitIdAccessBindingsResponses,
-	DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdOptions,
-	DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses,
-	GetApiGovernanceUnitByUnitIdAccessRestrictionsOptions,
-	GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses,
-	PostApiGovernanceUnitByUnitIdAccessRestrictionsOptions,
-	PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses,
-	DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdOptions,
-	DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses,
-	GetApiGovernanceUnitByUnitIdProtectionsOptions,
-	GetApiGovernanceUnitByUnitIdProtectionsResponses,
-	PostApiGovernanceUnitByUnitIdProtectionsOptions,
-	PostApiGovernanceUnitByUnitIdProtectionsResponses,
-	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions,
-	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses,
+	DeleteApiGovernanceUnitByUnitIdOwnershipOptions,
+	DeleteApiGovernanceUnitByUnitIdOwnershipResponses,
 	GetApiGovernanceUnitAccessInvitationsOptions,
 	GetApiGovernanceUnitAccessInvitationsResponses,
 	GetApiGovernanceUnitByUnitIdAccessInvitationsOptions,
@@ -345,10 +333,6 @@ import type {
 	GetApiEntitiesByUnitIdResponses,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageResponses,
-	GetApiEntitiesByUnitIdAssociationPolicyOptions,
-	GetApiEntitiesByUnitIdAssociationPolicyResponses,
-	PatchApiEntitiesByUnitIdAssociationPolicyOptions,
-	PatchApiEntitiesByUnitIdAssociationPolicyResponses,
 	GetApiTagsOptions,
 	GetApiTagsResponses,
 	PostApiTagsOptions,
@@ -531,10 +515,6 @@ import type {
 	GetApiRealmsByRealmIdMembersResponses,
 	PatchApiRealmsByRealmIdMembersByProfileIdOptions,
 	PatchApiRealmsByRealmIdMembersByProfileIdResponses,
-	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
-	GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses,
-	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions,
-	PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses,
 	PutApiRealmsByRealmIdRulesOptions,
 	PutApiRealmsByRealmIdRulesResponses,
 	GetApiRealmsByRealmIdRulesOptions,
@@ -1414,6 +1394,59 @@ export function postApiFeedback<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Get Unit access configuration
+ * {@link /api/governance/unit/:unitId/access}
+ */
+export function getApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitByUnitIdAccessOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/access",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace Unit subject access
+ * {@link /api/governance/unit/:unitId/access}
+ */
+export function putApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean = true>(
+	options: Options<PutApiGovernanceUnitByUnitIdAccessOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/governance/unit/{unitId}/access",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Search Unit access candidates
+ * {@link /api/governance/unit/:unitId/access-candidates}
+ */
+export function getApiGovernanceUnitByUnitIdAccessCandidates<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitByUnitIdAccessCandidatesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/access-candidates",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary Resolve effective Unit access for the current Profile
  * {@link /api/governance/unit/:unitId/access/effective}
  */
@@ -1450,216 +1483,20 @@ export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boole
 }
 
 /**
- * @summary Claim community Unit ownership
- * {@link /api/governance/unit/:unitId/ownership/claim}
+ * @summary Revoke Unit ownership
+ * {@link /api/governance/unit/:unitId/ownership}
  */
-export function postApiGovernanceUnitByUnitIdOwnershipClaim<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernanceUnitByUnitIdOwnershipClaimOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceUnitByUnitIdOwnershipClaimResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/governance/unit/{unitId}/ownership/claim",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernanceUnitByUnitIdOwnershipClaimResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary List Unit access bindings
- * {@link /api/governance/unit/:unitId/access-bindings}
- */
-export function getApiGovernanceUnitByUnitIdAccessBindings<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceUnitByUnitIdAccessBindingsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/governance/unit/{unitId}/access-bindings",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Create Unit access binding
- * {@link /api/governance/unit/:unitId/access-bindings}
- */
-export function postApiGovernanceUnitByUnitIdAccessBindings<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernanceUnitByUnitIdAccessBindingsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/governance/unit/{unitId}/access-bindings",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Revoke Unit access binding
- * {@link /api/governance/unit/:unitId/access-bindings/:bindingId}
- */
-export function deleteApiGovernanceUnitByUnitIdAccessBindingsByBindingId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdOptions, ThrowOnError>,
-): Promise<
-	RequestResult<DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses, ThrowOnError>
-> {
+export function deleteApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiGovernanceUnitByUnitIdOwnershipOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/governance/unit/{unitId}/access-bindings/{bindingId}",
+		url: "/api/governance/unit/{unitId}/ownership",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses,
-			ThrowOnError
-		>
-	>;
-}
-
-/**
- * @summary List Unit access restrictions
- * {@link /api/governance/unit/:unitId/access-restrictions}
- */
-export function getApiGovernanceUnitByUnitIdAccessRestrictions<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceUnitByUnitIdAccessRestrictionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/governance/unit/{unitId}/access-restrictions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Restrict subject access to a Unit scope
- * {@link /api/governance/unit/:unitId/access-restrictions}
- */
-export function postApiGovernanceUnitByUnitIdAccessRestrictions<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PostApiGovernanceUnitByUnitIdAccessRestrictionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/governance/unit/{unitId}/access-restrictions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Revoke Unit access restriction
- * {@link /api/governance/unit/:unitId/access-restrictions/:restrictionId}
- */
-export function deleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<
-		DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdOptions,
-		ThrowOnError
-	>,
-): Promise<
-	RequestResult<
-		DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses,
-		ThrowOnError
-	>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/governance/unit/{unitId}/access-restrictions/{restrictionId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses,
-			ThrowOnError
-		>
-	>;
-}
-
-/**
- * @summary List Unit protections
- * {@link /api/governance/unit/:unitId/protections}
- */
-export function getApiGovernanceUnitByUnitIdProtections<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceUnitByUnitIdProtectionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/governance/unit/{unitId}/protections",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Protect Unit scope
- * {@link /api/governance/unit/:unitId/protections}
- */
-export function postApiGovernanceUnitByUnitIdProtections<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernanceUnitByUnitIdProtectionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/governance/unit/{unitId}/protections",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Revoke Unit protection
- * {@link /api/governance/unit/:unitId/protections/:protectionId}
- */
-export function deleteApiGovernanceUnitByUnitIdProtectionsByProtectionId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions, ThrowOnError>,
-): Promise<
-	RequestResult<DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/governance/unit/{unitId}/protections/{protectionId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses,
-			ThrowOnError
-		>
-	>;
+	}) as Promise<RequestResult<DeleteApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>;
 }
 
 /**
@@ -1991,7 +1828,7 @@ export function postApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
  * {@link /api/governance/grants}
  */
 export function getApiGovernanceGrants<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceGrantsOptions, ThrowOnError>,
+	options: Options<GetApiGovernanceGrantsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiGovernanceGrantsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
@@ -3951,39 +3788,6 @@ export function putApiEntitiesByUnitIdLocalizationsByLanguage<ThrowOnError exten
 }
 
 /**
- * @summary Get Entity association policy
- * {@link /api/entities/:unitId/association-policy}
- */
-export function getApiEntitiesByUnitIdAssociationPolicy<ThrowOnError extends boolean = true>(
-	options: Options<GetApiEntitiesByUnitIdAssociationPolicyOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/entities/{unitId}/association-policy",
-		...config,
-	}) as Promise<RequestResult<GetApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Update Entity association policy
- * {@link /api/entities/:unitId/association-policy}
- */
-export function patchApiEntitiesByUnitIdAssociationPolicy<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiEntitiesByUnitIdAssociationPolicyOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PATCH",
-		url: "/api/entities/{unitId}/association-policy",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PatchApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>>;
-}
-
-/**
  * @summary List tags
  * {@link /api/tags}
  */
@@ -5842,52 +5646,6 @@ export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends b
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Get Realm member capability access
- * {@link /api/realms/:realmId/members/:profileId/capabilities}
- */
-export function getApiRealmsByRealmIdMembersByProfileIdCapabilities<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions, ThrowOnError>,
-): Promise<
-	RequestResult<GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/realms/{realmId}/members/{profileId}/capabilities",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Replace Realm member capability access
- * {@link /api/realms/:realmId/members/:profileId/capabilities}
- */
-export function putApiRealmsByRealmIdMembersByProfileIdCapabilities<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/realms/{realmId}/members/{profileId}/capabilities",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiRealmsByRealmIdMembersByProfileIdCapabilitiesResponses, ThrowOnError>
-	>;
 }
 
 /**

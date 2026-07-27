@@ -125,10 +125,39 @@ export const OfficialRealmManifest = {
 	],
 	ownerProfileId: OfficialProfileIds.community,
 	members: [
-		{ profileId: OfficialProfileIds.community, role: "owner" as const },
-		{ profileId: OfficialProfileIds.editorial, role: "admin" as const },
-		{ profileId: OfficialProfileIds.moderation, role: "moderator" as const },
+		OfficialProfileIds.community,
+		OfficialProfileIds.editorial,
+		OfficialProfileIds.moderation,
 	],
+	access: [
+		{
+			profileId: OfficialProfileIds.editorial,
+			permissions: [
+				"unit.read",
+				"unit.update",
+				"unit.publish",
+				"unit.access.manage",
+				"realm.contribute",
+				"realm.settings.update",
+				"realm.members.read",
+				"realm.members.manage",
+				"realm.rules.publish",
+				"realm.pins.manage",
+				"realm.units.moderate",
+			],
+		},
+		{
+			profileId: OfficialProfileIds.moderation,
+			permissions: [
+				"unit.read",
+				"realm.contribute",
+				"realm.members.read",
+				"realm.members.manage",
+				"realm.pins.manage",
+				"realm.units.moderate",
+			],
+		},
+	] as const,
 } as const;
 
 export const RezicsScoreRealmManifest = {
@@ -148,10 +177,39 @@ export const RezicsScoreRealmManifest = {
 	],
 	ownerProfileId: OfficialProfileIds.community,
 	members: [
-		{ profileId: OfficialProfileIds.community, role: "owner" as const },
-		{ profileId: OfficialProfileIds.editorial, role: "admin" as const },
-		{ profileId: OfficialProfileIds.moderation, role: "moderator" as const },
+		OfficialProfileIds.community,
+		OfficialProfileIds.editorial,
+		OfficialProfileIds.moderation,
 	],
+	access: [
+		{
+			profileId: OfficialProfileIds.editorial,
+			permissions: [
+				"unit.read",
+				"unit.update",
+				"unit.publish",
+				"unit.access.manage",
+				"realm.contribute",
+				"realm.settings.update",
+				"realm.members.read",
+				"realm.members.manage",
+				"realm.rules.publish",
+				"realm.pins.manage",
+				"realm.units.moderate",
+			],
+		},
+		{
+			profileId: OfficialProfileIds.moderation,
+			permissions: [
+				"unit.read",
+				"realm.contribute",
+				"realm.members.read",
+				"realm.members.manage",
+				"realm.pins.manage",
+				"realm.units.moderate",
+			],
+		},
+	] as const,
 } as const;
 
 export const BootstrapRealmManifest = [OfficialRealmManifest, RezicsScoreRealmManifest] as const;

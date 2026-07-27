@@ -1,5 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
-import { boolean, check, index, pgEnum, primaryKey, text, unique, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, index, pgEnum, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -18,17 +18,12 @@ import {
 	type AssociationRole,
 	CreditAttributionRoleValues,
 	type CreditAttributionRole,
-	EntityAssociationPolicyModeValues,
 	SubjectAssociationRoleValues,
 	type SubjectAssociationRole,
 	toEnumValues,
 } from "./contract-values";
 
 export const associationKind = pgEnum("association_kind", toEnumValues(AssociationKindValues));
-export const entityAssociationPolicyMode = pgEnum(
-	"entity_association_policy_mode",
-	toEnumValues(EntityAssociationPolicyModeValues),
-);
 export const associationProposalDirection = pgEnum(
 	"association_proposal_direction",
 	toEnumValues(AssociationProposalDirectionValues),
@@ -52,30 +47,6 @@ export const entity = pgTable(
 	(table) => [
 		index("entity_kind_idx").on(table.kind),
 		check("entity_kind_not_blank", sql`btrim(${table.kind}) <> ''`),
-	],
-);
-
-/**
- * Target-side consent for structured incoming relationships. This does not govern
- * free-text mentions or editing the Entity's own fields.
- */
-export const entityAssociationPolicy = pgTable(
-	"entity_association_policy",
-	{
-		entityId: uuid()
-			.notNull()
-			.references(() => entity.id, { onDelete: "cascade" }),
-		kind: associationKind().notNull(),
-		mode: entityAssociationPolicyMode().default("open").notNull(),
-		updatedByProfileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.entityId, table.kind] }),
-		index("entity_association_policy_updated_by_idx").on(table.updatedByProfileId),
 	],
 );
 

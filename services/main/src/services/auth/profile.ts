@@ -10,7 +10,7 @@ import {
 	profilePreference,
 	realmMember,
 	unit,
-	unitAccessBinding,
+	unitOwnership,
 	unitLocalization,
 	users,
 } from "../database/schema";
@@ -85,16 +85,12 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			await tx.insert(realmMember).values({
 				realmId: OfficialRealmUnitIds.score,
 				profileId: profileUnit.id,
-				role: "member",
 				state: "active",
 			});
-			await tx.insert(unitAccessBinding).values({
+			await tx.insert(unitOwnership).values({
 				unitId: profileUnit.id,
-				subjectKind: "profile",
 				profileId: profileUnit.id,
-				role: "owner",
-				scope: [],
-				grantedByProfileId: profileUnit.id,
+				assignedByProfileId: profileUnit.id,
 			});
 			await ensureOfficialZoneFollows(tx, [profileUnit.id], { sequenceIsEmpty: true });
 			await recordUnitRevision(tx, {

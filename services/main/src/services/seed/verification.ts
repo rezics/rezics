@@ -7,7 +7,6 @@ import {
 	moderationCase,
 	notification,
 	apiTokenPolicyBinding,
-	entityAssociationPolicy,
 	postScore,
 	profileRealmTagSubscription,
 	profileUnitTag,
@@ -20,6 +19,7 @@ import {
 	sharedSearchQuery,
 	subjectAssociation,
 	unit,
+	unitAccessGrant,
 	unitAccessInvitation,
 	unitAccessRestriction,
 	unitAssociationProposal,
@@ -71,8 +71,18 @@ export async function verifySeedDatabase(
 			query: database.select({ value: count() }).from(unitAccessRestriction),
 		},
 		{
-			name: "Entity association policy",
-			query: database.select({ value: count() }).from(entityAssociationPolicy),
+			name: "Entity association access grant",
+			query: database
+				.select({ value: count() })
+				.from(unitAccessGrant)
+				.where(
+					inArray(unitAccessGrant.permission, [
+						"entity.association.credit.request",
+						"entity.association.credit.direct",
+						"entity.association.subject.request",
+						"entity.association.subject.direct",
+					]),
+				),
 		},
 		{
 			name: "Unit association proposal",

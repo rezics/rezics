@@ -4,9 +4,7 @@ import { PortableTextDocument } from "@rezics/block";
 import {
 	GovernanceReasonCodeValues,
 	ModerationActionKindValues,
-	RealmCapabilityValues,
 	RealmJoinPolicyValues,
-	RealmMemberRoleValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
 	RealmUnitStatusValues,
@@ -14,7 +12,6 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { RealmCapabilitySourceValues } from "../../realms/member-access";
 import {
 	DateTime,
 	FractionalPosition,
@@ -29,8 +26,6 @@ const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(va
 const RealmJoinPolicy = t.Union(RealmJoinPolicyValues.map((value) => t.Literal(value)));
 
 const RealmStatus = t.Union(UnitStatusValues.map((value) => t.Literal(value)));
-
-const RealmMemberRole = t.Union(RealmMemberRoleValues.map((value) => t.Literal(value)));
 
 const RealmMemberState = t.Union(RealmMemberStateValues.map((value) => t.Literal(value)));
 
@@ -95,46 +90,13 @@ export type ListRealmMembersQuery = Static<typeof ListRealmMembersQuery>;
 export const RealmMemberParams = t.Object({ realmId: Uuid, profileId: Uuid });
 export type RealmMemberParams = Static<typeof RealmMemberParams>;
 
-export const UpdateRealmMemberBody = t.Object({
-	role: t.Optional(RealmMemberRole),
-	state: t.Optional(RealmMemberState),
-});
-export type UpdateRealmMemberBody = Static<typeof UpdateRealmMemberBody>;
-
-const RealmCapability = t.UnionEnum(RealmCapabilityValues);
-const RealmCapabilitySource = t.UnionEnum(RealmCapabilitySourceValues);
-
-export const RealmMemberCapabilityAccessResponse = t.Object({
-	realmId: Uuid,
-	profileId: Uuid,
-	role: t.String(),
-	capabilities: t.Array(
-		t.Object({
-			capability: RealmCapability,
-			sources: t.Array(RealmCapabilitySource, { uniqueItems: true }),
-			directGrant: t.Nullable(
-				t.Object({
-					grantedByProfileId: Uuid,
-					expiresAt: t.Nullable(DateTime),
-				}),
-			),
-		}),
-	),
-});
-
-export const ReplaceRealmMemberCapabilityAccessBody = t.Object(
+export const UpdateRealmMemberBody = t.Object(
 	{
-		capabilities: t.Array(RealmCapability, {
-			maxItems: RealmCapabilityValues.length,
-			uniqueItems: true,
-		}),
-		expiresAt: t.Nullable(DateTime),
+		state: RealmMemberState,
 	},
 	{ additionalProperties: false },
 );
-export type ReplaceRealmMemberCapabilityAccessBody = Static<
-	typeof ReplaceRealmMemberCapabilityAccessBody
->;
+export type UpdateRealmMemberBody = Static<typeof UpdateRealmMemberBody>;
 
 export const PublishRealmRulesBody = t.Object({
 	requireOnJoin: t.Boolean(),

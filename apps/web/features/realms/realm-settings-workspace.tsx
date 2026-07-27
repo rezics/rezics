@@ -40,7 +40,6 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./realm-moderation";
-import { RealmMemberAccess } from "./realm-member-access";
 import { RealmMembers } from "./realm-members";
 import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
@@ -55,13 +54,11 @@ export function RealmSettingsWorkspacePage({
 	baseHref,
 	section,
 	comparison,
-	memberProfileId,
 }: {
 	realmId: string;
 	baseHref: string;
 	section?: RealmSettingsSectionId;
 	comparison?: { from: string | null; to: string | null };
-	memberProfileId?: string;
 }) {
 	return (
 		<RequireSession>
@@ -70,7 +67,6 @@ export function RealmSettingsWorkspacePage({
 				comparison={comparison}
 				realmId={realmId}
 				section={section}
-				memberProfileId={memberProfileId}
 			/>
 		</RequireSession>
 	);
@@ -81,13 +77,11 @@ function RealmSettingsWorkspaceContent({
 	baseHref,
 	section,
 	comparison,
-	memberProfileId,
 }: {
 	realmId: string;
 	baseHref: string;
 	section?: RealmSettingsSectionId;
 	comparison?: { from: string | null; to: string | null };
-	memberProfileId?: string;
 }) {
 	const { t } = useTranslation(["docks", "errors", "history", "realms"]);
 	const localizationLanguages = useLocalizationLanguages();
@@ -171,9 +165,7 @@ function RealmSettingsWorkspaceContent({
 	];
 	const visibleSectionIds = new Set(getRealmSettingsSectionIds(capabilities, canManageDocks));
 	const sections = allSections.filter((candidate) => visibleSectionIds.has(candidate.id));
-	const sectionAllowed =
-		(!section || visibleSectionIds.has(section)) &&
-		(!memberProfileId || capabilities.canManageMembers);
+	const sectionAllowed = !section || visibleSectionIds.has(section);
 	const localization =
 		realm.data.localizations.find((item) => item.language === realm.data.language) ??
 		realm.data.localizations[0];
@@ -212,19 +204,11 @@ function RealmSettingsWorkspaceContent({
 					<RealmProfileSettings embedded realm={realm.data} />
 				</RealmSettingsSection>
 			) : section === "members" ? (
-				memberProfileId ? (
-					<RealmMemberAccessSection
-						baseHref={baseHref}
-						profileId={memberProfileId}
-						realmId={realmId}
-					/>
-				) : (
-					<RealmMembersSection
-						baseHref={baseHref}
-						canManage={capabilities.canManageMembers}
-						realmId={realmId}
-					/>
-				)
+				<RealmMembersSection
+					baseHref={baseHref}
+					canManage={capabilities.canManageMembers}
+					realmId={realmId}
+				/>
 			) : section === "rules" ? (
 				<RealmRulesSection baseHref={baseHref} realmId={realmId} />
 			) : section === "pins" ? (
@@ -257,31 +241,6 @@ function RealmSettingsWorkspaceContent({
 				/>
 			)}
 		</ManagementWorkspace>
-	);
-}
-
-function RealmMemberAccessSection({
-	baseHref,
-	realmId,
-	profileId,
-}: {
-	baseHref: string;
-	realmId: string;
-	profileId: string;
-}) {
-	const { t } = useTranslation(["realms"]);
-	return (
-		<section>
-			<ManagementWorkspaceSectionHeader
-				backHref={realmSettingsSectionHref(baseHref, "members")}
-				backLabel={t.realms.memberAccess.backToMembers}
-				description={t.realms.memberAccess.description}
-				link={Link}
-				showBackOnDesktop
-				title={t.realms.membersView.editPermissions}
-			/>
-			<RealmMemberAccess profileId={profileId} realmId={realmId} />
-		</section>
 	);
 }
 
@@ -330,7 +289,6 @@ function RealmMembersSection({
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="members">
 			<RealmMembers
-				baseHref={baseHref}
 				canManage={canManage}
 				error={query.error}
 				members={query.data?.items}

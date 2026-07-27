@@ -1,8 +1,7 @@
-import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { database } from "../../database";
 import {
-	capabilityGrant,
 	realm as realmTable,
 	realmRuleAcceptance as realmRuleAcknowledgementTable,
 } from "../../database/schema";
@@ -11,52 +10,14 @@ import {
 	getCurrentRealmRules,
 	type RealmMembership,
 } from "../../realms/service";
-import {
-	RealmCapabilityRequired,
-	RealmRoleManagementForbidden,
-	RealmRulesAcceptanceRequired,
-} from "../errors";
+import { RealmCapabilityRequired, RealmRulesAcceptanceRequired } from "../errors";
 import type { PlatformAuthorization } from "../platform/authorization";
+import type { UnitAuthorization } from "../unit/authorization";
 import {
-	canManageRealmMember,
-	canRealmRolePerform,
 	shouldRequireRealmRuleAcknowledgement,
 	type RealmCapability,
 	type RealmRuleTrigger,
 } from "./policy";
-
-async function hasActiveRealmCapabilityGrant(
-	realmId: string,
-	profileId: string,
-	capability: RealmCapability,
-) {
-	const [grant] = await database
-		.select({ id: capabilityGrant.id })
-		.from(capabilityGrant)
-		.where(
-			and(
-				eq(capabilityGrant.authority, "realm"),
-				eq(capabilityGrant.realmId, realmId),
-				eq(capabilityGrant.profileId, profileId),
-				eq(capabilityGrant.capability, capability),
-				isNull(capabilityGrant.revokedAt),
-				or(isNull(capabilityGrant.expiresAt), sql`${capabilityGrant.expiresAt} > now()`),
-			),
-		)
-		.limit(1);
-	return Boolean(grant);
-}
-
-async function hasMembershipCapability(
-	current: RealmMembership | undefined,
-	capability: RealmCapability,
-) {
-	if (!current || current.state !== "active") return false;
-	return (
-		canRealmRolePerform(current.role, capability) ||
-		(await hasActiveRealmCapabilityGrant(current.realmId, current.profileId, capability))
-	);
-}
 
 async function ensureRulesAccepted(
 	realmId: string,
@@ -82,6 +43,7 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 	constructor(
 		readonly profileId: ProfileId,
 		private readonly platform: PlatformAuthorization<ProfileId>,
+		private readonly unit: UnitAuthorization<ProfileId>,
 	) {}
 
 	async decideCapabilities<Capability extends RealmCapability>(
@@ -89,66 +51,22 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		capabilities: readonly [Capability, ...Capability[]],
 	): Promise<ReadonlyMap<Capability, boolean>> {
 		const denied = () => new Map(capabilities.map((capability) => [capability, false]));
-		if (!this.profileId) return denied();
-		const [realmRecord, membership, grants] = await Promise.all([
-			database
-				.select({ id: realmTable.id })
-				.from(realmTable)
-				.where(eq(realmTable.id, realmId))
-				.limit(1),
-			findRealmMembership(realmId, this.profileId),
-			database
-				.select({
-					authority: capabilityGrant.authority,
-					capability: capabilityGrant.capability,
-				})
-				.from(capabilityGrant)
-				.where(
-					and(
-						eq(capabilityGrant.profileId, this.profileId),
-						inArray(capabilityGrant.capability, capabilities),
-						isNull(capabilityGrant.revokedAt),
-						or(
-							isNull(capabilityGrant.expiresAt),
-							sql`${capabilityGrant.expiresAt} > now()`,
-						),
-						or(
-							and(
-								eq(capabilityGrant.authority, "realm"),
-								eq(capabilityGrant.realmId, realmId),
-							),
-							and(
-								eq(capabilityGrant.authority, "platform"),
-								isNull(capabilityGrant.realmId),
-							),
-						),
-					),
-				),
-		]);
-		if (!realmRecord.length) return denied();
-		const platformGrants = new Set(
-			grants
-				.filter(({ authority }) => authority === "platform")
-				.map(({ capability }) => capability),
+		const [record] = await database
+			.select({ id: realmTable.id })
+			.from(realmTable)
+			.where(eq(realmTable.id, realmId))
+			.limit(1);
+		if (!record || !this.profileId) return denied();
+		const decisions = await Promise.all(
+			capabilities.map(async (capability) => {
+				const [unitDecision, platformDecision] = await Promise.all([
+					this.unit.decide(realmId, capability),
+					this.platform.hasCapability(capability),
+				]);
+				return [capability, unitDecision.allowed || platformDecision] as const;
+			}),
 		);
-		const realmGrants = new Set(
-			membership?.state === "active"
-				? grants
-						.filter(({ authority }) => authority === "realm")
-						.map(({ capability }) => capability)
-				: [],
-		);
-		return new Map(
-			capabilities.map((capability) => [
-				capability,
-				Boolean(
-					(membership?.state === "active" &&
-						canRealmRolePerform(membership.role, capability)) ||
-					realmGrants.has(capability) ||
-					platformGrants.has(capability),
-				),
-			]),
-		);
+		return new Map(decisions);
 	}
 
 	async ensureMembershipCapability(
@@ -157,8 +75,8 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		capability: RealmCapability,
 	): Promise<RealmMembership> {
 		const current = await findRealmMembership(realmId, this.profileId);
-		if (!current || !(await hasMembershipCapability(current, capability)))
-			throw new RealmCapabilityRequired();
+		if (!current || current.state !== "active") throw new RealmCapabilityRequired();
+		await this.ensureCapability(realmId, capability);
 		return current;
 	}
 
@@ -168,15 +86,11 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		capability: RealmCapability,
 	): Promise<RealmMembership | undefined> {
 		const current = await findRealmMembership(realmId, this.profileId);
-		if (await hasMembershipCapability(current, capability)) return current;
-		if (await this.platform.hasCapability(capability)) {
-			const [realm] = await database
-				.select({ id: realmTable.id })
-				.from(realmTable)
-				.where(eq(realmTable.id, realmId))
-				.limit(1);
-			if (realm) return current;
-		}
+		const [decision, platformDecision] = await Promise.all([
+			this.unit.decide(realmId, capability),
+			this.platform.hasCapability(capability),
+		]);
+		if (decision.allowed || platformDecision) return current;
 		throw new RealmCapabilityRequired();
 	}
 
@@ -188,12 +102,5 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		if (!realmId) return;
 		await this.ensureMembershipCapability(realmId, "realm.contribute");
 		if (trigger) await ensureRulesAccepted(realmId, this.profileId, trigger);
-	}
-
-	ensureCanManageMember(actorRole: string, targetRole: string, nextRole?: string): void {
-		if (!canManageRealmMember(actorRole, targetRole))
-			throw new RealmRoleManagementForbidden("manage");
-		if (nextRole && !canManageRealmMember(actorRole, targetRole, nextRole))
-			throw new RealmRoleManagementForbidden("grant");
 	}
 }

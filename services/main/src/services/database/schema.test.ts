@@ -10,7 +10,6 @@ import {
 	unitLocalizationContentMetric,
 	creditAttribution,
 	unitAssociationProposal,
-	entityAssociationPolicy,
 	subjectAssociation,
 	feedback,
 	unit,
@@ -30,8 +29,6 @@ import {
 	isCreditAttributionRoleForUnitKind,
 	DockKindValues,
 	DockKindsByUnitKind,
-	AssociationKindValues,
-	EntityAssociationPolicyModeValues,
 	moderationAction,
 	moderationCase,
 	ModerationActionKindValues,
@@ -46,11 +43,11 @@ import {
 	post,
 	postScore,
 	profilePreference,
-	unitAccessBinding,
+	unitAccessGrant,
 	unitAccessInvitation,
 	unitAccessRestriction,
 	unitFollow,
-	unitProtection,
+	unitOwnership,
 	unitAliasVoteStat,
 	unitReactionStat,
 	unitTagVoteStat,
@@ -169,11 +166,12 @@ describe("database schema contracts", () => {
 	});
 
 	it("enforces Unit access subject invariants at the database boundary", () => {
-		const binding = getTableConfig(unitAccessBinding);
+		const grant = getTableConfig(unitAccessGrant);
+		const ownership = getTableConfig(unitOwnership);
 		const restriction = getTableConfig(unitAccessRestriction);
 
-		expect(binding.checks.map((constraint) => constraint.name)).toContain(
-			"unit_access_binding_subject_role_check",
+		expect(grant.checks.map((constraint) => constraint.name)).toContain(
+			"unit_access_grant_subject_shape_check",
 		);
 		expect(restriction.checks.map((constraint) => constraint.name)).toContain(
 			"unit_access_restriction_subject_shape_check",
@@ -185,16 +183,20 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["profile", "realm"]);
-		expect(unitAccessBinding.subjectKind.enumValues).toEqual([
+		expect(unitAccessGrant.subjectKind.enumValues).toEqual([
 			"profile",
 			"realm",
 			"authenticated",
 		]);
-		expect(binding.indexes.map((index) => index.config.name)).toEqual(
-			expect.arrayContaining(["unit_access_binding_active_owner_key"]),
+		expect(grant.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_access_grant_active_profile_scope_key",
+				"unit_access_grant_active_realm_scope_key",
+				"unit_access_grant_active_authenticated_scope_key",
+			]),
 		);
-		expect(binding.checks.map((constraint) => constraint.name)).toContain(
-			"unit_access_binding_owner_scope_check",
+		expect(ownership.indexes.map((index) => index.config.name)).toContain(
+			"unit_ownership_active_unit_key",
 		);
 	});
 
@@ -203,7 +205,7 @@ describe("database schema contracts", () => {
 		expect(getTableName(unitAccessInvitation)).toBe("unit_access_invitation");
 		expect(invitation.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
-				"unit_access_invitation_role_check",
+				"unit_access_invitation_permissions_check",
 				"unit_access_invitation_resolution_shape_check",
 			]),
 		);
@@ -272,14 +274,15 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("separates Entity credit consent from subject association consent", () => {
-		expect(entityAssociationPolicy.kind.enumValues).toEqual(AssociationKindValues);
-		expect(entityAssociationPolicy.mode.enumValues).toEqual(EntityAssociationPolicyModeValues);
-		const policy = getTableConfig(entityAssociationPolicy);
-		expect(policy.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
-			"entity_id",
-			"kind",
-		]);
+	it("stores Entity association consent in Unit access permissions", () => {
+		expect(UnitPermissionValues).toEqual(
+			expect.arrayContaining([
+				"entity.association.credit.request",
+				"entity.association.credit.direct",
+				"entity.association.subject.request",
+				"entity.association.subject.direct",
+			]),
+		);
 		expect(getTableName(subjectAssociation)).toBe("subject_association");
 		expect(getTableConfig(subjectAssociation).columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining(["unit_id", "entity_id", "role"]),
@@ -382,7 +385,6 @@ describe("database schema contracts", () => {
 		expect(moderationAction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(feedback.resolutionCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(unitAccessRestriction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
-		expect(unitProtection.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
 			"moderation_action_actor_case_idempotency_key",
 		);

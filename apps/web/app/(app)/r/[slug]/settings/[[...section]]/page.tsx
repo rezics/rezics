@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { parseRealmSettingsPath } from "@/features/realms/model/realm-settings-section";
 import { RealmSettingsWorkspacePage } from "@/features/realms/realm-settings-workspace";
-import { isUuid, resolvePublicSlug } from "@/features/slugs/resolve-public-slug.server";
+import { resolvePublicSlug } from "@/features/slugs/resolve-public-slug.server";
 
 export default async function Page({
 	params,
@@ -14,7 +14,6 @@ export default async function Page({
 	const [{ slug, section }, query] = await Promise.all([params, searchParams]);
 	const route = parseRealmSettingsPath(section);
 	if (!route) notFound();
-	if (route.memberProfileId && !isUuid(route.memberProfileId)) notFound();
 	const resolved = await resolvePublicSlug("realm", slug);
 	if (!resolved) notFound();
 	const suffix = section?.length ? `/${section.join("/")}` : "";
@@ -32,7 +31,6 @@ export default async function Page({
 			}
 			realmId={resolved.id}
 			section={route.section}
-			memberProfileId={route.memberProfileId}
 		/>
 	);
 }
