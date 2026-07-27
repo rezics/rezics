@@ -18,6 +18,7 @@ import {
 	conversationParticipantStat,
 	realmTagVoteStat,
 	realmScoreContext,
+	realmRuleAcceptance,
 	realmRuleRevision,
 	recommendationMetricDaily,
 	recommendationSignalKind,
@@ -231,6 +232,17 @@ describe("database schema contracts", () => {
 		expect(realmRuleRevision.acknowledgementMode.enumValues).toEqual(
 			RealmRuleAcknowledgementModeValues,
 		);
+		const revision = getTableConfig(realmRuleRevision);
+		expect(revision.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining(["require_on_join", "require_on_post"]),
+		);
+		expect(revision.columns.map((column) => column.name)).not.toContain("require_on_update");
+
+		const acceptance = getTableConfig(realmRuleAcceptance);
+		expect(acceptance.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"revision_id",
+			"profile_id",
+		]);
 	});
 
 	it("records typed generic Unit status provenance", () => {

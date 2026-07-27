@@ -40,6 +40,7 @@ export default {
 	RealmCapabilityRequired: `You do not have the required ${realmTerms.label} permission.`,
 	ScoreContextUnitUnsupported: `This Unit cannot currently be used as a scoring context. Choose a ${realmTerms.label}.`,
 	RealmRulesAcceptanceRequired: `Accept the current ${realmTerms.label} rules to continue.`,
+	RealmRuleRevisionChanged: "The rules have changed. Review the latest revision before agreeing.",
 	PlatformCapabilityRequired: "A platform permission is required for this action.",
 	PlatformGrantManagerRequired:
 		"The platform must retain at least one non-expiring grant manager.",

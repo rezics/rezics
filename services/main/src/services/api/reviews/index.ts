@@ -332,7 +332,6 @@ export default new Elysia()
 					await authorization.realm.ensureUnitCreation(
 						body.realmId,
 						"realm.units.create",
-						"post",
 					);
 					const validatedScore = body.score
 						? {
@@ -676,9 +675,6 @@ export default new Elysia()
 						[StatusCodes.OK]: ScoreResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"RealmRulesAcceptanceRequired",
-						]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 							"ScoreContextUnitUnsupported",
 						]),

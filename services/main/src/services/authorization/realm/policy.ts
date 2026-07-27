@@ -1,7 +1,6 @@
 import type { RealmPermission } from "@rezics/access";
 
 export type RealmCapability = RealmPermission;
-export type RealmRuleTrigger = "post" | "update";
 
 export function isRealmVisible(status: string, visibility: string, membershipState?: string) {
 	return (
@@ -17,11 +16,4 @@ export function isRealmJoinable(status: string, visibility: string, membershipSt
 		(visibility.toLowerCase() !== "private" ||
 			["active", "pending"].includes(membershipState?.toLowerCase() ?? ""))
 	);
-}
-
-export function shouldRequireRealmRuleAcknowledgement(
-	trigger: RealmRuleTrigger,
-	rules: { requireOnPost: boolean; requireOnUpdate: boolean },
-) {
-	return trigger === "post" ? rules.requireOnPost : rules.requireOnUpdate;
 }

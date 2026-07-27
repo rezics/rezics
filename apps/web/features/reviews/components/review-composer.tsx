@@ -8,6 +8,8 @@ import { useState, type FormEvent } from "react";
 
 import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input } from "@rezics/ui";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
+import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { writePortableText } from "@/lib/block";
@@ -38,6 +40,7 @@ export function ReviewComposer({
 	const defaultScoreContext = useDefaultScoreContext();
 	const selectedTarget = fixedTarget ?? target;
 	const scoreContext = realm ?? defaultScoreContext.context;
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm?.id);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -53,82 +56,95 @@ export function ReviewComposer({
 			return;
 		}
 		setInvalid(false);
+		const selectedRealm = realm;
 		try {
-			const result = await create.mutateAsync({
-				body: {
-					targetId: selectedTarget.id,
-					...(realm ? { realmId: realm.id } : {}),
-					...(score !== undefined && scoreContext
-						? { score: { contextUnitId: scoreContext.id, value: score } }
-						: {}),
-					language: toContentLanguage(locale.target),
-					title,
-					...(String(form.get("summary") ?? "").trim()
-						? { summary: String(form.get("summary") ?? "").trim() }
-						: {}),
-					body: writePortableText(body),
-				},
+			await rulesAcknowledgement.run(async () => {
+				const result = await create.mutateAsync({
+					body: {
+						targetId: selectedTarget.id,
+						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
+						...(score !== undefined && scoreContext
+							? { score: { contextUnitId: scoreContext.id, value: score } }
+							: {}),
+						language: toContentLanguage(locale.target),
+						title,
+						...(String(form.get("summary") ?? "").trim()
+							? { summary: String(form.get("summary") ?? "").trim() }
+							: {}),
+						body: writePortableText(body),
+					},
+				});
+				await invalidateReviews(
+					queryClient,
+					result.id,
+					selectedTarget.id,
+					score !== undefined ? scoreContext?.id : undefined,
+				);
+				await onCreated(result.id);
+				formElement.reset();
+				setBody([]);
+				setScore(undefined);
+				setRealm(undefined);
+				if (!fixedTarget) setTarget(undefined);
 			});
-			await invalidateReviews(
-				queryClient,
-				result.id,
-				selectedTarget.id,
-				score !== undefined ? scoreContext?.id : undefined,
-			);
-			await onCreated(result.id);
-			formElement.reset();
-			setBody([]);
-			setScore(undefined);
-			setRealm(undefined);
-			if (!fixedTarget) setTarget(undefined);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
 
 	return (
-		<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
-			<FieldGroup>
-				{fixedTarget ? null : (
-					<Field required>
-						<FieldLabel>{t.engagement.reviewTarget}</FieldLabel>
-						<EntityPicker index="units" onChange={setTarget} value={target} />
+		<>
+			<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
+				<FieldGroup>
+					{fixedTarget ? null : (
+						<Field required>
+							<FieldLabel>{t.engagement.reviewTarget}</FieldLabel>
+							<EntityPicker index="units" onChange={setTarget} value={target} />
+						</Field>
+					)}
+					<Field>
+						<FieldLabel>{t.engagement.reviewRealm}</FieldLabel>
+						<EntityPicker index="realms" onChange={setRealm} value={realm} />
+						<p className="text-sm text-muted-foreground">
+							{t.engagement.reviewScoreContextHint}
+						</p>
 					</Field>
-				)}
-				<Field>
-					<FieldLabel>{t.engagement.reviewRealm}</FieldLabel>
-					<EntityPicker index="realms" onChange={setRealm} value={realm} />
-					<p className="text-sm text-muted-foreground">
-						{t.engagement.reviewScoreContextHint}
+					<Field required>
+						<FieldLabel>{t.ui.title}</FieldLabel>
+						<Input maxLength={500} name="title" required />
+					</Field>
+					<Field>
+						<FieldLabel>{t.ui.summary}</FieldLabel>
+						<Input maxLength={2000} name="summary" />
+					</Field>
+					<ScoreInput disabled={!scoreContext} onChange={setScore} value={score} />
+					<PortableTextEditor
+						label={t.ui.body}
+						onChange={setBody}
+						required
+						value={body}
+					/>
+				</FieldGroup>
+				{invalid ? (
+					<p className="text-sm text-destructive" role="alert">
+						{t.errors.invalid}
 					</p>
-				</Field>
-				<Field required>
-					<FieldLabel>{t.ui.title}</FieldLabel>
-					<Input maxLength={500} name="title" required />
-				</Field>
-				<Field>
-					<FieldLabel>{t.ui.summary}</FieldLabel>
-					<Input maxLength={2000} name="summary" />
-				</Field>
-				<ScoreInput disabled={!scoreContext} onChange={setScore} value={score} />
-				<PortableTextEditor label={t.ui.body} onChange={setBody} required value={body} />
-			</FieldGroup>
-			{invalid ? (
-				<p className="text-sm text-destructive" role="alert">
-					{t.errors.invalid}
-				</p>
-			) : null}
-			<RequestFailure error={defaultScoreContext.error} fallback={t.ui.retryLater} />
-			<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-			<Button
-				className="w-fit"
-				disabled={!selectedTarget || !body.length || (score !== undefined && !scoreContext)}
-				isLoading={create.isPending}
-				type="submit"
-				variant="solid"
-			>
-				{t.ui.create}
-			</Button>
-		</form>
+				) : null}
+				<RequestFailure error={defaultScoreContext.error} fallback={t.ui.retryLater} />
+				<RequestFailure error={create.error} fallback={t.ui.retryLater} />
+				<Button
+					className="w-fit"
+					disabled={
+						!selectedTarget || !body.length || (score !== undefined && !scoreContext)
+					}
+					isLoading={create.isPending}
+					type="submit"
+					variant="solid"
+				>
+					{t.ui.create}
+				</Button>
+			</form>
+			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />
+		</>
 	);
 }

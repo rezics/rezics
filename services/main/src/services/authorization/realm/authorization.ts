@@ -14,19 +14,11 @@ import {
 import { RealmCapabilityRequired, RealmRulesAcceptanceRequired } from "../errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import type { UnitAuthorization } from "../unit/authorization";
-import {
-	shouldRequireRealmRuleAcknowledgement,
-	type RealmCapability,
-	type RealmRuleTrigger,
-} from "./policy";
+import { type RealmCapability } from "./policy";
 
-async function ensureRulesAccepted(
-	realmId: string,
-	profileId: string,
-	trigger: RealmRuleTrigger,
-): Promise<void> {
+async function ensureRulesAccepted(realmId: string, profileId: string): Promise<void> {
 	const rules = await getCurrentRealmRules(realmId);
-	if (!rules?.revisionId || !shouldRequireRealmRuleAcknowledgement(trigger, rules)) return;
+	if (!rules?.revisionId || !rules.requireOnPost) return;
 	const [acknowledgement] = await database
 		.select({ revisionId: realmRuleAcknowledgementTable.revisionId })
 		.from(realmRuleAcknowledgementTable)
@@ -98,21 +90,18 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 	async ensureParticipation(
 		this: RealmAuthorization<string>,
 		realmId: string | undefined,
-		trigger?: RealmRuleTrigger,
 	): Promise<void> {
 		if (!realmId) return;
 		await this.ensureMembershipCapability(realmId, "realm.contribute");
-		if (trigger) await ensureRulesAccepted(realmId, this.profileId, trigger);
 	}
 
 	async ensureUnitCreation(
 		this: RealmAuthorization<string>,
 		realmId: string | undefined,
 		permission: RealmUnitCreatePermission,
-		trigger: RealmRuleTrigger,
 	): Promise<void> {
 		if (!realmId) return;
 		await this.ensureCapability(realmId, permission);
-		await ensureRulesAccepted(realmId, this.profileId, trigger);
+		await ensureRulesAccepted(realmId, this.profileId);
 	}
 }

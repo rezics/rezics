@@ -4958,6 +4958,7 @@ export const ApiErrorCode = {
 	RealmNotFound: "RealmNotFound",
 	RealmMembershipNotFound: "RealmMembershipNotFound",
 	RealmOwnerLeaveForbidden: "RealmOwnerLeaveForbidden",
+	RealmRuleRevisionChanged: "RealmRuleRevisionChanged",
 	RealmMemberNotFound: "RealmMemberNotFound",
 	RealmUnitNotFound: "RealmUnitNotFound",
 	RealmScoreContextPostNotMounted: "RealmScoreContextPostNotMounted",
@@ -74404,34 +74405,6 @@ export type PutApiScoresByTargetIdStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiScoresByTargetIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmRulesAcceptanceRequired'
-		 * @type string
-		 */
-		code: "RealmRulesAcceptanceRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
 export type PutApiScoresByTargetIdStatus422 =
 	| {
 			/**
@@ -74519,7 +74492,6 @@ export type PutApiScoresByTargetIdResponses = {
 	"400": PutApiScoresByTargetIdStatus400;
 	"403": PutApiScoresByTargetIdStatus403;
 	"404": PutApiScoresByTargetIdStatus404;
-	"409": PutApiScoresByTargetIdStatus409;
 	"422": PutApiScoresByTargetIdStatus422;
 	"429": PutApiScoresByTargetIdStatus429;
 	"500": PutApiScoresByTargetIdStatus500;
@@ -74533,7 +74505,6 @@ export type PutApiScoresByTargetIdResponse =
 	| PutApiScoresByTargetIdStatus400
 	| PutApiScoresByTargetIdStatus403
 	| PutApiScoresByTargetIdStatus404
-	| PutApiScoresByTargetIdStatus409
 	| PutApiScoresByTargetIdStatus422
 	| PutApiScoresByTargetIdStatus429
 	| PutApiScoresByTargetIdStatus500;
@@ -75954,34 +75925,6 @@ export type PutApiPollsByPollIdVoteStatus404 = {
 /**
  * @type object
  */
-export type PutApiPollsByPollIdVoteStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmRulesAcceptanceRequired'
-		 * @type string
-		 */
-		code: "RealmRulesAcceptanceRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type PutApiPollsByPollIdVoteStatus422 = ValidationError;
 
 /**
@@ -76047,7 +75990,6 @@ export type PutApiPollsByPollIdVoteResponses = {
 	"400": PutApiPollsByPollIdVoteStatus400;
 	"403": PutApiPollsByPollIdVoteStatus403;
 	"404": PutApiPollsByPollIdVoteStatus404;
-	"409": PutApiPollsByPollIdVoteStatus409;
 	"422": PutApiPollsByPollIdVoteStatus422;
 	"429": PutApiPollsByPollIdVoteStatus429;
 	"500": PutApiPollsByPollIdVoteStatus500;
@@ -76061,7 +76003,6 @@ export type PutApiPollsByPollIdVoteResponse =
 	| PutApiPollsByPollIdVoteStatus400
 	| PutApiPollsByPollIdVoteStatus403
 	| PutApiPollsByPollIdVoteStatus404
-	| PutApiPollsByPollIdVoteStatus409
 	| PutApiPollsByPollIdVoteStatus422
 	| PutApiPollsByPollIdVoteStatus429
 	| PutApiPollsByPollIdVoteStatus500;
@@ -82527,11 +82468,6 @@ export type PutApiRealmsByRealmIdMembershipStatus200 = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdMembershipStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
 export type PutApiRealmsByRealmIdMembershipStatus404 = {
 	/**
 	 * @type object
@@ -82619,35 +82555,11 @@ export type PutApiRealmsByRealmIdMembershipStatus429 = {
  */
 export type PutApiRealmsByRealmIdMembershipStatus500 = InternalError;
 
-export const PutApiRealmsByRealmIdMembershipRequestLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PutApiRealmsByRealmIdMembershipRequestLanguageEnum =
-	(typeof PutApiRealmsByRealmIdMembershipRequestLanguageEnum)[keyof typeof PutApiRealmsByRealmIdMembershipRequestLanguageEnum];
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdMembershipBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	ruleRevisionId?: string;
-	/**
-	 * @type string | undefined
-	 */
-	language?: PutApiRealmsByRealmIdMembershipRequestLanguageEnum;
-};
-
 /**
  * @type object
  */
 export type PutApiRealmsByRealmIdMembershipOptions = {
-	body: PutApiRealmsByRealmIdMembershipBody;
+	body?: never;
 	path: PutApiRealmsByRealmIdMembershipPath;
 	query?: never;
 	headers?: never;
@@ -82658,7 +82570,6 @@ export type PutApiRealmsByRealmIdMembershipOptions = {
  */
 export type PutApiRealmsByRealmIdMembershipResponses = {
 	"200": PutApiRealmsByRealmIdMembershipStatus200;
-	"400": PutApiRealmsByRealmIdMembershipStatus400;
 	"404": PutApiRealmsByRealmIdMembershipStatus404;
 	"409": PutApiRealmsByRealmIdMembershipStatus409;
 	"422": PutApiRealmsByRealmIdMembershipStatus422;
@@ -82671,7 +82582,6 @@ export type PutApiRealmsByRealmIdMembershipResponses = {
  */
 export type PutApiRealmsByRealmIdMembershipResponse =
 	| PutApiRealmsByRealmIdMembershipStatus200
-	| PutApiRealmsByRealmIdMembershipStatus400
 	| PutApiRealmsByRealmIdMembershipStatus404
 	| PutApiRealmsByRealmIdMembershipStatus409
 	| PutApiRealmsByRealmIdMembershipStatus422
@@ -83490,10 +83400,6 @@ export type PutApiRealmsByRealmIdRulesBody = {
 	 */
 	requireOnPost: boolean;
 	/**
-	 * @type boolean
-	 */
-	requireOnUpdate: boolean;
-	/**
 	 * @type array
 	 */
 	rules: {
@@ -83739,10 +83645,6 @@ export type GetApiRealmsByRealmIdRulesStatus200 = {
 	 */
 	requireOnPost: boolean;
 	/**
-	 * @type boolean
-	 */
-	requireOnUpdate: boolean;
-	/**
 	 * @type array
 	 */
 	items: {
@@ -83960,6 +83862,177 @@ export type GetApiRealmsByRealmIdRulesResponse =
 	| GetApiRealmsByRealmIdRulesStatus404
 	| GetApiRealmsByRealmIdRulesStatus422
 	| GetApiRealmsByRealmIdRulesStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	revisionId: string;
+};
+
+/**
+ * @type void
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204 = void;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: "RealmNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmRuleRevisionChanged'
+		 * @type string
+		 */
+		code: "RealmRuleRevisionChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500 = InternalError;
+
+export const PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum =
+	(typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum)[keyof typeof PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementBody = {
+	/**
+	 * @type string
+	 */
+	language: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions = {
+	body: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementBody;
+	path: PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses = {
+	"204": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204;
+	"400": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400;
+	"404": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404;
+	"409": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409;
+	"422": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422;
+	"429": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429;
+	"500": PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponse =
+	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204
+	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
+	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
+	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
+	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
+	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
+	| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500;
 
 /**
  * @type object

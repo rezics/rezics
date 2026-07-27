@@ -519,6 +519,8 @@ import type {
 	PutApiRealmsByRealmIdRulesResponses,
 	GetApiRealmsByRealmIdRulesOptions,
 	GetApiRealmsByRealmIdRulesResponses,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses,
 	GetApiRealmsByRealmIdPinsOptions,
 	GetApiRealmsByRealmIdPinsResponses,
 	PutApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -5679,6 +5681,32 @@ export function getApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 
 	return request({ method: "GET", url: "/api/realms/{realmId}/rules", ...config }) as Promise<
 		RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Acknowledge current Realm rules
+ * {@link /api/realms/:realmId/rules/:revisionId/acknowledgement}
+ */
+export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/rules/{revisionId}/acknowledgement",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses, ThrowOnError>
 	>;
 }
 

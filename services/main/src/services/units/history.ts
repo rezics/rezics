@@ -118,7 +118,6 @@ const RuleSnapshotSchema = z.object({
 	acknowledgementMode: z.enum(RealmRuleAcknowledgementModeValues),
 	requireOnJoin: z.boolean(),
 	requireOnPost: z.boolean(),
-	requireOnUpdate: z.boolean(),
 	rules: z.array(
 		z.object({
 			position: z.int().nonnegative(),
@@ -402,7 +401,6 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 		acknowledgementMode: revision.acknowledgementMode,
 		requireOnJoin: revision.requireOnJoin,
 		requireOnPost: revision.requireOnPost,
-		requireOnUpdate: revision.requireOnUpdate,
 		rules,
 	});
 }
@@ -653,7 +651,6 @@ async function restoreRealmRules(
 			acknowledgementMode: value?.acknowledgementMode ?? "explicit",
 			requireOnJoin: value?.requireOnJoin ?? false,
 			requireOnPost: value?.requireOnPost ?? false,
-			requireOnUpdate: value?.requireOnUpdate ?? false,
 		})
 		.returning({ id: realmRuleRevision.id });
 	if (!revision) throw new Error("Realm rule restore did not return a revision");
@@ -1018,7 +1015,6 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 						acknowledgementMode: rules.acknowledgementMode,
 						requireOnJoin: rules.requireOnJoin,
 						requireOnPost: rules.requireOnPost,
-						requireOnUpdate: rules.requireOnUpdate,
 						rules: rules.rules,
 					}
 				: null,

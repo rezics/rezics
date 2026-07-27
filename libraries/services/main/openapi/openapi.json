@@ -9256,6 +9256,7 @@
 					"RealmNotFound",
 					"RealmMembershipNotFound",
 					"RealmOwnerLeaveForbidden",
+					"RealmRuleRevisionChanged",
 					"RealmMemberNotFound",
 					"RealmUnitNotFound",
 					"RealmScoreContextPostNotMounted",
@@ -103521,33 +103522,6 @@
 							}
 						}
 					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "RealmRulesAcceptanceRequired",
-													"type": "string",
-													"enum": ["RealmRulesAcceptanceRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"422": {
 						"description": "Response for status 422",
 						"content": {
@@ -105054,33 +105028,6 @@
 													"default": "UnitNotFound",
 													"type": "string",
 													"enum": ["UnitNotFound", "PollNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "RealmRulesAcceptanceRequired",
-													"type": "string",
-													"enum": ["RealmRulesAcceptanceRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -112893,20 +112840,6 @@
 						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"ruleRevisionId": { "format": "uuid", "type": "string" },
-									"language": { "type": "string", "enum": ["zh", "en"] }
-								}
-							}
-						}
-					},
-					"required": true
-				},
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -112917,14 +112850,6 @@
 									"required": ["state"],
 									"properties": { "state": { "type": "string" } }
 								}
-							}
-						}
-					},
-					"400": {
-						"description": "Request body could not be parsed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -113733,12 +113658,12 @@
 					"content": {
 						"application/json": {
 							"schema": {
+								"additionalProperties": false,
 								"type": "object",
 								"required": [
 									"acknowledgementMode",
 									"requireOnJoin",
 									"requireOnPost",
-									"requireOnUpdate",
 									"rules"
 								],
 								"properties": {
@@ -113749,7 +113674,6 @@
 									},
 									"requireOnJoin": { "type": "boolean" },
 									"requireOnPost": { "type": "boolean" },
-									"requireOnUpdate": { "type": "boolean" },
 									"rules": {
 										"minItems": 1,
 										"maxItems": 100,
@@ -114192,7 +114116,6 @@
 										"acknowledgementMode",
 										"requireOnJoin",
 										"requireOnPost",
-										"requireOnUpdate",
 										"items"
 									],
 									"properties": {
@@ -114226,7 +114149,6 @@
 										},
 										"requireOnJoin": { "type": "boolean" },
 										"requireOnPost": { "type": "boolean" },
-										"requireOnUpdate": { "type": "boolean" },
 										"items": {
 											"type": "array",
 											"items": {
@@ -114580,6 +114502,162 @@
 				},
 				"operationId": "getApiRealmsByRealmIdRules",
 				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdRules"
+			}
+		},
+		"/api/realms/{realmId}/rules/{revisionId}/acknowledgement": {
+			"put": {
+				"summary": "Acknowledge current Realm rules",
+				"tags": ["Realms"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmNotFound",
+													"type": "string",
+													"enum": ["RealmNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmRuleRevisionChanged",
+													"type": "string",
+													"enum": ["RealmRuleRevisionChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "revisionId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["language"],
+								"properties": {
+									"language": { "type": "string", "enum": ["zh", "en"] }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"operationId": "putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement",
+				"x-rezics-policy-operation-id": "putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement"
 			}
 		},
 		"/api/realms/{realmId}/pins": {

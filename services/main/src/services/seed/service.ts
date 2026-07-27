@@ -1829,7 +1829,6 @@ async function seedStructure(
 				index % 2 === 0 ? ("explicit" as const) : ("implicit_on_follow" as const),
 			requireOnJoin: index % 2 === 0,
 			requireOnPost: index % 3 === 0,
-			requireOnUpdate: true,
 			createdByProfileId: realmUnit.ownerProfileId,
 			publishedAt: realmUnit.createdAt,
 		})),

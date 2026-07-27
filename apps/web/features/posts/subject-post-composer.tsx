@@ -8,6 +8,8 @@ import { useState, type FormEvent } from "react";
 
 import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input } from "@rezics/ui";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
+import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { writePortableText } from "@/lib/block";
@@ -31,6 +33,7 @@ export function SubjectPostComposer({
 	const [realm, setRealm] = useState<PickedRealm>();
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [invalid, setInvalid] = useState(false);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm?.id);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -40,51 +43,62 @@ export function SubjectPostComposer({
 			return;
 		}
 		setInvalid(false);
+		const selectedRealm = realm;
 		try {
-			const result = await create.mutateAsync({
-				body: {
-					title,
-					language: toContentLanguage(locale.target),
-					body: writePortableText(body),
-					subjectId,
-					...(realm ? { realmId: realm.id } : {}),
-				},
+			await rulesAcknowledgement.run(async () => {
+				const result = await create.mutateAsync({
+					body: {
+						title,
+						language: toContentLanguage(locale.target),
+						body: writePortableText(body),
+						subjectId,
+						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
+					},
+				});
+				await invalidatePostQueries(queryClient, result.id);
+				await onCreated?.(result.id);
 			});
-			await invalidatePostQueries(queryClient, result.id);
-			await onCreated?.(result.id);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
 
 	return (
-		<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
-			<FieldGroup>
-				<Field required>
-					<FieldLabel>{t.ui.title}</FieldLabel>
-					<Input maxLength={500} name="title" required />
-				</Field>
-				<Field>
-					<FieldLabel>{t.posts.realm}</FieldLabel>
-					<EntityPicker index="realms" onChange={setRealm} value={realm} />
-				</Field>
-				<PortableTextEditor label={t.ui.body} onChange={setBody} required value={body} />
-			</FieldGroup>
-			{invalid ? (
-				<p className="text-sm text-destructive" role="alert">
-					{t.errors.invalid}
-				</p>
-			) : null}
-			<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-			<Button
-				className="w-fit"
-				disabled={!body.length}
-				isLoading={create.isPending}
-				type="submit"
-				variant="solid"
-			>
-				{t.posts.publish}
-			</Button>
-		</form>
+		<>
+			<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
+				<FieldGroup>
+					<Field required>
+						<FieldLabel>{t.ui.title}</FieldLabel>
+						<Input maxLength={500} name="title" required />
+					</Field>
+					<Field>
+						<FieldLabel>{t.posts.realm}</FieldLabel>
+						<EntityPicker index="realms" onChange={setRealm} value={realm} />
+					</Field>
+					<PortableTextEditor
+						label={t.ui.body}
+						onChange={setBody}
+						required
+						value={body}
+					/>
+				</FieldGroup>
+				{invalid ? (
+					<p className="text-sm text-destructive" role="alert">
+						{t.errors.invalid}
+					</p>
+				) : null}
+				<RequestFailure error={create.error} fallback={t.ui.retryLater} />
+				<Button
+					className="w-fit"
+					disabled={!body.length}
+					isLoading={create.isPending}
+					type="submit"
+					variant="solid"
+				>
+					{t.posts.publish}
+				</Button>
+			</form>
+			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />
+		</>
 	);
 }

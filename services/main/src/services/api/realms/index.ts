@@ -85,9 +85,9 @@ import {
 	toPortableTextResponse,
 } from "../schema/response";
 import {
+	AcknowledgeRealmRulesBody,
 	CreateRealmBody,
 	CreateRealmPinBody,
-	JoinRealmBody,
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ListRealmsQuery,
@@ -105,6 +105,7 @@ import {
 	RealmMemberParams,
 	RealmParams,
 	RealmDetailQuery,
+	RealmRuleRevisionParams,
 	RealmRulesQuery,
 	SetRealmScoreContextBody,
 	RealmPinParams,
@@ -116,6 +117,7 @@ import {
 	decodeRealmUnitModerationCursor,
 	encodeRealmUnitModerationCursor,
 } from "./moderation-pagination";
+import { requireCurrentRealmRuleRevision } from "./rule-acknowledgement";
 import {
 	executeAuthorizedModerationAction,
 	loadModerationCaseForAction,
@@ -797,7 +799,7 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.put(
 		"/:realmId/membership",
-		async ({ params, profile, body }) => {
+		async ({ params, profile }) => {
 			const [record] = await database
 				.select({
 					status: unit.status,
@@ -828,8 +830,7 @@ export default new Elysia({ prefix: "/realms" })
 					.orderBy(desc(realmRuleRevision.version))
 					.limit(1);
 				const acceptsOnFollow = rules?.acknowledgementMode === "implicit_on_follow";
-				const explicitlyAccepted = rules?.id === body.ruleRevisionId;
-				if (rules?.requireOnJoin && !acceptsOnFollow && !explicitlyAccepted) {
+				if (rules?.requireOnJoin && !acceptsOnFollow) {
 					const [existingAcceptance] = await tx
 						.select({ revisionId: realmRuleAcceptance.revisionId })
 						.from(realmRuleAcceptance)
@@ -854,13 +855,13 @@ export default new Elysia({ prefix: "/realms" })
 					.insert(unitFollow)
 					.values({ followerProfileId: profile.unitId, unitId: params.realmId })
 					.onConflictDoNothing();
-				if (rules && (acceptsOnFollow || explicitlyAccepted))
+				if (rules && acceptsOnFollow)
 					await tx
 						.insert(realmRuleAcceptance)
 						.values({
 							revisionId: rules.id,
 							profileId: profile.unitId,
-							language: acceptsOnFollow ? null : body.language,
+							language: null,
 						})
 						.onConflictDoNothing();
 			});
@@ -869,7 +870,6 @@ export default new Elysia({ prefix: "/realms" })
 		{
 			access: "contribute:interaction:write",
 			params: RealmParams,
-			body: JoinRealmBody,
 			response: {
 				[StatusCodes.OK]: MembershipResponse,
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
@@ -1099,7 +1099,6 @@ export default new Elysia({ prefix: "/realms" })
 						acknowledgementMode: body.acknowledgementMode,
 						requireOnJoin: body.requireOnJoin,
 						requireOnPost: body.requireOnPost,
-						requireOnUpdate: body.requireOnUpdate,
 						createdByProfileId: profile.unitId,
 					})
 					.returning();
@@ -1163,7 +1162,6 @@ export default new Elysia({ prefix: "/realms" })
 					acknowledgementMode: "explicit",
 					requireOnJoin: false,
 					requireOnPost: false,
-					requireOnUpdate: false,
 					items: [],
 				};
 			const items = await database
@@ -1211,6 +1209,51 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 			},
 			detail: { summary: "Get current Realm rules", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/rules/:revisionId/acknowledgement",
+		async ({ params, profile, body, request }) => {
+			await ensureRealmVisible(params.realmId, request.headers);
+			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
+				);
+				const [current] = await tx
+					.select({ revisionId: realmRuleRevision.id })
+					.from(realmRuleRevision)
+					.where(eq(realmRuleRevision.realmId, params.realmId))
+					.orderBy(desc(realmRuleRevision.version))
+					.limit(1);
+				const revisionId = requireCurrentRealmRuleRevision(
+					params.revisionId,
+					current?.revisionId,
+				);
+				await tx
+					.insert(realmRuleAcceptance)
+					.values({
+						revisionId,
+						profileId: profile.unitId,
+						language: body.language,
+					})
+					.onConflictDoNothing();
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "contribute:interaction:write",
+			params: RealmRuleRevisionParams,
+			body: AcknowledgeRealmRulesBody,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
+			},
+			detail: {
+				summary: "Acknowledge current Realm rules",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
 		},
 	)
 	.get(

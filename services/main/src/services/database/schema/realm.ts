@@ -85,7 +85,6 @@ export const realmRuleRevision = pgTable(
 		acknowledgementMode: realmRuleAcknowledgementMode().default("explicit").notNull(),
 		requireOnJoin: boolean().default(false).notNull(),
 		requireOnPost: boolean().default(false).notNull(),
-		requireOnUpdate: boolean().default(true).notNull(),
 		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		publishedAt: createCreatedAtColumn(),
 	},

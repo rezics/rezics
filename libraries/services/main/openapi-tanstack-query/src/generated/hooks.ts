@@ -1469,7 +1469,6 @@ import type {
 	PutApiScoresByTargetIdStatus400,
 	PutApiScoresByTargetIdStatus403,
 	PutApiScoresByTargetIdStatus404,
-	PutApiScoresByTargetIdStatus409,
 	PutApiScoresByTargetIdStatus422,
 	PutApiScoresByTargetIdStatus429,
 	PutApiScoresByTargetIdStatus500,
@@ -1530,7 +1529,6 @@ import type {
 	PutApiPollsByPollIdVoteStatus400,
 	PutApiPollsByPollIdVoteStatus403,
 	PutApiPollsByPollIdVoteStatus404,
-	PutApiPollsByPollIdVoteStatus409,
 	PutApiPollsByPollIdVoteStatus422,
 	PutApiPollsByPollIdVoteStatus429,
 	PutApiPollsByPollIdVoteStatus500,
@@ -1679,7 +1677,6 @@ import type {
 	DeleteApiRealmsByRealmIdScoreContextStatus500,
 	PutApiRealmsByRealmIdMembershipOptions,
 	PutApiRealmsByRealmIdMembershipStatus200,
-	PutApiRealmsByRealmIdMembershipStatus400,
 	PutApiRealmsByRealmIdMembershipStatus404,
 	PutApiRealmsByRealmIdMembershipStatus409,
 	PutApiRealmsByRealmIdMembershipStatus422,
@@ -1719,6 +1716,14 @@ import type {
 	GetApiRealmsByRealmIdRulesStatus404,
 	GetApiRealmsByRealmIdRulesStatus422,
 	GetApiRealmsByRealmIdRulesStatus500,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429,
+	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500,
 	GetApiRealmsByRealmIdPinsOptions,
 	GetApiRealmsByRealmIdPinsStatus200,
 	GetApiRealmsByRealmIdPinsStatus404,
@@ -2235,6 +2240,7 @@ import {
 	patchApiRealmsByRealmIdMembersByProfileId,
 	putApiRealmsByRealmIdRules,
 	getApiRealmsByRealmIdRules,
+	putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement,
 	getApiRealmsByRealmIdPins,
 	putApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdPinsByUnitId,
@@ -24709,7 +24715,6 @@ export function putApiScoresByTargetIdMutationOptions<TContext = unknown>(
 			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
-			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
 			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
@@ -24742,7 +24747,6 @@ export function usePutApiScoresByTargetId<TContext>(
 				| PutApiScoresByTargetIdStatus400
 				| PutApiScoresByTargetIdStatus403
 				| PutApiScoresByTargetIdStatus404
-				| PutApiScoresByTargetIdStatus409
 				| PutApiScoresByTargetIdStatus422
 				| PutApiScoresByTargetIdStatus429
 				| PutApiScoresByTargetIdStatus500
@@ -24763,7 +24767,6 @@ export function usePutApiScoresByTargetId<TContext>(
 			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
-			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
 			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
@@ -24778,7 +24781,6 @@ export function usePutApiScoresByTargetId<TContext>(
 			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
-			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
 			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
@@ -24798,7 +24800,6 @@ export function usePutApiScoresByTargetId<TContext>(
 			| PutApiScoresByTargetIdStatus400
 			| PutApiScoresByTargetIdStatus403
 			| PutApiScoresByTargetIdStatus404
-			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
 			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
@@ -25718,7 +25719,6 @@ export function putApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 			| PutApiPollsByPollIdVoteStatus400
 			| PutApiPollsByPollIdVoteStatus403
 			| PutApiPollsByPollIdVoteStatus404
-			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
 			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
@@ -25751,7 +25751,6 @@ export function usePutApiPollsByPollIdVote<TContext>(
 				| PutApiPollsByPollIdVoteStatus400
 				| PutApiPollsByPollIdVoteStatus403
 				| PutApiPollsByPollIdVoteStatus404
-				| PutApiPollsByPollIdVoteStatus409
 				| PutApiPollsByPollIdVoteStatus422
 				| PutApiPollsByPollIdVoteStatus429
 				| PutApiPollsByPollIdVoteStatus500
@@ -25772,7 +25771,6 @@ export function usePutApiPollsByPollIdVote<TContext>(
 			| PutApiPollsByPollIdVoteStatus400
 			| PutApiPollsByPollIdVoteStatus403
 			| PutApiPollsByPollIdVoteStatus404
-			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
 			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
@@ -25787,7 +25785,6 @@ export function usePutApiPollsByPollIdVote<TContext>(
 			| PutApiPollsByPollIdVoteStatus400
 			| PutApiPollsByPollIdVoteStatus403
 			| PutApiPollsByPollIdVoteStatus404
-			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
 			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
@@ -25807,7 +25804,6 @@ export function usePutApiPollsByPollIdVote<TContext>(
 			| PutApiPollsByPollIdVoteStatus400
 			| PutApiPollsByPollIdVoteStatus403
 			| PutApiPollsByPollIdVoteStatus404
-			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
 			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
@@ -27943,7 +27939,6 @@ export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknow
 	return mutationOptions<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -27954,11 +27949,10 @@ export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknow
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path, body }) => {
+		mutationFn: async ({ path }) => {
 			const { data } = await putApiRealmsByRealmIdMembership({
 				...config,
 				path,
-				body,
 				throwOnError: true,
 			});
 			return data;
@@ -27975,7 +27969,6 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdMembershipStatus200,
 			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdMembershipStatus400
 				| PutApiRealmsByRealmIdMembershipStatus404
 				| PutApiRealmsByRealmIdMembershipStatus409
 				| PutApiRealmsByRealmIdMembershipStatus422
@@ -27997,7 +27990,6 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	) as UseMutationOptions<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -28011,7 +28003,6 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	return useMutation<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -28030,7 +28021,6 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdMembershipStatus400
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -28572,6 +28562,117 @@ export function useGetApiRealmsByRealmIdRules<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationKey = () =>
+	[{ url: "/api/realms/:realmId/rules/:revisionId/acknowledgement" }] as const;
+
+export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
+		>,
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Acknowledge current Realm rules
+ * {@link /api/realms/:realmId/rules/:revisionId/acknowledgement}
+ */
+export function usePutApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
+				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
+				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
+				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
+				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
+				| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
+			>,
+			PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
+		>,
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
+		>,
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus404
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus409
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus422
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus429
+			| PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500
+		>,
+		PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
+		TContext
+	>;
 }
 
 export const getApiRealmsByRealmIdPinsQueryKey = ({

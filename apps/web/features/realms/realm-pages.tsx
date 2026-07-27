@@ -59,17 +59,9 @@ import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 import { RealmFeed } from "./components/realm-feed";
 import { RealmPinnedContentSection } from "./components/realm-pinned-content-section";
-import { RealmRulesCard } from "./components/realm-rules-card";
-import { RealmJoinRulesDialog } from "./components/realm-join-rules-dialog";
-import type { RealmRulePresentation } from "./components/realm-rules-card";
-
-type RealmJoinRuleGate =
-	| { readonly state: "loading" | "unavailable" | "not-required" }
-	| {
-			readonly state: "requires-acknowledgement";
-			readonly revisionId: string;
-			readonly rules: readonly RealmRulePresentation[];
-	  };
+import { RealmRulesCard, type RealmRulePresentation } from "./components/realm-rules-card";
+import { RealmRulesAcknowledgementPrompt } from "./components/realm-rules-acknowledgement-prompt";
+import { useRealmRulesAcknowledgement } from "./hooks/use-realm-rules-acknowledgement";
 
 export function RealmsPage() {
 	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
@@ -292,19 +284,6 @@ export function RealmDetailPage({ id }: { id: string }) {
 	const localization = selectLocalization(realm.localizations, realm.language);
 	const canManage = canOpenRealmSettings(realm.capabilities, dockAccess.allowedKinds.length > 0);
 	const canPost = realm.capabilities.canCreateUnits;
-	const joinRuleGate: RealmJoinRuleGate = rules.isPending
-		? { state: "loading" }
-		: rules.isError
-			? { state: "unavailable" }
-			: rules.data?.requireOnJoin && rules.data.acknowledgementMode === "explicit"
-				? rules.data.revisionId && rules.data.items.length
-					? {
-							state: "requires-acknowledgement",
-							revisionId: rules.data.revisionId,
-							rules: rules.data.items,
-						}
-					: { state: "unavailable" }
-				: { state: "not-required" };
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">
 			<header className="grid gap-6 border-b pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -351,12 +330,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 						</p>
 					) : null}
 				</div>
-				<RealmActions
-					canManage={canManage}
-					canPost={canPost}
-					joinRuleGate={joinRuleGate}
-					realm={realm}
-				/>
+				<RealmActions canManage={canManage} canPost={canPost} realm={realm} />
 			</header>
 
 			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
@@ -484,39 +458,24 @@ function realmPinnedContentHref(
 
 function RealmActions({
 	realm,
-	joinRuleGate,
 	canManage,
 	canPost,
 }: {
 	realm: GetApiRealmsByRealmIdStatus200;
-	joinRuleGate: RealmJoinRuleGate;
 	canManage: boolean;
 	canPost: boolean;
 }) {
-	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
+	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const join = usePutApiRealmsByRealmIdMembership();
 	const leave = useDeleteApiRealmsByRealmIdMembership();
-	const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm.id);
 	const membership = realm.viewerMembership;
 
-	function joinRealm(ruleRevisionId?: string) {
-		join.mutate(
-			{
-				path: { realmId: realm.id },
-				body: {
-					language: toContentLanguage(locale.target),
-					...(ruleRevisionId ? { ruleRevisionId } : {}),
-				},
-			},
-			{
-				onSuccess: () => {
-					setRulesDialogOpen(false);
-					return invalidateRealmDetails(queryClient, realm.id);
-				},
-			},
-		);
+	async function joinRealm() {
+		await join.mutateAsync({ path: { realmId: realm.id } });
+		await invalidateRealmDetails(queryClient, realm.id);
 	}
 
 	if (!session)
@@ -534,11 +493,6 @@ function RealmActions({
 					{!isRealmOwner(membership) && (
 						<Button
 							variant="outline"
-							disabled={
-								!membership &&
-								(joinRuleGate.state === "loading" ||
-									joinRuleGate.state === "unavailable")
-							}
 							isLoading={join.isPending || leave.isPending}
 							onClick={() => {
 								if (membership)
@@ -549,9 +503,8 @@ function RealmActions({
 												invalidateRealmDetails(queryClient, realm.id),
 										},
 									);
-								else if (joinRuleGate.state === "requires-acknowledgement")
-									setRulesDialogOpen(true);
-								else if (joinRuleGate.state === "not-required") joinRealm();
+								else
+									void rulesAcknowledgement.run(joinRealm).catch(() => undefined);
 							}}
 						>
 							{membership ? t.realms.leave : t.realms.join}
@@ -570,16 +523,7 @@ function RealmActions({
 				</div>
 				<RequestFailure error={join.error ?? leave.error} />
 			</div>
-			{joinRuleGate.state === "requires-acknowledgement" && rulesDialogOpen ? (
-				<RealmJoinRulesDialog
-					error={<RequestFailure error={join.error} />}
-					isPending={join.isPending}
-					onConfirm={() => joinRealm(joinRuleGate.revisionId)}
-					onOpenChange={setRulesDialogOpen}
-					open
-					rules={joinRuleGate.rules}
-				/>
-			) : null}
+			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="join" />
 		</>
 	);
 }

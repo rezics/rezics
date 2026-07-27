@@ -288,7 +288,6 @@ export function RealmRules({
 		useState<RuleAcknowledgementMode>("explicit");
 	const [requireOnJoin, setRequireOnJoin] = useState(false);
 	const [requireOnPost, setRequireOnPost] = useState(false);
-	const [requireOnUpdate, setRequireOnUpdate] = useState(false);
 
 	useEffect(() => {
 		if (!data) return;
@@ -305,7 +304,6 @@ export function RealmRules({
 		setAcknowledgementMode(data.acknowledgementMode);
 		setRequireOnJoin(Boolean(data.requireOnJoin));
 		setRequireOnPost(Boolean(data.requireOnPost));
-		setRequireOnUpdate(Boolean(data.requireOnUpdate));
 	}, [data, toContentLanguage(locale.target)]);
 
 	if (error)
@@ -333,7 +331,6 @@ export function RealmRules({
 					acknowledgementMode,
 					requireOnJoin,
 					requireOnPost,
-					requireOnUpdate,
 					rules: rules.map((rule) => ({
 						language: rule.language,
 						title: rule.title.trim(),
@@ -374,19 +371,24 @@ export function RealmRules({
 								</NativeSelectOption>
 							</NativeSelect>
 						</Field>
-						<div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-							<RuleRequirement checked={requireOnJoin} onChange={setRequireOnJoin}>
-								{t.realms.requireOnJoin}
-							</RuleRequirement>
-							<RuleRequirement checked={requireOnPost} onChange={setRequireOnPost}>
-								{t.realms.requireOnPost}
-							</RuleRequirement>
-							<RuleRequirement
-								checked={requireOnUpdate}
-								onChange={setRequireOnUpdate}
-							>
-								{t.realms.requireOnUpdate}
-							</RuleRequirement>
+						<div className="grid gap-2">
+							<div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+								<RuleRequirement
+									checked={requireOnJoin}
+									onChange={setRequireOnJoin}
+								>
+									{t.realms.requireOnJoin}
+								</RuleRequirement>
+								<RuleRequirement
+									checked={requireOnPost}
+									onChange={setRequireOnPost}
+								>
+									{t.realms.requireOnPost}
+								</RuleRequirement>
+							</div>
+							<p className="text-muted-foreground text-sm">
+								{t.realms.ruleAcknowledgementHint}
+							</p>
 						</div>
 						{drafts.map((rule, index) => (
 							<div

@@ -1,15 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { isRealmJoinable, isRealmVisible, shouldRequireRealmRuleAcknowledgement } from "./policy";
+import { isRealmJoinable, isRealmVisible } from "./policy";
 
 describe("realm policy", () => {
-	it("keeps rule acknowledgements scoped to their configured trigger", () => {
-		const rules = { requireOnPost: true, requireOnUpdate: false };
-
-		expect(shouldRequireRealmRuleAcknowledgement("post", rules)).toBe(true);
-		expect(shouldRequireRealmRuleAcknowledgement("update", rules)).toBe(false);
-	});
-
 	it.each([
 		["published", "public", undefined, true],
 		["draft", "public", undefined, false],

@@ -19,6 +19,16 @@ export class RealmOwnerLeaveForbidden extends Data.TaggedError("RealmOwnerLeaveF
 	readonly message = "The Realm owner cannot leave";
 }
 
+export class RealmRuleRevisionChanged extends Data.TaggedError("RealmRuleRevisionChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = RealmRuleRevisionChanged.status;
+	readonly message = "The current Realm rule revision has changed";
+
+	constructor(readonly details: { readonly currentRevisionId: string | null }) {
+		super();
+	}
+}
+
 export class RealmMemberNotFound extends Data.TaggedError("RealmMemberNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = RealmMemberNotFound.status;
@@ -82,6 +92,7 @@ export const RealmErrors = [
 	RealmNotFound,
 	RealmMembershipNotFound,
 	RealmOwnerLeaveForbidden,
+	RealmRuleRevisionChanged,
 	RealmMemberNotFound,
 	RealmUnitNotFound,
 	RealmScoreContextPostNotMounted,

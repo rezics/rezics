@@ -31,7 +31,6 @@ export async function getCurrentRealmRules(realmId: string) {
 				acknowledgementMode: realmRuleRevision.acknowledgementMode,
 				requireOnJoin: realmRuleRevision.requireOnJoin,
 				requireOnPost: realmRuleRevision.requireOnPost,
-				requireOnUpdate: realmRuleRevision.requireOnUpdate,
 			})
 			.from(realmRuleRevision)
 			.where(eq(realmRuleRevision.realmId, realmId))

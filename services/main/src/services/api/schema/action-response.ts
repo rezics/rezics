@@ -124,7 +124,6 @@ export const RealmRulesResponse = t.Object({
 	acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
 	requireOnJoin: t.Boolean(),
 	requireOnPost: t.Boolean(),
-	requireOnUpdate: t.Boolean(),
 	items: t.Array(
 		t.Object({
 			id: Uuid,

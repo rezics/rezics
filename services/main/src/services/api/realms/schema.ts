@@ -73,12 +73,6 @@ export const UpdateRealmBody = t.Object({
 });
 export type UpdateRealmBody = Static<typeof UpdateRealmBody>;
 
-export const JoinRealmBody = t.Object({
-	ruleRevisionId: t.Optional(Uuid),
-	language: t.Optional(ContentLanguage),
-});
-export type JoinRealmBody = Static<typeof JoinRealmBody>;
-
 export const ListRealmMembersQuery = t.Object(
 	{
 		profileId: t.Optional(Uuid),
@@ -101,21 +95,32 @@ export const UpdateRealmMemberBody = t.Object(
 );
 export type UpdateRealmMemberBody = Static<typeof UpdateRealmMemberBody>;
 
-export const UpdateRealmRulesBody = t.Object({
-	acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
-	requireOnJoin: t.Boolean(),
-	requireOnPost: t.Boolean(),
-	requireOnUpdate: t.Boolean(),
-	rules: t.Array(
-		t.Object({
-			language: ContentLanguage,
-			title: t.String({ minLength: 1, maxLength: 500 }),
-			content: PortableTextDocument,
-		}),
-		{ minItems: 1, maxItems: 100 },
-	),
-});
+export const UpdateRealmRulesBody = t.Object(
+	{
+		acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
+		requireOnJoin: t.Boolean(),
+		requireOnPost: t.Boolean(),
+		rules: t.Array(
+			t.Object({
+				language: ContentLanguage,
+				title: t.String({ minLength: 1, maxLength: 500 }),
+				content: PortableTextDocument,
+			}),
+			{ minItems: 1, maxItems: 100 },
+		),
+	},
+	{ additionalProperties: false },
+);
 export type UpdateRealmRulesBody = Static<typeof UpdateRealmRulesBody>;
+
+export const RealmRuleRevisionParams = t.Object({ realmId: Uuid, revisionId: Uuid });
+export type RealmRuleRevisionParams = Static<typeof RealmRuleRevisionParams>;
+
+export const AcknowledgeRealmRulesBody = t.Object(
+	{ language: ContentLanguage },
+	{ additionalProperties: false },
+);
+export type AcknowledgeRealmRulesBody = Static<typeof AcknowledgeRealmRulesBody>;
 
 export const RealmRulesQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,

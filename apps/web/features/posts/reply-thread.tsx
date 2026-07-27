@@ -38,6 +38,8 @@ import {
 	PortableTextEditor,
 	preloadPortableTextEditor,
 } from "@/features/editor/portable-text-editor";
+import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
+import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -530,6 +532,7 @@ function ReplyPostComposer({
 	const [expanded, setExpanded] = useState(initiallyExpanded);
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [editorKey, setEditorKey] = useState(0);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(realmId);
 
 	useEffect(() => {
 		if (initiallyExpanded || expanded) return;
@@ -546,27 +549,25 @@ function ReplyPostComposer({
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		create.mutate(
-			{
-				path: { postId: rootPostId },
-				body: {
-					...(parentPostId ? { parentPostId } : {}),
-					...(realmId ? { realmId } : {}),
-					language: toContentLanguage(locale.target),
-					body: writePortableText(body),
-				},
-			},
-			{
-				onSuccess: async (createdReply) => {
-					onReplyCreated(createdReply);
-					await invalidatePostQueries(queryClient, rootPostId);
-					setBody([]);
-					setEditorKey((value) => value + 1);
-					setExpanded(false);
-					onComplete?.();
-				},
-			},
-		);
+		void rulesAcknowledgement
+			.run(async () => {
+				const createdReply = await create.mutateAsync({
+					path: { postId: rootPostId },
+					body: {
+						...(parentPostId ? { parentPostId } : {}),
+						...(realmId ? { realmId } : {}),
+						language: toContentLanguage(locale.target),
+						body: writePortableText(body),
+					},
+				});
+				onReplyCreated(createdReply);
+				await invalidatePostQueries(queryClient, rootPostId);
+				setBody([]);
+				setEditorKey((value) => value + 1);
+				setExpanded(false);
+				onComplete?.();
+			})
+			.catch(() => undefined);
 	}
 
 	return (
@@ -620,6 +621,7 @@ function ReplyPostComposer({
 					{t.posts.openReplyComposer}
 				</button>
 			)}
+			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />
 		</>
 	);
 }

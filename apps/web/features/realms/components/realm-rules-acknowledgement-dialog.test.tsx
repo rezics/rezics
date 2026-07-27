@@ -6,7 +6,7 @@ import { create } from "native-i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { RealmJoinRulesDialog } from "./realm-join-rules-dialog";
+import { RealmRulesAcknowledgementDialog } from "./realm-rules-acknowledgement-dialog";
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
@@ -34,12 +34,17 @@ const translation = await create(resources).getTranslation(["realms"], ["zh-Hant
 
 afterEach(cleanup);
 
-describe("RealmJoinRulesDialog", () => {
-	it("requires an explicit acknowledgement before confirming", () => {
+describe("RealmRulesAcknowledgementDialog", () => {
+	it.each([
+		["join", "同意並加入"],
+		["publish", "同意並繼續發布"],
+	] as const)("requires an explicit acknowledgement before confirming %s", (intent, label) => {
 		const onConfirm = vi.fn();
 		render(
 			<TranslationProvider initial={translation.snapshot}>
-				<RealmJoinRulesDialog
+				<RealmRulesAcknowledgementDialog
+					intent={intent}
+					isLoading={false}
 					isPending={false}
 					onConfirm={onConfirm}
 					onOpenChange={vi.fn()}
@@ -59,7 +64,7 @@ describe("RealmJoinRulesDialog", () => {
 			</TranslationProvider>,
 		);
 
-		const confirm = screen.getByRole("button", { name: "同意並加入" });
+		const confirm = screen.getByRole("button", { name: label });
 		expect((confirm as HTMLButtonElement).disabled).toBe(true);
 		const agreement = screen.getByRole("button", {
 			name: "我已閱讀並同意遵守這些規則。",

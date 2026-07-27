@@ -3,9 +3,11 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
+	AcknowledgeRealmRulesBody,
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
 	ModerateRealmUnitBody,
+	RealmRuleRevisionParams,
 	RealmRulesQuery,
 	RealmUnitListResponse,
 	RealmUnitModerationActionResponse,
@@ -37,7 +39,6 @@ describe("Realm member API contract", () => {
 					acknowledgementMode,
 					requireOnJoin: true,
 					requireOnPost: true,
-					requireOnUpdate: true,
 					rules: [
 						{
 							language: "en",
@@ -56,6 +57,23 @@ describe("Realm member API contract", () => {
 				acknowledgementMode: "silent",
 				requireOnJoin: false,
 				requireOnPost: false,
+				rules: [
+					{
+						language: "en",
+						title: "Community rules",
+						content: createPortableTextDocument([], "0123456789ab"),
+					},
+				],
+			}),
+		).toBe(false);
+	});
+
+	it("rejects the removed update acknowledgement trigger", () => {
+		expect(
+			Check(UpdateRealmRulesBody, {
+				acknowledgementMode: "explicit",
+				requireOnJoin: true,
+				requireOnPost: true,
 				requireOnUpdate: true,
 				rules: [
 					{
@@ -66,6 +84,17 @@ describe("Realm member API contract", () => {
 				],
 			}),
 		).toBe(false);
+	});
+
+	it("requires a concrete rule revision and acknowledgement language", () => {
+		expect(
+			Check(RealmRuleRevisionParams, {
+				realmId: "019f995d-7595-7c99-9183-250790bbfe2f",
+				revisionId: "019f995d-7595-7c99-9183-250790bbfe30",
+			}),
+		).toBe(true);
+		expect(Check(AcknowledgeRealmRulesBody, { language: "zh" })).toBe(true);
+		expect(Check(AcknowledgeRealmRulesBody, {})).toBe(false);
 	});
 });
 

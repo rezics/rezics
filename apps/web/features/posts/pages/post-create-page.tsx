@@ -17,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
+import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { writePortableText } from "@/lib/block";
@@ -43,6 +45,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 	const [realm, setRealm] = useState<PickedEntity>();
 	const [subject, setSubject] = useState<PickedEntity>();
 	const [body, setBody] = useState<PortableTextValue>([]);
+	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm?.id);
 
 	useEffect(() => {
 		if (!defaultRealm.data || realm) return;
@@ -62,23 +65,22 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 		const data = new FormData(event.currentTarget);
 		const title = String(data.get("title") ?? "").trim();
 		if (!title || !body.length) return;
-		create.mutate(
-			{
-				body: {
-					title,
-					language: toContentLanguage(locale.target),
-					body: writePortableText(body),
-					...(realm ? { realmId: realm.id } : {}),
-					...(subject ? { subjectId: subject.id } : {}),
-				},
-			},
-			{
-				onSuccess: async (post) => {
-					await invalidatePostQueries(queryClient, post.id);
-					router.push(postHref(post.id, realm?.id));
-				},
-			},
-		);
+		const selectedRealm = realm;
+		void rulesAcknowledgement
+			.run(async () => {
+				const post = await create.mutateAsync({
+					body: {
+						title,
+						language: toContentLanguage(locale.target),
+						body: writePortableText(body),
+						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
+						...(subject ? { subjectId: subject.id } : {}),
+					},
+				});
+				await invalidatePostQueries(queryClient, post.id);
+				router.push(postHref(post.id, selectedRealm?.id));
+			})
+			.catch(() => undefined);
 	}
 
 	return (
@@ -128,6 +130,10 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 						/>
 					</FieldGroup>
 				</form>
+				<RealmRulesAcknowledgementPrompt
+					controller={rulesAcknowledgement}
+					intent="publish"
+				/>
 			</main>
 		</RequireSession>
 	);

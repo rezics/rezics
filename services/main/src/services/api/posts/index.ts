@@ -289,7 +289,6 @@ export default new Elysia()
 					await authorization.realm.ensureUnitCreation(
 						body.realmId,
 						"realm.units.create",
-						"post",
 					);
 					if (body.subjectId) {
 						await authorization.unit.ensureCanRead(body.subjectId);
@@ -729,7 +728,6 @@ export default new Elysia()
 					await authorization.realm.ensureUnitCreation(
 						body.realmId,
 						"realm.post.replies.create",
-						"post",
 					);
 					const createdReply = await database.transaction(async (tx) => {
 						const [root] = await tx

@@ -285,7 +285,6 @@ export default new Elysia({ prefix: "/polls" })
 					"PollClosed",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PollNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRulesAcceptanceRequired"]),
 			},
 			detail: { summary: "Replace poll vote", tags: ["Polls"] },
 		},

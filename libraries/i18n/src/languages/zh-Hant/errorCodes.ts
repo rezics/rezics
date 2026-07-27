@@ -39,6 +39,7 @@ export default {
 	RealmCapabilityRequired: `你沒有所需的${realmTerms.inline}權限。`,
 	ScoreContextUnitUnsupported: `目前無法使用這個單元作為評分語境；請選擇${realmTerms.inline}。`,
 	RealmRulesAcceptanceRequired: `請先同意目前的${realmTerms.inline}規則。`,
+	RealmRuleRevisionChanged: "規則已更新，請重新閱讀最新版本後再同意。",
 	PlatformCapabilityRequired: "此操作需要平台權限。",
 	PlatformGrantManagerRequired: "平台必須保留至少一位無期限授權管理員。",
 	CollectionOwnershipRequired: "這個收藏集不屬於你。",

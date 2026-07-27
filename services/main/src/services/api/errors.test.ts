@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { SearchUnavailable } from "../search/errors";
 import { UnitPermissionForbidden } from "../units/errors";
+import { RealmRuleRevisionChanged } from "./realms/errors";
 import {
 	ApiErrorCodes,
 	ApiErrorRegistry,
@@ -44,6 +45,20 @@ describe("API errors", () => {
 				message: "Request body is malformed",
 			},
 			requestId: "request-1",
+		});
+
+		const revisionChanged = new RealmRuleRevisionChanged({
+			currentRevisionId: "019f995d-7595-7c99-9183-250790bbfe2f",
+		});
+		expect(toApiErrorBody(revisionChanged, "request-2")).toEqual({
+			error: {
+				code: "RealmRuleRevisionChanged",
+				message: "The current Realm rule revision has changed",
+				details: {
+					currentRevisionId: "019f995d-7595-7c99-9183-250790bbfe2f",
+				},
+			},
+			requestId: "request-2",
 		});
 	});
 
