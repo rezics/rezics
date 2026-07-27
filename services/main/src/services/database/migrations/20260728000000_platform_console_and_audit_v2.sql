@@ -19,6 +19,10 @@ DROP INDEX "capability_grant_granted_by_idx";
 DROP INDEX "capability_grant_revoked_by_idx";
 
 UPDATE "capability_grant"
+SET "capability" = 'realm.rules.update'
+WHERE "capability" = 'realm.rules.publish';
+
+UPDATE "capability_grant"
 SET "capability" = 'platform.development_preview.access'
 WHERE "capability" IN ('unit.content_structure.preview', 'unit.zone.preview');
 
