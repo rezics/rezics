@@ -12,7 +12,7 @@ import type { PortableTextValue } from "@rezics/portable-text";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDownIcon, MessageCircleIcon, MessagesSquareIcon } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type ComponentProps, type FormEvent } from "react";
 
 import {
 	Button,
@@ -27,7 +27,10 @@ import {
 import { SignInButton } from "@/features/auth/auth-portal";
 import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
 import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action-policy";
-import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import {
+	PortableTextEditor,
+	preloadPortableTextEditor,
+} from "@/features/editor/portable-text-editor";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -44,6 +47,12 @@ const ReplyEngagementPolicy = {
 	comments: false,
 	primary: "none",
 } as const satisfies FeedActionPolicy;
+
+const editorPreloadIntentHandlers = {
+	onFocus: preloadPortableTextEditor,
+	onPointerDown: preloadPortableTextEditor,
+	onPointerEnter: preloadPortableTextEditor,
+} satisfies Pick<ComponentProps<"button">, "onFocus" | "onPointerDown" | "onPointerEnter">;
 
 export function ReplyPostThread({
 	rootPostId,
@@ -326,8 +335,12 @@ function ReplyPostNode({
 								actions={
 									signedIn && reply.capabilities.canReply ? (
 										<Button
+											{...editorPreloadIntentHandlers}
 											className="min-h-11 sm:min-h-8"
-											onClick={() => setReplying((value) => !value)}
+											onClick={() => {
+												preloadPortableTextEditor();
+												setReplying((value) => !value);
+											}}
 											size="sm"
 											type="button"
 											variant="secondary"
@@ -350,6 +363,7 @@ function ReplyPostNode({
 												? {
 														kind: "command",
 														onSelect: () => {
+															preloadPortableTextEditor();
 															setBody(readPortableText(reply.body));
 															setEditing(true);
 														},
@@ -431,6 +445,19 @@ function ReplyPostComposer({
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [editorKey, setEditorKey] = useState(0);
 
+	useEffect(() => {
+		if (initiallyExpanded || expanded) return;
+		const preload = () => preloadPortableTextEditor();
+
+		if ("requestIdleCallback" in window) {
+			const idleCallbackId = window.requestIdleCallback(preload, { timeout: 2_000 });
+			return () => window.cancelIdleCallback(idleCallbackId);
+		}
+
+		const timeoutId = setTimeout(preload, 1_000);
+		return () => clearTimeout(timeoutId);
+	}, [expanded, initiallyExpanded]);
+
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		create.mutate(
@@ -495,8 +522,12 @@ function ReplyPostComposer({
 				</form>
 			) : (
 				<button
+					{...editorPreloadIntentHandlers}
 					className="flex h-11 w-full items-center rounded-xl border border-input bg-background px-4 text-start text-muted-foreground text-sm shadow-sm/5 outline-none transition-colors hover:bg-surface-hover focus-visible:ring-[3px] focus-visible:ring-ring/32"
-					onClick={() => setExpanded(true)}
+					onClick={() => {
+						preloadPortableTextEditor();
+						setExpanded(true);
+					}}
 					type="button"
 				>
 					{t.posts.openReplyComposer}

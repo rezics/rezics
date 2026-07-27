@@ -5,6 +5,8 @@ const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
+	loading: "正在載入編輯器…",
+	loadFailed: "無法載入編輯器。",
 	paragraph: "內文",
 	heading2: "二級標題",
 	heading3: "三級標題",

@@ -5,6 +5,8 @@ const { forms: realmTerms } = enTerminology.realm;
 const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
+	loading: "Loading editor…",
+	loadFailed: "The editor could not be loaded.",
 	paragraph: "Paragraph",
 	heading2: "Heading 2",
 	heading3: "Heading 3",
