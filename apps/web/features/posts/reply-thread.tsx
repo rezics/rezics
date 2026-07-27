@@ -5,41 +5,44 @@ import { toContentLanguage } from "@rezics/i18n";
 import {
 	getApiPostsByPostIdReplies,
 	getApiPostsByPostIdRepliesQueryKey,
-	useDeleteApiPostsByPostIdRepliesByReplyPostId,
 	usePatchApiPostsByPostIdRepliesByReplyPostId,
 	usePostApiPostsByPostIdReplies,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronDownIcon, MessageCircleIcon, MessagesSquareIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 
 import {
-	AlertDialog,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
 	Button,
 	cn,
 	FieldGroup,
+	IdentityAvatar,
 	PortableTextContent,
 	Skeleton,
 	Spinner,
+	ThreadBranch,
 } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
+import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
+import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action-policy";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
+import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
 import { buildReplyPostTree, type ReplyPostTreeNode } from "./reply-tree";
+import { PostOverflowMenu } from "./components/post-overflow-menu";
 import { invalidatePostQueries } from "./query";
 import { AttributionLinks } from "./attribution-list";
 import { postHref } from "./url";
+
+const ReplyEngagementPolicy = {
+	comments: false,
+	primary: "none",
+} as const satisfies FeedActionPolicy;
 
 export function ReplyPostThread({
 	rootPostId,
@@ -84,8 +87,8 @@ export function ReplyPostThread({
 	);
 
 	return (
-		<section className="flex flex-col gap-4" id="replies">
-			<h2 className="font-heading text-2xl font-bold">{t.posts.replies}</h2>
+		<section className="flex min-w-0 flex-col gap-4" id="replies">
+			<h2 className="font-heading font-bold text-xl">{t.posts.replies}</h2>
 			{!canReply ? (
 				<p className="text-muted-foreground text-sm">{t.posts.replyingLocked}</p>
 			) : session ? (
@@ -94,10 +97,11 @@ export function ReplyPostThread({
 					parentPostId={parentPostId}
 					realmId={realmId}
 					action={t.ui.postReply}
+					initiallyExpanded={false}
 				/>
 			) : (
 				<SignInButton
-					className="w-fit"
+					className="h-11 w-full justify-start rounded-xl text-muted-foreground"
 					destination={postHref(parentPostId ?? rootPostId, realmId)}
 					variant="outline"
 				>
@@ -107,7 +111,13 @@ export function ReplyPostThread({
 			{replies.isPending ? (
 				<div className="flex flex-col gap-3">
 					{Array.from({ length: 3 }, (_, index) => (
-						<Skeleton key={index} className="h-32 rounded-xl" />
+						<div className="flex gap-2 py-3" key={index}>
+							<Skeleton className="size-6 shrink-0 rounded-full" />
+							<div className="grid flex-1 gap-3">
+								<Skeleton className="h-4 w-40 rounded-md" />
+								<Skeleton className="h-16 rounded-lg" />
+							</div>
+						</div>
 					))}
 				</div>
 			) : replies.isError && !replies.data ? (
@@ -118,7 +128,7 @@ export function ReplyPostThread({
 					</Button>
 				</div>
 			) : visibleTree.length ? (
-				<div className="flex flex-col gap-3">
+				<div className="flex min-w-0 flex-col">
 					{visibleTree.map((reply) => (
 						<ReplyPostNode
 							key={reply.id}
@@ -126,6 +136,7 @@ export function ReplyPostThread({
 							rootPostId={rootPostId}
 							realmId={realmId}
 							signedIn={Boolean(session)}
+							topLevel
 						/>
 					))}
 					{replies.isFetchNextPageError ? (
@@ -163,21 +174,29 @@ function ReplyPostNode({
 	rootPostId,
 	realmId,
 	signedIn,
+	topLevel = false,
 }: {
 	reply: ReplyPostTreeNode;
 	rootPostId: string;
 	realmId?: string;
 	signedIn: boolean;
+	topLevel?: boolean;
 }) {
-	const { t } = useTranslation(["actions", "posts", "ui"]);
+	const { locale, t } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
-	const remove = useDeleteApiPostsByPostIdRepliesByReplyPostId();
 	const [editing, setEditing] = useState(false);
 	const [replying, setReplying] = useState(false);
+	const [descendantsVisible, setDescendantsVisible] = useState(true);
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const canEdit =
 		reply.capabilities.canEdit && reply.status !== "deleted" && Boolean(reply.latestRevisionId);
+	const primaryAttribution =
+		reply.attributions.find((attribution) => attribution.role === "publisher") ??
+		reply.attributions[0];
+	const primaryName = primaryAttribution?.creditedUnit.title ?? t.posts.unknownAttribution;
+	const primaryInitials = Array.from(primaryName.trim())[0]?.toLocaleUpperCase() ?? primaryName;
+	const hasDescendants = reply.children.length > 0 || reply.hasMoreChildren;
 
 	function save(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -200,170 +219,188 @@ function ReplyPostNode({
 	}
 
 	return (
-		<div
-			className={cn(reply.parentPostId ? "ms-3 border-s-2 ps-3 sm:ms-5 sm:ps-4" : "border-t")}
+		<article
+			aria-label={primaryName}
+			className={cn(
+				"relative min-w-0 py-3",
+				topLevel && "border-border-weak border-t first:border-t-0",
+			)}
 		>
-			<div className="flex flex-col gap-3 py-4">
-				<div className="flex flex-wrap items-center gap-3 text-sm">
-					<AttributionLinks
-						attributions={reply.attributions}
-						className="font-medium hover:underline"
-						emptyLabel={t.posts.unknownAttribution}
-					/>
-					<Link
-						className="text-muted-foreground text-xs"
-						href={postHref(reply.id, realmId)}
-					>
-						{new Date(reply.createdAt).toLocaleString()}
-					</Link>
-				</div>
-				{reply.status === "deleted" ? (
-					<p className="text-muted-foreground text-sm">{t.posts.deletedReply}</p>
-				) : editing ? (
-					<form onSubmit={save}>
-						<FieldGroup>
-							<PortableTextEditor
-								label={t.posts.replyBody}
-								onChange={setBody}
-								value={body}
-							/>
-							<RequestFailure error={update.error} />
-							<div className="flex flex-wrap gap-2">
-								<Button
-									variant="solid"
-									type="submit"
-									size="sm"
-									disabled={!body.length || update.isPending}
-								>
-									{update.isPending && <Spinner data-icon="inline-start" />}
-									{t.ui.save}
-								</Button>
-								<Button
-									type="button"
-									size="sm"
-									variant="quiet"
-									onClick={() => setEditing(false)}
-								>
-									{t.posts.cancel}
-								</Button>
-							</div>
-						</FieldGroup>
-					</form>
-				) : (
-					<div className="prose prose-sm max-w-none">
-						<PortableTextContent
-							value={readPortableText(reply.body)}
-							variant="compact"
-						/>
-					</div>
-				)}
-				{reply.status !== "deleted" && (
-					<div className="flex flex-wrap gap-1">
-						{signedIn && reply.capabilities.canReply && (
-							<Button
-								type="button"
-								size="xs"
-								variant="quiet"
-								onClick={() => setReplying((value) => !value)}
-							>
-								{t.posts.reply}
-							</Button>
-						)}
-						{canEdit && (
-							<>
-								<Button
-									type="button"
-									size="xs"
-									variant="quiet"
-									onClick={() => {
-										setBody(readPortableText(reply.body));
-										setEditing(true);
-									}}
-								>
-									{t.ui.edit}
-								</Button>
-								<AlertDialog>
-									<AlertDialogTrigger asChild>
-										<Button type="button" size="xs" variant="quiet">
-											{t.posts.delete}
+			<ThreadBranch
+				{...(hasDescendants
+					? {
+							collapseDescendantsLabel: t.posts.hideChildReplies,
+							descendants: (
+								<>
+									{reply.children.map((child) => (
+										<ReplyPostNode
+											key={child.id}
+											reply={child}
+											rootPostId={rootPostId}
+											realmId={realmId}
+											signedIn={signedIn}
+										/>
+									))}
+									{reply.hasMoreChildren ? (
+										<Button
+											className="mt-1 w-fit"
+											size="xs"
+											variant="outline"
+											asChild
+										>
+											<Link href={postHref(reply.id, realmId, "replies")}>
+												<MessagesSquareIcon
+													aria-hidden
+													data-icon="inline-start"
+												/>
+												{t.actions.loadMore}
+												<ChevronDownIcon
+													aria-hidden
+													data-icon="inline-end"
+												/>
+											</Link>
 										</Button>
-									</AlertDialogTrigger>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>
-												{t.posts.deleteReplyTitle}
-											</AlertDialogTitle>
-											<AlertDialogDescription>
-												{t.posts.deleteReplyDescription}
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<RequestFailure error={remove.error} />
-										<AlertDialogFooter>
-											<AlertDialogCancel>{t.posts.cancel}</AlertDialogCancel>
-											<Button
-												type="button"
-												variant="destructive"
-												disabled={remove.isPending}
-												onClick={() =>
-													remove.mutate(
-														{
-															path: {
-																postId: rootPostId,
-																replyPostId: reply.id,
-															},
+									) : null}
+								</>
+							),
+							descendantsVisible,
+							expandDescendantsLabel: t.posts.showChildReplies,
+							hasDescendants: true as const,
+							onDescendantsVisibleChange: setDescendantsVisible,
+						}
+					: { hasDescendants: false as const })}
+				content={
+					<div className="min-w-0">
+						{reply.status === "deleted" ? (
+							<p className="mt-2 text-muted-foreground text-sm">
+								{t.posts.deletedReply}
+							</p>
+						) : editing ? (
+							<form className="mt-3" onSubmit={save}>
+								<FieldGroup>
+									<PortableTextEditor
+										ariaLabel={t.posts.replyBody}
+										onChange={setBody}
+										value={body}
+									/>
+									<RequestFailure error={update.error} />
+									<div className="flex flex-wrap gap-2">
+										<Button
+											variant="solid"
+											type="submit"
+											size="sm"
+											disabled={!body.length || update.isPending}
+										>
+											{update.isPending && (
+												<Spinner data-icon="inline-start" />
+											)}
+											{t.ui.save}
+										</Button>
+										<Button
+											type="button"
+											size="sm"
+											variant="quiet"
+											onClick={() => {
+												setBody([]);
+												setEditing(false);
+											}}
+										>
+											{t.posts.cancel}
+										</Button>
+									</div>
+								</FieldGroup>
+							</form>
+						) : (
+							<div className="prose prose-sm mt-2 max-w-none">
+								<PortableTextContent
+									value={readPortableText(reply.body)}
+									variant="compact"
+								/>
+							</div>
+						)}
+						{reply.status !== "deleted" && (
+							<ConnectedFeedEngagementBar
+								actions={
+									signedIn && reply.capabilities.canReply ? (
+										<Button
+											className="min-h-11 sm:min-h-8"
+											onClick={() => setReplying((value) => !value)}
+											size="sm"
+											type="button"
+											variant="secondary"
+										>
+											<MessageCircleIcon
+												aria-hidden
+												data-icon="inline-start"
+											/>
+											{t.posts.reply}
+										</Button>
+									) : null
+								}
+								href={postHref(reply.id, realmId)}
+								itemId={reply.id}
+								overflowMenu={
+									<PostOverflowMenu
+										canDelete={canEdit}
+										editAction={
+											canEdit
+												? {
+														kind: "command",
+														onSelect: () => {
+															setBody(readPortableText(reply.body));
+															setEditing(true);
 														},
-														{
-															onSuccess: () =>
-																invalidatePostQueries(
-																	queryClient,
-																	rootPostId,
-																	reply.id,
-																),
-														},
-													)
-												}
-											>
-												{remove.isPending && (
-													<Spinner data-icon="inline-start" />
-												)}
-												{t.posts.delete}
-											</Button>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
-							</>
+													}
+												: undefined
+										}
+										postId={reply.id}
+										rootPostId={rootPostId}
+									/>
+								}
+								policy={ReplyEngagementPolicy}
+								realmId={realmId}
+								showErrors={false}
+							/>
+						)}
+						{replying && reply.capabilities.canReply && (
+							<ReplyPostComposer
+								rootPostId={rootPostId}
+								parentPostId={reply.id}
+								realmId={realmId}
+								action={t.posts.reply}
+								initiallyExpanded
+								onComplete={() => setReplying(false)}
+								onCancel={() => setReplying(false)}
+							/>
 						)}
 					</div>
-				)}
-				{replying && reply.capabilities.canReply && (
-					<ReplyPostComposer
-						rootPostId={rootPostId}
-						parentPostId={reply.id}
-						realmId={realmId}
-						action={t.posts.reply}
-						onComplete={() => setReplying(false)}
-					/>
-				)}
-			</div>
-			{reply.children.length > 0 && (
-				<div className="flex flex-col">
-					{reply.children.map((child) => (
-						<ReplyPostNode
-							key={child.id}
-							reply={child}
-							rootPostId={rootPostId}
-							realmId={realmId}
-							signedIn={signedIn}
+				}
+				header={
+					<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
+						<AttributionLinks
+							attributions={reply.attributions}
+							className="font-semibold hover:underline"
+							emptyLabel={t.posts.unknownAttribution}
+							publisherLabel={t.posts.publisher}
 						/>
-					))}
-				</div>
-			)}
-			{reply.hasMoreChildren && (
-				<Button className="mb-3 ms-3 w-fit sm:ms-5" size="xs" variant="quiet" asChild>
-					<Link href={postHref(reply.id, realmId, "replies")}>{t.actions.loadMore}</Link>
-				</Button>
-			)}
-		</div>
+						<Link
+							className="text-muted-foreground text-xs hover:underline"
+							href={postHref(reply.id, realmId)}
+						>
+							{formatRelativeTime(reply.createdAt, locale.target)}
+						</Link>
+					</div>
+				}
+				marker={
+					<IdentityAvatar
+						avatar={primaryAttribution?.creditedUnit.avatar}
+						className="size-6 text-[0.625rem]"
+						fallback={primaryInitials}
+						size="sm"
+					/>
+				}
+			/>
+		</article>
 	);
 }
 
@@ -372,17 +409,22 @@ function ReplyPostComposer({
 	parentPostId,
 	realmId,
 	action,
+	initiallyExpanded,
 	onComplete,
+	onCancel,
 }: {
 	rootPostId: string;
 	parentPostId?: string;
 	realmId?: string;
 	action: string;
+	initiallyExpanded: boolean;
 	onComplete?: () => void;
+	onCancel?: () => void;
 }) {
 	const { t, locale } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
 	const create = usePostApiPostsByPostIdReplies();
+	const [expanded, setExpanded] = useState(initiallyExpanded);
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [editorKey, setEditorKey] = useState(0);
 
@@ -403,6 +445,7 @@ function ReplyPostComposer({
 					await invalidatePostQueries(queryClient, rootPostId);
 					setBody([]);
 					setEditorKey((value) => value + 1);
+					setExpanded(false);
 					onComplete?.();
 				},
 			},
@@ -410,26 +453,52 @@ function ReplyPostComposer({
 	}
 
 	return (
-		<form onSubmit={submit}>
-			<FieldGroup>
-				<PortableTextEditor
-					key={editorKey}
-					label={t.posts.replyBody}
-					onChange={setBody}
-					value={body}
-				/>
-				<RequestFailure error={create.error} />
-				<Button
-					variant="solid"
-					type="submit"
-					className="w-fit"
-					size="sm"
-					disabled={!body.length || create.isPending}
+		<>
+			{expanded ? (
+				<form className="mt-2" onSubmit={submit}>
+					<FieldGroup>
+						<PortableTextEditor
+							ariaLabel={t.posts.replyBody}
+							key={editorKey}
+							onChange={setBody}
+							value={body}
+						/>
+						<RequestFailure error={create.error} />
+						<div className="flex flex-wrap gap-2">
+							<Button
+								variant="solid"
+								type="submit"
+								className="w-fit"
+								size="sm"
+								disabled={!body.length || create.isPending}
+							>
+								{create.isPending && <Spinner data-icon="inline-start" />}
+								{action}
+							</Button>
+							<Button
+								onClick={() => {
+									setBody([]);
+									setExpanded(false);
+									onCancel?.();
+								}}
+								size="sm"
+								type="button"
+								variant="quiet"
+							>
+								{t.posts.cancel}
+							</Button>
+						</div>
+					</FieldGroup>
+				</form>
+			) : (
+				<button
+					className="flex h-11 w-full items-center rounded-xl border border-input bg-background px-4 text-start text-muted-foreground text-sm shadow-sm/5 outline-none transition-colors hover:bg-surface-hover focus-visible:ring-[3px] focus-visible:ring-ring/32"
+					onClick={() => setExpanded(true)}
+					type="button"
 				>
-					{create.isPending && <Spinner data-icon="inline-start" />}
-					{action}
-				</Button>
-			</FieldGroup>
-		</form>
+					{t.posts.openReplyComposer}
+				</button>
+			)}
+		</>
 	);
 }

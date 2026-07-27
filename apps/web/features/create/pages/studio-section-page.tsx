@@ -12,7 +12,7 @@ import {
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { PreviewCapabilityBoundary } from "@/features/development/components/preview-capability-boundary";
+import { PreviewCapabilityBoundary } from "@/features/preview-access/components/preview-capability-boundary";
 import { useTranslation } from "@/i18n/client";
 import {
 	StudioSectionCreateHrefs,

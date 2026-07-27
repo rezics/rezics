@@ -145,13 +145,6 @@ export function FeedPostCard({
 			ref={elementRef}
 		>
 			<FeedCardHeader
-				menu={
-					<FeedItemOverflowMenu
-						canExclude={canExclude}
-						item={post}
-						onHiddenChange={onHiddenChange}
-					/>
-				}
 				attributions={attributions}
 				realms={realms}
 				recommendation={reason}
@@ -224,7 +217,18 @@ export function FeedPostCard({
 				/>
 			) : null}
 			<CardContent className="px-4 pb-4 sm:px-5">
-				<FeedItemActions href={href} item={post} onOpen={trackOpen} />
+				<FeedItemActions
+					href={href}
+					item={post}
+					onOpen={trackOpen}
+					overflowMenu={
+						<FeedItemOverflowMenu
+							canExclude={canExclude}
+							item={post}
+							onHiddenChange={onHiddenChange}
+						/>
+					}
+				/>
 			</CardContent>
 		</FeedCard>
 	);
@@ -270,13 +274,6 @@ export function FeedUnitCard({
 			ref={elementRef}
 		>
 			<FeedCardHeader
-				menu={
-					<FeedItemOverflowMenu
-						canExclude={canExclude}
-						item={unit}
-						onHiddenChange={onHiddenChange}
-					/>
-				}
 				attributions={attributions}
 				realms={realms}
 				recommendation={reason}
@@ -338,7 +335,18 @@ export function FeedUnitCard({
 				</div>
 			</CardContent>
 			<CardContent className="px-4 pb-4 sm:px-5">
-				<FeedItemActions href={href} item={unit} onOpen={trackOpen} />
+				<FeedItemActions
+					href={href}
+					item={unit}
+					onOpen={trackOpen}
+					overflowMenu={
+						<FeedItemOverflowMenu
+							canExclude={canExclude}
+							item={unit}
+							onHiddenChange={onHiddenChange}
+						/>
+					}
+				/>
 			</CardContent>
 		</FeedCard>
 	);
@@ -428,10 +436,12 @@ function FeedItemActions({
 	href,
 	item,
 	onOpen,
+	overflowMenu,
 }: {
 	href?: string;
 	item: FeedItem;
 	onOpen: () => void;
+	overflowMenu?: ReactNode;
 }) {
 	const policy = getFeedActionPolicy(
 		item.itemType === "post"
@@ -444,6 +454,7 @@ function FeedItemActions({
 			initialReaction={parseFeedReaction(item.viewerReaction)}
 			itemId={item.id}
 			onCommentsClick={onOpen}
+			overflowMenu={overflowMenu}
 			policy={policy}
 			realmId={item.realmId ?? undefined}
 			replyCount={item.itemType === "post" ? Number(item.replyCount) : 0}

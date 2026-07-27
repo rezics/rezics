@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
-import { PreviewCapabilityBoundary } from "@/features/development/components/preview-capability-boundary";
+import { PreviewCapabilityBoundary } from "@/features/preview-access/components/preview-capability-boundary";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toApiDateTime } from "./model/zone-form";

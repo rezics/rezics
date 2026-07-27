@@ -20,8 +20,8 @@ vi.mock("@/lib/use-hydrated-session", () => ({
 vi.mock("@rezics/openapi-tanstack-query", () => ({
 	useGetApiUsersMe: () => mocks.profile,
 }));
-vi.mock("./development-page", () => ({
-	DevelopmentPage: () => <div>development-notice</div>,
+vi.mock("./preview-access-notice", () => ({
+	PreviewAccessNotice: () => <div>preview-access-notice</div>,
 }));
 vi.mock("@rezics/ui", () => ({
 	QueryFailure: () => <div>query-failure</div>,
@@ -49,7 +49,7 @@ describe("PreviewCapabilityBoundary", () => {
 			</PreviewCapabilityBoundary>,
 		);
 
-		expect(screen.getByText("development-notice")).toBeTruthy();
+		expect(screen.getByText("preview-access-notice")).toBeTruthy();
 		expect(screen.queryByText("zone-content")).toBeNull();
 	});
 
@@ -62,6 +62,6 @@ describe("PreviewCapabilityBoundary", () => {
 		);
 
 		expect(screen.getByText("zone-content")).toBeTruthy();
-		expect(screen.queryByText("development-notice")).toBeNull();
+		expect(screen.queryByText("preview-access-notice")).toBeNull();
 	});
 });

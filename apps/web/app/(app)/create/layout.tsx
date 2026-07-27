@@ -5,7 +5,7 @@ import { TranslationBoundary } from "@/i18n/translation-boundary";
 
 export default function CreateLayout({ children }: { children: ReactNode }) {
 	return (
-		<TranslationBoundary namespaces={["create", "development"]}>
+		<TranslationBoundary namespaces={["create", "previewAccess"]}>
 			<StudioWorkspace>{children}</StudioWorkspace>
 		</TranslationBoundary>
 	);

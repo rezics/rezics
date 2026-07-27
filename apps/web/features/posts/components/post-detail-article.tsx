@@ -14,7 +14,11 @@ import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action
 import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
-import { AttributionLinks, type AttributionSummary } from "../attribution-list";
+import {
+	AttributionLinks,
+	PublisherAttributionLinks,
+	type AttributionSummary,
+} from "../attribution-list";
 import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
 
 type PostKind = Extract<
@@ -42,13 +46,17 @@ export interface PostDetailArticleValue {
 export function PostDetailArticle({
 	actions,
 	commentsHref,
+	engagementOverflow,
 	post,
 	replyCount = 0,
+	variant = "card",
 }: {
 	readonly actions?: ReactNode;
 	readonly commentsHref?: string;
+	readonly engagementOverflow?: ReactNode;
 	readonly post: PostDetailArticleValue;
 	readonly replyCount?: number;
+	readonly variant?: "card" | "thread";
 }) {
 	const { locale, t } = useTranslation(["feed", "posts"]);
 	const attachedScore = post.scores[0];
@@ -56,6 +64,65 @@ export function PostDetailArticle({
 	const rating: FeedTargetRating | undefined = attachedScoreValue
 		? { kind: "attached", value: attachedScoreValue }
 		: undefined;
+	const content = (
+		<>
+			<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+				<p className="font-semibold text-brand text-xs">
+					{t.feed.content.kinds[`post:${post.postKind}`]}
+				</p>
+				{rating ? <FeedCardRating className="mt-0" rating={rating} /> : null}
+			</div>
+			<h1
+				className="mt-2 font-heading font-black text-2xl leading-tight sm:text-3xl"
+				id={`post-detail-${post.id}`}
+			>
+				{post.title}
+			</h1>
+			{post.body ? (
+				<div className="prose mt-5 max-w-none">
+					<PortableTextContent value={readPortableText(post.body)} variant="article" />
+				</div>
+			) : post.summary ? (
+				<p className="mt-4 text-muted-foreground leading-7">{post.summary}</p>
+			) : null}
+			<div className="mt-6 border-border-weak border-t pt-2">
+				<ConnectedFeedEngagementBar
+					href={commentsHref}
+					itemId={post.id}
+					overflowMenu={engagementOverflow}
+					policy={PostDetailActionPolicy}
+					realmId={post.realmId ?? undefined}
+					replyCount={replyCount}
+				/>
+			</div>
+		</>
+	);
+
+	if (variant === "thread")
+		return (
+			<article aria-labelledby={`post-detail-${post.id}`} className="min-w-0">
+				<header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+					<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
+						<PublisherAttributionLinks
+							attributions={post.attributions}
+							emptyLabel={t.posts.unknownAttribution}
+							publisherLabel={t.posts.publisher}
+						/>
+						<span aria-hidden className="text-xs">
+							·
+						</span>
+						<time className="text-xs">
+							{formatRelativeTime(post.createdAt, locale.target)}
+						</time>
+					</div>
+					{actions ? (
+						<div className="flex flex-wrap justify-end gap-2">{actions}</div>
+					) : null}
+				</header>
+				<div className="mt-4">{content}</div>
+			</article>
+		);
+
 	return (
 		<Card asChild className="gap-0 overflow-hidden py-0">
 			<article aria-labelledby={`post-detail-${post.id}`}>
@@ -73,39 +140,7 @@ export function PostDetailArticle({
 						<div className="flex flex-wrap justify-end gap-2">{actions}</div>
 					) : null}
 				</CardHeader>
-				<CardContent className="px-4 py-5 sm:px-6 sm:py-6">
-					<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-						<p className="font-semibold text-brand text-xs">
-							{t.feed.content.kinds[`post:${post.postKind}`]}
-						</p>
-						{rating ? <FeedCardRating className="mt-0" rating={rating} /> : null}
-					</div>
-					<h1
-						className="mt-2 font-heading font-black text-2xl leading-tight sm:text-3xl"
-						id={`post-detail-${post.id}`}
-					>
-						{post.title}
-					</h1>
-					{post.body ? (
-						<div className="prose mt-5 max-w-none">
-							<PortableTextContent
-								value={readPortableText(post.body)}
-								variant="article"
-							/>
-						</div>
-					) : post.summary ? (
-						<p className="mt-4 text-muted-foreground leading-7">{post.summary}</p>
-					) : null}
-					<div className="mt-6 border-border-weak border-t pt-2">
-						<ConnectedFeedEngagementBar
-							href={commentsHref}
-							itemId={post.id}
-							policy={PostDetailActionPolicy}
-							realmId={post.realmId ?? undefined}
-							replyCount={replyCount}
-						/>
-					</div>
-				</CardContent>
+				<CardContent className="px-4 py-5 sm:px-6 sm:py-6">{content}</CardContent>
 			</article>
 		</Card>
 	);

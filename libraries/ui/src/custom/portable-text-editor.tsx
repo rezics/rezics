@@ -537,7 +537,9 @@ function SlashCommandEditable({
 				renderDecorator={renderDecorator}
 				renderListItem={({ children }) => children}
 				renderPlaceholder={() => (
-					<span className="text-muted-foreground">{labels.placeholder}</span>
+					<span className="inline-block ps-5 text-muted-foreground sm:ps-6">
+						{labels.placeholder}
+					</span>
 				)}
 				renderStyle={renderStyle}
 			/>
@@ -950,6 +952,7 @@ export function PortableTextEditor({
 	value,
 	onChange,
 	variant = "compact",
+	ariaLabel,
 	className,
 	label,
 	required = false,
@@ -957,6 +960,7 @@ export function PortableTextEditor({
 	value: PortableTextEditorValue;
 	onChange: (value: PortableTextEditorValue) => void;
 	variant?: PortableTextEditorVariant;
+	ariaLabel?: string;
 	className?: string;
 	label?: string;
 	required?: boolean;
@@ -965,11 +969,11 @@ export function PortableTextEditor({
 	const normalized = normalizePortableText(value);
 	const presentations = useUnitMentionPresentations(normalized);
 	const labelId = useId();
-	const ariaLabel = label ?? labels.richText;
-	const frameLabel = label ? { "aria-labelledby": labelId } : { "aria-label": ariaLabel };
+	const accessibleLabel = label ?? ariaLabel ?? labels.richText;
+	const frameLabel = label ? { "aria-labelledby": labelId } : { "aria-label": accessibleLabel };
 	const surface = (surfaceVariant: PortableTextEditorVariant) => (
 		<EditorSurface
-			ariaLabel={ariaLabel}
+			ariaLabel={accessibleLabel}
 			ariaLabelledBy={label ? labelId : undefined}
 			onChange={onChange}
 			presentations={presentations}

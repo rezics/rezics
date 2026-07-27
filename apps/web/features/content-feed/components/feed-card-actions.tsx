@@ -25,7 +25,7 @@ import {
 	Share2Icon,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import {
 	Button,
@@ -120,23 +120,31 @@ export function FeedVoteControl({
 }
 
 export function FeedEngagementBar({
+	actions,
 	href,
 	initialReaction,
 	itemId,
 	onCommentsClick,
+	overflowMenu,
 	policy,
+	reactionDisabled = false,
 	realmId,
 	replyCount = 0,
 	score,
+	showErrors = true,
 }: {
+	actions?: ReactNode;
 	href?: string;
 	initialReaction: FeedReaction;
 	itemId: string;
 	onCommentsClick?: () => void;
+	overflowMenu?: ReactNode;
 	policy: FeedActionPolicy;
+	reactionDisabled?: boolean;
 	realmId?: string;
 	replyCount?: number;
 	score: number;
+	showErrors?: boolean;
 }) {
 	const { locale, t } = useTranslation(["feed", "ui"]);
 	const { data: session } = useHydratedSession();
@@ -189,7 +197,7 @@ export function FeedEngagementBar({
 		<div className="mt-3 grid gap-1 pt-1">
 			<div className="flex items-center gap-1.5 overflow-x-auto">
 				<FeedVoteControl
-					disabled={pending}
+					disabled={pending || reactionDisabled}
 					onReactionChange={(next) => void changeReaction(next)}
 					reaction={reaction}
 					score={formattedScore}
@@ -213,28 +221,38 @@ export function FeedEngagementBar({
 						variant="secondary"
 					/>
 				) : null}
+				{actions}
 				<FeedShareSurface href={href} itemId={itemId} />
+				{overflowMenu}
 			</div>
-			<RequestFailure
-				error={putReaction.error ?? deleteReaction.error}
-				fallback={t.ui.retryLater}
-			/>
+			{showErrors ? (
+				<RequestFailure
+					error={putReaction.error ?? deleteReaction.error}
+					fallback={t.ui.retryLater}
+				/>
+			) : null}
 		</div>
 	);
 }
 
 export function ConnectedFeedEngagementBar({
+	actions,
 	href,
 	itemId,
+	overflowMenu,
 	policy,
 	realmId,
 	replyCount = 0,
+	showErrors = true,
 }: {
+	readonly actions?: ReactNode;
 	readonly href?: string;
 	readonly itemId: string;
+	readonly overflowMenu?: ReactNode;
 	readonly policy: FeedActionPolicy;
 	readonly realmId?: string;
 	readonly replyCount?: number;
+	readonly showErrors?: boolean;
 }) {
 	const reactions = useGetApiReactionsUnitsByUnitId({
 		path: { unitId: itemId },
@@ -249,25 +267,31 @@ export function ConnectedFeedEngagementBar({
 	return (
 		<>
 			<FeedEngagementBar
+				actions={actions}
 				href={href}
 				initialReaction={parseFeedReaction(reactions.data?.viewerReaction)}
 				itemId={itemId}
+				overflowMenu={overflowMenu}
 				policy={policy}
+				reactionDisabled={reactions.isError}
 				realmId={realmId}
 				replyCount={replyCount}
 				score={(counts.get("upvote") ?? 0) - (counts.get("downvote") ?? 0)}
+				showErrors={showErrors}
 			/>
-			<RequestFailure error={reactions.error} />
+			{showErrors ? <RequestFailure error={reactions.error} /> : null}
 		</>
 	);
 }
 
 export function FeedOverflowMenu({
 	canExclude,
+	children,
 	itemId,
 	onNotInterested,
 }: {
 	canExclude: boolean;
+	children?: ReactNode;
 	itemId: string;
 	onNotInterested?: () => void;
 }) {
@@ -307,7 +331,9 @@ export function FeedOverflowMenu({
 				onToggleSaved={() => void toggleSaved()}
 				savePending={addFavorite.isPending || removeFavorite.isPending}
 				saved={saved}
-			/>
+			>
+				{children}
+			</FeedOverflowMenuView>
 			<CollectionPickerButton
 				targetId={itemId}
 				onOpenChange={setCollectionOpen}
@@ -319,6 +345,7 @@ export function FeedOverflowMenu({
 
 export function FeedOverflowMenuView({
 	canExclude,
+	children,
 	onAddToCollection,
 	onNotInterested,
 	onToggleSaved,
@@ -326,6 +353,7 @@ export function FeedOverflowMenuView({
 	saved,
 }: {
 	canExclude: boolean;
+	children?: ReactNode;
 	onAddToCollection: () => void;
 	onNotInterested?: () => void;
 	onToggleSaved: () => void;
@@ -338,7 +366,7 @@ export function FeedOverflowMenuView({
 			<MenuTrigger asChild>
 				<Button
 					aria-label={t.feed.moreActions}
-					className="ms-auto size-11 data-[state=open]:bg-accent sm:size-8"
+					className="size-11 data-[state=open]:bg-accent sm:size-8"
 					pill
 					size="icon-md"
 					variant="quiet"
@@ -361,6 +389,7 @@ export function FeedOverflowMenuView({
 						{t.feed.notInterested}
 					</MenuItem>
 				) : null}
+				{children}
 			</MenuContent>
 		</Menu>
 	);

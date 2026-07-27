@@ -8,7 +8,7 @@ import { QueryFailure, QueryPending } from "@rezics/ui";
 import type { ReactNode } from "react";
 
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { DevelopmentPage } from "./development-page";
+import { PreviewAccessNotice } from "./preview-access-notice";
 
 export type PreviewCapability = Extract<
 	GetApiUsersMeStatus200PlatformCapabilitiesEnum,
@@ -26,9 +26,9 @@ export function PreviewCapabilityBoundary({
 	const profile = useGetApiUsersMe({ query: { enabled: Boolean(session.data) } });
 
 	if (session.isPending || (session.data && profile.isPending)) return <QueryPending />;
-	if (!session.data) return <DevelopmentPage />;
+	if (!session.data) return <PreviewAccessNotice />;
 	if (profile.isError || !profile.data)
 		return <QueryFailure error={profile.error} retry={() => void profile.refetch()} />;
-	if (!profile.data.platformCapabilities.includes(capability)) return <DevelopmentPage />;
+	if (!profile.data.platformCapabilities.includes(capability)) return <PreviewAccessNotice />;
 	return children;
 }

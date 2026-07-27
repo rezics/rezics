@@ -7,9 +7,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		t: {
-			development: {
-				title: "In development",
-				description: "This feature is still in development.",
+			previewAccess: {
+				title: "Preview access required",
+				description: "This feature is not publicly available.",
 				openSourcePrefix: "The project is open source at",
 				openSourceSuffix: ".",
 				participationPrefix: "To participate,",
@@ -27,13 +27,13 @@ vi.mock("@rezics/ui", () => ({
 	CardContent: ({ children }: { readonly children: ReactNode }) => <div>{children}</div>,
 }));
 
-import { DevelopmentPage } from "./development-page";
+import { PreviewAccessNotice } from "./preview-access-notice";
 
-describe("DevelopmentPage", () => {
+describe("PreviewAccessNotice", () => {
 	afterEach(cleanup);
 
 	it("opens the contact page in a new browsing context", () => {
-		render(<DevelopmentPage />);
+		render(<PreviewAccessNotice />);
 
 		const contact = screen.getByRole("link", { name: "contact us" });
 		expect(contact.getAttribute("href")).toBe("https://about.rezics.com/contact-us/");
