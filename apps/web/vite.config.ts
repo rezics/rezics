@@ -52,6 +52,11 @@ for (const plugin of pwaPlugins) {
 
 export default defineConfig({
 	plugins: [vinext({}), ...pwaPlugins, tailwindcss()],
+	// RSC resolves React Query's "use client" modules by file path, so keep its
+	// package entry and internal modules on the same unoptimized module graph.
+	optimizeDeps: {
+		exclude: ["@tanstack/react-query"],
+	},
 	build: {
 		rolldownOptions: {
 			output: {
