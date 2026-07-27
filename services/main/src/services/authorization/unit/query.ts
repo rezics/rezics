@@ -2,7 +2,7 @@ import { and, eq, exists, inArray, isNull, not, or, sql, type SQLWrapper } from 
 
 import { database } from "../../database";
 import {
-	capabilityGrant,
+	platformCapabilityGrant,
 	realmMember,
 	unit,
 	unitAccessGrant,
@@ -103,17 +103,16 @@ export function getUnitReadCondition(
 	);
 	const platformSubject = exists(
 		database
-			.select({ id: capabilityGrant.id })
-			.from(capabilityGrant)
+			.select({ id: platformCapabilityGrant.id })
+			.from(platformCapabilityGrant)
 			.where(
 				and(
-					eq(capabilityGrant.authority, "platform"),
-					eq(capabilityGrant.profileId, profileId),
-					eq(capabilityGrant.capability, "unit.edit"),
-					isNull(capabilityGrant.revokedAt),
+					eq(platformCapabilityGrant.profileId, profileId),
+					eq(platformCapabilityGrant.capability, "unit.edit"),
+					isNull(platformCapabilityGrant.revokedAt),
 					or(
-						isNull(capabilityGrant.expiresAt),
-						sql`${capabilityGrant.expiresAt} > now()`,
+						isNull(platformCapabilityGrant.expiresAt),
+						sql`${platformCapabilityGrant.expiresAt} > now()`,
 					),
 				),
 			),

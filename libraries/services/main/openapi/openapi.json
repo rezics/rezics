@@ -9110,7 +9110,9 @@
 					"RealmCapabilityRequired",
 					"RealmRulesAcceptanceRequired",
 					"PlatformCapabilityRequired",
-					"PlatformGrantManagerRequired",
+					"PlatformAccessManagerRequired",
+					"PlatformAccessRevisionConflict",
+					"PlatformAccessConfigurationInvalid",
 					"CollectionOwnershipRequired",
 					"UnitNotFound",
 					"UnitPermissionForbidden",
@@ -18126,10 +18128,7 @@
 															"kind": {
 																"default": "standard",
 																"type": "string",
-																"enum": [
-																	"standard",
-																	"staff_trusted"
-																]
+																"enum": ["standard", "privileged"]
 															},
 															"source": {
 																"default": "assigned",
@@ -18664,7 +18663,7 @@
 												"kind": {
 													"default": "standard",
 													"type": "string",
-													"enum": ["standard", "staff_trusted"]
+													"enum": ["standard", "privileged"]
 												},
 												"source": {
 													"default": "assigned",
@@ -19108,7 +19107,7 @@
 												"kind": {
 													"default": "standard",
 													"type": "string",
-													"enum": ["standard", "staff_trusted"]
+													"enum": ["standard", "privileged"]
 												},
 												"source": {
 													"default": "assigned",
@@ -19760,7 +19759,7 @@
 												"kind": {
 													"default": "standard",
 													"type": "string",
-													"enum": ["standard", "staff_trusted"]
+													"enum": ["standard", "privileged"]
 												},
 												"source": {
 													"default": "assigned",
@@ -20186,7 +20185,7 @@
 												"kind": {
 													"default": "standard",
 													"type": "string",
-													"enum": ["standard", "staff_trusted"]
+													"enum": ["standard", "privileged"]
 												},
 												"source": {
 													"default": "assigned",
@@ -20437,7 +20436,7 @@
 		},
 		"/api/api-token-policies": {
 			"get": {
-				"summary": "List API token policies as staff",
+				"summary": "List API token policies with platform access",
 				"tags": ["API Token Policies"],
 				"security": [{ "SessionCookie": [] }],
 				"responses": {
@@ -20469,7 +20468,7 @@
 													"kind": {
 														"default": "standard",
 														"type": "string",
-														"enum": ["standard", "staff_trusted"]
+														"enum": ["standard", "privileged"]
 													},
 													"schemaVersion": {
 														"minimum": 1,
@@ -20703,7 +20702,7 @@
 		},
 		"/api/api-token-policies/{policyKey}": {
 			"patch": {
-				"summary": "Replace an API token policy as staff",
+				"summary": "Replace an API token policy with platform access",
 				"tags": ["API Token Policies"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -20884,7 +20883,7 @@
 										"kind": {
 											"default": "standard",
 											"type": "string",
-											"enum": ["standard", "staff_trusted"]
+											"enum": ["standard", "privileged"]
 										},
 										"schemaVersion": {
 											"minimum": 1,
@@ -21206,7 +21205,7 @@
 		},
 		"/api/api-token-policies/bindings/{tokenId}": {
 			"put": {
-				"summary": "Assign an API token policy as staff",
+				"summary": "Assign an API token policy with platform access",
 				"tags": ["API Token Policies"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -21386,7 +21385,7 @@
 										"kind": {
 											"default": "standard",
 											"type": "string",
-											"enum": ["standard", "staff_trusted"]
+											"enum": ["standard", "privileged"]
 										},
 										"source": {
 											"default": "assigned",
@@ -36129,11 +36128,81 @@
 				"x-rezics-policy-operation-id": "postApiGovernanceModerationEnforcementsByEnforcementIdRevoke"
 			}
 		},
-		"/api/governance/grants": {
+		"/api/audit/events": {
 			"get": {
-				"summary": "List capability grants",
-				"tags": ["Governance"],
+				"summary": "List global security audit events",
+				"tags": ["Audit"],
 				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 500, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					},
+					{
+						"name": "category",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "admin_activity",
+							"type": "string",
+							"enum": ["admin_activity", "policy_denied", "system_event"]
+						}
+					},
+					{
+						"name": "outcome",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "succeeded",
+							"type": "string",
+							"enum": ["succeeded", "denied", "failed"]
+						}
+					},
+					{
+						"name": "action",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "actorProfileId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "authorityKind",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "platform",
+							"type": "string",
+							"enum": ["platform", "realm", "unit"]
+						}
+					},
+					{
+						"name": "authorityId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -36141,7 +36210,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "nextCursor"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -36149,41 +36218,193 @@
 												"type": "object",
 												"required": [
 													"id",
-													"profileId",
-													"capability",
-													"grantedByProfileId",
-													"expiresAt",
-													"revokedAt",
-													"createdAt",
-													"updatedAt"
+													"schemaVersion",
+													"category",
+													"outcome",
+													"actor",
+													"authority",
+													"action",
+													"reasonCode",
+													"requestId",
+													"traceId",
+													"target",
+													"details",
+													"createdAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"profileId": {
-														"format": "uuid",
-														"type": "string"
+													"schemaVersion": {
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "type": "integer" }
+														]
 													},
-													"capability": { "type": "string" },
-													"grantedByProfileId": {
-														"format": "uuid",
-														"type": "string"
+													"category": {
+														"default": "admin_activity",
+														"type": "string",
+														"enum": [
+															"admin_activity",
+															"policy_denied",
+															"system_event"
+														]
 													},
-													"expiresAt": {
+													"outcome": {
+														"default": "succeeded",
+														"type": "string",
+														"enum": ["succeeded", "denied", "failed"]
+													},
+													"actor": {
+														"type": "object",
+														"required": [
+															"kind",
+															"profileId",
+															"profileName",
+															"credentialKind",
+															"credentialId"
+														],
+														"properties": {
+															"kind": {
+																"default": "profile",
+																"type": "string",
+																"enum": ["profile", "system"]
+															},
+															"profileId": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"profileName": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"credentialKind": {
+																"default": "session",
+																"type": "string",
+																"enum": [
+																	"session",
+																	"api_token",
+																	"bootstrap",
+																	"system"
+																]
+															},
+															"credentialId": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															}
+														}
+													},
+													"authority": {
+														"type": "object",
+														"required": ["kind", "id"],
+														"properties": {
+															"kind": {
+																"default": "platform",
+																"type": "string",
+																"enum": [
+																	"platform",
+																	"realm",
+																	"unit"
+																]
+															},
+															"id": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
+													},
+													"action": { "type": "string" },
+													"reasonCode": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"requestId": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"traceId": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"target": {
 														"nullable": true,
 														"anyOf": [
 															{
-																"format": "date-time",
-																"type": "string"
+																"type": "object",
+																"required": [
+																	"kind",
+																	"id",
+																	"path",
+																	"name"
+																],
+																"properties": {
+																	"kind": { "type": "string" },
+																	"id": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"path": {
+																		"nullable": true,
+																		"anyOf": [
+																			{ "type": "string" },
+																			{ "type": "null" }
+																		]
+																	},
+																	"name": {
+																		"nullable": true,
+																		"anyOf": [
+																			{ "type": "string" },
+																			{ "type": "null" }
+																		]
+																	}
+																}
 															},
 															{ "type": "null" }
 														]
 													},
-													"revokedAt": {
+													"details": {
 														"nullable": true,
 														"anyOf": [
 															{
-																"format": "date-time",
-																"type": "string"
+																"type": "object",
+																"patternProperties": {
+																	"^(.*)$": {}
+																}
 															},
 															{ "type": "null" }
 														]
@@ -36191,147 +36412,14 @@
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
-													},
-													"updatedAt": {
-														"format": "date-time",
-														"type": "string"
 													}
 												}
 											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										}
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "RealmCapabilityRequired",
-													"type": "string",
-													"enum": [
-														"RealmCapabilityRequired",
-														"PlatformCapabilityRequired"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "getApiGovernanceGrants",
-				"x-rezics-policy-operation-id": "getApiGovernanceGrants"
-			},
-			"post": {
-				"summary": "Create capability grant",
-				"tags": ["Governance"],
-				"security": [{ "SessionCookie": [] }],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["profileId", "capability"],
-								"properties": {
-									"profileId": { "format": "uuid", "type": "string" },
-									"capability": {
-										"type": "string",
-										"enum": [
-											"entity.associations.override",
-											"unit.edit",
-											"platform.development_preview.access",
-											"unit.ownership.transfer",
-											"unit.slug.manage",
-											"unit.slug.namespace.manage",
-											"unit.slug.redirect.release",
-											"platform.api_token_policy.manage",
-											"platform.moderate",
-											"platform.suppress",
-											"platform.grants.manage",
-											"realm.contribute",
-											"realm.units.create",
-											"realm.post.replies.create",
-											"realm.settings.update",
-											"realm.members.read",
-											"realm.members.manage",
-											"realm.rules.update",
-											"realm.pins.manage",
-											"realm.units.moderate"
-										]
-									},
-									"expiresAt": { "format": "date-time", "type": "string" }
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": [
-										"id",
-										"profileId",
-										"capability",
-										"grantedByProfileId",
-										"expiresAt",
-										"revokedAt",
-										"createdAt",
-										"updatedAt"
-									],
-									"properties": {
-										"id": { "format": "uuid", "type": "string" },
-										"profileId": { "format": "uuid", "type": "string" },
-										"capability": { "type": "string" },
-										"grantedByProfileId": {
-											"format": "uuid",
-											"type": "string"
-										},
-										"expiresAt": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "date-time", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"revokedAt": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "date-time", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
 							}
@@ -36342,29 +36430,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"oneOf": [
-										{
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
 											"type": "object",
-											"required": ["error", "requestId"],
+											"required": ["code", "message"],
 											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "CapabilityGrantExpiryInvalid",
-															"type": "string",
-															"enum": ["CapabilityGrantExpiryInvalid"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
 												},
-												"requestId": { "type": "string" }
+												"message": { "type": "string" },
+												"details": {}
 											}
 										},
-										{ "$ref": "#/components/schemas/MalformedRequestBody" }
-									]
+										"requestId": { "type": "string" }
+									}
 								}
 							}
 						}
@@ -36382,40 +36465,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "RealmCapabilityRequired",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
-													"enum": [
-														"RealmCapabilityRequired",
-														"PlatformCapabilityRequired",
-														"FreshSessionRequired"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformGrantManagerRequired",
-													"type": "string",
-													"enum": ["PlatformGrantManagerRequired"]
+													"enum": ["PlatformCapabilityRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -36444,132 +36496,8 @@
 						}
 					}
 				},
-				"operationId": "postApiGovernanceGrants",
-				"x-rezics-policy-operation-id": "postApiGovernanceGrants"
-			}
-		},
-		"/api/governance/grants/{grantId}": {
-			"delete": {
-				"summary": "Revoke capability grant",
-				"tags": ["Governance"],
-				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "RealmCapabilityRequired",
-													"type": "string",
-													"enum": [
-														"RealmCapabilityRequired",
-														"PlatformCapabilityRequired",
-														"FreshSessionRequired"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "CapabilityGrantNotFound",
-													"type": "string",
-													"enum": ["CapabilityGrantNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformGrantManagerRequired",
-													"type": "string",
-													"enum": ["PlatformGrantManagerRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"security": [{ "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "grantId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"operationId": "deleteApiGovernanceGrantsByGrantId",
-				"x-rezics-policy-operation-id": "deleteApiGovernanceGrantsByGrantId"
+				"operationId": "getApiAuditEvents",
+				"x-rezics-policy-operation-id": "getApiAuditEvents"
 			}
 		},
 		"/api/series": {
@@ -46071,9 +45999,12 @@
 													"uniqueItems": true,
 													"type": "array",
 													"items": {
-														"default": "entity.associations.override",
+														"default": "platform.access.read",
 														"type": "string",
 														"enum": [
+															"platform.access.read",
+															"platform.access.manage",
+															"platform.audit.read",
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
@@ -46084,7 +46015,6 @@
 															"platform.api_token_policy.manage",
 															"platform.moderate",
 															"platform.suppress",
-															"platform.grants.manage",
 															"realm.contribute",
 															"realm.units.create",
 															"realm.post.replies.create",
@@ -50101,10 +50031,10 @@
 				"x-rezics-policy-operation-id": "deleteApiUsersByIdBlock"
 			}
 		},
-		"/api/staff/access-policy": {
+		"/api/platform-access/policy": {
 			"get": {
-				"summary": "Get platform staff access policy",
-				"tags": ["Staff"],
+				"summary": "Get the platform access policy",
+				"tags": ["Platform access"],
 				"security": [{ "SessionCookie": [] }],
 				"responses": {
 					"200": {
@@ -50119,9 +50049,12 @@
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"default": "entity.associations.override",
+												"default": "platform.access.read",
 												"type": "string",
 												"enum": [
+													"platform.access.read",
+													"platform.access.manage",
+													"platform.audit.read",
 													"entity.associations.override",
 													"unit.edit",
 													"platform.development_preview.access",
@@ -50132,7 +50065,6 @@
 													"platform.api_token_policy.manage",
 													"platform.moderate",
 													"platform.suppress",
-													"platform.grants.manage",
 													"realm.contribute",
 													"realm.units.create",
 													"realm.post.replies.create",
@@ -50186,20 +50118,20 @@
 						}
 					}
 				},
-				"operationId": "getApiStaffAccess-policy",
-				"x-rezics-policy-operation-id": "getApiStaffAccess-policy"
+				"operationId": "getApiPlatform-accessPolicy",
+				"x-rezics-policy-operation-id": "getApiPlatform-accessPolicy"
 			}
 		},
-		"/api/staff/profiles": {
+		"/api/platform-access/profiles": {
 			"get": {
-				"summary": "Search Profiles for staff access",
-				"tags": ["Staff"],
+				"summary": "List or search Profiles and their platform access",
+				"tags": ["Platform access"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
 					{
 						"name": "query",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
 					},
 					{
@@ -50208,11 +50140,11 @@
 						"required": false,
 						"schema": {
 							"minimum": 1,
-							"maximum": 50,
-							"default": 20,
+							"maximum": 100,
+							"default": 50,
 							"anyOf": [
 								{ "format": "integer", "default": 0, "type": "string" },
-								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
 							]
 						}
 					}
@@ -50235,7 +50167,7 @@
 													"name",
 													"email",
 													"grants",
-													"isSuperAdmin"
+													"revision"
 												],
 												"properties": {
 													"profileId": {
@@ -50258,15 +50190,25 @@
 														"items": {
 															"type": "object",
 															"required": [
+																"id",
 																"capability",
 																"grantedByProfileId",
-																"expiresAt"
+																"expiresAt",
+																"createdAt",
+																"updatedAt"
 															],
 															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
 																"capability": {
-																	"default": "entity.associations.override",
+																	"default": "platform.access.read",
 																	"type": "string",
 																	"enum": [
+																		"platform.access.read",
+																		"platform.access.manage",
+																		"platform.audit.read",
 																		"entity.associations.override",
 																		"unit.edit",
 																		"platform.development_preview.access",
@@ -50277,7 +50219,6 @@
 																		"platform.api_token_policy.manage",
 																		"platform.moderate",
 																		"platform.suppress",
-																		"platform.grants.manage",
 																		"realm.contribute",
 																		"realm.units.create",
 																		"realm.post.replies.create",
@@ -50302,11 +50243,19 @@
 																		},
 																		{ "type": "null" }
 																	]
+																},
+																"createdAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"updatedAt": {
+																	"format": "date-time",
+																	"type": "string"
 																}
 															}
 														}
 													},
-													"isSuperAdmin": { "type": "boolean" }
+													"revision": { "minLength": 1, "type": "string" }
 												}
 											}
 										}
@@ -50359,15 +50308,23 @@
 						}
 					}
 				},
-				"operationId": "getApiStaffProfiles",
-				"x-rezics-policy-operation-id": "getApiStaffProfiles"
+				"operationId": "getApiPlatform-accessProfiles",
+				"x-rezics-policy-operation-id": "getApiPlatform-accessProfiles"
 			}
 		},
-		"/api/staff/members": {
+		"/api/platform-access/profiles/{profileId}": {
 			"get": {
-				"summary": "List active staff access",
-				"tags": ["Staff"],
+				"summary": "Get one Profile's platform access",
+				"tags": ["Platform access"],
 				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "profileId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -50375,92 +50332,88 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": [
+										"profileId",
+										"name",
+										"email",
+										"grants",
+										"revision"
+									],
 									"properties": {
-										"items": {
+										"profileId": { "format": "uuid", "type": "string" },
+										"name": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"email": { "format": "email", "type": "string" },
+										"grants": {
 											"type": "array",
 											"items": {
 												"type": "object",
 												"required": [
-													"profileId",
-													"name",
-													"email",
-													"grants",
-													"isSuperAdmin"
+													"id",
+													"capability",
+													"grantedByProfileId",
+													"expiresAt",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
-													"profileId": {
+													"id": { "format": "uuid", "type": "string" },
+													"capability": {
+														"default": "platform.access.read",
+														"type": "string",
+														"enum": [
+															"platform.access.read",
+															"platform.access.manage",
+															"platform.audit.read",
+															"entity.associations.override",
+															"unit.edit",
+															"platform.development_preview.access",
+															"unit.ownership.transfer",
+															"unit.slug.manage",
+															"unit.slug.namespace.manage",
+															"unit.slug.redirect.release",
+															"platform.api_token_policy.manage",
+															"platform.moderate",
+															"platform.suppress",
+															"realm.contribute",
+															"realm.units.create",
+															"realm.post.replies.create",
+															"realm.settings.update",
+															"realm.members.read",
+															"realm.members.manage",
+															"realm.rules.update",
+															"realm.pins.manage",
+															"realm.units.moderate"
+														]
+													},
+													"grantedByProfileId": {
 														"format": "uuid",
 														"type": "string"
 													},
-													"name": {
+													"expiresAt": {
 														"nullable": true,
 														"anyOf": [
-															{ "type": "string" },
+															{
+																"format": "date-time",
+																"type": "string"
+															},
 															{ "type": "null" }
 														]
 													},
-													"email": {
-														"format": "email",
+													"createdAt": {
+														"format": "date-time",
 														"type": "string"
 													},
-													"grants": {
-														"type": "array",
-														"items": {
-															"type": "object",
-															"required": [
-																"capability",
-																"grantedByProfileId",
-																"expiresAt"
-															],
-															"properties": {
-																"capability": {
-																	"default": "entity.associations.override",
-																	"type": "string",
-																	"enum": [
-																		"entity.associations.override",
-																		"unit.edit",
-																		"platform.development_preview.access",
-																		"unit.ownership.transfer",
-																		"unit.slug.manage",
-																		"unit.slug.namespace.manage",
-																		"unit.slug.redirect.release",
-																		"platform.api_token_policy.manage",
-																		"platform.moderate",
-																		"platform.suppress",
-																		"platform.grants.manage",
-																		"realm.contribute",
-																		"realm.units.create",
-																		"realm.post.replies.create",
-																		"realm.settings.update",
-																		"realm.members.read",
-																		"realm.members.manage",
-																		"realm.rules.update",
-																		"realm.pins.manage",
-																		"realm.units.moderate"
-																	]
-																},
-																"grantedByProfileId": {
-																	"format": "uuid",
-																	"type": "string"
-																},
-																"expiresAt": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"format": "date-time",
-																			"type": "string"
-																		},
-																		{ "type": "null" }
-																	]
-																}
-															}
-														}
-													},
-													"isSuperAdmin": { "type": "boolean" }
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
 												}
 											}
-										}
+										},
+										"revision": { "minLength": 1, "type": "string" }
 									}
 								}
 							}
@@ -50493,6 +50446,41 @@
 							}
 						}
 					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ProfileNotFound",
+													"type": "string",
+													"enum": ["ProfileNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
@@ -50502,14 +50490,12 @@
 						}
 					}
 				},
-				"operationId": "getApiStaffMembers",
-				"x-rezics-policy-operation-id": "getApiStaffMembers"
-			}
-		},
-		"/api/staff/members/{profileId}": {
+				"operationId": "getApiPlatform-accessProfilesByProfileId",
+				"x-rezics-policy-operation-id": "getApiPlatform-accessProfilesByProfileId"
+			},
 			"put": {
-				"summary": "Replace a Profile's platform access",
-				"tags": ["Staff"],
+				"summary": "Replace one Profile's platform access",
+				"tags": ["Platform access"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
 					{
@@ -50525,45 +50511,55 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["capabilities", "expiresAt"],
+								"required": ["expectedRevision", "grants"],
 								"properties": {
-									"capabilities": {
-										"maxItems": 20,
+									"expectedRevision": { "minLength": 1, "type": "string" },
+									"grants": {
+										"maxItems": 22,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
-											"default": "entity.associations.override",
-											"type": "string",
-											"enum": [
-												"entity.associations.override",
-												"unit.edit",
-												"platform.development_preview.access",
-												"unit.ownership.transfer",
-												"unit.slug.manage",
-												"unit.slug.namespace.manage",
-												"unit.slug.redirect.release",
-												"platform.api_token_policy.manage",
-												"platform.moderate",
-												"platform.suppress",
-												"platform.grants.manage",
-												"realm.contribute",
-												"realm.units.create",
-												"realm.post.replies.create",
-												"realm.settings.update",
-												"realm.members.read",
-												"realm.members.manage",
-												"realm.rules.update",
-												"realm.pins.manage",
-												"realm.units.moderate"
-											]
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["capability", "expiresAt"],
+											"properties": {
+												"capability": {
+													"default": "platform.access.read",
+													"type": "string",
+													"enum": [
+														"platform.access.read",
+														"platform.access.manage",
+														"platform.audit.read",
+														"entity.associations.override",
+														"unit.edit",
+														"platform.development_preview.access",
+														"unit.ownership.transfer",
+														"unit.slug.manage",
+														"unit.slug.namespace.manage",
+														"unit.slug.redirect.release",
+														"platform.api_token_policy.manage",
+														"platform.moderate",
+														"platform.suppress",
+														"realm.contribute",
+														"realm.units.create",
+														"realm.post.replies.create",
+														"realm.settings.update",
+														"realm.members.read",
+														"realm.members.manage",
+														"realm.rules.update",
+														"realm.pins.manage",
+														"realm.units.moderate"
+													]
+												},
+												"expiresAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												}
+											}
 										}
-									},
-									"expiresAt": {
-										"nullable": true,
-										"anyOf": [
-											{ "format": "date-time", "type": "string" },
-											{ "type": "null" }
-										]
 									}
 								}
 							}
@@ -50583,7 +50579,7 @@
 										"name",
 										"email",
 										"grants",
-										"isSuperAdmin"
+										"revision"
 									],
 									"properties": {
 										"profileId": { "format": "uuid", "type": "string" },
@@ -50597,15 +50593,22 @@
 											"items": {
 												"type": "object",
 												"required": [
+													"id",
 													"capability",
 													"grantedByProfileId",
-													"expiresAt"
+													"expiresAt",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
+													"id": { "format": "uuid", "type": "string" },
 													"capability": {
-														"default": "entity.associations.override",
+														"default": "platform.access.read",
 														"type": "string",
 														"enum": [
+															"platform.access.read",
+															"platform.access.manage",
+															"platform.audit.read",
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
@@ -50616,7 +50619,6 @@
 															"platform.api_token_policy.manage",
 															"platform.moderate",
 															"platform.suppress",
-															"platform.grants.manage",
 															"realm.contribute",
 															"realm.units.create",
 															"realm.post.replies.create",
@@ -50641,11 +50643,19 @@
 															},
 															{ "type": "null" }
 														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
 													}
 												}
 											}
 										},
-										"isSuperAdmin": { "type": "boolean" }
+										"revision": { "minLength": 1, "type": "string" }
 									}
 								}
 							}
@@ -50668,7 +50678,10 @@
 														"code": {
 															"default": "CapabilityGrantExpiryInvalid",
 															"type": "string",
-															"enum": ["CapabilityGrantExpiryInvalid"]
+															"enum": [
+																"CapabilityGrantExpiryInvalid",
+																"PlatformAccessConfigurationInvalid"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -50753,9 +50766,12 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformGrantManagerRequired",
+													"default": "PlatformAccessManagerRequired",
 													"type": "string",
-													"enum": ["PlatformGrantManagerRequired"]
+													"enum": [
+														"PlatformAccessManagerRequired",
+														"PlatformAccessRevisionConflict"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -50784,157 +50800,8 @@
 						}
 					}
 				},
-				"operationId": "putApiStaffMembersByProfileId",
-				"x-rezics-policy-operation-id": "putApiStaffMembersByProfileId"
-			}
-		},
-		"/api/staff/audit": {
-			"get": {
-				"summary": "List staff access audit events",
-				"tags": ["Staff"],
-				"security": [{ "SessionCookie": [] }],
-				"parameters": [
-					{
-						"name": "limit",
-						"in": "query",
-						"required": false,
-						"schema": {
-							"minimum": 1,
-							"maximum": 100,
-							"default": 50,
-							"anyOf": [
-								{ "format": "integer", "default": 0, "type": "string" },
-								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
-							]
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["items"],
-									"properties": {
-										"items": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"required": [
-													"id",
-													"actorProfileId",
-													"actorName",
-													"action",
-													"decisionCode",
-													"subjectProfileId",
-													"subjectName",
-													"metadata",
-													"createdAt"
-												],
-												"properties": {
-													"id": { "format": "uuid", "type": "string" },
-													"actorProfileId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"actorName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"action": { "type": "string" },
-													"decisionCode": { "type": "string" },
-													"subjectProfileId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"subjectName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"metadata": {
-														"nullable": true,
-														"anyOf": [
-															{
-																"type": "object",
-																"patternProperties": {
-																	"^(.*)$": {}
-																}
-															},
-															{ "type": "null" }
-														]
-													},
-													"createdAt": {
-														"format": "date-time",
-														"type": "string"
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "getApiStaffAudit",
-				"x-rezics-policy-operation-id": "getApiStaffAudit"
+				"operationId": "putApiPlatform-accessProfilesByProfileId",
+				"x-rezics-policy-operation-id": "putApiPlatform-accessProfilesByProfileId"
 			}
 		},
 		"/api/tags/{tagId}": {
@@ -51177,6 +51044,33 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -51239,6 +51133,40 @@
 							}
 						}
 					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
@@ -51249,6 +51177,7 @@
 					}
 				},
 				"operationId": "getApiTagsByTagId",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"x-rezics-policy-operation-id": "getApiTagsByTagId"
 			}
 		},
@@ -51586,6 +51515,33 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -51648,6 +51604,40 @@
 							}
 						}
 					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
@@ -51658,6 +51648,7 @@
 					}
 				},
 				"operationId": "getApiTag-structuresByStructureId",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"x-rezics-policy-operation-id": "getApiTag-structuresByStructureId"
 			},
 			"put": {
@@ -55135,9 +55126,9 @@
 		},
 		"/api/slug-addresses/units/{unitId}": {
 			"get": {
-				"operationId": "getUnitSlugAddressAsStaff",
-				"summary": "Get a Unit canonical slug address as staff",
-				"description": "Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
+				"operationId": "getUnitSlugAddressWithPlatformAccess",
+				"summary": "Get a Unit canonical slug address with platform access",
+				"description": "Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
 				"tags": ["Slug Addresses"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -55281,8 +55272,8 @@
 				"x-rezics-policy-operation-id": "getApiSlug-addressesUnitsByUnitId"
 			},
 			"put": {
-				"operationId": "replaceUnitSlugAddressAsStaff",
-				"summary": "Replace any Unit slug address as staff",
+				"operationId": "replaceUnitSlugAddressWithPlatformAccess",
+				"summary": "Replace any Unit slug address with platform access",
 				"description": "Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.",
 				"tags": ["Slug Addresses"],
 				"security": [{ "SessionCookie": [] }],
@@ -55585,8 +55576,8 @@
 		},
 		"/api/slug-addresses/namespaces": {
 			"post": {
-				"operationId": "createSlugNamespaceAsStaff",
-				"summary": "Create an explicitly addressed namespace as staff",
+				"operationId": "createSlugNamespaceWithPlatformAccess",
+				"summary": "Create an explicitly addressed namespace with platform access",
 				"description": "Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.",
 				"tags": ["Slug Addresses"],
 				"security": [{ "SessionCookie": [] }],
@@ -55881,9 +55872,9 @@
 		},
 		"/api/slug-addresses/redirects/{redirectAddressId}": {
 			"delete": {
-				"operationId": "releaseSlugRedirectAsStaff",
-				"summary": "Release a retained slug redirect as staff",
-				"description": "Deletes one temporary Redirect record so its scoped label may be reused. This is an audited staff action; retention and quarantine policy determines when a redirect is eligible for release.",
+				"operationId": "releaseSlugRedirectWithPlatformAccess",
+				"summary": "Release a retained slug redirect with platform access",
+				"description": "Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.",
 				"tags": ["Slug Addresses"],
 				"responses": {
 					"204": {
@@ -163132,6 +163123,33 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -163191,6 +163209,40 @@
 							}
 						}
 					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
@@ -163228,6 +163280,7 @@
 					}
 				},
 				"operationId": "postApiSearchByIndex",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"x-rezics-policy-operation-id": "postApiSearchByIndex"
 			}
 		},

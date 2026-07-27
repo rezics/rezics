@@ -1,7 +1,8 @@
 import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
+import { recordAuditEvent } from "../../audit";
 import { database, type DatabaseTransaction } from "../../database";
-import { auditEvent, profile, unitAccessGrant, unitAccessInvitation } from "../../database/schema";
+import { profile, unitAccessGrant, unitAccessInvitation } from "../../database/schema";
 import {
 	UnitAccessConfigurationInvalid,
 	UnitAccessInvitationConflict,
@@ -51,14 +52,18 @@ async function recordInvitationAudit(
 		readonly metadata?: Record<string, unknown>;
 	},
 ) {
-	await tx.insert(auditEvent).values({
-		actorProfileId: input.actorProfileId,
+	await recordAuditEvent(tx, {
+		category: "admin_activity",
+		outcome: "succeeded",
+		actor: { kind: "profile", profileId: input.actorProfileId },
+		authority: { kind: "unit", id: input.unitId },
 		action: input.action,
-		decisionCode: "allowed",
-		subjectKind: "unit_access_invitation",
-		subjectId: input.invitationId,
-		subjectPath: input.unitId,
-		metadata: input.metadata,
+		target: {
+			kind: "unit_access_invitation",
+			id: input.invitationId,
+			path: input.unitId,
+		},
+		details: input.metadata,
 	});
 }
 

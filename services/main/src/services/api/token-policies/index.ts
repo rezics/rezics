@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 
 import Elysia from "elysia";
 
+import { recordAuditEvent } from "../../audit";
 import { ApiTokenPolicyDocumentInvalid } from "../../auth/api-token/policy-schema";
 import {
 	ApiTokenPolicyAssignmentInvalid,
@@ -12,7 +13,7 @@ import {
 } from "../../auth/api-token/policy-service";
 import session from "../../auth/session";
 import { database } from "../../database";
-import { apiAccessPolicy, apikeys, auditEvent } from "../../database/schema";
+import { apiAccessPolicy, apikeys } from "../../database/schema";
 import { toApiErrorResponse } from "../schema/response";
 import {
 	ApiTokenNotFound,
@@ -31,7 +32,7 @@ import {
 } from "./schema";
 
 const AuthenticationResponse = toApiErrorResponse(["InteractiveSessionRequired"]);
-const StaffAccessResponse = toApiErrorResponse([
+const PlatformAccessResponse = toApiErrorResponse([
 	"FreshSessionRequired",
 	"PlatformCapabilityRequired",
 ]);
@@ -56,9 +57,12 @@ export default new Elysia({ prefix: "/api-token-policies" })
 			response: {
 				[StatusCodes.OK]: ApiAccessPolicyListResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
-				[StatusCodes.FORBIDDEN]: StaffAccessResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
 			},
-			detail: { summary: "List API token policies as staff", tags: ["API Token Policies"] },
+			detail: {
+				summary: "List API token policies with platform access",
+				tags: ["API Token Policies"],
+			},
 		},
 	)
 	.patch(
@@ -82,13 +86,14 @@ export default new Elysia({ prefix: "/api-token-policies" })
 						if (!existing) throw new ApiTokenPolicyNotFound();
 						throw new ApiTokenPolicyRevisionConflict();
 					}
-					await tx.insert(auditEvent).values({
-						actorProfileId: profile.unitId,
+					await recordAuditEvent(tx, {
+						category: "admin_activity",
+						outcome: "succeeded",
+						actor: { kind: "profile", profileId: profile.unitId },
+						authority: { kind: "platform" },
 						action: "api_token.policy.replace",
-						decisionCode: "allowed",
-						subjectKind: "api_token_policy",
-						subjectId: updated.id,
-						metadata: { key: updated.key, revision: updated.revision },
+						target: { kind: "api_token_policy", id: updated.id },
+						details: { key: updated.key, revision: updated.revision },
 					});
 					return updated;
 				});
@@ -105,13 +110,13 @@ export default new Elysia({ prefix: "/api-token-policies" })
 			response: {
 				[StatusCodes.OK]: ApiAccessPolicySummary,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
-				[StatusCodes.FORBIDDEN]: StaffAccessResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
 				[StatusCodes.NOT_FOUND]: PolicyNotFoundResponse,
 				[StatusCodes.CONFLICT]: RevisionConflictResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
 			},
 			detail: {
-				summary: "Replace an API token policy as staff",
+				summary: "Replace an API token policy with platform access",
 				tags: ["API Token Policies"],
 			},
 		},
@@ -137,13 +142,14 @@ export default new Elysia({ prefix: "/api-token-policies" })
 						actorProfileId: profile.unitId,
 					});
 					if (!assigned) throw new ApiTokenPolicyNotFound();
-					await tx.insert(auditEvent).values({
-						actorProfileId: profile.unitId,
+					await recordAuditEvent(tx, {
+						category: "admin_activity",
+						outcome: "succeeded",
+						actor: { kind: "profile", profileId: profile.unitId },
+						authority: { kind: "platform" },
 						action: "api_token.policy.assign",
-						decisionCode: "allowed",
-						subjectKind: "api_token",
-						subjectId: params.tokenId,
-						metadata: {
+						target: { kind: "api_token", id: params.tokenId },
+						details: {
 							policyKey: assigned.key,
 							bindingRevision: assigned.bindingRevision,
 							reason: body.reason,
@@ -177,12 +183,12 @@ export default new Elysia({ prefix: "/api-token-policies" })
 			response: {
 				[StatusCodes.OK]: ApiTokenPolicy,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
-				[StatusCodes.FORBIDDEN]: StaffAccessResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
 				[StatusCodes.NOT_FOUND]: TokenOrPolicyNotFoundResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
 			},
 			detail: {
-				summary: "Assign an API token policy as staff",
+				summary: "Assign an API token policy with platform access",
 				tags: ["API Token Policies"],
 			},
 		},

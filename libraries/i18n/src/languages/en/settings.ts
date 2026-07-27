@@ -158,7 +158,7 @@ export default {
 			feedbackWrite: "Submit feedback",
 		},
 		limits: "Usage limits",
-		standardLimitsDescription: `Tokens you create always use the Standard policy; you can configure quotas only within the ranges below. Only staff can grant ${verbatimTerms.staffTrusted.value}.`,
+		standardLimitsDescription: `Tokens you create always use the Standard policy; you can configure quotas only within the ranges below. Granting ${verbatimTerms.privilegedTokenPolicy.value} policies requires platform access.`,
 		limitsDescription:
 			"Quotas must remain within the current policy's allowed ranges. Global and operation-specific limits apply together.",
 		limitRanges: insert(
@@ -201,7 +201,7 @@ export default {
 		neverUsed: "Never used",
 		policy: "Policy",
 		standardPolicy: "Standard",
-		staffTrustedPolicy: verbatimTerms.staffTrusted.value,
+		privilegedPolicy: verbatimTerms.privilegedTokenPolicy.value,
 		trustedFallback: "Standard fallback active",
 		trustedUntil: "Higher-rate access expires",
 		manageAccess: "Manage name and access",

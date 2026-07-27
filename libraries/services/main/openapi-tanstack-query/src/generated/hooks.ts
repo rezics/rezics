@@ -5,15 +5,15 @@
 
 import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import type {
-	CreateSlugNamespaceAsStaffOptions,
-	CreateSlugNamespaceAsStaffStatus201,
-	CreateSlugNamespaceAsStaffStatus400,
-	CreateSlugNamespaceAsStaffStatus401,
-	CreateSlugNamespaceAsStaffStatus403,
-	CreateSlugNamespaceAsStaffStatus404,
-	CreateSlugNamespaceAsStaffStatus409,
-	CreateSlugNamespaceAsStaffStatus422,
-	CreateSlugNamespaceAsStaffStatus500,
+	CreateSlugNamespaceWithPlatformAccessOptions,
+	CreateSlugNamespaceWithPlatformAccessStatus201,
+	CreateSlugNamespaceWithPlatformAccessStatus400,
+	CreateSlugNamespaceWithPlatformAccessStatus401,
+	CreateSlugNamespaceWithPlatformAccessStatus403,
+	CreateSlugNamespaceWithPlatformAccessStatus404,
+	CreateSlugNamespaceWithPlatformAccessStatus409,
+	CreateSlugNamespaceWithPlatformAccessStatus422,
+	CreateSlugNamespaceWithPlatformAccessStatus500,
 	DeleteApiApiTokensByTokenIdOptions,
 	DeleteApiApiTokensByTokenIdStatus204,
 	DeleteApiApiTokensByTokenIdStatus401,
@@ -408,23 +408,12 @@ import type {
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus422,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus500,
-	GetApiGovernanceGrantsStatus200,
-	GetApiGovernanceGrantsStatus403,
-	GetApiGovernanceGrantsStatus500,
-	PostApiGovernanceGrantsOptions,
-	PostApiGovernanceGrantsStatus200,
-	PostApiGovernanceGrantsStatus400,
-	PostApiGovernanceGrantsStatus403,
-	PostApiGovernanceGrantsStatus409,
-	PostApiGovernanceGrantsStatus422,
-	PostApiGovernanceGrantsStatus500,
-	DeleteApiGovernanceGrantsByGrantIdOptions,
-	DeleteApiGovernanceGrantsByGrantIdStatus204,
-	DeleteApiGovernanceGrantsByGrantIdStatus403,
-	DeleteApiGovernanceGrantsByGrantIdStatus404,
-	DeleteApiGovernanceGrantsByGrantIdStatus409,
-	DeleteApiGovernanceGrantsByGrantIdStatus422,
-	DeleteApiGovernanceGrantsByGrantIdStatus500,
+	GetApiAuditEventsOptions,
+	GetApiAuditEventsStatus200,
+	GetApiAuditEventsStatus400,
+	GetApiAuditEventsStatus403,
+	GetApiAuditEventsStatus422,
+	GetApiAuditEventsStatus500,
 	PostApiSeriesOptions,
 	PostApiSeriesStatus200,
 	PostApiSeriesStatus400,
@@ -746,35 +735,35 @@ import type {
 	DeleteApiUsersByIdBlockStatus422,
 	DeleteApiUsersByIdBlockStatus429,
 	DeleteApiUsersByIdBlockStatus500,
-	GetApiStaffAccessPolicyStatus200,
-	GetApiStaffAccessPolicyStatus403,
-	GetApiStaffAccessPolicyStatus500,
-	GetApiStaffProfilesOptions,
-	GetApiStaffProfilesStatus200,
-	GetApiStaffProfilesStatus403,
-	GetApiStaffProfilesStatus422,
-	GetApiStaffProfilesStatus500,
-	GetApiStaffMembersStatus200,
-	GetApiStaffMembersStatus403,
-	GetApiStaffMembersStatus500,
-	PutApiStaffMembersByProfileIdOptions,
-	PutApiStaffMembersByProfileIdStatus200,
-	PutApiStaffMembersByProfileIdStatus400,
-	PutApiStaffMembersByProfileIdStatus403,
-	PutApiStaffMembersByProfileIdStatus404,
-	PutApiStaffMembersByProfileIdStatus409,
-	PutApiStaffMembersByProfileIdStatus422,
-	PutApiStaffMembersByProfileIdStatus500,
-	GetApiStaffAuditOptions,
-	GetApiStaffAuditStatus200,
-	GetApiStaffAuditStatus403,
-	GetApiStaffAuditStatus422,
-	GetApiStaffAuditStatus500,
+	GetApiPlatformAccessPolicyStatus200,
+	GetApiPlatformAccessPolicyStatus403,
+	GetApiPlatformAccessPolicyStatus500,
+	GetApiPlatformAccessProfilesOptions,
+	GetApiPlatformAccessProfilesStatus200,
+	GetApiPlatformAccessProfilesStatus403,
+	GetApiPlatformAccessProfilesStatus422,
+	GetApiPlatformAccessProfilesStatus500,
+	GetApiPlatformAccessProfilesByProfileIdOptions,
+	GetApiPlatformAccessProfilesByProfileIdStatus200,
+	GetApiPlatformAccessProfilesByProfileIdStatus403,
+	GetApiPlatformAccessProfilesByProfileIdStatus404,
+	GetApiPlatformAccessProfilesByProfileIdStatus422,
+	GetApiPlatformAccessProfilesByProfileIdStatus500,
+	PutApiPlatformAccessProfilesByProfileIdOptions,
+	PutApiPlatformAccessProfilesByProfileIdStatus200,
+	PutApiPlatformAccessProfilesByProfileIdStatus400,
+	PutApiPlatformAccessProfilesByProfileIdStatus403,
+	PutApiPlatformAccessProfilesByProfileIdStatus404,
+	PutApiPlatformAccessProfilesByProfileIdStatus409,
+	PutApiPlatformAccessProfilesByProfileIdStatus422,
+	PutApiPlatformAccessProfilesByProfileIdStatus500,
 	GetApiTagsByTagIdOptions,
 	GetApiTagsByTagIdStatus200,
+	GetApiTagsByTagIdStatus401,
 	GetApiTagsByTagIdStatus403,
 	GetApiTagsByTagIdStatus404,
 	GetApiTagsByTagIdStatus422,
+	GetApiTagsByTagIdStatus429,
 	GetApiTagsByTagIdStatus500,
 	PostApiTagStructuresOptions,
 	PostApiTagStructuresStatus200,
@@ -786,9 +775,11 @@ import type {
 	PostApiTagStructuresStatus500,
 	GetApiTagStructuresByStructureIdOptions,
 	GetApiTagStructuresByStructureIdStatus200,
+	GetApiTagStructuresByStructureIdStatus401,
 	GetApiTagStructuresByStructureIdStatus403,
 	GetApiTagStructuresByStructureIdStatus404,
 	GetApiTagStructuresByStructureIdStatus422,
+	GetApiTagStructuresByStructureIdStatus429,
 	GetApiTagStructuresByStructureIdStatus500,
 	PutApiTagStructuresByStructureIdOptions,
 	PutApiTagStructuresByStructureIdStatus200,
@@ -893,30 +884,30 @@ import type {
 	ReplaceOwnProfileSlugAddressStatus422,
 	ReplaceOwnProfileSlugAddressStatus429,
 	ReplaceOwnProfileSlugAddressStatus500,
-	GetUnitSlugAddressAsStaffOptions,
-	GetUnitSlugAddressAsStaffStatus200,
-	GetUnitSlugAddressAsStaffStatus401,
-	GetUnitSlugAddressAsStaffStatus403,
-	GetUnitSlugAddressAsStaffStatus404,
-	GetUnitSlugAddressAsStaffStatus422,
-	GetUnitSlugAddressAsStaffStatus500,
-	ReplaceUnitSlugAddressAsStaffOptions,
-	ReplaceUnitSlugAddressAsStaffStatus200,
-	ReplaceUnitSlugAddressAsStaffStatus400,
-	ReplaceUnitSlugAddressAsStaffStatus401,
-	ReplaceUnitSlugAddressAsStaffStatus403,
-	ReplaceUnitSlugAddressAsStaffStatus404,
-	ReplaceUnitSlugAddressAsStaffStatus409,
-	ReplaceUnitSlugAddressAsStaffStatus422,
-	ReplaceUnitSlugAddressAsStaffStatus500,
-	ReleaseSlugRedirectAsStaffOptions,
-	ReleaseSlugRedirectAsStaffStatus204,
-	ReleaseSlugRedirectAsStaffStatus400,
-	ReleaseSlugRedirectAsStaffStatus401,
-	ReleaseSlugRedirectAsStaffStatus403,
-	ReleaseSlugRedirectAsStaffStatus404,
-	ReleaseSlugRedirectAsStaffStatus422,
-	ReleaseSlugRedirectAsStaffStatus500,
+	GetUnitSlugAddressWithPlatformAccessOptions,
+	GetUnitSlugAddressWithPlatformAccessStatus200,
+	GetUnitSlugAddressWithPlatformAccessStatus401,
+	GetUnitSlugAddressWithPlatformAccessStatus403,
+	GetUnitSlugAddressWithPlatformAccessStatus404,
+	GetUnitSlugAddressWithPlatformAccessStatus422,
+	GetUnitSlugAddressWithPlatformAccessStatus500,
+	ReplaceUnitSlugAddressWithPlatformAccessOptions,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus200,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus400,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus401,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus403,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus404,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus409,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus422,
+	ReplaceUnitSlugAddressWithPlatformAccessStatus500,
+	ReleaseSlugRedirectWithPlatformAccessOptions,
+	ReleaseSlugRedirectWithPlatformAccessStatus204,
+	ReleaseSlugRedirectWithPlatformAccessStatus400,
+	ReleaseSlugRedirectWithPlatformAccessStatus401,
+	ReleaseSlugRedirectWithPlatformAccessStatus403,
+	ReleaseSlugRedirectWithPlatformAccessStatus404,
+	ReleaseSlugRedirectWithPlatformAccessStatus422,
+	ReleaseSlugRedirectWithPlatformAccessStatus500,
 	PostApiUnitsPresentationsOptions,
 	PostApiUnitsPresentationsStatus200,
 	PostApiUnitsPresentationsStatus400,
@@ -1928,8 +1919,10 @@ import type {
 	PostApiSearchByIndexOptions,
 	PostApiSearchByIndexStatus200,
 	PostApiSearchByIndexStatus400,
+	PostApiSearchByIndexStatus401,
 	PostApiSearchByIndexStatus403,
 	PostApiSearchByIndexStatus422,
+	PostApiSearchByIndexStatus429,
 	PostApiSearchByIndexStatus500,
 	PostApiSearchByIndexStatus503,
 	PostApiImageAssetsOptions,
@@ -1983,7 +1976,7 @@ import type {
 	UseMutationResult,
 } from "@tanstack/react-query";
 import {
-	createSlugNamespaceAsStaff,
+	createSlugNamespaceWithPlatformAccess,
 	deleteApiApiTokensByTokenId,
 	deleteApiMessagesByMessageId,
 	deleteApiRecommendationsExclusionsByUnitId,
@@ -2047,9 +2040,7 @@ import {
 	patchApiGovernanceFeedbackByFeedbackIdResolve,
 	postApiGovernanceModerationEnforcements,
 	postApiGovernanceModerationEnforcementsByEnforcementIdRevoke,
-	getApiGovernanceGrants,
-	postApiGovernanceGrants,
-	deleteApiGovernanceGrantsByGrantId,
+	getApiAuditEvents,
 	postApiSeries,
 	getApiSeriesBySeriesIdReleases,
 	replaceZoneSlugAddress,
@@ -2097,11 +2088,10 @@ import {
 	getApiUsersMeBlocks,
 	putApiUsersByIdBlock,
 	deleteApiUsersByIdBlock,
-	getApiStaffAccessPolicy,
-	getApiStaffProfiles,
-	getApiStaffMembers,
-	putApiStaffMembersByProfileId,
-	getApiStaffAudit,
+	getApiPlatformAccessPolicy,
+	getApiPlatformAccessProfiles,
+	getApiPlatformAccessProfilesByProfileId,
+	putApiPlatformAccessProfilesByProfileId,
 	getApiTagsByTagId,
 	postApiTagStructures,
 	getApiTagStructuresByStructureId,
@@ -2120,9 +2110,9 @@ import {
 	getPublicUnitSlugAddress,
 	resolveScopedUnitSlugAddress,
 	replaceOwnProfileSlugAddress,
-	getUnitSlugAddressAsStaff,
-	replaceUnitSlugAddressAsStaff,
-	releaseSlugRedirectAsStaff,
+	getUnitSlugAddressWithPlatformAccess,
+	replaceUnitSlugAddressWithPlatformAccess,
+	releaseSlugRedirectWithPlatformAccess,
 	postApiUnitsPresentations,
 	getApiUnitsByIdByUnitIdSeriesMemberships,
 	getApiUnitsByIdByUnitIdStatusEvents,
@@ -5820,7 +5810,7 @@ export function getApiApiTokenPoliciesQueryOptions(
 }
 
 /**
- * @summary List API token policies as staff
+ * @summary List API token policies with platform access
  * {@link /api/api-token-policies}
  */
 export function useGetApiApiTokenPolicies<
@@ -5905,7 +5895,7 @@ export function patchApiApiTokenPoliciesByPolicyKeyMutationOptions<TContext = un
 }
 
 /**
- * @summary Replace an API token policy as staff
+ * @summary Replace an API token policy with platform access
  * {@link /api/api-token-policies/:policyKey}
  */
 export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
@@ -6019,7 +6009,7 @@ export function putApiApiTokenPoliciesBindingsByTokenIdMutationOptions<TContext 
 }
 
 /**
- * @summary Assign an API token policy as staff
+ * @summary Assign an API token policy with platform access
  * {@link /api/api-token-policies/bindings/:tokenId}
  */
 export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
@@ -8585,24 +8575,34 @@ export function usePostApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 	>;
 }
 
-export const getApiGovernanceGrantsQueryKey = () => [{ url: "/api/governance/grants" }] as const;
+export const getApiAuditEventsQueryKey = ({
+	query,
+}: Omit<GetApiAuditEventsOptions, "headers"> = {}) =>
+	[{ url: "/api/audit/events" }, ...(query ? [query] : [])] as const;
 
-type GetApiGovernanceGrantsQueryKey = ReturnType<typeof getApiGovernanceGrantsQueryKey>;
+type GetApiAuditEventsQueryKey = ReturnType<typeof getApiAuditEventsQueryKey>;
 
-export function getApiGovernanceGrantsQueryOptions(
+export function getApiAuditEventsQueryOptions(
+	{ query }: GetApiAuditEventsOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiGovernanceGrantsQueryKey();
+	const queryKey = getApiAuditEventsQueryKey({ query });
 	return queryOptions<
-		GetApiGovernanceGrantsStatus200,
-		ResponseErrorConfig<GetApiGovernanceGrantsStatus403 | GetApiGovernanceGrantsStatus500>,
-		GetApiGovernanceGrantsStatus200,
+		GetApiAuditEventsStatus200,
+		ResponseErrorConfig<
+			| GetApiAuditEventsStatus400
+			| GetApiAuditEventsStatus403
+			| GetApiAuditEventsStatus422
+			| GetApiAuditEventsStatus500
+		>,
+		GetApiAuditEventsStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceGrants({
+			const { data } = await getApiAuditEvents({
 				...config,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -8612,20 +8612,28 @@ export function getApiGovernanceGrantsQueryOptions(
 }
 
 /**
- * @summary List capability grants
- * {@link /api/governance/grants}
+ * @summary List global security audit events
+ * {@link /api/audit/events}
  */
-export function useGetApiGovernanceGrants<
-	TData = GetApiGovernanceGrantsStatus200,
-	TQueryData = GetApiGovernanceGrantsStatus200,
-	TQueryKey extends QueryKey = GetApiGovernanceGrantsQueryKey,
+export function useGetApiAuditEvents<
+	TData = GetApiAuditEventsStatus200,
+	TQueryData = GetApiAuditEventsStatus200,
+	TQueryKey extends QueryKey = GetApiAuditEventsQueryKey,
 >(
+	{
+		query,
+	}: {
+		query?: GetApiAuditEventsOptions["query"] | (() => GetApiAuditEventsOptions["query"]);
+	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiGovernanceGrantsStatus200,
+				GetApiAuditEventsStatus200,
 				ResponseErrorConfig<
-					GetApiGovernanceGrantsStatus403 | GetApiGovernanceGrantsStatus500
+					| GetApiAuditEventsStatus400
+					| GetApiAuditEventsStatus403
+					| GetApiAuditEventsStatus422
+					| GetApiAuditEventsStatus500
 				>,
 				TData,
 				TQueryData,
@@ -8637,224 +8645,29 @@ export function useGetApiGovernanceGrants<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiGovernanceGrantsQueryKey();
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiAuditEventsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiGovernanceGrantsQueryOptions(config),
+			...getApiAuditEventsQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiGovernanceGrantsStatus403 | GetApiGovernanceGrantsStatus500>
+		ResponseErrorConfig<
+			| GetApiAuditEventsStatus400
+			| GetApiAuditEventsStatus403
+			| GetApiAuditEventsStatus422
+			| GetApiAuditEventsStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
-}
-
-export const postApiGovernanceGrantsMutationKey = () =>
-	[{ url: "/api/governance/grants" }] as const;
-
-export function postApiGovernanceGrantsMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = postApiGovernanceGrantsMutationKey();
-	return mutationOptions<
-		PostApiGovernanceGrantsStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernanceGrantsStatus400
-			| PostApiGovernanceGrantsStatus403
-			| PostApiGovernanceGrantsStatus409
-			| PostApiGovernanceGrantsStatus422
-			| PostApiGovernanceGrantsStatus500
-		>,
-		PostApiGovernanceGrantsOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiGovernanceGrants({ ...config, body, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Create capability grant
- * {@link /api/governance/grants}
- */
-export function usePostApiGovernanceGrants<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiGovernanceGrantsStatus200,
-			ResponseErrorConfig<
-				| PostApiGovernanceGrantsStatus400
-				| PostApiGovernanceGrantsStatus403
-				| PostApiGovernanceGrantsStatus409
-				| PostApiGovernanceGrantsStatus422
-				| PostApiGovernanceGrantsStatus500
-			>,
-			PostApiGovernanceGrantsOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiGovernanceGrantsMutationKey();
-
-	const baseOptions = postApiGovernanceGrantsMutationOptions(config) as UseMutationOptions<
-		PostApiGovernanceGrantsStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernanceGrantsStatus400
-			| PostApiGovernanceGrantsStatus403
-			| PostApiGovernanceGrantsStatus409
-			| PostApiGovernanceGrantsStatus422
-			| PostApiGovernanceGrantsStatus500
-		>,
-		PostApiGovernanceGrantsOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiGovernanceGrantsStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernanceGrantsStatus400
-			| PostApiGovernanceGrantsStatus403
-			| PostApiGovernanceGrantsStatus409
-			| PostApiGovernanceGrantsStatus422
-			| PostApiGovernanceGrantsStatus500
-		>,
-		PostApiGovernanceGrantsOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiGovernanceGrantsStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernanceGrantsStatus400
-			| PostApiGovernanceGrantsStatus403
-			| PostApiGovernanceGrantsStatus409
-			| PostApiGovernanceGrantsStatus422
-			| PostApiGovernanceGrantsStatus500
-		>,
-		PostApiGovernanceGrantsOptions,
-		TContext
-	>;
-}
-
-export const deleteApiGovernanceGrantsByGrantIdMutationKey = () =>
-	[{ url: "/api/governance/grants/:grantId" }] as const;
-
-export function deleteApiGovernanceGrantsByGrantIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiGovernanceGrantsByGrantIdMutationKey();
-	return mutationOptions<
-		DeleteApiGovernanceGrantsByGrantIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiGovernanceGrantsByGrantIdStatus403
-			| DeleteApiGovernanceGrantsByGrantIdStatus404
-			| DeleteApiGovernanceGrantsByGrantIdStatus409
-			| DeleteApiGovernanceGrantsByGrantIdStatus422
-			| DeleteApiGovernanceGrantsByGrantIdStatus500
-		>,
-		DeleteApiGovernanceGrantsByGrantIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiGovernanceGrantsByGrantId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Revoke capability grant
- * {@link /api/governance/grants/:grantId}
- */
-export function useDeleteApiGovernanceGrantsByGrantId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiGovernanceGrantsByGrantIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiGovernanceGrantsByGrantIdStatus403
-				| DeleteApiGovernanceGrantsByGrantIdStatus404
-				| DeleteApiGovernanceGrantsByGrantIdStatus409
-				| DeleteApiGovernanceGrantsByGrantIdStatus422
-				| DeleteApiGovernanceGrantsByGrantIdStatus500
-			>,
-			DeleteApiGovernanceGrantsByGrantIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiGovernanceGrantsByGrantIdMutationKey();
-
-	const baseOptions = deleteApiGovernanceGrantsByGrantIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiGovernanceGrantsByGrantIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiGovernanceGrantsByGrantIdStatus403
-			| DeleteApiGovernanceGrantsByGrantIdStatus404
-			| DeleteApiGovernanceGrantsByGrantIdStatus409
-			| DeleteApiGovernanceGrantsByGrantIdStatus422
-			| DeleteApiGovernanceGrantsByGrantIdStatus500
-		>,
-		DeleteApiGovernanceGrantsByGrantIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiGovernanceGrantsByGrantIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiGovernanceGrantsByGrantIdStatus403
-			| DeleteApiGovernanceGrantsByGrantIdStatus404
-			| DeleteApiGovernanceGrantsByGrantIdStatus409
-			| DeleteApiGovernanceGrantsByGrantIdStatus422
-			| DeleteApiGovernanceGrantsByGrantIdStatus500
-		>,
-		DeleteApiGovernanceGrantsByGrantIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiGovernanceGrantsByGrantIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiGovernanceGrantsByGrantIdStatus403
-			| DeleteApiGovernanceGrantsByGrantIdStatus404
-			| DeleteApiGovernanceGrantsByGrantIdStatus409
-			| DeleteApiGovernanceGrantsByGrantIdStatus422
-			| DeleteApiGovernanceGrantsByGrantIdStatus500
-		>,
-		DeleteApiGovernanceGrantsByGrantIdOptions,
-		TContext
-	>;
 }
 
 export const postApiSeriesMutationKey = () => [{ url: "/api/series" }] as const;
@@ -13671,23 +13484,26 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 	>;
 }
 
-export const getApiStaffAccessPolicyQueryKey = () => [{ url: "/api/staff/access-policy" }] as const;
+export const getApiPlatformAccessPolicyQueryKey = () =>
+	[{ url: "/api/platform-access/policy" }] as const;
 
-type GetApiStaffAccessPolicyQueryKey = ReturnType<typeof getApiStaffAccessPolicyQueryKey>;
+type GetApiPlatformAccessPolicyQueryKey = ReturnType<typeof getApiPlatformAccessPolicyQueryKey>;
 
-export function getApiStaffAccessPolicyQueryOptions(
+export function getApiPlatformAccessPolicyQueryOptions(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiStaffAccessPolicyQueryKey();
+	const queryKey = getApiPlatformAccessPolicyQueryKey();
 	return queryOptions<
-		GetApiStaffAccessPolicyStatus200,
-		ResponseErrorConfig<GetApiStaffAccessPolicyStatus403 | GetApiStaffAccessPolicyStatus500>,
-		GetApiStaffAccessPolicyStatus200,
+		GetApiPlatformAccessPolicyStatus200,
+		ResponseErrorConfig<
+			GetApiPlatformAccessPolicyStatus403 | GetApiPlatformAccessPolicyStatus500
+		>,
+		GetApiPlatformAccessPolicyStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiStaffAccessPolicy({
+			const { data } = await getApiPlatformAccessPolicy({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
@@ -13698,20 +13514,20 @@ export function getApiStaffAccessPolicyQueryOptions(
 }
 
 /**
- * @summary Get platform staff access policy
- * {@link /api/staff/access-policy}
+ * @summary Get the platform access policy
+ * {@link /api/platform-access/policy}
  */
-export function useGetApiStaffAccessPolicy<
-	TData = GetApiStaffAccessPolicyStatus200,
-	TQueryData = GetApiStaffAccessPolicyStatus200,
-	TQueryKey extends QueryKey = GetApiStaffAccessPolicyQueryKey,
+export function useGetApiPlatformAccessPolicy<
+	TData = GetApiPlatformAccessPolicyStatus200,
+	TQueryData = GetApiPlatformAccessPolicyStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformAccessPolicyQueryKey,
 >(
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiStaffAccessPolicyStatus200,
+				GetApiPlatformAccessPolicyStatus200,
 				ResponseErrorConfig<
-					GetApiStaffAccessPolicyStatus403 | GetApiStaffAccessPolicyStatus500
+					GetApiPlatformAccessPolicyStatus403 | GetApiPlatformAccessPolicyStatus500
 				>,
 				TData,
 				TQueryData,
@@ -13723,18 +13539,20 @@ export function useGetApiStaffAccessPolicy<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiStaffAccessPolicyQueryKey();
+	const queryKey = resolvedOptions?.queryKey ?? getApiPlatformAccessPolicyQueryKey();
 
 	const queryResult = useQuery(
 		{
-			...getApiStaffAccessPolicyQueryOptions(config),
+			...getApiPlatformAccessPolicyQueryOptions(config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiStaffAccessPolicyStatus403 | GetApiStaffAccessPolicyStatus500>
+		ResponseErrorConfig<
+			GetApiPlatformAccessPolicyStatus403 | GetApiPlatformAccessPolicyStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -13742,31 +13560,31 @@ export function useGetApiStaffAccessPolicy<
 	return queryResult;
 }
 
-export const getApiStaffProfilesQueryKey = ({
+export const getApiPlatformAccessProfilesQueryKey = ({
 	query,
-}: Omit<GetApiStaffProfilesOptions, "headers">) =>
-	[{ url: "/api/staff/profiles" }, ...(query ? [query] : [])] as const;
+}: Omit<GetApiPlatformAccessProfilesOptions, "headers"> = {}) =>
+	[{ url: "/api/platform-access/profiles" }, ...(query ? [query] : [])] as const;
 
-type GetApiStaffProfilesQueryKey = ReturnType<typeof getApiStaffProfilesQueryKey>;
+type GetApiPlatformAccessProfilesQueryKey = ReturnType<typeof getApiPlatformAccessProfilesQueryKey>;
 
-export function getApiStaffProfilesQueryOptions(
-	{ query }: GetApiStaffProfilesOptions,
+export function getApiPlatformAccessProfilesQueryOptions(
+	{ query }: GetApiPlatformAccessProfilesOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiStaffProfilesQueryKey({ query });
+	const queryKey = getApiPlatformAccessProfilesQueryKey({ query });
 	return queryOptions<
-		GetApiStaffProfilesStatus200,
+		GetApiPlatformAccessProfilesStatus200,
 		ResponseErrorConfig<
-			| GetApiStaffProfilesStatus403
-			| GetApiStaffProfilesStatus422
-			| GetApiStaffProfilesStatus500
+			| GetApiPlatformAccessProfilesStatus403
+			| GetApiPlatformAccessProfilesStatus422
+			| GetApiPlatformAccessProfilesStatus500
 		>,
-		GetApiStaffProfilesStatus200,
+		GetApiPlatformAccessProfilesStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiStaffProfiles({
+			const { data } = await getApiPlatformAccessProfiles({
 				...config,
 				query,
 				signal: config.signal ?? signal,
@@ -13778,25 +13596,29 @@ export function getApiStaffProfilesQueryOptions(
 }
 
 /**
- * @summary Search Profiles for staff access
- * {@link /api/staff/profiles}
+ * @summary List or search Profiles and their platform access
+ * {@link /api/platform-access/profiles}
  */
-export function useGetApiStaffProfiles<
-	TData = GetApiStaffProfilesStatus200,
-	TQueryData = GetApiStaffProfilesStatus200,
-	TQueryKey extends QueryKey = GetApiStaffProfilesQueryKey,
+export function useGetApiPlatformAccessProfiles<
+	TData = GetApiPlatformAccessProfilesStatus200,
+	TQueryData = GetApiPlatformAccessProfilesStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformAccessProfilesQueryKey,
 >(
 	{
 		query,
-	}: { query: GetApiStaffProfilesOptions["query"] | (() => GetApiStaffProfilesOptions["query"]) },
+	}: {
+		query?:
+			| GetApiPlatformAccessProfilesOptions["query"]
+			| (() => GetApiPlatformAccessProfilesOptions["query"]);
+	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiStaffProfilesStatus200,
+				GetApiPlatformAccessProfilesStatus200,
 				ResponseErrorConfig<
-					| GetApiStaffProfilesStatus403
-					| GetApiStaffProfilesStatus422
-					| GetApiStaffProfilesStatus500
+					| GetApiPlatformAccessProfilesStatus403
+					| GetApiPlatformAccessProfilesStatus422
+					| GetApiPlatformAccessProfilesStatus500
 				>,
 				TData,
 				TQueryData,
@@ -13809,11 +13631,12 @@ export function useGetApiStaffProfiles<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiStaffProfilesQueryKey(resolvedParams);
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiPlatformAccessProfilesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiStaffProfilesQueryOptions(resolvedParams, config),
+			...getApiPlatformAccessProfilesQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -13821,9 +13644,9 @@ export function useGetApiStaffProfiles<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiStaffProfilesStatus403
-			| GetApiStaffProfilesStatus422
-			| GetApiStaffProfilesStatus500
+			| GetApiPlatformAccessProfilesStatus403
+			| GetApiPlatformAccessProfilesStatus422
+			| GetApiPlatformAccessProfilesStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -13832,24 +13655,36 @@ export function useGetApiStaffProfiles<
 	return queryResult;
 }
 
-export const getApiStaffMembersQueryKey = () => [{ url: "/api/staff/members" }] as const;
+export const getApiPlatformAccessProfilesByProfileIdQueryKey = ({
+	path,
+}: Omit<GetApiPlatformAccessProfilesByProfileIdOptions, "headers">) =>
+	[{ url: "/api/platform-access/profiles/:profileId", params: path }] as const;
 
-type GetApiStaffMembersQueryKey = ReturnType<typeof getApiStaffMembersQueryKey>;
+type GetApiPlatformAccessProfilesByProfileIdQueryKey = ReturnType<
+	typeof getApiPlatformAccessProfilesByProfileIdQueryKey
+>;
 
-export function getApiStaffMembersQueryOptions(
+export function getApiPlatformAccessProfilesByProfileIdQueryOptions(
+	{ path }: GetApiPlatformAccessProfilesByProfileIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiStaffMembersQueryKey();
+	const queryKey = getApiPlatformAccessProfilesByProfileIdQueryKey({ path });
 	return queryOptions<
-		GetApiStaffMembersStatus200,
-		ResponseErrorConfig<GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500>,
-		GetApiStaffMembersStatus200,
+		GetApiPlatformAccessProfilesByProfileIdStatus200,
+		ResponseErrorConfig<
+			| GetApiPlatformAccessProfilesByProfileIdStatus403
+			| GetApiPlatformAccessProfilesByProfileIdStatus404
+			| GetApiPlatformAccessProfilesByProfileIdStatus422
+			| GetApiPlatformAccessProfilesByProfileIdStatus500
+		>,
+		GetApiPlatformAccessProfilesByProfileIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiStaffMembers({
+			const { data } = await getApiPlatformAccessProfilesByProfileId({
 				...config,
+				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -13859,19 +13694,31 @@ export function getApiStaffMembersQueryOptions(
 }
 
 /**
- * @summary List active staff access
- * {@link /api/staff/members}
+ * @summary Get one Profile's platform access
+ * {@link /api/platform-access/profiles/:profileId}
  */
-export function useGetApiStaffMembers<
-	TData = GetApiStaffMembersStatus200,
-	TQueryData = GetApiStaffMembersStatus200,
-	TQueryKey extends QueryKey = GetApiStaffMembersQueryKey,
+export function useGetApiPlatformAccessProfilesByProfileId<
+	TData = GetApiPlatformAccessProfilesByProfileIdStatus200,
+	TQueryData = GetApiPlatformAccessProfilesByProfileIdStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformAccessProfilesByProfileIdQueryKey,
 >(
+	{
+		path,
+	}: {
+		path:
+			| GetApiPlatformAccessProfilesByProfileIdOptions["path"]
+			| (() => GetApiPlatformAccessProfilesByProfileIdOptions["path"]);
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiStaffMembersStatus200,
-				ResponseErrorConfig<GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500>,
+				GetApiPlatformAccessProfilesByProfileIdStatus200,
+				ResponseErrorConfig<
+					| GetApiPlatformAccessProfilesByProfileIdStatus403
+					| GetApiPlatformAccessProfilesByProfileIdStatus404
+					| GetApiPlatformAccessProfilesByProfileIdStatus422
+					| GetApiPlatformAccessProfilesByProfileIdStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -13882,18 +13729,26 @@ export function useGetApiStaffMembers<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiStaffMembersQueryKey();
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiPlatformAccessProfilesByProfileIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiStaffMembersQueryOptions(config),
+			...getApiPlatformAccessProfilesByProfileIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500>
+		ResponseErrorConfig<
+			| GetApiPlatformAccessProfilesByProfileIdStatus403
+			| GetApiPlatformAccessProfilesByProfileIdStatus404
+			| GetApiPlatformAccessProfilesByProfileIdStatus422
+			| GetApiPlatformAccessProfilesByProfileIdStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -13901,29 +13756,29 @@ export function useGetApiStaffMembers<
 	return queryResult;
 }
 
-export const putApiStaffMembersByProfileIdMutationKey = () =>
-	[{ url: "/api/staff/members/:profileId" }] as const;
+export const putApiPlatformAccessProfilesByProfileIdMutationKey = () =>
+	[{ url: "/api/platform-access/profiles/:profileId" }] as const;
 
-export function putApiStaffMembersByProfileIdMutationOptions<TContext = unknown>(
+export function putApiPlatformAccessProfilesByProfileIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiStaffMembersByProfileIdMutationKey();
+	const mutationKey = putApiPlatformAccessProfilesByProfileIdMutationKey();
 	return mutationOptions<
-		PutApiStaffMembersByProfileIdStatus200,
+		PutApiPlatformAccessProfilesByProfileIdStatus200,
 		ResponseErrorConfig<
-			| PutApiStaffMembersByProfileIdStatus400
-			| PutApiStaffMembersByProfileIdStatus403
-			| PutApiStaffMembersByProfileIdStatus404
-			| PutApiStaffMembersByProfileIdStatus409
-			| PutApiStaffMembersByProfileIdStatus422
-			| PutApiStaffMembersByProfileIdStatus500
+			| PutApiPlatformAccessProfilesByProfileIdStatus400
+			| PutApiPlatformAccessProfilesByProfileIdStatus403
+			| PutApiPlatformAccessProfilesByProfileIdStatus404
+			| PutApiPlatformAccessProfilesByProfileIdStatus409
+			| PutApiPlatformAccessProfilesByProfileIdStatus422
+			| PutApiPlatformAccessProfilesByProfileIdStatus500
 		>,
-		PutApiStaffMembersByProfileIdOptions,
+		PutApiPlatformAccessProfilesByProfileIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiStaffMembersByProfileId({
+			const { data } = await putApiPlatformAccessProfilesByProfileId({
 				...config,
 				path,
 				body,
@@ -13935,22 +13790,22 @@ export function putApiStaffMembersByProfileIdMutationOptions<TContext = unknown>
 }
 
 /**
- * @summary Replace a Profile's platform access
- * {@link /api/staff/members/:profileId}
+ * @summary Replace one Profile's platform access
+ * {@link /api/platform-access/profiles/:profileId}
  */
-export function usePutApiStaffMembersByProfileId<TContext>(
+export function usePutApiPlatformAccessProfilesByProfileId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiStaffMembersByProfileIdStatus200,
+			PutApiPlatformAccessProfilesByProfileIdStatus200,
 			ResponseErrorConfig<
-				| PutApiStaffMembersByProfileIdStatus400
-				| PutApiStaffMembersByProfileIdStatus403
-				| PutApiStaffMembersByProfileIdStatus404
-				| PutApiStaffMembersByProfileIdStatus409
-				| PutApiStaffMembersByProfileIdStatus422
-				| PutApiStaffMembersByProfileIdStatus500
+				| PutApiPlatformAccessProfilesByProfileIdStatus400
+				| PutApiPlatformAccessProfilesByProfileIdStatus403
+				| PutApiPlatformAccessProfilesByProfileIdStatus404
+				| PutApiPlatformAccessProfilesByProfileIdStatus409
+				| PutApiPlatformAccessProfilesByProfileIdStatus422
+				| PutApiPlatformAccessProfilesByProfileIdStatus500
 			>,
-			PutApiStaffMembersByProfileIdOptions,
+			PutApiPlatformAccessProfilesByProfileIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -13958,33 +13813,36 @@ export function usePutApiStaffMembersByProfileId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiStaffMembersByProfileIdMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiPlatformAccessProfilesByProfileIdMutationKey();
 
-	const baseOptions = putApiStaffMembersByProfileIdMutationOptions(config) as UseMutationOptions<
-		PutApiStaffMembersByProfileIdStatus200,
+	const baseOptions = putApiPlatformAccessProfilesByProfileIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiPlatformAccessProfilesByProfileIdStatus200,
 		ResponseErrorConfig<
-			| PutApiStaffMembersByProfileIdStatus400
-			| PutApiStaffMembersByProfileIdStatus403
-			| PutApiStaffMembersByProfileIdStatus404
-			| PutApiStaffMembersByProfileIdStatus409
-			| PutApiStaffMembersByProfileIdStatus422
-			| PutApiStaffMembersByProfileIdStatus500
+			| PutApiPlatformAccessProfilesByProfileIdStatus400
+			| PutApiPlatformAccessProfilesByProfileIdStatus403
+			| PutApiPlatformAccessProfilesByProfileIdStatus404
+			| PutApiPlatformAccessProfilesByProfileIdStatus409
+			| PutApiPlatformAccessProfilesByProfileIdStatus422
+			| PutApiPlatformAccessProfilesByProfileIdStatus500
 		>,
-		PutApiStaffMembersByProfileIdOptions,
+		PutApiPlatformAccessProfilesByProfileIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiStaffMembersByProfileIdStatus200,
+		PutApiPlatformAccessProfilesByProfileIdStatus200,
 		ResponseErrorConfig<
-			| PutApiStaffMembersByProfileIdStatus400
-			| PutApiStaffMembersByProfileIdStatus403
-			| PutApiStaffMembersByProfileIdStatus404
-			| PutApiStaffMembersByProfileIdStatus409
-			| PutApiStaffMembersByProfileIdStatus422
-			| PutApiStaffMembersByProfileIdStatus500
+			| PutApiPlatformAccessProfilesByProfileIdStatus400
+			| PutApiPlatformAccessProfilesByProfileIdStatus403
+			| PutApiPlatformAccessProfilesByProfileIdStatus404
+			| PutApiPlatformAccessProfilesByProfileIdStatus409
+			| PutApiPlatformAccessProfilesByProfileIdStatus422
+			| PutApiPlatformAccessProfilesByProfileIdStatus500
 		>,
-		PutApiStaffMembersByProfileIdOptions,
+		PutApiPlatformAccessProfilesByProfileIdOptions,
 		TContext
 	>(
 		{
@@ -13994,104 +13852,18 @@ export function usePutApiStaffMembersByProfileId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiStaffMembersByProfileIdStatus200,
+		PutApiPlatformAccessProfilesByProfileIdStatus200,
 		ResponseErrorConfig<
-			| PutApiStaffMembersByProfileIdStatus400
-			| PutApiStaffMembersByProfileIdStatus403
-			| PutApiStaffMembersByProfileIdStatus404
-			| PutApiStaffMembersByProfileIdStatus409
-			| PutApiStaffMembersByProfileIdStatus422
-			| PutApiStaffMembersByProfileIdStatus500
+			| PutApiPlatformAccessProfilesByProfileIdStatus400
+			| PutApiPlatformAccessProfilesByProfileIdStatus403
+			| PutApiPlatformAccessProfilesByProfileIdStatus404
+			| PutApiPlatformAccessProfilesByProfileIdStatus409
+			| PutApiPlatformAccessProfilesByProfileIdStatus422
+			| PutApiPlatformAccessProfilesByProfileIdStatus500
 		>,
-		PutApiStaffMembersByProfileIdOptions,
+		PutApiPlatformAccessProfilesByProfileIdOptions,
 		TContext
 	>;
-}
-
-export const getApiStaffAuditQueryKey = ({
-	query,
-}: Omit<GetApiStaffAuditOptions, "headers"> = {}) =>
-	[{ url: "/api/staff/audit" }, ...(query ? [query] : [])] as const;
-
-type GetApiStaffAuditQueryKey = ReturnType<typeof getApiStaffAuditQueryKey>;
-
-export function getApiStaffAuditQueryOptions(
-	{ query }: GetApiStaffAuditOptions = {},
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiStaffAuditQueryKey({ query });
-	return queryOptions<
-		GetApiStaffAuditStatus200,
-		ResponseErrorConfig<
-			GetApiStaffAuditStatus403 | GetApiStaffAuditStatus422 | GetApiStaffAuditStatus500
-		>,
-		GetApiStaffAuditStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiStaffAudit({
-				...config,
-				query,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary List staff access audit events
- * {@link /api/staff/audit}
- */
-export function useGetApiStaffAudit<
-	TData = GetApiStaffAuditStatus200,
-	TQueryData = GetApiStaffAuditStatus200,
-	TQueryKey extends QueryKey = GetApiStaffAuditQueryKey,
->(
-	{
-		query,
-	}: { query?: GetApiStaffAuditOptions["query"] | (() => GetApiStaffAuditOptions["query"]) } = {},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiStaffAuditStatus200,
-				ResponseErrorConfig<
-					| GetApiStaffAuditStatus403
-					| GetApiStaffAuditStatus422
-					| GetApiStaffAuditStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiStaffAuditQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiStaffAuditQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			GetApiStaffAuditStatus403 | GetApiStaffAuditStatus422 | GetApiStaffAuditStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
 }
 
 export const getApiTagsByTagIdQueryKey = ({
@@ -14110,9 +13882,11 @@ export function getApiTagsByTagIdQueryOptions(
 	return queryOptions<
 		GetApiTagsByTagIdStatus200,
 		ResponseErrorConfig<
+			| GetApiTagsByTagIdStatus401
 			| GetApiTagsByTagIdStatus403
 			| GetApiTagsByTagIdStatus404
 			| GetApiTagsByTagIdStatus422
+			| GetApiTagsByTagIdStatus429
 			| GetApiTagsByTagIdStatus500
 		>,
 		GetApiTagsByTagIdStatus200,
@@ -14153,9 +13927,11 @@ export function useGetApiTagsByTagId<
 			QueryObserverOptions<
 				GetApiTagsByTagIdStatus200,
 				ResponseErrorConfig<
+					| GetApiTagsByTagIdStatus401
 					| GetApiTagsByTagIdStatus403
 					| GetApiTagsByTagIdStatus404
 					| GetApiTagsByTagIdStatus422
+					| GetApiTagsByTagIdStatus429
 					| GetApiTagsByTagIdStatus500
 				>,
 				TData,
@@ -14184,9 +13960,11 @@ export function useGetApiTagsByTagId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiTagsByTagIdStatus401
 			| GetApiTagsByTagIdStatus403
 			| GetApiTagsByTagIdStatus404
 			| GetApiTagsByTagIdStatus422
+			| GetApiTagsByTagIdStatus429
 			| GetApiTagsByTagIdStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -14315,9 +14093,11 @@ export function getApiTagStructuresByStructureIdQueryOptions(
 	return queryOptions<
 		GetApiTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| GetApiTagStructuresByStructureIdStatus401
 			| GetApiTagStructuresByStructureIdStatus403
 			| GetApiTagStructuresByStructureIdStatus404
 			| GetApiTagStructuresByStructureIdStatus422
+			| GetApiTagStructuresByStructureIdStatus429
 			| GetApiTagStructuresByStructureIdStatus500
 		>,
 		GetApiTagStructuresByStructureIdStatus200,
@@ -14362,9 +14142,11 @@ export function useGetApiTagStructuresByStructureId<
 			QueryObserverOptions<
 				GetApiTagStructuresByStructureIdStatus200,
 				ResponseErrorConfig<
+					| GetApiTagStructuresByStructureIdStatus401
 					| GetApiTagStructuresByStructureIdStatus403
 					| GetApiTagStructuresByStructureIdStatus404
 					| GetApiTagStructuresByStructureIdStatus422
+					| GetApiTagStructuresByStructureIdStatus429
 					| GetApiTagStructuresByStructureIdStatus500
 				>,
 				TData,
@@ -14394,9 +14176,11 @@ export function useGetApiTagStructuresByStructureId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiTagStructuresByStructureIdStatus401
 			| GetApiTagStructuresByStructureIdStatus403
 			| GetApiTagStructuresByStructureIdStatus404
 			| GetApiTagStructuresByStructureIdStatus422
+			| GetApiTagStructuresByStructureIdStatus429
 			| GetApiTagStructuresByStructureIdStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -15986,33 +15770,35 @@ export function useReplaceOwnProfileSlugAddress<TContext>(
 	>;
 }
 
-export const getUnitSlugAddressAsStaffQueryKey = ({
+export const getUnitSlugAddressWithPlatformAccessQueryKey = ({
 	path,
-}: Omit<GetUnitSlugAddressAsStaffOptions, "headers">) =>
+}: Omit<GetUnitSlugAddressWithPlatformAccessOptions, "headers">) =>
 	[{ url: "/api/slug-addresses/units/:unitId", params: path }] as const;
 
-type GetUnitSlugAddressAsStaffQueryKey = ReturnType<typeof getUnitSlugAddressAsStaffQueryKey>;
+type GetUnitSlugAddressWithPlatformAccessQueryKey = ReturnType<
+	typeof getUnitSlugAddressWithPlatformAccessQueryKey
+>;
 
-export function getUnitSlugAddressAsStaffQueryOptions(
-	{ path }: GetUnitSlugAddressAsStaffOptions,
+export function getUnitSlugAddressWithPlatformAccessQueryOptions(
+	{ path }: GetUnitSlugAddressWithPlatformAccessOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getUnitSlugAddressAsStaffQueryKey({ path });
+	const queryKey = getUnitSlugAddressWithPlatformAccessQueryKey({ path });
 	return queryOptions<
-		GetUnitSlugAddressAsStaffStatus200,
+		GetUnitSlugAddressWithPlatformAccessStatus200,
 		ResponseErrorConfig<
-			| GetUnitSlugAddressAsStaffStatus401
-			| GetUnitSlugAddressAsStaffStatus403
-			| GetUnitSlugAddressAsStaffStatus404
-			| GetUnitSlugAddressAsStaffStatus422
-			| GetUnitSlugAddressAsStaffStatus500
+			| GetUnitSlugAddressWithPlatformAccessStatus401
+			| GetUnitSlugAddressWithPlatformAccessStatus403
+			| GetUnitSlugAddressWithPlatformAccessStatus404
+			| GetUnitSlugAddressWithPlatformAccessStatus422
+			| GetUnitSlugAddressWithPlatformAccessStatus500
 		>,
-		GetUnitSlugAddressAsStaffStatus200,
+		GetUnitSlugAddressWithPlatformAccessStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getUnitSlugAddressAsStaff({
+			const { data } = await getUnitSlugAddressWithPlatformAccess({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -16024,32 +15810,32 @@ export function getUnitSlugAddressAsStaffQueryOptions(
 }
 
 /**
- * @description Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
- * @summary Get a Unit canonical slug address as staff
+ * @description Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
+ * @summary Get a Unit canonical slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
-export function useGetUnitSlugAddressAsStaff<
-	TData = GetUnitSlugAddressAsStaffStatus200,
-	TQueryData = GetUnitSlugAddressAsStaffStatus200,
-	TQueryKey extends QueryKey = GetUnitSlugAddressAsStaffQueryKey,
+export function useGetUnitSlugAddressWithPlatformAccess<
+	TData = GetUnitSlugAddressWithPlatformAccessStatus200,
+	TQueryData = GetUnitSlugAddressWithPlatformAccessStatus200,
+	TQueryKey extends QueryKey = GetUnitSlugAddressWithPlatformAccessQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetUnitSlugAddressAsStaffOptions["path"]
-			| (() => GetUnitSlugAddressAsStaffOptions["path"]);
+			| GetUnitSlugAddressWithPlatformAccessOptions["path"]
+			| (() => GetUnitSlugAddressWithPlatformAccessOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetUnitSlugAddressAsStaffStatus200,
+				GetUnitSlugAddressWithPlatformAccessStatus200,
 				ResponseErrorConfig<
-					| GetUnitSlugAddressAsStaffStatus401
-					| GetUnitSlugAddressAsStaffStatus403
-					| GetUnitSlugAddressAsStaffStatus404
-					| GetUnitSlugAddressAsStaffStatus422
-					| GetUnitSlugAddressAsStaffStatus500
+					| GetUnitSlugAddressWithPlatformAccessStatus401
+					| GetUnitSlugAddressWithPlatformAccessStatus403
+					| GetUnitSlugAddressWithPlatformAccessStatus404
+					| GetUnitSlugAddressWithPlatformAccessStatus422
+					| GetUnitSlugAddressWithPlatformAccessStatus500
 				>,
 				TData,
 				TQueryData,
@@ -16062,11 +15848,12 @@ export function useGetUnitSlugAddressAsStaff<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
-	const queryKey = resolvedOptions?.queryKey ?? getUnitSlugAddressAsStaffQueryKey(resolvedParams);
+	const queryKey =
+		resolvedOptions?.queryKey ?? getUnitSlugAddressWithPlatformAccessQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getUnitSlugAddressAsStaffQueryOptions(resolvedParams, config),
+			...getUnitSlugAddressWithPlatformAccessQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -16074,11 +15861,11 @@ export function useGetUnitSlugAddressAsStaff<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetUnitSlugAddressAsStaffStatus401
-			| GetUnitSlugAddressAsStaffStatus403
-			| GetUnitSlugAddressAsStaffStatus404
-			| GetUnitSlugAddressAsStaffStatus422
-			| GetUnitSlugAddressAsStaffStatus500
+			| GetUnitSlugAddressWithPlatformAccessStatus401
+			| GetUnitSlugAddressWithPlatformAccessStatus403
+			| GetUnitSlugAddressWithPlatformAccessStatus404
+			| GetUnitSlugAddressWithPlatformAccessStatus422
+			| GetUnitSlugAddressWithPlatformAccessStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -16087,30 +15874,30 @@ export function useGetUnitSlugAddressAsStaff<
 	return queryResult;
 }
 
-export const replaceUnitSlugAddressAsStaffMutationKey = () =>
+export const replaceUnitSlugAddressWithPlatformAccessMutationKey = () =>
 	[{ url: "/api/slug-addresses/units/:unitId" }] as const;
 
-export function replaceUnitSlugAddressAsStaffMutationOptions<TContext = unknown>(
+export function replaceUnitSlugAddressWithPlatformAccessMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = replaceUnitSlugAddressAsStaffMutationKey();
+	const mutationKey = replaceUnitSlugAddressWithPlatformAccessMutationKey();
 	return mutationOptions<
-		ReplaceUnitSlugAddressAsStaffStatus200,
+		ReplaceUnitSlugAddressWithPlatformAccessStatus200,
 		ResponseErrorConfig<
-			| ReplaceUnitSlugAddressAsStaffStatus400
-			| ReplaceUnitSlugAddressAsStaffStatus401
-			| ReplaceUnitSlugAddressAsStaffStatus403
-			| ReplaceUnitSlugAddressAsStaffStatus404
-			| ReplaceUnitSlugAddressAsStaffStatus409
-			| ReplaceUnitSlugAddressAsStaffStatus422
-			| ReplaceUnitSlugAddressAsStaffStatus500
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus400
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus401
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus403
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus404
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus409
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus422
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus500
 		>,
-		ReplaceUnitSlugAddressAsStaffOptions,
+		ReplaceUnitSlugAddressWithPlatformAccessOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await replaceUnitSlugAddressAsStaff({
+			const { data } = await replaceUnitSlugAddressWithPlatformAccess({
 				...config,
 				path,
 				body,
@@ -16123,23 +15910,23 @@ export function replaceUnitSlugAddressAsStaffMutationOptions<TContext = unknown>
 
 /**
  * @description Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
- * @summary Replace any Unit slug address as staff
+ * @summary Replace any Unit slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
-export function useReplaceUnitSlugAddressAsStaff<TContext>(
+export function useReplaceUnitSlugAddressWithPlatformAccess<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			ReplaceUnitSlugAddressAsStaffStatus200,
+			ReplaceUnitSlugAddressWithPlatformAccessStatus200,
 			ResponseErrorConfig<
-				| ReplaceUnitSlugAddressAsStaffStatus400
-				| ReplaceUnitSlugAddressAsStaffStatus401
-				| ReplaceUnitSlugAddressAsStaffStatus403
-				| ReplaceUnitSlugAddressAsStaffStatus404
-				| ReplaceUnitSlugAddressAsStaffStatus409
-				| ReplaceUnitSlugAddressAsStaffStatus422
-				| ReplaceUnitSlugAddressAsStaffStatus500
+				| ReplaceUnitSlugAddressWithPlatformAccessStatus400
+				| ReplaceUnitSlugAddressWithPlatformAccessStatus401
+				| ReplaceUnitSlugAddressWithPlatformAccessStatus403
+				| ReplaceUnitSlugAddressWithPlatformAccessStatus404
+				| ReplaceUnitSlugAddressWithPlatformAccessStatus409
+				| ReplaceUnitSlugAddressWithPlatformAccessStatus422
+				| ReplaceUnitSlugAddressWithPlatformAccessStatus500
 			>,
-			ReplaceUnitSlugAddressAsStaffOptions,
+			ReplaceUnitSlugAddressWithPlatformAccessOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16147,35 +15934,38 @@ export function useReplaceUnitSlugAddressAsStaff<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? replaceUnitSlugAddressAsStaffMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? replaceUnitSlugAddressWithPlatformAccessMutationKey();
 
-	const baseOptions = replaceUnitSlugAddressAsStaffMutationOptions(config) as UseMutationOptions<
-		ReplaceUnitSlugAddressAsStaffStatus200,
+	const baseOptions = replaceUnitSlugAddressWithPlatformAccessMutationOptions(
+		config,
+	) as UseMutationOptions<
+		ReplaceUnitSlugAddressWithPlatformAccessStatus200,
 		ResponseErrorConfig<
-			| ReplaceUnitSlugAddressAsStaffStatus400
-			| ReplaceUnitSlugAddressAsStaffStatus401
-			| ReplaceUnitSlugAddressAsStaffStatus403
-			| ReplaceUnitSlugAddressAsStaffStatus404
-			| ReplaceUnitSlugAddressAsStaffStatus409
-			| ReplaceUnitSlugAddressAsStaffStatus422
-			| ReplaceUnitSlugAddressAsStaffStatus500
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus400
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus401
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus403
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus404
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus409
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus422
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus500
 		>,
-		ReplaceUnitSlugAddressAsStaffOptions,
+		ReplaceUnitSlugAddressWithPlatformAccessOptions,
 		TContext
 	>;
 
 	return useMutation<
-		ReplaceUnitSlugAddressAsStaffStatus200,
+		ReplaceUnitSlugAddressWithPlatformAccessStatus200,
 		ResponseErrorConfig<
-			| ReplaceUnitSlugAddressAsStaffStatus400
-			| ReplaceUnitSlugAddressAsStaffStatus401
-			| ReplaceUnitSlugAddressAsStaffStatus403
-			| ReplaceUnitSlugAddressAsStaffStatus404
-			| ReplaceUnitSlugAddressAsStaffStatus409
-			| ReplaceUnitSlugAddressAsStaffStatus422
-			| ReplaceUnitSlugAddressAsStaffStatus500
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus400
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus401
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus403
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus404
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus409
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus422
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus500
 		>,
-		ReplaceUnitSlugAddressAsStaffOptions,
+		ReplaceUnitSlugAddressWithPlatformAccessOptions,
 		TContext
 	>(
 		{
@@ -16185,45 +15975,45 @@ export function useReplaceUnitSlugAddressAsStaff<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		ReplaceUnitSlugAddressAsStaffStatus200,
+		ReplaceUnitSlugAddressWithPlatformAccessStatus200,
 		ResponseErrorConfig<
-			| ReplaceUnitSlugAddressAsStaffStatus400
-			| ReplaceUnitSlugAddressAsStaffStatus401
-			| ReplaceUnitSlugAddressAsStaffStatus403
-			| ReplaceUnitSlugAddressAsStaffStatus404
-			| ReplaceUnitSlugAddressAsStaffStatus409
-			| ReplaceUnitSlugAddressAsStaffStatus422
-			| ReplaceUnitSlugAddressAsStaffStatus500
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus400
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus401
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus403
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus404
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus409
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus422
+			| ReplaceUnitSlugAddressWithPlatformAccessStatus500
 		>,
-		ReplaceUnitSlugAddressAsStaffOptions,
+		ReplaceUnitSlugAddressWithPlatformAccessOptions,
 		TContext
 	>;
 }
 
-export const createSlugNamespaceAsStaffMutationKey = () =>
+export const createSlugNamespaceWithPlatformAccessMutationKey = () =>
 	[{ url: "/api/slug-addresses/namespaces" }] as const;
 
-export function createSlugNamespaceAsStaffMutationOptions<TContext = unknown>(
+export function createSlugNamespaceWithPlatformAccessMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = createSlugNamespaceAsStaffMutationKey();
+	const mutationKey = createSlugNamespaceWithPlatformAccessMutationKey();
 	return mutationOptions<
-		CreateSlugNamespaceAsStaffStatus201,
+		CreateSlugNamespaceWithPlatformAccessStatus201,
 		ResponseErrorConfig<
-			| CreateSlugNamespaceAsStaffStatus400
-			| CreateSlugNamespaceAsStaffStatus401
-			| CreateSlugNamespaceAsStaffStatus403
-			| CreateSlugNamespaceAsStaffStatus404
-			| CreateSlugNamespaceAsStaffStatus409
-			| CreateSlugNamespaceAsStaffStatus422
-			| CreateSlugNamespaceAsStaffStatus500
+			| CreateSlugNamespaceWithPlatformAccessStatus400
+			| CreateSlugNamespaceWithPlatformAccessStatus401
+			| CreateSlugNamespaceWithPlatformAccessStatus403
+			| CreateSlugNamespaceWithPlatformAccessStatus404
+			| CreateSlugNamespaceWithPlatformAccessStatus409
+			| CreateSlugNamespaceWithPlatformAccessStatus422
+			| CreateSlugNamespaceWithPlatformAccessStatus500
 		>,
-		CreateSlugNamespaceAsStaffOptions,
+		CreateSlugNamespaceWithPlatformAccessOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await createSlugNamespaceAsStaff({
+			const { data } = await createSlugNamespaceWithPlatformAccess({
 				...config,
 				body,
 				throwOnError: true,
@@ -16235,23 +16025,23 @@ export function createSlugNamespaceAsStaffMutationOptions<TContext = unknown>(
 
 /**
  * @description Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
- * @summary Create an explicitly addressed namespace as staff
+ * @summary Create an explicitly addressed namespace with platform access
  * {@link /api/slug-addresses/namespaces}
  */
-export function useCreateSlugNamespaceAsStaff<TContext>(
+export function useCreateSlugNamespaceWithPlatformAccess<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			CreateSlugNamespaceAsStaffStatus201,
+			CreateSlugNamespaceWithPlatformAccessStatus201,
 			ResponseErrorConfig<
-				| CreateSlugNamespaceAsStaffStatus400
-				| CreateSlugNamespaceAsStaffStatus401
-				| CreateSlugNamespaceAsStaffStatus403
-				| CreateSlugNamespaceAsStaffStatus404
-				| CreateSlugNamespaceAsStaffStatus409
-				| CreateSlugNamespaceAsStaffStatus422
-				| CreateSlugNamespaceAsStaffStatus500
+				| CreateSlugNamespaceWithPlatformAccessStatus400
+				| CreateSlugNamespaceWithPlatformAccessStatus401
+				| CreateSlugNamespaceWithPlatformAccessStatus403
+				| CreateSlugNamespaceWithPlatformAccessStatus404
+				| CreateSlugNamespaceWithPlatformAccessStatus409
+				| CreateSlugNamespaceWithPlatformAccessStatus422
+				| CreateSlugNamespaceWithPlatformAccessStatus500
 			>,
-			CreateSlugNamespaceAsStaffOptions,
+			CreateSlugNamespaceWithPlatformAccessOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16259,35 +16049,38 @@ export function useCreateSlugNamespaceAsStaff<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? createSlugNamespaceAsStaffMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? createSlugNamespaceWithPlatformAccessMutationKey();
 
-	const baseOptions = createSlugNamespaceAsStaffMutationOptions(config) as UseMutationOptions<
-		CreateSlugNamespaceAsStaffStatus201,
+	const baseOptions = createSlugNamespaceWithPlatformAccessMutationOptions(
+		config,
+	) as UseMutationOptions<
+		CreateSlugNamespaceWithPlatformAccessStatus201,
 		ResponseErrorConfig<
-			| CreateSlugNamespaceAsStaffStatus400
-			| CreateSlugNamespaceAsStaffStatus401
-			| CreateSlugNamespaceAsStaffStatus403
-			| CreateSlugNamespaceAsStaffStatus404
-			| CreateSlugNamespaceAsStaffStatus409
-			| CreateSlugNamespaceAsStaffStatus422
-			| CreateSlugNamespaceAsStaffStatus500
+			| CreateSlugNamespaceWithPlatformAccessStatus400
+			| CreateSlugNamespaceWithPlatformAccessStatus401
+			| CreateSlugNamespaceWithPlatformAccessStatus403
+			| CreateSlugNamespaceWithPlatformAccessStatus404
+			| CreateSlugNamespaceWithPlatformAccessStatus409
+			| CreateSlugNamespaceWithPlatformAccessStatus422
+			| CreateSlugNamespaceWithPlatformAccessStatus500
 		>,
-		CreateSlugNamespaceAsStaffOptions,
+		CreateSlugNamespaceWithPlatformAccessOptions,
 		TContext
 	>;
 
 	return useMutation<
-		CreateSlugNamespaceAsStaffStatus201,
+		CreateSlugNamespaceWithPlatformAccessStatus201,
 		ResponseErrorConfig<
-			| CreateSlugNamespaceAsStaffStatus400
-			| CreateSlugNamespaceAsStaffStatus401
-			| CreateSlugNamespaceAsStaffStatus403
-			| CreateSlugNamespaceAsStaffStatus404
-			| CreateSlugNamespaceAsStaffStatus409
-			| CreateSlugNamespaceAsStaffStatus422
-			| CreateSlugNamespaceAsStaffStatus500
+			| CreateSlugNamespaceWithPlatformAccessStatus400
+			| CreateSlugNamespaceWithPlatformAccessStatus401
+			| CreateSlugNamespaceWithPlatformAccessStatus403
+			| CreateSlugNamespaceWithPlatformAccessStatus404
+			| CreateSlugNamespaceWithPlatformAccessStatus409
+			| CreateSlugNamespaceWithPlatformAccessStatus422
+			| CreateSlugNamespaceWithPlatformAccessStatus500
 		>,
-		CreateSlugNamespaceAsStaffOptions,
+		CreateSlugNamespaceWithPlatformAccessOptions,
 		TContext
 	>(
 		{
@@ -16297,44 +16090,44 @@ export function useCreateSlugNamespaceAsStaff<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		CreateSlugNamespaceAsStaffStatus201,
+		CreateSlugNamespaceWithPlatformAccessStatus201,
 		ResponseErrorConfig<
-			| CreateSlugNamespaceAsStaffStatus400
-			| CreateSlugNamespaceAsStaffStatus401
-			| CreateSlugNamespaceAsStaffStatus403
-			| CreateSlugNamespaceAsStaffStatus404
-			| CreateSlugNamespaceAsStaffStatus409
-			| CreateSlugNamespaceAsStaffStatus422
-			| CreateSlugNamespaceAsStaffStatus500
+			| CreateSlugNamespaceWithPlatformAccessStatus400
+			| CreateSlugNamespaceWithPlatformAccessStatus401
+			| CreateSlugNamespaceWithPlatformAccessStatus403
+			| CreateSlugNamespaceWithPlatformAccessStatus404
+			| CreateSlugNamespaceWithPlatformAccessStatus409
+			| CreateSlugNamespaceWithPlatformAccessStatus422
+			| CreateSlugNamespaceWithPlatformAccessStatus500
 		>,
-		CreateSlugNamespaceAsStaffOptions,
+		CreateSlugNamespaceWithPlatformAccessOptions,
 		TContext
 	>;
 }
 
-export const releaseSlugRedirectAsStaffMutationKey = () =>
+export const releaseSlugRedirectWithPlatformAccessMutationKey = () =>
 	[{ url: "/api/slug-addresses/redirects/:redirectAddressId" }] as const;
 
-export function releaseSlugRedirectAsStaffMutationOptions<TContext = unknown>(
+export function releaseSlugRedirectWithPlatformAccessMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = releaseSlugRedirectAsStaffMutationKey();
+	const mutationKey = releaseSlugRedirectWithPlatformAccessMutationKey();
 	return mutationOptions<
-		ReleaseSlugRedirectAsStaffStatus204,
+		ReleaseSlugRedirectWithPlatformAccessStatus204,
 		ResponseErrorConfig<
-			| ReleaseSlugRedirectAsStaffStatus400
-			| ReleaseSlugRedirectAsStaffStatus401
-			| ReleaseSlugRedirectAsStaffStatus403
-			| ReleaseSlugRedirectAsStaffStatus404
-			| ReleaseSlugRedirectAsStaffStatus422
-			| ReleaseSlugRedirectAsStaffStatus500
+			| ReleaseSlugRedirectWithPlatformAccessStatus400
+			| ReleaseSlugRedirectWithPlatformAccessStatus401
+			| ReleaseSlugRedirectWithPlatformAccessStatus403
+			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus422
+			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,
-		ReleaseSlugRedirectAsStaffOptions,
+		ReleaseSlugRedirectWithPlatformAccessOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await releaseSlugRedirectAsStaff({
+			const { data } = await releaseSlugRedirectWithPlatformAccess({
 				...config,
 				path,
 				body,
@@ -16346,23 +16139,23 @@ export function releaseSlugRedirectAsStaffMutationOptions<TContext = unknown>(
 }
 
 /**
- * @description Deletes one temporary Redirect record so its scoped label may be reused. This is an audited staff action; retention and quarantine policy determines when a redirect is eligible for release.
- * @summary Release a retained slug redirect as staff
+ * @description Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
+ * @summary Release a retained slug redirect with platform access
  * {@link /api/slug-addresses/redirects/:redirectAddressId}
  */
-export function useReleaseSlugRedirectAsStaff<TContext>(
+export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			ReleaseSlugRedirectAsStaffStatus204,
+			ReleaseSlugRedirectWithPlatformAccessStatus204,
 			ResponseErrorConfig<
-				| ReleaseSlugRedirectAsStaffStatus400
-				| ReleaseSlugRedirectAsStaffStatus401
-				| ReleaseSlugRedirectAsStaffStatus403
-				| ReleaseSlugRedirectAsStaffStatus404
-				| ReleaseSlugRedirectAsStaffStatus422
-				| ReleaseSlugRedirectAsStaffStatus500
+				| ReleaseSlugRedirectWithPlatformAccessStatus400
+				| ReleaseSlugRedirectWithPlatformAccessStatus401
+				| ReleaseSlugRedirectWithPlatformAccessStatus403
+				| ReleaseSlugRedirectWithPlatformAccessStatus404
+				| ReleaseSlugRedirectWithPlatformAccessStatus422
+				| ReleaseSlugRedirectWithPlatformAccessStatus500
 			>,
-			ReleaseSlugRedirectAsStaffOptions,
+			ReleaseSlugRedirectWithPlatformAccessOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16370,33 +16163,36 @@ export function useReleaseSlugRedirectAsStaff<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? releaseSlugRedirectAsStaffMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? releaseSlugRedirectWithPlatformAccessMutationKey();
 
-	const baseOptions = releaseSlugRedirectAsStaffMutationOptions(config) as UseMutationOptions<
-		ReleaseSlugRedirectAsStaffStatus204,
+	const baseOptions = releaseSlugRedirectWithPlatformAccessMutationOptions(
+		config,
+	) as UseMutationOptions<
+		ReleaseSlugRedirectWithPlatformAccessStatus204,
 		ResponseErrorConfig<
-			| ReleaseSlugRedirectAsStaffStatus400
-			| ReleaseSlugRedirectAsStaffStatus401
-			| ReleaseSlugRedirectAsStaffStatus403
-			| ReleaseSlugRedirectAsStaffStatus404
-			| ReleaseSlugRedirectAsStaffStatus422
-			| ReleaseSlugRedirectAsStaffStatus500
+			| ReleaseSlugRedirectWithPlatformAccessStatus400
+			| ReleaseSlugRedirectWithPlatformAccessStatus401
+			| ReleaseSlugRedirectWithPlatformAccessStatus403
+			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus422
+			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,
-		ReleaseSlugRedirectAsStaffOptions,
+		ReleaseSlugRedirectWithPlatformAccessOptions,
 		TContext
 	>;
 
 	return useMutation<
-		ReleaseSlugRedirectAsStaffStatus204,
+		ReleaseSlugRedirectWithPlatformAccessStatus204,
 		ResponseErrorConfig<
-			| ReleaseSlugRedirectAsStaffStatus400
-			| ReleaseSlugRedirectAsStaffStatus401
-			| ReleaseSlugRedirectAsStaffStatus403
-			| ReleaseSlugRedirectAsStaffStatus404
-			| ReleaseSlugRedirectAsStaffStatus422
-			| ReleaseSlugRedirectAsStaffStatus500
+			| ReleaseSlugRedirectWithPlatformAccessStatus400
+			| ReleaseSlugRedirectWithPlatformAccessStatus401
+			| ReleaseSlugRedirectWithPlatformAccessStatus403
+			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus422
+			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,
-		ReleaseSlugRedirectAsStaffOptions,
+		ReleaseSlugRedirectWithPlatformAccessOptions,
 		TContext
 	>(
 		{
@@ -16406,16 +16202,16 @@ export function useReleaseSlugRedirectAsStaff<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		ReleaseSlugRedirectAsStaffStatus204,
+		ReleaseSlugRedirectWithPlatformAccessStatus204,
 		ResponseErrorConfig<
-			| ReleaseSlugRedirectAsStaffStatus400
-			| ReleaseSlugRedirectAsStaffStatus401
-			| ReleaseSlugRedirectAsStaffStatus403
-			| ReleaseSlugRedirectAsStaffStatus404
-			| ReleaseSlugRedirectAsStaffStatus422
-			| ReleaseSlugRedirectAsStaffStatus500
+			| ReleaseSlugRedirectWithPlatformAccessStatus400
+			| ReleaseSlugRedirectWithPlatformAccessStatus401
+			| ReleaseSlugRedirectWithPlatformAccessStatus403
+			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus422
+			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,
-		ReleaseSlugRedirectAsStaffOptions,
+		ReleaseSlugRedirectWithPlatformAccessOptions,
 		TContext
 	>;
 }
@@ -31819,8 +31615,10 @@ export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus401
 			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
+			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
 		>,
@@ -31850,8 +31648,10 @@ export function usePostApiSearchByIndex<TContext>(
 			PostApiSearchByIndexStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchByIndexStatus400
+				| PostApiSearchByIndexStatus401
 				| PostApiSearchByIndexStatus403
 				| PostApiSearchByIndexStatus422
+				| PostApiSearchByIndexStatus429
 				| PostApiSearchByIndexStatus500
 				| PostApiSearchByIndexStatus503
 			>,
@@ -31869,8 +31669,10 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus401
 			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
+			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
 		>,
@@ -31882,8 +31684,10 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus401
 			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
+			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
 		>,
@@ -31900,8 +31704,10 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
+			| PostApiSearchByIndexStatus401
 			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
+			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500
 			| PostApiSearchByIndexStatus503
 		>,

@@ -16,6 +16,7 @@ import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
+import { PlatformCapabilityValues } from "@rezics/access";
 
 import { env } from "../config";
 import { Authorization } from "../authorization";
@@ -39,7 +40,7 @@ import {
 	auditEvent,
 	book,
 	catalogUnitContentLicense,
-	capabilityGrant,
+	platformCapabilityGrant,
 	collection,
 	collectionItem,
 	contentStructure,
@@ -1934,25 +1935,13 @@ async function seedStructure(
 			.set({ postTargetingLocked: true })
 			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.unitId)));
 
-	const capabilities = [
-		"realm.contribute",
-		"realm.settings.update",
-		"realm.members.manage",
-		"realm.rules.update",
-		"realm.pins.manage",
-		"realm.units.moderate",
-	] as const;
 	await writeBatches(
 		Array.from({ length: SeedPlan.capabilityGrants }, (_, index) => {
-			const platform = index < 20;
-			const realmUnit = platform ? null : itemAt(catalog.realms, index - 20);
 			const createdAt = data.pastDate(365);
 			const revoked = index % 13 === 0;
 			return {
-				authority: platform ? ("platform" as const) : ("realm" as const),
-				realmId: realmUnit?.id,
 				profileId: itemAt(profiles, index * 7).id,
-				capability: platform ? "platform.moderate" : itemAt(capabilities, index),
+				capability: itemAt(PlatformCapabilityValues, index),
 				grantedByProfileId: itemAt(profiles, index * 11 + 1).id,
 				expiresAt: index % 5 === 0 ? data.futureDate(365) : null,
 				revokedAt: revoked ? new Date(createdAt.getTime() + 86_400_000) : null,
@@ -1961,21 +1950,23 @@ async function seedStructure(
 				updatedAt: createdAt,
 			};
 		}),
-		(batch) => tx.insert(capabilityGrant).values(batch),
+		(batch) => tx.insert(platformCapabilityGrant).values(batch),
 	);
-	const staff = itemAt(profiles, 0);
-	await tx.insert(capabilityGrant).values(
-		[
-			"platform.api_token_policy.manage",
-			"platform.grants.manage",
-			"unit.slug.manage",
-			"unit.slug.namespace.manage",
-			"unit.slug.redirect.release",
-		].map((capability) => ({
-			authority: "platform" as const,
-			profileId: staff.id,
+	const platformAdministrator = itemAt(profiles, 0);
+	await tx.insert(platformCapabilityGrant).values(
+		(
+			[
+				"platform.api_token_policy.manage",
+				"platform.access.manage",
+				"platform.audit.read",
+				"unit.slug.manage",
+				"unit.slug.namespace.manage",
+				"unit.slug.redirect.release",
+			] as const
+		).map((capability) => ({
+			profileId: platformAdministrator.id,
 			capability,
-			grantedByProfileId: staff.id,
+			grantedByProfileId: platformAdministrator.id,
 		})),
 	);
 	await writeBatches(
@@ -2606,17 +2597,24 @@ async function seedGovernance(
 	const actions = [...normalActions, ...reverseActions, ...enforcementActions];
 	await writeBatches(
 		Array.from({ length: SeedPlan.auditEvents }, (_, index) => ({
+			schemaVersion: 2,
+			category: index % 13 === 0 ? ("policy_denied" as const) : ("admin_activity" as const),
+			outcome: index % 13 === 0 ? ("denied" as const) : ("succeeded" as const),
+			actorKind: index % 10 === 0 ? ("system" as const) : ("profile" as const),
 			actorProfileId: index % 10 === 0 ? null : itemAt(profiles, index * 7).id,
+			actorCredentialKind: index % 10 === 0 ? ("system" as const) : ("session" as const),
+			authorityKind: "unit" as const,
+			authorityId: itemAt(governanceTargets, index * 17).id,
 			action: itemAt(
 				["unit.update", "moderation.decide", "realm.manage", "profile.login"],
 				index,
 			),
-			decisionCode: index % 13 === 0 ? "denied" : "allowed",
+			reasonCode: index % 13 === 0 ? "policy_denied" : null,
 			requestId: `seed-audit-${position(index)}`,
-			subjectKind: "unit",
-			subjectId: itemAt(governanceTargets, index * 17).id,
-			subjectPath: index % 5 === 0 ? "/localizations/en/title" : null,
-			metadata: { seed: true, actionId: itemAt(actions, index).id },
+			targetKind: "unit",
+			targetId: itemAt(governanceTargets, index * 17).id,
+			targetPath: index % 5 === 0 ? "/localizations/en/title" : null,
+			details: { seed: true, actionId: itemAt(actions, index).id },
 			createdAt: data.pastDate(180),
 		})),
 		(batch) => tx.insert(auditEvent).values(batch),

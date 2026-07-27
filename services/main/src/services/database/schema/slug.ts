@@ -17,7 +17,7 @@ import { unit } from "./core";
  *
  * @todo
  * Automate Redirect retention and quarantine. Until that policy is finalized,
- * release remains an explicit, audited staff action.
+ * release remains an explicit, audited platform action.
  */
 export const unitSlugAddress = pgTable(
 	"unit_slug_address",

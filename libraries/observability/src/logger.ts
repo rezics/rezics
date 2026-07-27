@@ -25,6 +25,14 @@ export interface StructuredLogger {
 
 export type LogWriter = (line: string, severity: LogSeverity) => void;
 
+export function getActiveTraceContext():
+	{ readonly traceId: string; readonly spanId: string } | undefined {
+	const context = trace.getActiveSpan()?.spanContext();
+	return context?.traceId && context.spanId
+		? { traceId: context.traceId, spanId: context.spanId }
+		: undefined;
+}
+
 function defaultWriter(line: string, severity: LogSeverity): void {
 	const stream = severity === "error" ? process.stderr : process.stdout;
 	stream.write(`${line}\n`);
@@ -36,7 +44,7 @@ export function createStructuredLogger(
 	writer: LogWriter = defaultWriter,
 ): StructuredLogger {
 	function write(severity: LogSeverity, message: string, details: LogDetails = {}): void {
-		const spanContext = trace.getActiveSpan()?.spanContext();
+		const spanContext = getActiveTraceContext();
 		const event: Record<string, SafeJsonValue> = {
 			timestamp: new Date().toISOString(),
 			severity,

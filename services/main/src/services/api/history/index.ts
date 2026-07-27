@@ -3,11 +3,11 @@ import { and, desc, eq, exists, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t, type Static } from "elysia";
 
+import { recordAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { primaryUnitTitle } from "../../units/localization";
 import {
-	auditEvent,
 	revisionContent,
 	profile as profileTable,
 	unit,
@@ -464,13 +464,15 @@ export default new Elysia({ prefix: "/history" })
 						suppressed: body.suppressed,
 					})
 					.where(eq(unitRevision.id, params.revisionId));
-				await tx.insert(auditEvent).values({
-					actorProfileId: profile.unitId,
+				await recordAuditEvent(tx, {
+					category: "admin_activity",
+					outcome: "succeeded",
+					actor: { kind: "profile", profileId: profile.unitId },
+					authority: { kind: "unit", id: current.unitId },
 					action: "revision.visibility.update",
-					decisionCode: body.reasonCode,
-					subjectKind: "unit_revision",
-					subjectId: params.revisionId,
-					metadata: {
+					reasonCode: body.reasonCode,
+					target: { kind: "unit_revision", id: params.revisionId },
+					details: {
 						contentHidden: body.contentHidden,
 						summaryHidden: body.summaryHidden,
 						actorHidden: body.actorHidden,

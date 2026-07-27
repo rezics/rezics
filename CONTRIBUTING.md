@@ -18,4 +18,4 @@
 - Use TSDoc syntax for exported TypeScript boundaries. Mark an API intended to become public but not yet released with `@alpha`, and explain the current product state and intended audience in `@remarks`.
 - Promote the release tag to `@beta` only after an API is deliberately available as a supported preview or beta. Use `@internal` only for APIs that are not intended for third-party use. No release tag is a synonym for "unfinished."
 - Put the maturity annotation on the owning exported boundary instead of repeating it on every implementation helper.
-- Documentation tags never enforce authorization. Any staff-only or otherwise restricted API must also have a typed runtime policy, server-side enforcement, and tests for allowed and denied callers.
+- Documentation tags never enforce authorization. Any platform-restricted API must also have a typed runtime policy, server-side enforcement, and tests for allowed and denied callers.

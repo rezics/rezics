@@ -42,7 +42,7 @@ export const apiAccessPolicy = pgTable(
 	(table) => [
 		index("api_access_policy_updated_by_idx").on(table.updatedByProfileId),
 		check("api_access_policy_key_check", sql`${table.key} ~ '^[a-z][a-z0-9_-]{0,63}$'`),
-		check("api_access_policy_kind_check", sql`${table.kind} in ('standard', 'staff_trusted')`),
+		check("api_access_policy_kind_check", sql`${table.kind} in ('standard', 'privileged')`),
 		check("api_access_policy_schema_version_check", sql`${table.schemaVersion} > 0`),
 		check("api_access_policy_revision_check", sql`${table.revision} > 0`),
 		check(

@@ -30,7 +30,7 @@ export default {
 		viewProfile: "查看個人資料",
 		myContent: "我的內容",
 		settings: "設定",
-		staff: "工作人員控制台",
+		console: "管理主控台",
 		invitations: "收到的存取邀請",
 		signOut: "登出",
 	},

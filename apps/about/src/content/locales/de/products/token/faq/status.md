@@ -1,1 +1,1 @@
-Staff Trusted wählt ein getrennt geprüftes und über die Datenbank konfigurierbares Grenzprofil mit höheren Höchstwerten. Berechtigungsprüfungen bleiben bestehen. Jede Zuweisung gilt für genau ein Token, ist befristet und versioniert und erfasst den Handelnden sowie den Grund.
+Privileged wählt ein getrennt geprüftes und über die Datenbank konfigurierbares Grenzprofil mit höheren Höchstwerten. Berechtigungsprüfungen bleiben bestehen. Jede Zuweisung gilt für genau ein Token, ist befristet und versioniert und erfasst den Handelnden sowie den Grund.

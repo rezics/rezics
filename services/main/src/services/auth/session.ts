@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import Elysia, { type DocumentDecoration } from "elysia";
 import type { User } from "better-auth";
 
+import { setAuditCredentialContext } from "../audit";
 import { Authorization } from "../authorization";
 import { database } from "../database";
 import { users } from "../database/schema";
@@ -51,6 +52,16 @@ export type AuthenticatedIdentity = BaseIdentity & {
 	credential: SessionIdentity["credential"] | ApiKeyIdentity["credential"];
 	session: SessionIdentity["session"] | undefined;
 };
+
+export type ResolvedIdentity =
+	| {
+			profile: SessionProfile;
+			authorization: Authorization<string>;
+	  }
+	| {
+			profile: undefined;
+			authorization: Authorization<undefined>;
+	  };
 
 export type AccessPolicy =
 	| { credential: "session-only" | "fresh-session-only" | "api-key-only" }
@@ -223,7 +234,10 @@ async function requireAccess(
 	return identity;
 }
 
-export async function resolveIdentity(headers: Headers, permission?: ApiPermission) {
+export async function resolveIdentity(
+	headers: Headers,
+	permission?: ApiPermission,
+): Promise<ResolvedIdentity> {
 	const token = bearerToken(headers);
 	let identity: AuthenticatedIdentity | undefined;
 	if (token) {
@@ -248,6 +262,13 @@ export default new Elysia({ name: "session-context" }).macro({
 			);
 			if (identity.credential.kind === "apiKey")
 				requestLimitLeases.set(request, identity.credential.limitLease);
+			setAuditCredentialContext({
+				credentialKind: identity.credential.kind === "apiKey" ? "api_token" : "session",
+				credentialId:
+					identity.credential.kind === "apiKey"
+						? identity.credential.id
+						: identity.credential.session.id,
+			});
 			return identity;
 		},
 		async afterResponse({ request }) {

@@ -48,7 +48,7 @@ export type ApiTokenPolicySummary = {
 
 export class ApiTokenPolicyAssignmentInvalid extends Error {
 	constructor() {
-		super("Staff Trusted policy assignments require a future expiry and reason");
+		super("Privileged policy assignments require a future expiry and reason");
 		this.name = "ApiTokenPolicyAssignmentInvalid";
 	}
 }
@@ -140,7 +140,7 @@ export async function resolveApiTokenPolicy(
 
 	const { binding, policy } = record;
 	const trustedUnavailable =
-		policy.kind === "staff_trusted" &&
+		policy.kind === "privileged" &&
 		(!policy.enabled || binding.validUntil === null || binding.validUntil <= now);
 	if (trustedUnavailable) return resolveTrustedFallback(executor, tokenId, binding);
 	if (!policy.enabled) throw new Error(`Assigned API token policy is disabled: ${policy.key}`);
@@ -148,9 +148,9 @@ export async function resolveApiTokenPolicy(
 	try {
 		return resolvePolicyDocument(tokenId, policy, binding, "assigned");
 	} catch (error) {
-		if (policy.kind !== "staff_trusted" || !(error instanceof ApiTokenPolicyDocumentInvalid))
+		if (policy.kind !== "privileged" || !(error instanceof ApiTokenPolicyDocumentInvalid))
 			throw error;
-		logger.error("Invalid Staff Trusted API token policy; using Standard fallback", {
+		logger.error("Invalid Privileged API token policy; using Standard fallback", {
 			eventName: "api_token.policy.trusted_fallback",
 			errorCode: "ApiTokenPolicyDocumentInvalid",
 			error,
@@ -310,7 +310,7 @@ export async function assignApiTokenPolicy(
 		input.override,
 	);
 	if (
-		policy.kind === "staff_trusted" &&
+		policy.kind === "privileged" &&
 		(!input.validUntil || input.validUntil <= new Date() || input.reason.trim() === "")
 	)
 		throw new ApiTokenPolicyAssignmentInvalid();
@@ -321,7 +321,7 @@ export async function assignApiTokenPolicy(
 			tokenId: input.tokenId,
 			policyId: policy.id,
 			configurationOverride: override,
-			validUntil: policy.kind === "staff_trusted" ? input.validUntil : null,
+			validUntil: policy.kind === "privileged" ? input.validUntil : null,
 			assignedByProfileId: input.actorProfileId,
 			assignmentReason: input.reason.trim(),
 		})
@@ -330,7 +330,7 @@ export async function assignApiTokenPolicy(
 			set: {
 				policyId: policy.id,
 				configurationOverride: override,
-				validUntil: policy.kind === "staff_trusted" ? input.validUntil : null,
+				validUntil: policy.kind === "privileged" ? input.validUntil : null,
 				assignedByProfileId: input.actorProfileId,
 				assignmentReason: input.reason.trim(),
 				revision: sql`${apiTokenPolicyBinding.revision} + 1`,

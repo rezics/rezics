@@ -5,8 +5,8 @@
 
 import type { Options, RequestResult } from "./.kubb/client";
 import type {
-	CreateSlugNamespaceAsStaffOptions,
-	CreateSlugNamespaceAsStaffResponses,
+	CreateSlugNamespaceWithPlatformAccessOptions,
+	CreateSlugNamespaceWithPlatformAccessResponses,
 	DeleteApiApiTokensByTokenIdOptions,
 	DeleteApiApiTokensByTokenIdResponses,
 	DeleteApiMessagesByMessageIdOptions,
@@ -133,12 +133,8 @@ import type {
 	PostApiGovernanceModerationEnforcementsResponses,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeOptions,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponses,
-	GetApiGovernanceGrantsOptions,
-	GetApiGovernanceGrantsResponses,
-	PostApiGovernanceGrantsOptions,
-	PostApiGovernanceGrantsResponses,
-	DeleteApiGovernanceGrantsByGrantIdOptions,
-	DeleteApiGovernanceGrantsByGrantIdResponses,
+	GetApiAuditEventsOptions,
+	GetApiAuditEventsResponses,
 	PostApiSeriesOptions,
 	PostApiSeriesResponses,
 	GetApiSeriesBySeriesIdReleasesOptions,
@@ -233,16 +229,14 @@ import type {
 	PutApiUsersByIdBlockResponses,
 	DeleteApiUsersByIdBlockOptions,
 	DeleteApiUsersByIdBlockResponses,
-	GetApiStaffAccessPolicyOptions,
-	GetApiStaffAccessPolicyResponses,
-	GetApiStaffProfilesOptions,
-	GetApiStaffProfilesResponses,
-	GetApiStaffMembersOptions,
-	GetApiStaffMembersResponses,
-	PutApiStaffMembersByProfileIdOptions,
-	PutApiStaffMembersByProfileIdResponses,
-	GetApiStaffAuditOptions,
-	GetApiStaffAuditResponses,
+	GetApiPlatformAccessPolicyOptions,
+	GetApiPlatformAccessPolicyResponses,
+	GetApiPlatformAccessProfilesOptions,
+	GetApiPlatformAccessProfilesResponses,
+	GetApiPlatformAccessProfilesByProfileIdOptions,
+	GetApiPlatformAccessProfilesByProfileIdResponses,
+	PutApiPlatformAccessProfilesByProfileIdOptions,
+	PutApiPlatformAccessProfilesByProfileIdResponses,
 	GetApiTagsByTagIdOptions,
 	GetApiTagsByTagIdResponses,
 	PostApiTagStructuresOptions,
@@ -279,12 +273,12 @@ import type {
 	ResolveScopedUnitSlugAddressResponses,
 	ReplaceOwnProfileSlugAddressOptions,
 	ReplaceOwnProfileSlugAddressResponses,
-	GetUnitSlugAddressAsStaffOptions,
-	GetUnitSlugAddressAsStaffResponses,
-	ReplaceUnitSlugAddressAsStaffOptions,
-	ReplaceUnitSlugAddressAsStaffResponses,
-	ReleaseSlugRedirectAsStaffOptions,
-	ReleaseSlugRedirectAsStaffResponses,
+	GetUnitSlugAddressWithPlatformAccessOptions,
+	GetUnitSlugAddressWithPlatformAccessResponses,
+	ReplaceUnitSlugAddressWithPlatformAccessOptions,
+	ReplaceUnitSlugAddressWithPlatformAccessResponses,
+	ReleaseSlugRedirectWithPlatformAccessOptions,
+	ReleaseSlugRedirectWithPlatformAccessResponses,
 	PostApiUnitsPresentationsOptions,
 	PostApiUnitsPresentationsResponses,
 	GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
@@ -1291,7 +1285,7 @@ export function getCurrentApiToken<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List API token policies as staff
+ * @summary List API token policies with platform access
  * {@link /api/api-token-policies}
  */
 export function getApiApiTokenPolicies<ThrowOnError extends boolean = true>(
@@ -1308,7 +1302,7 @@ export function getApiApiTokenPolicies<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Replace an API token policy as staff
+ * @summary Replace an API token policy with platform access
  * {@link /api/api-token-policies/:policyKey}
  */
 export function patchApiApiTokenPoliciesByPolicyKey<ThrowOnError extends boolean = true>(
@@ -1325,7 +1319,7 @@ export function patchApiApiTokenPoliciesByPolicyKey<ThrowOnError extends boolean
 }
 
 /**
- * @summary Assign an API token policy as staff
+ * @summary Assign an API token policy with platform access
  * {@link /api/api-token-policies/bindings/:tokenId}
  */
 export function putApiApiTokenPoliciesBindingsByTokenId<ThrowOnError extends boolean = true>(
@@ -1826,54 +1820,20 @@ export function postApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 }
 
 /**
- * @summary List capability grants
- * {@link /api/governance/grants}
+ * @summary List global security audit events
+ * {@link /api/audit/events}
  */
-export function getApiGovernanceGrants<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceGrantsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiGovernanceGrantsResponses, ThrowOnError>> {
+export function getApiAuditEvents<ThrowOnError extends boolean = true>(
+	options: Options<GetApiAuditEventsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiAuditEventsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/governance/grants",
+		url: "/api/audit/events",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiGovernanceGrantsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Create capability grant
- * {@link /api/governance/grants}
- */
-export function postApiGovernanceGrants<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernanceGrantsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceGrantsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/governance/grants",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiGovernanceGrantsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Revoke capability grant
- * {@link /api/governance/grants/:grantId}
- */
-export function deleteApiGovernanceGrantsByGrantId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiGovernanceGrantsByGrantIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiGovernanceGrantsByGrantIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/governance/grants/{grantId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiGovernanceGrantsByGrantIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiAuditEventsResponses, ThrowOnError>>;
 }
 
 /**
@@ -2817,88 +2777,71 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Get platform staff access policy
- * {@link /api/staff/access-policy}
+ * @summary Get the platform access policy
+ * {@link /api/platform-access/policy}
  */
-export function getApiStaffAccessPolicy<ThrowOnError extends boolean = true>(
-	options: Options<GetApiStaffAccessPolicyOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiStaffAccessPolicyResponses, ThrowOnError>> {
+export function getApiPlatformAccessPolicy<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformAccessPolicyOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiPlatformAccessPolicyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/staff/access-policy",
+		url: "/api/platform-access/policy",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiStaffAccessPolicyResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiPlatformAccessPolicyResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Search Profiles for staff access
- * {@link /api/staff/profiles}
+ * @summary List or search Profiles and their platform access
+ * {@link /api/platform-access/profiles}
  */
-export function getApiStaffProfiles<ThrowOnError extends boolean = true>(
-	options: Options<GetApiStaffProfilesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiStaffProfilesResponses, ThrowOnError>> {
+export function getApiPlatformAccessProfiles<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformAccessProfilesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiPlatformAccessProfilesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/staff/profiles",
+		url: "/api/platform-access/profiles",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiStaffProfilesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiPlatformAccessProfilesResponses, ThrowOnError>>;
 }
 
 /**
- * @summary List active staff access
- * {@link /api/staff/members}
+ * @summary Get one Profile's platform access
+ * {@link /api/platform-access/profiles/:profileId}
  */
-export function getApiStaffMembers<ThrowOnError extends boolean = true>(
-	options: Options<GetApiStaffMembersOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiStaffMembersResponses, ThrowOnError>> {
+export function getApiPlatformAccessProfilesByProfileId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformAccessProfilesByProfileIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/staff/members",
+		url: "/api/platform-access/profiles/{profileId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiStaffMembersResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Replace a Profile's platform access
- * {@link /api/staff/members/:profileId}
+ * @summary Replace one Profile's platform access
+ * {@link /api/platform-access/profiles/:profileId}
  */
-export function putApiStaffMembersByProfileId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiStaffMembersByProfileIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiStaffMembersByProfileIdResponses, ThrowOnError>> {
+export function putApiPlatformAccessProfilesByProfileId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiPlatformAccessProfilesByProfileIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/staff/members/{profileId}",
+		url: "/api/platform-access/profiles/{profileId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PutApiStaffMembersByProfileIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary List staff access audit events
- * {@link /api/staff/audit}
- */
-export function getApiStaffAudit<ThrowOnError extends boolean = true>(
-	options: Options<GetApiStaffAuditOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiStaffAuditResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/staff/audit",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiStaffAuditResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2910,9 +2853,15 @@ export function getApiTagsByTagId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/tags/{tagId}", ...config }) as Promise<
-		RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/tags/{tagId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2947,6 +2896,10 @@ export function getApiTagStructuresByStructureId<ThrowOnError extends boolean = 
 	return request({
 		method: "GET",
 		url: "/api/tag-structures/{structureId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<GetApiTagStructuresByStructureIdResponses, ThrowOnError>>;
 }
@@ -3273,13 +3226,13 @@ export function replaceOwnProfileSlugAddress<ThrowOnError extends boolean = true
 }
 
 /**
- * @description Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
- * @summary Get a Unit canonical slug address as staff
+ * @description Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
+ * @summary Get a Unit canonical slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
-export function getUnitSlugAddressAsStaff<ThrowOnError extends boolean = true>(
-	options: Options<GetUnitSlugAddressAsStaffOptions, ThrowOnError>,
-): Promise<RequestResult<GetUnitSlugAddressAsStaffResponses, ThrowOnError>> {
+export function getUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolean = true>(
+	options: Options<GetUnitSlugAddressWithPlatformAccessOptions, ThrowOnError>,
+): Promise<RequestResult<GetUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -3287,17 +3240,17 @@ export function getUnitSlugAddressAsStaff<ThrowOnError extends boolean = true>(
 		url: "/api/slug-addresses/units/{unitId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetUnitSlugAddressAsStaffResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>;
 }
 
 /**
  * @description Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
- * @summary Replace any Unit slug address as staff
+ * @summary Replace any Unit slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
-export function replaceUnitSlugAddressAsStaff<ThrowOnError extends boolean = true>(
-	options: Options<ReplaceUnitSlugAddressAsStaffOptions, ThrowOnError>,
-): Promise<RequestResult<ReplaceUnitSlugAddressAsStaffResponses, ThrowOnError>> {
+export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolean = true>(
+	options: Options<ReplaceUnitSlugAddressWithPlatformAccessOptions, ThrowOnError>,
+): Promise<RequestResult<ReplaceUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -3305,17 +3258,17 @@ export function replaceUnitSlugAddressAsStaff<ThrowOnError extends boolean = tru
 		url: "/api/slug-addresses/units/{unitId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<ReplaceUnitSlugAddressAsStaffResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ReplaceUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>;
 }
 
 /**
  * @description Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
- * @summary Create an explicitly addressed namespace as staff
+ * @summary Create an explicitly addressed namespace with platform access
  * {@link /api/slug-addresses/namespaces}
  */
-export function createSlugNamespaceAsStaff<ThrowOnError extends boolean = true>(
-	options: Options<CreateSlugNamespaceAsStaffOptions, ThrowOnError>,
-): Promise<RequestResult<CreateSlugNamespaceAsStaffResponses, ThrowOnError>> {
+export function createSlugNamespaceWithPlatformAccess<ThrowOnError extends boolean = true>(
+	options: Options<CreateSlugNamespaceWithPlatformAccessOptions, ThrowOnError>,
+): Promise<RequestResult<CreateSlugNamespaceWithPlatformAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -3323,17 +3276,17 @@ export function createSlugNamespaceAsStaff<ThrowOnError extends boolean = true>(
 		url: "/api/slug-addresses/namespaces",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<CreateSlugNamespaceAsStaffResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<CreateSlugNamespaceWithPlatformAccessResponses, ThrowOnError>>;
 }
 
 /**
- * @description Deletes one temporary Redirect record so its scoped label may be reused. This is an audited staff action; retention and quarantine policy determines when a redirect is eligible for release.
- * @summary Release a retained slug redirect as staff
+ * @description Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
+ * @summary Release a retained slug redirect with platform access
  * {@link /api/slug-addresses/redirects/:redirectAddressId}
  */
-export function releaseSlugRedirectAsStaff<ThrowOnError extends boolean = true>(
-	options: Options<ReleaseSlugRedirectAsStaffOptions, ThrowOnError>,
-): Promise<RequestResult<ReleaseSlugRedirectAsStaffResponses, ThrowOnError>> {
+export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boolean = true>(
+	options: Options<ReleaseSlugRedirectWithPlatformAccessOptions, ThrowOnError>,
+): Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -3341,7 +3294,7 @@ export function releaseSlugRedirectAsStaff<ThrowOnError extends boolean = true>(
 		url: "/api/slug-addresses/redirects/{redirectAddressId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<ReleaseSlugRedirectAsStaffResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>>;
 }
 
 /**
@@ -6292,9 +6245,15 @@ export function postApiSearchByIndex<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiSearchByIndexResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/search/{index}", ...config }) as Promise<
-		RequestResult<PostApiSearchByIndexResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/search/{index}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiSearchByIndexResponses, ThrowOnError>>;
 }
 
 /**

@@ -1,11 +1,11 @@
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 
+import { recordAuditEvent } from "../audit";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import { databaseConstraintName } from "../database/constraint";
 import {
-	auditEvent,
 	series,
 	seriesRelease,
 	unit,
@@ -394,13 +394,14 @@ export async function updateUnitVariantContext(input: {
 			actorProfileId: input.actorProfileId,
 			event: "update",
 		});
-		await tx.insert(auditEvent).values({
-			actorProfileId: input.actorProfileId,
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "profile", profileId: input.actorProfileId },
+			authority: { kind: "unit", id: input.variantUnitId },
 			action: input.mainUnitId ? "unit.variant.main.set" : "unit.variant.main.detach",
-			decisionCode: "allowed",
-			subjectKind: "unit",
-			subjectId: input.variantUnitId,
-			metadata: {
+			target: { kind: "unit", id: input.variantUnitId },
+			details: {
 				beforeMainUnitId: currentMainUnitId,
 				afterMainUnitId: input.mainUnitId,
 			},
@@ -484,13 +485,14 @@ export async function promoteUnitVariantToMain(input: {
 				actorProfileId: input.actorProfileId,
 				event: "update",
 			});
-		await tx.insert(auditEvent).values({
-			actorProfileId: input.actorProfileId,
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "profile", profileId: input.actorProfileId },
+			authority: { kind: "unit", id: input.variantUnitId },
 			action: "unit.variant.main.promote",
-			decisionCode: "allowed",
-			subjectKind: "unit",
-			subjectId: input.variantUnitId,
-			metadata: {
+			target: { kind: "unit", id: input.variantUnitId },
+			details: {
 				oldMainUnitId: input.expectedMainUnitId,
 				newMainUnitId: input.variantUnitId,
 				affectedUnitIds: changedUnitIds,

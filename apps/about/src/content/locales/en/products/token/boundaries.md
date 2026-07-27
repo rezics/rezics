@@ -1,5 +1,5 @@
 - Authentication, permission checks, security limits, and usage limits are separate middleware responsibilities.
 - Effective limits are resolved from a policy profile, then a per-token override, then a per-operation override, while immutable server caps remain in force.
-- Standard and Staff Trusted configurations use different validated schemas. Their JSON configuration is stored in the database and validated again whenever it is read.
-- A Staff Trusted policy raises throughput only. It does not add permissions, requires an expiry and audit reason, and safely falls back when it expires or becomes invalid.
+- Standard and Privileged configurations use different validated schemas. Their JSON configuration is stored in the database and validated again whenever it is read.
+- A Privileged policy raises throughput only. It does not add permissions, requires an expiry and audit reason, and safely falls back when it expires or becomes invalid.
 - Token secrets are shown once and stored only as hashes. Self-inspection never returns hashes, secret references, or credential material.

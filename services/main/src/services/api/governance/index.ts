@@ -3,12 +3,11 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
+import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import type { Authorization } from "../../authorization";
 import { database } from "../../database";
 import {
 	accountEnforcement,
-	auditEvent,
-	capabilityGrant,
 	feedback,
 	moderationAction,
 	moderationCase,
@@ -31,16 +30,11 @@ import { ProfileNotFound } from "../users/errors";
 import {
 	AccountEnforcementParams,
 	CreateAccountEnforcementBody,
-	CreateGrantBody,
 	CreateModerationActionBody,
 	EnforcementResponse,
 	FeedbackParams,
-	GrantListResponse,
-	GrantParams,
-	GrantResponse,
 	GovernanceNoteParams,
 	GovernanceNoteResponse,
-	ListGrantsQuery,
 	ListModerationCasesQuery,
 	ModerationActionResponse,
 	ModerationCaseListResponse,
@@ -52,8 +46,6 @@ import {
 	UpdateGovernanceNoteBody,
 } from "./schema";
 import {
-	CapabilityGrantExpiryInvalid,
-	CapabilityGrantNotFound,
 	EnforcementAlreadyRevoked,
 	EnforcementChanged,
 	EnforcementExpiryInvalid,
@@ -68,19 +60,10 @@ import {
 	executeAuthorizedModerationAction,
 	loadModerationCaseForAction,
 } from "./moderation-service";
-import {
-	ensurePlatformGrantMutationContinuity,
-	lockPlatformAccessGrants,
-} from "../../staff/access-service";
 
 const CapabilityForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
 	"PlatformCapabilityRequired",
-]);
-const GrantMutationForbiddenResponse = toApiErrorResponse([
-	"RealmCapabilityRequired",
-	"PlatformCapabilityRequired",
-	"FreshSessionRequired",
 ]);
 
 const caseSelection = {
@@ -109,17 +92,6 @@ const enforcementSelection = {
 	revocationActionId: accountEnforcement.revocationActionId,
 	createdAt: accountEnforcement.createdAt,
 	updatedAt: accountEnforcement.updatedAt,
-};
-
-const grantSelection = {
-	id: capabilityGrant.id,
-	profileId: capabilityGrant.profileId,
-	capability: capabilityGrant.capability,
-	grantedByProfileId: capabilityGrant.grantedByProfileId,
-	expiresAt: capabilityGrant.expiresAt,
-	revokedAt: capabilityGrant.revokedAt,
-	createdAt: capabilityGrant.createdAt,
-	updatedAt: capabilityGrant.updatedAt,
 };
 
 type CaseRecord = typeof moderationCase.$inferSelect;
@@ -175,10 +147,28 @@ async function recordAuditEvent(
 		subjectKind?: string;
 		subjectId?: string;
 		subjectPath?: string | null;
+		authorityRealmId?: string;
 		metadata?: Record<string, unknown>;
 	},
 ) {
-	await tx.insert(auditEvent).values(input);
+	await appendAuditEvent(tx, {
+		category: "admin_activity",
+		outcome: "succeeded",
+		actor: { kind: "profile", profileId: input.actorProfileId },
+		authority: input.authorityRealmId
+			? { kind: "realm", id: input.authorityRealmId }
+			: { kind: "platform" },
+		action: input.action,
+		reasonCode: input.decisionCode === "allowed" ? undefined : input.decisionCode,
+		target: input.subjectKind
+			? {
+					kind: input.subjectKind,
+					id: input.subjectId,
+					path: input.subjectPath ?? undefined,
+				}
+			: undefined,
+		details: input.metadata,
+	});
 }
 
 export default new Elysia({ prefix: "/governance" })
@@ -358,6 +348,8 @@ export default new Elysia({ prefix: "/governance" })
 					decisionCode: "allowed",
 					subjectKind: "moderation_case",
 					subjectId: params.caseId,
+					authorityRealmId:
+						current.authority === "realm" ? (current.realmId ?? undefined) : undefined,
 					metadata: { changes, internalNotePostId: note?.postId },
 				});
 				const [presented] = await presentModerationCases(tx, [updated]);
@@ -483,6 +475,8 @@ export default new Elysia({ prefix: "/governance" })
 					decisionCode: body.resolutionCode,
 					subjectKind: "feedback",
 					subjectId: updated.id,
+					authorityRealmId:
+						caseRow?.authority === "realm" ? (caseRow.realmId ?? undefined) : undefined,
 					metadata: { publicNoticePostId: publicNotice?.postId },
 				});
 				await createNotification(tx, {
@@ -717,160 +711,5 @@ export default new Elysia({ prefix: "/governance" })
 				]),
 			},
 			detail: { summary: "Revoke account enforcement", tags: ["Governance"] },
-		},
-	)
-	.get(
-		"/grants",
-		async ({ authorization }) => {
-			await authorization.platform.ensureCapability("platform.grants.manage");
-			return {
-				items: await database
-					.select(grantSelection)
-					.from(capabilityGrant)
-					.where(
-						and(
-							eq(capabilityGrant.authority, "platform"),
-							isNull(capabilityGrant.realmId),
-						),
-					)
-					.orderBy(desc(capabilityGrant.createdAt), desc(capabilityGrant.id)),
-			};
-		},
-		{
-			access: "session-only",
-			query: ListGrantsQuery,
-			response: {
-				[StatusCodes.OK]: GrantListResponse,
-				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
-			},
-			detail: { summary: "List capability grants", tags: ["Governance"] },
-		},
-	)
-	.post(
-		"/grants",
-		async ({ authorization, profile, body }) => {
-			await authorization.platform.ensureCapability("platform.grants.manage");
-			const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
-			if (expiresAt && expiresAt <= new Date()) throw new CapabilityGrantExpiryInvalid();
-			return database.transaction(async (tx) => {
-				await lockPlatformAccessGrants(tx);
-				await ensurePlatformGrantMutationContinuity(tx, {
-					profileId: body.profileId,
-					capability: body.capability,
-					active: true,
-					expiresAt: expiresAt ?? null,
-				});
-				const [created] = await tx
-					.insert(capabilityGrant)
-					.values({
-						authority: "platform",
-						realmId: null,
-						profileId: body.profileId,
-						capability: body.capability,
-						grantedByProfileId: profile.unitId,
-						expiresAt,
-					})
-					.onConflictDoUpdate({
-						target: [
-							capabilityGrant.authority,
-							capabilityGrant.realmId,
-							capabilityGrant.profileId,
-							capabilityGrant.capability,
-						],
-						set: {
-							grantedByProfileId: profile.unitId,
-							expiresAt,
-							revokedAt: null,
-							revokedByProfileId: null,
-						},
-					})
-					.returning(grantSelection);
-				if (!created) throw new Error("Capability grant insertion did not return a row");
-				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
-					action: "capability_grant.upsert",
-					decisionCode: "allowed",
-					subjectKind: "profile",
-					subjectId: body.profileId,
-					metadata: {
-						authority: "platform",
-						capability: body.capability,
-					},
-				});
-				return created;
-			});
-		},
-		{
-			access: "fresh-session-only",
-			body: CreateGrantBody,
-			response: {
-				[StatusCodes.OK]: GrantResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["CapabilityGrantExpiryInvalid"]),
-				[StatusCodes.FORBIDDEN]: GrantMutationForbiddenResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["PlatformGrantManagerRequired"]),
-			},
-			detail: { summary: "Create capability grant", tags: ["Governance"] },
-		},
-	)
-	.delete(
-		"/grants/:grantId",
-		async ({ authorization, profile, params }) => {
-			const [current] = await database
-				.select()
-				.from(capabilityGrant)
-				.where(
-					and(
-						eq(capabilityGrant.id, params.grantId),
-						eq(capabilityGrant.authority, "platform"),
-						isNull(capabilityGrant.realmId),
-					),
-				)
-				.limit(1);
-			if (!current || current.revokedAt) throw new CapabilityGrantNotFound();
-			await authorization.platform.ensureCapability("platform.grants.manage");
-			await database.transaction(async (tx) => {
-				await lockPlatformAccessGrants(tx);
-				await ensurePlatformGrantMutationContinuity(tx, {
-					profileId: current.profileId,
-					capability: current.capability,
-					active: false,
-					expiresAt: null,
-				});
-				const [updated] = await tx
-					.update(capabilityGrant)
-					.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
-					.where(
-						and(eq(capabilityGrant.id, current.id), isNull(capabilityGrant.revokedAt)),
-					)
-					.returning({
-						profileId: capabilityGrant.profileId,
-						capability: capabilityGrant.capability,
-					});
-				if (!updated) throw new CapabilityGrantNotFound();
-				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
-					action: "capability_grant.revoke",
-					decisionCode: "allowed",
-					subjectKind: "profile",
-					subjectId: updated.profileId,
-					metadata: { grantId: current.id },
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "fresh-session-only",
-			params: GrantParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: GrantMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["CapabilityGrantNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["PlatformGrantManagerRequired"]),
-			},
-			detail: {
-				summary: "Revoke capability grant",
-				tags: ["Governance"],
-				responses: NoContentResponse,
-			},
 		},
 	);

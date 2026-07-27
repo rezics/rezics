@@ -8,7 +8,12 @@ export type {
 	ServiceIdentityInput,
 } from "./config";
 export { resolveObservabilityConfiguration } from "./config";
-export type { LogDetails, SafeRequestLogContext, StructuredLogger } from "./logger";
+export {
+	getActiveTraceContext,
+	type LogDetails,
+	type SafeRequestLogContext,
+	type StructuredLogger,
+} from "./logger";
 export type {
 	DependencyName,
 	ReadinessCheckState,

@@ -2,12 +2,12 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
 import type { PlatformAuthorization } from "../authorization/platform/authorization";
+import { recordAuditEvent } from "../audit";
 import { createCommunityOwnedUnitAccess } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
 import { databaseConstraintName } from "../database/constraint";
 import { toSafeInteger } from "../database/integer";
 import {
-	auditEvent,
 	tag,
 	unit,
 	unitStructure,
@@ -263,13 +263,15 @@ export async function updateTagStructureDefinition(input: {
 			event: "update",
 			message: reason,
 		});
-		await tx.insert(auditEvent).values({
-			actorProfileId: input.actorProfileId,
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "profile", profileId: input.actorProfileId },
+			authority: { kind: "unit", id: input.structureId },
 			action: "unit.structure.definition.update",
-			decisionCode: "administrative",
-			subjectKind: "unit",
-			subjectId: input.structureId,
-			metadata: {
+			reasonCode: "administrative",
+			target: { kind: "unit", id: input.structureId },
+			details: {
 				beforeMemberUnitIds: current.memberUnitIds,
 				afterMemberUnitIds: [...input.memberTagIds],
 				reason,

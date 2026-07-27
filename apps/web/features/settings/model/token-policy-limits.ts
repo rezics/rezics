@@ -22,17 +22,15 @@ export const StandardTokenPolicyLimitRanges = {
 	dailyCostUnits: { minimum: 1, maximum: 10_000 },
 } as const satisfies TokenPolicyLimitRanges;
 
-export const StaffTrustedTokenPolicyLimitRanges = {
+export const PrivilegedTokenPolicyLimitRanges = {
 	requestsPerMinute: { minimum: 1, maximum: 5_000 },
 	maxConcurrentRequests: { minimum: 1, maximum: 64 },
 	dailyCostUnits: { minimum: 1, maximum: 1_000_000 },
 } as const satisfies TokenPolicyLimitRanges;
 
-export function getTokenPolicyLimitRanges(
-	kind: "standard" | "staff_trusted",
-): TokenPolicyLimitRanges {
-	return kind === "staff_trusted"
-		? StaffTrustedTokenPolicyLimitRanges
+export function getTokenPolicyLimitRanges(kind: "standard" | "privileged"): TokenPolicyLimitRanges {
+	return kind === "privileged"
+		? PrivilegedTokenPolicyLimitRanges
 		: StandardTokenPolicyLimitRanges;
 }
 

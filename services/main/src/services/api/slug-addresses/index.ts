@@ -5,11 +5,11 @@ import session from "../../auth/session";
 import { UnitNotFound } from "../../units/errors";
 import {
 	createSlugNamespace,
-	getCanonicalUnitSlugAddressAsStaff,
+	getCanonicalUnitSlugAddressWithPlatformAccess,
 	getPublicCanonicalUnitSlugAddress,
 	releaseSlugRedirect,
 	replaceOwnProfileSlugAddress,
-	replaceUnitSlugAddressAsStaff,
+	replaceUnitSlugAddressWithPlatformAccess,
 	resolveScopedUnitAddress,
 	resolveUnitPath,
 } from "../../units/slug-address";
@@ -156,7 +156,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 	.get(
 		"/units/:unitId",
 		async ({ params, authorization }) =>
-			getCanonicalUnitSlugAddressAsStaff(authorization, params.unitId),
+			getCanonicalUnitSlugAddressWithPlatformAccess(authorization, params.unitId),
 		{
 			access: "session-only",
 			params: UnitSlugAddressParams,
@@ -170,10 +170,10 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				]),
 			},
 			detail: {
-				operationId: "getUnitSlugAddressAsStaff",
-				summary: "Get a Unit canonical slug address as staff",
+				operationId: "getUnitSlugAddressWithPlatformAccess",
+				summary: "Get a Unit canonical slug address with platform access",
 				description:
-					"Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
+					"Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
 				tags: ["Slug Addresses"],
 			},
 		},
@@ -182,7 +182,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 		"/units/:unitId",
 		async ({ params, authorization, body }) =>
 			presentPath(
-				await replaceUnitSlugAddressAsStaff(authorization, {
+				await replaceUnitSlugAddressWithPlatformAccess(authorization, {
 					unitId: params.unitId,
 					...body,
 				}),
@@ -201,8 +201,8 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
 			},
 			detail: {
-				operationId: "replaceUnitSlugAddressAsStaff",
-				summary: "Replace any Unit slug address as staff",
+				operationId: "replaceUnitSlugAddressWithPlatformAccess",
+				summary: "Replace any Unit slug address with platform access",
 				description:
 					"Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.",
 				tags: ["Slug Addresses"],
@@ -229,8 +229,8 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
 			},
 			detail: {
-				operationId: "createSlugNamespaceAsStaff",
-				summary: "Create an explicitly addressed namespace as staff",
+				operationId: "createSlugNamespaceWithPlatformAccess",
+				summary: "Create an explicitly addressed namespace with platform access",
 				description:
 					"Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.",
 				tags: ["Slug Addresses"],
@@ -257,10 +257,10 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["SlugRedirectNotFound"]),
 			},
 			detail: {
-				operationId: "releaseSlugRedirectAsStaff",
-				summary: "Release a retained slug redirect as staff",
+				operationId: "releaseSlugRedirectWithPlatformAccess",
+				summary: "Release a retained slug redirect with platform access",
 				description:
-					"Deletes one temporary Redirect record so its scoped label may be reused. This is an audited staff action; retention and quarantine policy determines when a redirect is eligible for release.",
+					"Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.",
 				tags: ["Slug Addresses"],
 				responses: NoContentResponse,
 			},

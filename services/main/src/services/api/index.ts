@@ -4,8 +4,10 @@ import { getActiveObservability } from "@rezics/observability";
 import { createElysiaObservability } from "@rezics/observability/elysia";
 import Elysia from "elysia";
 
+import { enterAuditRequestContext, getAuditRequestContext } from "../audit";
 import catalog from "./catalog";
 import associationProposals from "./association-proposals";
+import audit from "./audit";
 import collections from "./collections";
 import realms from "./realms";
 import realmNavigation from "./realm-navigation";
@@ -29,7 +31,7 @@ import reactions from "./reactions";
 import reviews from "./reviews";
 import search from "./search";
 import slugAddresses from "./slug-addresses";
-import staff from "./staff";
+import platformAccess from "./platform-access";
 import tags from "./tags";
 import tokens from "./tokens";
 import tokenInfo from "./token-info";
@@ -81,10 +83,16 @@ export default new Elysia({ normalize: "typebox" })
 			credentials: true,
 			methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 			allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"],
+			exposeHeaders: ["X-Request-Id"],
 		}),
 	)
-	.onError(({ error, code, request, route, set, status }) => {
+	.onRequest(({ set }) => {
 		const requestId = crypto.randomUUID();
+		enterAuditRequestContext({ requestId });
+		set.headers["X-Request-Id"] = requestId;
+	})
+	.onError(({ error, code, request, route, set, status }) => {
+		const requestId = getAuditRequestContext()?.requestId ?? crypto.randomUUID();
 		if (isApiError(error)) {
 			if (error._tag === "ApiTokenRateLimitExceeded")
 				set.headers["Retry-After"] = String(error.retryAfterSeconds);
@@ -164,10 +172,11 @@ export default new Elysia({ normalize: "typebox" })
 				.use(feed)
 				.use(feedback)
 				.use(governance)
+				.use(audit)
 				.use(domainExtensions)
 				.use(docks)
 				.use(users)
-				.use(staff)
+				.use(platformAccess)
 				.use(tags)
 				.use(slugAddresses)
 				.use(units)

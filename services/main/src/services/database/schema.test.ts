@@ -539,7 +539,7 @@ describe("database schema contracts", () => {
 		expect(VariantCapableUnitKindValues).toEqual(["book", "software", "media"]);
 	});
 
-	it("keeps structural, Redirect, and staff capability meanings explicit", () => {
+	it("keeps structural, Redirect, and platform capability meanings explicit", () => {
 		expect(UnitKindValues).toContain("slug_namespace");
 		expect(UnitKindValues).not.toContain("redirect");
 		expect(CommunityCatalogUnitKindValues).toEqual([

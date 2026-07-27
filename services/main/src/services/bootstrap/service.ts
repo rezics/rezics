@@ -11,8 +11,7 @@ import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
 	apiAccessPolicy,
-	auditEvent,
-	capabilityGrant,
+	platformCapabilityGrant,
 	contentStructure,
 	contentStructureNode,
 	imageAsset,
@@ -57,7 +56,8 @@ import {
 } from "../api/docks/history";
 import type { ContentLanguage } from "../database/schema/contract-values";
 import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
-import { lockPlatformAccessGrants } from "../staff/access-service";
+import { recordAuditEvent } from "../audit";
+import { lockPlatformAccess } from "../platform-access";
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
@@ -84,7 +84,7 @@ import {
 	BootstrapProfileIdValues,
 	BootstrapProfileManifest,
 	BootstrapRealmManifest,
-	BootstrapSuperAdminProfile,
+	BootstrapPlatformAdministratorProfile,
 	BootstrapUnitIds,
 	OfficialProfileIds,
 	OfficialRealmManifest,
@@ -541,72 +541,69 @@ async function ensureBootstrapProfiles(
 	return issuedCredentials;
 }
 
-async function ensureBootstrapSuperAdminGrants(tx: DatabaseTransaction): Promise<void> {
-	await lockPlatformAccessGrants(tx);
+async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Promise<void> {
+	await lockPlatformAccess(tx);
 	const createdAt = bootstrapEpoch();
-	for (const capability of BootstrapSuperAdminProfile.capabilities) {
+	for (const capability of BootstrapPlatformAdministratorProfile.capabilities) {
 		const [current] = await tx
 			.select({
-				grantedByProfileId: capabilityGrant.grantedByProfileId,
-				expiresAt: capabilityGrant.expiresAt,
-				revokedAt: capabilityGrant.revokedAt,
-				revokedByProfileId: capabilityGrant.revokedByProfileId,
+				id: platformCapabilityGrant.id,
+				expiresAt: platformCapabilityGrant.expiresAt,
 			})
-			.from(capabilityGrant)
+			.from(platformCapabilityGrant)
 			.where(
 				and(
-					eq(capabilityGrant.authority, "platform"),
-					isNull(capabilityGrant.realmId),
-					eq(capabilityGrant.profileId, BootstrapSuperAdminProfile.profileId),
-					eq(capabilityGrant.capability, capability),
+					eq(
+						platformCapabilityGrant.profileId,
+						BootstrapPlatformAdministratorProfile.profileId,
+					),
+					eq(platformCapabilityGrant.capability, capability),
+					isNull(platformCapabilityGrant.revokedAt),
 				),
 			)
 			.limit(1);
-		const changed =
-			!current ||
-			current.grantedByProfileId !== BootstrapSuperAdminProfile.profileId ||
-			current.expiresAt !== null ||
-			current.revokedAt !== null ||
-			current.revokedByProfileId !== null;
-		await tx
-			.insert(capabilityGrant)
+		if (current?.expiresAt === null) continue;
+		if (current)
+			await tx
+				.update(platformCapabilityGrant)
+				.set({
+					revokedAt: createdAt,
+					revokedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
+					updatedAt: createdAt,
+				})
+				.where(eq(platformCapabilityGrant.id, current.id));
+		const [created] = await tx
+			.insert(platformCapabilityGrant)
 			.values({
-				authority: "platform",
-				realmId: null,
-				profileId: BootstrapSuperAdminProfile.profileId,
+				profileId: BootstrapPlatformAdministratorProfile.profileId,
 				capability,
-				grantedByProfileId: BootstrapSuperAdminProfile.profileId,
-				expiresAt: null,
-				revokedAt: null,
-				revokedByProfileId: null,
+				grantedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
 				createdAt,
 				updatedAt: createdAt,
 			})
-			.onConflictDoUpdate({
-				target: [
-					capabilityGrant.authority,
-					capabilityGrant.realmId,
-					capabilityGrant.profileId,
-					capabilityGrant.capability,
-				],
-				set: {
-					grantedByProfileId: BootstrapSuperAdminProfile.profileId,
-					expiresAt: null,
-					revokedAt: null,
-					revokedByProfileId: null,
-					updatedAt: createdAt,
-				},
-			});
-		if (changed)
-			await tx.insert(auditEvent).values({
-				actorProfileId: BootstrapSuperAdminProfile.profileId,
-				action: "capability_grant.bootstrap",
-				decisionCode: "allowed",
-				subjectKind: "profile",
-				subjectId: BootstrapSuperAdminProfile.profileId,
-				metadata: { authority: "platform", capability, source: "bootstrap" },
-				createdAt,
-			});
+			.returning({ id: platformCapabilityGrant.id });
+		await recordAuditEvent(tx, {
+			category: "system_event",
+			outcome: "succeeded",
+			actor: {
+				kind: "profile",
+				profileId: BootstrapPlatformAdministratorProfile.profileId,
+				credentialKind: "bootstrap",
+			},
+			authority: { kind: "platform" },
+			action: "platform.access.bootstrap",
+			target: {
+				kind: "profile",
+				id: BootstrapPlatformAdministratorProfile.profileId,
+			},
+			details: {
+				capability,
+				grantId: created?.id,
+				replacedGrantId: current?.id,
+				source: "bootstrap",
+			},
+			createdAt,
+		});
 	}
 }
 
@@ -1458,7 +1455,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		accountCount,
 		profileCount,
 		bootstrapProfileOwners,
-		bootstrapSuperAdminGrants,
+		bootstrapPlatformAccess,
 		officialRealms,
 		officialZones,
 		officialZoneSearchFeatures,
@@ -1518,21 +1515,23 @@ async function isBootstrapReady(): Promise<boolean> {
 			),
 		database
 			.select({
-				capability: capabilityGrant.capability,
-				grantedByProfileId: capabilityGrant.grantedByProfileId,
-				expiresAt: capabilityGrant.expiresAt,
-				revokedAt: capabilityGrant.revokedAt,
-				revokedByProfileId: capabilityGrant.revokedByProfileId,
+				capability: platformCapabilityGrant.capability,
+				grantedByProfileId: platformCapabilityGrant.grantedByProfileId,
+				expiresAt: platformCapabilityGrant.expiresAt,
+				revokedAt: platformCapabilityGrant.revokedAt,
+				revokedByProfileId: platformCapabilityGrant.revokedByProfileId,
 			})
-			.from(capabilityGrant)
+			.from(platformCapabilityGrant)
 			.where(
 				and(
-					eq(capabilityGrant.authority, "platform"),
-					isNull(capabilityGrant.realmId),
-					eq(capabilityGrant.profileId, BootstrapSuperAdminProfile.profileId),
-					inArray(capabilityGrant.capability, [
-						...BootstrapSuperAdminProfile.capabilities,
+					eq(
+						platformCapabilityGrant.profileId,
+						BootstrapPlatformAdministratorProfile.profileId,
+					),
+					inArray(platformCapabilityGrant.capability, [
+						...BootstrapPlatformAdministratorProfile.capabilities,
 					]),
+					isNull(platformCapabilityGrant.revokedAt),
 				),
 			),
 		database
@@ -1716,12 +1715,13 @@ async function isBootstrapReady(): Promise<boolean> {
 		profileCount[0]?.value === BootstrapProfileIdValues.length &&
 		bootstrapProfileOwners.length === BootstrapProfileIdValues.length &&
 		bootstrapProfileOwners.every((owner) => owner.profileId === owner.unitId) &&
-		bootstrapSuperAdminGrants.length === BootstrapSuperAdminProfile.capabilities.length &&
-		BootstrapSuperAdminProfile.capabilities.every((capability) =>
-			bootstrapSuperAdminGrants.some(
+		bootstrapPlatformAccess.length ===
+			BootstrapPlatformAdministratorProfile.capabilities.length &&
+		BootstrapPlatformAdministratorProfile.capabilities.every((capability) =>
+			bootstrapPlatformAccess.some(
 				(grant) =>
 					grant.capability === capability &&
-					grant.grantedByProfileId === BootstrapSuperAdminProfile.profileId &&
+					grant.grantedByProfileId === BootstrapPlatformAdministratorProfile.profileId &&
 					grant.expiresAt === null &&
 					grant.revokedAt === null &&
 					grant.revokedByProfileId === null,
@@ -1874,7 +1874,7 @@ async function bootstrapDatabase(
 		);
 		await ensureSlugNamespaces(tx);
 		const credentials = await ensureBootstrapProfiles(tx, options.credentialMode);
-		await ensureBootstrapSuperAdminGrants(tx);
+		await ensureBootstrapPlatformAccess(tx);
 		await ensureDefaultApiTokenPolicies(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
 		await ensureScoreContextProfileDefaults(tx);

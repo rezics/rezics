@@ -22,11 +22,11 @@ describe("API token policy schemas", () => {
 		}
 	});
 
-	it("uses different safety bounds for standard and Staff Trusted tokens", () => {
+	it("uses different safety bounds for standard and Privileged tokens", () => {
 		const trustedOverride = {
 			limits: { requestsPerMinute: 1_000, maxConcurrentRequests: 16 },
 		};
-		expect(decodeTokenPolicyOverride("staff_trusted", 1, trustedOverride)).toEqual(
+		expect(decodeTokenPolicyOverride("privileged", 1, trustedOverride)).toEqual(
 			trustedOverride,
 		);
 		expect(() => decodeTokenPolicyOverride("standard", 1, trustedOverride)).toThrow(

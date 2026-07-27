@@ -802,8 +802,8 @@ function TokenCard({
 	const policyLabel =
 		token.policy.source === "trusted_fallback"
 			? t.settings.tokens.trustedFallback
-			: token.policy.kind === "staff_trusted"
-				? t.settings.tokens.staffTrustedPolicy
+			: token.policy.kind === "privileged"
+				? t.settings.tokens.privilegedPolicy
 				: t.settings.tokens.standardPolicy;
 
 	return (
@@ -820,9 +820,7 @@ function TokenCard({
 						<Badge variant={token.enabled ? "success" : "secondary"}>
 							{token.enabled ? t.settings.tokens.enabled : t.settings.tokens.disabled}
 						</Badge>
-						<Badge
-							variant={token.policy.kind === "staff_trusted" ? "warning" : "outline"}
-						>
+						<Badge variant={token.policy.kind === "privileged" ? "warning" : "outline"}>
 							{policyLabel}
 						</Badge>
 					</div>
@@ -861,7 +859,7 @@ function TokenCard({
 						</dd>
 					</div>
 				</dl>
-				{token.policy.kind === "staff_trusted" && token.policy.validUntil ? (
+				{token.policy.kind === "privileged" && token.policy.validUntil ? (
 					<p className="text-sm text-warning">
 						{t.settings.tokens.trustedUntil}:{" "}
 						{formatDate(token.policy.validUntil, locale)}

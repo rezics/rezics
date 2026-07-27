@@ -2,9 +2,9 @@ import { createHash } from "node:crypto";
 
 import { and, eq, isNull } from "drizzle-orm";
 
+import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import {
-	auditEvent,
 	feedback,
 	moderationAction,
 	moderationCase,
@@ -711,14 +711,22 @@ export async function executeAuthorizedModerationAction(
 				},
 			});
 		}
-	await tx.insert(auditEvent).values({
-		actorProfileId: input.actorProfileId,
+	await recordAuditEvent(tx, {
+		category: "admin_activity",
+		outcome: "succeeded",
+		actor: { kind: "profile", profileId: input.actorProfileId },
+		authority:
+			input.caseRow.authority === "realm" && input.caseRow.realmId
+				? { kind: "realm", id: input.caseRow.realmId }
+				: { kind: "platform" },
 		action: `moderation.${input.body.kind}`,
-		decisionCode: input.body.reasonCode,
-		subjectKind: input.caseRow.targetKind,
-		subjectId: input.caseRow.targetId,
-		subjectPath: input.caseRow.targetPath,
-		metadata: {
+		reasonCode: input.body.reasonCode,
+		target: {
+			kind: input.caseRow.targetKind,
+			id: input.caseRow.targetId,
+			path: input.caseRow.targetPath ?? undefined,
+		},
+		details: {
 			moderationActionId: created.id,
 			caseId: input.caseRow.id,
 			realmId: input.caseRow.realmId,

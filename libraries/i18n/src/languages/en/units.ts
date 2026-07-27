@@ -279,7 +279,7 @@ export default {
 		draftHint:
 			"Creating, renaming, and moving only update the draft. Saving writes every change at once.",
 		development: "The content structure editor is in development",
-		developmentDescription: `Content structure is not available for this unit type yet. Preview ${verbatimTerms.api.value} access is limited to staff accounts.`,
+		developmentDescription: `Content structure is not available for this unit type yet. Preview ${verbatimTerms.api.value} access requires the development preview capability.`,
 	},
 	chapter: {
 		title: "Edit chapter",

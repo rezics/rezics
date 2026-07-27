@@ -22,9 +22,9 @@ const standardPolicy = {
 const trustedPolicy = {
 	...standardPolicy,
 	id: "01983000-0000-7000-8000-000000000002",
-	key: DefaultApiTokenPolicies.staffTrusted.key,
-	kind: "staff_trusted" as const,
-	configuration: DefaultApiTokenPolicies.staffTrusted.configuration,
+	key: DefaultApiTokenPolicies.privileged.key,
+	kind: "privileged" as const,
+	configuration: DefaultApiTokenPolicies.privileged.configuration,
 };
 
 const trustedBinding = {
@@ -74,7 +74,7 @@ describe("API token policy resolution", () => {
 		expect(policy.configuration).toEqual(DefaultApiTokenPolicies.standard.configuration);
 	});
 
-	it("falls back to Standard after a Staff Trusted assignment expires", async () => {
+	it("falls back to Standard after a Privileged assignment expires", async () => {
 		const expiredBinding = {
 			...trustedBinding,
 			validUntil: new Date("2026-07-22T09:59:59.999Z"),
@@ -93,7 +93,7 @@ describe("API token policy resolution", () => {
 		expect(policy.validUntil).toEqual(expiredBinding.validUntil);
 	});
 
-	it("falls back when a Staff Trusted JSON document fails runtime validation", async () => {
+	it("falls back when a Privileged JSON document fails runtime validation", async () => {
 		const invalidTrusted = { ...trustedPolicy, configuration: { unlimited: true } };
 		const policy = await resolveApiTokenPolicy(trustedBinding.tokenId, {
 			executor: queuedSelectExecutor(

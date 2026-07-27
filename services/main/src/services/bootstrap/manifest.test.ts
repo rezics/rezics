@@ -7,7 +7,7 @@ import {
 	BootstrapEpochUnixMilliseconds,
 	BootstrapProfileManifest,
 	BootstrapRealmManifest,
-	BootstrapSuperAdminProfile,
+	BootstrapPlatformAdministratorProfile,
 	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
@@ -56,19 +56,20 @@ describe("database bootstrap manifest", () => {
 		}
 	});
 
-	it("keeps the bootstrap Super Admin distinct and grants the complete platform policy", () => {
+	it("keeps the bootstrap administrator distinct and grants the complete platform policy", () => {
 		expect(BootstrapProfileManifest).toHaveLength(OfficialProfileManifest.length + 1);
-		expect(OfficialProfileManifest).not.toContain(BootstrapSuperAdminProfile);
-		expect(BootstrapSuperAdminProfile.email).toBe("admin@rezics.com");
-		expect(BootstrapSuperAdminProfile.capabilities).toEqual(
+		expect(OfficialProfileManifest).not.toContain(BootstrapPlatformAdministratorProfile);
+		expect(BootstrapPlatformAdministratorProfile.email).toBe("admin@rezics.com");
+		expect(BootstrapPlatformAdministratorProfile.capabilities).toEqual(
 			expect.arrayContaining([
-				"platform.grants.manage",
+				"platform.access.manage",
+				"platform.audit.read",
 				"platform.development_preview.access",
 				"unit.edit",
 			]),
 		);
-		expect(new Set(BootstrapSuperAdminProfile.capabilities).size).toBe(
-			BootstrapSuperAdminProfile.capabilities.length,
+		expect(new Set(BootstrapPlatformAdministratorProfile.capabilities).size).toBe(
+			BootstrapPlatformAdministratorProfile.capabilities.length,
 		);
 	});
 

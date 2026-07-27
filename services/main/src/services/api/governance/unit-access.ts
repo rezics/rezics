@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
+import { recordAuditEvent } from "../../audit";
 import session from "../../auth/session";
 import { lockUnitAccessState } from "../../authorization/unit/invitations";
 import {
@@ -13,7 +14,6 @@ import {
 } from "../../authorization/unit/policy";
 import { database, type DatabaseTransaction } from "../../database";
 import {
-	auditEvent,
 	profile as profileTable,
 	realm,
 	unit,
@@ -147,13 +147,14 @@ async function recordAccessAudit(
 		readonly metadata?: Record<string, unknown>;
 	},
 ) {
-	await tx.insert(auditEvent).values({
-		actorProfileId: input.actorProfileId,
+	await recordAuditEvent(tx, {
+		category: "admin_activity",
+		outcome: "succeeded",
+		actor: { kind: "profile", profileId: input.actorProfileId },
+		authority: { kind: "unit", id: input.unitId },
 		action: input.action,
-		decisionCode: "allowed",
-		subjectKind: "unit",
-		subjectId: input.unitId,
-		metadata: input.metadata,
+		target: { kind: "unit", id: input.unitId },
+		details: input.metadata,
 	});
 }
 

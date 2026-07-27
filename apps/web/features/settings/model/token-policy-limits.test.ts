@@ -4,7 +4,7 @@ import {
 	getTokenPolicyLimitRanges,
 	parseTokenPolicyLimit,
 	parseTokenPolicyLimits,
-	StaffTrustedTokenPolicyLimitRanges,
+	PrivilegedTokenPolicyLimitRanges,
 	StandardTokenPolicyLimitRanges,
 } from "./token-policy-limits";
 
@@ -18,13 +18,13 @@ describe("token policy limit ranges", () => {
 		expect(getTokenPolicyLimitRanges("standard")).toBe(StandardTokenPolicyLimitRanges);
 	});
 
-	it("selects the elevated ranges only for Staff Trusted policies", () => {
-		expect(StaffTrustedTokenPolicyLimitRanges).toEqual({
+	it("selects the elevated ranges only for Privileged policies", () => {
+		expect(PrivilegedTokenPolicyLimitRanges).toEqual({
 			requestsPerMinute: { minimum: 1, maximum: 5_000 },
 			maxConcurrentRequests: { minimum: 1, maximum: 64 },
 			dailyCostUnits: { minimum: 1, maximum: 1_000_000 },
 		});
-		expect(getTokenPolicyLimitRanges("staff_trusted")).toBe(StaffTrustedTokenPolicyLimitRanges);
+		expect(getTokenPolicyLimitRanges("privileged")).toBe(PrivilegedTokenPolicyLimitRanges);
 	});
 
 	it("keeps empty, invalid, and valid field states distinct", () => {

@@ -4,8 +4,8 @@ import { ApiPermissionValues } from "../../auth/api-permissions";
 import {
 	ApiTokenOperationId,
 	ApiTokenPolicyOverrideInput,
-	StaffTrustedTokenOperationLimits,
-	StaffTrustedTokenPolicyLimits,
+	PrivilegedTokenOperationLimits,
+	PrivilegedTokenPolicyLimits,
 	StandardTokenPolicyOverride,
 } from "../../auth/api-token/policy-schema";
 import { ApiTokenPolicyKindValues } from "../../database/schema";
@@ -50,8 +50,8 @@ export const ApiTokenPolicy = t.Object({
 	policyRevision: t.Integer({ minimum: 1 }),
 	bindingRevision: t.Nullable(t.Integer({ minimum: 1 })),
 	validUntil: t.Nullable(DateTime),
-	limits: StaffTrustedTokenPolicyLimits,
-	operations: t.Record(ApiTokenOperationId, StaffTrustedTokenOperationLimits),
+	limits: PrivilegedTokenPolicyLimits,
+	operations: t.Record(ApiTokenOperationId, PrivilegedTokenOperationLimits),
 });
 
 export const ReplaceApiTokenPolicyBody = t.Object(

@@ -42,8 +42,11 @@ export default {
 	RealmRulesAcceptanceRequired: `Accept the current ${realmTerms.label} rules to continue.`,
 	RealmRuleRevisionChanged: "The rules have changed. Review the latest revision before agreeing.",
 	PlatformCapabilityRequired: "A platform permission is required for this action.",
-	PlatformGrantManagerRequired:
-		"The platform must retain at least one non-expiring grant manager.",
+	PlatformAccessManagerRequired:
+		"The platform must retain at least one non-expiring access manager.",
+	PlatformAccessRevisionConflict:
+		"Platform access changed elsewhere. Reload it before trying again.",
+	PlatformAccessConfigurationInvalid: "Each platform capability may appear only once.",
 	CollectionOwnershipRequired: "You do not own this collection.",
 	ProfileNotFound: "This profile could not be found.",
 	ProfileChanged: "This profile changed. Refresh and try again.",

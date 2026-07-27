@@ -1,3 +1,3 @@
 - Ein Agent erhält nur die Berechtigungen, die zum Ergänzen fehlender Buchdaten oder einer Übersetzung erforderlich sind.
 - Ein Importprogramm oder lokales Werkzeug nutzt eigene Zugangsdaten, die unabhängig deaktiviert oder widerrufen werden können.
-- Für eine geprüfte Arbeitslast kann Staff Trusted befristet mehr Durchsatz gewähren, ohne zusätzliche Datenberechtigungen zu erteilen.
+- Für eine geprüfte Arbeitslast kann Privileged befristet mehr Durchsatz gewähren, ohne zusätzliche Datenberechtigungen zu erteilen.

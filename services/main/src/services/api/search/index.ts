@@ -889,10 +889,12 @@ export default new Elysia({ prefix: "/search" })
 		"/:index",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
-			if (params.index === "tag-structures")
+			if (params.index === "tag-structures") {
+				if (!identity.profile) throw new AuthenticationRequired();
 				await identity.authorization.platform.ensureCapability(
 					DevelopmentPreviewCapability,
 				);
+			}
 			try {
 				return await searchDomain(params.index, {
 					...body,
@@ -910,6 +912,7 @@ export default new Elysia({ prefix: "/search" })
 			body: DomainSearchBody,
 			response: {
 				[StatusCodes.OK]: DomainSearchResponse,
+				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,

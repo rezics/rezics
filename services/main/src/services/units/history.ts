@@ -17,11 +17,11 @@ import type { Static, TSchema } from "@sinclair/typebox";
 import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
 import { PublicationLicenseIds } from "@rezics/license";
 
+import { recordAuditEvent } from "../audit";
 import type { DatabaseTransaction } from "../database";
 import type { Authorization } from "../authorization";
 import { isPrimaryUnitLocalization } from "./localization";
 import {
-	auditEvent,
 	book,
 	collection,
 	collectionItem,
@@ -1177,12 +1177,15 @@ export async function recordUnitRevision(
 		throw new UnitRevisionConflict(head?.revisionId ?? null);
 	}
 	if (input.event === "delete")
-		await tx.insert(auditEvent).values({
-			actorProfileId: input.actorProfileId,
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: input.actorProfileId
+				? { kind: "profile", profileId: input.actorProfileId }
+				: { kind: "system" },
+			authority: { kind: "unit", id: input.unitId },
 			action: "unit.delete",
-			decisionCode: "allowed",
-			subjectKind: "unit",
-			subjectId: input.unitId,
+			target: { kind: "unit", id: input.unitId },
 		});
 
 	const documents = snapshotToDocuments(await snapshotUnit(tx, input.unitId));

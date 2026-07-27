@@ -1,6 +1,3 @@
-export const CapabilityAuthorityValues = ["platform", "realm"] as const;
-export type CapabilityAuthority = (typeof CapabilityAuthorityValues)[number];
-
 export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
 export type UnitAccessSubjectKind = (typeof UnitAccessSubjectKindValues)[number];
 
@@ -76,9 +73,16 @@ export const DevelopmentPreviewCapability = "platform.development_preview.access
 /**
  * Platform-wide capabilities assignable to Profiles.
  *
+ * @remarks
+ * These capabilities govern global control-plane operations. They are not
+ * roles, employment states, or API credential scopes.
+ *
  * @alpha
  */
 export const PlatformCapabilityValues = [
+	"platform.access.read",
+	"platform.access.manage",
+	"platform.audit.read",
 	"entity.associations.override",
 	"unit.edit",
 	DevelopmentPreviewCapability,
@@ -89,10 +93,167 @@ export const PlatformCapabilityValues = [
 	"platform.api_token_policy.manage",
 	"platform.moderate",
 	"platform.suppress",
-	"platform.grants.manage",
 	...RealmPermissionValues,
 ] as const;
 export type PlatformCapability = (typeof PlatformCapabilityValues)[number];
+
+export type PlatformCapabilityDefinition = {
+	readonly resource: string;
+	readonly action: string;
+	readonly rationale: string;
+};
+
+/**
+ * Complete semantic metadata for every platform capability.
+ *
+ * @alpha
+ */
+export const PlatformCapabilityDefinitions = {
+	"platform.access.read": {
+		resource: "platform.access",
+		action: "read",
+		rationale:
+			"Inspecting who has platform authority is independently grantable from changing it.",
+	},
+	"platform.access.manage": {
+		resource: "platform.access",
+		action: "manage",
+		rationale:
+			"Platform access administration intentionally bundles granting, renewing, and revoking platform capabilities.",
+	},
+	"platform.audit.read": {
+		resource: "platform.audit",
+		action: "read",
+		rationale:
+			"Global security audit data contains sensitive operational context and requires an independent read boundary.",
+	},
+	"entity.associations.override": {
+		resource: "entity.associations",
+		action: "override",
+		rationale: "Overrides association consent and validation workflows across the platform.",
+	},
+	"unit.edit": {
+		resource: "unit",
+		action: "edit",
+		rationale: "Provides emergency platform-wide Unit editing authority.",
+	},
+	[DevelopmentPreviewCapability]: {
+		resource: "platform.development_preview",
+		action: "access",
+		rationale:
+			"Controls entry to unreleased product surfaces without granting their domain operations.",
+	},
+	"unit.ownership.transfer": {
+		resource: "unit.ownership",
+		action: "transfer",
+		rationale: "Transfers ownership outside the target Unit's ordinary access policy.",
+	},
+	"unit.slug.manage": {
+		resource: "unit.slug",
+		action: "manage",
+		rationale: "Administers canonical Unit addresses outside ordinary owner-managed routes.",
+	},
+	"unit.slug.namespace.manage": {
+		resource: "unit.slug.namespace",
+		action: "manage",
+		rationale: "Administers global slug namespaces.",
+	},
+	"unit.slug.redirect.release": {
+		resource: "unit.slug.redirect",
+		action: "release",
+		rationale: "Releases reserved redirects and can affect public address integrity.",
+	},
+	"platform.api_token_policy.manage": {
+		resource: "platform.api_token_policy",
+		action: "manage",
+		rationale: "Administers platform API-token policies and privileged assignments.",
+	},
+	"platform.moderate": {
+		resource: "platform",
+		action: "moderate",
+		rationale: "Applies moderation decisions across platform resources.",
+	},
+	"platform.suppress": {
+		resource: "platform",
+		action: "suppress",
+		rationale: "Suppresses sensitive historical content across platform resources.",
+	},
+	"realm.contribute": {
+		resource: "realm",
+		action: "contribute",
+		rationale: "Provides recovery authority for Realm contributions across the platform.",
+	},
+	"realm.units.create": {
+		resource: "realm.units",
+		action: "create",
+		rationale: "Provides recovery authority to create Units in any Realm.",
+	},
+	"realm.post.replies.create": {
+		resource: "realm.post.replies",
+		action: "create",
+		rationale: "Provides recovery authority to create Replies in any Realm.",
+	},
+	"realm.settings.update": {
+		resource: "realm.settings",
+		action: "update",
+		rationale: "Provides recovery authority to update settings in any Realm.",
+	},
+	"realm.members.read": {
+		resource: "realm.members",
+		action: "read",
+		rationale: "Provides recovery authority to inspect membership in any Realm.",
+	},
+	"realm.members.manage": {
+		resource: "realm.members",
+		action: "manage",
+		rationale: "Provides recovery authority to administer membership in any Realm.",
+	},
+	"realm.rules.update": {
+		resource: "realm.rules",
+		action: "update",
+		rationale: "Provides recovery authority to publish rules in any Realm.",
+	},
+	"realm.pins.manage": {
+		resource: "realm.pins",
+		action: "manage",
+		rationale: "Provides recovery authority to administer pins in any Realm.",
+	},
+	"realm.units.moderate": {
+		resource: "realm.units",
+		action: "moderate",
+		rationale: "Provides recovery authority to moderate Units in any Realm.",
+	},
+} as const satisfies Record<PlatformCapability, PlatformCapabilityDefinition>;
+
+/**
+ * Canonical prerequisite access implied by a platform capability.
+ *
+ * @alpha
+ */
+export const PlatformCapabilityImplications: Partial<
+	Record<PlatformCapability, readonly PlatformCapability[]>
+> = {
+	"platform.access.manage": ["platform.access.read"],
+	"realm.members.manage": ["realm.members.read"],
+};
+
+/**
+ * Returns the implication-closed platform capability set in canonical order.
+ *
+ * @alpha
+ */
+export function expandPlatformCapabilities(
+	capabilities: readonly PlatformCapability[],
+): PlatformCapability[] {
+	const expanded = new Set<PlatformCapability>();
+	const visit = (capability: PlatformCapability) => {
+		if (expanded.has(capability)) return;
+		expanded.add(capability);
+		for (const implied of PlatformCapabilityImplications[capability] ?? []) visit(implied);
+	};
+	for (const capability of capabilities) visit(capability);
+	return PlatformCapabilityValues.filter((capability) => expanded.has(capability));
+}
 
 export const StandardPermissionActionValues = ["read", "create", "update", "delete"] as const;
 export type StandardPermissionAction = (typeof StandardPermissionActionValues)[number];

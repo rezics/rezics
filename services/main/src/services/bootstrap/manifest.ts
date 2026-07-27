@@ -85,8 +85,8 @@ export const OfficialProfileIdValues: readonly string[] = OfficialProfileManifes
 	(profile) => profile.profileId,
 );
 
-export const BootstrapSuperAdminProfile = {
-	key: "superAdmin",
+export const BootstrapPlatformAdministratorProfile = {
+	key: "platformAdministrator",
 	authUserId: "019b76da-a800-7100-8000-000000000004",
 	accountId: "019b76da-a800-7110-8000-000000000004",
 	profileId: "019b76da-a800-7200-8000-000000000004",
@@ -102,7 +102,7 @@ export const BootstrapSuperAdminProfile = {
 
 export const BootstrapProfileManifest = [
 	...OfficialProfileManifest,
-	BootstrapSuperAdminProfile,
+	BootstrapPlatformAdministratorProfile,
 ] as const;
 export const BootstrapProfileIdValues: readonly string[] = BootstrapProfileManifest.map(
 	(profile) => profile.profileId,

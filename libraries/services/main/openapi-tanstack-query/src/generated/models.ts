@@ -4812,7 +4812,9 @@ export const ApiErrorCode = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	PlatformGrantManagerRequired: "PlatformGrantManagerRequired",
+	PlatformAccessManagerRequired: "PlatformAccessManagerRequired",
+	PlatformAccessRevisionConflict: "PlatformAccessRevisionConflict",
+	PlatformAccessConfigurationInvalid: "PlatformAccessConfigurationInvalid",
 	CollectionOwnershipRequired: "CollectionOwnershipRequired",
 	UnitNotFound: "UnitNotFound",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -12124,7 +12126,7 @@ export type GetApiApiTokensStatus200ItemsPermissionsEnum =
 
 export const GetApiApiTokensStatus200ItemsPolicyKindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type GetApiApiTokensStatus200ItemsPolicyKindEnum =
@@ -12344,7 +12346,7 @@ export type PostApiApiTokensStatus200PermissionsEnum =
 
 export const PostApiApiTokensStatus200PolicyKindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type PostApiApiTokensStatus200PolicyKindEnum =
@@ -12679,7 +12681,7 @@ export type PatchApiApiTokensByTokenIdStatus200PermissionsEnum =
 
 export const PatchApiApiTokensByTokenIdStatus200PolicyKindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type PatchApiApiTokensByTokenIdStatus200PolicyKindEnum =
@@ -13140,7 +13142,7 @@ export type PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum =
 
 export const PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum =
@@ -13481,7 +13483,7 @@ export type GetCurrentApiTokenStatus200PermissionsEnum =
 
 export const GetCurrentApiTokenStatus200PolicyKindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type GetCurrentApiTokenStatus200PolicyKindEnum =
@@ -13664,7 +13666,7 @@ export type GetCurrentApiTokenResponse =
 
 export const GetApiApiTokenPoliciesStatus200ItemsKindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type GetApiApiTokenPoliciesStatus200ItemsKindEnum =
@@ -13842,7 +13844,7 @@ export type PatchApiApiTokenPoliciesByPolicyKeyPath = {
 
 export const PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum =
@@ -14142,7 +14144,7 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdPath = {
 
 export const PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum = {
 	standard: "standard",
-	staff_trusted: "staff_trusted",
+	privileged: "privileged",
 } as const;
 
 export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum =
@@ -24352,10 +24354,131 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponse
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus422
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus500;
 
+export const GetApiAuditEventsCategory = {
+	admin_activity: "admin_activity",
+	policy_denied: "policy_denied",
+	system_event: "system_event",
+} as const;
+
+export type GetApiAuditEventsCategory =
+	(typeof GetApiAuditEventsCategory)[keyof typeof GetApiAuditEventsCategory];
+
+export const GetApiAuditEventsOutcome = {
+	succeeded: "succeeded",
+	denied: "denied",
+	failed: "failed",
+} as const;
+
+export type GetApiAuditEventsOutcome =
+	(typeof GetApiAuditEventsOutcome)[keyof typeof GetApiAuditEventsOutcome];
+
+export const GetApiAuditEventsAuthorityKind = {
+	platform: "platform",
+	realm: "realm",
+	unit: "unit",
+} as const;
+
+export type GetApiAuditEventsAuthorityKind =
+	(typeof GetApiAuditEventsAuthorityKind)[keyof typeof GetApiAuditEventsAuthorityKind];
+
 /**
  * @type object
  */
-export type GetApiGovernanceGrantsStatus200 = {
+export type GetApiAuditEventsQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+	/**
+	 * @default 'admin_activity'
+	 * @type string | undefined
+	 */
+	category?: GetApiAuditEventsCategory;
+	/**
+	 * @default 'succeeded'
+	 * @type string | undefined
+	 */
+	outcome?: GetApiAuditEventsOutcome;
+	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	action?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	actorProfileId?: string;
+	/**
+	 * @default 'platform'
+	 * @type string | undefined
+	 */
+	authorityKind?: GetApiAuditEventsAuthorityKind;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	authorityId?: string;
+};
+
+export const GetApiAuditEventsStatus200ItemsCategoryEnum = {
+	admin_activity: "admin_activity",
+	policy_denied: "policy_denied",
+	system_event: "system_event",
+} as const;
+
+export type GetApiAuditEventsStatus200ItemsCategoryEnum =
+	(typeof GetApiAuditEventsStatus200ItemsCategoryEnum)[keyof typeof GetApiAuditEventsStatus200ItemsCategoryEnum];
+
+export const GetApiAuditEventsStatus200ItemsOutcomeEnum = {
+	succeeded: "succeeded",
+	denied: "denied",
+	failed: "failed",
+} as const;
+
+export type GetApiAuditEventsStatus200ItemsOutcomeEnum =
+	(typeof GetApiAuditEventsStatus200ItemsOutcomeEnum)[keyof typeof GetApiAuditEventsStatus200ItemsOutcomeEnum];
+
+export const GetApiAuditEventsStatus200ItemsActorKindEnum = {
+	profile: "profile",
+	system: "system",
+} as const;
+
+export type GetApiAuditEventsStatus200ItemsActorKindEnum =
+	(typeof GetApiAuditEventsStatus200ItemsActorKindEnum)[keyof typeof GetApiAuditEventsStatus200ItemsActorKindEnum];
+
+export const GetApiAuditEventsStatus200ItemsActorCredentialKindEnum = {
+	session: "session",
+	api_token: "api_token",
+	bootstrap: "bootstrap",
+	system: "system",
+} as const;
+
+export type GetApiAuditEventsStatus200ItemsActorCredentialKindEnum =
+	(typeof GetApiAuditEventsStatus200ItemsActorCredentialKindEnum)[keyof typeof GetApiAuditEventsStatus200ItemsActorCredentialKindEnum];
+
+export const GetApiAuditEventsStatus200ItemsAuthorityKindEnum = {
+	platform: "platform",
+	realm: "realm",
+	unit: "unit",
+} as const;
+
+export type GetApiAuditEventsStatus200ItemsAuthorityKindEnum =
+	(typeof GetApiAuditEventsStatus200ItemsAuthorityKindEnum)[keyof typeof GetApiAuditEventsStatus200ItemsAuthorityKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiAuditEventsStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -24366,60 +24489,92 @@ export type GetApiGovernanceGrantsStatus200 = {
 		 * @type string
 		 */
 		id: string;
+		schemaVersion: string | number;
 		/**
-		 * @description
-		 * Format: `uuid`
+		 * @default 'admin_activity'
 		 * @type string
 		 */
-		profileId: string;
+		category: GetApiAuditEventsStatus200ItemsCategoryEnum;
+		/**
+		 * @default 'succeeded'
+		 * @type string
+		 */
+		outcome: GetApiAuditEventsStatus200ItemsOutcomeEnum;
+		/**
+		 * @type object
+		 */
+		actor: {
+			/**
+			 * @default 'profile'
+			 * @type string
+			 */
+			kind: GetApiAuditEventsStatus200ItemsActorKindEnum;
+			profileId: (string | null) | null;
+			profileName: (string | null) | null;
+			/**
+			 * @default 'session'
+			 * @type string
+			 */
+			credentialKind: GetApiAuditEventsStatus200ItemsActorCredentialKindEnum;
+			credentialId: (string | null) | null;
+		};
+		/**
+		 * @type object
+		 */
+		authority: {
+			/**
+			 * @default 'platform'
+			 * @type string
+			 */
+			kind: GetApiAuditEventsStatus200ItemsAuthorityKindEnum;
+			id: (string | null) | null;
+		};
 		/**
 		 * @type string
 		 */
-		capability: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		grantedByProfileId: string;
-		expiresAt: (string | null) | null;
-		revokedAt: (string | null) | null;
+		action: string;
+		reasonCode: (string | null) | null;
+		requestId: (string | null) | null;
+		traceId: (string | null) | null;
+		target:
+			| ({
+					/**
+					 * @type string
+					 */
+					kind: string;
+					id: (string | null) | null;
+					path: (string | null) | null;
+					name: (string | null) | null;
+			  } | null)
+			| null;
+		details:
+			| ({
+					[key: string]: unknown;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
 		 * @type string
 		 */
 		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
 	}[];
+	nextCursor: (string | null) | null;
 };
-
-export const GetApiGovernanceGrantsStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type GetApiGovernanceGrantsStatus403ErrorCodeEnum =
-	(typeof GetApiGovernanceGrantsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceGrantsStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiGovernanceGrantsStatus403 = {
+export type GetApiAuditEventsStatus400 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'RealmCapabilityRequired'
+		 * @default 'InvalidPaginationCursor'
 		 * @type string
 		 */
-		code: GetApiGovernanceGrantsStatus403ErrorCodeEnum;
+		code: "InvalidPaginationCursor";
 		/**
 		 * @type string
 		 */
@@ -24438,412 +24593,71 @@ export type GetApiGovernanceGrantsStatus403 = {
 /**
  * @type object
  */
-export type GetApiGovernanceGrantsStatus500 = InternalError;
+export type GetApiAuditEventsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
  */
-export type GetApiGovernanceGrantsOptions = {
+export type GetApiAuditEventsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiAuditEventsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiAuditEventsOptions = {
 	body?: never;
 	path?: never;
-	query?: never;
+	query?: GetApiAuditEventsQuery;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiGovernanceGrantsResponses = {
-	"200": GetApiGovernanceGrantsStatus200;
-	"403": GetApiGovernanceGrantsStatus403;
-	"500": GetApiGovernanceGrantsStatus500;
+export type GetApiAuditEventsResponses = {
+	"200": GetApiAuditEventsStatus200;
+	"400": GetApiAuditEventsStatus400;
+	"403": GetApiAuditEventsStatus403;
+	"422": GetApiAuditEventsStatus422;
+	"500": GetApiAuditEventsStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiGovernanceGrantsResponse =
-	| GetApiGovernanceGrantsStatus200
-	| GetApiGovernanceGrantsStatus403
-	| GetApiGovernanceGrantsStatus500;
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	/**
-	 * @type string
-	 */
-	capability: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	grantedByProfileId: string;
-	expiresAt: (string | null) | null;
-	revokedAt: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export type PostApiGovernanceGrantsStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'CapabilityGrantExpiryInvalid'
-				 * @type string
-				 */
-				code: "CapabilityGrantExpiryInvalid";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-export const PostApiGovernanceGrantsStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	FreshSessionRequired: "FreshSessionRequired",
-} as const;
-
-export type PostApiGovernanceGrantsStatus403ErrorCodeEnum =
-	(typeof PostApiGovernanceGrantsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceGrantsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: PostApiGovernanceGrantsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformGrantManagerRequired'
-		 * @type string
-		 */
-		code: "PlatformGrantManagerRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsStatus500 = InternalError;
-
-export const PostApiGovernanceGrantsRequestCapabilityEnum = {
-	"entity.associations.override": "entity.associations.override",
-	"unit.edit": "unit.edit",
-	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
-	"unit.slug.manage": "unit.slug.manage",
-	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
-	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
-	"platform.moderate": "platform.moderate",
-	"platform.suppress": "platform.suppress",
-	"platform.grants.manage": "platform.grants.manage",
-	"realm.contribute": "realm.contribute",
-	"realm.units.create": "realm.units.create",
-	"realm.post.replies.create": "realm.post.replies.create",
-	"realm.settings.update": "realm.settings.update",
-	"realm.members.read": "realm.members.read",
-	"realm.members.manage": "realm.members.manage",
-	"realm.rules.update": "realm.rules.update",
-	"realm.pins.manage": "realm.pins.manage",
-	"realm.units.moderate": "realm.units.moderate",
-} as const;
-
-export type PostApiGovernanceGrantsRequestCapabilityEnum =
-	(typeof PostApiGovernanceGrantsRequestCapabilityEnum)[keyof typeof PostApiGovernanceGrantsRequestCapabilityEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	/**
-	 * @type string
-	 */
-	capability: PostApiGovernanceGrantsRequestCapabilityEnum;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string | undefined
-	 */
-	expiresAt?: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsOptions = {
-	body: PostApiGovernanceGrantsBody;
-	path?: never;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceGrantsResponses = {
-	"200": PostApiGovernanceGrantsStatus200;
-	"400": PostApiGovernanceGrantsStatus400;
-	"403": PostApiGovernanceGrantsStatus403;
-	"409": PostApiGovernanceGrantsStatus409;
-	"422": PostApiGovernanceGrantsStatus422;
-	"500": PostApiGovernanceGrantsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiGovernanceGrantsResponse =
-	| PostApiGovernanceGrantsStatus200
-	| PostApiGovernanceGrantsStatus400
-	| PostApiGovernanceGrantsStatus403
-	| PostApiGovernanceGrantsStatus409
-	| PostApiGovernanceGrantsStatus422
-	| PostApiGovernanceGrantsStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	grantId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiGovernanceGrantsByGrantIdStatus204 = void;
-
-export const DeleteApiGovernanceGrantsByGrantIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	FreshSessionRequired: "FreshSessionRequired",
-} as const;
-
-export type DeleteApiGovernanceGrantsByGrantIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiGovernanceGrantsByGrantIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceGrantsByGrantIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceGrantsByGrantIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'CapabilityGrantNotFound'
-		 * @type string
-		 */
-		code: "CapabilityGrantNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformGrantManagerRequired'
-		 * @type string
-		 */
-		code: "PlatformGrantManagerRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdOptions = {
-	body?: never;
-	path: DeleteApiGovernanceGrantsByGrantIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceGrantsByGrantIdResponses = {
-	"204": DeleteApiGovernanceGrantsByGrantIdStatus204;
-	"403": DeleteApiGovernanceGrantsByGrantIdStatus403;
-	"404": DeleteApiGovernanceGrantsByGrantIdStatus404;
-	"409": DeleteApiGovernanceGrantsByGrantIdStatus409;
-	"422": DeleteApiGovernanceGrantsByGrantIdStatus422;
-	"500": DeleteApiGovernanceGrantsByGrantIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiGovernanceGrantsByGrantIdResponse =
-	| DeleteApiGovernanceGrantsByGrantIdStatus204
-	| DeleteApiGovernanceGrantsByGrantIdStatus403
-	| DeleteApiGovernanceGrantsByGrantIdStatus404
-	| DeleteApiGovernanceGrantsByGrantIdStatus409
-	| DeleteApiGovernanceGrantsByGrantIdStatus422
-	| DeleteApiGovernanceGrantsByGrantIdStatus500;
+export type GetApiAuditEventsResponse =
+	| GetApiAuditEventsStatus200
+	| GetApiAuditEventsStatus400
+	| GetApiAuditEventsStatus403
+	| GetApiAuditEventsStatus422
+	| GetApiAuditEventsStatus500;
 
 /**
  * @type object
@@ -33382,6 +33196,9 @@ export type GetApiUsersMeStatus200AvatarIconPrefixEnum =
 	(typeof GetApiUsersMeStatus200AvatarIconPrefixEnum)[keyof typeof GetApiUsersMeStatus200AvatarIconPrefixEnum];
 
 export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
+	"platform.access.read": "platform.access.read",
+	"platform.access.manage": "platform.access.manage",
+	"platform.audit.read": "platform.audit.read",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -33392,7 +33209,6 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
-	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -37347,7 +37163,10 @@ export type DeleteApiUsersByIdBlockResponse =
 	| DeleteApiUsersByIdBlockStatus429
 	| DeleteApiUsersByIdBlockStatus500;
 
-export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
+export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
+	"platform.access.read": "platform.access.read",
+	"platform.access.manage": "platform.access.manage",
+	"platform.audit.read": "platform.audit.read",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -37358,7 +37177,6 @@ export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
-	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -37370,23 +37188,23 @@ export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
-export type GetApiStaffAccessPolicyStatus200CapabilitiesEnum =
-	(typeof GetApiStaffAccessPolicyStatus200CapabilitiesEnum)[keyof typeof GetApiStaffAccessPolicyStatus200CapabilitiesEnum];
+export type GetApiPlatformAccessPolicyStatus200CapabilitiesEnum =
+	(typeof GetApiPlatformAccessPolicyStatus200CapabilitiesEnum)[keyof typeof GetApiPlatformAccessPolicyStatus200CapabilitiesEnum];
 
 /**
  * @type object
  */
-export type GetApiStaffAccessPolicyStatus200 = {
+export type GetApiPlatformAccessPolicyStatus200 = {
 	/**
 	 * @type array
 	 */
-	capabilities: GetApiStaffAccessPolicyStatus200CapabilitiesEnum[];
+	capabilities: GetApiPlatformAccessPolicyStatus200CapabilitiesEnum[];
 };
 
 /**
  * @type object
  */
-export type GetApiStaffAccessPolicyStatus403 = {
+export type GetApiPlatformAccessPolicyStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -37414,12 +37232,12 @@ export type GetApiStaffAccessPolicyStatus403 = {
 /**
  * @type object
  */
-export type GetApiStaffAccessPolicyStatus500 = InternalError;
+export type GetApiPlatformAccessPolicyStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiStaffAccessPolicyOptions = {
+export type GetApiPlatformAccessPolicyOptions = {
 	body?: never;
 	path?: never;
 	query?: never;
@@ -37429,37 +37247,40 @@ export type GetApiStaffAccessPolicyOptions = {
 /**
  * @type object
  */
-export type GetApiStaffAccessPolicyResponses = {
-	"200": GetApiStaffAccessPolicyStatus200;
-	"403": GetApiStaffAccessPolicyStatus403;
-	"500": GetApiStaffAccessPolicyStatus500;
+export type GetApiPlatformAccessPolicyResponses = {
+	"200": GetApiPlatformAccessPolicyStatus200;
+	"403": GetApiPlatformAccessPolicyStatus403;
+	"500": GetApiPlatformAccessPolicyStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiStaffAccessPolicyResponse =
-	| GetApiStaffAccessPolicyStatus200
-	| GetApiStaffAccessPolicyStatus403
-	| GetApiStaffAccessPolicyStatus500;
+export type GetApiPlatformAccessPolicyResponse =
+	| GetApiPlatformAccessPolicyStatus200
+	| GetApiPlatformAccessPolicyStatus403
+	| GetApiPlatformAccessPolicyStatus500;
 
 /**
  * @type object
  */
-export type GetApiStaffProfilesQuery = {
+export type GetApiPlatformAccessProfilesQuery = {
 	/**
 	 * @minLength 1
 	 * @maxLength 200
-	 * @type string
+	 * @type string | undefined
 	 */
-	query: string;
+	query?: string;
 	/**
-	 * @default 20
+	 * @default 50
 	 */
 	limit?: string | number;
 };
 
-export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
+export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
+	"platform.access.read": "platform.access.read",
+	"platform.access.manage": "platform.access.manage",
+	"platform.audit.read": "platform.audit.read",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -37470,7 +37291,6 @@ export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
-	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -37482,13 +37302,13 @@ export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
-export type GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum =
-	(typeof GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum)[keyof typeof GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum];
+export type GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum =
+	(typeof GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum)[keyof typeof GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum];
 
 /**
  * @type object
  */
-export type GetApiStaffProfilesStatus200 = {
+export type GetApiPlatformAccessProfilesStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -37511,10 +37331,16 @@ export type GetApiStaffProfilesStatus200 = {
 		 */
 		grants: {
 			/**
-			 * @default 'entity.associations.override'
+			 * @description
+			 * Format: `uuid`
 			 * @type string
 			 */
-			capability: GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum;
+			id: string;
+			/**
+			 * @default 'platform.access.read'
+			 * @type string
+			 */
+			capability: GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum;
 			/**
 			 * @description
 			 * Format: `uuid`
@@ -37522,18 +37348,31 @@ export type GetApiStaffProfilesStatus200 = {
 			 */
 			grantedByProfileId: string;
 			expiresAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
 		}[];
 		/**
-		 * @type boolean
+		 * @minLength 1
+		 * @type string
 		 */
-		isSuperAdmin: boolean;
+		revision: string;
 	}[];
 };
 
 /**
  * @type object
  */
-export type GetApiStaffProfilesStatus403 = {
+export type GetApiPlatformAccessProfilesStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -37561,175 +37400,46 @@ export type GetApiStaffProfilesStatus403 = {
 /**
  * @type object
  */
-export type GetApiStaffProfilesStatus422 = ValidationError;
+export type GetApiPlatformAccessProfilesStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiStaffProfilesStatus500 = InternalError;
+export type GetApiPlatformAccessProfilesStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiStaffProfilesOptions = {
+export type GetApiPlatformAccessProfilesOptions = {
 	body?: never;
 	path?: never;
-	query: GetApiStaffProfilesQuery;
+	query?: GetApiPlatformAccessProfilesQuery;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiStaffProfilesResponses = {
-	"200": GetApiStaffProfilesStatus200;
-	"403": GetApiStaffProfilesStatus403;
-	"422": GetApiStaffProfilesStatus422;
-	"500": GetApiStaffProfilesStatus500;
+export type GetApiPlatformAccessProfilesResponses = {
+	"200": GetApiPlatformAccessProfilesStatus200;
+	"403": GetApiPlatformAccessProfilesStatus403;
+	"422": GetApiPlatformAccessProfilesStatus422;
+	"500": GetApiPlatformAccessProfilesStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiStaffProfilesResponse =
-	| GetApiStaffProfilesStatus200
-	| GetApiStaffProfilesStatus403
-	| GetApiStaffProfilesStatus422
-	| GetApiStaffProfilesStatus500;
-
-export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
-	"entity.associations.override": "entity.associations.override",
-	"unit.edit": "unit.edit",
-	"platform.development_preview.access": "platform.development_preview.access",
-	"unit.ownership.transfer": "unit.ownership.transfer",
-	"unit.slug.manage": "unit.slug.manage",
-	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
-	"unit.slug.redirect.release": "unit.slug.redirect.release",
-	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
-	"platform.moderate": "platform.moderate",
-	"platform.suppress": "platform.suppress",
-	"platform.grants.manage": "platform.grants.manage",
-	"realm.contribute": "realm.contribute",
-	"realm.units.create": "realm.units.create",
-	"realm.post.replies.create": "realm.post.replies.create",
-	"realm.settings.update": "realm.settings.update",
-	"realm.members.read": "realm.members.read",
-	"realm.members.manage": "realm.members.manage",
-	"realm.rules.update": "realm.rules.update",
-	"realm.pins.manage": "realm.pins.manage",
-	"realm.units.moderate": "realm.units.moderate",
-} as const;
-
-export type GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum =
-	(typeof GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum)[keyof typeof GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum];
+export type GetApiPlatformAccessProfilesResponse =
+	| GetApiPlatformAccessProfilesStatus200
+	| GetApiPlatformAccessProfilesStatus403
+	| GetApiPlatformAccessProfilesStatus422
+	| GetApiPlatformAccessProfilesStatus500;
 
 /**
  * @type object
  */
-export type GetApiStaffMembersStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		profileId: string;
-		name: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `email`
-		 * @type string
-		 */
-		email: string;
-		/**
-		 * @type array
-		 */
-		grants: {
-			/**
-			 * @default 'entity.associations.override'
-			 * @type string
-			 */
-			capability: GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			grantedByProfileId: string;
-			expiresAt: (string | null) | null;
-		}[];
-		/**
-		 * @type boolean
-		 */
-		isSuperAdmin: boolean;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiStaffMembersStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiStaffMembersStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiStaffMembersOptions = {
-	body?: never;
-	path?: never;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiStaffMembersResponses = {
-	"200": GetApiStaffMembersStatus200;
-	"403": GetApiStaffMembersStatus403;
-	"500": GetApiStaffMembersStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiStaffMembersResponse =
-	GetApiStaffMembersStatus200 | GetApiStaffMembersStatus403 | GetApiStaffMembersStatus500;
-
-/**
- * @type object
- */
-export type PutApiStaffMembersByProfileIdPath = {
+export type GetApiPlatformAccessProfilesByProfileIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -37738,7 +37448,10 @@ export type PutApiStaffMembersByProfileIdPath = {
 	profileId: string;
 };
 
-export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
+export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum = {
+	"platform.access.read": "platform.access.read",
+	"platform.access.manage": "platform.access.manage",
+	"platform.audit.read": "platform.audit.read",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -37749,7 +37462,6 @@ export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
-	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -37761,13 +37473,13 @@ export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
-export type PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum =
-	(typeof PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum)[keyof typeof PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum];
+export type GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum =
+	(typeof GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum)[keyof typeof GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum];
 
 /**
  * @type object
  */
-export type PutApiStaffMembersByProfileIdStatus200 = {
+export type GetApiPlatformAccessProfilesByProfileIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -37786,10 +37498,16 @@ export type PutApiStaffMembersByProfileIdStatus200 = {
 	 */
 	grants: {
 		/**
-		 * @default 'entity.associations.override'
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		capability: PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum;
+		id: string;
+		/**
+		 * @default 'platform.access.read'
+		 * @type string
+		 */
+		capability: GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -37797,52 +37515,30 @@ export type PutApiStaffMembersByProfileIdStatus200 = {
 		 */
 		grantedByProfileId: string;
 		expiresAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
-	 * @type boolean
+	 * @minLength 1
+	 * @type string
 	 */
-	isSuperAdmin: boolean;
+	revision: string;
 };
-
-export type PutApiStaffMembersByProfileIdStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'CapabilityGrantExpiryInvalid'
-				 * @type string
-				 */
-				code: "CapabilityGrantExpiryInvalid";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-export const PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	FreshSessionRequired: "FreshSessionRequired",
-} as const;
-
-export type PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum =
-	(typeof PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum)[keyof typeof PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiStaffMembersByProfileIdStatus403 = {
+export type GetApiPlatformAccessProfilesByProfileIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -37851,7 +37547,7 @@ export type PutApiStaffMembersByProfileIdStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: PutApiStaffMembersByProfileIdStatus403ErrorCodeEnum;
+		code: "PlatformCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -37870,7 +37566,7 @@ export type PutApiStaffMembersByProfileIdStatus403 = {
 /**
  * @type object
  */
-export type PutApiStaffMembersByProfileIdStatus404 = {
+export type GetApiPlatformAccessProfilesByProfileIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -37898,42 +37594,60 @@ export type PutApiStaffMembersByProfileIdStatus404 = {
 /**
  * @type object
  */
-export type PutApiStaffMembersByProfileIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformGrantManagerRequired'
-		 * @type string
-		 */
-		code: "PlatformGrantManagerRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
+export type GetApiPlatformAccessProfilesByProfileIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformAccessProfilesByProfileIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformAccessProfilesByProfileIdOptions = {
+	body?: never;
+	path: GetApiPlatformAccessProfilesByProfileIdPath;
+	query?: never;
+	headers?: never;
 };
 
 /**
  * @type object
  */
-export type PutApiStaffMembersByProfileIdStatus422 = ValidationError;
+export type GetApiPlatformAccessProfilesByProfileIdResponses = {
+	"200": GetApiPlatformAccessProfilesByProfileIdStatus200;
+	"403": GetApiPlatformAccessProfilesByProfileIdStatus403;
+	"404": GetApiPlatformAccessProfilesByProfileIdStatus404;
+	"422": GetApiPlatformAccessProfilesByProfileIdStatus422;
+	"500": GetApiPlatformAccessProfilesByProfileIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiPlatformAccessProfilesByProfileIdResponse =
+	| GetApiPlatformAccessProfilesByProfileIdStatus200
+	| GetApiPlatformAccessProfilesByProfileIdStatus403
+	| GetApiPlatformAccessProfilesByProfileIdStatus404
+	| GetApiPlatformAccessProfilesByProfileIdStatus422
+	| GetApiPlatformAccessProfilesByProfileIdStatus500;
 
 /**
  * @type object
  */
-export type PutApiStaffMembersByProfileIdStatus500 = InternalError;
+export type PutApiPlatformAccessProfilesByProfileIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+};
 
-export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
+export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum = {
+	"platform.access.read": "platform.access.read",
+	"platform.access.manage": "platform.access.manage",
+	"platform.audit.read": "platform.audit.read",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -37944,7 +37658,6 @@ export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
-	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
 	"realm.post.replies.create": "realm.post.replies.create",
@@ -37956,109 +37669,115 @@ export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
-export type PutApiStaffMembersByProfileIdRequestCapabilitiesEnum =
-	(typeof PutApiStaffMembersByProfileIdRequestCapabilitiesEnum)[keyof typeof PutApiStaffMembersByProfileIdRequestCapabilitiesEnum];
+export type PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum =
+	(typeof PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum)[keyof typeof PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum];
 
 /**
  * @type object
  */
-export type PutApiStaffMembersByProfileIdBody = {
+export type PutApiPlatformAccessProfilesByProfileIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	name: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `email`
+	 * @type string
+	 */
+	email: string;
 	/**
 	 * @type array
 	 */
-	capabilities: PutApiStaffMembersByProfileIdRequestCapabilitiesEnum[];
-	expiresAt: (string | null) | null;
-};
-
-/**
- * @type object
- */
-export type PutApiStaffMembersByProfileIdOptions = {
-	body: PutApiStaffMembersByProfileIdBody;
-	path: PutApiStaffMembersByProfileIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiStaffMembersByProfileIdResponses = {
-	"200": PutApiStaffMembersByProfileIdStatus200;
-	"400": PutApiStaffMembersByProfileIdStatus400;
-	"403": PutApiStaffMembersByProfileIdStatus403;
-	"404": PutApiStaffMembersByProfileIdStatus404;
-	"409": PutApiStaffMembersByProfileIdStatus409;
-	"422": PutApiStaffMembersByProfileIdStatus422;
-	"500": PutApiStaffMembersByProfileIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiStaffMembersByProfileIdResponse =
-	| PutApiStaffMembersByProfileIdStatus200
-	| PutApiStaffMembersByProfileIdStatus400
-	| PutApiStaffMembersByProfileIdStatus403
-	| PutApiStaffMembersByProfileIdStatus404
-	| PutApiStaffMembersByProfileIdStatus409
-	| PutApiStaffMembersByProfileIdStatus422
-	| PutApiStaffMembersByProfileIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiStaffAuditQuery = {
-	/**
-	 * @default 50
-	 */
-	limit?: string | number;
-};
-
-/**
- * @type object
- */
-export type GetApiStaffAuditStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
+	grants: {
 		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
 		 */
 		id: string;
-		actorProfileId: (string | null) | null;
-		actorName: (string | null) | null;
 		/**
+		 * @default 'platform.access.read'
 		 * @type string
 		 */
-		action: string;
+		capability: PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnum;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		decisionCode: string;
-		subjectProfileId: (string | null) | null;
-		subjectName: (string | null) | null;
-		metadata:
-			| ({
-					[key: string]: unknown;
-			  } | null)
-			| null;
+		grantedByProfileId: string;
+		expiresAt: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
 		 * @type string
 		 */
 		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
+	/**
+	 * @minLength 1
+	 * @type string
+	 */
+	revision: string;
 };
+
+export const PutApiPlatformAccessProfilesByProfileIdStatus400ErrorCodeEnum = {
+	CapabilityGrantExpiryInvalid: "CapabilityGrantExpiryInvalid",
+	PlatformAccessConfigurationInvalid: "PlatformAccessConfigurationInvalid",
+} as const;
+
+export type PutApiPlatformAccessProfilesByProfileIdStatus400ErrorCodeEnum =
+	(typeof PutApiPlatformAccessProfilesByProfileIdStatus400ErrorCodeEnum)[keyof typeof PutApiPlatformAccessProfilesByProfileIdStatus400ErrorCodeEnum];
+
+export type PutApiPlatformAccessProfilesByProfileIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'CapabilityGrantExpiryInvalid'
+				 * @type string
+				 */
+				code: PutApiPlatformAccessProfilesByProfileIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PutApiPlatformAccessProfilesByProfileIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PutApiPlatformAccessProfilesByProfileIdStatus403ErrorCodeEnum =
+	(typeof PutApiPlatformAccessProfilesByProfileIdStatus403ErrorCodeEnum)[keyof typeof PutApiPlatformAccessProfilesByProfileIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiStaffAuditStatus403 = {
+export type PutApiPlatformAccessProfilesByProfileIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -38067,7 +37786,7 @@ export type GetApiStaffAuditStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "PlatformCapabilityRequired";
+		code: PutApiPlatformAccessProfilesByProfileIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -38086,41 +37805,161 @@ export type GetApiStaffAuditStatus403 = {
 /**
  * @type object
  */
-export type GetApiStaffAuditStatus422 = ValidationError;
+export type PutApiPlatformAccessProfilesByProfileIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ProfileNotFound'
+		 * @type string
+		 */
+		code: "ProfileNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiPlatformAccessProfilesByProfileIdStatus409ErrorCodeEnum = {
+	PlatformAccessManagerRequired: "PlatformAccessManagerRequired",
+	PlatformAccessRevisionConflict: "PlatformAccessRevisionConflict",
+} as const;
+
+export type PutApiPlatformAccessProfilesByProfileIdStatus409ErrorCodeEnum =
+	(typeof PutApiPlatformAccessProfilesByProfileIdStatus409ErrorCodeEnum)[keyof typeof PutApiPlatformAccessProfilesByProfileIdStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiStaffAuditStatus500 = InternalError;
+export type PutApiPlatformAccessProfilesByProfileIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformAccessManagerRequired'
+		 * @type string
+		 */
+		code: PutApiPlatformAccessProfilesByProfileIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
  */
-export type GetApiStaffAuditOptions = {
-	body?: never;
-	path?: never;
-	query?: GetApiStaffAuditQuery;
+export type PutApiPlatformAccessProfilesByProfileIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiPlatformAccessProfilesByProfileIdStatus500 = InternalError;
+
+export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum = {
+	"platform.access.read": "platform.access.read",
+	"platform.access.manage": "platform.access.manage",
+	"platform.audit.read": "platform.audit.read",
+	"entity.associations.override": "entity.associations.override",
+	"unit.edit": "unit.edit",
+	"platform.development_preview.access": "platform.development_preview.access",
+	"unit.ownership.transfer": "unit.ownership.transfer",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
+	"platform.moderate": "platform.moderate",
+	"platform.suppress": "platform.suppress",
+	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
+	"realm.settings.update": "realm.settings.update",
+	"realm.members.read": "realm.members.read",
+	"realm.members.manage": "realm.members.manage",
+	"realm.rules.update": "realm.rules.update",
+	"realm.pins.manage": "realm.pins.manage",
+	"realm.units.moderate": "realm.units.moderate",
+} as const;
+
+export type PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum =
+	(typeof PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum)[keyof typeof PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum];
+
+/**
+ * @type object
+ */
+export type PutApiPlatformAccessProfilesByProfileIdBody = {
+	/**
+	 * @minLength 1
+	 * @type string
+	 */
+	expectedRevision: string;
+	/**
+	 * @type array
+	 */
+	grants: {
+		/**
+		 * @default 'platform.access.read'
+		 * @type string
+		 */
+		capability: PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum;
+		expiresAt: (string | null) | null;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PutApiPlatformAccessProfilesByProfileIdOptions = {
+	body: PutApiPlatformAccessProfilesByProfileIdBody;
+	path: PutApiPlatformAccessProfilesByProfileIdPath;
+	query?: never;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiStaffAuditResponses = {
-	"200": GetApiStaffAuditStatus200;
-	"403": GetApiStaffAuditStatus403;
-	"422": GetApiStaffAuditStatus422;
-	"500": GetApiStaffAuditStatus500;
+export type PutApiPlatformAccessProfilesByProfileIdResponses = {
+	"200": PutApiPlatformAccessProfilesByProfileIdStatus200;
+	"400": PutApiPlatformAccessProfilesByProfileIdStatus400;
+	"403": PutApiPlatformAccessProfilesByProfileIdStatus403;
+	"404": PutApiPlatformAccessProfilesByProfileIdStatus404;
+	"409": PutApiPlatformAccessProfilesByProfileIdStatus409;
+	"422": PutApiPlatformAccessProfilesByProfileIdStatus422;
+	"500": PutApiPlatformAccessProfilesByProfileIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiStaffAuditResponse =
-	| GetApiStaffAuditStatus200
-	| GetApiStaffAuditStatus403
-	| GetApiStaffAuditStatus422
-	| GetApiStaffAuditStatus500;
+export type PutApiPlatformAccessProfilesByProfileIdResponse =
+	| PutApiPlatformAccessProfilesByProfileIdStatus200
+	| PutApiPlatformAccessProfilesByProfileIdStatus400
+	| PutApiPlatformAccessProfilesByProfileIdStatus403
+	| PutApiPlatformAccessProfilesByProfileIdStatus404
+	| PutApiPlatformAccessProfilesByProfileIdStatus409
+	| PutApiPlatformAccessProfilesByProfileIdStatus422
+	| PutApiPlatformAccessProfilesByProfileIdStatus500;
 
 /**
  * @type object
@@ -38210,6 +38049,34 @@ export type GetApiTagsByTagIdStatus200 = {
 /**
  * @type object
  */
+export type GetApiTagsByTagIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiTagsByTagIdStatus403 = {
 	/**
 	 * @type object
@@ -38271,6 +38138,30 @@ export type GetApiTagsByTagIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiTagsByTagIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiTagsByTagIdStatus500 = InternalError;
 
 /**
@@ -38288,9 +38179,11 @@ export type GetApiTagsByTagIdOptions = {
  */
 export type GetApiTagsByTagIdResponses = {
 	"200": GetApiTagsByTagIdStatus200;
+	"401": GetApiTagsByTagIdStatus401;
 	"403": GetApiTagsByTagIdStatus403;
 	"404": GetApiTagsByTagIdStatus404;
 	"422": GetApiTagsByTagIdStatus422;
+	"429": GetApiTagsByTagIdStatus429;
 	"500": GetApiTagsByTagIdStatus500;
 };
 
@@ -38299,9 +38192,11 @@ export type GetApiTagsByTagIdResponses = {
  */
 export type GetApiTagsByTagIdResponse =
 	| GetApiTagsByTagIdStatus200
+	| GetApiTagsByTagIdStatus401
 	| GetApiTagsByTagIdStatus403
 	| GetApiTagsByTagIdStatus404
 	| GetApiTagsByTagIdStatus422
+	| GetApiTagsByTagIdStatus429
 	| GetApiTagsByTagIdStatus500;
 
 /**
@@ -38571,6 +38466,34 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 /**
  * @type object
  */
+export type GetApiTagStructuresByStructureIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiTagStructuresByStructureIdStatus403 = {
 	/**
 	 * @type object
@@ -38632,6 +38555,30 @@ export type GetApiTagStructuresByStructureIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiTagStructuresByStructureIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiTagStructuresByStructureIdStatus500 = InternalError;
 
 /**
@@ -38649,9 +38596,11 @@ export type GetApiTagStructuresByStructureIdOptions = {
  */
 export type GetApiTagStructuresByStructureIdResponses = {
 	"200": GetApiTagStructuresByStructureIdStatus200;
+	"401": GetApiTagStructuresByStructureIdStatus401;
 	"403": GetApiTagStructuresByStructureIdStatus403;
 	"404": GetApiTagStructuresByStructureIdStatus404;
 	"422": GetApiTagStructuresByStructureIdStatus422;
+	"429": GetApiTagStructuresByStructureIdStatus429;
 	"500": GetApiTagStructuresByStructureIdStatus500;
 };
 
@@ -38660,9 +38609,11 @@ export type GetApiTagStructuresByStructureIdResponses = {
  */
 export type GetApiTagStructuresByStructureIdResponse =
 	| GetApiTagStructuresByStructureIdStatus200
+	| GetApiTagStructuresByStructureIdStatus401
 	| GetApiTagStructuresByStructureIdStatus403
 	| GetApiTagStructuresByStructureIdStatus404
 	| GetApiTagStructuresByStructureIdStatus422
+	| GetApiTagStructuresByStructureIdStatus429
 	| GetApiTagStructuresByStructureIdStatus500;
 
 /**
@@ -41555,7 +41506,7 @@ export type ReplaceOwnProfileSlugAddressResponse =
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffPath = {
+export type GetUnitSlugAddressWithPlatformAccessPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -41567,7 +41518,7 @@ export type GetUnitSlugAddressAsStaffPath = {
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffStatus200 = {
+export type GetUnitSlugAddressWithPlatformAccessStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -41593,7 +41544,7 @@ export type GetUnitSlugAddressAsStaffStatus200 = {
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffStatus401 = {
+export type GetUnitSlugAddressWithPlatformAccessStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -41621,7 +41572,7 @@ export type GetUnitSlugAddressAsStaffStatus401 = {
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffStatus403 = {
+export type GetUnitSlugAddressWithPlatformAccessStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -41646,18 +41597,18 @@ export type GetUnitSlugAddressAsStaffStatus403 = {
 	requestId: string;
 };
 
-export const GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum = {
+export const GetUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	UnitSlugAddressNotFound: "UnitSlugAddressNotFound",
 } as const;
 
-export type GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum =
-	(typeof GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum)[keyof typeof GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum];
+export type GetUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum =
+	(typeof GetUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum)[keyof typeof GetUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffStatus404 = {
+export type GetUnitSlugAddressWithPlatformAccessStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -41666,7 +41617,7 @@ export type GetUnitSlugAddressAsStaffStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum;
+		code: GetUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -41685,19 +41636,19 @@ export type GetUnitSlugAddressAsStaffStatus404 = {
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffStatus422 = ValidationError;
+export type GetUnitSlugAddressWithPlatformAccessStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffStatus500 = InternalError;
+export type GetUnitSlugAddressWithPlatformAccessStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffOptions = {
+export type GetUnitSlugAddressWithPlatformAccessOptions = {
 	body?: never;
-	path: GetUnitSlugAddressAsStaffPath;
+	path: GetUnitSlugAddressWithPlatformAccessPath;
 	query?: never;
 	headers?: never;
 };
@@ -41705,30 +41656,30 @@ export type GetUnitSlugAddressAsStaffOptions = {
 /**
  * @type object
  */
-export type GetUnitSlugAddressAsStaffResponses = {
-	"200": GetUnitSlugAddressAsStaffStatus200;
-	"401": GetUnitSlugAddressAsStaffStatus401;
-	"403": GetUnitSlugAddressAsStaffStatus403;
-	"404": GetUnitSlugAddressAsStaffStatus404;
-	"422": GetUnitSlugAddressAsStaffStatus422;
-	"500": GetUnitSlugAddressAsStaffStatus500;
+export type GetUnitSlugAddressWithPlatformAccessResponses = {
+	"200": GetUnitSlugAddressWithPlatformAccessStatus200;
+	"401": GetUnitSlugAddressWithPlatformAccessStatus401;
+	"403": GetUnitSlugAddressWithPlatformAccessStatus403;
+	"404": GetUnitSlugAddressWithPlatformAccessStatus404;
+	"422": GetUnitSlugAddressWithPlatformAccessStatus422;
+	"500": GetUnitSlugAddressWithPlatformAccessStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetUnitSlugAddressAsStaffResponse =
-	| GetUnitSlugAddressAsStaffStatus200
-	| GetUnitSlugAddressAsStaffStatus401
-	| GetUnitSlugAddressAsStaffStatus403
-	| GetUnitSlugAddressAsStaffStatus404
-	| GetUnitSlugAddressAsStaffStatus422
-	| GetUnitSlugAddressAsStaffStatus500;
+export type GetUnitSlugAddressWithPlatformAccessResponse =
+	| GetUnitSlugAddressWithPlatformAccessStatus200
+	| GetUnitSlugAddressWithPlatformAccessStatus401
+	| GetUnitSlugAddressWithPlatformAccessStatus403
+	| GetUnitSlugAddressWithPlatformAccessStatus404
+	| GetUnitSlugAddressWithPlatformAccessStatus422
+	| GetUnitSlugAddressWithPlatformAccessStatus500;
 
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffPath = {
+export type ReplaceUnitSlugAddressWithPlatformAccessPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -41740,7 +41691,7 @@ export type ReplaceUnitSlugAddressAsStaffPath = {
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffStatus200 = {
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -41768,7 +41719,7 @@ export type ReplaceUnitSlugAddressAsStaffStatus200 = {
 	canonicalPath: string[];
 };
 
-export type ReplaceUnitSlugAddressAsStaffStatus400 =
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus400 =
 	| {
 			/**
 			 * @type object
@@ -41798,7 +41749,7 @@ export type ReplaceUnitSlugAddressAsStaffStatus400 =
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffStatus401 = {
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -41823,18 +41774,18 @@ export type ReplaceUnitSlugAddressAsStaffStatus401 = {
 	requestId: string;
 };
 
-export const ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum = {
+export const ReplaceUnitSlugAddressWithPlatformAccessStatus403ErrorCodeEnum = {
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
 } as const;
 
-export type ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum =
-	(typeof ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum];
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus403ErrorCodeEnum =
+	(typeof ReplaceUnitSlugAddressWithPlatformAccessStatus403ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressWithPlatformAccessStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffStatus403 = {
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -41843,7 +41794,7 @@ export type ReplaceUnitSlugAddressAsStaffStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum;
+		code: ReplaceUnitSlugAddressWithPlatformAccessStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -41859,18 +41810,18 @@ export type ReplaceUnitSlugAddressAsStaffStatus403 = {
 	requestId: string;
 };
 
-export const ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum = {
+export const ReplaceUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	SlugScopeNotFound: "SlugScopeNotFound",
 } as const;
 
-export type ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum =
-	(typeof ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum];
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum =
+	(typeof ReplaceUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffStatus404 = {
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -41879,7 +41830,7 @@ export type ReplaceUnitSlugAddressAsStaffStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum;
+		code: ReplaceUnitSlugAddressWithPlatformAccessStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -41895,19 +41846,19 @@ export type ReplaceUnitSlugAddressAsStaffStatus404 = {
 	requestId: string;
 };
 
-export const ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum = {
+export const ReplaceUnitSlugAddressWithPlatformAccessStatus409ErrorCodeEnum = {
 	SlugTaken: "SlugTaken",
 	SlugScopeUnavailable: "SlugScopeUnavailable",
 	SlugScopeCycle: "SlugScopeCycle",
 } as const;
 
-export type ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum =
-	(typeof ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum];
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus409ErrorCodeEnum =
+	(typeof ReplaceUnitSlugAddressWithPlatformAccessStatus409ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressWithPlatformAccessStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffStatus409 = {
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -41916,7 +41867,7 @@ export type ReplaceUnitSlugAddressAsStaffStatus409 = {
 		 * @default 'SlugTaken'
 		 * @type string
 		 */
-		code: ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum;
+		code: ReplaceUnitSlugAddressWithPlatformAccessStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -41932,7 +41883,7 @@ export type ReplaceUnitSlugAddressAsStaffStatus409 = {
 	requestId: string;
 };
 
-export type ReplaceUnitSlugAddressAsStaffStatus422 =
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus422 =
 	| {
 			/**
 			 * @type object
@@ -41962,9 +41913,9 @@ export type ReplaceUnitSlugAddressAsStaffStatus422 =
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffStatus500 = InternalError;
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus500 = InternalError;
 
-export const ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum = {
+export const ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum = {
 	content_policy: "content_policy",
 	realm_rules: "realm_rules",
 	spam: "spam",
@@ -41979,13 +41930,13 @@ export const ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum = {
 	other: "other",
 } as const;
 
-export type ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum =
-	(typeof ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum];
+export type ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum =
+	(typeof ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum)[keyof typeof ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum];
 
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffBody = {
+export type ReplaceUnitSlugAddressWithPlatformAccessBody = {
 	scopeUnitId: (string | null) | null;
 	/**
 	 * @minLength 1
@@ -41997,15 +41948,15 @@ export type ReplaceUnitSlugAddressAsStaffBody = {
 	/**
 	 * @type string
 	 */
-	reasonCode: ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum;
+	reasonCode: ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum;
 };
 
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffOptions = {
-	body: ReplaceUnitSlugAddressAsStaffBody;
-	path: ReplaceUnitSlugAddressAsStaffPath;
+export type ReplaceUnitSlugAddressWithPlatformAccessOptions = {
+	body: ReplaceUnitSlugAddressWithPlatformAccessBody;
+	path: ReplaceUnitSlugAddressWithPlatformAccessPath;
 	query?: never;
 	headers?: never;
 };
@@ -42013,34 +41964,34 @@ export type ReplaceUnitSlugAddressAsStaffOptions = {
 /**
  * @type object
  */
-export type ReplaceUnitSlugAddressAsStaffResponses = {
-	"200": ReplaceUnitSlugAddressAsStaffStatus200;
-	"400": ReplaceUnitSlugAddressAsStaffStatus400;
-	"401": ReplaceUnitSlugAddressAsStaffStatus401;
-	"403": ReplaceUnitSlugAddressAsStaffStatus403;
-	"404": ReplaceUnitSlugAddressAsStaffStatus404;
-	"409": ReplaceUnitSlugAddressAsStaffStatus409;
-	"422": ReplaceUnitSlugAddressAsStaffStatus422;
-	"500": ReplaceUnitSlugAddressAsStaffStatus500;
+export type ReplaceUnitSlugAddressWithPlatformAccessResponses = {
+	"200": ReplaceUnitSlugAddressWithPlatformAccessStatus200;
+	"400": ReplaceUnitSlugAddressWithPlatformAccessStatus400;
+	"401": ReplaceUnitSlugAddressWithPlatformAccessStatus401;
+	"403": ReplaceUnitSlugAddressWithPlatformAccessStatus403;
+	"404": ReplaceUnitSlugAddressWithPlatformAccessStatus404;
+	"409": ReplaceUnitSlugAddressWithPlatformAccessStatus409;
+	"422": ReplaceUnitSlugAddressWithPlatformAccessStatus422;
+	"500": ReplaceUnitSlugAddressWithPlatformAccessStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type ReplaceUnitSlugAddressAsStaffResponse =
-	| ReplaceUnitSlugAddressAsStaffStatus200
-	| ReplaceUnitSlugAddressAsStaffStatus400
-	| ReplaceUnitSlugAddressAsStaffStatus401
-	| ReplaceUnitSlugAddressAsStaffStatus403
-	| ReplaceUnitSlugAddressAsStaffStatus404
-	| ReplaceUnitSlugAddressAsStaffStatus409
-	| ReplaceUnitSlugAddressAsStaffStatus422
-	| ReplaceUnitSlugAddressAsStaffStatus500;
+export type ReplaceUnitSlugAddressWithPlatformAccessResponse =
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus200
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus400
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus401
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus403
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus404
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus409
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus422
+	| ReplaceUnitSlugAddressWithPlatformAccessStatus500;
 
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffStatus201 = {
+export type CreateSlugNamespaceWithPlatformAccessStatus201 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -42068,7 +42019,7 @@ export type CreateSlugNamespaceAsStaffStatus201 = {
 	canonicalPath: string[];
 };
 
-export type CreateSlugNamespaceAsStaffStatus400 =
+export type CreateSlugNamespaceWithPlatformAccessStatus400 =
 	| {
 			/**
 			 * @type object
@@ -42098,7 +42049,7 @@ export type CreateSlugNamespaceAsStaffStatus400 =
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffStatus401 = {
+export type CreateSlugNamespaceWithPlatformAccessStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -42123,18 +42074,18 @@ export type CreateSlugNamespaceAsStaffStatus401 = {
 	requestId: string;
 };
 
-export const CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum = {
+export const CreateSlugNamespaceWithPlatformAccessStatus403ErrorCodeEnum = {
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
 } as const;
 
-export type CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum =
-	(typeof CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum];
+export type CreateSlugNamespaceWithPlatformAccessStatus403ErrorCodeEnum =
+	(typeof CreateSlugNamespaceWithPlatformAccessStatus403ErrorCodeEnum)[keyof typeof CreateSlugNamespaceWithPlatformAccessStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffStatus403 = {
+export type CreateSlugNamespaceWithPlatformAccessStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -42143,7 +42094,7 @@ export type CreateSlugNamespaceAsStaffStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum;
+		code: CreateSlugNamespaceWithPlatformAccessStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42159,18 +42110,18 @@ export type CreateSlugNamespaceAsStaffStatus403 = {
 	requestId: string;
 };
 
-export const CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum = {
+export const CreateSlugNamespaceWithPlatformAccessStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	SlugScopeNotFound: "SlugScopeNotFound",
 } as const;
 
-export type CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum =
-	(typeof CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum];
+export type CreateSlugNamespaceWithPlatformAccessStatus404ErrorCodeEnum =
+	(typeof CreateSlugNamespaceWithPlatformAccessStatus404ErrorCodeEnum)[keyof typeof CreateSlugNamespaceWithPlatformAccessStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffStatus404 = {
+export type CreateSlugNamespaceWithPlatformAccessStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -42179,7 +42130,7 @@ export type CreateSlugNamespaceAsStaffStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum;
+		code: CreateSlugNamespaceWithPlatformAccessStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42195,19 +42146,19 @@ export type CreateSlugNamespaceAsStaffStatus404 = {
 	requestId: string;
 };
 
-export const CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum = {
+export const CreateSlugNamespaceWithPlatformAccessStatus409ErrorCodeEnum = {
 	SlugTaken: "SlugTaken",
 	SlugScopeUnavailable: "SlugScopeUnavailable",
 	SlugScopeCycle: "SlugScopeCycle",
 } as const;
 
-export type CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum =
-	(typeof CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum];
+export type CreateSlugNamespaceWithPlatformAccessStatus409ErrorCodeEnum =
+	(typeof CreateSlugNamespaceWithPlatformAccessStatus409ErrorCodeEnum)[keyof typeof CreateSlugNamespaceWithPlatformAccessStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffStatus409 = {
+export type CreateSlugNamespaceWithPlatformAccessStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -42216,7 +42167,7 @@ export type CreateSlugNamespaceAsStaffStatus409 = {
 		 * @default 'SlugTaken'
 		 * @type string
 		 */
-		code: CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum;
+		code: CreateSlugNamespaceWithPlatformAccessStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42232,7 +42183,7 @@ export type CreateSlugNamespaceAsStaffStatus409 = {
 	requestId: string;
 };
 
-export type CreateSlugNamespaceAsStaffStatus422 =
+export type CreateSlugNamespaceWithPlatformAccessStatus422 =
 	| {
 			/**
 			 * @type object
@@ -42262,9 +42213,9 @@ export type CreateSlugNamespaceAsStaffStatus422 =
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffStatus500 = InternalError;
+export type CreateSlugNamespaceWithPlatformAccessStatus500 = InternalError;
 
-export const CreateSlugNamespaceAsStaffRequestReasonCodeEnum = {
+export const CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum = {
 	content_policy: "content_policy",
 	realm_rules: "realm_rules",
 	spam: "spam",
@@ -42279,13 +42230,13 @@ export const CreateSlugNamespaceAsStaffRequestReasonCodeEnum = {
 	other: "other",
 } as const;
 
-export type CreateSlugNamespaceAsStaffRequestReasonCodeEnum =
-	(typeof CreateSlugNamespaceAsStaffRequestReasonCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffRequestReasonCodeEnum];
+export type CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum =
+	(typeof CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum)[keyof typeof CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum];
 
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffBody = {
+export type CreateSlugNamespaceWithPlatformAccessBody = {
 	scopeUnitId: (string | null) | null;
 	/**
 	 * @minLength 1
@@ -42297,14 +42248,14 @@ export type CreateSlugNamespaceAsStaffBody = {
 	/**
 	 * @type string
 	 */
-	reasonCode: CreateSlugNamespaceAsStaffRequestReasonCodeEnum;
+	reasonCode: CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum;
 };
 
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffOptions = {
-	body: CreateSlugNamespaceAsStaffBody;
+export type CreateSlugNamespaceWithPlatformAccessOptions = {
+	body: CreateSlugNamespaceWithPlatformAccessBody;
 	path?: never;
 	query?: never;
 	headers?: never;
@@ -42313,34 +42264,34 @@ export type CreateSlugNamespaceAsStaffOptions = {
 /**
  * @type object
  */
-export type CreateSlugNamespaceAsStaffResponses = {
-	"201": CreateSlugNamespaceAsStaffStatus201;
-	"400": CreateSlugNamespaceAsStaffStatus400;
-	"401": CreateSlugNamespaceAsStaffStatus401;
-	"403": CreateSlugNamespaceAsStaffStatus403;
-	"404": CreateSlugNamespaceAsStaffStatus404;
-	"409": CreateSlugNamespaceAsStaffStatus409;
-	"422": CreateSlugNamespaceAsStaffStatus422;
-	"500": CreateSlugNamespaceAsStaffStatus500;
+export type CreateSlugNamespaceWithPlatformAccessResponses = {
+	"201": CreateSlugNamespaceWithPlatformAccessStatus201;
+	"400": CreateSlugNamespaceWithPlatformAccessStatus400;
+	"401": CreateSlugNamespaceWithPlatformAccessStatus401;
+	"403": CreateSlugNamespaceWithPlatformAccessStatus403;
+	"404": CreateSlugNamespaceWithPlatformAccessStatus404;
+	"409": CreateSlugNamespaceWithPlatformAccessStatus409;
+	"422": CreateSlugNamespaceWithPlatformAccessStatus422;
+	"500": CreateSlugNamespaceWithPlatformAccessStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type CreateSlugNamespaceAsStaffResponse =
-	| CreateSlugNamespaceAsStaffStatus201
-	| CreateSlugNamespaceAsStaffStatus400
-	| CreateSlugNamespaceAsStaffStatus401
-	| CreateSlugNamespaceAsStaffStatus403
-	| CreateSlugNamespaceAsStaffStatus404
-	| CreateSlugNamespaceAsStaffStatus409
-	| CreateSlugNamespaceAsStaffStatus422
-	| CreateSlugNamespaceAsStaffStatus500;
+export type CreateSlugNamespaceWithPlatformAccessResponse =
+	| CreateSlugNamespaceWithPlatformAccessStatus201
+	| CreateSlugNamespaceWithPlatformAccessStatus400
+	| CreateSlugNamespaceWithPlatformAccessStatus401
+	| CreateSlugNamespaceWithPlatformAccessStatus403
+	| CreateSlugNamespaceWithPlatformAccessStatus404
+	| CreateSlugNamespaceWithPlatformAccessStatus409
+	| CreateSlugNamespaceWithPlatformAccessStatus422
+	| CreateSlugNamespaceWithPlatformAccessStatus500;
 
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffPath = {
+export type ReleaseSlugRedirectWithPlatformAccessPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -42352,17 +42303,17 @@ export type ReleaseSlugRedirectAsStaffPath = {
 /**
  * @type void
  */
-export type ReleaseSlugRedirectAsStaffStatus204 = void;
+export type ReleaseSlugRedirectWithPlatformAccessStatus204 = void;
 
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffStatus400 = MalformedRequestBody;
+export type ReleaseSlugRedirectWithPlatformAccessStatus400 = MalformedRequestBody;
 
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffStatus401 = {
+export type ReleaseSlugRedirectWithPlatformAccessStatus401 = {
 	/**
 	 * @type object
 	 */
@@ -42387,18 +42338,18 @@ export type ReleaseSlugRedirectAsStaffStatus401 = {
 	requestId: string;
 };
 
-export const ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum = {
+export const ReleaseSlugRedirectWithPlatformAccessStatus403ErrorCodeEnum = {
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
 } as const;
 
-export type ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum =
-	(typeof ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum)[keyof typeof ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum];
+export type ReleaseSlugRedirectWithPlatformAccessStatus403ErrorCodeEnum =
+	(typeof ReleaseSlugRedirectWithPlatformAccessStatus403ErrorCodeEnum)[keyof typeof ReleaseSlugRedirectWithPlatformAccessStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffStatus403 = {
+export type ReleaseSlugRedirectWithPlatformAccessStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -42407,7 +42358,7 @@ export type ReleaseSlugRedirectAsStaffStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum;
+		code: ReleaseSlugRedirectWithPlatformAccessStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -42426,7 +42377,7 @@ export type ReleaseSlugRedirectAsStaffStatus403 = {
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffStatus404 = {
+export type ReleaseSlugRedirectWithPlatformAccessStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -42454,14 +42405,14 @@ export type ReleaseSlugRedirectAsStaffStatus404 = {
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffStatus422 = ValidationError;
+export type ReleaseSlugRedirectWithPlatformAccessStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffStatus500 = InternalError;
+export type ReleaseSlugRedirectWithPlatformAccessStatus500 = InternalError;
 
-export const ReleaseSlugRedirectAsStaffRequestReasonCodeEnum = {
+export const ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum = {
 	content_policy: "content_policy",
 	realm_rules: "realm_rules",
 	spam: "spam",
@@ -42476,25 +42427,25 @@ export const ReleaseSlugRedirectAsStaffRequestReasonCodeEnum = {
 	other: "other",
 } as const;
 
-export type ReleaseSlugRedirectAsStaffRequestReasonCodeEnum =
-	(typeof ReleaseSlugRedirectAsStaffRequestReasonCodeEnum)[keyof typeof ReleaseSlugRedirectAsStaffRequestReasonCodeEnum];
+export type ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum =
+	(typeof ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum)[keyof typeof ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum];
 
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffBody = {
+export type ReleaseSlugRedirectWithPlatformAccessBody = {
 	/**
 	 * @type string
 	 */
-	reasonCode: ReleaseSlugRedirectAsStaffRequestReasonCodeEnum;
+	reasonCode: ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum;
 };
 
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffOptions = {
-	body: ReleaseSlugRedirectAsStaffBody;
-	path: ReleaseSlugRedirectAsStaffPath;
+export type ReleaseSlugRedirectWithPlatformAccessOptions = {
+	body: ReleaseSlugRedirectWithPlatformAccessBody;
+	path: ReleaseSlugRedirectWithPlatformAccessPath;
 	query?: never;
 	headers?: never;
 };
@@ -42502,27 +42453,27 @@ export type ReleaseSlugRedirectAsStaffOptions = {
 /**
  * @type object
  */
-export type ReleaseSlugRedirectAsStaffResponses = {
-	"204": ReleaseSlugRedirectAsStaffStatus204;
-	"400": ReleaseSlugRedirectAsStaffStatus400;
-	"401": ReleaseSlugRedirectAsStaffStatus401;
-	"403": ReleaseSlugRedirectAsStaffStatus403;
-	"404": ReleaseSlugRedirectAsStaffStatus404;
-	"422": ReleaseSlugRedirectAsStaffStatus422;
-	"500": ReleaseSlugRedirectAsStaffStatus500;
+export type ReleaseSlugRedirectWithPlatformAccessResponses = {
+	"204": ReleaseSlugRedirectWithPlatformAccessStatus204;
+	"400": ReleaseSlugRedirectWithPlatformAccessStatus400;
+	"401": ReleaseSlugRedirectWithPlatformAccessStatus401;
+	"403": ReleaseSlugRedirectWithPlatformAccessStatus403;
+	"404": ReleaseSlugRedirectWithPlatformAccessStatus404;
+	"422": ReleaseSlugRedirectWithPlatformAccessStatus422;
+	"500": ReleaseSlugRedirectWithPlatformAccessStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type ReleaseSlugRedirectAsStaffResponse =
-	| ReleaseSlugRedirectAsStaffStatus204
-	| ReleaseSlugRedirectAsStaffStatus400
-	| ReleaseSlugRedirectAsStaffStatus401
-	| ReleaseSlugRedirectAsStaffStatus403
-	| ReleaseSlugRedirectAsStaffStatus404
-	| ReleaseSlugRedirectAsStaffStatus422
-	| ReleaseSlugRedirectAsStaffStatus500;
+export type ReleaseSlugRedirectWithPlatformAccessResponse =
+	| ReleaseSlugRedirectWithPlatformAccessStatus204
+	| ReleaseSlugRedirectWithPlatformAccessStatus400
+	| ReleaseSlugRedirectWithPlatformAccessStatus401
+	| ReleaseSlugRedirectWithPlatformAccessStatus403
+	| ReleaseSlugRedirectWithPlatformAccessStatus404
+	| ReleaseSlugRedirectWithPlatformAccessStatus422
+	| ReleaseSlugRedirectWithPlatformAccessStatus500;
 
 export const PostApiUnitsPresentationsStatus200ItemsKindEnum = {
 	slug_namespace: "slug_namespace",
@@ -106996,6 +106947,34 @@ export type PostApiSearchByIndexStatus400 = MalformedRequestBody;
 /**
  * @type object
  */
+export type PostApiSearchByIndexStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiSearchByIndexStatus403 = {
 	/**
 	 * @type object
@@ -107047,6 +107026,30 @@ export type PostApiSearchByIndexStatus422 =
 			requestId: string;
 	  }
 	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchByIndexStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -107238,8 +107241,10 @@ export type PostApiSearchByIndexOptions = {
 export type PostApiSearchByIndexResponses = {
 	"200": PostApiSearchByIndexStatus200;
 	"400": PostApiSearchByIndexStatus400;
+	"401": PostApiSearchByIndexStatus401;
 	"403": PostApiSearchByIndexStatus403;
 	"422": PostApiSearchByIndexStatus422;
+	"429": PostApiSearchByIndexStatus429;
 	"500": PostApiSearchByIndexStatus500;
 	"503": PostApiSearchByIndexStatus503;
 };
@@ -107250,8 +107255,10 @@ export type PostApiSearchByIndexResponses = {
 export type PostApiSearchByIndexResponse =
 	| PostApiSearchByIndexStatus200
 	| PostApiSearchByIndexStatus400
+	| PostApiSearchByIndexStatus401
 	| PostApiSearchByIndexStatus403
 	| PostApiSearchByIndexStatus422
+	| PostApiSearchByIndexStatus429
 	| PostApiSearchByIndexStatus500
 	| PostApiSearchByIndexStatus503;
 

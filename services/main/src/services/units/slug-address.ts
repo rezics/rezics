@@ -5,10 +5,10 @@ import {
 	type PublicSlugAddressValue,
 } from "@rezics/slug";
 
+import { recordAuditEvent } from "../audit";
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
 import {
-	auditEvent,
 	profile,
 	unit,
 	unitSlugAddress,
@@ -522,13 +522,13 @@ async function loadPublicCanonicalUnitPathOrNotFound(
 }
 
 /**
- * Returns canonical registry details after proving the staff capability.
+ * Returns canonical registry details after proving platform access.
  *
  * @remarks
  * Ordinary resource reads use the public projection helpers and do not expose
  * administrative address IDs.
  */
-export async function getCanonicalUnitSlugAddressAsStaff(
+export async function getCanonicalUnitSlugAddressWithPlatformAccess(
 	authorization: Authorization<string>,
 	unitId: string,
 ): Promise<CanonicalUnitSlugAddress> {
@@ -702,13 +702,14 @@ export async function replaceOwnProfileSlugAddress(
 			slug,
 		});
 		if (result.changed)
-			await tx.insert(auditEvent).values({
-				actorProfileId: authorization.profileId,
+			await recordAuditEvent(tx, {
+				category: "admin_activity",
+				outcome: "succeeded",
+				actor: { kind: "profile", profileId: authorization.profileId },
+				authority: { kind: "unit", id: ownedProfile.id },
 				action: result.before ? "unit.slug.rename" : "unit.slug.assign",
-				decisionCode: "allowed",
-				subjectKind: "unit",
-				subjectId: ownedProfile.id,
-				metadata: {
+				target: { kind: "unit", id: ownedProfile.id },
+				details: {
 					before: result.before,
 					after: result.after,
 					redirectAddressId: result.redirectAddressId,
@@ -756,13 +757,17 @@ async function replacePublicUnitSlugAddress(
 			slug,
 		});
 		if (result.changed)
-			await tx.insert(auditEvent).values({
-				actorProfileId: authorization.profileId,
+			await recordAuditEvent(tx, {
+				category: "admin_activity",
+				outcome: "succeeded",
+				actor: { kind: "profile", profileId: authorization.profileId },
+				authority:
+					input.kind === "realm"
+						? { kind: "realm", id: input.unitId }
+						: { kind: "unit", id: input.unitId },
 				action: result.before ? "unit.slug.rename" : "unit.slug.assign",
-				decisionCode: "allowed",
-				subjectKind: "unit",
-				subjectId: input.unitId,
-				metadata: {
+				target: { kind: "unit", id: input.unitId },
+				details: {
 					before: result.before,
 					after: result.after,
 					redirectAddressId: result.redirectAddressId,
@@ -888,15 +893,15 @@ export async function replaceZonePageSlugAddress(
 }
 
 /**
- * Replaces any Unit's canonical slug address through the staff-only contract.
+ * Replaces any Unit's canonical slug address through the platform access contract.
  *
  * @remarks
  * Resource-specific Profile, Realm, and Zone commands fix their namespaces and
- * prove narrower authority. This command remains for staff-governed kinds and
+ * prove narrower authority. This command remains for platform-governed kinds and
  * namespace administration. Permanent platform namespaces are immutable
  * because the resolver caches them.
  */
-export async function replaceUnitSlugAddressAsStaff(
+export async function replaceUnitSlugAddressWithPlatformAccess(
 	authorization: Authorization<string>,
 	input: {
 		readonly unitId: string;
@@ -931,17 +936,19 @@ export async function replaceUnitSlugAddressAsStaff(
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
 		const result = await replaceCanonicalAddress(tx, { ...input, slug });
 		if (result.changed)
-			await tx.insert(auditEvent).values({
-				actorProfileId: authorization.profileId,
+			await recordAuditEvent(tx, {
+				category: "admin_activity",
+				outcome: "succeeded",
+				actor: { kind: "profile", profileId: authorization.profileId },
+				authority: { kind: "platform" },
 				action: !result.before
 					? "unit.slug.assign"
 					: result.before.scopeUnitId === result.after.scopeUnitId
 						? "unit.slug.rename"
 						: "unit.slug.move",
-				decisionCode: input.reasonCode,
-				subjectKind: "unit",
-				subjectId: input.unitId,
-				metadata: {
+				reasonCode: input.reasonCode,
+				target: { kind: "unit", id: input.unitId },
+				details: {
 					before: result.before,
 					after: result.after,
 					redirectAddressId: result.redirectAddressId,
@@ -959,7 +966,7 @@ export async function replaceUnitSlugAddressAsStaff(
 	};
 }
 
-/** Creates an explicitly addressed namespace through the staff-only slug API. */
+/** Creates an explicitly addressed namespace through the platform access API. */
 export async function createSlugNamespace(
 	authorization: Authorization<string>,
 	input: {
@@ -983,13 +990,15 @@ export async function createSlugNamespace(
 			scopeUnitId: input.scopeUnitId,
 			slug,
 		});
-		await tx.insert(auditEvent).values({
-			actorProfileId: authorization.profileId,
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "profile", profileId: authorization.profileId },
+			authority: { kind: "platform" },
 			action: "unit.slug_namespace.create",
-			decisionCode: input.reasonCode,
-			subjectKind: "unit",
-			subjectId: created.id,
-			metadata: { after: mutation.after, addressId: mutation.addressId },
+			reasonCode: input.reasonCode,
+			target: { kind: "unit", id: created.id },
+			details: { after: mutation.after, addressId: mutation.addressId },
 		});
 		await recordUnitRevision(tx, {
 			unitId: created.id,
@@ -1008,7 +1017,7 @@ export async function createSlugNamespace(
 	};
 }
 
-/** Releases one retained Redirect address through the staff-only slug API. */
+/** Releases one retained Redirect address through the platform access API. */
 export async function releaseSlugRedirect(
 	authorization: Authorization<string>,
 	input: {
@@ -1038,13 +1047,15 @@ export async function releaseSlugRedirect(
 		if (redirect.scopeUnitId === null)
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
 		await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, redirect.id));
-		await tx.insert(auditEvent).values({
-			actorProfileId: authorization.profileId,
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "profile", profileId: authorization.profileId },
+			authority: { kind: "platform" },
 			action: "unit.slug_redirect.release",
-			decisionCode: input.reasonCode,
-			subjectKind: "unit",
-			subjectId: redirect.targetUnitId,
-			metadata: {
+			reasonCode: input.reasonCode,
+			target: { kind: "unit", id: redirect.targetUnitId },
+			details: {
 				redirectAddressId: redirect.id,
 				before: { scopeUnitId: redirect.scopeUnitId, slug: redirect.slug },
 				after: null,

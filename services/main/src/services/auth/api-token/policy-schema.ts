@@ -20,7 +20,7 @@ export const StandardTokenPolicyLimits = t.Object(
 	{ additionalProperties: false },
 );
 
-export const StaffTrustedTokenPolicyLimits = t.Object(
+export const PrivilegedTokenPolicyLimits = t.Object(
 	{
 		requestsPerMinute: t.Integer({ minimum: 1, maximum: 5_000 }),
 		maxConcurrentRequests: t.Integer({ minimum: 1, maximum: 64 }),
@@ -33,7 +33,7 @@ export const StandardTokenOperationLimits = t.Partial(StandardTokenPolicyLimits,
 	additionalProperties: false,
 	minProperties: 1,
 });
-export const StaffTrustedTokenOperationLimits = t.Partial(StaffTrustedTokenPolicyLimits, {
+export const PrivilegedTokenOperationLimits = t.Partial(PrivilegedTokenPolicyLimits, {
 	additionalProperties: false,
 	minProperties: 1,
 });
@@ -46,10 +46,10 @@ export const StandardTokenPolicyConfiguration = t.Object(
 	{ additionalProperties: false },
 );
 
-export const StaffTrustedTokenPolicyConfiguration = t.Object(
+export const PrivilegedTokenPolicyConfiguration = t.Object(
 	{
-		limits: StaffTrustedTokenPolicyLimits,
-		operations: t.Record(ApiTokenOperationId, StaffTrustedTokenOperationLimits),
+		limits: PrivilegedTokenPolicyLimits,
+		operations: t.Record(ApiTokenOperationId, PrivilegedTokenOperationLimits),
 	},
 	{ additionalProperties: false },
 );
@@ -62,18 +62,18 @@ export const StandardTokenPolicyOverride = t.Object(
 	{ additionalProperties: false },
 );
 
-export const StaffTrustedTokenPolicyOverride = t.Object(
+export const PrivilegedTokenPolicyOverride = t.Object(
 	{
-		limits: t.Optional(StaffTrustedTokenOperationLimits),
-		operations: t.Optional(t.Record(ApiTokenOperationId, StaffTrustedTokenOperationLimits)),
+		limits: t.Optional(PrivilegedTokenOperationLimits),
+		operations: t.Optional(t.Record(ApiTokenOperationId, PrivilegedTokenOperationLimits)),
 	},
 	{ additionalProperties: false },
 );
 
 /** The widest transport shape. The assigned policy kind applies the authoritative validator. */
-export const ApiTokenPolicyOverrideInput = StaffTrustedTokenPolicyOverride;
+export const ApiTokenPolicyOverrideInput = PrivilegedTokenPolicyOverride;
 
-export type TokenPolicyLimits = Static<typeof StaffTrustedTokenPolicyLimits>;
+export type TokenPolicyLimits = Static<typeof PrivilegedTokenPolicyLimits>;
 export type TokenOperationLimits = Partial<TokenPolicyLimits>;
 export type TokenPolicyConfiguration = {
 	limits: TokenPolicyLimits;
@@ -98,9 +98,9 @@ export const DefaultApiTokenPolicies = {
 			operations: {},
 		},
 	},
-	staffTrusted: {
-		key: "staff-trusted-default",
-		kind: "staff_trusted",
+	privileged: {
+		key: "privileged-default",
+		kind: "privileged",
 		schemaVersion: ApiTokenPolicySchemaVersion,
 		configuration: {
 			limits: {
@@ -112,7 +112,7 @@ export const DefaultApiTokenPolicies = {
 		},
 	},
 } as const satisfies Record<
-	"standard" | "staffTrusted",
+	"standard" | "privileged",
 	{
 		key: string;
 		kind: ApiTokenPolicyKind;
@@ -136,11 +136,11 @@ export class ApiTokenPolicyDocumentInvalid extends Error {
 function schemaForConfiguration(kind: ApiTokenPolicyKind) {
 	return kind === "standard"
 		? StandardTokenPolicyConfiguration
-		: StaffTrustedTokenPolicyConfiguration;
+		: PrivilegedTokenPolicyConfiguration;
 }
 
 function schemaForOverride(kind: ApiTokenPolicyKind) {
-	return kind === "standard" ? StandardTokenPolicyOverride : StaffTrustedTokenPolicyOverride;
+	return kind === "standard" ? StandardTokenPolicyOverride : PrivilegedTokenPolicyOverride;
 }
 
 function assertSupportedVersion(

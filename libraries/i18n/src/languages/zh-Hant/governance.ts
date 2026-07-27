@@ -39,6 +39,9 @@ export default {
 	inviteAssociation: "邀請關聯",
 	noProposals: "目前沒有關聯提案。",
 	capabilities: {
+		"platform.access.read": "檢視平台權限指派",
+		"platform.access.manage": "管理平台權限指派",
+		"platform.audit.read": "檢視平台稽核紀錄",
 		"entity.associations.override": "略過目錄實體關聯權限",
 		"unit.edit": "編輯所有條目",
 		"platform.development_preview.access": "使用尚未發布的開發預覽功能",
@@ -49,7 +52,6 @@ export default {
 		"platform.api_token_policy.manage": `管理 ${verbatimTerms.api.value} 權杖政策`,
 		"platform.moderate": "執行平台內容治理",
 		"platform.suppress": "隱藏平台內容與修訂",
-		"platform.grants.manage": "管理平台工作人員授權",
 		"realm.contribute": `參與所有${realmTerms.pluralLabel}`,
 		"realm.units.create": `在所有${realmTerms.pluralLabel}建立條目`,
 		"realm.post.replies.create": `在所有${realmTerms.pluralLabel}建立回覆`,

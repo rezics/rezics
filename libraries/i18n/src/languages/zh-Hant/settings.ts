@@ -154,7 +154,7 @@ export default {
 			feedbackWrite: "提交意見回饋",
 		},
 		limits: "用量限制",
-		standardLimitsDescription: `自行建立的權杖一律使用標準策略；你只能在下列範圍內設定用量上限。${verbatimTerms.staffTrusted.value} 只能由工作人員授予。`,
+		standardLimitsDescription: `自行建立的權杖一律使用標準策略；你只能在下列範圍內設定用量上限。${verbatimTerms.privilegedTokenPolicy.value} 策略需要平台權限才能授予。`,
 		limitsDescription:
 			"你只能在目前策略允許的範圍內設定用量上限；全域限制與個別操作限制會同時生效。",
 		limitRanges: insert(
@@ -195,7 +195,7 @@ export default {
 		neverUsed: "尚未使用",
 		policy: "策略",
 		standardPolicy: "標準",
-		staffTrustedPolicy: verbatimTerms.staffTrusted.value,
+		privilegedPolicy: verbatimTerms.privilegedTokenPolicy.value,
 		trustedFallback: "已回復標準策略",
 		trustedUntil: "較高速率有效期限",
 		manageAccess: "管理名稱與權限",

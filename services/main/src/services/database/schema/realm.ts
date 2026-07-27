@@ -1,4 +1,4 @@
-import { CapabilityAuthorityValues } from "@rezics/access";
+import { PlatformCapabilityValues } from "@rezics/access";
 import { sql } from "drizzle-orm";
 import {
 	boolean,
@@ -9,6 +9,7 @@ import {
 	primaryKey,
 	text,
 	unique,
+	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 
@@ -40,9 +41,9 @@ export const realmRuleAcknowledgementMode = pgEnum(
 	toEnumValues(RealmRuleAcknowledgementModeValues),
 );
 export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
-export const capabilityAuthority = pgEnum(
-	"capability_authority",
-	toEnumValues(CapabilityAuthorityValues),
+export const platformCapability = pgEnum(
+	"platform_capability",
+	toEnumValues(PlatformCapabilityValues),
 );
 
 export const realm = pgTable("realm", {
@@ -200,16 +201,14 @@ export const realmUnit = pgTable(
 	],
 );
 
-export const capabilityGrant = pgTable(
-	"capability_grant",
+export const platformCapabilityGrant = pgTable(
+	"platform_capability_grant",
 	{
 		id: createUuidv7PrimaryKey(),
-		authority: capabilityAuthority().notNull(),
-		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		capability: text().notNull(),
+		capability: platformCapability().notNull(),
 		grantedByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -220,24 +219,18 @@ export const capabilityGrant = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("capability_grant_identity_key")
-			.on(table.authority, table.realmId, table.profileId, table.capability)
-			.nullsNotDistinct(),
-		index("capability_grant_profile_expiry_idx").on(table.profileId, table.expiresAt),
-		index("capability_grant_realm_idx").on(table.realmId),
-		index("capability_grant_granted_by_idx").on(table.grantedByProfileId),
-		index("capability_grant_revoked_by_idx").on(table.revokedByProfileId),
+		uniqueIndex("platform_capability_grant_active_key")
+			.on(table.profileId, table.capability)
+			.where(sql`${table.revokedAt} is null`),
+		index("platform_capability_grant_profile_expiry_idx").on(table.profileId, table.expiresAt),
+		index("platform_capability_grant_granted_by_idx").on(table.grantedByProfileId),
+		index("platform_capability_grant_revoked_by_idx").on(table.revokedByProfileId),
 		check(
-			"capability_grant_authority_check",
-			sql`(${table.authority} = 'realm'::capability_authority) = (${table.realmId} is not null)`,
-		),
-		check("capability_grant_capability_not_blank", sql`btrim(${table.capability}) <> ''`),
-		check(
-			"capability_grant_revocation_check",
+			"platform_capability_grant_revocation_check",
 			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,
 		),
 		check(
-			"capability_grant_expiry_check",
+			"platform_capability_grant_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,
 		),
 	],

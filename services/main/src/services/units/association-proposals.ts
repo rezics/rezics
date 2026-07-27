@@ -1,6 +1,7 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
 import { Authorization } from "../authorization";
+import { recordAuditEvent } from "../audit";
 import { associationTargetScope } from "../authorization/unit/scope";
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -11,7 +12,6 @@ import {
 	type SubjectAssociationRole,
 } from "../database/schema/contract-values";
 import {
-	auditEvent,
 	creditAttribution,
 	entity,
 	unitAssociationProposal,
@@ -104,17 +104,19 @@ async function recordProposalAudit(
 	input: {
 		readonly actorProfileId: string;
 		readonly action: string;
+		readonly authorityUnitId: string;
 		readonly proposalId: string;
 		readonly metadata?: Record<string, unknown>;
 	},
 ) {
-	await tx.insert(auditEvent).values({
-		actorProfileId: input.actorProfileId,
+	await recordAuditEvent(tx, {
+		category: "admin_activity",
+		outcome: "succeeded",
+		actor: { kind: "profile", profileId: input.actorProfileId },
+		authority: { kind: "unit", id: input.authorityUnitId },
 		action: input.action,
-		decisionCode: "allowed",
-		subjectKind: "unit_association_proposal",
-		subjectId: input.proposalId,
-		metadata: input.metadata,
+		target: { kind: "unit_association_proposal", id: input.proposalId },
+		details: input.metadata,
 	});
 }
 
@@ -192,6 +194,7 @@ async function insertProposal(
 	await recordProposalAudit(tx, {
 		actorProfileId: input.createdByProfileId,
 		action: `unit.association_proposal.${input.direction}.create`,
+		authorityUnitId: input.sourceUnitId,
 		proposalId: created.id,
 		metadata: {
 			sourceUnitId: input.sourceUnitId,
@@ -537,6 +540,7 @@ export async function resolveAssociationProposal(
 		await recordProposalAudit(tx, {
 			actorProfileId,
 			action: `unit.association_proposal.${input.action}`,
+			authorityUnitId: input.actingUnitId,
 			proposalId: proposal.id,
 			metadata: { actingUnitId: input.actingUnitId },
 		});

@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 import Elysia, { t } from "elysia";
 
+import { recordAuditEvent } from "../../audit";
 import { fromApiKeyPermissions, toApiKeyPermissions } from "../../auth/api-permissions";
 import { ApiTokenPolicyDocumentInvalid } from "../../auth/api-token/policy-schema";
 import {
@@ -13,7 +14,6 @@ import {
 import session from "../../auth/session";
 import { auth } from "../../auth";
 import { database } from "../../database";
-import { auditEvent } from "../../database/schema";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import { ApiTokenNotFound, ApiTokenPolicyInvalid, ApiTokenPolicyRevisionConflict } from "./errors";
@@ -119,13 +119,14 @@ export default new Elysia({ prefix: "/api-tokens" })
 						actorProfileId: profile.unitId,
 						override: body.policyOverride,
 					});
-					await tx.insert(auditEvent).values({
-						actorProfileId: profile.unitId,
+					await recordAuditEvent(tx, {
+						category: "admin_activity",
+						outcome: "succeeded",
+						actor: { kind: "profile", profileId: profile.unitId },
+						authority: { kind: "platform" },
 						action: "api_token.create",
-						decisionCode: "allowed",
-						subjectKind: "api_token",
-						subjectId: created.id,
-						metadata: { permissions: body.permissions },
+						target: { kind: "api_token", id: created.id },
+						details: { permissions: body.permissions },
 					});
 				});
 			} catch (error) {
@@ -171,13 +172,14 @@ export default new Elysia({ prefix: "/api-tokens" })
 					enabled: body.enabled,
 				},
 			});
-			await database.insert(auditEvent).values({
-				actorProfileId: profile.unitId,
+			await recordAuditEvent(database, {
+				category: "admin_activity",
+				outcome: "succeeded",
+				actor: { kind: "profile", profileId: profile.unitId },
+				authority: { kind: "platform" },
 				action: "api_token.update",
-				decisionCode: "allowed",
-				subjectKind: "api_token",
-				subjectId: params.tokenId,
-				metadata: {
+				target: { kind: "api_token", id: params.tokenId },
+				details: {
 					nameChanged: body.name !== undefined,
 					permissionsChanged: body.permissions !== undefined,
 					expiryChanged: body.expiresInDays !== undefined,
@@ -212,13 +214,14 @@ export default new Elysia({ prefix: "/api-tokens" })
 						override: body.configurationOverride,
 					});
 					if (!replaced) throw new ApiTokenPolicyRevisionConflict();
-					await tx.insert(auditEvent).values({
-						actorProfileId: profile.unitId,
+					await recordAuditEvent(tx, {
+						category: "admin_activity",
+						outcome: "succeeded",
+						actor: { kind: "profile", profileId: profile.unitId },
+						authority: { kind: "platform" },
 						action: "api_token.policy_override.replace",
-						decisionCode: "allowed",
-						subjectKind: "api_token",
-						subjectId: params.tokenId,
-						metadata: {
+						target: { kind: "api_token", id: params.tokenId },
+						details: {
 							policyKey: replaced.key,
 							bindingRevision: replaced.bindingRevision,
 						},
@@ -255,12 +258,13 @@ export default new Elysia({ prefix: "/api-tokens" })
 				headers: request.headers,
 				body: { keyId: params.tokenId },
 			});
-			await database.insert(auditEvent).values({
-				actorProfileId: profile.unitId,
+			await recordAuditEvent(database, {
+				category: "admin_activity",
+				outcome: "succeeded",
+				actor: { kind: "profile", profileId: profile.unitId },
+				authority: { kind: "platform" },
 				action: "api_token.revoke",
-				decisionCode: "allowed",
-				subjectKind: "api_token",
-				subjectId: params.tokenId,
+				target: { kind: "api_token", id: params.tokenId },
 			});
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},

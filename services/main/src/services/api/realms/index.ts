@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, gt, inArray, isNull, lt, max, notInArray, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
+import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { RealmRulesAcceptanceRequired } from "../../authorization/errors";
@@ -28,7 +29,6 @@ import {
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
-	auditEvent,
 	contentStructure,
 	moderationAction,
 	moderationCase,
@@ -199,13 +199,15 @@ async function recordAuditEvent(
 	subjectId: string,
 	metadata?: Record<string, unknown>,
 ) {
-	await tx.insert(auditEvent).values({
-		actorProfileId,
+	const metadataRealmId = typeof metadata?.realmId === "string" ? metadata.realmId : subjectId;
+	await appendAuditEvent(tx, {
+		category: "admin_activity",
+		outcome: "succeeded",
+		actor: { kind: "profile", profileId: actorProfileId },
+		authority: { kind: "realm", id: metadataRealmId },
 		action,
-		decisionCode: "allowed",
-		subjectKind: "unit",
-		subjectId,
-		metadata,
+		target: { kind: "unit", id: subjectId },
+		details: metadata,
 	});
 }
 

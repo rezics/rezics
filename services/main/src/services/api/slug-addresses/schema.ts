@@ -65,17 +65,17 @@ export const ReplaceOwnProfileSlugAddressBody = ReplacePublicUnitSlugAddressBody
 
 export const UnitSlugAddressParams = t.Object({ unitId: Uuid });
 
-const StaffSlugAddressInput = {
+const PlatformSlugAddressInput = {
 	scopeUnitId: t.Nullable(Uuid),
 	slug: SlugLabelInput,
 	reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
 };
 
-export const ReplaceUnitSlugAddressBody = t.Object(StaffSlugAddressInput, {
+export const ReplaceUnitSlugAddressBody = t.Object(PlatformSlugAddressInput, {
 	additionalProperties: false,
 });
 
-export const CreateSlugNamespaceBody = t.Object(StaffSlugAddressInput, {
+export const CreateSlugNamespaceBody = t.Object(PlatformSlugAddressInput, {
 	additionalProperties: false,
 });
 

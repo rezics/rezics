@@ -111,8 +111,11 @@ function useUserMenuModel({
 	const name = profile?.name?.trim() || fallbackName.trim() || t.ui.unnamed;
 	const initial = Array.from(name)[0]?.toLocaleUpperCase(locale);
 	const publicProfileHref = profile ? profileHref(profile) : "/settings/profile";
-	const canManageStaff =
-		profile?.platformCapabilities.includes("platform.grants.manage") ?? false;
+	const canAccessConsole =
+		profile?.platformCapabilities.some(
+			(capability) =>
+				capability === "platform.access.read" || capability === "platform.audit.read",
+		) ?? false;
 
 	const signOut = async () => {
 		await authClient.signOut();
@@ -122,7 +125,7 @@ function useUserMenuModel({
 	};
 
 	return {
-		canManageStaff,
+		canAccessConsole,
 		currentLocaleLabel: locale === "zh-Hant" ? t.locale.zh : t.locale.en,
 		currentThemeLabel: t.locale.displayModes[themePreference],
 		initial,
@@ -142,7 +145,7 @@ function useUserMenuModel({
 type UserMenuModel = ReturnType<typeof useUserMenuModel>;
 
 function DesktopUserMenu({
-	canManageStaff,
+	canAccessConsole,
 	currentLocaleLabel,
 	currentThemeLabel,
 	initial,
@@ -255,11 +258,11 @@ function DesktopUserMenu({
 						{t.nav.userMenu.settings}
 					</Link>
 				</MenuItem>
-				{canManageStaff ? (
-					<MenuItem asChild value="staff">
-						<Link href="/staff">
+				{canAccessConsole ? (
+					<MenuItem asChild value="console">
+						<Link href="/console">
 							<ShieldCheck aria-hidden />
-							{t.nav.userMenu.staff}
+							{t.nav.userMenu.console}
 						</Link>
 					</MenuItem>
 				) : null}
@@ -283,7 +286,7 @@ function DesktopUserMenu({
 
 function MobileUserMenu(model: UserMenuModel) {
 	const {
-		canManageStaff,
+		canAccessConsole,
 		currentLocaleLabel,
 		currentThemeLabel,
 		initial,
@@ -444,11 +447,11 @@ function MobileUserMenu(model: UserMenuModel) {
 									{t.nav.userMenu.settings}
 								</Link>
 							</Button>
-							{canManageStaff ? (
+							{canAccessConsole ? (
 								<Button asChild className={MobileMenuItemClassName} variant="quiet">
-									<Link href="/staff" onClick={close}>
+									<Link href="/console" onClick={close}>
 										<ShieldCheck aria-hidden />
-										{t.nav.userMenu.staff}
+										{t.nav.userMenu.console}
 									</Link>
 								</Button>
 							) : null}

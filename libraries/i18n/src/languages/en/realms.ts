@@ -173,7 +173,7 @@ export default {
 		language: String,
 	}),
 	annotationRoles: {
-		internal_note: "Governance staff only",
+		internal_note: "Authorized governance users only",
 		public_notice: "Visible to content owners",
 	},
 	submitModeration: "Submit governance action",

@@ -155,10 +155,10 @@ may only target that Profile's system Favorites Collection.
 - A Zone update authority may assign or rename that Zone only in `zones`.
 - Callers provide a label, never a scope, for these resource-specific commands;
   the backend fixes and proves the namespace.
-- Staff commands cannot move an enabled Profile, Realm, or Zone outside its
+- Platform-authorized commands cannot move an enabled Profile, Realm, or Zone outside its
   fixed public namespace; otherwise an ID response and browser route could
   disagree about its canonical address.
-- Other kinds and namespace operations remain staff-governed. There is no
+- Other kinds and namespace operations remain platform-governed. There is no
   public Collection or Favorites assignment command while those routes are
   disabled.
 
@@ -172,7 +172,7 @@ may only target that Profile's system Favorites Collection.
   the Page retains its stable `/zone/{zoneId}/page/{pageId}` route.
 - Renames retain the former address as a temporary Redirect record. Retained
   addresses issue temporary redirects and may be released for reuse through an
-  audited staff action. The automated retention and quarantine schedule remains
+  audited platform action. The automated retention and quarantine schedule remains
   a separate policy decision; clients must not cache former-slug redirects as
   permanent.
 - Public path and scoped lookup return not found for an unavailable scope,

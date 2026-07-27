@@ -35,8 +35,8 @@ export const verbatimTerms = {
 		category: "product",
 		rationale: "User-confirmed name for the REZICS authoring workspace.",
 	},
-	staffTrusted: {
-		value: "Staff Trusted",
+	privilegedTokenPolicy: {
+		value: "Privileged",
 		category: "product",
 		rationale: "Canonical name of the elevated API token policy class.",
 	},

@@ -4,6 +4,7 @@ import {
 	check,
 	foreignKey,
 	index,
+	integer,
 	pgEnum,
 	text,
 	unique,
@@ -62,6 +63,20 @@ export const governanceNoteSubjectKind = pgEnum(
 	"governance_note_subject_kind",
 	toEnumValues(GovernanceNoteSubjectKindValues),
 );
+export const auditEventCategory = pgEnum("audit_event_category", [
+	"admin_activity",
+	"policy_denied",
+	"system_event",
+]);
+export const auditEventOutcome = pgEnum("audit_event_outcome", ["succeeded", "denied", "failed"]);
+export const auditActorKind = pgEnum("audit_actor_kind", ["profile", "system"]);
+export const auditCredentialKind = pgEnum("audit_credential_kind", [
+	"session",
+	"api_token",
+	"bootstrap",
+	"system",
+]);
+export const auditAuthorityKind = pgEnum("audit_authority_kind", ["platform", "realm", "unit"]);
 
 export const feedback = pgTable(
 	"feedback",
@@ -327,14 +342,23 @@ export const auditEvent = pgTable(
 	"audit_event",
 	{
 		id: createUuidv7PrimaryKey(),
+		schemaVersion: integer().default(2).notNull(),
+		category: auditEventCategory().notNull(),
+		outcome: auditEventOutcome().notNull(),
+		actorKind: auditActorKind().notNull(),
 		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		actorCredentialKind: auditCredentialKind().notNull(),
+		actorCredentialId: text(),
+		authorityKind: auditAuthorityKind().notNull(),
+		authorityId: uuid(),
 		action: text().notNull(),
-		decisionCode: text().notNull(),
+		reasonCode: text(),
 		requestId: text(),
-		subjectKind: text(),
-		subjectId: uuid(),
-		subjectPath: text(),
-		metadata: createJsonObjectColumn(),
+		traceId: text(),
+		targetKind: text(),
+		targetId: uuid(),
+		targetPath: text(),
+		details: createJsonObjectColumn(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -348,16 +372,33 @@ export const auditEvent = pgTable(
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
-		index("audit_event_subject_idx").on(table.subjectKind, table.subjectId),
+		index("audit_event_category_created_at_idx").on(
+			table.category,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("audit_event_authority_created_at_idx").on(
+			table.authorityKind,
+			table.authorityId,
+			table.createdAt.desc(),
+		),
+		index("audit_event_target_idx").on(table.targetKind, table.targetId),
 		index("audit_event_request_idx").on(table.requestId),
+		index("audit_event_trace_idx").on(table.traceId),
+		check("audit_event_schema_version_check", sql`${table.schemaVersion} > 0`),
+		check("audit_event_action_check", sql`btrim(${table.action}) <> ''`),
 		check(
-			"audit_event_action_check",
-			sql`btrim(${table.action}) <> '' and btrim(${table.decisionCode}) <> ''`,
+			"audit_event_actor_check",
+			sql`(${table.actorKind} = 'profile'::audit_actor_kind) = (${table.actorProfileId} is not null)`,
 		),
 		check(
-			"audit_event_subject_check",
-			sql`(${table.subjectKind} is null) = (${table.subjectId} is null)`,
+			"audit_event_authority_check",
+			sql`(${table.authorityKind} = 'platform'::audit_authority_kind) = (${table.authorityId} is null)`,
 		),
-		createJsonObjectConstraint("audit_event_metadata_json_object_check", table.metadata),
+		check(
+			"audit_event_target_check",
+			sql`${table.targetKind} is not null or (${table.targetId} is null and ${table.targetPath} is null)`,
+		),
+		createJsonObjectConstraint("audit_event_details_json_object_check", table.details),
 	],
 );

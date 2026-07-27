@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
 	AuthenticatedGrantableUnitPermissionValues,
 	DevelopmentPreviewCapability,
+	expandPlatformCapabilities,
 	expandUnitPermissions,
 	isUnitPermissionApplicable,
 	isUnitPermissionGrantableToAuthenticated,
+	PlatformCapabilityDefinitions,
 	PlatformCapabilityValues,
 	StandardPermissionActionValues,
 	UnitPermissionDefinitions,
@@ -96,6 +98,17 @@ describe("permission schema", () => {
 		expect(
 			PlatformCapabilityValues.filter((capability) => capability.includes("preview")),
 		).toEqual([DevelopmentPreviewCapability]);
+	});
+
+	it("defines every platform capability and keeps audit reads independent", () => {
+		expect(Object.keys(PlatformCapabilityDefinitions)).toEqual([...PlatformCapabilityValues]);
+		expect(expandPlatformCapabilities(["platform.access.manage"])).toEqual([
+			"platform.access.read",
+			"platform.access.manage",
+		]);
+		expect(expandPlatformCapabilities(["platform.audit.read"])).toEqual([
+			"platform.audit.read",
+		]);
 	});
 });
 

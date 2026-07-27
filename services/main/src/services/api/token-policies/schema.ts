@@ -3,16 +3,16 @@ import { t } from "elysia";
 import {
 	ApiTokenOperationId,
 	ApiTokenPolicyOverrideInput,
-	StaffTrustedTokenOperationLimits,
-	StaffTrustedTokenPolicyConfiguration,
-	StaffTrustedTokenPolicyLimits,
+	PrivilegedTokenOperationLimits,
+	PrivilegedTokenPolicyConfiguration,
+	PrivilegedTokenPolicyLimits,
 } from "../../auth/api-token/policy-schema";
 import { ApiTokenPolicyKindValues } from "../../database/schema";
 import { DateTime, Uuid } from "../schema";
 
 const PolicyConfiguration = t.Object({
-	limits: StaffTrustedTokenPolicyLimits,
-	operations: t.Record(ApiTokenOperationId, StaffTrustedTokenOperationLimits),
+	limits: PrivilegedTokenPolicyLimits,
+	operations: t.Record(ApiTokenOperationId, PrivilegedTokenOperationLimits),
 });
 
 export const ApiAccessPolicySummary = t.Object({
@@ -33,7 +33,7 @@ export const ApiAccessPolicyParams = t.Object({ policyKey: t.String({ minLength:
 export const ReplaceApiAccessPolicyBody = t.Object(
 	{
 		expectedRevision: t.Integer({ minimum: 1 }),
-		configuration: StaffTrustedTokenPolicyConfiguration,
+		configuration: PrivilegedTokenPolicyConfiguration,
 	},
 	{ additionalProperties: false },
 );

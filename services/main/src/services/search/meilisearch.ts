@@ -126,7 +126,7 @@ async function coarseAccessFilter(profileId: string | undefined): Promise<string
 	if (!profileId) return "access.publicDiscoverable = true";
 	const context = await database.execute<{ realm_ids: string[]; platform_editor: boolean }>(
 		sql`select coalesce(array_agg(distinct realm_id) filter (where realm_id is not null), array[]::uuid[])::text[] as realm_ids,
-				exists(select 1 from capability_grant where authority = 'platform' and profile_id = ${profileId}::uuid and capability = 'unit.edit' and revoked_at is null and (expires_at is null or expires_at > now())) as platform_editor
+				exists(select 1 from platform_capability_grant where profile_id = ${profileId}::uuid and capability = 'unit.edit' and revoked_at is null and (expires_at is null or expires_at > now())) as platform_editor
 			from realm_member where profile_id = ${profileId}::uuid and state = 'active'`,
 	);
 	const row = context.rows[0];

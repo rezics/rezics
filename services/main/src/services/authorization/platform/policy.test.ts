@@ -1,29 +1,25 @@
-import { PlatformCapabilityValues } from "@rezics/access";
 import { describe, expect, it } from "vitest";
 
 import {
+	grantingPlatformCapabilities,
 	isPlatformCapability,
-	isSuperAdminCapabilitySet,
-	preservesPermanentGrantManager,
+	preservesPermanentAccessManager,
 } from "./policy";
 
 describe("platform authorization policy", () => {
 	it("recognizes only contract capabilities", () => {
-		expect(isPlatformCapability("platform.grants.manage")).toBe(true);
+		expect(isPlatformCapability("platform.access.manage")).toBe(true);
 		expect(isPlatformCapability("platform.super-admin")).toBe(false);
 	});
 
-	it("derives Super Admin from the complete capability set", () => {
-		expect(isSuperAdminCapabilitySet(new Set(PlatformCapabilityValues))).toBe(true);
-		expect(
-			isSuperAdminCapabilitySet(
-				new Set(
-					PlatformCapabilityValues.filter(
-						(capability) => capability !== "platform.grants.manage",
-					),
-				),
-			),
-		).toBe(false);
+	it("allows access management to satisfy access reads without implying audit reads", () => {
+		expect(grantingPlatformCapabilities("platform.access.read")).toEqual([
+			"platform.access.read",
+			"platform.access.manage",
+		]);
+		expect(grantingPlatformCapabilities("platform.audit.read")).toEqual([
+			"platform.audit.read",
+		]);
 	});
 
 	it.each([
@@ -34,7 +30,7 @@ describe("platform authorization policy", () => {
 	] as const)(
 		"checks permanent-manager continuity for %o",
 		(current, target, remains, expected) => {
-			expect(preservesPermanentGrantManager(current, target, remains)).toBe(expected);
+			expect(preservesPermanentAccessManager(current, target, remains)).toBe(expected);
 		},
 	);
 });

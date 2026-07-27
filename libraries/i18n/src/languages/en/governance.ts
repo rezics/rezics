@@ -40,6 +40,9 @@ export default {
 	inviteAssociation: "Invite association",
 	noProposals: "There are no association proposals.",
 	capabilities: {
+		"platform.access.read": "View platform access assignments",
+		"platform.access.manage": "Manage platform access assignments",
+		"platform.audit.read": "View the platform audit log",
 		"entity.associations.override": "Bypass catalog Entity association permissions",
 		"unit.edit": "Edit every Unit",
 		"platform.development_preview.access": "Access unreleased development previews",
@@ -50,7 +53,6 @@ export default {
 		"platform.api_token_policy.manage": `Manage ${verbatimTerms.api.value} token policy`,
 		"platform.moderate": "Moderate platform Units",
 		"platform.suppress": "Suppress platform content and revisions",
-		"platform.grants.manage": "Manage platform staff grants",
 		"realm.contribute": `Participate in every ${realmTerms.label}`,
 		"realm.units.create": `Create Units in every ${realmTerms.label}`,
 		"realm.post.replies.create": `Create replies in every ${realmTerms.label}`,

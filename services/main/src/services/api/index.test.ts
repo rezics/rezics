@@ -40,16 +40,27 @@ describe("API root", () => {
 		);
 
 		expect(unauthorized.status).toBe(StatusCodes.UNAUTHORIZED);
-		expect(unauthorized.headers.has("X-Request-Id")).toBe(false);
+		const unauthorizedRequestId = unauthorized.headers.get("X-Request-Id");
+		expect(unauthorizedRequestId).toMatch(
+			/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+		);
+		expect(unauthorizedRequestId).not.toBe(headers["X-Request-Id"]);
 		expect(unauthorized.headers.has("Content-Language")).toBe(false);
-		expect((await readErrorBody(unauthorized)).error).toEqual({
+		const unauthorizedBody = await readErrorBody(unauthorized);
+		expect(unauthorizedBody.requestId).toBe(unauthorizedRequestId);
+		expect(unauthorizedBody.error).toEqual({
 			code: "AuthenticationRequired",
 			message: "Authentication required",
 		});
 
 		expect(validation.status).toBe(StatusCodes.UNPROCESSABLE_ENTITY);
-		expect(validation.headers.has("X-Request-Id")).toBe(false);
-		expect((await readErrorBody(validation)).error).toEqual({
+		const validationRequestId = validation.headers.get("X-Request-Id");
+		expect(validationRequestId).toMatch(
+			/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+		);
+		const validationBody = await readErrorBody(validation);
+		expect(validationBody.requestId).toBe(validationRequestId);
+		expect(validationBody.error).toEqual({
 			code: "ValidationError",
 			message: "Request validation failed",
 		});
@@ -135,15 +146,15 @@ describe("API root", () => {
 		expect(previewProtectedZoneOperations).toEqual(["POST /api/zones"]);
 	});
 
-	it("denies anonymous Tag hierarchy reads at the development preview boundary", async () => {
+	it("requires authentication before checking the Tag hierarchy preview capability", async () => {
 		const response = await api.handle(
 			new Request("http://localhost/api/tags/00000000-0000-7000-8000-000000000001"),
 		);
 
-		expect(response.status).toBe(StatusCodes.FORBIDDEN);
+		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
 		expect((await readErrorBody(response)).error).toEqual({
-			code: "PlatformCapabilityRequired",
-			message: "Platform capability required",
+			code: "AuthenticationRequired",
+			message: "Authentication required",
 		});
 	});
 
@@ -178,7 +189,7 @@ describe("API root", () => {
 		]);
 	});
 
-	it("denies the Tag-path search category outside development preview", async () => {
+	it("requires authentication before checking the Tag-path search preview capability", async () => {
 		const response = await api.handle(
 			new Request("http://localhost/api/search/tag-structures", {
 				method: "POST",
@@ -187,8 +198,8 @@ describe("API root", () => {
 			}),
 		);
 
-		expect(response.status).toBe(StatusCodes.FORBIDDEN);
-		expect((await readErrorBody(response)).error.code).toBe("PlatformCapabilityRequired");
+		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+		expect((await readErrorBody(response)).error.code).toBe("AuthenticationRequired");
 	});
 
 	it("documents untracked progress as a successful state", () => {

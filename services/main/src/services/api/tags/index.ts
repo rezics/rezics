@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { AuthenticationRequired } from "../../auth/errors";
 import { database } from "../../database";
 import { realm } from "../../database/schema";
 import {
@@ -60,6 +61,7 @@ export default new Elysia()
 			"/:tagId",
 			async ({ params, query, request }) => {
 				const identity = await resolveIdentity(request.headers, "unit:read");
+				if (!identity.profile) throw new AuthenticationRequired();
 				await identity.authorization.platform.ensureCapability(
 					DevelopmentPreviewCapability,
 				);
@@ -75,6 +77,7 @@ export default new Elysia()
 				query: TagHierarchyQuery,
 				response: {
 					[StatusCodes.OK]: TagHierarchyResponse,
+					[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
 					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
 				},
@@ -117,6 +120,7 @@ export default new Elysia()
 				"/:structureId",
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request.headers, "unit:read");
+					if (!identity.profile) throw new AuthenticationRequired();
 					await identity.authorization.platform.ensureCapability(
 						DevelopmentPreviewCapability,
 					);
@@ -131,6 +135,7 @@ export default new Elysia()
 					query: TagStructureQuery,
 					response: {
 						[StatusCodes.OK]: TagStructureResponse,
+						[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
 					},
