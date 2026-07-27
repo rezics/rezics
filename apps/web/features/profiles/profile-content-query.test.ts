@@ -1,59 +1,66 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-const api = vi.hoisted(() => ({
-	postApiSearchFeaturesByTemplateExecute: vi.fn(),
-}));
-
-vi.mock("@rezics/openapi-tanstack-query", () => api);
-
-import { fetchProfileContentPage } from "./profile-content-query";
+import {
+	createProfileContentRequest,
+	normalizeProfileContentKinds,
+	profileContentParser,
+} from "./profile-content-query";
 
 const ProfileId = "019b0000-0000-7000-8000-000000000004";
 
-beforeEach(() => {
-	api.postApiSearchFeaturesByTemplateExecute.mockReset();
-	api.postApiSearchFeaturesByTemplateExecute.mockResolvedValue({
-		data: { query: "", groups: [] },
-	});
-});
-
 describe("Profile content page requests", () => {
-	it("uses the canonical Profile Search context", async () => {
-		const signal = new AbortController().signal;
-
-		await fetchProfileContentPage({ profileId: ProfileId, signal });
-
-		expect(api.postApiSearchFeaturesByTemplateExecute).toHaveBeenCalledWith({
-			path: { template: "global" },
-			body: {
-				contexts: [{ kind: "profile", profileId: ProfileId }],
-				injections: [],
-				state: {
-					pageSize: 10,
-					sort: "updatedAt:desc",
-				},
+	it("uses the canonical Profile Search context for an update-ordered Feed", () => {
+		expect(createProfileContentRequest({ contentKinds: [], profileId: ProfileId })).toEqual({
+			contexts: [{ kind: "profile", profileId: ProfileId }],
+			injections: [],
+			state: {
+				pageSize: 20,
+				sort: "updatedAt:desc",
 			},
-			signal,
-			throwOnError: true,
 		});
 	});
 
-	it("adds the server-issued grouped continuation cursor", async () => {
-		await fetchProfileContentPage({
-			cursor: "s2_cursor",
-			profileId: ProfileId,
-		});
-
-		expect(api.postApiSearchFeaturesByTemplateExecute).toHaveBeenCalledWith(
-			expect.objectContaining({
-				body: expect.objectContaining({
-					state: {
-						cursor: "s2_cursor",
-						pageSize: 10,
-						sort: "updatedAt:desc",
-					},
-				}),
+	it("composes selected content kinds into the Feed filter", () => {
+		expect(
+			createProfileContentRequest({
+				contentKinds: ["unit:collection", "post:review"],
+				profileId: ProfileId,
 			}),
-		);
+		).toEqual({
+			contexts: [{ kind: "profile", profileId: ProfileId }],
+			injections: [],
+			state: {
+				filter: {
+					where: {
+						any: [
+							{ kind: { in: ["collection"] } },
+							{ post: { is: { kind: { in: ["review"] } } } },
+						],
+					},
+				},
+				pageSize: 20,
+				sort: "updatedAt:desc",
+			},
+		});
+	});
+
+	it("keeps only content kinds supported by the Profile feed", () => {
+		expect(
+			normalizeProfileContentKinds([
+				"unit:book",
+				"post:picture",
+				"unit:collection",
+				"post:picture",
+			]),
+		).toEqual(["unit:collection", "post:picture"]);
+	});
+
+	it("parses only Profile feed content kinds from the URL", () => {
+		expect(profileContentParser.parseServerSide(undefined)).toEqual([]);
+		expect(
+			profileContentParser.parseServerSide(
+				"unit:entity,unit:book,post:review,post:picture,unknown",
+			),
+		).toEqual(["unit:entity", "post:review", "post:picture"]);
 	});
 });

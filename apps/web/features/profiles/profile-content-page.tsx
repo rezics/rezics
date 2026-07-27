@@ -1,61 +1,38 @@
 "use client";
 
-import { Button, UnitList } from "@rezics/ui";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQueryState } from "nuqs";
 
-import { useTranslation } from "@/i18n/client";
-import { RequestFailure } from "@/i18n/request-failure";
+import { FeedContentSelector } from "@/features/content-feed/components/feed-content-selector";
 import {
-	fetchProfileContentPage,
-	ProfileContentCategories,
-	type ProfileContentCategory,
-	type ProfileContentHit,
+	SearchFeedResults,
+	type SearchFeedSource,
+	useSearchFeedQuery,
+} from "@/features/content-feed/data/search-feed-list";
+import { useTranslation } from "@/i18n/client";
+import {
+	createProfileContentRequest,
+	normalizeProfileContentKinds,
+	profileContentParser,
+	ProfileContentKindValues,
 } from "./profile-content-query";
 import { useProfileContext } from "./profile-layout";
 
-function profileContentHref(category: ProfileContentCategory, hit: ProfileContentHit): string {
-	switch (category) {
-		case "entity":
-			return `/entities/${hit.id}`;
-		case "posts":
-			return `/posts/${hit.id}`;
-		case "reviews":
-			return `/reviews/${hit.id}`;
-		case "collections":
-			return `/collections/${hit.id}`;
-	}
-}
+const ProfileContentFeedSource = {
+	kind: "template",
+	template: "global",
+} satisfies SearchFeedSource;
 
 export function ProfileContentPage() {
-	const { t } = useTranslation(["actions", "profiles"]);
+	const { t } = useTranslation(["feed", "profiles"]);
 	const { profile } = useProfileContext();
-	const query = useInfiniteQuery({
-		queryKey: ["profile-content", profile.id],
-		queryFn: ({ pageParam, signal }) =>
-			fetchProfileContentPage({
-				...(pageParam ? { cursor: pageParam } : {}),
-				profileId: profile.id,
-				signal,
-			}),
-		initialPageParam: "",
-		getNextPageParam: (page) => page.nextCursor ?? undefined,
+	const [contentKinds, setContentKinds] = useQueryState("content", profileContentParser);
+	const query = useSearchFeedQuery({
+		request: createProfileContentRequest({
+			contentKinds,
+			profileId: profile.id,
+		}),
+		source: ProfileContentFeedSource,
 	});
-	const sections = ProfileContentCategories.map((category) => ({
-		category,
-		items:
-			query.data?.pages.flatMap((page) =>
-				page.groups
-					.filter((group) => group.index === category)
-					.flatMap((group) =>
-						group.hits.map((hit) => ({
-							id: hit.id,
-							title: hit.titles[0] ?? null,
-							summary: hit.summaries[0],
-							href: profileContentHref(category, hit),
-						})),
-					),
-			) ?? [],
-	})).filter(({ items }) => items.length > 0);
 
 	return (
 		<section aria-labelledby="profile-content-title" className="max-w-3xl">
@@ -68,51 +45,29 @@ export function ProfileContentPage() {
 				</p>
 			</div>
 
-			{query.isError && !query.data ? (
-				<div className="mt-6">
-					<RequestFailure error={query.error} />
-				</div>
-			) : query.isPending ? (
-				<div className="mt-6">
-					<UnitList error={false} items={undefined} pending />
-				</div>
-			) : sections.length ? (
-				<div className="mt-7 flex flex-col gap-8">
-					{sections.map(({ category, items }) => (
-						<section aria-labelledby={`profile-content-${category}`} key={category}>
-							<h3
-								className="mb-3 font-heading font-semibold text-lg"
-								id={`profile-content-${category}`}
-							>
-								{t.profiles.contentTypes[category]}
-							</h3>
-							<UnitList error={false} items={items} pending={false} />
-						</section>
-					))}
-				</div>
-			) : (
-				<p className="mt-6 border-y border-border-weak py-8 text-muted-foreground text-sm">
-					{t.profiles.contentEmpty}
-				</p>
-			)}
+			<div
+				aria-label={t.feed.contentFilterLabel}
+				className="mt-6 flex items-center border-b border-border-weak pb-5"
+				role="group"
+			>
+				<FeedContentSelector
+					onValueChange={(nextKinds) =>
+						void setContentKinds(normalizeProfileContentKinds(nextKinds))
+					}
+					options={ProfileContentKindValues}
+					value={contentKinds}
+				/>
+			</div>
 
-			{query.isFetchNextPageError ? (
-				<div className="mt-6 flex flex-col items-start gap-3">
-					<RequestFailure error={query.error} />
-					<Button onClick={() => void query.fetchNextPage()} size="sm" variant="outline">
-						{t.actions.retry}
-					</Button>
-				</div>
-			) : query.hasNextPage ? (
-				<Button
-					className="mt-7"
-					isLoading={query.isFetchingNextPage}
-					onClick={() => void query.fetchNextPage()}
-					variant="outline"
-				>
-					{t.actions.loadMore}
-				</Button>
-			) : null}
+			<div className="mt-4">
+				<SearchFeedResults
+					aria-label={t.profiles.contentTitle}
+					emptyBody={t.profiles.contentEmptyDescription}
+					emptyTitle={t.profiles.contentEmptyTitle}
+					infinite
+					query={query}
+				/>
+			</div>
 		</section>
 	);
 }
