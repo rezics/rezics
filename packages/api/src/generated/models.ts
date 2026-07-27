@@ -17603,16 +17603,18 @@ export type GetApiGovernanceUnitByUnitIdAccessQuery = {
 export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -17627,16 +17629,18 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum =
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -17651,16 +17655,18 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum =
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -17675,16 +17681,18 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum 
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -17898,16 +17906,18 @@ export type PutApiGovernanceUnitByUnitIdAccessPath = {
 export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -17922,16 +17932,18 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum =
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -17946,16 +17958,18 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum =
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -17970,16 +17984,18 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum 
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -18222,16 +18238,18 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus500 = InternalError;
 export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -18246,16 +18264,18 @@ export type PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum =
 export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -18562,16 +18582,18 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveQuery = {
 export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -19006,16 +19028,18 @@ export type GetApiGovernanceUnitAccessInvitationsQuery = {
 export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -19169,16 +19193,18 @@ export type GetApiGovernanceUnitByUnitIdAccessInvitationsQuery = {
 export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -19390,16 +19416,18 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsPath = {
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -19642,16 +19670,18 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500 = InternalEr
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 	"entity.association.credit.request": "entity.association.credit.request",
@@ -19752,16 +19782,18 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 	{
 		"unit.read": "unit.read",
 		"unit.update": "unit.update",
-		"unit.publish": "unit.publish",
+		"unit.status.update": "unit.status.update",
 		"unit.history.restore": "unit.history.restore",
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.delete": "unit.delete",
 		"realm.contribute": "realm.contribute",
+		"realm.units.create": "realm.units.create",
+		"realm.post.replies.create": "realm.post.replies.create",
 		"realm.settings.update": "realm.settings.update",
 		"realm.members.read": "realm.members.read",
 		"realm.members.manage": "realm.members.manage",
-		"realm.rules.publish": "realm.rules.publish",
+		"realm.rules.update": "realm.rules.update",
 		"realm.pins.manage": "realm.pins.manage",
 		"realm.units.moderate": "realm.units.moderate",
 		"entity.association.credit.request": "entity.association.credit.request",
@@ -19992,16 +20024,18 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 	{
 		"unit.read": "unit.read",
 		"unit.update": "unit.update",
-		"unit.publish": "unit.publish",
+		"unit.status.update": "unit.status.update",
 		"unit.history.restore": "unit.history.restore",
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
 		"unit.delete": "unit.delete",
 		"realm.contribute": "realm.contribute",
+		"realm.units.create": "realm.units.create",
+		"realm.post.replies.create": "realm.post.replies.create",
 		"realm.settings.update": "realm.settings.update",
 		"realm.members.read": "realm.members.read",
 		"realm.members.manage": "realm.members.manage",
-		"realm.rules.publish": "realm.rules.publish",
+		"realm.rules.update": "realm.rules.update",
 		"realm.pins.manage": "realm.pins.manage",
 		"realm.units.moderate": "realm.units.moderate",
 		"entity.association.credit.request": "entity.association.credit.request",
@@ -24590,10 +24624,12 @@ export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
@@ -33359,10 +33395,12 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
@@ -34446,7 +34484,7 @@ export type ListCurrentUserStudioContentView =
 
 export const ListCurrentUserStudioContentPermission = {
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.access.manage": "unit.access.manage",
 } as const;
 
@@ -34610,7 +34648,7 @@ export type ListCurrentUserStudioContentStatus200ItemsWorkStateEnum =
 
 export const ListCurrentUserStudioContentStatus200ItemsPermissionsEnum = {
 	"unit.update": "unit.update",
-	"unit.publish": "unit.publish",
+	"unit.status.update": "unit.status.update",
 	"unit.access.manage": "unit.access.manage",
 } as const;
 
@@ -37324,10 +37362,12 @@ export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
@@ -37435,10 +37475,12 @@ export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
@@ -37572,10 +37614,12 @@ export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
@@ -37712,10 +37756,12 @@ export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
@@ -37906,10 +37952,12 @@ export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
 	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
 	"realm.members.manage": "realm.members.manage",
-	"realm.rules.publish": "realm.rules.publish",
+	"realm.rules.update": "realm.rules.update",
 	"realm.pins.manage": "realm.pins.manage",
 	"realm.units.moderate": "realm.units.moderate",
 } as const;
@@ -81313,6 +81361,14 @@ export type GetApiRealmsByRealmIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canCreateUnits: boolean;
+		/**
+		 * @type boolean
+		 */
+		canCreateReplies: boolean;
+		/**
+		 * @type boolean
+		 */
 		canUpdateSettings: boolean;
 		/**
 		 * @type boolean
@@ -81325,7 +81381,7 @@ export type GetApiRealmsByRealmIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canPublishRules: boolean;
+		canUpdateRules: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -83137,6 +83193,14 @@ export type PutApiRealmsByRealmIdRulesStatus429 = {
  */
 export type PutApiRealmsByRealmIdRulesStatus500 = InternalError;
 
+export const PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum = {
+	explicit: "explicit",
+	implicit_on_follow: "implicit_on_follow",
+} as const;
+
+export type PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum =
+	(typeof PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum)[keyof typeof PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum];
+
 export const PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -83149,6 +83213,11 @@ export type PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum =
  * @type object
  */
 export type PutApiRealmsByRealmIdRulesBody = {
+	/**
+	 * @default 'explicit'
+	 * @type string
+	 */
+	acknowledgementMode: PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum;
 	/**
 	 * @type boolean
 	 */
@@ -83371,6 +83440,14 @@ export type GetApiRealmsByRealmIdRulesQuery = {
 	localizationLanguages?: GetApiRealmsByRealmIdRulesLocalizationLanguagesEnum[];
 };
 
+export const GetApiRealmsByRealmIdRulesStatus200AcknowledgementModeEnum = {
+	explicit: "explicit",
+	implicit_on_follow: "implicit_on_follow",
+} as const;
+
+export type GetApiRealmsByRealmIdRulesStatus200AcknowledgementModeEnum =
+	(typeof GetApiRealmsByRealmIdRulesStatus200AcknowledgementModeEnum)[keyof typeof GetApiRealmsByRealmIdRulesStatus200AcknowledgementModeEnum];
+
 export const GetApiRealmsByRealmIdRulesStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -83385,6 +83462,11 @@ export type GetApiRealmsByRealmIdRulesStatus200ItemsLanguageEnum =
 export type GetApiRealmsByRealmIdRulesStatus200 = {
 	revisionId: (string | null) | null;
 	version: ((string | number) | null) | null;
+	/**
+	 * @default 'explicit'
+	 * @type string
+	 */
+	acknowledgementMode: GetApiRealmsByRealmIdRulesStatus200AcknowledgementModeEnum;
 	/**
 	 * @type boolean
 	 */

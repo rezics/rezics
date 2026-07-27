@@ -1,4 +1,4 @@
-h1:TRbEUL03qpIkLmP5AJm9Nhc4zOHLJu82BCv04nMHmGo=
+h1:+ugaZkiaXvT7or0DXBPQ9fVn30oC3/g71c3r3BM0Zyc=
 20260718070400_current_baseline.sql h1:u9QkCNmNKf+J8LE4/Lz03NbMrJf4RTid39bT22xn5ew=
 20260718070401_history_invariants.sql h1:ZtbZeYtN6E3/SM2hzpdVuXS7pICASEq93v29wpj7dDs=
 20260718154924_unit_realm_restrictions.sql h1:87+KV38BAlkYD150B4fAMEe19exDPGV12bR3dfNuHjA=
@@ -67,3 +67,4 @@ h1:TRbEUL03qpIkLmP5AJm9Nhc4zOHLJu82BCv04nMHmGo=
 20260727180000_access_control_v2.sql h1:Kbg0o7SxAUPVVGx7zCyAAHQitt53RcFdcWndRaTiiaY=
 20260727180001_content_rating_defaults.sql h1:0u2aoAthV+rPl2SBDtDAqS+Og/eRy3CyOXNCCTWSYCk=
 20260727180002_realm_unit_moderation_queue.sql h1:li5a9Kwj5BBbDCDQKjpLpvj6BubhhP/gQnogwSQYtOs=
+20260727230000_access_create_permissions_and_rule_acknowledgement.sql h1:lyulkCywoTAlvouiuYZ5EzG0WYg13Ky47vP6DLBOxCk=

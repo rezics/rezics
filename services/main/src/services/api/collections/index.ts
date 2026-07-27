@@ -311,8 +311,10 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const publishDecision = body.status
-				? await authorization.unit.decide(params.collectionId, "unit.publish", ["unit"])
+			const statusUpdateDecision = body.status
+				? await authorization.unit.decide(params.collectionId, "unit.status.update", [
+						"unit",
+					])
 				: undefined;
 			const [current] = await database
 				.select({ systemKey: collection.systemKey })
@@ -370,7 +372,7 @@ export default new Elysia({ prefix: "/collections" })
 						actor: { kind: "profile", profileId: profile.unitId },
 						authorization: {
 							kind: "interactive",
-							publishAllowed: publishDecision?.allowed ?? false,
+							statusUpdateAllowed: statusUpdateDecision?.allowed ?? false,
 						},
 						revisionId: revision.revisionId,
 					});

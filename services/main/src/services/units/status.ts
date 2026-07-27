@@ -23,11 +23,11 @@ export type UnitStatusActor =
 	| { readonly kind: "import" };
 
 export type UnitStatusTransitionAuthorization =
-	| { readonly kind: "interactive"; readonly publishAllowed: boolean }
+	| { readonly kind: "interactive"; readonly statusUpdateAllowed: boolean }
 	| { readonly kind: "trusted" };
 
-export function crossesPublishedBoundary(fromStatus: UnitStatus, toStatus: UnitStatus): boolean {
-	return fromStatus !== toStatus && (fromStatus === "published" || toStatus === "published");
+export function changesUnitStatus(fromStatus: UnitStatus, toStatus: UnitStatus): boolean {
+	return fromStatus !== toStatus;
 }
 
 export type UnitStatusEventView = {
@@ -182,14 +182,10 @@ export async function transitionUnitStatus(
 		current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()
 	)
 		throw new UnitChanged(current.updatedAt);
-	if (current.status === input.toStatus)
+	if (!changesUnitStatus(current.status, input.toStatus))
 		return { changed: false, status: current.status, publishedAt: current.publishedAt };
-	if (
-		input.authorization.kind === "interactive" &&
-		crossesPublishedBoundary(current.status, input.toStatus) &&
-		!input.authorization.publishAllowed
-	)
-		throw new UnitPermissionForbidden("unit.publish", ["unit"]);
+	if (input.authorization.kind === "interactive" && !input.authorization.statusUpdateAllowed)
+		throw new UnitPermissionForbidden("unit.status.update", ["unit"]);
 
 	const revisionId = input.revisionId ?? current.headRevisionId ?? null;
 	if (revisionId) {

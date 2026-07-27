@@ -9,10 +9,12 @@ import {
 describe("realm membership permissions", () => {
 	it("opens settings from server-authoritative capabilities", () => {
 		const capabilities = {
+			canCreateUnits: false,
+			canCreateReplies: false,
 			canUpdateSettings: false,
 			canReadMembers: false,
 			canManageMembers: false,
-			canPublishRules: false,
+			canUpdateRules: false,
 			canManagePins: true,
 			canModerateUnits: false,
 			canManageAccess: false,
@@ -25,10 +27,12 @@ describe("realm membership permissions", () => {
 	it("does not infer settings access from membership roles", () => {
 		expect(
 			canOpenRealmSettings({
+				canCreateUnits: false,
+				canCreateReplies: false,
 				canUpdateSettings: false,
 				canReadMembers: false,
 				canManageMembers: false,
-				canPublishRules: false,
+				canUpdateRules: false,
 				canManagePins: false,
 				canModerateUnits: false,
 				canManageAccess: false,
@@ -39,10 +43,12 @@ describe("realm membership permissions", () => {
 
 	it("opens only the Dock section for a Dock-scoped editor", () => {
 		const capabilities = {
+			canCreateUnits: false,
+			canCreateReplies: false,
 			canUpdateSettings: false,
 			canReadMembers: false,
 			canManageMembers: false,
-			canPublishRules: false,
+			canUpdateRules: false,
 			canManagePins: false,
 			canModerateUnits: false,
 			canManageAccess: false,
@@ -55,10 +61,12 @@ describe("realm membership permissions", () => {
 	it("keeps member capabilities inside the members section", () => {
 		expect(
 			getRealmSettingsSectionIds({
+				canCreateUnits: false,
+				canCreateReplies: false,
 				canUpdateSettings: false,
 				canReadMembers: true,
 				canManageMembers: true,
-				canPublishRules: false,
+				canUpdateRules: false,
 				canManagePins: false,
 				canModerateUnits: false,
 				canManageAccess: false,

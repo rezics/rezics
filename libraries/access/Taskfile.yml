@@ -1,0 +1,10 @@
+version: "3"
+
+tasks:
+    typecheck:
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts

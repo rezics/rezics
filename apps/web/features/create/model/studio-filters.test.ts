@@ -13,7 +13,11 @@ import {
 describe("Studio filters", () => {
 	it("derives every filter value from the generated API contract", () => {
 		expect(StudioViews).toEqual(["all", "created", "contributed", "assigned", "delegated"]);
-		expect(StudioPermissions).toEqual(["unit.update", "unit.publish", "unit.access.manage"]);
+		expect(StudioPermissions).toEqual([
+			"unit.update",
+			"unit.status.update",
+			"unit.access.manage",
+		]);
 		expect(StudioWorkStates).toEqual(["actionable", "blocked"]);
 		expect(StudioStatuses).toEqual(["draft", "published", "archived"]);
 		expect(StudioVisibilities).toEqual(["public", "unlisted", "private"]);

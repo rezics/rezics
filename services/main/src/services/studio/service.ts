@@ -35,7 +35,7 @@ import { resolveStudioResourceUnitId } from "./projection";
 
 const StudioPermissions = [
 	"unit.update",
-	"unit.publish",
+	"unit.status.update",
 	"unit.access.manage",
 ] as const satisfies readonly StudioPermission[];
 
@@ -181,7 +181,7 @@ function directAssignmentSource(profileId: string, view: StudioView): SQL | unde
 			from ${unitAccessGrant} access_grant
 			where access_grant.subject_kind = 'profile'
 				and access_grant.profile_id = ${profileId}
-				and access_grant.permission in ('unit.update', 'unit.publish', 'unit.access.manage')
+				and access_grant.permission in ('unit.update', 'unit.status.update', 'unit.access.manage')
 				and access_grant.revoked_at is null
 				and (access_grant.expires_at is null or access_grant.expires_at > now())
 		) assignment
@@ -222,7 +222,7 @@ function delegatedAssignmentSource(profileId: string, view: StudioView): SQL | u
 				and structure.deleted_at is null
 		) book_owner on true
 		where access_grant.subject_kind = 'realm'
-			and access_grant.permission in ('unit.update', 'unit.publish', 'unit.access.manage')
+			and access_grant.permission in ('unit.update', 'unit.status.update', 'unit.access.manage')
 			and access_grant.revoked_at is null
 			and (access_grant.expires_at is null or access_grant.expires_at > now())
 	`;
@@ -363,7 +363,7 @@ async function loadAssignments(
 					(access_grant.subject_kind = 'profile' and access_grant.profile_id = ${profileId})
 					or access_grant.subject_kind = 'realm'
 				)
-				and access_grant.permission in ('unit.update', 'unit.publish', 'unit.access.manage')
+				and access_grant.permission in ('unit.update', 'unit.status.update', 'unit.access.manage')
 				and access_grant.revoked_at is null
 				and (access_grant.expires_at is null or access_grant.expires_at > now())
 		) assignment

@@ -75,7 +75,7 @@ describe("adjacent governance API contracts", () => {
 		expect(
 			Check(CreateUnitAccessInvitationBody, {
 				invitedProfileId: profileId,
-				permissions: ["unit.update", "unit.publish"],
+				permissions: ["unit.update", "unit.status.update"],
 				scope: [],
 				invitationExpiresAt: "2026-08-01T00:00:00.000Z",
 			}),

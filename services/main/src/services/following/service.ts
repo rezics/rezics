@@ -16,6 +16,7 @@ import {
 import { presentAvatar } from "../units/avatar";
 import { presentImageAsset } from "../units/service";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
+import { acknowledgeCurrentRealmRulesOnFollow } from "../realms/service";
 import {
 	decodeFollowingCursor,
 	encodeFollowingCursor,
@@ -156,6 +157,8 @@ export async function followUnit(input: {
 			.insert(unitFollow)
 			.values({ followerProfileId: input.followerProfileId, unitId: target.id })
 			.onConflictDoNothing();
+		if (target.kind === "realm")
+			await acknowledgeCurrentRealmRulesOnFollow(tx, target.id, input.followerProfileId);
 	});
 	return { following: true as const };
 }

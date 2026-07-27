@@ -1,3 +1,4 @@
+import { ContentStructurePreviewCapability } from "@rezics/access";
 import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
 import {
@@ -41,7 +42,6 @@ import {
 	unitTag,
 	unitTagVoteStat,
 	unitVariant,
-	ContentStructurePreviewCapability,
 } from "../database/schema";
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
@@ -185,7 +185,7 @@ export async function createUnit(
 		});
 		await createCommunityCatalogAccess(tx, created.id, ownerId, [
 			"unit.update",
-			"unit.publish",
+			"unit.status.update",
 		]);
 		const bookStructureSnapshot = bookStructure
 			? ContentStructureSnapshotSchema.parse({
@@ -546,8 +546,8 @@ export async function updateUnit(
 	body: UpdateUnitInput,
 ): Promise<UnitDetail> {
 	await authorization.unit.ensureCanUpdate(unitId, [["unit"], [kind]]);
-	const publishDecision = body.status
-		? await authorization.unit.decide(unitId, "unit.publish", ["unit"])
+	const statusUpdateDecision = body.status
+		? await authorization.unit.decide(unitId, "unit.status.update", ["unit"])
 		: undefined;
 	await database.transaction(async (tx) => {
 		const [updated] = await tx
@@ -656,7 +656,7 @@ export async function updateUnit(
 				actor: { kind: "profile", profileId: authorization.profileId },
 				authorization: {
 					kind: "interactive",
-					publishAllowed: publishDecision?.allowed ?? false,
+					statusUpdateAllowed: statusUpdateDecision?.allowed ?? false,
 				},
 				revisionId: revision.revisionId,
 			});

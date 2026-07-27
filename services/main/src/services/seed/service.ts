@@ -378,7 +378,7 @@ async function insertUnitDetails(
 			for (const permission of [
 				"unit.read",
 				"unit.update",
-				...(value.kind === "tag" ? [] : (["unit.publish"] as const)),
+				...(value.kind === "tag" ? [] : (["unit.status.update"] as const)),
 			] as const)
 				grantRows.push({
 					unitId: value.id,
@@ -1825,6 +1825,8 @@ async function seedStructure(
 		catalog.realms.map((realmUnit, index) => ({
 			realmId: realmUnit.id,
 			version: 1,
+			acknowledgementMode:
+				index % 2 === 0 ? ("explicit" as const) : ("implicit_on_follow" as const),
 			requireOnJoin: index % 2 === 0,
 			requireOnPost: index % 3 === 0,
 			requireOnUpdate: true,
@@ -1937,7 +1939,7 @@ async function seedStructure(
 		"realm.contribute",
 		"realm.settings.update",
 		"realm.members.manage",
-		"realm.rules.publish",
+		"realm.rules.update",
 		"realm.pins.manage",
 		"realm.units.moderate",
 	] as const;

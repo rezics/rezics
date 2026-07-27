@@ -1,3 +1,4 @@
+import { ZonePreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -36,7 +37,6 @@ import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
 import { database } from "../../database";
-import { ZonePreviewCapability } from "../../database/schema/contract-values";
 import {
 	software,
 	softwareRequirement,

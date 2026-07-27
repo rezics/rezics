@@ -71,7 +71,7 @@ export default {
 		},
 		permissions: {
 			"unit.update": "Can edit",
-			"unit.publish": "Can publish",
+			"unit.status.update": "Can change status",
 			"unit.access.manage": "Can manage access",
 		},
 		workStates: { actionable: "Actionable", blocked: "Currently blocked" },

@@ -1,3 +1,4 @@
+import { RealmUnitCreatePermissionValues } from "@rezics/access";
 import { hashPassword } from "better-auth/crypto";
 import type { AvatarReference } from "@rezics/avatar";
 import { walkBlockTree } from "@rezics/block";
@@ -707,6 +708,32 @@ async function ensureBootstrapRealm(
 				unitId: value.id,
 				subjectKind: "realm",
 				realmId: value.id,
+				permission,
+				scope: [],
+				grantedByProfileId: value.ownerProfileId,
+				createdAt,
+				updatedAt: createdAt,
+			});
+			changed = true;
+		}
+	}
+	for (const permission of RealmUnitCreatePermissionValues) {
+		const [stored] = await tx
+			.select({ id: unitAccessGrant.id })
+			.from(unitAccessGrant)
+			.where(
+				and(
+					eq(unitAccessGrant.unitId, value.id),
+					eq(unitAccessGrant.subjectKind, "authenticated"),
+					eq(unitAccessGrant.permission, permission),
+					isNull(unitAccessGrant.revokedAt),
+				),
+			)
+			.limit(1);
+		if (!stored) {
+			await tx.insert(unitAccessGrant).values({
+				unitId: value.id,
+				subjectKind: "authenticated",
 				permission,
 				scope: [],
 				grantedByProfileId: value.ownerProfileId,

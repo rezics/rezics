@@ -2,7 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, UnitKind, Uuid } from ".";
-import { RealmMemberStateValues } from "../../database/schema/contract-values";
+import {
+	RealmMemberStateValues,
+	RealmRuleAcknowledgementModeValues,
+} from "../../database/schema/contract-values";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import { AvatarResponse, FeedPostItemResponse, FeedUnitItemResponse } from "./response";
 
@@ -118,6 +121,7 @@ export const RealmRuleRevisionResponse = t.Object({ id: Uuid, version: t.Integer
 export const RealmRulesResponse = t.Object({
 	revisionId: NullableUuid,
 	version: t.Nullable(t.Integer()),
+	acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
 	requireOnJoin: t.Boolean(),
 	requireOnPost: t.Boolean(),
 	requireOnUpdate: t.Boolean(),

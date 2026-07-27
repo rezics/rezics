@@ -329,7 +329,11 @@ export default new Elysia()
 				"",
 				async ({ profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(body.targetId);
-					await authorization.realm.ensureParticipation(body.realmId);
+					await authorization.realm.ensureUnitCreation(
+						body.realmId,
+						"realm.units.create",
+						"post",
+					);
 					const validatedScore = body.score
 						? {
 								value: body.score.value,

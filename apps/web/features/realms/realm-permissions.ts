@@ -8,8 +8,21 @@ import {
 type RealmMembership = GetApiRealmsByRealmIdStatus200["viewerMembership"];
 type RealmCapabilities = GetApiRealmsByRealmIdStatus200["capabilities"];
 
+function hasRealmManagementCapability(capabilities: RealmCapabilities) {
+	return (
+		capabilities.canUpdateSettings ||
+		capabilities.canReadMembers ||
+		capabilities.canManageMembers ||
+		capabilities.canUpdateRules ||
+		capabilities.canManagePins ||
+		capabilities.canModerateUnits ||
+		capabilities.canManageAccess ||
+		capabilities.canRestoreHistory
+	);
+}
+
 export function canOpenRealmSettings(capabilities: RealmCapabilities, canManageDocks = false) {
-	return canManageDocks || Object.values(capabilities).some(Boolean);
+	return canManageDocks || hasRealmManagementCapability(capabilities);
 }
 
 export function getRealmSettingsSectionIds(
@@ -17,11 +30,11 @@ export function getRealmSettingsSectionIds(
 	canManageDocks = false,
 ): readonly RealmSettingsSectionId[] {
 	if (!canOpenRealmSettings(capabilities, canManageDocks)) return [];
-	const hasRealmCapability = Object.values(capabilities).some(Boolean);
+	const hasRealmCapability = hasRealmManagementCapability(capabilities);
 	return RealmSettingsSectionIds.filter((sectionId) => {
 		if (sectionId === "profile") return capabilities.canUpdateSettings;
 		if (sectionId === "members") return capabilities.canReadMembers;
-		if (sectionId === "rules") return capabilities.canPublishRules;
+		if (sectionId === "rules") return capabilities.canUpdateRules;
 		if (sectionId === "pins") return capabilities.canManagePins;
 		if (sectionId === "docks") return canManageDocks;
 		if (sectionId === "access") return capabilities.canManageAccess;

@@ -1,3 +1,4 @@
+import { PlatformCapabilityValues, ZonePreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { and, eq, or } from "drizzle-orm";
 import Elysia from "elysia";
@@ -18,8 +19,6 @@ import {
 	profileBlock,
 	unitFollow,
 	profilePreference,
-	PlatformCapabilityValues,
-	ZonePreviewCapability,
 	unitLocalization,
 } from "../../database/schema";
 import { ensureImageAssetsAttachable } from "../image-assets/service";

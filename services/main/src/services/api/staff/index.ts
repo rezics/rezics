@@ -1,10 +1,11 @@
+import { PlatformCapabilityValues } from "@rezics/access";
 import { desc, inArray } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
 
 import session from "../../auth/session";
 import { database } from "../../database";
-import { auditEvent, PlatformCapabilityValues } from "../../database/schema";
+import { auditEvent } from "../../database/schema";
 import {
 	listStaffMembers,
 	replacePlatformAccess,

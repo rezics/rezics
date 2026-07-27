@@ -1,3 +1,4 @@
+import { PlatformCapabilityValues } from "@rezics/access";
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { PlatformGrantManagerRequired } from "../authorization/errors";
@@ -9,7 +10,6 @@ import {
 } from "../authorization/platform/policy";
 import { type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import { auditEvent, capabilityGrant, profile, users } from "../database/schema";
-import { PlatformCapabilityValues } from "../database/schema/contract-values";
 import { primaryUnitTitle } from "../units/localization";
 import { CapabilityGrantExpiryInvalid } from "../api/governance/errors";
 import { ProfileNotFound } from "../api/users/errors";

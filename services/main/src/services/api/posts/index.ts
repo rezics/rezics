@@ -286,7 +286,11 @@ export default new Elysia()
 			.post(
 				"",
 				async ({ profile, authorization, body }) => {
-					await authorization.realm.ensureParticipation(body.realmId, "post");
+					await authorization.realm.ensureUnitCreation(
+						body.realmId,
+						"realm.units.create",
+						"post",
+					);
 					if (body.subjectId) {
 						await authorization.unit.ensureCanRead(body.subjectId);
 					}
@@ -448,6 +452,7 @@ export default new Elysia()
 						canEdit,
 						canManageAttributions,
 						accessDecision,
+						replyCreationDecision,
 						targetingLock,
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([row.id]),
@@ -462,6 +467,9 @@ export default new Elysia()
 						authorization.unit.canUpdate(row.id, ["localizations"]),
 						authorization.unit.canUpdate(row.id, ["credit-attributions"]),
 						authorization.unit.decide(row.id, "unit.access.manage"),
+						query.realmId
+							? authorization.unit.decide(query.realmId, "realm.post.replies.create")
+							: Promise.resolve({ allowed: true } as const),
 						findPostTargetingLock(database, {
 							targets:
 								row.postKind === "reply" && row.rootPostId
@@ -486,7 +494,7 @@ export default new Elysia()
 							canEdit,
 							canManageAttributions,
 							canManageAccess: accessDecision.allowed,
-							canReply: !targetingLock,
+							canReply: replyCreationDecision.allowed && !targetingLock,
 						},
 					};
 				},
@@ -662,6 +670,14 @@ export default new Elysia()
 						targetUnitIds: [params.postId, ...rows.map(({ id }) => id)],
 						...(query.realmId ? { realmId: query.realmId } : {}),
 					});
+					const replyCreationAllowed = query.realmId
+						? (
+								await authorization.unit.decide(
+									query.realmId,
+									"realm.post.replies.create",
+								)
+							).allowed
+						: true;
 					const rowById = new Map(rows.map((row) => [row.id, row]));
 					return {
 						items: await Promise.all(
@@ -678,6 +694,7 @@ export default new Elysia()
 									capabilities: {
 										canEdit: await authorization.unit.canUpdate(row.id),
 										canReply:
+											replyCreationAllowed &&
 											!lockedTargetIds.has(row.rootPostId) &&
 											!lockedTargetIds.has(row.id),
 									},
@@ -709,7 +726,11 @@ export default new Elysia()
 						() => new UnitNotFound("Post"),
 					);
 					await ensureRootPost(params.postId, body.realmId);
-					await authorization.realm.ensureParticipation(body.realmId, "post");
+					await authorization.realm.ensureUnitCreation(
+						body.realmId,
+						"realm.post.replies.create",
+						"post",
+					);
 					const createdReply = await database.transaction(async (tx) => {
 						const [root] = await tx
 							.select({ id: post.id })

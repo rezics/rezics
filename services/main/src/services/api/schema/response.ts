@@ -1,3 +1,4 @@
+import { PlatformCapabilityValues } from "@rezics/access";
 import { type Static, t } from "elysia";
 import {
 	FontAwesomeIconNamePatternSource,
@@ -25,7 +26,6 @@ import {
 	ContentRatingValues,
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
-	PlatformCapabilityValues,
 	ProgressStatusValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
@@ -874,10 +874,12 @@ export const RealmDetailResponse = t.Object({
 	viewerFollowing: t.Boolean(),
 	viewerMembership: t.Optional(t.Object({ isOwner: t.Boolean(), state: t.String() })),
 	capabilities: t.Object({
+		canCreateUnits: t.Boolean(),
+		canCreateReplies: t.Boolean(),
 		canUpdateSettings: t.Boolean(),
 		canReadMembers: t.Boolean(),
 		canManageMembers: t.Boolean(),
-		canPublishRules: t.Boolean(),
+		canUpdateRules: t.Boolean(),
 		canManagePins: t.Boolean(),
 		canModerateUnits: t.Boolean(),
 		canManageAccess: t.Boolean(),

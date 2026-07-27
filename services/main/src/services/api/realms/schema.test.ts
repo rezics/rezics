@@ -9,6 +9,7 @@ import {
 	RealmRulesQuery,
 	RealmUnitListResponse,
 	RealmUnitModerationActionResponse,
+	UpdateRealmRulesBody,
 } from "./schema";
 
 describe("Realm member API contract", () => {
@@ -26,6 +27,45 @@ describe("Realm member API contract", () => {
 	it("uses the shared localization fallback query for Realm rules", () => {
 		expect(Check(RealmRulesQuery, { localizationLanguages: ["en", "zh"] })).toBe(true);
 		expect(Check(RealmRulesQuery, { localizationLanguages: [] })).toBe(false);
+	});
+
+	it.each(["explicit", "implicit_on_follow"] as const)(
+		"accepts the %s rule acknowledgement mode",
+		(acknowledgementMode) => {
+			expect(
+				Check(UpdateRealmRulesBody, {
+					acknowledgementMode,
+					requireOnJoin: true,
+					requireOnPost: true,
+					requireOnUpdate: true,
+					rules: [
+						{
+							language: "en",
+							title: "Community rules",
+							content: createPortableTextDocument([], "0123456789ab"),
+						},
+					],
+				}),
+			).toBe(true);
+		},
+	);
+
+	it("rejects an undeclared rule acknowledgement mode", () => {
+		expect(
+			Check(UpdateRealmRulesBody, {
+				acknowledgementMode: "silent",
+				requireOnJoin: false,
+				requireOnPost: false,
+				requireOnUpdate: true,
+				rules: [
+					{
+						language: "en",
+						title: "Community rules",
+						content: createPortableTextDocument([], "0123456789ab"),
+					},
+				],
+			}),
+		).toBe(false);
 	});
 });
 

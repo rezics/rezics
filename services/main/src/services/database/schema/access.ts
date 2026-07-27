@@ -15,8 +15,9 @@ import {
 	UnitAccessRestrictionSubjectKindValues,
 	UnitAccessSubjectKindValues,
 	UnitPermissionValues,
-	toEnumValues,
-} from "./contract-values";
+} from "@rezics/access";
+
+import { toEnumValues } from "./contract-values";
 import {
 	createCreatedAtColumn,
 	createTimestampMsColumn,

@@ -5649,7 +5649,7 @@ export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends b
 }
 
 /**
- * @summary Publish Realm rules
+ * @summary Update Realm rules
  * {@link /api/realms/:realmId/rules}
  */
 export function putApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(

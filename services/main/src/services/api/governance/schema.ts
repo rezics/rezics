@@ -1,3 +1,4 @@
+import { PlatformCapabilityValues, UnitPermissionValues } from "@rezics/access";
 import { PortableTextDocument } from "@rezics/block";
 import { type Static, t } from "elysia";
 
@@ -5,8 +6,6 @@ import {
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
 	ModerationCaseStateValues,
-	PlatformCapabilityValues,
-	UnitPermissionValues,
 } from "../../database/schema/contract-values";
 import { DateTime, ContentLanguage, Uuid } from "../schema";
 

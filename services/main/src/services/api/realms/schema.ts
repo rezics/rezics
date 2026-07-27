@@ -8,6 +8,7 @@ import {
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
+	RealmRuleAcknowledgementModeValues,
 	RealmUnitStatusValues,
 	RealmUnitMutationCommandValues,
 	UnitStatusValues,
@@ -100,7 +101,8 @@ export const UpdateRealmMemberBody = t.Object(
 );
 export type UpdateRealmMemberBody = Static<typeof UpdateRealmMemberBody>;
 
-export const PublishRealmRulesBody = t.Object({
+export const UpdateRealmRulesBody = t.Object({
+	acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
 	requireOnJoin: t.Boolean(),
 	requireOnPost: t.Boolean(),
 	requireOnUpdate: t.Boolean(),
@@ -113,7 +115,7 @@ export const PublishRealmRulesBody = t.Object({
 		{ minItems: 1, maxItems: 100 },
 	),
 });
-export type PublishRealmRulesBody = Static<typeof PublishRealmRulesBody>;
+export type UpdateRealmRulesBody = Static<typeof UpdateRealmRulesBody>;
 
 export const RealmRulesQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,

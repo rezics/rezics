@@ -1,3 +1,4 @@
+import { ContentStructurePreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
@@ -19,7 +20,6 @@ import {
 	unitOwnership,
 	unitLocalization,
 	unitLocalizationContentMetric,
-	ContentStructurePreviewCapability,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
 import {

@@ -1,3 +1,4 @@
+import { PlatformCapabilityValues } from "@rezics/access";
 import {
 	createDockDocument,
 	createPortableTextDocument,
@@ -19,7 +20,6 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import type { UnitPredicate } from "@rezics/filter";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 
-import { PlatformCapabilityValues } from "../database/schema/contract-values";
 import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
 
 export { TopLevelSlugNamespaceUnitIds };
@@ -135,13 +135,13 @@ export const OfficialRealmManifest = {
 			permissions: [
 				"unit.read",
 				"unit.update",
-				"unit.publish",
+				"unit.status.update",
 				"unit.access.manage",
 				"realm.contribute",
 				"realm.settings.update",
 				"realm.members.read",
 				"realm.members.manage",
-				"realm.rules.publish",
+				"realm.rules.update",
 				"realm.pins.manage",
 				"realm.units.moderate",
 			],
@@ -187,13 +187,13 @@ export const RezicsScoreRealmManifest = {
 			permissions: [
 				"unit.read",
 				"unit.update",
-				"unit.publish",
+				"unit.status.update",
 				"unit.access.manage",
 				"realm.contribute",
 				"realm.settings.update",
 				"realm.members.read",
 				"realm.members.manage",
-				"realm.rules.publish",
+				"realm.rules.update",
 				"realm.pins.manage",
 				"realm.units.moderate",
 			],

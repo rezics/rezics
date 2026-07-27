@@ -18,6 +18,7 @@
 		"./verbatim-terms": "./src/verbatim-terms.ts"
 	},
 	"dependencies": {
+		"@rezics/access": "workspace:*",
 		"@rezics/license": "workspace:*",
 		"native-i18n": "0.2.0"
 	},

@@ -8,6 +8,7 @@ const transactionSelect = vi.hoisted(() => vi.fn());
 const transactionInsert = vi.hoisted(() => vi.fn());
 const insertValues = vi.hoisted(() => vi.fn());
 const onConflictDoNothing = vi.hoisted(() => vi.fn());
+const acknowledgeCurrentRealmRulesOnFollow = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", () => ({
 	database: {
@@ -15,6 +16,7 @@ vi.mock("../database", () => ({
 		transaction,
 	},
 }));
+vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow }));
 
 import { UnitKindValues } from "../database/schema/contract-values";
 import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
@@ -62,6 +64,8 @@ describe("followUnit", () => {
 				}),
 		);
 		ensureCanRead.mockClear();
+		acknowledgeCurrentRealmRulesOnFollow.mockReset();
+		acknowledgeCurrentRealmRulesOnFollow.mockResolvedValue(undefined);
 	});
 
 	it.each(UnitKindValues)("follows a readable %s Unit without a kind gate", async (kind) => {
@@ -83,6 +87,13 @@ describe("followUnit", () => {
 		expect(onConflictDoNothing).toHaveBeenCalledOnce();
 		if (kind === "profile") expect(transactionSelect).toHaveBeenCalledOnce();
 		else expect(transactionSelect).not.toHaveBeenCalled();
+		if (kind === "realm")
+			expect(acknowledgeCurrentRealmRulesOnFollow).toHaveBeenCalledWith(
+				expect.anything(),
+				TargetUnitId,
+				FollowerProfileId,
+			);
+		else expect(acknowledgeCurrentRealmRulesOnFollow).not.toHaveBeenCalled();
 	});
 
 	it("rejects following the caller's own Profile before writing", async () => {

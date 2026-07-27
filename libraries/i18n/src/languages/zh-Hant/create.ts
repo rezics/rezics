@@ -53,7 +53,7 @@ export default {
 		},
 		permissions: {
 			"unit.update": "可編輯",
-			"unit.publish": "可發布",
+			"unit.status.update": "可變更狀態",
 			"unit.access.manage": "可管理存取權",
 		},
 		workStates: { actionable: "可操作", blocked: "目前受阻" },

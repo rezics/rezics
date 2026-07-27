@@ -1,5 +1,6 @@
 import { getTableName, type SQL } from "drizzle-orm";
 import { getTableConfig, PgDialect } from "drizzle-orm/pg-core";
+import { PlatformCapabilityValues, UnitPermissionValues } from "@rezics/access";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -17,6 +18,7 @@ import {
 	conversationParticipantStat,
 	realmTagVoteStat,
 	realmScoreContext,
+	realmRuleRevision,
 	recommendationMetricDaily,
 	recommendationSignalKind,
 	recommendationUnitStat,
@@ -38,6 +40,7 @@ import {
 	realmUnitStatus,
 	realmUnitStatusEvent,
 	RealmUnitMutationCommandValues,
+	RealmRuleAcknowledgementModeValues,
 	scoreStat,
 	score,
 	post,
@@ -74,9 +77,7 @@ import {
 	ImageAssetPresentationRoleValues,
 	UnitRevisionSlotRoleValues,
 	UnitStatusActorKindValues,
-	PlatformCapabilityValues,
 	UnitKindValues,
-	UnitPermissionValues,
 	VariantCapableUnitKindValues,
 } from "./schema";
 
@@ -216,6 +217,20 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(UnitPermissionValues).toContain("unit.association.manage");
+		expect(UnitPermissionValues).toEqual(
+			expect.arrayContaining([
+				"unit.status.update",
+				"realm.units.create",
+				"realm.post.replies.create",
+				"realm.rules.update",
+			]),
+		);
+	});
+
+	it("stores the rule acknowledgement policy on each immutable Realm revision", () => {
+		expect(realmRuleRevision.acknowledgementMode.enumValues).toEqual(
+			RealmRuleAcknowledgementModeValues,
+		);
 	});
 
 	it("records typed generic Unit status provenance", () => {

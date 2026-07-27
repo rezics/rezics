@@ -291,12 +291,12 @@ export function RealmDetailPage({ id }: { id: string }) {
 	const realm = query.data;
 	const localization = selectLocalization(realm.localizations, realm.language);
 	const canManage = canOpenRealmSettings(realm.capabilities, dockAccess.allowedKinds.length > 0);
-	const canPost = realm.viewerMembership?.state === "active";
+	const canPost = realm.capabilities.canCreateUnits;
 	const joinRuleGate: RealmJoinRuleGate = rules.isPending
 		? { state: "loading" }
 		: rules.isError
 			? { state: "unavailable" }
-			: rules.data?.requireOnJoin
+			: rules.data?.requireOnJoin && rules.data.acknowledgementMode === "explicit"
 				? rules.data.revisionId && rules.data.items.length
 					? {
 							state: "requires-acknowledgement",

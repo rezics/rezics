@@ -3941,6 +3941,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@rezics/access@workspace:*, @rezics/access@workspace:libraries/access":
+  version: 0.0.0-use.local
+  resolution: "@rezics/access@workspace:libraries/access"
+  dependencies:
+    typescript: "npm:7"
+    vitest: "npm:4.1.10"
+  languageName: unknown
+  linkType: soft
+
 "@rezics/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@rezics/api@workspace:packages/api"
@@ -3990,6 +3999,7 @@ __metadata:
     "@elysiajs/cors": "npm:^1.4.2"
     "@elysiajs/openapi": "npm:^1.4.15"
     "@faker-js/faker": "npm:^10.5.0"
+    "@rezics/access": "workspace:*"
     "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
     "@rezics/brand": "workspace:*"
@@ -4151,6 +4161,7 @@ __metadata:
   resolution: "@rezics/i18n@workspace:libraries/i18n"
   dependencies:
     "@babel/parser": "npm:^7.29.7"
+    "@rezics/access": "workspace:*"
     "@rezics/license": "workspace:*"
     native-i18n: "npm:0.2.0"
     typescript: "npm:7"

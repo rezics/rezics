@@ -38,6 +38,7 @@ import {
 	realmPin,
 	realmRule,
 	realmRuleRevision,
+	RealmRuleAcknowledgementModeValues,
 	release,
 	revisionContent,
 	series,
@@ -114,6 +115,7 @@ const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 const RuleSnapshotSchema = z.object({
+	acknowledgementMode: z.enum(RealmRuleAcknowledgementModeValues),
 	requireOnJoin: z.boolean(),
 	requireOnPost: z.boolean(),
 	requireOnUpdate: z.boolean(),
@@ -397,6 +399,7 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 		.where(eq(realmRule.revisionId, revision.id))
 		.orderBy(realmRule.position, realmRule.id);
 	return RuleSnapshotSchema.parse({
+		acknowledgementMode: revision.acknowledgementMode,
 		requireOnJoin: revision.requireOnJoin,
 		requireOnPost: revision.requireOnPost,
 		requireOnUpdate: revision.requireOnUpdate,
@@ -647,6 +650,7 @@ async function restoreRealmRules(
 		.values({
 			realmId,
 			version: Number(latest?.value ?? 0) + 1,
+			acknowledgementMode: value?.acknowledgementMode ?? "explicit",
 			requireOnJoin: value?.requireOnJoin ?? false,
 			requireOnPost: value?.requireOnPost ?? false,
 			requireOnUpdate: value?.requireOnUpdate ?? false,
@@ -708,7 +712,9 @@ export async function restoreUnitSnapshot(
 		})
 		.from(subjectAssociation)
 		.where(eq(subjectAssociation.unitId, unitId));
-	const currentCreditTargetIds = new Set(currentCredits.map(({ creditedUnitId }) => creditedUnitId));
+	const currentCreditTargetIds = new Set(
+		currentCredits.map(({ creditedUnitId }) => creditedUnitId),
+	);
 	const currentSubjectTargetIds = new Set(
 		currentSubjectAssociations.map(({ entityId }) => entityId),
 	);
@@ -1009,6 +1015,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			realmUnit: [],
 			realmRules: rules
 				? {
+						acknowledgementMode: rules.acknowledgementMode,
 						requireOnJoin: rules.requireOnJoin,
 						requireOnPost: rules.requireOnPost,
 						requireOnUpdate: rules.requireOnUpdate,

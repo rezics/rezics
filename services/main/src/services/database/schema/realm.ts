@@ -1,3 +1,4 @@
+import { CapabilityAuthorityValues } from "@rezics/access";
 import { sql } from "drizzle-orm";
 import {
 	boolean,
@@ -13,11 +14,11 @@ import {
 
 import { pgTable } from "./base";
 import {
-	CapabilityAuthorityValues,
 	type ContentLanguage,
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
+	RealmRuleAcknowledgementModeValues,
 	RealmUnitStatusValues,
 	toEnumValues,
 } from "./contract-values";
@@ -34,6 +35,10 @@ import { profile, unit } from "./core";
 export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoinPolicyValues));
 export const realmMemberState = pgEnum("realm_member_state", toEnumValues(RealmMemberStateValues));
 export const realmPinKind = pgEnum("realm_pin_kind", toEnumValues(RealmPinKindValues));
+export const realmRuleAcknowledgementMode = pgEnum(
+	"realm_rule_acknowledgement_mode",
+	toEnumValues(RealmRuleAcknowledgementModeValues),
+);
 export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
 export const capabilityAuthority = pgEnum(
 	"capability_authority",
@@ -77,6 +82,7 @@ export const realmRuleRevision = pgTable(
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
 		version: integer().notNull(),
+		acknowledgementMode: realmRuleAcknowledgementMode().default("explicit").notNull(),
 		requireOnJoin: boolean().default(false).notNull(),
 		requireOnPost: boolean().default(false).notNull(),
 		requireOnUpdate: boolean().default(true).notNull(),

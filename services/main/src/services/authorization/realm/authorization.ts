@@ -1,3 +1,4 @@
+import type { RealmUnitCreatePermission } from "@rezics/access";
 import { and, eq } from "drizzle-orm";
 
 import { database } from "../../database";
@@ -102,5 +103,16 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		if (!realmId) return;
 		await this.ensureMembershipCapability(realmId, "realm.contribute");
 		if (trigger) await ensureRulesAccepted(realmId, this.profileId, trigger);
+	}
+
+	async ensureUnitCreation(
+		this: RealmAuthorization<string>,
+		realmId: string | undefined,
+		permission: RealmUnitCreatePermission,
+		trigger: RealmRuleTrigger,
+	): Promise<void> {
+		if (!realmId) return;
+		await this.ensureCapability(realmId, permission);
+		await ensureRulesAccepted(realmId, this.profileId, trigger);
 	}
 }

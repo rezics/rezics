@@ -60,6 +60,7 @@ type RuleDraft = {
 	content: PortableTextValue;
 	document?: PortableTextDocument;
 };
+type RuleAcknowledgementMode = "explicit" | "implicit_on_follow";
 
 export function RealmProfileSettings({
 	realm,
@@ -283,6 +284,8 @@ export function RealmRules({
 	const queryClient = useQueryClient();
 	const save = usePutApiRealmsByRealmIdRules();
 	const [drafts, setDrafts] = useState<RuleDraft[]>();
+	const [acknowledgementMode, setAcknowledgementMode] =
+		useState<RuleAcknowledgementMode>("explicit");
 	const [requireOnJoin, setRequireOnJoin] = useState(false);
 	const [requireOnPost, setRequireOnPost] = useState(false);
 	const [requireOnUpdate, setRequireOnUpdate] = useState(false);
@@ -299,6 +302,7 @@ export function RealmRules({
 					}))
 				: [{ language: toContentLanguage(locale.target), title: "", content: [] }],
 		);
+		setAcknowledgementMode(data.acknowledgementMode);
 		setRequireOnJoin(Boolean(data.requireOnJoin));
 		setRequireOnPost(Boolean(data.requireOnPost));
 		setRequireOnUpdate(Boolean(data.requireOnUpdate));
@@ -326,6 +330,7 @@ export function RealmRules({
 			{
 				path: { realmId },
 				body: {
+					acknowledgementMode,
 					requireOnJoin,
 					requireOnPost,
 					requireOnUpdate,
@@ -351,6 +356,24 @@ export function RealmRules({
 			<Card>
 				<CardContent className="p-5">
 					<form className="grid gap-5" onSubmit={submit}>
+						<Field>
+							<FieldLabel>{t.realms.ruleAcknowledgementMode}</FieldLabel>
+							<NativeSelect
+								value={acknowledgementMode}
+								onChange={(event) => {
+									const mode = event.currentTarget.value;
+									if (mode === "explicit" || mode === "implicit_on_follow")
+										setAcknowledgementMode(mode);
+								}}
+							>
+								<NativeSelectOption value="explicit">
+									{t.realms.ruleAcknowledgementModes.explicit}
+								</NativeSelectOption>
+								<NativeSelectOption value="implicit_on_follow">
+									{t.realms.ruleAcknowledgementModes.implicitOnFollow}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
 						<div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
 							<RuleRequirement checked={requireOnJoin} onChange={setRequireOnJoin}>
 								{t.realms.requireOnJoin}

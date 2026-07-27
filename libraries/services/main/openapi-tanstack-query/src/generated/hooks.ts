@@ -28346,7 +28346,7 @@ export function putApiRealmsByRealmIdRulesMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Publish Realm rules
+ * @summary Update Realm rules
  * {@link /api/realms/:realmId/rules}
  */
 export function usePutApiRealmsByRealmIdRules<TContext>(

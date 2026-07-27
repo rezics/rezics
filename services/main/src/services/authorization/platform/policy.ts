@@ -1,6 +1,6 @@
-import { PlatformCapabilityValues } from "../../database/schema";
+import { PlatformCapabilityValues, type PlatformCapability } from "@rezics/access";
 
-export type PlatformCapability = (typeof PlatformCapabilityValues)[number];
+export type { PlatformCapability };
 
 export function isPlatformCapability(value: string): value is PlatformCapability {
 	return PlatformCapabilityValues.some((capability) => capability === value);

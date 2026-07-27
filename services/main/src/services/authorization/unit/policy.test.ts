@@ -22,10 +22,9 @@ describe("unit visibility", () => {
 
 describe("unit access policy", () => {
 	it("closes implied permissions and scopes kind-specific permissions", () => {
-		expect(expandUnitPermissions(["unit.publish"])).toEqual([
+		expect(expandUnitPermissions(["unit.status.update"])).toEqual([
 			"unit.read",
-			"unit.update",
-			"unit.publish",
+			"unit.status.update",
 		]);
 		expect(isUnitPermissionApplicable("realm", "realm.members.manage")).toBe(true);
 		expect(isUnitPermissionApplicable("post", "realm.members.manage")).toBe(false);

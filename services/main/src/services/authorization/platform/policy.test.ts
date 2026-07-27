@@ -1,6 +1,6 @@
+import { PlatformCapabilityValues } from "@rezics/access";
 import { describe, expect, it } from "vitest";
 
-import { PlatformCapabilityValues } from "../../database/schema";
 import {
 	isPlatformCapability,
 	isSuperAdminCapabilitySet,

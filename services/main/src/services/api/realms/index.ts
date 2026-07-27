@@ -1,3 +1,4 @@
+import { RealmUnitCreatePermissionValues } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, gt, inArray, isNull, lt, max, notInArray, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -91,7 +92,7 @@ import {
 	ListRealmUnitsQuery,
 	ListRealmsQuery,
 	ModerateRealmUnitBody,
-	PublishRealmRulesBody,
+	UpdateRealmRulesBody,
 	RealmUnitParams,
 	RealmTagParams,
 	PutRealmTagContextBody,
@@ -394,6 +395,16 @@ export default new Elysia({ prefix: "/realms" })
 						grantedByProfileId: profile.unitId,
 					})),
 				);
+				if (body.visibility === "public")
+					await tx.insert(unitAccessGrant).values(
+						RealmUnitCreatePermissionValues.map((permission) => ({
+							unitId: created.id,
+							subjectKind: "authenticated" as const,
+							permission,
+							scope: [],
+							grantedByProfileId: profile.unitId,
+						})),
+					);
 				await tx.insert(unitFollow).values({
 					followerProfileId: profile.unitId,
 					unitId: created.id,
@@ -534,10 +545,12 @@ export default new Elysia({ prefix: "/realms" })
 				.limit(1);
 			const [realmCapabilities, accessDecision, historyDecision] = await Promise.all([
 				authorization.realm.decideCapabilities(params.realmId, [
+					"realm.units.create",
+					"realm.post.replies.create",
 					"realm.settings.update",
 					"realm.members.read",
 					"realm.members.manage",
-					"realm.rules.publish",
+					"realm.rules.update",
 					"realm.pins.manage",
 					"realm.units.moderate",
 				]),
@@ -586,10 +599,12 @@ export default new Elysia({ prefix: "/realms" })
 					: undefined,
 				viewerFollowing: following.length > 0,
 				capabilities: {
+					canCreateUnits: realmCapabilities.get("realm.units.create") ?? false,
+					canCreateReplies: realmCapabilities.get("realm.post.replies.create") ?? false,
 					canUpdateSettings: realmCapabilities.get("realm.settings.update") ?? false,
 					canReadMembers: realmCapabilities.get("realm.members.read") ?? false,
 					canManageMembers: realmCapabilities.get("realm.members.manage") ?? false,
-					canPublishRules: realmCapabilities.get("realm.rules.publish") ?? false,
+					canUpdateRules: realmCapabilities.get("realm.rules.update") ?? false,
 					canManagePins: realmCapabilities.get("realm.pins.manage") ?? false,
 					canModerateUnits: realmCapabilities.get("realm.units.moderate") ?? false,
 					canManageAccess: accessDecision.allowed,
@@ -704,8 +719,8 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
-			const publishDecision = body.status
-				? await authorization.unit.decide(params.realmId, "unit.publish", ["unit"])
+			const statusUpdateDecision = body.status
+				? await authorization.unit.decide(params.realmId, "unit.status.update", ["unit"])
 				: undefined;
 			const [current] = await database
 				.select({ id: unit.id })
@@ -760,7 +775,7 @@ export default new Elysia({ prefix: "/realms" })
 						actor: { kind: "profile", profileId: profile.unitId },
 						authorization: {
 							kind: "interactive",
-							publishAllowed: publishDecision?.allowed ?? false,
+							statusUpdateAllowed: statusUpdateDecision?.allowed ?? false,
 						},
 						revisionId: revision.revisionId,
 					});
@@ -805,14 +820,29 @@ export default new Elysia({ prefix: "/realms" })
 				const [rules] = await tx
 					.select({
 						id: realmRuleRevision.id,
+						acknowledgementMode: realmRuleRevision.acknowledgementMode,
 						requireOnJoin: realmRuleRevision.requireOnJoin,
 					})
 					.from(realmRuleRevision)
 					.where(eq(realmRuleRevision.realmId, params.realmId))
 					.orderBy(desc(realmRuleRevision.version))
 					.limit(1);
-				if (rules?.requireOnJoin && rules.id !== body.ruleRevisionId)
-					throw new RealmRulesAcceptanceRequired({ revisionId: rules.id });
+				const acceptsOnFollow = rules?.acknowledgementMode === "implicit_on_follow";
+				const explicitlyAccepted = rules?.id === body.ruleRevisionId;
+				if (rules?.requireOnJoin && !acceptsOnFollow && !explicitlyAccepted) {
+					const [existingAcceptance] = await tx
+						.select({ revisionId: realmRuleAcceptance.revisionId })
+						.from(realmRuleAcceptance)
+						.where(
+							and(
+								eq(realmRuleAcceptance.revisionId, rules.id),
+								eq(realmRuleAcceptance.profileId, profile.unitId),
+							),
+						)
+						.limit(1);
+					if (!existingAcceptance)
+						throw new RealmRulesAcceptanceRequired({ revisionId: rules.id });
+				}
 				await tx
 					.insert(realmMember)
 					.values({ realmId: params.realmId, profileId: profile.unitId, state })
@@ -824,13 +854,13 @@ export default new Elysia({ prefix: "/realms" })
 					.insert(unitFollow)
 					.values({ followerProfileId: profile.unitId, unitId: params.realmId })
 					.onConflictDoNothing();
-				if (rules && rules.id === body.ruleRevisionId)
+				if (rules && (acceptsOnFollow || explicitlyAccepted))
 					await tx
 						.insert(realmRuleAcceptance)
 						.values({
 							revisionId: rules.id,
 							profileId: profile.unitId,
-							language: body.language,
+							language: acceptsOnFollow ? null : body.language,
 						})
 						.onConflictDoNothing();
 			});
@@ -1050,12 +1080,9 @@ export default new Elysia({ prefix: "/realms" })
 	.put(
 		"/:realmId/rules",
 		async ({ params, profile, authorization, body }) => {
-			await ensureRealmFieldsAuthorized(
-				authorization,
-				params.realmId,
-				"realm.rules.publish",
-				["rules"],
-			);
+			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
+				"rules",
+			]);
 			const revision = await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
@@ -1069,6 +1096,7 @@ export default new Elysia({ prefix: "/realms" })
 					.values({
 						realmId: params.realmId,
 						version: Number(latest?.version ?? 0) + 1,
+						acknowledgementMode: body.acknowledgementMode,
 						requireOnJoin: body.requireOnJoin,
 						requireOnPost: body.requireOnPost,
 						requireOnUpdate: body.requireOnUpdate,
@@ -1107,7 +1135,7 @@ export default new Elysia({ prefix: "/realms" })
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
-				await recordAuditEvent(tx, profile.unitId, "realm.rules.publish", params.realmId);
+				await recordAuditEvent(tx, profile.unitId, "realm.rules.update", params.realmId);
 				return created;
 			});
 			return { id: revision.id, version: revision.version };
@@ -1115,12 +1143,12 @@ export default new Elysia({ prefix: "/realms" })
 		{
 			access: "write:realm:manage",
 			params: RealmParams,
-			body: PublishRealmRulesBody,
+			body: UpdateRealmRulesBody,
 			response: {
 				[StatusCodes.OK]: RealmRuleRevisionResponse,
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 			},
-			detail: { summary: "Publish Realm rules", tags: ["Realms"] },
+			detail: { summary: "Update Realm rules", tags: ["Realms"] },
 		},
 	)
 	.get(
@@ -1132,6 +1160,7 @@ export default new Elysia({ prefix: "/realms" })
 				return {
 					revisionId: null,
 					version: null,
+					acknowledgementMode: "explicit",
 					requireOnJoin: false,
 					requireOnPost: false,
 					requireOnUpdate: false,

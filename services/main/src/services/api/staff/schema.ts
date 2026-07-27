@@ -1,6 +1,6 @@
+import { PlatformCapabilityValues } from "@rezics/access";
 import { type Static, t } from "elysia";
 
-import { PlatformCapabilityValues } from "../../database/schema/contract-values";
 import { DateTime, Uuid } from "../schema";
 
 export const PlatformCapability = t.UnionEnum(PlatformCapabilityValues);

@@ -1,3 +1,4 @@
+import type { PlatformCapability, UnitPermission } from "@rezics/access";
 import { insert } from "native-i18n";
 
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
@@ -53,13 +54,15 @@ export default {
 		"platform.suppress": "Suppress platform content and revisions",
 		"platform.grants.manage": "Manage platform staff grants",
 		"realm.contribute": `Participate in every ${realmTerms.label}`,
+		"realm.units.create": `Create Units in every ${realmTerms.label}`,
+		"realm.post.replies.create": `Create replies in every ${realmTerms.label}`,
 		"realm.settings.update": `Update ${realmTerms.label} settings`,
 		"realm.members.read": `Read ${realmTerms.label} members`,
 		"realm.members.manage": `Manage ${realmTerms.label} members`,
-		"realm.rules.publish": `Publish ${realmTerms.label} rules`,
+		"realm.rules.update": `Update ${realmTerms.label} rules`,
 		"realm.pins.manage": `Manage ${realmTerms.label} pinned content`,
 		"realm.units.moderate": `Moderate ${realmTerms.label} content`,
-	},
+	} satisfies Record<PlatformCapability, string>,
 	direction: {
 		request: "Request",
 		invitation: "Invitation",
@@ -134,22 +137,24 @@ export default {
 		permissions: {
 			"unit.read": "Read",
 			"unit.update": "Edit",
-			"unit.publish": "Publish",
+			"unit.status.update": "Change status",
 			"unit.history.restore": "Restore history",
 			"unit.access.manage": "Manage access",
 			"unit.association.manage": "Manage associations",
 			"unit.delete": "Delete",
 			"realm.contribute": `Contribute to ${realmTerms.label}`,
+			"realm.units.create": "Create Units",
+			"realm.post.replies.create": "Create replies",
 			"realm.settings.update": `Edit ${realmTerms.label} settings`,
 			"realm.members.read": "View members",
 			"realm.members.manage": "Manage members",
-			"realm.rules.publish": "Publish rules",
+			"realm.rules.update": "Update rules",
 			"realm.pins.manage": "Manage pins",
 			"realm.units.moderate": "Moderate content",
 			"entity.association.credit.request": "Request credit association",
 			"entity.association.credit.direct": "Create credit association directly",
 			"entity.association.subject.request": "Request subject association",
 			"entity.association.subject.direct": "Create subject association directly",
-		},
+		} satisfies Record<UnitPermission, string>,
 	},
 } satisfies typeof import("../zh-Hant/governance").default;

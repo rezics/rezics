@@ -1,25 +1,7 @@
+export { scopeCovers, scopeKey, unitScope } from "@rezics/access";
+import { unitScope, type UnitScope } from "@rezics/access";
 import type { AssociationKind } from "../../database/schema/contract-values";
 
-const SegmentPattern = /^[a-z0-9][a-z0-9-]*$/;
-
-export type UnitScope = readonly string[];
-
-export function unitScope(...segments: string[]): UnitScope {
-	if (segments.length > 8 || segments.some((segment) => !SegmentPattern.test(segment)))
-		throw new TypeError("Invalid Unit authorization scope");
-	return segments;
-}
-
-/** A root or ancestor grant covers a requested descendant scope. */
-export function scopeCovers(granted: readonly string[], requested: readonly string[]): boolean {
-	return (
-		granted.length <= requested.length &&
-		granted.every((segment, index) => requested[index] === segment)
-	);
-}
-
-export function scopeKey(scope: readonly string[]): string {
-	return scope.join("/");
-}
+export type { UnitScope };
 
 export const associationTargetScope = (kind: AssociationKind) => unitScope("associations", kind);

@@ -1,6 +1,6 @@
-import { RealmCapabilityValues } from "../../database/schema";
+import type { RealmPermission } from "@rezics/access";
 
-export type RealmCapability = (typeof RealmCapabilityValues)[number];
+export type RealmCapability = RealmPermission;
 export type RealmRuleTrigger = "post" | "update";
 
 export function isRealmVisible(status: string, visibility: string, membershipState?: string) {

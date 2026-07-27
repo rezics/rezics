@@ -44,7 +44,7 @@ export type StudioView = Static<typeof StudioView>;
 
 export const StudioPermissionValues = [
 	"unit.update",
-	"unit.publish",
+	"unit.status.update",
 	"unit.access.manage",
 ] as const;
 export const StudioPermission = t.UnionEnum(StudioPermissionValues, { default: undefined });

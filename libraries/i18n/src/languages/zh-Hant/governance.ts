@@ -1,3 +1,4 @@
+import type { PlatformCapability, UnitPermission } from "@rezics/access";
 import { insert } from "native-i18n";
 
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
@@ -52,13 +53,15 @@ export default {
 		"platform.suppress": "隱藏平台內容與修訂",
 		"platform.grants.manage": "管理平台工作人員授權",
 		"realm.contribute": `參與所有${realmTerms.pluralLabel}`,
+		"realm.units.create": `在所有${realmTerms.pluralLabel}建立條目`,
+		"realm.post.replies.create": `在所有${realmTerms.pluralLabel}建立回覆`,
 		"realm.settings.update": `更新${realmTerms.label}設定`,
 		"realm.members.read": `檢視${realmTerms.label}成員`,
 		"realm.members.manage": `管理${realmTerms.label}成員`,
-		"realm.rules.publish": `發布${realmTerms.label}規則`,
+		"realm.rules.update": `更新${realmTerms.label}規則`,
 		"realm.pins.manage": `管理${realmTerms.label}置頂內容`,
 		"realm.units.moderate": `治理${realmTerms.label}內容`,
-	},
+	} satisfies Record<PlatformCapability, string>,
 	direction: {
 		request: "請求",
 		invitation: "邀請",
@@ -130,22 +133,24 @@ export default {
 		permissions: {
 			"unit.read": "檢視",
 			"unit.update": "編輯",
-			"unit.publish": "發布",
+			"unit.status.update": "變更狀態",
 			"unit.history.restore": "還原歷史",
 			"unit.access.manage": "管理權限",
 			"unit.association.manage": "管理關聯",
 			"unit.delete": "刪除",
 			"realm.contribute": `參與${realmTerms.label}`,
+			"realm.units.create": "建立條目",
+			"realm.post.replies.create": "建立回覆",
 			"realm.settings.update": `編輯${realmTerms.label}設定`,
 			"realm.members.read": "檢視成員",
 			"realm.members.manage": "管理成員",
-			"realm.rules.publish": "發布規則",
+			"realm.rules.update": "更新規則",
 			"realm.pins.manage": "管理置頂",
 			"realm.units.moderate": "治理內容",
 			"entity.association.credit.request": "申請署名關聯",
 			"entity.association.credit.direct": "直接建立署名關聯",
 			"entity.association.subject.request": "申請主題關聯",
 			"entity.association.subject.direct": "直接建立主題關聯",
-		},
+		} satisfies Record<UnitPermission, string>,
 	},
 };

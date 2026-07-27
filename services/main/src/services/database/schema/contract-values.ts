@@ -229,37 +229,8 @@ export const EnforcementKindValues = [
 	"rate_limit",
 	"trust_restriction",
 ] as const;
-export const CapabilityAuthorityValues = ["platform", "realm"] as const;
-export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
-export const UnitAccessRestrictionSubjectKindValues = ["profile", "realm"] as const;
-export const UnitAccessInvitationResolutionValues = ["accepted", "declined", "cancelled"] as const;
-export const RealmCapabilityValues = [
-	"realm.contribute",
-	"realm.settings.update",
-	"realm.members.read",
-	"realm.members.manage",
-	"realm.rules.publish",
-	"realm.pins.manage",
-	"realm.units.moderate",
-] as const;
-export const EntityAssociationPermissionValues = [
-	"entity.association.credit.request",
-	"entity.association.credit.direct",
-	"entity.association.subject.request",
-	"entity.association.subject.direct",
-] as const;
-export const UnitPermissionValues = [
-	"unit.read",
-	"unit.update",
-	"unit.publish",
-	"unit.history.restore",
-	"unit.access.manage",
-	"unit.association.manage",
-	"unit.delete",
-	...RealmCapabilityValues,
-	...EntityAssociationPermissionValues,
-] as const;
 export const RealmJoinPolicyValues = ["open", "approval"] as const;
+export const RealmRuleAcknowledgementModeValues = ["explicit", "implicit_on_follow"] as const;
 
 /**
  * Runtime states for a roleless Realm membership.
@@ -391,44 +362,6 @@ export const AssociationKindValues = ["credit", "subject"] as const;
 export type AssociationKind = (typeof AssociationKindValues)[number];
 export const AssociationProposalDirectionValues = ["request", "invitation"] as const;
 export const AssociationProposalResolutionValues = ["accepted", "declined", "cancelled"] as const;
-
-/**
- * Grants access to unreleased Content Structure APIs for Unit types whose
- * editors are still under development.
- *
- * @alpha
- * @remarks
- * This capability is a runtime authorization boundary. The annotation only
- * communicates release maturity and must never be treated as access control.
- */
-export const ContentStructurePreviewCapability = "unit.content_structure.preview" as const;
-
-/**
- * Grants access to the unreleased Zone product and Zone-owned APIs.
- *
- * @alpha
- * @remarks
- * This is a server-enforced product preview boundary. Unit ownership or public
- * visibility does not replace this platform capability while Zone is in
- * development.
- */
-export const ZonePreviewCapability = "unit.zone.preview" as const;
-
-export const PlatformCapabilityValues = [
-	"entity.associations.override",
-	"unit.edit",
-	ContentStructurePreviewCapability,
-	ZonePreviewCapability,
-	"unit.ownership.transfer",
-	"unit.slug.manage",
-	"unit.slug.namespace.manage",
-	"unit.slug.redirect.release",
-	"platform.api_token_policy.manage",
-	"platform.moderate",
-	"platform.suppress",
-	"platform.grants.manage",
-	...RealmCapabilityValues,
-] as const;
 
 export const ApiTokenPolicyKindValues = ["standard", "staff_trusted"] as const;
 export const ApiTokenUsageBucketKindValues = ["minute_requests", "daily_cost"] as const;
