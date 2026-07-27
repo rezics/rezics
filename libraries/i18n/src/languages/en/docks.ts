@@ -1,6 +1,5 @@
 import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-
 const { forms: dockTerms } = enTerminology.dock;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
@@ -23,7 +22,7 @@ export default {
 	notConfigured: `This ${dockTerms.inline} has not been configured. Saving will create it.`,
 	deleted: `This ${dockTerms.inline} is deleted. Restore an earlier revision to publish it again.`,
 	invalidDocument: `The stored ${dockTerms.inline} document is invalid and cannot be edited.`,
-	invalidDraft: `Complete every required ${verbatimTerms.id.value} field before saving.`,
+	invalidDraft: "Choose content for every required field before saving.",
 	unsaved: "Unsaved changes",
 	save: `Save ${dockTerms.inline}`,
 	reload: "Reload latest revision",
@@ -46,7 +45,7 @@ export default {
 		moveUp: "Move up",
 		moveDown: "Move down",
 		type: "Content block type",
-		identifier: `Content ${verbatimTerms.id.value}`,
+		identifier: "Search content",
 		appearance: "Appearance",
 		searchSource: "Search source",
 		zoneSearch: `${zoneTerms.label} search configuration`,
@@ -78,6 +77,8 @@ export default {
 		types: {
 			"post-full-view": `Full ${postTerms.inline}`,
 			"unit-ref": "Unit reference",
+			"realm-ref": `Related ${realmTerms.label}`,
+			"zone-ref": `Related ${zoneTerms.label}`,
 			search: "Search",
 			feed: "Feed",
 			menu: "Navigation menu",

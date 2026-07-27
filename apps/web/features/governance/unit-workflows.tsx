@@ -24,7 +24,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 
-import { Badge, EntityPicker } from "@rezics/ui";
+import { Badge, EntityPicker, UnitPicker } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -92,6 +92,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 	const cancel = useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId({
 		mutation: { onSuccess: refresh },
 	});
+	const [invitedProfileId, setInvitedProfileId] = useState<string>();
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -109,11 +110,12 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 			.map((segment) => segment.trim())
 			.filter(Boolean);
 		const accessExpiry = String(form.get("accessExpiresAt") ?? "");
+		if (!invitedProfileId) return;
 		try {
 			await create.mutateAsync({
 				path: { unitId },
 				body: {
-					invitedProfileId: String(form.get("invitedProfileId") ?? "").trim(),
+					invitedProfileId,
 					role,
 					scope,
 					invitationExpiresAt: toIsoDate(form.get("invitationExpiresAt")),
@@ -121,6 +123,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 				},
 			});
 			formElement.reset();
+			setInvitedProfileId(undefined);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -137,7 +140,12 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 					<FieldGroup>
 						<Field required>
 							<FieldLabel>{t.governance.invitedProfile}</FieldLabel>
-							<Input name="invitedProfileId" required />
+							<UnitPicker
+								index="users"
+								kinds={["profile"]}
+								onValueChange={setInvitedProfileId}
+								value={invitedProfileId}
+							/>
 						</Field>
 						<div className="grid gap-4 sm:grid-cols-2">
 							<Field required>
@@ -361,6 +369,7 @@ function AssociationProposalManager({
 		mutation: { onSuccess: refresh },
 	});
 	const [contextPost, setContextPost] = useState<{ id: string; label: string }>();
+	const [relatedUnitId, setRelatedUnitId] = useState<string>();
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -368,7 +377,7 @@ function AssociationProposalManager({
 		const form = new FormData(formElement);
 		const role = String(form.get("role") ?? "");
 		const expiresAt = toIsoDate(form.get("expiresAt"));
-		const relatedUnitId = String(form.get("relatedUnitId") ?? "").trim();
+		if (!relatedUnitId) return;
 		try {
 			if (kind === "credit") {
 				if (!isKnownAttributionRole(role)) return;
@@ -419,6 +428,7 @@ function AssociationProposalManager({
 			}
 			formElement.reset();
 			setContextPost(undefined);
+			setRelatedUnitId(undefined);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -443,7 +453,13 @@ function AssociationProposalManager({
 										: t.governance.targetEntity
 									: t.governance.sourceUnit}
 							</FieldLabel>
-							<Input name="relatedUnitId" required />
+							<UnitPicker
+								kinds={
+									kind === "subject" && side === "source" ? ["entity"] : undefined
+								}
+								onValueChange={setRelatedUnitId}
+								value={relatedUnitId}
+							/>
 						</Field>
 						<div className="grid gap-4 sm:grid-cols-2">
 							<Field required>

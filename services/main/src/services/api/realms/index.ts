@@ -280,6 +280,12 @@ export default new Elysia({ prefix: "/realms" })
 				.select({
 					id: realm.id,
 					joinPolicy: realm.joinPolicy,
+					memberCount: sql<number>`(
+						select count(*)::int
+						from ${realmMember}
+						where ${realmMember.realmId} = ${realm.id}
+							and ${realmMember.state} = 'active'
+					)`,
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
@@ -466,6 +472,12 @@ export default new Elysia({ prefix: "/realms" })
 					status: unit.status,
 					visibility: unit.visibility,
 					joinPolicy: realm.joinPolicy,
+					memberCount: sql<number>`(
+						select count(*)::int
+						from ${realmMember}
+						where ${realmMember.realmId} = ${realm.id}
+							and ${realmMember.state} = 'active'
+					)`,
 					createdAt: unit.createdAt,
 					updatedAt: unit.updatedAt,
 				})

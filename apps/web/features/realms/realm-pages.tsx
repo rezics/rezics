@@ -29,6 +29,7 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
+import { UsersIcon } from "lucide-react";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
@@ -47,6 +48,7 @@ import { postHref } from "@/features/posts/url";
 import { tagDetailHref } from "@/features/tags/routing/tag-links";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -58,6 +60,16 @@ import { invalidateRealmDetails } from "./query";
 import { RealmFeed } from "./components/realm-feed";
 import { RealmPinnedContentSection } from "./components/realm-pinned-content-section";
 import { RealmRulesCard } from "./components/realm-rules-card";
+import { RealmJoinRulesDialog } from "./components/realm-join-rules-dialog";
+import type { RealmRulePresentation } from "./components/realm-rules-card";
+
+type RealmJoinRuleGate =
+	| { readonly state: "loading" | "unavailable" | "not-required" }
+	| {
+			readonly state: "requires-acknowledgement";
+			readonly revisionId: string;
+			readonly rules: readonly RealmRulePresentation[];
+	  };
 
 export function RealmsPage() {
 	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
@@ -280,6 +292,19 @@ export function RealmDetailPage({ id }: { id: string }) {
 	const localization = selectLocalization(realm.localizations, realm.language);
 	const canManage = canOpenRealmSettings(realm.capabilities, dockAccess.allowedKinds.length > 0);
 	const canPost = realm.viewerMembership?.state === "active";
+	const joinRuleGate: RealmJoinRuleGate = rules.isPending
+		? { state: "loading" }
+		: rules.isError
+			? { state: "unavailable" }
+			: rules.data?.requireOnJoin
+				? rules.data.revisionId && rules.data.items.length
+					? {
+							state: "requires-acknowledgement",
+							revisionId: rules.data.revisionId,
+							rules: rules.data.items,
+						}
+					: { state: "unavailable" }
+				: { state: "not-required" };
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">
 			<header className="grid gap-6 border-b pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -329,8 +354,8 @@ export function RealmDetailPage({ id }: { id: string }) {
 				<RealmActions
 					canManage={canManage}
 					canPost={canPost}
+					joinRuleGate={joinRuleGate}
 					realm={realm}
-					ruleRevisionId={rules.data?.revisionId ?? undefined}
 				/>
 			</header>
 
@@ -371,18 +396,74 @@ export function RealmDetailPage({ id }: { id: string }) {
 				</div>
 
 				<aside className="grid min-w-0 max-w-full gap-5 overflow-hidden lg:sticky lg:top-20">
+					<RealmSidebarRulesSection
+						error={rules.error}
+						isError={rules.isError}
+						rules={rules.data?.items}
+						title={t.realms.rules}
+					/>
+					<RealmSidebarMembersSection
+						label={t.realms.members}
+						valueLabel={t.realms.memberCount({
+							count: toNonNegativeApiInteger(realm.memberCount),
+						})}
+					/>
 					<UnitDockRenderer
 						ownerUnitId={realm.id}
 						target={{ ownerKind: "realm", dockKind: "main" }}
 					/>
-					{rules.isError ? (
-						<RequestFailure error={rules.error} />
-					) : rules.data?.items.length ? (
-						<RealmRulesCard rules={rules.data.items} title={t.realms.rules} />
-					) : null}
 				</aside>
 			</div>
 		</main>
+	);
+}
+
+/**
+ * Keeps Realm rules in the mandatory sidebar sequence while they remain owner-rendered.
+ *
+ * @remarks
+ * This system section must move behind the main Dock renderer once Dock supports protected,
+ * non-removable Realm sections.
+ */
+function RealmSidebarRulesSection({
+	error,
+	isError,
+	rules,
+	title,
+}: {
+	readonly error: unknown;
+	readonly isError: boolean;
+	readonly rules?: readonly RealmRulePresentation[];
+	readonly title: string;
+}) {
+	if (isError) return <RequestFailure error={error} />;
+	return rules?.length ? <RealmRulesCard rules={rules} title={title} /> : null;
+}
+
+/**
+ * Keeps the Realm member summary in the mandatory sidebar sequence while it is owner-rendered.
+ *
+ * @remarks
+ * This system section must move behind the main Dock renderer once Dock supports protected,
+ * non-removable Realm sections.
+ */
+function RealmSidebarMembersSection({
+	label,
+	valueLabel,
+}: {
+	readonly label: string;
+	readonly valueLabel: string;
+}) {
+	return (
+		<Card appearance="outlined">
+			<CardContent className="flex items-center justify-between gap-4 px-5">
+				<div className="grid gap-1">
+					<h2 className="font-serif font-semibold text-lg">{label}</h2>
+					<p className="text-muted-foreground text-sm">{valueLabel}</p>
+				</div>
+				<UsersIcon aria-hidden className="size-5 text-brand" />
+			</CardContent>
+		</Card>
 	);
 }
 
@@ -403,12 +484,12 @@ function realmPinnedContentHref(
 
 function RealmActions({
 	realm,
-	ruleRevisionId,
+	joinRuleGate,
 	canManage,
 	canPost,
 }: {
 	realm: GetApiRealmsByRealmIdStatus200;
-	ruleRevisionId?: string;
+	joinRuleGate: RealmJoinRuleGate;
 	canManage: boolean;
 	canPost: boolean;
 }) {
@@ -417,63 +498,88 @@ function RealmActions({
 	const { data: session } = useHydratedSession();
 	const join = usePutApiRealmsByRealmIdMembership();
 	const leave = useDeleteApiRealmsByRealmIdMembership();
+	const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
 	const membership = realm.viewerMembership;
+
+	function joinRealm(ruleRevisionId?: string) {
+		join.mutate(
+			{
+				path: { realmId: realm.id },
+				body: {
+					language: toContentLanguage(locale.target),
+					...(ruleRevisionId ? { ruleRevisionId } : {}),
+				},
+			},
+			{
+				onSuccess: () => {
+					setRulesDialogOpen(false);
+					return invalidateRealmDetails(queryClient, realm.id);
+				},
+			},
+		);
+	}
 
 	if (!session)
 		return <SignInButton destination={realmHref(realm)}>{t.realms.signInToJoin}</SignInButton>;
 
 	return (
-		<div className="flex flex-col items-end gap-2">
-			<div className="flex flex-wrap justify-end gap-2">
-				<FollowButton
-					initialFollowing={realm.viewerFollowing}
-					onChanged={() => invalidateRealmDetails(queryClient, realm.id)}
-					unitId={realm.id}
-				/>
-				{!isRealmOwner(membership) && (
-					<Button
-						variant="outline"
-						isLoading={join.isPending || leave.isPending}
-						onClick={() => {
-							if (membership)
-								leave.mutate(
-									{ path: { realmId: realm.id } },
-									{
-										onSuccess: () =>
-											invalidateRealmDetails(queryClient, realm.id),
-									},
-								);
-							else
-								join.mutate(
-									{
-										path: { realmId: realm.id },
-										body: {
-											language: toContentLanguage(locale.target),
-											...(ruleRevisionId ? { ruleRevisionId } : {}),
+		<>
+			<div className="flex flex-col items-end gap-2">
+				<div className="flex flex-wrap justify-end gap-2">
+					<FollowButton
+						initialFollowing={realm.viewerFollowing}
+						onChanged={() => invalidateRealmDetails(queryClient, realm.id)}
+						unitId={realm.id}
+					/>
+					{!isRealmOwner(membership) && (
+						<Button
+							variant="outline"
+							disabled={
+								!membership &&
+								(joinRuleGate.state === "loading" ||
+									joinRuleGate.state === "unavailable")
+							}
+							isLoading={join.isPending || leave.isPending}
+							onClick={() => {
+								if (membership)
+									leave.mutate(
+										{ path: { realmId: realm.id } },
+										{
+											onSuccess: () =>
+												invalidateRealmDetails(queryClient, realm.id),
 										},
-									},
-									{
-										onSuccess: () =>
-											invalidateRealmDetails(queryClient, realm.id),
-									},
-								);
-						}}
-					>
-						{membership ? t.realms.leave : t.realms.join}
-					</Button>
-				)}
-				{canPost ? (
-					<Button variant="solid" asChild>
-						<Link href={`/posts/new?realmId=${realm.id}`}>{t.posts.create}</Link>
-					</Button>
-				) : null}
-				{canManage && (
-					<Button variant="solid" asChild>
-						<Link href={realmSettingsHref(realm)}>{t.realms.settings}</Link>
-					</Button>
-				)}
+									);
+								else if (joinRuleGate.state === "requires-acknowledgement")
+									setRulesDialogOpen(true);
+								else if (joinRuleGate.state === "not-required") joinRealm();
+							}}
+						>
+							{membership ? t.realms.leave : t.realms.join}
+						</Button>
+					)}
+					{canPost ? (
+						<Button variant="solid" asChild>
+							<Link href={`/posts/new?realmId=${realm.id}`}>{t.posts.create}</Link>
+						</Button>
+					) : null}
+					{canManage && (
+						<Button variant="solid" asChild>
+							<Link href={realmSettingsHref(realm)}>{t.realms.settings}</Link>
+						</Button>
+					)}
+				</div>
+				<RequestFailure error={join.error ?? leave.error} />
 			</div>
-			<RequestFailure error={join.error ?? leave.error} />
-		</div>
+			{joinRuleGate.state === "requires-acknowledgement" && rulesDialogOpen ? (
+				<RealmJoinRulesDialog
+					error={<RequestFailure error={join.error} />}
+					isPending={join.isPending}
+					onConfirm={() => joinRealm(joinRuleGate.revisionId)}
+					onOpenChange={setRulesDialogOpen}
+					open
+					rules={joinRuleGate.rules}
+				/>
+			) : null}
+		</>
 	);
 }

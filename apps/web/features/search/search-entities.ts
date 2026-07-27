@@ -2,34 +2,67 @@ import {
 	PostApiSearchByIndexIndex,
 	postApiSearch,
 	postApiSearchByIndex,
+	postApiUnitsPresentations,
 } from "@rezics/openapi-tanstack-query";
 import type { EntitySearch } from "@rezics/ui";
+
+import { isUnitId } from "@/features/units/model/unit-id";
 
 function isSearchIndex(index: string): index is PostApiSearchByIndexIndex {
 	return Object.values(PostApiSearchByIndexIndex).some((candidate) => candidate === index);
 }
 
+function indexIncludesKind(index: string, kind: string): boolean {
+	if (index === "all" || index === "units") return true;
+	const kindsByIndex: Readonly<Record<string, readonly string[]>> = {
+		users: ["profile"],
+		entity: ["entity"],
+		tags: ["tag"],
+		"tag-structures": ["structure"],
+		posts: ["post"],
+		realms: ["realm"],
+		collections: ["collection"],
+		reviews: ["post"],
+		polls: ["poll"],
+	};
+	return kindsByIndex[index]?.includes(kind) ?? false;
+}
+
+async function resolveExactUnit(index: string, query: string, signal: AbortSignal) {
+	if (!isUnitId(query)) return [];
+	const { data } = await postApiUnitsPresentations({
+		body: { ids: [query] },
+		signal,
+	});
+	return data.items
+		.filter((item) => indexIncludesKind(index, item.kind))
+		.map((item) => ({
+			id: item.id,
+			label: item.title ?? item.id,
+			kind: item.kind,
+			avatar: item.avatar,
+		}));
+}
+
 export const searchEntities: EntitySearch = async (index, query, signal) => {
+	const exact = await resolveExactUnit(index, query, signal);
+	if (exact.length) return exact;
 	if (index === "all") {
 		const { data } = await postApiSearch({
 			body: { query, limitPerIndex: 3 },
 			signal,
 		});
 		const byId = new Map(
-			data.groups.flatMap((group) =>
-				group.hits.map(
-					(hit) =>
-						[
-							hit.id,
-							{
-								id: hit.id,
-								label: hit.titles[0] ?? hit.name ?? hit.id,
-								kind: hit.kind,
-								avatar: hit.avatar,
-							},
-						] as const,
-				),
-			),
+			data.groups
+				.flatMap((group) =>
+					group.hits.map((hit) => ({
+						id: hit.id,
+						label: hit.titles[0] ?? hit.name ?? hit.id,
+						kind: hit.kind,
+						avatar: hit.avatar,
+					})),
+				)
+				.map((hit) => [hit.id, hit] as const),
 		);
 		return [...byId.values()].slice(0, 20);
 	}
@@ -39,10 +72,15 @@ export const searchEntities: EntitySearch = async (index, query, signal) => {
 		body: { query, limit: 10 },
 		signal,
 	});
-	return data.hits.map((hit) => ({
-		id: hit.id,
-		label: hit.titles[0] ?? hit.name ?? hit.id,
-		kind: hit.kind,
-		avatar: hit.avatar,
-	}));
+	const byId = new Map(
+		data.hits
+			.map((hit) => ({
+				id: hit.id,
+				label: hit.titles[0] ?? hit.name ?? hit.id,
+				kind: hit.kind,
+				avatar: hit.avatar,
+			}))
+			.map((hit) => [hit.id, hit] as const),
+	);
+	return [...byId.values()].slice(0, 10);
 };

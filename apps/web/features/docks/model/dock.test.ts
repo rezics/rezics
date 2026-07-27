@@ -49,12 +49,14 @@ describe("Dock frontend contract", () => {
 
 	it("offers only blocks supported by each frontend Dock host", () => {
 		expect(getDockAddableBlockTypes({ ownerKind: "realm", dockKind: "main" })).toEqual([
-			"unit-ref",
+			"realm-ref",
+			"zone-ref",
 			"menu",
 			"divider",
 		]);
 		expect(getDockAddableBlockTypes({ ownerKind: "book", dockKind: "main" })).toEqual([
-			"unit-ref",
+			"realm-ref",
+			"zone-ref",
 			"divider",
 		]);
 		expect(getDockAddableBlockTypes({ ownerKind: "zone", dockKind: "main" })).not.toContain(

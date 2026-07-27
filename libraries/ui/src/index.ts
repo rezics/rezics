@@ -111,5 +111,6 @@ export * from "./custom/unit-mention";
 export * from "./custom/ui-provider";
 export * from "./custom/unit-card";
 export * from "./custom/unit-list";
+export * from "./custom/unit-picker";
 export * from "./utils";
 export * from "./use-is-mobile";

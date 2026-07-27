@@ -4,6 +4,7 @@ import { useFilter, useListCollection } from "@ark-ui/react";
 import { useEffect, useState } from "react";
 
 import { useEntitySearch, useUiMessages } from "./ui-provider";
+import { IdentityAvatar } from "./identity-avatar";
 import {
 	Combobox,
 	ComboboxContent,
@@ -13,18 +14,32 @@ import {
 	ComboboxList,
 } from "../ui/combobox";
 
-type EntityPickerValue = { id: string; label: string };
+/**
+ * Presentation accepted and returned by {@link EntityPicker}.
+ *
+ * @alpha
+ */
+export interface EntityPickerValue {
+	readonly id: string;
+	readonly label: string;
+	readonly kind?: string;
+	readonly avatar?: import("@rezics/avatar").PresentedAvatar | null;
+}
 
 export function EntityPicker({
 	index,
 	kind,
+	kinds,
 	value,
 	onChange,
+	onClear,
 }: {
 	index: string;
 	kind?: string;
+	kinds?: readonly string[];
 	value?: EntityPickerValue;
 	onChange: (value: EntityPickerValue) => void;
+	onClear?: () => void;
 }) {
 	const messages = useUiMessages();
 	const searchEntities = useEntitySearch();
@@ -38,6 +53,8 @@ export function EntityPicker({
 	const [inputValue, setInputValue] = useState(value?.label ?? "");
 	const [isPending, setIsPending] = useState(false);
 	const [isError, setIsError] = useState(false);
+	const allowedKinds = kinds ?? (kind ? [kind] : undefined);
+	const allowedKindsKey = allowedKinds?.join("\u0000");
 
 	useEffect(() => {
 		const query = inputValue.trim();
@@ -56,8 +73,16 @@ export function EntityPicker({
 			void searchEntities(index, query, request.signal)
 				.then(
 					(nextHits) => {
-						if (!request.signal.aborted)
-							set(nextHits.filter((hit) => !kind || hit.kind === kind));
+						if (request.signal.aborted) return;
+						const allowed = allowedKindsKey
+							? new Set(allowedKindsKey.split("\u0000"))
+							: undefined;
+						set(
+							nextHits.filter(
+								(hit) =>
+									!allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
+							),
+						);
 					},
 					() => {
 						if (!request.signal.aborted) {
@@ -74,7 +99,7 @@ export function EntityPicker({
 			window.clearTimeout(timer);
 			controller?.abort();
 		};
-	}, [index, inputValue, kind, searchEntities, set]);
+	}, [allowedKindsKey, index, inputValue, searchEntities, set]);
 
 	useEffect(() => {
 		setInputValue(value?.label ?? "");
@@ -88,6 +113,7 @@ export function EntityPicker({
 				onInputValueChange={({ inputValue: nextInputValue }) => {
 					setInputValue(nextInputValue);
 					filter(nextInputValue);
+					if (!nextInputValue && value) onClear?.();
 				}}
 				onValueChange={({ value: selectedValues }) => {
 					const selected = collection.items.find((item) => item.id === selectedValues[0]);
@@ -116,7 +142,14 @@ export function EntityPicker({
 							<ComboboxList>
 								{collection.items.map((item) => (
 									<ComboboxItem item={item} key={item.id}>
-										{item.label || messages.unnamed}
+										<IdentityAvatar
+											avatar={item.avatar}
+											className="size-7"
+											fallback={item.label.slice(0, 1) || "?"}
+										/>
+										<span className="min-w-0 flex-1 truncate">
+											{item.label || messages.unnamed}
+										</span>
 									</ComboboxItem>
 								))}
 							</ComboboxList>

@@ -247,7 +247,7 @@ export function FeedUnitCard({
 	position?: number;
 	setSize?: number;
 }) {
-	const { t, locale } = useTranslation(["feed", "posts", "ui"]);
+	const { t, locale } = useTranslation(["feed", "posts", "realms", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(unit.id, unit.tracking);
 	const reason = recommendationReasonLabel(unit.recommendationReason, t.feed);
 	const href = unitHref(unit.unitKind, unit.id);
@@ -265,6 +265,7 @@ export function FeedUnitCard({
 				}
 			: undefined;
 	const identityPresentation = unit.presentation.kind === "identity" ? unit.presentation : null;
+	const isRealm = unit.unitKind === "realm";
 
 	return (
 		<FeedCard
@@ -277,7 +278,8 @@ export function FeedUnitCard({
 				attributions={attributions}
 				realms={realms}
 				recommendation={reason}
-				timestamp={formatRelativeTime(unit.createdAt, locale.target)}
+				showAttributions={!isRealm}
+				timestamp={isRealm ? undefined : formatRelativeTime(unit.createdAt, locale.target)}
 			/>
 			<CardContent
 				className={cn(
@@ -322,6 +324,15 @@ export function FeedUnitCard({
 						{unit.summary ? (
 							<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
 								{unit.summary}
+							</p>
+						) : null}
+						{isRealm && identityPresentation?.memberCount !== null ? (
+							<p className="mt-2 text-xs font-medium text-muted-foreground">
+								{t.realms.memberCount({
+									count: toNonNegativeApiInteger(
+										identityPresentation?.memberCount ?? 0,
+									),
+								})}
 							</p>
 						) : null}
 						{unit.collection ? (

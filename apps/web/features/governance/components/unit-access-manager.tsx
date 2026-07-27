@@ -32,6 +32,7 @@ import {
 	NativeSelectOption,
 	QueryFailure,
 	QueryPending,
+	UnitPicker,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
@@ -161,6 +162,7 @@ function AccessBindingsCard({ unitId }: { unitId: string }) {
 	const { t } = useTranslation(["governance"]);
 	const queryClient = useQueryClient();
 	const [subjectKind, setSubjectKind] = useState<SubjectKind>("profile");
+	const [subjectId, setSubjectId] = useState<string>();
 	const options = { path: { unitId } } as const;
 	const query = useGetApiGovernanceUnitByUnitIdAccessBindings(options);
 	const refresh = () =>
@@ -180,19 +182,20 @@ function AccessBindingsCard({ unitId }: { unitId: string }) {
 		const form = new FormData(formElement);
 		const roleValue = String(form.get("role") ?? "");
 		if (!isAccessRole(roleValue)) return;
-		const subjectId = String(form.get("subjectId") ?? "").trim();
 		const relationValue = String(form.get("relation") ?? "member");
 		const relation =
 			relationValue === "content_editor" || relationValue === "governor"
 				? relationValue
 				: "member";
-		const subject: PostApiGovernanceUnitByUnitIdAccessBindingsBody["subject"] =
-			subjectKind === "authenticated"
-				? { kind: "authenticated" }
-				: subjectKind === "realm"
+		let subject: PostApiGovernanceUnitByUnitIdAccessBindingsBody["subject"];
+		if (subjectKind === "authenticated") subject = { kind: "authenticated" };
+		else {
+			if (!subjectId) return;
+			subject =
+				subjectKind === "realm"
 					? { kind: "realm", realmId: subjectId, relation }
 					: { kind: "profile", profileId: subjectId };
-		if (subjectKind !== "authenticated" && !subjectId) return;
+		}
 		const expiresAt = optionalIsoDate(form, "expiresAt");
 		if (expiresAt === null) return;
 		try {
@@ -206,6 +209,7 @@ function AccessBindingsCard({ unitId }: { unitId: string }) {
 				},
 			});
 			formElement.reset();
+			setSubjectId(undefined);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -231,8 +235,10 @@ function AccessBindingsCard({ unitId }: { unitId: string }) {
 											value === "profile" ||
 											value === "realm" ||
 											value === "authenticated"
-										)
+										) {
 											setSubjectKind(value);
+											setSubjectId(undefined);
+										}
 									}}
 									value={subjectKind}
 								>
@@ -248,7 +254,12 @@ function AccessBindingsCard({ unitId }: { unitId: string }) {
 							{subjectKind !== "authenticated" ? (
 								<Field required>
 									<FieldLabel>{t.governance.access.subjectId}</FieldLabel>
-									<Input name="subjectId" required />
+									<UnitPicker
+										index={subjectKind === "realm" ? "realms" : "users"}
+										kinds={[subjectKind]}
+										onValueChange={setSubjectId}
+										value={subjectId}
+									/>
 								</Field>
 							) : null}
 							{subjectKind === "realm" ? (
@@ -347,6 +358,7 @@ function AccessRestrictionsCard({ unitId }: { unitId: string }) {
 	const queryClient = useQueryClient();
 	const [subjectKind, setSubjectKind] =
 		useState<Exclude<SubjectKind, "authenticated">>("profile");
+	const [subjectId, setSubjectId] = useState<string>();
 	const options = { path: { unitId } } as const;
 	const query = useGetApiGovernanceUnitByUnitIdAccessRestrictions(options);
 	const refresh = () =>
@@ -363,7 +375,6 @@ function AccessRestrictionsCard({ unitId }: { unitId: string }) {
 		event.preventDefault();
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
-		const subjectId = String(form.get("subjectId") ?? "").trim();
 		const permissionValue = String(form.get("permission") ?? "");
 		const reasonValue = String(form.get("reason") ?? "");
 		if (!subjectId || !isUnitPermission(permissionValue) || !isReasonCode(reasonValue)) return;
@@ -384,6 +395,7 @@ function AccessRestrictionsCard({ unitId }: { unitId: string }) {
 				},
 			});
 			formElement.reset();
+			setSubjectId(undefined);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -402,13 +414,14 @@ function AccessRestrictionsCard({ unitId }: { unitId: string }) {
 								<FieldLabel>{t.governance.access.subjectKind}</FieldLabel>
 								<NativeSelect
 									value={subjectKind}
-									onChange={(event) =>
+									onChange={(event) => {
 										setSubjectKind(
 											event.currentTarget.value === "realm"
 												? "realm"
 												: "profile",
-										)
-									}
+										);
+										setSubjectId(undefined);
+									}}
 								>
 									{(["profile", "realm"] as const).map((kind) => (
 										<NativeSelectOption key={kind} value={kind}>
@@ -419,7 +432,12 @@ function AccessRestrictionsCard({ unitId }: { unitId: string }) {
 							</Field>
 							<Field required>
 								<FieldLabel>{t.governance.access.subjectId}</FieldLabel>
-								<Input name="subjectId" required />
+								<UnitPicker
+									index={subjectKind === "realm" ? "realms" : "users"}
+									kinds={[subjectKind]}
+									onValueChange={setSubjectId}
+									value={subjectId}
+								/>
 							</Field>
 							<Field required>
 								<FieldLabel>{t.governance.access.permission}</FieldLabel>

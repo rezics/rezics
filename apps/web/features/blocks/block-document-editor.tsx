@@ -18,6 +18,7 @@ import {
 	Input,
 	NativeSelect,
 	NativeSelectOption,
+	UnitPicker,
 } from "@rezics/ui";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -49,10 +50,12 @@ export interface BlockEditorLabels {
 }
 
 export type BlockEditorDocument = UnitReferencedBlockDocument | DockDocument;
-export type BlockEditorAddableType = "post-full-view" | "unit-ref" | "feed" | "menu" | "divider";
+export type BlockEditorAddableType =
+	"post-full-view" | "unit-ref" | "realm-ref" | "zone-ref" | "feed" | "menu" | "divider";
 const DefaultAddableBlockTypes: readonly BlockEditorAddableType[] = [
 	"post-full-view",
-	"unit-ref",
+	"realm-ref",
+	"zone-ref",
 	"feed",
 	"menu",
 	"divider",
@@ -86,13 +89,23 @@ function isDividerStyle(value: string): value is (typeof DividerStyles)[number] 
 	return DividerStyles.some((style) => style === value);
 }
 
+type RelatedUnitKind = "realm" | "zone";
+
+function relatedUnitKind(type: BlockEditorAddableType): RelatedUnitKind | undefined {
+	if (type === "realm-ref") return "realm";
+	if (type === "zone-ref") return "zone";
+	return undefined;
+}
+
 function createBlock(type: BlockEditorAddableType): UnitReferencedBlock {
 	const _key = createBlockKey();
 	switch (type) {
 		case "post-full-view":
 			return { _type: type, _key, postId: "" };
 		case "unit-ref":
-			return { _type: type, _key, unitId: "", appearance: "card" };
+		case "realm-ref":
+		case "zone-ref":
+			return { _type: "unit-ref", _key, unitId: "", appearance: "card" };
 		case "feed":
 			return {
 				_type: type,
@@ -130,6 +143,9 @@ export function BlockDocumentEditor({
 	const [selectedType, setSelectedType] = useState<BlockEditorAddableType | undefined>(
 		firstAddableType,
 	);
+	const [relatedKinds, setRelatedKinds] = useState<ReadonlyMap<string, RelatedUnitKind>>(
+		() => new Map(),
+	);
 	const activeType =
 		selectedType && addableTypes.includes(selectedType) ? selectedType : firstAddableType;
 
@@ -145,59 +161,70 @@ export function BlockDocumentEditor({
 	}
 	return (
 		<div className="grid gap-4">
-			{document.blocks.map((block, index) => (
-				<Card appearance="outlined" key={block._key}>
-					<CardContent className="grid gap-4 p-4">
-						<div className="flex items-center justify-between gap-3">
-							<strong>{labels.types[block._type] ?? block._type}</strong>
-							<div className="flex gap-1">
-								<Button
-									aria-label={labels.moveUp}
-									disabled={index === 0}
-									onClick={() => move(index, -1)}
-									size="icon-sm"
-									type="button"
-									variant="quiet"
-								>
-									<ArrowUp aria-hidden />
-								</Button>
-								<Button
-									aria-label={labels.moveDown}
-									disabled={index === document.blocks.length - 1}
-									onClick={() => move(index, 1)}
-									size="icon-sm"
-									type="button"
-									variant="quiet"
-								>
-									<ArrowDown aria-hidden />
-								</Button>
-								<Button
-									aria-label={labels.remove}
-									onClick={() =>
-										onChange({
-											...document,
-											blocks: document.blocks.filter(
-												(_, candidate) => candidate !== index,
-											),
-										})
-									}
-									size="icon-sm"
-									type="button"
-									variant="quiet"
-								>
-									<Trash2 aria-hidden />
-								</Button>
+			{document.blocks.map((block, index) => {
+				const relatedKind = relatedKinds.get(block._key);
+				const visibleType = relatedKind ? `${relatedKind}-ref` : block._type;
+				return (
+					<Card appearance="outlined" key={block._key}>
+						<CardContent className="grid gap-4 p-4">
+							<div className="flex items-center justify-between gap-3">
+								<strong>{labels.types[visibleType] ?? visibleType}</strong>
+								<div className="flex gap-1">
+									<Button
+										aria-label={labels.moveUp}
+										disabled={index === 0}
+										onClick={() => move(index, -1)}
+										size="icon-sm"
+										type="button"
+										variant="quiet"
+									>
+										<ArrowUp aria-hidden />
+									</Button>
+									<Button
+										aria-label={labels.moveDown}
+										disabled={index === document.blocks.length - 1}
+										onClick={() => move(index, 1)}
+										size="icon-sm"
+										type="button"
+										variant="quiet"
+									>
+										<ArrowDown aria-hidden />
+									</Button>
+									<Button
+										aria-label={labels.remove}
+										onClick={() => {
+											setRelatedKinds((current) => {
+												if (!current.has(block._key)) return current;
+												const next = new Map(current);
+												next.delete(block._key);
+												return next;
+											});
+											onChange({
+												...document,
+												blocks: document.blocks.filter(
+													(_, candidate) => candidate !== index,
+												),
+											});
+										}}
+										size="icon-sm"
+										type="button"
+										variant="quiet"
+									>
+										<Trash2 aria-hidden />
+									</Button>
+								</div>
 							</div>
-						</div>
-						<BlockFields
-							block={block}
-							allowZoneSearchSource={allowZoneSearchSource}
-							labels={labels}
-							onChange={(next) => replace(index, next)}
-						/>
-					</CardContent>
-				</Card>
-			))}
+							<BlockFields
+								block={block}
+								allowZoneSearchSource={allowZoneSearchSource}
+								labels={labels}
+								onChange={(next) => replace(index, next)}
+								relatedKind={relatedKind}
+							/>
+						</CardContent>
+					</Card>
+				);
+			})}
 			{activeType ? (
 				<FieldGroup className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
 					<Field>
@@ -218,12 +245,18 @@ export function BlockDocumentEditor({
 						</NativeSelect>
 					</Field>
 					<Button
-						onClick={() =>
+						onClick={() => {
+							const block = createBlock(activeType);
+							const kind = relatedUnitKind(activeType);
+							if (kind)
+								setRelatedKinds((current) =>
+									new Map(current).set(block._key, kind),
+								);
 							onChange({
 								...document,
-								blocks: [...document.blocks, createBlock(activeType)],
-							})
-						}
+								blocks: [...document.blocks, block],
+							});
+						}}
 						type="button"
 					>
 						<Plus aria-hidden /> {labels.add}
@@ -239,28 +272,36 @@ function BlockFields({
 	block,
 	labels,
 	onChange,
+	relatedKind,
 }: {
 	readonly allowZoneSearchSource: boolean;
 	readonly block: UnitReferencedBlock;
 	readonly labels: BlockEditorLabels;
 	readonly onChange: (block: UnitReferencedBlock) => void;
+	readonly relatedKind?: RelatedUnitKind;
 }) {
 	if (block._type === "post-full-view" || block._type === "unit-ref") {
-		const identifier = block._type === "post-full-view" ? block.postId : block.unitId;
 		return (
 			<FieldGroup className="grid gap-4 sm:grid-cols-2">
 				<Field required>
 					<FieldLabel>{labels.identifier}</FieldLabel>
-					<Input
-						onChange={(event) =>
+					<UnitPicker
+						index={block._type === "post-full-view" ? "posts" : "units"}
+						kinds={
+							block._type === "post-full-view"
+								? ["post"]
+								: relatedKind
+									? [relatedKind]
+									: undefined
+						}
+						onValueChange={(value) =>
 							onChange(
 								block._type === "post-full-view"
-									? { ...block, postId: event.currentTarget.value }
-									: { ...block, unitId: event.currentTarget.value },
+									? { ...block, postId: value ?? "" }
+									: { ...block, unitId: value ?? "" },
 							)
 						}
-						required
-						value={identifier}
+						value={block._type === "post-full-view" ? block.postId : block.unitId}
 					/>
 				</Field>
 				{block._type === "unit-ref" && (

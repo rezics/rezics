@@ -49,7 +49,7 @@ vi.stubGlobal("matchMedia", (query: string) => ({
 }));
 
 const translation = await create(resources).getTranslation(
-	["actions", "engagement", "feed", "posts", "state", "ui", "units"],
+	["actions", "engagement", "feed", "posts", "realms", "state", "ui", "units"],
 	["zh-Hant"],
 );
 
@@ -335,6 +335,7 @@ describe("FeedUnitCard", () => {
 					id: "019f9872-bd49-7bb4-a6b7-ec621fca2044",
 					url: "/banner.jpg",
 				},
+				memberCount: 128,
 			},
 		} satisfies FeedUnit;
 
@@ -347,5 +348,8 @@ describe("FeedUnitCard", () => {
 		expect(container.querySelector('[data-slot="avatar-emoji"]')?.textContent).toBe("🧠");
 		expect(container.querySelector('[data-slot="cover"]')).toBeNull();
 		expect(container.querySelector('[data-slot="banner"]')).toBeNull();
+		expect(container.querySelector("time")).toBeNull();
+		expect(screen.queryByText("未知署名")).toBeNull();
+		expect(screen.getByText("128 位成員")).toBeTruthy();
 	});
 });

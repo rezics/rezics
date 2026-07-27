@@ -33,6 +33,7 @@ import {
 	scoreStat,
 	collectionItem,
 	unitFollow,
+	realmMember,
 	realmUnit,
 	recommendationProfileInterest,
 	recommendationUnitEdge,
@@ -843,6 +844,7 @@ export async function hydrateFeedItems(
 	const collectionIds = rows
 		.filter(({ unitKind }) => unitKind === "collection")
 		.map(({ id }) => id);
+	const realmIds = rows.filter(({ unitKind }) => unitKind === "realm").map(({ id }) => id);
 	const ratedWorkIds = rows
 		.filter(
 			(row): row is typeof row & { unitKind: FeedUnitKind } =>
@@ -870,6 +872,7 @@ export async function hydrateFeedItems(
 		scoreContextRows,
 		rootRows,
 		collectionCounts,
+		realmMemberCounts,
 		reviewScores,
 	] = await Promise.all([
 		postIds.length
@@ -1006,6 +1009,21 @@ export async function hydrateFeedItems(
 					.where(inArray(collectionItem.collectionId, collectionIds))
 					.groupBy(collectionItem.collectionId)
 			: [],
+		realmIds.length
+			? database
+					.select({
+						realmId: realmMember.realmId,
+						count: sql<number>`count(*)::int`,
+					})
+					.from(realmMember)
+					.where(
+						and(
+							inArray(realmMember.realmId, realmIds),
+							eq(realmMember.state, "active"),
+						),
+					)
+					.groupBy(realmMember.realmId)
+			: [],
 		reviewIds.length
 			? database
 					.select({
@@ -1057,6 +1075,7 @@ export async function hydrateFeedItems(
 	const collectionDirectItemCount = new Map(
 		collectionCounts.map((row) => [row.collectionId, row.count]),
 	);
+	const realmMemberCount = new Map(realmMemberCounts.map((row) => [row.realmId, row.count]));
 	const reactionCount = new Map(
 		reactions.map((row) => [
 			`${row.unitId}:${row.reaction}`,
@@ -1168,6 +1187,10 @@ export async function hydrateFeedItems(
 							kind: "identity",
 							avatar: presentAvatar(row.avatar),
 							banner: presentImageAsset(row.bannerAssetId, "banner"),
+							memberCount:
+								row.unitKind === "realm"
+									? (realmMemberCount.get(row.id) ?? 0)
+									: null,
 						},
 					},
 				];

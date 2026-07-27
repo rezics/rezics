@@ -36,6 +36,7 @@ import {
 	TreeViewItem,
 	TreeViewNode,
 	type TreeNodeType,
+	UnitPicker,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Link as LinkIcon, Plus, Trash2 } from "lucide-react";
@@ -411,11 +412,8 @@ function NavigationItemFields({
 		>
 			<Field required>
 				<FieldLabel>{t.management.navigationEditor.labelUnitId}</FieldLabel>
-				<Input
-					onChange={(event) =>
-						onChange({ ...item, labelUnitId: event.currentTarget.value })
-					}
-					required
+				<UnitPicker
+					onValueChange={(value) => onChange({ ...item, labelUnitId: value ?? "" })}
 					value={item.labelUnitId}
 				/>
 			</Field>
@@ -477,21 +475,31 @@ function NavigationItemFields({
 								? t.management.navigationEditor.targetUnitId
 								: t.management.navigationEditor.targetUrl}
 						</FieldLabel>
-						<Input
-							onChange={(event) =>
-								onChange({
-									...item,
-									target:
-										item.target.kind === "unit"
-											? { ...item.target, unitId: event.currentTarget.value }
-											: { ...item.target, url: event.currentTarget.value },
-								})
-							}
-							required
-							value={
-								item.target.kind === "unit" ? item.target.unitId : item.target.url
-							}
-						/>
+						{item.target.kind === "unit" ? (
+							<UnitPicker
+								onValueChange={(value) =>
+									onChange({
+										...item,
+										target: { kind: "unit", unitId: value ?? "" },
+									})
+								}
+								value={item.target.unitId}
+							/>
+						) : (
+							<Input
+								onChange={(event) =>
+									onChange({
+										...item,
+										target: {
+											kind: "external",
+											url: event.currentTarget.value,
+										},
+									})
+								}
+								required
+								value={item.target.url}
+							/>
+						)}
 					</Field>
 				</>
 			) : null}

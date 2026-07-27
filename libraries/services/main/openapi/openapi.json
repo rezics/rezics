@@ -22660,7 +22660,8 @@
 																		"required": [
 																			"kind",
 																			"avatar",
-																			"banner"
+																			"banner",
+																			"memberCount"
 																		],
 																		"properties": {
 																			"kind": {
@@ -22786,6 +22787,28 @@
 																								"type": "string"
 																							}
 																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"memberCount": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"minimum": 0,
+																						"anyOf": [
+																							{
+																								"format": "integer",
+																								"default": 0,
+																								"type": "string"
+																							},
+																							{
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						]
 																					},
 																					{
 																						"type": "null"
@@ -107600,6 +107623,7 @@
 													"id",
 													"slugAddress",
 													"joinPolicy",
+													"memberCount",
 													"language",
 													"title",
 													"summary",
@@ -107650,6 +107674,17 @@
 														]
 													},
 													"joinPolicy": { "type": "string" },
+													"memberCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
 													"language": {
 														"type": "string",
 														"enum": ["zh", "en"]
@@ -108649,6 +108684,7 @@
 										"visibility",
 										"language",
 										"joinPolicy",
+										"memberCount",
 										"createdAt",
 										"updatedAt",
 										"avatar",
@@ -108713,6 +108749,17 @@
 											]
 										},
 										"joinPolicy": { "type": "string" },
+										"memberCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
 										"avatar": {
@@ -112995,7 +113042,8 @@
 																		"required": [
 																			"kind",
 																			"avatar",
-																			"banner"
+																			"banner",
+																			"memberCount"
 																		],
 																		"properties": {
 																			"kind": {
@@ -113121,6 +113169,28 @@
 																								"type": "string"
 																							}
 																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"memberCount": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"minimum": 0,
+																						"anyOf": [
+																							{
+																								"format": "integer",
+																								"default": 0,
+																								"type": "string"
+																							},
+																							{
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						]
 																					},
 																					{
 																						"type": "null"
@@ -126942,7 +127012,8 @@
 																		"required": [
 																			"kind",
 																			"avatar",
-																			"banner"
+																			"banner",
+																			"memberCount"
 																		],
 																		"properties": {
 																			"kind": {
@@ -127068,6 +127139,28 @@
 																								"type": "string"
 																							}
 																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"memberCount": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"minimum": 0,
+																						"anyOf": [
+																							{
+																								"format": "integer",
+																								"default": 0,
+																								"type": "string"
+																							},
+																							{
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						]
 																					},
 																					{
 																						"type": "null"
@@ -144337,7 +144430,8 @@
 																		"required": [
 																			"kind",
 																			"avatar",
-																			"banner"
+																			"banner",
+																			"memberCount"
 																		],
 																		"properties": {
 																			"kind": {
@@ -144463,6 +144557,28 @@
 																								"type": "string"
 																							}
 																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"memberCount": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"minimum": 0,
+																						"anyOf": [
+																							{
+																								"format": "integer",
+																								"default": 0,
+																								"type": "string"
+																							},
+																							{
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						]
 																					},
 																					{
 																						"type": "null"

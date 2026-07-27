@@ -57,7 +57,8 @@ export function partitionDockPresentationIds(
 }
 
 export function getDockAddableBlockTypes(target: DockTarget) {
-	if (target.ownerKind === "zone") return ["unit-ref", "feed", "menu", "divider"] as const;
-	if (target.ownerKind === "realm") return ["unit-ref", "menu", "divider"] as const;
-	return ["unit-ref", "divider"] as const;
+	if (target.ownerKind === "zone")
+		return ["realm-ref", "zone-ref", "feed", "menu", "divider"] as const;
+	if (target.ownerKind === "realm") return ["realm-ref", "zone-ref", "menu", "divider"] as const;
+	return ["realm-ref", "zone-ref", "divider"] as const;
 }

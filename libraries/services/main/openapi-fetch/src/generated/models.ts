@@ -15105,6 +15105,7 @@ export type PostApiFeedQueryStatus200 = {
 										url: string;
 								  } | null)
 								| null;
+							memberCount: ((string | number) | null) | null;
 					  }
 					| {
 							/**
@@ -79560,6 +79561,7 @@ export type GetApiRealmsStatus200 = {
 		 * @type string
 		 */
 		joinPolicy: string;
+		memberCount: string | number;
 		/**
 		 * @type string
 		 */
@@ -80464,6 +80466,7 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 * @type string
 	 */
 	joinPolicy: string;
+	memberCount: string | number;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -84226,6 +84229,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 										url: string;
 								  } | null)
 								| null;
+							memberCount: ((string | number) | null) | null;
 					  }
 					| {
 							/**
@@ -91036,6 +91040,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 										url: string;
 								  } | null)
 								| null;
+							memberCount: ((string | number) | null) | null;
 					  }
 					| {
 							/**
@@ -98645,6 +98650,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 										url: string;
 								  } | null)
 								| null;
+							memberCount: ((string | number) | null) | null;
 					  }
 					| {
 							/**

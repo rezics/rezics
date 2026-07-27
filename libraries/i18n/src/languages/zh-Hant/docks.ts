@@ -1,6 +1,5 @@
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-
 const { forms: dockTerms } = zhHantTerminology.dock;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
@@ -23,7 +22,7 @@ export default {
 	notConfigured: `尚未設定此${dockTerms.inline}；儲存後即會建立。`,
 	deleted: `此${dockTerms.inline}已刪除；還原先前修訂即可再次顯示。`,
 	invalidDocument: `已儲存的${dockTerms.inline}文件無效，無法進行編輯。`,
-	invalidDraft: `儲存前請填妥所有必填的${verbatimTerms.id.value}欄位。`,
+	invalidDraft: "儲存前請為所有必填欄位選擇內容。",
 	unsaved: "有未儲存的變更",
 	save: `儲存${dockTerms.inline}`,
 	reload: "重新載入最新修訂",
@@ -46,7 +45,7 @@ export default {
 		moveUp: "上移",
 		moveDown: "下移",
 		type: "內容區塊類型",
-		identifier: `內容 ${verbatimTerms.id.value}`,
+		identifier: "搜尋內容",
 		appearance: "呈現方式",
 		searchSource: "搜尋來源",
 		zoneSearch: `${zoneTerms.label}搜尋設定`,
@@ -78,6 +77,8 @@ export default {
 		types: {
 			"post-full-view": `完整${postTerms.inline}`,
 			"unit-ref": "內容引用",
+			"realm-ref": `關聯${realmTerms.label}`,
+			"zone-ref": `關聯${zoneTerms.label}`,
 			search: "搜尋",
 			feed: "內容動態",
 			menu: "導覽選單",

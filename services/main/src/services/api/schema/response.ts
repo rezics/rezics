@@ -471,6 +471,7 @@ export const RealmListResponse = t.Object({
 			id: Uuid,
 			slugAddress: NullablePublicSlugAddressResponse,
 			joinPolicy: t.String(),
+			memberCount: t.Integer({ minimum: 0 }),
 			language: ContentLanguage,
 			title: NullableText,
 			summary: NullableText,
@@ -574,6 +575,7 @@ const FeedUnitPresentationResponse = t.Union([
 		kind: t.Literal("identity"),
 		avatar: AvatarResponse,
 		banner: ImageAssetResponse,
+		memberCount: t.Nullable(t.Integer({ minimum: 0 })),
 	}),
 	t.Object({
 		kind: t.Literal("general"),
@@ -849,6 +851,7 @@ export const RealmDetailResponse = t.Object({
 	visibility: t.String(),
 	language: t.Nullable(ContentLanguage),
 	joinPolicy: t.String(),
+	memberCount: t.Integer({ minimum: 0 }),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	avatar: AvatarResponse,

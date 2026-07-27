@@ -87,40 +87,47 @@ export function FeedCardHeader({
 	timestamp,
 	recommendation,
 	menu,
+	showAttributions = true,
 }: {
 	attributions: readonly FeedAttributionContext[];
 	realms: readonly FeedRealmContext[];
-	timestamp: string;
+	timestamp?: string;
 	recommendation?: ReactNode;
 	menu?: ReactNode;
+	showAttributions?: boolean;
 }) {
 	const { t } = useTranslation(["feed", "posts", "units"]);
+	if (!showAttributions && !realms.length && !timestamp && !recommendation && !menu) return null;
 	return (
 		<CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-2 gap-y-1 px-4 pt-4 sm:px-5">
 			<div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
-				<FeedContextGroup
-					emptyLabel={t.posts.unknownAttribution}
-					items={attributions}
-					listLabel={t.feed.attributionList({ count: attributions.length })}
-					renderInfoCard={(attribution) => (
-						<FeedAttributionInfoCard
-							attribution={attribution}
-							roleLabel={
-								isKnownAttributionRole(attribution.role)
-									? t.units.attributionRoles[attribution.role]
-									: attribution.role
-							}
-						/>
-					)}
-					showListLabel={(primary, count) =>
-						t.feed.showAttributionList({ attribution: primary.name, count })
-					}
-				/>
+				{showAttributions ? (
+					<FeedContextGroup
+						emptyLabel={t.posts.unknownAttribution}
+						items={attributions}
+						listLabel={t.feed.attributionList({ count: attributions.length })}
+						renderInfoCard={(attribution) => (
+							<FeedAttributionInfoCard
+								attribution={attribution}
+								roleLabel={
+									isKnownAttributionRole(attribution.role)
+										? t.units.attributionRoles[attribution.role]
+										: attribution.role
+								}
+							/>
+						)}
+						showListLabel={(primary, count) =>
+							t.feed.showAttributionList({ attribution: primary.name, count })
+						}
+					/>
+				) : null}
 				{realms.length > 0 ? (
 					<>
-						<span className="text-muted-foreground text-xs">
-							{t.feed.contextSeparator}
-						</span>
+						{showAttributions ? (
+							<span className="text-muted-foreground text-xs">
+								{t.feed.contextSeparator}
+							</span>
+						) : null}
 						<FeedContextGroup
 							items={realms}
 							listLabel={t.feed.realmList({ count: realms.length })}
@@ -131,10 +138,16 @@ export function FeedCardHeader({
 						/>
 					</>
 				) : null}
-				<span aria-hidden className="text-muted-foreground text-xs">
-					·
-				</span>
-				<time className="text-muted-foreground text-xs">{timestamp}</time>
+				{timestamp ? (
+					<>
+						{showAttributions || realms.length ? (
+							<span aria-hidden className="text-muted-foreground text-xs">
+								·
+							</span>
+						) : null}
+						<time className="text-muted-foreground text-xs">{timestamp}</time>
+					</>
+				) : null}
 			</div>
 			{menu ? <div className="row-span-2">{menu}</div> : null}
 			{recommendation ? (

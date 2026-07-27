@@ -31,6 +31,8 @@ import {
 	NativeSelectOption,
 	QueryFailure,
 	QueryPending,
+	UnitMultiPicker,
+	UnitPicker,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -349,10 +351,8 @@ function SearchDocumentEditor({
 											<FieldLabel>
 												{t.zones.management.search.labelUnitId}
 											</FieldLabel>
-											<Input
-												onChange={(event) => {
-													const labelUnitId =
-														event.currentTarget.value.trim();
+											<UnitPicker
+												onValueChange={(labelUnitId) => {
 													setDraft({
 														...document,
 														controls: document.controls.map(
@@ -379,12 +379,10 @@ function SearchDocumentEditor({
 												<FieldLabel>
 													{t.zones.management.search.allowedTagIds}
 												</FieldLabel>
-												<Input
-													onChange={(event) => {
-														const values = event.currentTarget.value
-															.split(",")
-															.map((value) => value.trim())
-															.filter(Boolean);
+												<UnitMultiPicker
+													index="tags"
+													kinds={["tag"]}
+													onValuesChange={(values) => {
 														setDraft({
 															...document,
 															controls: document.controls.map(
@@ -396,7 +394,9 @@ function SearchDocumentEditor({
 																					values.length
 																						? {
 																								kind: "include",
-																								values,
+																								values: [
+																									...values,
+																								],
 																							}
 																						: {
 																								kind: "all",
@@ -406,14 +406,16 @@ function SearchDocumentEditor({
 															),
 														});
 													}}
-													placeholder={
-														t.zones.management.search
-															.allowedTagIdsPlaceholder
+													removeLabel={
+														t.zones.management.search.removeAllowedTag
 													}
-													value={
+													values={
 														control.optionPolicy?.kind === "include"
-															? control.optionPolicy.values.join(", ")
-															: ""
+															? control.optionPolicy.values.filter(
+																	(value): value is string =>
+																		typeof value === "string",
+																)
+															: []
 													}
 												/>
 											</Field>
