@@ -385,7 +385,7 @@ function FeedContextGroup<T extends FeedContextItem>({
 					<span className="shrink-0 text-muted-foreground">+{additionalCount}</span>
 				</Button>
 			</HoverCardTrigger>
-			<HoverCardContent className="w-72 p-2">
+			<HoverCardContent className="w-[min(22rem,calc(100vw-2rem))] p-2">
 				<div aria-label={listLabel} className="grid gap-0.5" role="list">
 					{items.map((item) => (
 						<div key={item.id} role="listitem">
@@ -398,16 +398,20 @@ function FeedContextGroup<T extends FeedContextItem>({
 								<HoverCardTrigger asChild>
 									{item.href ? (
 										<a
-											className="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/32"
+											className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/32"
 											href={item.href}
 										>
 											<FeedAvatar item={item} />
-											<span className="truncate">{item.name}</span>
+											<span className="min-w-0 flex-1 truncate">
+												{item.name}
+											</span>
 										</a>
 									) : (
-										<span className="flex min-h-11 items-center gap-2 px-2 py-1.5 text-sm">
+										<span className="flex min-h-11 min-w-0 items-center gap-2 px-2 py-1.5 text-sm">
 											<FeedAvatar item={item} />
-											<span className="truncate">{item.name}</span>
+											<span className="min-w-0 flex-1 truncate">
+												{item.name}
+											</span>
 										</span>
 									)}
 								</HoverCardTrigger>
