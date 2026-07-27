@@ -7,6 +7,7 @@ import {
 	findOrCreateRevisionContent,
 	materializeStoredRevisionContent,
 } from "../../history/content";
+import { recordStudioWorkRelation } from "../../studio/projection";
 import { DockRevisionConflict } from "./errors";
 
 export const DockContentModel = "rezics.dock.v1" as const;
@@ -129,7 +130,7 @@ async function commitDockRevision(
 			editSummary: input.message,
 			kind: input.kind,
 		})
-		.returning({ id: dockRevision.id });
+		.returning({ id: dockRevision.id, createdAt: dockRevision.createdAt });
 	if (!revision) throw new Error("Dock revision insertion returned no id");
 	await tx
 		.insert(dockRevisionHead)
@@ -138,6 +139,13 @@ async function commitDockRevision(
 			target: dockRevisionHead.dockId,
 			set: { revisionId: revision.id },
 		});
+	await recordStudioWorkRelation(tx, {
+		profileId: input.actorProfileId,
+		relation: "contributed",
+		source: "dock_revision",
+		occurredAt: revision.createdAt,
+		target: { kind: "dock", dockId: input.dockId },
+	});
 	return { revisionId: revision.id, revisionCreated: true as const };
 }
 

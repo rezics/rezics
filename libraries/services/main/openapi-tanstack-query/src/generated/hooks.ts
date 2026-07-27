@@ -714,10 +714,17 @@ import type {
 	PatchApiUsersMeStatus500,
 	ListCurrentUserStudioContentOptions,
 	ListCurrentUserStudioContentStatus200,
+	ListCurrentUserStudioContentStatus400,
 	ListCurrentUserStudioContentStatus403,
 	ListCurrentUserStudioContentStatus422,
 	ListCurrentUserStudioContentStatus429,
 	ListCurrentUserStudioContentStatus500,
+	RecordCurrentUserStudioVisitOptions,
+	RecordCurrentUserStudioVisitStatus200,
+	RecordCurrentUserStudioVisitStatus404,
+	RecordCurrentUserStudioVisitStatus422,
+	RecordCurrentUserStudioVisitStatus429,
+	RecordCurrentUserStudioVisitStatus500,
 	GetApiUsersMePreferencesStatus200,
 	GetApiUsersMePreferencesStatus404,
 	GetApiUsersMePreferencesStatus429,
@@ -2121,6 +2128,7 @@ import {
 	getApiUsersMe,
 	patchApiUsersMe,
 	listCurrentUserStudioContent,
+	recordCurrentUserStudioVisit,
 	getApiUsersMePreferences,
 	patchApiUsersMePreferences,
 	putApiUsersMePreferences,
@@ -13052,6 +13060,7 @@ export function listCurrentUserStudioContentQueryOptions(
 	return queryOptions<
 		ListCurrentUserStudioContentStatus200,
 		ResponseErrorConfig<
+			| ListCurrentUserStudioContentStatus400
 			| ListCurrentUserStudioContentStatus403
 			| ListCurrentUserStudioContentStatus422
 			| ListCurrentUserStudioContentStatus429
@@ -13074,7 +13083,7 @@ export function listCurrentUserStudioContentQueryOptions(
 }
 
 /**
- * @summary List current user's created Studio content
+ * @summary List current user's Studio work resources
  * {@link /api/users/me/studio}
  */
 export function useListCurrentUserStudioContent<
@@ -13094,6 +13103,7 @@ export function useListCurrentUserStudioContent<
 			QueryObserverOptions<
 				ListCurrentUserStudioContentStatus200,
 				ResponseErrorConfig<
+					| ListCurrentUserStudioContentStatus400
 					| ListCurrentUserStudioContentStatus403
 					| ListCurrentUserStudioContentStatus422
 					| ListCurrentUserStudioContentStatus429
@@ -13123,6 +13133,7 @@ export function useListCurrentUserStudioContent<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| ListCurrentUserStudioContentStatus400
 			| ListCurrentUserStudioContentStatus403
 			| ListCurrentUserStudioContentStatus422
 			| ListCurrentUserStudioContentStatus429
@@ -13133,6 +13144,102 @@ export function useListCurrentUserStudioContent<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const recordCurrentUserStudioVisitMutationKey = () =>
+	[{ url: "/api/users/me/studio/:unitId/visit" }] as const;
+
+export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = recordCurrentUserStudioVisitMutationKey();
+	return mutationOptions<
+		RecordCurrentUserStudioVisitStatus200,
+		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus404
+			| RecordCurrentUserStudioVisitStatus422
+			| RecordCurrentUserStudioVisitStatus429
+			| RecordCurrentUserStudioVisitStatus500
+		>,
+		RecordCurrentUserStudioVisitOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await recordCurrentUserStudioVisit({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Record a Studio resource visit
+ * {@link /api/users/me/studio/:unitId/visit}
+ */
+export function useRecordCurrentUserStudioVisit<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RecordCurrentUserStudioVisitStatus200,
+			ResponseErrorConfig<
+				| RecordCurrentUserStudioVisitStatus404
+				| RecordCurrentUserStudioVisitStatus422
+				| RecordCurrentUserStudioVisitStatus429
+				| RecordCurrentUserStudioVisitStatus500
+			>,
+			RecordCurrentUserStudioVisitOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? recordCurrentUserStudioVisitMutationKey();
+
+	const baseOptions = recordCurrentUserStudioVisitMutationOptions(config) as UseMutationOptions<
+		RecordCurrentUserStudioVisitStatus200,
+		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus404
+			| RecordCurrentUserStudioVisitStatus422
+			| RecordCurrentUserStudioVisitStatus429
+			| RecordCurrentUserStudioVisitStatus500
+		>,
+		RecordCurrentUserStudioVisitOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RecordCurrentUserStudioVisitStatus200,
+		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus404
+			| RecordCurrentUserStudioVisitStatus422
+			| RecordCurrentUserStudioVisitStatus429
+			| RecordCurrentUserStudioVisitStatus500
+		>,
+		RecordCurrentUserStudioVisitOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RecordCurrentUserStudioVisitStatus200,
+		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus404
+			| RecordCurrentUserStudioVisitStatus422
+			| RecordCurrentUserStudioVisitStatus429
+			| RecordCurrentUserStudioVisitStatus500
+		>,
+		RecordCurrentUserStudioVisitOptions,
+		TContext
+	>;
 }
 
 export const getApiUsersMePreferencesQueryKey = () =>

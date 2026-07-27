@@ -9,6 +9,7 @@ export const StudioSectionIds = [
 	"realm",
 	"zone",
 	"post",
+	"wiki",
 	"collection",
 	"review",
 	"poll",
@@ -35,7 +36,12 @@ export const StudioSectionCreateHrefs = {
 	collection: "/collections/new",
 	review: "/reviews/new",
 	poll: "/polls/new",
-} as const satisfies Record<StudioSectionId, string>;
+} as const satisfies Partial<Record<StudioSectionId, string>>;
+
+export function studioSectionCreateHref(sectionId: StudioSectionId): string | undefined {
+	if (sectionId === "wiki") return undefined;
+	return StudioSectionCreateHrefs[sectionId];
+}
 
 export function studioContentHref(sectionId: StudioSectionId, unitId: string): string {
 	switch (sectionId) {
@@ -52,6 +58,7 @@ export function studioContentHref(sectionId: StudioSectionId, unitId: string): s
 		case "zone":
 			return `/zone/${unitId}`;
 		case "post":
+		case "wiki":
 			return `/posts/${unitId}`;
 		case "collection":
 			return `/collections/${unitId}`;

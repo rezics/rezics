@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, isNull, or } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import Elysia from "elysia";
 import { parseNullablePublicationLicenseId } from "@rezics/license";
 import { OfficialRealmUnitIds } from "@rezics/slug";
@@ -10,7 +10,6 @@ import {
 	avatarReferenceToColumns,
 	isPrimaryUnitLocalization,
 	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationTitle,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
@@ -21,8 +20,6 @@ import {
 	profilePreference,
 	PlatformCapabilityValues,
 	ZonePreviewCapability,
-	post as postTable,
-	unitStatusEvent,
 	unitLocalization,
 } from "../../database/schema";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
@@ -50,7 +47,8 @@ import {
 	FollowingUnitParams,
 	StudioContentListQuery,
 	StudioContentListResponse,
-	type StudioSection,
+	StudioResourceParams,
+	StudioVisitResponse,
 	UpdateInterfaceLocaleBody,
 	UpdateProfileBody,
 	UpdateFollowingBody,
@@ -66,6 +64,7 @@ import {
 	unfollowUnit,
 	updateFollowingPresentation,
 } from "../../following/service";
+import { listStudioContent, recordStudioVisit } from "../../studio/service";
 import {
 	PreferencesNotFound,
 	ProfileChanged,
@@ -80,28 +79,6 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 	"ImageAssetNotFound",
 ]);
 const UnitForbiddenResponse = toApiErrorResponse(["UnitProtected"]);
-
-function getStudioSectionCondition(section: StudioSection) {
-	switch (section) {
-		case "post":
-			return and(eq(unit.kind, "post"), eq(postTable.kind, "post"));
-		case "review":
-			return and(eq(unit.kind, "post"), eq(postTable.kind, "review"));
-		case "book":
-		case "software":
-		case "media":
-		case "entity":
-		case "tag":
-		case "realm":
-		case "zone":
-		case "collection":
-		case "poll":
-			return eq(unit.kind, section);
-		default:
-			section satisfies never;
-			throw new Error("Unsupported Studio section");
-	}
-}
 
 function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 	return {
@@ -150,49 +127,45 @@ export default new Elysia({ prefix: "/users" })
 		async ({ authorization, profile, query }) => {
 			if (query.section === "zone")
 				await authorization.platform.ensureCapability(ZonePreviewCapability);
-			const rows = await database
-				.select({
-					id: unit.id,
-					language: resolvedUnitLocalizationLanguage(
-						unit.id,
-						query.localizationLanguages,
-					),
-					title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
-					status: unit.status,
-					visibility: unit.visibility,
-					createdAt: unit.createdAt,
-					updatedAt: unit.updatedAt,
-				})
-				.from(unit)
-				.innerJoin(
-					unitStatusEvent,
-					and(
-						eq(unitStatusEvent.unitId, unit.id),
-						isNull(unitStatusEvent.fromStatus),
-						eq(unitStatusEvent.changedByProfileId, profile.unitId),
-					),
-				)
-				.leftJoin(postTable, eq(postTable.id, unit.id))
-				.where(and(isNull(unit.deletedAt), getStudioSectionCondition(query.section)))
-				.orderBy(desc(unit.createdAt), desc(unit.id))
-				.limit(query.limit ?? 50);
-			return {
-				items: rows.map((row) => {
-					if (!row.language) throw new Error(`Studio Unit ${row.id} has no localization`);
-					return { ...row, language: row.language, section: query.section };
-				}),
-			};
+			return listStudioContent({
+				profileId: profile.unitId,
+				authorization: authorization.unit,
+				query,
+			});
 		},
 		{
 			access: "profile:read",
 			query: StudioContentListQuery,
 			response: {
 				[StatusCodes.OK]: StudioContentListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 			},
 			detail: {
 				operationId: "listCurrentUserStudioContent",
-				summary: "List current user's created Studio content",
+				summary: "List current user's Studio work resources",
+				tags: ["Users", "Studio"],
+			},
+		},
+	)
+	.put(
+		"/me/studio/:unitId/visit",
+		async ({ authorization, profile, params }) =>
+			recordStudioVisit({
+				profileId: profile.unitId,
+				unitId: params.unitId,
+				authorization: authorization.unit,
+			}),
+		{
+			access: "write:interaction:write",
+			params: StudioResourceParams,
+			response: {
+				[StatusCodes.OK]: StudioVisitResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				operationId: "recordCurrentUserStudioVisit",
+				summary: "Record a Studio resource visit",
 				tags: ["Users", "Studio"],
 			},
 		},

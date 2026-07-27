@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { studioContentHref } from "../model/studio-section";
+import { studioContentHref, studioSectionCreateHref } from "../model/studio-section";
 import { parseStudioSection, studioSectionHref } from "./studio-routes";
 
 describe("Studio routes", () => {
@@ -9,6 +9,7 @@ describe("Studio routes", () => {
 		expect(parseStudioSection("/create/review")).toBe("review");
 		expect(parseStudioSection("/create/review/")).toBe("review");
 		expect(parseStudioSection("/create/zone")).toBe("zone");
+		expect(parseStudioSection("/create/wiki")).toBe("wiki");
 		expect(parseStudioSection("/create")).toBeUndefined();
 	});
 
@@ -17,5 +18,8 @@ describe("Studio routes", () => {
 		expect(studioContentHref("realm", "unit-id")).toBe("/realm/unit-id");
 		expect(studioContentHref("zone", "unit-id")).toBe("/zone/unit-id");
 		expect(studioContentHref("review", "unit-id")).toBe("/reviews/unit-id");
+		expect(studioContentHref("wiki", "unit-id")).toBe("/posts/unit-id");
+		expect(studioSectionCreateHref("book")).toBe("/units/book/new");
+		expect(studioSectionCreateHref("wiki")).toBeUndefined();
 	});
 });

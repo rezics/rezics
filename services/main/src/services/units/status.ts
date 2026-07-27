@@ -10,6 +10,7 @@ import {
 	UnitStatusActorKindValues,
 	UnitStatusValues,
 } from "../database/schema";
+import { recordStudioWorkRelation } from "../studio/projection";
 import { primaryUnitTitle } from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
@@ -96,6 +97,17 @@ export async function recordInitialUnitStatus(
 		})
 		.returning({ id: unitStatusEvent.id });
 	if (!event) throw new Error("Initial Unit status insertion did not return an event");
+	if (input.actor.kind === "profile")
+		await recordStudioWorkRelation(tx, {
+			profileId: input.actor.profileId,
+			relation: "created",
+			source: "unit_status",
+			occurredAt: createdAt,
+			target: {
+				kind: "unit_creation",
+				unitId: input.unitId,
+			},
+		});
 	return event.id;
 }
 

@@ -41,6 +41,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/rebuild-content-metrics.ts
 
+    studio:rebuild:
+        desc: Rebuild the personalized Studio work-relation projection.
+        cmds:
+            - yarn exec tsx scripts/rebuild-studio.ts
+
     search:index:
         desc: Check or explicitly manage one versioned Meilisearch projection generation.
         cmds:
@@ -165,6 +170,7 @@ tasks:
             - task: db:migrate
             - task: db:bootstrap
             - task: content-metrics:rebuild
+            - task: studio:rebuild
 
     db:adopt-atlas:
         desc: One-time adoption of an existing Drizzle-managed database at the known baseline.
@@ -185,6 +191,7 @@ tasks:
         cmds:
             - yarn exec tsx scripts/seed.ts {{.CLI_ARGS}}
             - task: content-metrics:rebuild
+            - task: studio:rebuild
             - task: recommendations:refresh
             - task: aggregates:reconcile
             - task: db:seed:check

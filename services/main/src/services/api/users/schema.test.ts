@@ -79,15 +79,35 @@ describe("public profile localization query", () => {
 describe("Studio content list contract", () => {
 	it("accepts only supported sections and bounded limits", () => {
 		expect(Check(StudioContentListQuery, { section: "book" })).toBe(true);
+		expect(StudioContentListQuery.properties.view.default).toBe("all");
+		expect(StudioContentListQuery.properties.sort.default).toBe("recent");
+		expect(StudioContentListQuery.properties.permission.default).toBeUndefined();
+		expect(StudioContentListQuery.properties.workState.default).toBeUndefined();
+		expect(StudioContentListQuery.properties.status.default).toBeUndefined();
+		expect(StudioContentListQuery.properties.visibility.default).toBeUndefined();
 		expect(
 			Check(StudioContentListQuery, {
-				section: "review",
+				section: "wiki",
+				view: "contributed",
+				permission: "unit.update",
+				workState: "actionable",
+				status: "published",
+				visibility: "public",
+				sort: "recent",
 				localizationLanguages: ["zh", "en"],
+				cursor: "opaque",
 				limit: 100,
 			}),
 		).toBe(true);
 		expect(Check(StudioContentListQuery, { section: "zone" })).toBe(true);
 		expect(Check(StudioContentListQuery, { section: "unknown" })).toBe(false);
+		expect(Check(StudioContentListQuery, { section: "book", view: "mine" })).toBe(false);
+		expect(
+			Check(StudioContentListQuery, {
+				section: "book",
+				permission: "unit.delete",
+			}),
+		).toBe(false);
 		expect(Check(StudioContentListQuery, { section: "book", limit: 101 })).toBe(false);
 	});
 });

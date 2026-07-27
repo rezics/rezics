@@ -49572,7 +49572,7 @@
 		"/api/users/me/studio": {
 			"get": {
 				"operationId": "listCurrentUserStudioContent",
-				"summary": "List current user's created Studio content",
+				"summary": "List current user's Studio work resources",
 				"tags": ["Users", "Studio"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -49581,7 +49581,6 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"default": "book",
 							"type": "string",
 							"enum": [
 								"book",
@@ -49592,10 +49591,63 @@
 								"realm",
 								"zone",
 								"post",
+								"wiki",
 								"collection",
 								"review",
 								"poll"
 							]
+						}
+					},
+					{
+						"name": "view",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "all",
+							"type": "string",
+							"enum": ["all", "created", "contributed", "assigned", "delegated"]
+						}
+					},
+					{
+						"name": "permission",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"unit.update",
+								"unit.publish",
+								"unit.access.manage",
+								"unit.protection.manage"
+							]
+						}
+					},
+					{
+						"name": "workState",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["actionable", "blocked"] }
+					},
+					{
+						"name": "status",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["draft", "published", "archived"] }
+					},
+					{
+						"name": "visibility",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["public", "unlisted", "private"] }
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "recent",
+							"type": "string",
+							"enum": ["recent", "updated", "created", "relevant"]
 						}
 					},
 					{
@@ -49609,6 +49661,12 @@
 							"type": "array",
 							"items": { "type": "string", "enum": ["zh", "en"] }
 						}
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "maxLength": 1024, "type": "string" }
 					},
 					{
 						"name": "limit",
@@ -49632,7 +49690,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "nextCursor"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -49640,18 +49698,67 @@
 												"type": "object",
 												"required": [
 													"id",
+													"slugAddress",
 													"section",
 													"language",
 													"title",
 													"status",
 													"visibility",
+													"relations",
+													"roles",
+													"workState",
+													"permissions",
+													"accessSources",
+													"firstContributedAt",
+													"lastContributedAt",
+													"contributionCount",
+													"assignedAt",
+													"lastVisitedAt",
+													"relevantAt",
 													"createdAt",
 													"updatedAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
 													"section": {
-														"default": "book",
 														"type": "string",
 														"enum": [
 															"book",
@@ -49662,6 +49769,7 @@
 															"realm",
 															"zone",
 															"post",
+															"wiki",
 															"collection",
 															"review",
 															"poll"
@@ -49688,6 +49796,120 @@
 														"type": "string",
 														"enum": ["public", "unlisted", "private"]
 													},
+													"relations": {
+														"minItems": 1,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"type": "string",
+															"enum": [
+																"created",
+																"contributed",
+																"assigned",
+																"delegated"
+															]
+														}
+													},
+													"roles": {
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "viewer",
+															"type": "string",
+															"enum": [
+																"viewer",
+																"editor",
+																"publishing_editor",
+																"maintainer",
+																"owner"
+															]
+														}
+													},
+													"workState": {
+														"type": "string",
+														"enum": ["actionable", "blocked"]
+													},
+													"permissions": {
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"type": "string",
+															"enum": [
+																"unit.update",
+																"unit.publish",
+																"unit.access.manage",
+																"unit.protection.manage"
+															]
+														}
+													},
+													"accessSources": {
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"type": "string",
+															"enum": [
+																"direct",
+																"realm",
+																"authenticated",
+																"platform"
+															]
+														}
+													},
+													"firstContributedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"lastContributedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"contributionCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"assignedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"lastVisitedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"relevantAt": {
+														"format": "date-time",
+														"type": "string"
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -49698,7 +49920,38 @@
 													}
 												}
 											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -49783,6 +50036,117 @@
 					}
 				},
 				"x-rezics-policy-operation-id": "getApiUsersMeStudio"
+			}
+		},
+		"/api/users/me/studio/{unitId}/visit": {
+			"put": {
+				"operationId": "recordCurrentUserStudioVisit",
+				"summary": "Record a Studio resource visit",
+				"tags": ["Users", "Studio"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["unitId", "lastVisitedAt"],
+									"properties": {
+										"unitId": { "format": "uuid", "type": "string" },
+										"lastVisitedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"x-rezics-policy-operation-id": "putApiUsersMeStudioByUnitIdVisit"
 			}
 		},
 		"/api/users/me/preferences": {

@@ -42,6 +42,11 @@ export const dockRevision = pgTable(
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
+		index("dock_revision_actor_created_at_idx").on(
+			table.actorProfileId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
 		index("dock_revision_content_idx").on(table.contentId),
 		check(
 			"dock_revision_kind_check",

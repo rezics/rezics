@@ -380,6 +380,83 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		return (await this.decide(unitId, "unit.update", scope)).allowed;
 	}
 
+	async findAllowedScope(
+		unitId: string,
+		permission: UnitPermission,
+	): Promise<UnitScope | undefined> {
+		if (!this.profileId) return undefined;
+		const rootDecision = await this.decide(unitId, permission);
+		if (rootDecision.allowed) return [];
+
+		const bindings = await database
+			.select({
+				subjectKind: unitAccessBinding.subjectKind,
+				profileId: unitAccessBinding.profileId,
+				realmId: unitAccessBinding.realmId,
+				realmRelation: unitAccessBinding.realmRelation,
+				role: unitAccessBinding.role,
+				scope: unitAccessBinding.scope,
+			})
+			.from(unitAccessBinding)
+			.where(
+				and(
+					eq(unitAccessBinding.unitId, unitId),
+					isNull(unitAccessBinding.revokedAt),
+					or(
+						isNull(unitAccessBinding.expiresAt),
+						sql`${unitAccessBinding.expiresAt} > now()`,
+					),
+				),
+			);
+		const candidateScopes = new Map<string, UnitScope>();
+		for (const binding of bindings) {
+			if (!roleAllows(binding.role, permission)) continue;
+			const subjectMatches =
+				binding.subjectKind === "authenticated" ||
+				(binding.subjectKind === "profile" && binding.profileId === this.profileId) ||
+				(binding.subjectKind === "realm" &&
+					(await realmBindingMatches(database, binding, this.profileId)));
+			if (subjectMatches) candidateScopes.set(scopeKey(binding.scope), binding.scope);
+		}
+		for (const scope of [...candidateScopes.values()].sort(
+			(left, right) =>
+				left.length - right.length || scopeKey(left).localeCompare(scopeKey(right)),
+		))
+			if ((await this.decide(unitId, permission, scope)).allowed) return scope;
+		return undefined;
+	}
+
+	async matchesActiveBinding(bindingId: string, permission: UnitPermission): Promise<boolean> {
+		if (!this.profileId) return false;
+		const [binding] = await database
+			.select({
+				subjectKind: unitAccessBinding.subjectKind,
+				profileId: unitAccessBinding.profileId,
+				realmId: unitAccessBinding.realmId,
+				realmRelation: unitAccessBinding.realmRelation,
+				role: unitAccessBinding.role,
+			})
+			.from(unitAccessBinding)
+			.where(
+				and(
+					eq(unitAccessBinding.id, bindingId),
+					isNull(unitAccessBinding.revokedAt),
+					or(
+						isNull(unitAccessBinding.expiresAt),
+						sql`${unitAccessBinding.expiresAt} > now()`,
+					),
+				),
+			)
+			.limit(1);
+		if (!binding || !roleAllows(binding.role, permission)) return false;
+		return (
+			binding.subjectKind === "authenticated" ||
+			(binding.subjectKind === "profile" && binding.profileId === this.profileId) ||
+			(binding.subjectKind === "realm" &&
+				(await realmBindingMatches(database, binding, this.profileId)))
+		);
+	}
+
 	async ensureCanUpdate(unitId: string, scopes: readonly UnitScope[]): Promise<void> {
 		for (const scope of scopes.length ? scopes : [[]])
 			await this.ensure(unitId, "unit.update", scope);

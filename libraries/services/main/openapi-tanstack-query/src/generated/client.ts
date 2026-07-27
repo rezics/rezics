@@ -219,6 +219,8 @@ import type {
 	PatchApiUsersMeResponses,
 	ListCurrentUserStudioContentOptions,
 	ListCurrentUserStudioContentResponses,
+	RecordCurrentUserStudioVisitOptions,
+	RecordCurrentUserStudioVisitResponses,
 	GetApiUsersMePreferencesOptions,
 	GetApiUsersMePreferencesResponses,
 	PatchApiUsersMePreferencesOptions,
@@ -2698,7 +2700,7 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List current user's created Studio content
+ * @summary List current user's Studio work resources
  * {@link /api/users/me/studio}
  */
 export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
@@ -2715,6 +2717,26 @@ export function listCurrentUserStudioContent<ThrowOnError extends boolean = true
 		],
 		...config,
 	}) as Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Record a Studio resource visit
+ * {@link /api/users/me/studio/:unitId/visit}
+ */
+export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true>(
+	options: Options<RecordCurrentUserStudioVisitOptions, ThrowOnError>,
+): Promise<RequestResult<RecordCurrentUserStudioVisitResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/users/me/studio/{unitId}/visit",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RecordCurrentUserStudioVisitResponses, ThrowOnError>>;
 }
 
 /**

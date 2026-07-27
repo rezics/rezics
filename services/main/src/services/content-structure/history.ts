@@ -12,6 +12,7 @@ import {
 	revisionPayloadByteSize,
 	type StoredRevisionContent,
 } from "../history/content";
+import { recordStudioWorkRelation } from "../studio/projection";
 import {
 	ContentStructureCheckpointDepth,
 	ContentStructureContentModel,
@@ -178,7 +179,10 @@ async function commitContentStructureRevision(
 			replayByteSize,
 			checkpointByteSize,
 		})
-		.returning({ id: contentStructureRevision.id });
+		.returning({
+			id: contentStructureRevision.id,
+			createdAt: contentStructureRevision.createdAt,
+		});
 	if (!revision) throw new Error("Content Structure revision insertion returned no id");
 	await tx
 		.insert(contentStructureRevisionHead)
@@ -187,6 +191,13 @@ async function commitContentStructureRevision(
 			target: contentStructureRevisionHead.structureId,
 			set: { revisionId: revision.id },
 		});
+	await recordStudioWorkRelation(tx, {
+		profileId: input.actorProfileId,
+		relation: "contributed",
+		source: "content_structure_revision",
+		occurredAt: revision.createdAt,
+		target: { kind: "content_structure", structureId: input.structureId },
+	});
 	return { revisionId: revision.id, revisionCreated: true };
 }
 

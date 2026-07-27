@@ -87,6 +87,7 @@ import {
 	replaceUnitStructureDefinition,
 } from "../tag-structures/definition";
 import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
+import { recordStudioWorkRelation } from "../studio/projection";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -1238,7 +1239,7 @@ export async function recordUnitRevision(
 			minor: input.minor ?? false,
 			byteSize,
 		})
-		.returning({ id: unitRevision.id });
+		.returning({ id: unitRevision.id, createdAt: unitRevision.createdAt });
 	if (!revision) throw new Error("Unit revision insertion did not return an id");
 
 	await tx.insert(unitRevisionSlot).values(
@@ -1285,6 +1286,18 @@ export async function recordUnitRevision(
 					: {},
 			})),
 		);
+	if (input.event !== "create")
+		await recordStudioWorkRelation(tx, {
+			profileId: input.actorProfileId,
+			relation: "contributed",
+			source: "unit_revision",
+			occurredAt: revision.createdAt,
+			target: {
+				kind: "unit_contribution",
+				unitId: input.unitId,
+				authorizationScope: null,
+			},
+		});
 	return { revisionId: revision.id, revisionCreated: true };
 }
 

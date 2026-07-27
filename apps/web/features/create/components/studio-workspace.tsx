@@ -12,6 +12,7 @@ import {
 	ClipboardPenLine,
 	Code2,
 	Folder,
+	FileText,
 	Landmark,
 	MessageSquareText,
 	PanelsTopLeft,
@@ -99,6 +100,13 @@ export function StudioWorkspace({ children }: { readonly children: ReactNode }) 
 			label: labels.post.label,
 			description: labels.post.description,
 			icon: MessageSquareText,
+		},
+		{
+			id: "wiki",
+			href: studioSectionHref("wiki"),
+			label: labels.wiki.label,
+			description: labels.wiki.description,
+			icon: FileText,
 		},
 		{
 			id: "collection",

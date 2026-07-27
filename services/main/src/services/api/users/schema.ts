@@ -5,9 +5,11 @@ import { PortableTextDocument } from "@rezics/block";
 import {
 	ContentLanguageValues,
 	ContentRatingValues,
+	UnitAccessRoleValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
+import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import {
 	AvatarInput,
 	ContentLanguage,
@@ -29,17 +31,56 @@ export const StudioSectionValues = [
 	"realm",
 	"zone",
 	"post",
+	"wiki",
 	"collection",
 	"review",
 	"poll",
 ] as const;
-export const StudioSection = t.UnionEnum(StudioSectionValues);
+export const StudioSection = t.UnionEnum(StudioSectionValues, { default: undefined });
 export type StudioSection = Static<typeof StudioSection>;
+
+export const StudioViewValues = ["all", "created", "contributed", "assigned", "delegated"] as const;
+export const StudioView = t.UnionEnum(StudioViewValues, { default: "all" });
+export type StudioView = Static<typeof StudioView>;
+
+export const StudioPermissionValues = [
+	"unit.update",
+	"unit.publish",
+	"unit.access.manage",
+	"unit.protection.manage",
+] as const;
+export const StudioPermission = t.UnionEnum(StudioPermissionValues, { default: undefined });
+export type StudioPermission = Static<typeof StudioPermission>;
+
+export const StudioWorkStateValues = ["actionable", "blocked"] as const;
+export const StudioWorkState = t.UnionEnum(StudioWorkStateValues, { default: undefined });
+export type StudioWorkState = Static<typeof StudioWorkState>;
+
+export const StudioSortValues = ["recent", "updated", "created", "relevant"] as const;
+export const StudioSort = t.UnionEnum(StudioSortValues, { default: "recent" });
+export type StudioSort = Static<typeof StudioSort>;
+
+export const StudioRelationValues = ["created", "contributed", "assigned", "delegated"] as const;
+export const StudioRelation = t.UnionEnum(StudioRelationValues, { default: undefined });
+export type StudioRelation = Static<typeof StudioRelation>;
+
+export const StudioAccessSourceValues = ["direct", "realm", "authenticated", "platform"] as const;
+export const StudioAccessSource = t.UnionEnum(StudioAccessSourceValues, {
+	default: undefined,
+});
+export type StudioAccessSource = Static<typeof StudioAccessSource>;
 
 export const StudioContentListQuery = t.Object(
 	{
 		section: StudioSection,
+		view: t.Optional(StudioView),
+		permission: t.Optional(StudioPermission),
+		workState: t.Optional(StudioWorkState),
+		status: t.Optional(t.UnionEnum(UnitStatusValues, { default: undefined })),
+		visibility: t.Optional(t.UnionEnum(UnitVisibilityValues, { default: undefined })),
+		sort: t.Optional(StudioSort),
 		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ maxLength: 1_024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 	},
 	{ additionalProperties: false },
@@ -50,15 +91,36 @@ export const StudioContentListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
+			slugAddress: NullablePublicSlugAddressResponse,
 			section: StudioSection,
 			language: ContentLanguage,
 			title: t.Nullable(t.String()),
 			status: t.UnionEnum(UnitStatusValues),
 			visibility: t.UnionEnum(UnitVisibilityValues),
+			relations: t.Array(StudioRelation, { minItems: 1, uniqueItems: true }),
+			roles: t.Array(t.UnionEnum(UnitAccessRoleValues), { uniqueItems: true }),
+			workState: StudioWorkState,
+			permissions: t.Array(StudioPermission, { uniqueItems: true }),
+			accessSources: t.Array(StudioAccessSource, { uniqueItems: true }),
+			firstContributedAt: t.Nullable(DateTime),
+			lastContributedAt: t.Nullable(DateTime),
+			contributionCount: t.Integer({ minimum: 0 }),
+			assignedAt: t.Nullable(DateTime),
+			lastVisitedAt: t.Nullable(DateTime),
+			relevantAt: DateTime,
 			createdAt: DateTime,
 			updatedAt: DateTime,
 		}),
 	),
+	nextCursor: t.Nullable(t.String()),
+});
+
+export const StudioResourceParams = t.Object({ unitId: Uuid });
+export type StudioResourceParams = Static<typeof StudioResourceParams>;
+
+export const StudioVisitResponse = t.Object({
+	unitId: Uuid,
+	lastVisitedAt: DateTime,
 });
 
 export const CollectionConfigV1 = t.Object(
