@@ -3,108 +3,48 @@
 import {
 	parseSearchFeatureDefinition,
 	parseSharedSearchQueryDocument,
-	SearchCategoryValues,
 	type ResolvedSearchControl,
-	type SearchCategory,
 	type SearchFeatureContext,
 	type SearchFeatureState,
 	type SearchInjection,
 	type SearchScalar,
-	type SearchTemplateId,
 	type SharedSearchQuerySelection,
 	type SharedSearchQueryState,
 	unitFilterSearchQuery,
 	withUnitFilterSearch,
 } from "@rezics/filter";
 import {
-	type PostApiSearchFeaturesByTemplateExecuteStatus200,
 	useGetApiSearchFeaturesByTemplate,
 	useGetApiSearchZonesByZoneIdFeature,
 	useGetApiSearchSharedQueriesById,
-	usePostApiSearchFeaturesByTemplateExecute,
-	usePostApiSearchZonesByZoneIdFeatureExecute,
 	usePostApiSearchSharedQueries,
 } from "@rezics/openapi-tanstack-query";
-import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
+import { PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryState, useQueryStates } from "nuqs";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { profileHref } from "@/features/profiles/profile-route";
-import { realmHref } from "@/features/slugs/unit-route";
+import {
+	SearchFeedResults,
+	type SearchFeedRequest,
+	type SearchFeedSource,
+	useSearchFeedQuery,
+} from "@/features/content-feed/data/search-feed-list";
 import { useTranslation } from "@/i18n/client";
-import { RequestFailure } from "@/i18n/request-failure";
 import { searchParamsParsers } from "@/lib/search-params";
 import {
 	SearchFeature,
 	type SearchFeatureRequest,
 	type SearchFeatureShareRequest,
 } from "./search-feature";
-import { SearchResultCard } from "./search-result-card";
 
-type SearchResponse = PostApiSearchFeaturesByTemplateExecuteStatus200;
-type SearchGroup = SearchResponse["groups"][number];
-type SearchHit = SearchGroup["hits"][number];
 const DisabledZoneId = "00000000-0000-7000-8000-000000000000";
+const EmptySearchFeedRequest = {
+	contexts: [],
+	injections: [],
+	state: {},
+} satisfies SearchFeedRequest;
 
-export type SearchSurfaceSource =
-	| Readonly<{ kind: "template"; template: SearchTemplateId }>
-	| Readonly<{ kind: "zone"; zoneId: string }>;
-
-function isSearchCategory(value: string): value is SearchCategory {
-	return SearchCategoryValues.some((category) => category === value);
-}
-
-function displayCount(value: string | number): number {
-	const parsed = typeof value === "number" ? value : Number(value);
-	return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : 0;
-}
-
-function searchHitHref(hit: SearchHit) {
-	switch (hit.category) {
-		case "users":
-			return profileHref(hit);
-		case "realms":
-			return realmHref(hit);
-		case "posts":
-			return `/posts/${hit.id}`;
-		case "collections":
-			return `/collections/${hit.id}`;
-		case "reviews":
-			return `/reviews/${hit.id}`;
-		case "entity":
-			return `/entities/${hit.id}`;
-		case "tags":
-			return `/tags/${hit.id}`;
-		case "tag-structures":
-			return `/tag-structures/${hit.id}`;
-		case "polls":
-			return `/polls/${hit.id}`;
-		case "units":
-			return hit.kind === "book" || hit.kind === "software" || hit.kind === "media"
-				? `/units/${hit.kind}/${hit.id}`
-				: undefined;
-		default:
-			return undefined;
-	}
-}
-
-function appendGroups(
-	current: readonly SearchGroup[],
-	next: readonly SearchGroup[],
-): SearchGroup[] {
-	const groups = new Map(current.map((group) => [group.index, group]));
-	for (const group of next) {
-		const previous = groups.get(group.index);
-		if (!previous) {
-			groups.set(group.index, group);
-			continue;
-		}
-		const hits = new Map(previous.hits.map((hit) => [hit.id, hit]));
-		for (const hit of group.hits) hits.set(hit.id, hit);
-		groups.set(group.index, { ...group, hits: [...hits.values()] });
-	}
-	return [...groups.values()];
-}
+export type SearchSurfaceSource = SearchFeedSource;
 
 export function SearchSurface({
 	id,
@@ -132,7 +72,7 @@ export function SearchSurface({
 		value: SearchScalar,
 	) => string | undefined;
 }) {
-	const { t } = useTranslation(["actions", "search", "state"]);
+	const { t } = useTranslation("search");
 	const template = source.kind === "template" ? source.template : "global";
 	const templateDefinition = useGetApiSearchFeaturesByTemplate(
 		{ path: { template } },
@@ -142,68 +82,51 @@ export function SearchSurface({
 		{ path: { zoneId: source.kind === "zone" ? source.zoneId : DisabledZoneId } },
 		{ query: { enabled: source.kind === "zone" } },
 	);
-	const executeTemplate = usePostApiSearchFeaturesByTemplateExecute();
-	const executeZone = usePostApiSearchZonesByZoneIdFeatureExecute();
 	const shareMutation = usePostApiSearchSharedQueries();
-	const [groups, setGroups] = useState<readonly SearchGroup[]>([]);
-	const [facets, setFacets] = useState<SearchResponse["facets"]>();
-	const [nextCursor, setNextCursor] = useState<string>();
 	const [lastRequest, setLastRequest] = useState<SearchFeatureRequest>();
 	const initialExecuted = useRef(false);
+	const feedRequest: SearchFeedRequest = lastRequest
+		? {
+				contexts: [...contexts],
+				injections: lastRequest.injections,
+				state: lastRequest.state,
+			}
+		: EmptySearchFeedRequest;
+	const results = useSearchFeedQuery({
+		enabled: Boolean(lastRequest),
+		request: feedRequest,
+		source,
+	});
 	const rawDefinition =
 		source.kind === "template" ? templateDefinition.data : zoneDefinition.data?.definition;
 
-	async function run(request: SearchFeatureRequest, append = false) {
-		if (!append) {
+	const run = useCallback(
+		(request: SearchFeatureRequest) => {
 			setLastRequest(request);
 			onQueryChange?.(unitFilterSearchQuery(request.state.filter));
-		}
-		try {
-			const response =
-				source.kind === "template"
-					? await executeTemplate.mutateAsync({
-							path: { template: source.template },
-							body: {
-								contexts: [...contexts],
-								injections: request.injections,
-								state: request.state,
-							},
-						})
-					: await executeZone.mutateAsync({
-							path: { zoneId: source.zoneId },
-							body: {
-								injections: request.injections,
-								state: request.state,
-							},
-						});
-			setGroups((current) =>
-				append ? appendGroups(current, response.groups) : response.groups,
-			);
-			setFacets(response.facets);
-			setNextCursor(response.nextCursor);
-		} catch {
-			// The mutation state supplies the localized visible failure.
-		}
-	}
+		},
+		[onQueryChange],
+	);
 
 	useEffect(() => {
-		if ((!initialState && !initialQuery?.trim()) || !rawDefinition || initialExecuted.current)
+		if (
+			(!initialState && !initialQuery?.trim() && injections.length === 0) ||
+			!rawDefinition ||
+			initialExecuted.current
+		)
 			return;
 		const initialFilter = withUnitFilterSearch(undefined, initialQuery ?? "");
 		const state: SearchFeatureState =
 			initialState ?? (initialFilter ? { filter: initialFilter } : {});
 		initialExecuted.current = true;
-		void run({ injections: [...injections], state });
-	}, [initialQuery, initialState, injections, rawDefinition]);
+		run({ injections: [...injections], state });
+	}, [initialQuery, initialState, injections, rawDefinition, run]);
 
 	const definitionPending =
 		source.kind === "template" ? templateDefinition.isPending : zoneDefinition.isPending;
 	const definitionError =
 		source.kind === "template" ? templateDefinition.error : zoneDefinition.error;
-	const executionPending = executeTemplate.isPending || executeZone.isPending;
-	const executionError = executeTemplate.error ?? executeZone.error;
-	const executionIsError = executeTemplate.isError || executeZone.isError;
-	const executionIsSuccess = executeTemplate.isSuccess || executeZone.isSuccess;
+	const executionPending = Boolean(lastRequest) && results.isFetching;
 	if (definitionPending) return <QueryPending />;
 	if (definitionError || !rawDefinition)
 		return (
@@ -217,7 +140,7 @@ export function SearchSurface({
 			/>
 		);
 	const definition = parseSearchFeatureDefinition(rawDefinition);
-	const hasHits = groups.some((group) => group.hits.length > 0);
+	const facets = results.data?.pages[0]?.facets;
 
 	async function share(request: SearchFeatureShareRequest) {
 		const response = await shareMutation.mutateAsync({
@@ -233,86 +156,34 @@ export function SearchSurface({
 	}
 
 	return (
-		<>
-			<SearchFeature
-				definition={definition}
-				error={executionIsError}
-				facets={facets}
-				id={id}
-				initialQuery={initialQuery}
-				initialSelections={initialSelections}
-				initialState={initialState}
-				injections={injections}
-				onExecute={(request) => void run(request)}
-				onInjectionsChange={onInjectionsChange}
-				onShare={source.kind === "template" ? share : undefined}
-				pending={executionPending}
-				resolveOptionLabel={resolveOptionLabel}
-			/>
-			{executionError ? <RequestFailure error={executionError} /> : null}
-			{hasHits ? (
-				<section aria-label={t.search.results} className="grid gap-8">
-					<h2 className="font-heading font-semibold text-xl">{t.search.results}</h2>
-					{groups.flatMap((group) => {
-						if (!group.hits.length) return [];
-						const category = isSearchCategory(group.index) ? group.index : undefined;
-						const categoryLabel = category
-							? t.search.resultGroups[category]
-							: group.index;
-						return [
-							<section className="grid gap-3" key={group.index}>
-								<header className="flex items-baseline justify-between gap-3 border-b border-border-weak pb-2">
-									<h3 className="font-semibold">{categoryLabel}</h3>
-									<span className="text-muted-foreground text-sm">
-										{group.total.relation === "lower-bound"
-											? t.search.atLeastResultCount({
-													count: displayCount(group.total.value),
-												})
-											: t.search.resultCount({
-													count: displayCount(group.total.value),
-												})}
-									</span>
-								</header>
-								<ul className="grid gap-3 sm:gap-4">
-									{group.hits.map((hit) => (
-										<li key={hit.id}>
-											<SearchResultCard
-												categoryLabel={categoryLabel}
-												result={{
-													title: hit.titles[0] ?? hit.name,
-													summary: hit.summaries[0] ?? hit.summary,
-													href: searchHitHref(hit),
-													avatar: hit.avatar,
-												}}
-											/>
-										</li>
-									))}
-								</ul>
-							</section>,
-						];
-					})}
+		<SearchFeature
+			appearance="feed"
+			definition={definition}
+			error={results.isError}
+			facets={facets}
+			id={id}
+			initialQuery={initialQuery}
+			initialSelections={initialSelections}
+			initialState={initialState}
+			injections={injections}
+			onExecute={run}
+			onInjectionsChange={onInjectionsChange}
+			onShare={source.kind === "template" ? share : undefined}
+			pending={executionPending}
+			resolveOptionLabel={resolveOptionLabel}
+		>
+			{lastRequest ? (
+				<section className="grid gap-4">
+					<h2 className="font-heading font-semibold text-xl">{t.results}</h2>
+					<SearchFeedResults
+						aria-label={t.results}
+						emptyBody={t.emptyBody}
+						emptyTitle={t.empty}
+						query={results}
+					/>
 				</section>
-			) : executionIsSuccess ? (
-				<p className="text-sm text-muted-foreground">{t.search.empty}</p>
 			) : null}
-			{nextCursor && lastRequest ? (
-				<div className="flex justify-center">
-					<Button
-						isLoading={executionPending}
-						onClick={() => {
-							const state: SearchFeatureState = {
-								...lastRequest.state,
-								cursor: nextCursor,
-							};
-							void run({ ...lastRequest, state }, true);
-						}}
-						variant="outline"
-					>
-						{t.actions.loadMore}
-					</Button>
-				</div>
-			) : null}
-		</>
+		</SearchFeature>
 	);
 }
 

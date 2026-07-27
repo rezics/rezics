@@ -102,6 +102,7 @@ export default {
 	allLanguages: "All languages",
 	resetFilters: "Reset filters",
 	empty: "No matching results.",
+	emptyBody: "Try different keywords or filters.",
 	query: "Keywords",
 	advancedCombination: "Combine filters",
 	advancedCombinations: { all: "Match all filters", any: "Match any filter" },

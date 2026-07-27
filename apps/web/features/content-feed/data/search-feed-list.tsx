@@ -1,60 +1,69 @@
 "use client";
 
-import {
-	postApiSearchFeaturesByTemplateFeed,
-	type PostApiSearchFeaturesByTemplateExecuteBody,
-	type PostApiSearchFeaturesByTemplateFeedTemplate,
-} from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
+import type { SearchTemplateId } from "@rezics/filter";
 import { Alert, AlertAction, AlertDescription, Button } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
 import { type FeedDisplayContext, UnscopedFeedDisplayContext } from "../model/feed-display-context";
+import {
+	fetchSearchFeedPage,
+	type SearchFeedRequest,
+	type SearchFeedSource,
+} from "./search-feed-query";
 
-type SearchFeedRequest = Pick<
-	PostApiSearchFeaturesByTemplateExecuteBody,
-	"contexts" | "injections" | "state"
->;
+export type { SearchFeedRequest, SearchFeedSource } from "./search-feed-query";
 
-export function SearchFeedList({
-	displayContext = UnscopedFeedDisplayContext,
-	infinite = false,
+export function useSearchFeedQuery({
+	enabled = true,
 	request,
-	requestedRealmId,
-	template,
+	source,
 }: {
-	displayContext?: FeedDisplayContext;
-	infinite?: boolean;
-	request: SearchFeedRequest;
-	requestedRealmId?: string;
-	template: PostApiSearchFeaturesByTemplateFeedTemplate;
+	readonly enabled?: boolean;
+	readonly request: SearchFeedRequest;
+	readonly source: SearchFeedSource;
+}) {
+	return useInfiniteQuery({
+		enabled,
+		queryKey: ["search-feature-feed", source, request],
+		queryFn: ({ pageParam, signal }) =>
+			fetchSearchFeedPage({
+				...(pageParam ? { cursor: pageParam } : {}),
+				request,
+				signal,
+				source,
+			}),
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+	});
+}
+
+type SearchFeedQuery = ReturnType<typeof useSearchFeedQuery>;
+
+export function SearchFeedResults({
+	"aria-label": ariaLabel,
+	displayContext = UnscopedFeedDisplayContext,
+	emptyBody,
+	emptyTitle,
+	infinite = false,
+	query,
+	requestedRealmId,
+}: {
+	readonly "aria-label"?: string;
+	readonly displayContext?: FeedDisplayContext;
+	readonly emptyBody?: string;
+	readonly emptyTitle?: string;
+	readonly infinite?: boolean;
+	readonly query: SearchFeedQuery;
+	readonly requestedRealmId?: string;
 }) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-	const query = useInfiniteQuery({
-		queryKey: ["search-feature-feed", template, request],
-		queryFn: async ({ pageParam, signal }) => {
-			const { data } = await postApiSearchFeaturesByTemplateFeed({
-				path: { template },
-				body: {
-					...request,
-					state: {
-						...request.state,
-						...(pageParam ? { cursor: pageParam } : {}),
-					},
-				},
-				signal,
-			});
-			return data;
-		},
-		initialPageParam: "",
-		getNextPageParam: (page) => page.nextCursor ?? undefined,
-	});
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		const element = loadMoreRef.current;
@@ -62,14 +71,14 @@ export function SearchFeedList({
 			!infinite ||
 			!element ||
 			!query.hasNextPage ||
-			query.isFetchingNextPage ||
+			query.isFetching ||
 			query.isFetchNextPageError ||
 			typeof IntersectionObserver === "undefined"
 		)
 			return;
 		const observer = new IntersectionObserver(
 			([entry]) => {
-				if (entry?.isIntersecting) void query.fetchNextPage();
+				if (entry?.isIntersecting && !query.isFetching) void query.fetchNextPage();
 			},
 			{ rootMargin: "320px 0px" },
 		);
@@ -79,12 +88,14 @@ export function SearchFeedList({
 		infinite,
 		query.fetchNextPage,
 		query.hasNextPage,
-		query.isFetchingNextPage,
+		query.isFetching,
 		query.isFetchNextPageError,
 	]);
-	const items = query.data?.pages
-		.flatMap((page) => page.items)
-		.filter(({ id }) => !hidden.has(id));
+	const items = [
+		...new Map(
+			query.data?.pages.flatMap((page) => page.items).map((item) => [item.id, item]) ?? [],
+		).values(),
+	].filter(({ id }) => !hidden.has(id));
 	const setItemHidden = (id: string, value: boolean) =>
 		setHidden((current) => {
 			const next = new Set(current);
@@ -95,9 +106,9 @@ export function SearchFeedList({
 
 	return (
 		<FeedList
-			aria-label={t.feed.title}
-			emptyBody={t.feed.emptyBody}
-			emptyTitle={t.feed.emptyTitle}
+			aria-label={ariaLabel ?? t.feed.title}
+			emptyBody={emptyBody ?? t.feed.emptyBody}
+			emptyTitle={emptyTitle ?? t.feed.emptyTitle}
 			errorLabel={t.state.error}
 			footer={
 				query.isFetchNextPageError ? (
@@ -156,8 +167,39 @@ export function SearchFeedList({
 					? { status: "pending" }
 					: query.isError && !query.data
 						? { status: "error", retry: () => void query.refetch() }
-						: { status: "ready", items: items ?? [] }
+						: { status: "ready", items }
 			}
+		/>
+	);
+}
+
+export function SearchFeedList({
+	displayContext = UnscopedFeedDisplayContext,
+	infinite = false,
+	request,
+	requestedRealmId,
+	source,
+	template,
+}: {
+	readonly displayContext?: FeedDisplayContext;
+	readonly infinite?: boolean;
+	readonly request: SearchFeedRequest;
+	readonly requestedRealmId?: string;
+} & (
+	| Readonly<{ source: SearchFeedSource; template?: never }>
+	| Readonly<{ source?: never; template: SearchTemplateId }>
+)) {
+	const resolvedSource: SearchFeedSource = source ?? { kind: "template", template };
+	const query = useSearchFeedQuery({
+		request,
+		source: resolvedSource,
+	});
+	return (
+		<SearchFeedResults
+			displayContext={displayContext}
+			infinite={infinite}
+			query={query}
+			requestedRealmId={requestedRealmId}
 		/>
 	);
 }

@@ -23,6 +23,7 @@ import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
+	primaryUnitTitle,
 } from "../../units/localization";
 import {
 	post,
@@ -43,6 +44,7 @@ import {
 	unitReaction,
 	unitReactionGlobalStat,
 	unitRevisionHead,
+	unitStructureMember,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import {
@@ -168,6 +170,7 @@ const FeedContentDefinitions = {
 	"unit:release": { itemType: "unit", unitKind: "release" },
 	"unit:entity": { itemType: "unit", unitKind: "entity" },
 	"unit:tag": { itemType: "unit", unitKind: "tag" },
+	"unit:structure": { itemType: "unit", unitKind: "structure" },
 	"unit:series": { itemType: "unit", unitKind: "series" },
 	"unit:zone": { itemType: "unit", unitKind: "zone" },
 	"unit:collection": { itemType: "unit", unitKind: "collection" },
@@ -807,7 +810,20 @@ export async function hydrateFeedItems(
 			parentPostId: postReply.parentPostId,
 			language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
 			body: unitLocalization.content,
-			title: unitLocalization.title,
+			title: sql<string | null>`case
+				when ${unit.kind} = 'structure' then (
+					select string_agg(
+						coalesce(
+							${primaryUnitTitle(unitStructureMember.memberUnitId)},
+							${unitStructureMember.memberUnitId}::text
+						),
+						' › ' order by ${unitStructureMember.ordinal}
+					)
+					from ${unitStructureMember}
+					where ${unitStructureMember.structureId} = ${unit.id}
+				)
+				else ${unitLocalization.title}
+			end`,
 			summary: unitLocalization.summary,
 			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", displayLanguages),
 			avatar: resolvedUnitLocalizationAvatar(unit.id, displayLanguages),

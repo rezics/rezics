@@ -107,8 +107,11 @@ The search page exposes one everyday search surface: keywords, a small set of pr
 and a link-style advanced-filter action. Advanced conditions are edited as an explicit boolean
 expression and are rendered back on the main page as a read-only summary. Advanced editing is
 strictly a frontend affordance: quick filters and the advanced builder submit the same
-`SearchControlExpression`, and the server has no search mode. Result groups remain separate so
-category identity and category-specific totals are not lost during presentation.
+`SearchControlExpression`, and the server has no search mode. The Search presentation retains
+separate result groups so category identity and category-specific totals are not lost. The Feed
+presentation instead distributes its page budget across the configured categories, interleaves the
+authorized rank from each group into one stable mixed stream, and then hydrates canonical Feed
+items.
 
 Shared queries are immutable, cursor-free `SharedSearchQueryDocument` values stored in
 `shared_search_query`. PostgreSQL 18 generates the public bearer identifier with native

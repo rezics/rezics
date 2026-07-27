@@ -5,6 +5,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: tagStructureTerms } = enTerminology.tagStructure;
 const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
@@ -51,6 +52,7 @@ export default {
 			"unit:release": "Releases",
 			"unit:entity": "Catalog entries",
 			"unit:tag": "Tags",
+			"unit:structure": tagStructureTerms.pluralLabel,
 			"unit:series": "Series",
 			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "Collections",

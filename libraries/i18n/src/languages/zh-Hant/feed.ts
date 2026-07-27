@@ -5,6 +5,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
@@ -51,6 +52,7 @@ export default {
 			"unit:release": "發行版本",
 			"unit:entity": "目錄條目",
 			"unit:tag": "標籤",
+			"unit:structure": tagStructureTerms.pluralLabel,
 			"unit:series": "系列",
 			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "收藏集",

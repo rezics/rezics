@@ -14565,6 +14565,7 @@ export const PostApiFeedQueryStatus200ItemsUnitKindEnum = {
 	release: "release",
 	entity: "entity",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -84379,6 +84380,7 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum = {
 	release: "release",
 	entity: "entity",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -91222,6 +91224,7 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsUnitKindEnum = {
 	release: "release",
 	entity: "entity",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -95771,6 +95774,2990 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteResponse =
 /**
  * @type object
  */
+export type PostApiSearchZonesByZoneIdFeatureFeedPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+};
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason = {
+	followed_unit: "followed_unit",
+	followed_realm: "followed_realm",
+	based_on_activity: "based_on_activity",
+	related_subject: "related_subject",
+	popular_now: "popular_now",
+	new_and_relevant: "new_and_relevant",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum = {
+	home_feed: "home_feed",
+	home_book: "home_book",
+	home_software: "home_software",
+	home_media: "home_media",
+	unit_related: "unit_related",
+	post_related: "post_related",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum = {
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	poll: "poll",
+	realm: "realm",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum = {
+	post: "post",
+	reply: "reply",
+	excerpt: "excerpt",
+	chapter: "chapter",
+	wiki: "wiki",
+	picture: "picture",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: (
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				language: (("zh" | "en") | null) | null;
+				/**
+				 * @type array
+				 */
+				attributions: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'author'
+					 * @type string
+					 */
+					role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum;
+					/**
+					 * @description
+					 * Format: `fractional-position`
+					 * @minLength 2
+					 * @maxLength 512
+					 * @type string
+					 */
+					position: string;
+					/**
+					 * @type object
+					 */
+					creditedUnit: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @default 'slug_namespace'
+						 * @type string
+						 */
+						kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						avatar:
+							| (
+									| (
+											| {
+													/**
+													 * @type string
+													 */
+													type: "image";
+													/**
+													 * @type object
+													 */
+													image: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														id: string;
+														/**
+														 * @type string
+														 */
+														url: string;
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "emoji";
+													/**
+													 * @maxLength 64
+													 * @type string
+													 */
+													emoji: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "icon";
+													/**
+													 * @type object
+													 */
+													icon: {
+														/**
+														 * @type string
+														 */
+														provider: "font-awesome";
+														/**
+														 * @type string
+														 */
+														prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+														/**
+														 * @maxLength 128
+														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+														 * @type string
+														 */
+														name: string;
+													};
+											  }
+									  )
+									| null
+							  )
+							| null;
+					};
+				}[];
+				realmId: (string | null) | null;
+				/**
+				 * @type array
+				 */
+				realms: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				title: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				updatedAt: string;
+				/**
+				 * @type object
+				 */
+				reactions: {
+					upvote: string | number;
+					downvote: string | number;
+				};
+				viewerReaction: (string | null) | null;
+				recommendationReason:
+					| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason | null)
+					| null;
+				tracking:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							requestId: string;
+							/**
+							 * @default 'home_feed'
+							 * @type string
+							 */
+							surface: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum;
+							position: string | number;
+							/**
+							 * @minLength 1
+							 * @maxLength 64
+							 * @pattern \S
+							 * @type string
+							 */
+							policyVersion: string;
+							/**
+							 * @minLength 43
+							 * @maxLength 43
+							 * @pattern ^[A-Za-z0-9_-]{43}$
+							 * @type string
+							 */
+							signature: string;
+					  } | null)
+					| null;
+				/**
+				 * @type string
+				 */
+				itemType: "unit";
+				/**
+				 * @default 'profile'
+				 * @type string
+				 */
+				unitKind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsUnitKindEnum;
+				/**
+				 * @type null
+				 */
+				postKind: null;
+				summary: (string | null) | null;
+				cover:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				collection:
+					| ({
+							directItemCount: string | number;
+					  } | null)
+					| null;
+				presentation:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "rated-work";
+							/**
+							 * @type object
+							 */
+							scores: {
+								preferred:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+								global:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											contextUnitId: string;
+											contextTitle: (string | null) | null;
+											totalScore: string | number;
+											totalCount: string | number;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "identity";
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPresentationAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+							banner:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+							memberCount: ((string | number) | null) | null;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "general";
+					  };
+		  }
+		| (
+				| {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						language: (("zh" | "en") | null) | null;
+						/**
+						 * @type array
+						 */
+						attributions: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'author'
+							 * @type string
+							 */
+							role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum;
+							/**
+							 * @description
+							 * Format: `fractional-position`
+							 * @minLength 2
+							 * @maxLength 512
+							 * @type string
+							 */
+							position: string;
+							/**
+							 * @type object
+							 */
+							creditedUnit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'slug_namespace'
+								 * @type string
+								 */
+								kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+								title: (string | null) | null;
+								summary: (string | null) | null;
+								avatar:
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
+									| null;
+							};
+						}[];
+						realmId: (string | null) | null;
+						/**
+						 * @type array
+						 */
+						realms: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+							title: (string | null) | null;
+							summary: (string | null) | null;
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+						}[];
+						title: (string | null) | null;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						createdAt: string;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						updatedAt: string;
+						/**
+						 * @type object
+						 */
+						reactions: {
+							upvote: string | number;
+							downvote: string | number;
+						};
+						viewerReaction: (string | null) | null;
+						recommendationReason:
+							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason | null)
+							| null;
+						tracking:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									requestId: string;
+									/**
+									 * @default 'home_feed'
+									 * @type string
+									 */
+									surface: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum;
+									position: string | number;
+									/**
+									 * @minLength 1
+									 * @maxLength 64
+									 * @pattern \S
+									 * @type string
+									 */
+									policyVersion: string;
+									/**
+									 * @minLength 43
+									 * @maxLength 43
+									 * @pattern ^[A-Za-z0-9_-]{43}$
+									 * @type string
+									 */
+									signature: string;
+							  } | null)
+							| null;
+						/**
+						 * @type string
+						 */
+						itemType: "post";
+						/**
+						 * @type string
+						 */
+						unitKind: "post";
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+						subjectId: (string | null) | null;
+						rootPostId: (string | null) | null;
+						parentPostId: (string | null) | null;
+						body:
+							| ({
+									/**
+									 * @type string
+									 */
+									_type: "portable-text";
+									/**
+									 * @pattern ^[0-9a-f]{12}$
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type array
+									 */
+									content: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "block";
+												/**
+												 * @type array
+												 */
+												children: (
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @type string
+															 */
+															_type: "span";
+															/**
+															 * @type string
+															 */
+															text: string;
+															/**
+															 * @type array | undefined
+															 */
+															marks?: string[];
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @type string
+															 */
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
+													  }
+												)[];
+												/**
+												 * @type array | undefined
+												 */
+												markDefs?: {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: string;
+													[key: string]: unknown;
+												}[];
+												/**
+												 * @type string | undefined
+												 */
+												listItem?: string;
+												/**
+												 * @type string | undefined
+												 */
+												style?: string;
+												/**
+												 * @minLength 1
+												 * @type integer | undefined
+												 */
+												level?: number;
+												[key: string]: unknown;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "image";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string
+												 */
+												assetId: string;
+												/**
+												 * @type string | undefined
+												 */
+												alt?: string;
+												/**
+												 * @type string | undefined
+												 */
+												caption?: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @pattern ^(?!(?:block|image)$).+
+												 * @type string
+												 */
+												_type: string;
+												[key: string]: unknown;
+										  }
+									)[];
+							  } | null)
+							| null;
+						replyCount: string | number;
+						latestRevisionId: (string | null) | null;
+						replyContext:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									rootPostId: string;
+									title: (string | null) | null;
+									/**
+									 * @type array
+									 */
+									attributions: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @default 'author'
+										 * @type string
+										 */
+										role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										/**
+										 * @description
+										 * Format: `fractional-position`
+										 * @minLength 2
+										 * @maxLength 512
+										 * @type string
+										 */
+										position: string;
+										/**
+										 * @type object
+										 */
+										creditedUnit: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @default 'slug_namespace'
+											 * @type string
+											 */
+											kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											slugAddress:
+												| ({
+														/**
+														 * @minLength 1
+														 * @maxLength 63
+														 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+														 * @type string
+														 */
+														slug: string;
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														scopeUnitId: string;
+														/**
+														 * @type array
+														 */
+														canonicalPath: string[];
+												  } | null)
+												| null;
+											title: (string | null) | null;
+											summary: (string | null) | null;
+											avatar:
+												| (
+														| (
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "image";
+																		/**
+																		 * @type object
+																		 */
+																		image: {
+																			/**
+																			 * @description
+																			 * Format: `uuid`
+																			 * @type string
+																			 */
+																			id: string;
+																			/**
+																			 * @type string
+																			 */
+																			url: string;
+																		};
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "emoji";
+																		/**
+																		 * @maxLength 64
+																		 * @type string
+																		 */
+																		emoji: string;
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "icon";
+																		/**
+																		 * @type object
+																		 */
+																		icon: {
+																			/**
+																			 * @type string
+																			 */
+																			provider: "font-awesome";
+																			/**
+																			 * @type string
+																			 */
+																			prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			/**
+																			 * @maxLength 128
+																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																			 * @type string
+																			 */
+																			name: string;
+																		};
+																  }
+														  )
+														| null
+												  )
+												| null;
+										};
+									}[];
+									subjectId: (string | null) | null;
+							  } | null)
+							| null;
+						subject:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									type: string;
+									title: (string | null) | null;
+									summary: (string | null) | null;
+									cover:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+										  } | null)
+										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
+							  } | null)
+							| null;
+						/**
+						 * @default 'post'
+						 * @type string
+						 */
+						postKind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum;
+				  }
+				| {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						language: (("zh" | "en") | null) | null;
+						/**
+						 * @type array
+						 */
+						attributions: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'author'
+							 * @type string
+							 */
+							role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum;
+							/**
+							 * @description
+							 * Format: `fractional-position`
+							 * @minLength 2
+							 * @maxLength 512
+							 * @type string
+							 */
+							position: string;
+							/**
+							 * @type object
+							 */
+							creditedUnit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'slug_namespace'
+								 * @type string
+								 */
+								kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+								title: (string | null) | null;
+								summary: (string | null) | null;
+								avatar:
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
+									| null;
+							};
+						}[];
+						realmId: (string | null) | null;
+						/**
+						 * @type array
+						 */
+						realms: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+							title: (string | null) | null;
+							summary: (string | null) | null;
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+						}[];
+						title: (string | null) | null;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						createdAt: string;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						updatedAt: string;
+						/**
+						 * @type object
+						 */
+						reactions: {
+							upvote: string | number;
+							downvote: string | number;
+						};
+						viewerReaction: (string | null) | null;
+						recommendationReason:
+							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRecommendationReason | null)
+							| null;
+						tracking:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									requestId: string;
+									/**
+									 * @default 'home_feed'
+									 * @type string
+									 */
+									surface: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsTrackingSurfaceEnum;
+									position: string | number;
+									/**
+									 * @minLength 1
+									 * @maxLength 64
+									 * @pattern \S
+									 * @type string
+									 */
+									policyVersion: string;
+									/**
+									 * @minLength 43
+									 * @maxLength 43
+									 * @pattern ^[A-Za-z0-9_-]{43}$
+									 * @type string
+									 */
+									signature: string;
+							  } | null)
+							| null;
+						/**
+						 * @type string
+						 */
+						itemType: "post";
+						/**
+						 * @type string
+						 */
+						unitKind: "post";
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+						subjectId: (string | null) | null;
+						rootPostId: (string | null) | null;
+						parentPostId: (string | null) | null;
+						body:
+							| ({
+									/**
+									 * @type string
+									 */
+									_type: "portable-text";
+									/**
+									 * @pattern ^[0-9a-f]{12}$
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type array
+									 */
+									content: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "block";
+												/**
+												 * @type array
+												 */
+												children: (
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @type string
+															 */
+															_type: "span";
+															/**
+															 * @type string
+															 */
+															text: string;
+															/**
+															 * @type array | undefined
+															 */
+															marks?: string[];
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															_key: string;
+															/**
+															 * @type string
+															 */
+															_type: "unit-mention";
+															/**
+															 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+															 * @type string
+															 */
+															unitId: string;
+													  }
+												)[];
+												/**
+												 * @type array | undefined
+												 */
+												markDefs?: {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: string;
+													[key: string]: unknown;
+												}[];
+												/**
+												 * @type string | undefined
+												 */
+												listItem?: string;
+												/**
+												 * @type string | undefined
+												 */
+												style?: string;
+												/**
+												 * @minLength 1
+												 * @type integer | undefined
+												 */
+												level?: number;
+												[key: string]: unknown;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "image";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string
+												 */
+												assetId: string;
+												/**
+												 * @type string | undefined
+												 */
+												alt?: string;
+												/**
+												 * @type string | undefined
+												 */
+												caption?: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @pattern ^(?!(?:block|image)$).+
+												 * @type string
+												 */
+												_type: string;
+												[key: string]: unknown;
+										  }
+									)[];
+							  } | null)
+							| null;
+						replyCount: string | number;
+						latestRevisionId: (string | null) | null;
+						replyContext:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									rootPostId: string;
+									title: (string | null) | null;
+									/**
+									 * @type array
+									 */
+									attributions: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @default 'author'
+										 * @type string
+										 */
+										role: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsRoleEnum;
+										/**
+										 * @description
+										 * Format: `fractional-position`
+										 * @minLength 2
+										 * @maxLength 512
+										 * @type string
+										 */
+										position: string;
+										/**
+										 * @type object
+										 */
+										creditedUnit: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @default 'slug_namespace'
+											 * @type string
+											 */
+											kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											slugAddress:
+												| ({
+														/**
+														 * @minLength 1
+														 * @maxLength 63
+														 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+														 * @type string
+														 */
+														slug: string;
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														scopeUnitId: string;
+														/**
+														 * @type array
+														 */
+														canonicalPath: string[];
+												  } | null)
+												| null;
+											title: (string | null) | null;
+											summary: (string | null) | null;
+											avatar:
+												| (
+														| (
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "image";
+																		/**
+																		 * @type object
+																		 */
+																		image: {
+																			/**
+																			 * @description
+																			 * Format: `uuid`
+																			 * @type string
+																			 */
+																			id: string;
+																			/**
+																			 * @type string
+																			 */
+																			url: string;
+																		};
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "emoji";
+																		/**
+																		 * @maxLength 64
+																		 * @type string
+																		 */
+																		emoji: string;
+																  }
+																| {
+																		/**
+																		 * @type string
+																		 */
+																		type: "icon";
+																		/**
+																		 * @type object
+																		 */
+																		icon: {
+																			/**
+																			 * @type string
+																			 */
+																			provider: "font-awesome";
+																			/**
+																			 * @type string
+																			 */
+																			prefix: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																			/**
+																			 * @maxLength 128
+																			 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																			 * @type string
+																			 */
+																			name: string;
+																		};
+																  }
+														  )
+														| null
+												  )
+												| null;
+										};
+									}[];
+									subjectId: (string | null) | null;
+							  } | null)
+							| null;
+						subject:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									type: string;
+									title: (string | null) | null;
+									summary: (string | null) | null;
+									cover:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+										  } | null)
+										| null;
+									/**
+									 * @type object
+									 */
+									scores: {
+										preferred:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+										global:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													contextUnitId: string;
+													contextTitle: (string | null) | null;
+													totalScore: string | number;
+													totalCount: string | number;
+											  } | null)
+											| null;
+									};
+							  } | null)
+							| null;
+						/**
+						 * @type string
+						 */
+						postKind: "review";
+						/**
+						 * @type array
+						 */
+						scores: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							scoreId: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							contextUnitId: string;
+							value: string | number;
+						}[];
+				  }
+		  )
+	)[];
+	/**
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
+	/**
+	 * @type array | undefined
+	 */
+	facets?: {
+		/**
+		 * @type string | undefined
+		 */
+		controlKey?: string;
+		/**
+		 * @type string
+		 */
+		field: string;
+		/**
+		 * @type array
+		 */
+		options: {
+			/**
+			 * @type string
+			 */
+			value: string;
+			/**
+			 * @type object
+			 */
+			count: {
+				value: string | number;
+				/**
+				 * @default 'exact'
+				 * @type string
+				 */
+				relation: PostApiSearchZonesByZoneIdFeatureFeedStatus200FacetsOptionsCountRelationEnum;
+			};
+		}[];
+	}[];
+	total: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus400 = MalformedRequestBody;
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZoneSearchFeatureNotFound: "ZoneSearchFeatureNotFound",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdFeatureFeedStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus503 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SearchUnavailable'
+		 * @type string
+		 */
+		code: "SearchUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum = {
+	tag: "tag",
+	link: "link",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum = {
+	best: "best",
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
+	/**
+	 * @type array
+	 */
+	injections: {
+		/**
+		 * @type string
+		 */
+		source: PostApiSearchZonesByZoneIdFeatureFeedRequestInjectionsSourceEnum;
+		/**
+		 * @type object
+		 */
+		value: {
+			/**
+			 * @minLength 1
+			 * @maxLength 64
+			 * @pattern ^[a-z][a-z0-9-]*$
+			 * @type string
+			 */
+			controlKey: string;
+			filter:
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "not-equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						operator: "any-of" | "all-of" | "none-of";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| (
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower: string | number | boolean;
+								upper?: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower?: string | number | boolean;
+								upper: string | number | boolean;
+						  }
+				  )
+				| {
+						field:
+							| "category"
+							| "kind"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "credit"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-word-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
+						/**
+						 * @type string
+						 */
+						operator: "exists";
+						/**
+						 * @type boolean
+						 */
+						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
+				  };
+		};
+		/**
+		 * @default true
+		 * @type boolean
+		 */
+		removable: boolean;
+	}[];
+	/**
+	 * @type object
+	 */
+	state: {
+		filter?: UnitFilter;
+		/**
+		 * @type string | undefined
+		 */
+		sort?: PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum;
+		/**
+		 * @minLength 1
+		 * @maxLength 100
+		 * @type integer | undefined
+		 */
+		pageSize?: number;
+		/**
+		 * @maxLength 4096
+		 * @pattern ^s2_[A-Za-z0-9_-]+$
+		 * @type string | undefined
+		 */
+		cursor?: string;
+		expression?:
+			| {
+					/**
+					 * @minLength 1
+					 * @maxLength 64
+					 * @pattern ^[a-z][a-z0-9-]*$
+					 * @type string
+					 */
+					controlKey: string;
+					filter:
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "kind"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "credit"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-word-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "kind"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "credit"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-word-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
+						  };
+			  }
+			| {
+					operator: "all" | "any";
+					/**
+					 * @type array
+					 */
+					clauses: unknown[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					operator: "not";
+					/**
+					 * @type unknown
+					 */
+					clause: unknown;
+			  };
+	};
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedOptions = {
+	body: PostApiSearchZonesByZoneIdFeatureFeedBody;
+	path: PostApiSearchZonesByZoneIdFeatureFeedPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedResponses = {
+	"200": PostApiSearchZonesByZoneIdFeatureFeedStatus200;
+	"400": PostApiSearchZonesByZoneIdFeatureFeedStatus400;
+	"404": PostApiSearchZonesByZoneIdFeatureFeedStatus404;
+	"422": PostApiSearchZonesByZoneIdFeatureFeedStatus422;
+	"500": PostApiSearchZonesByZoneIdFeatureFeedStatus500;
+	"503": PostApiSearchZonesByZoneIdFeatureFeedStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiSearchZonesByZoneIdFeatureFeedResponse =
+	| PostApiSearchZonesByZoneIdFeatureFeedStatus200
+	| PostApiSearchZonesByZoneIdFeatureFeedStatus400
+	| PostApiSearchZonesByZoneIdFeatureFeedStatus404
+	| PostApiSearchZonesByZoneIdFeatureFeedStatus422
+	| PostApiSearchZonesByZoneIdFeatureFeedStatus500
+	| PostApiSearchZonesByZoneIdFeatureFeedStatus503;
+
+/**
+ * @type object
+ */
 export type GetApiSearchZonesByZoneIdFeatureRevisionsPath = {
 	/**
 	 * @description
@@ -98828,6 +101815,7 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 	release: "release",
 	entity: "entity",
 	tag: "tag",
+	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",

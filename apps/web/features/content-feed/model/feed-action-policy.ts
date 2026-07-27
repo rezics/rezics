@@ -48,6 +48,7 @@ function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): 
 		case "release":
 		case "entity":
 		case "tag":
+		case "structure":
 		case "series":
 			return { comments: false, primary: "collect" };
 		default:

@@ -59,6 +59,7 @@ import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
 import { DateTime, Uuid } from "../schema";
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
+import { mixSearchGroupHits } from "./mixed-feed";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import {
 	toApiErrorResponse,
@@ -245,14 +246,10 @@ async function presentSearchResultAsFeed(
 	result: Awaited<ReturnType<typeof executeSearchFeatureInput>>,
 	profileId?: string,
 ) {
-	const seen = new Set<string>();
-	const candidates = result.groups.flatMap((group) =>
-		group.hits.flatMap((hit) => {
-			if (seen.has(hit.id)) return [];
-			seen.add(hit.id);
-			return [{ id: hit.id, realmId: null }];
-		}),
-	);
+	const candidates = mixSearchGroupHits(result.groups).map(({ id }) => ({
+		id,
+		realmId: null,
+	}));
 	const viewer = await resolveRecommendationViewer(profileId, false);
 	const items = await hydrateFeedItems(
 		candidates,
@@ -445,6 +442,64 @@ export default new Elysia({ prefix: "/search" })
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
 			detail: { summary: "Execute a Zone Search Feature", tags: ["Search", "Zones"] },
+		},
+	)
+	.post(
+		"/zones/:zoneId/feature/feed",
+		async ({ params, body, request }) => {
+			try {
+				const identity = await resolveIdentity(request.headers, "unit:read");
+				await identity.authorization.unit.ensureCanRead(
+					params.zoneId,
+					() => new UnitNotFound("Zone"),
+				);
+				const feature = await database.transaction((tx) =>
+					getZoneSearchFeature(tx, params.zoneId),
+				);
+				if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
+				const result = await executeSearchFeatureInput(
+					{
+						document: feature.document,
+						contexts: [{ kind: "zone", zoneId: params.zoneId }],
+						injections: body.injections,
+						state: body.state,
+					},
+					"feed",
+					identity.authorization.profileId,
+				);
+				return presentSearchResultAsFeed(result, identity.authorization.profileId);
+			} catch (cause) {
+				if (
+					cause instanceof InvalidSearch ||
+					cause instanceof SearchUnavailable ||
+					cause instanceof UnitNotFound ||
+					cause instanceof ZoneSearchFeatureNotFound
+				)
+					throw cause;
+				logSearchFailure(
+					"Zone Search Feature Feed presentation failed",
+					"search.zone_feature_feed.failed",
+					cause,
+				);
+				throw new SearchUnavailable(cause);
+			}
+		},
+		{
+			params: ZoneSearchFeatureParams,
+			body: ZoneSearchFeatureExecutionBody,
+			response: {
+				[StatusCodes.OK]: SearchFeedResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: {
+				summary: "Present a Zone Search Feature as a Feed",
+				tags: ["Search", "Zones"],
+			},
 		},
 	)
 	.get(

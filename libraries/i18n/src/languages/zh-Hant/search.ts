@@ -102,6 +102,7 @@ export default {
 	allLanguages: "全部語言",
 	resetFilters: "重設篩選",
 	empty: "找不到相符的內容。",
+	emptyBody: "請嘗試其他關鍵字或篩選條件。",
 	query: "關鍵字",
 	advancedCombination: "篩選條件組合",
 	advancedCombinations: { all: "符合所有條件", any: "符合任一條件" },

@@ -587,9 +587,16 @@ export function compileSearchFeatureInput(
 		throw new InvalidSearch(`Search sort ${sort} is unavailable`);
 	if (!isSearchSortAvailable(sort, query))
 		throw new InvalidSearch(`Search sort ${sort} requires a text query`);
-	const pageSize = input.state.pageSize ?? input.document.results.pageSize;
-	if (pageSize > input.document.results.maxPageSize)
+	const requestedPageSize = input.state.pageSize ?? input.document.results.pageSize;
+	if (requestedPageSize > input.document.results.maxPageSize)
 		throw new InvalidSearch("Search page size exceeds the configured maximum");
+	// Search executes one authorized cursor per category. On the Feed surface,
+	// distribute the requested page budget across those cursors so a mixed page
+	// does not multiply the configured size by the number of categories.
+	const pageSize =
+		surface === "feed"
+			? Math.max(1, Math.floor(requestedPageSize / input.document.categories.length))
+			: requestedPageSize;
 
 	const baseline = new Map<string, SearchControlValue>();
 	for (const value of input.document.defaults) baseline.set(value.controlKey, value);

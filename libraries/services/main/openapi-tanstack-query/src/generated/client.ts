@@ -579,6 +579,8 @@ import type {
 	PutApiSearchZonesByZoneIdFeatureResponses,
 	PostApiSearchZonesByZoneIdFeatureExecuteOptions,
 	PostApiSearchZonesByZoneIdFeatureExecuteResponses,
+	PostApiSearchZonesByZoneIdFeatureFeedOptions,
+	PostApiSearchZonesByZoneIdFeatureFeedResponses,
 	GetApiSearchZonesByZoneIdFeatureRevisionsOptions,
 	GetApiSearchZonesByZoneIdFeatureRevisionsResponses,
 	PostApiSearchZonesByZoneIdFeatureRestoreOptions,
@@ -6304,6 +6306,22 @@ export function postApiSearchZonesByZoneIdFeatureExecute<ThrowOnError extends bo
 		url: "/api/search/zones/{zoneId}/feature/execute",
 		...config,
 	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureExecuteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Present a Zone Search Feature as a Feed
+ * {@link /api/search/zones/:zoneId/feature/feed}
+ */
+export function postApiSearchZonesByZoneIdFeatureFeed<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchZonesByZoneIdFeatureFeedOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureFeedResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/zones/{zoneId}/feature/feed",
+		...config,
+	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureFeedResponses, ThrowOnError>>;
 }
 
 /**

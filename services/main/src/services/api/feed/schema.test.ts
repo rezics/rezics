@@ -2,12 +2,17 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 import { UnitPredicate } from "@rezics/filter";
 
-import { FeedRequest } from "./schema";
+import { FeedContentKindValues, FeedRequest, FeedUnitKindValues } from "./schema";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";
 const checkFeedRequest = (value: unknown) => Check(FeedRequest, [UnitPredicate], value);
 
 describe("Feed API contract", () => {
+	it("can hydrate every Unit category exposed by mixed Search", () => {
+		expect(FeedUnitKindValues).toContain("structure");
+		expect(FeedContentKindValues).toContain("unit:structure");
+	});
+
 	it("accepts the canonical domain Filter tree", () => {
 		expect(
 			checkFeedRequest({

@@ -108,6 +108,39 @@ describe("Search Feature v1", () => {
 		).toThrow("Search sort relevance is unavailable");
 	});
 
+	it("distributes the Feed page budget across configured categories", () => {
+		const globalDocument = createDefaultSearchDocument("global");
+		const globalInput = {
+			document: globalDocument,
+			contexts: [],
+			injections: [],
+			state: {},
+		};
+
+		expect(compileSearchFeatureInputForSurface(globalInput, "search").request.pageSize).toBe(
+			globalDocument.results.pageSize,
+		);
+		expect(compileSearchFeatureInputForSurface(globalInput, "feed").request.pageSize).toBe(
+			Math.max(
+				1,
+				Math.floor(globalDocument.results.pageSize / globalDocument.categories.length),
+			),
+		);
+
+		const realmDocument = createDefaultSearchDocument("realm");
+		expect(
+			compileSearchFeatureInputForSurface(
+				{
+					document: realmDocument,
+					contexts: [],
+					injections: [],
+					state: {},
+				},
+				"feed",
+			).request.pageSize,
+		).toBe(realmDocument.results.pageSize);
+	});
+
 	it("uses the dedicated Realms category without a redundant kind constraint", () => {
 		const compiled = compileSearchFeatureInput({
 			document: createDefaultSearchDocument("realm"),
