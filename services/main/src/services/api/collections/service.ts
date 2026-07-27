@@ -1,5 +1,5 @@
-import { and, eq, sql } from "drizzle-orm";
-import type { UnwrapSchema } from "elysia";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { t, type UnwrapSchema } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
 import {
 	CollectionDefinitionDocument,
@@ -9,7 +9,7 @@ import {
 	parseDocument,
 } from "@rezics/block";
 
-import { getUnitReadCondition } from "../../authorization/unit/query";
+import type { Authorization } from "../../authorization";
 import { database } from "../../database";
 import {
 	avatarReferenceFromColumns,
@@ -22,14 +22,50 @@ import {
 	unit,
 	unitAccessBinding,
 	unitLocalization,
+	unitRevisionHead,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import { DefaultContentLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
-import { CollectionDetailResponse } from "../schema/response";
+import { CollectionContentResponse, CollectionDetailResponse } from "../schema/response";
 import { presentImageAsset } from "../../units/service";
 import { presentAvatar } from "../../units/avatar";
+import { parseJsonCursor } from "../../pagination";
+import { InvalidPaginationCursor } from "../../pagination/errors";
+import { resolveRecommendationViewer } from "../../recommendations/context";
+import { hydrateFeedItems } from "../feed";
+import { FeedContentKindValues } from "../feed/schema";
+
+const CollectionItemsCursor = t.Object(
+	{
+		v: t.Literal(1),
+		collectionId: t.String(),
+		revisionId: t.String(),
+		offset: t.Integer({ minimum: 1 }),
+	},
+	{ additionalProperties: false },
+);
+
+function encodeCollectionItemsCursor(value: typeof CollectionItemsCursor.static) {
+	return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+function decodeCollectionItemsCursor(
+	value: string | undefined,
+	collectionId: string,
+	revisionId: string,
+) {
+	if (!value) return 0;
+	try {
+		const cursor = parseJsonCursor(value, CollectionItemsCursor);
+		if (cursor.collectionId !== collectionId || cursor.revisionId !== revisionId)
+			throw new InvalidPaginationCursor();
+		return cursor.offset;
+	} catch {
+		throw new InvalidPaginationCursor();
+	}
+}
 
 export async function ensureFavorites(ownerId: string) {
 	const find = () =>
@@ -92,7 +128,7 @@ export async function ensureFavorites(ownerId: string) {
 
 export async function getCollection(
 	collectionId: string,
-	viewerId?: string,
+	authorization: Authorization,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<UnwrapSchema<typeof CollectionDetailResponse>> {
 	const [record] = await database
@@ -106,19 +142,18 @@ export async function getCollection(
 			definitionDocument: collectionTable.definitionDocument,
 			presentationDocument: collectionTable.presentationDocument,
 			itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collectionTable.id})::int`,
+			latestRevisionId: unitRevisionHead.revisionId,
 			createdAt: unit.createdAt,
 			updatedAt: unit.updatedAt,
 		})
 		.from(collectionTable)
 		.innerJoin(unit, eq(unit.id, collectionTable.id))
+		.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
 		.where(eq(collectionTable.id, collectionId))
 		.limit(1);
-	if (
-		!record ||
-		(record.ownerId !== viewerId &&
-			!(record.status === "published" && ["public", "unlisted"].includes(record.visibility)))
-	)
-		throw new CollectionNotFound();
+	if (!record) throw new CollectionNotFound();
+	const readDecision = await authorization.unit.decide(collectionId, "unit.read");
+	if (!readDecision.allowed) throw new CollectionNotFound();
 	const definitionDocument = parseDocument(
 		CollectionDefinitionDocument,
 		record.definitionDocument,
@@ -150,36 +185,14 @@ export async function getCollection(
 		localizationLanguages,
 	);
 	if (!selectedLocalization) throw new CollectionNotFound();
-	const items = await database
-		.select({
-			targetId: collectionItem.unitId,
-			kind: collectionItem.role,
-			language: unitLocalization.language,
-			position: collectionItem.position,
-			type: unit.kind,
-			title: unitLocalization.title,
-			coverAssetId: unitLocalization.coverAssetId,
-			directItemCount: sql<
-				number | null
-			>`case when ${unit.kind} = 'collection' then (select count(*)::int from collection_item nested_item where nested_item.collection_id = ${collectionItem.unitId}) else null end`,
-		})
-		.from(collectionItem)
-		.innerJoin(unit, eq(unit.id, collectionItem.unitId))
-		.innerJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, unit.id),
-				eq(
-					unitLocalization.language,
-					resolvedUnitLocalizationLanguage(
-						collectionItem.unitId,
-						localizationLanguages,
-					),
-				),
-			),
-		)
-		.where(and(eq(collectionItem.collectionId, collectionId), getUnitReadCondition(viewerId)))
-		.orderBy(collectionItem.position, collectionItem.unitId);
+	const [updateDecision, accessDecision, restoreDecision, deleteDecision] = await Promise.all([
+		authorization.unit.decide(collectionId, "unit.update"),
+		authorization.unit.decide(collectionId, "unit.access.manage"),
+		authorization.unit.decide(collectionId, "unit.history.restore"),
+		authorization.unit.decide(collectionId, "unit.delete"),
+	]);
+	const ordinaryCollection = record.systemKey === null;
+	const canUpdate = updateDecision.allowed && ordinaryCollection;
 	return {
 		...record,
 		language: selectedLocalization.language,
@@ -211,10 +224,94 @@ export async function getCollection(
 				cover: presentImageAsset(coverAssetId, "cover"),
 			}),
 		),
-		items: items.map(({ coverAssetId, ...item }) => ({
-			...item,
-			cover: presentImageAsset(coverAssetId, "cover"),
-			parentTargetId: null,
-		})),
+		capabilities: {
+			canEditDetails: canUpdate,
+			canManageItems: canUpdate && record.source === "manual",
+			canEditPresentation: canUpdate,
+			canManageLocalizations: canUpdate,
+			canManageAccess: accessDecision.allowed && ordinaryCollection,
+			canViewHistory:
+				updateDecision.allowed || accessDecision.allowed || restoreDecision.allowed,
+			canRestoreHistory: restoreDecision.allowed && ordinaryCollection,
+			canDelete: deleteDecision.allowed && ordinaryCollection,
+		},
+	};
+}
+
+export async function getCollectionContent(
+	collectionId: string,
+	authorization: Authorization,
+	input: {
+		readonly localizationLanguages?: readonly ContentLanguage[];
+		readonly cursor?: string;
+		readonly limit?: number;
+	},
+): Promise<UnwrapSchema<typeof CollectionContentResponse>> {
+	const localizationLanguages = input.localizationLanguages ?? [];
+	const collection = await getCollection(collectionId, authorization, localizationLanguages);
+	const offset = decodeCollectionItemsCursor(
+		input.cursor,
+		collectionId,
+		collection.latestRevisionId,
+	);
+	const limit = input.limit ?? 20;
+	const order = collection.presentationDocument.order;
+	const orderBy =
+		order === "name"
+			? [asc(unitLocalization.title), asc(collectionItem.unitId)]
+			: order === "added-at"
+				? [desc(collectionItem.createdAt), desc(collectionItem.unitId)]
+				: [asc(collectionItem.position), asc(collectionItem.unitId)];
+	const memberships = await database
+		.select({
+			targetId: collectionItem.unitId,
+			role: collectionItem.role,
+			parentTargetId: collectionItem.parentUnitId,
+			position: collectionItem.position,
+			createdAt: collectionItem.createdAt,
+		})
+		.from(collectionItem)
+		.innerJoin(unit, eq(unit.id, collectionItem.unitId))
+		.innerJoin(
+			unitLocalization,
+			and(
+				eq(unitLocalization.unitId, unit.id),
+				eq(
+					unitLocalization.language,
+					resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+				),
+			),
+		)
+		.where(eq(collectionItem.collectionId, collectionId))
+		.orderBy(...orderBy)
+		.offset(offset)
+		.limit(limit + 1);
+	const page = memberships.slice(0, limit);
+	const viewer = await resolveRecommendationViewer(authorization.profileId, false);
+	const contents = await hydrateFeedItems(
+		page.map(({ targetId }) => ({ id: targetId, realmId: null })),
+		viewer,
+		{
+			content: FeedContentKindValues,
+			...(localizationLanguages.length ? { localizationLanguages } : {}),
+		},
+		new Date(),
+		{ kind: "contextual" },
+	);
+	const contentById = new Map(contents.map((content) => [content.id, content]));
+	return {
+		items: page.flatMap((membership) => {
+			const content = contentById.get(membership.targetId);
+			return content ? [{ membership, content }] : [];
+		}),
+		nextCursor:
+			memberships.length > limit
+				? encodeCollectionItemsCursor({
+						v: 1,
+						collectionId,
+						revisionId: collection.latestRevisionId,
+						offset: offset + limit,
+					})
+				: null,
 	};
 }

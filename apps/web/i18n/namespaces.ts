@@ -17,4 +17,9 @@ export const RootTranslationNamespaces = defineBundle([
 	"ui",
 ]);
 
-export const AppShellTranslationNamespaces = defineBundle(["locale", "nav", "notifications"]);
+export const AppShellTranslationNamespaces = defineBundle([
+	"collections",
+	"locale",
+	"nav",
+	"notifications",
+]);

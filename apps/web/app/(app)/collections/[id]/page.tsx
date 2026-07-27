@@ -1,4 +1,4 @@
-import { CollectionDetail } from "@/features/collections/collections";
+import { CollectionDetailPage } from "@/features/collections/pages/collection-detail-page";
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-	return <CollectionDetail id={(await params).id} />;
+	return <CollectionDetailPage collectionId={(await params).id} />;
 }

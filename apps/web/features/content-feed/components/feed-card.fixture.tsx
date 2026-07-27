@@ -43,14 +43,11 @@ function useFixtureCardContext() {
 }
 
 function FixtureMenu() {
-	const [saved, setSaved] = useState(false);
 	return (
 		<FeedOverflowMenuView
 			canExclude
-			onAddToCollection={() => undefined}
 			onNotInterested={() => undefined}
-			onToggleSaved={() => setSaved((current) => !current)}
-			saved={saved}
+			onSave={() => undefined}
 		/>
 	);
 }

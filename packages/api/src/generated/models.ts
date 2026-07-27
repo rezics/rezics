@@ -65884,6 +65884,15 @@ export type GetApiCollectionsQuery = {
 	limit?: string | number;
 };
 
+export const GetApiCollectionsStatus200ItemsSourceEnum = {
+	manual: "manual",
+	search: "search",
+	system: "system",
+} as const;
+
+export type GetApiCollectionsStatus200ItemsSourceEnum =
+	(typeof GetApiCollectionsStatus200ItemsSourceEnum)[keyof typeof GetApiCollectionsStatus200ItemsSourceEnum];
+
 export const GetApiCollectionsStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -65913,6 +65922,12 @@ export type GetApiCollectionsStatus200 = {
 		 */
 		ownerId: string;
 		/**
+		 * @default 'manual'
+		 * @type string
+		 */
+		source: GetApiCollectionsStatus200ItemsSourceEnum;
+		systemKey: ("favorites" | null) | null;
+		/**
 		 * @type string
 		 */
 		language: GetApiCollectionsStatus200ItemsLanguageEnum;
@@ -65921,6 +65936,16 @@ export type GetApiCollectionsStatus200 = {
 		 * @type boolean
 		 */
 		containsTarget: boolean;
+		/**
+		 * @type boolean
+		 */
+		acceptsItems: boolean;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		latestRevisionId: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		cover:
@@ -66031,14 +66056,6 @@ export const PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum = {
 
 export type PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum];
-
-export const PostApiCollectionsStatus200ItemsLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PostApiCollectionsStatus200ItemsLanguageEnum =
-	(typeof PostApiCollectionsStatus200ItemsLanguageEnum)[keyof typeof PostApiCollectionsStatus200ItemsLanguageEnum];
 
 /**
  * @type object
@@ -66523,6 +66540,12 @@ export type PostApiCollectionsStatus200 = {
 	itemCount: string | number;
 	/**
 	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @description
 	 * Format: `date-time`
 	 * @type string
 	 */
@@ -66637,53 +66660,42 @@ export type PostApiCollectionsStatus200 = {
 			| null;
 	}[];
 	/**
-	 * @type array
+	 * @type object
 	 */
-	items: {
+	capabilities: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type boolean
 		 */
-		targetId: string;
+		canEditDetails: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		kind: string;
+		canManageItems: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		language: PostApiCollectionsStatus200ItemsLanguageEnum;
-		parentTargetId: (string | null) | null;
+		canEditPresentation: boolean;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		canManageLocalizations: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		type: string;
-		title: (string | null) | null;
-		cover:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
-			| null;
-		directItemCount: ((string | number) | null) | null;
-	}[];
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canViewHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canRestoreHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canDelete: boolean;
+	};
 };
 
 /**
@@ -67577,14 +67589,6 @@ export const GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnu
 export type GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum];
 
-export const GetApiCollectionsFavoritesStatus200ItemsLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type GetApiCollectionsFavoritesStatus200ItemsLanguageEnum =
-	(typeof GetApiCollectionsFavoritesStatus200ItemsLanguageEnum)[keyof typeof GetApiCollectionsFavoritesStatus200ItemsLanguageEnum];
-
 /**
  * @type object
  */
@@ -68068,6 +68072,12 @@ export type GetApiCollectionsFavoritesStatus200 = {
 	itemCount: string | number;
 	/**
 	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @description
 	 * Format: `date-time`
 	 * @type string
 	 */
@@ -68182,53 +68192,42 @@ export type GetApiCollectionsFavoritesStatus200 = {
 			| null;
 	}[];
 	/**
-	 * @type array
+	 * @type object
 	 */
-	items: {
+	capabilities: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type boolean
 		 */
-		targetId: string;
+		canEditDetails: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		kind: string;
+		canManageItems: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		language: GetApiCollectionsFavoritesStatus200ItemsLanguageEnum;
-		parentTargetId: (string | null) | null;
+		canEditPresentation: boolean;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		canManageLocalizations: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		type: string;
-		title: (string | null) | null;
-		cover:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
-			| null;
-		directItemCount: ((string | number) | null) | null;
-	}[];
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canViewHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canRestoreHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canDelete: boolean;
+	};
 };
 
 /**
@@ -68327,6 +68326,2155 @@ export type GetApiCollectionsFavoritesResponse =
 /**
  * @type object
  */
+export type GetApiCollectionsByCollectionIdItemsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	collectionId: string;
+};
+
+export const GetApiCollectionsByCollectionIdItemsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsLocalizationLanguagesEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsLocalizationLanguagesEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiCollectionsByCollectionIdItemsLocalizationLanguagesEnum[];
+	/**
+	 * @maxLength 4096
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 20
+	 */
+	limit?: string | number;
+};
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum = {
+	item: "item",
+	featured: "featured",
+	favorite: "favorite",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRecommendationReason = {
+	followed_unit: "followed_unit",
+	followed_realm: "followed_realm",
+	based_on_activity: "based_on_activity",
+	related_subject: "related_subject",
+	popular_now: "popular_now",
+	new_and_relevant: "new_and_relevant",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRecommendationReason =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRecommendationReason)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRecommendationReason];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum = {
+	home_feed: "home_feed",
+	home_book: "home_book",
+	home_software: "home_software",
+	home_media: "home_media",
+	unit_related: "unit_related",
+	post_related: "post_related",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEnum = {
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	poll: "poll",
+	realm: "realm",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPresentationAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPresentationAvatarIconPrefixEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPresentationAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPresentationAvatarIconPrefixEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsRoleEnum =
+	{
+		author: "author",
+		"co-author": "co-author",
+		translator: "translator",
+		illustrator: "illustrator",
+		editor: "editor",
+		publisher: "publisher",
+		letterer: "letterer",
+		colorist: "colorist",
+		developer: "developer",
+		composer: "composer",
+		designer: "designer",
+		director: "director",
+		producer: "producer",
+		writer: "writer",
+		actor: "actor",
+		narrator: "narrator",
+		studio: "studio",
+		distributor: "distributor",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsRoleEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsRoleEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsRoleEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		structure: "structure",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPostKindEnum = {
+	post: "post",
+	reply: "reply",
+	excerpt: "excerpt",
+	chapter: "chapter",
+	wiki: "wiki",
+	picture: "picture",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPostKindEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPostKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPostKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @type object
+		 */
+		membership: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			targetId: string;
+			/**
+			 * @default 'item'
+			 * @type string
+			 */
+			role: GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum;
+			parentTargetId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+		};
+		content:
+			| {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					language: (("zh" | "en") | null) | null;
+					/**
+					 * @type array
+					 */
+					attributions: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @default 'author'
+						 * @type string
+						 */
+						role: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum;
+						/**
+						 * @description
+						 * Format: `fractional-position`
+						 * @minLength 2
+						 * @maxLength 512
+						 * @type string
+						 */
+						position: string;
+						/**
+						 * @type object
+						 */
+						creditedUnit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'slug_namespace'
+							 * @type string
+							 */
+							kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+							title: (string | null) | null;
+							summary: (string | null) | null;
+							avatar:
+								| (
+										| (
+												| {
+														/**
+														 * @type string
+														 */
+														type: "image";
+														/**
+														 * @type object
+														 */
+														image: {
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															id: string;
+															/**
+															 * @type string
+															 */
+															url: string;
+														};
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "emoji";
+														/**
+														 * @maxLength 64
+														 * @type string
+														 */
+														emoji: string;
+												  }
+												| {
+														/**
+														 * @type string
+														 */
+														type: "icon";
+														/**
+														 * @type object
+														 */
+														icon: {
+															/**
+															 * @type string
+															 */
+															provider: "font-awesome";
+															/**
+															 * @type string
+															 */
+															prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum;
+															/**
+															 * @maxLength 128
+															 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+															 * @type string
+															 */
+															name: string;
+														};
+												  }
+										  )
+										| null
+								  )
+								| null;
+						};
+					}[];
+					realmId: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					realms: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						avatar:
+							| (
+									| (
+											| {
+													/**
+													 * @type string
+													 */
+													type: "image";
+													/**
+													 * @type object
+													 */
+													image: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														id: string;
+														/**
+														 * @type string
+														 */
+														url: string;
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "emoji";
+													/**
+													 * @maxLength 64
+													 * @type string
+													 */
+													emoji: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "icon";
+													/**
+													 * @type object
+													 */
+													icon: {
+														/**
+														 * @type string
+														 */
+														provider: "font-awesome";
+														/**
+														 * @type string
+														 */
+														prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum;
+														/**
+														 * @maxLength 128
+														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+														 * @type string
+														 */
+														name: string;
+													};
+											  }
+									  )
+									| null
+							  )
+							| null;
+					}[];
+					title: (string | null) | null;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					createdAt: string;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					updatedAt: string;
+					/**
+					 * @type object
+					 */
+					reactions: {
+						upvote: string | number;
+						downvote: string | number;
+					};
+					viewerReaction: (string | null) | null;
+					recommendationReason:
+						| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRecommendationReason | null)
+						| null;
+					tracking:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								requestId: string;
+								/**
+								 * @default 'home_feed'
+								 * @type string
+								 */
+								surface: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum;
+								position: string | number;
+								/**
+								 * @minLength 1
+								 * @maxLength 64
+								 * @pattern \S
+								 * @type string
+								 */
+								policyVersion: string;
+								/**
+								 * @minLength 43
+								 * @maxLength 43
+								 * @pattern ^[A-Za-z0-9_-]{43}$
+								 * @type string
+								 */
+								signature: string;
+						  } | null)
+						| null;
+					/**
+					 * @type string
+					 */
+					itemType: "unit";
+					/**
+					 * @default 'profile'
+					 * @type string
+					 */
+					unitKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEnum;
+					/**
+					 * @type null
+					 */
+					postKind: null;
+					summary: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+					collection:
+						| ({
+								directItemCount: string | number;
+						  } | null)
+						| null;
+					presentation:
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "rated-work";
+								/**
+								 * @type object
+								 */
+								scores: {
+									preferred:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
+												totalScore: string | number;
+												totalCount: string | number;
+										  } | null)
+										| null;
+									global:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												contextUnitId: string;
+												contextTitle: (string | null) | null;
+												totalScore: string | number;
+												totalCount: string | number;
+										  } | null)
+										| null;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "identity";
+								avatar:
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPresentationAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
+									| null;
+								banner:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
+								memberCount: ((string | number) | null) | null;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "general";
+						  };
+			  }
+			| (
+					| {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							language: (("zh" | "en") | null) | null;
+							/**
+							 * @type array
+							 */
+							attributions: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'author'
+								 * @type string
+								 */
+								role: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum;
+								/**
+								 * @description
+								 * Format: `fractional-position`
+								 * @minLength 2
+								 * @maxLength 512
+								 * @type string
+								 */
+								position: string;
+								/**
+								 * @type object
+								 */
+								creditedUnit: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @default 'slug_namespace'
+									 * @type string
+									 */
+									kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum;
+									slugAddress:
+										| ({
+												/**
+												 * @minLength 1
+												 * @maxLength 63
+												 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+												 * @type string
+												 */
+												slug: string;
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												scopeUnitId: string;
+												/**
+												 * @type array
+												 */
+												canonicalPath: string[];
+										  } | null)
+										| null;
+									title: (string | null) | null;
+									summary: (string | null) | null;
+									avatar:
+										| (
+												| (
+														| {
+																/**
+																 * @type string
+																 */
+																type: "image";
+																/**
+																 * @type object
+																 */
+																image: {
+																	/**
+																	 * @description
+																	 * Format: `uuid`
+																	 * @type string
+																	 */
+																	id: string;
+																	/**
+																	 * @type string
+																	 */
+																	url: string;
+																};
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																type: "emoji";
+																/**
+																 * @maxLength 64
+																 * @type string
+																 */
+																emoji: string;
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																type: "icon";
+																/**
+																 * @type object
+																 */
+																icon: {
+																	/**
+																	 * @type string
+																	 */
+																	provider: "font-awesome";
+																	/**
+																	 * @type string
+																	 */
+																	prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum;
+																	/**
+																	 * @maxLength 128
+																	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																	 * @type string
+																	 */
+																	name: string;
+																};
+														  }
+												  )
+												| null
+										  )
+										| null;
+								};
+							}[];
+							realmId: (string | null) | null;
+							/**
+							 * @type array
+							 */
+							realms: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+								title: (string | null) | null;
+								summary: (string | null) | null;
+								avatar:
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
+									| null;
+							}[];
+							title: (string | null) | null;
+							/**
+							 * @description
+							 * Format: `date-time`
+							 * @type string
+							 */
+							createdAt: string;
+							/**
+							 * @description
+							 * Format: `date-time`
+							 * @type string
+							 */
+							updatedAt: string;
+							/**
+							 * @type object
+							 */
+							reactions: {
+								upvote: string | number;
+								downvote: string | number;
+							};
+							viewerReaction: (string | null) | null;
+							recommendationReason:
+								| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRecommendationReason | null)
+								| null;
+							tracking:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										requestId: string;
+										/**
+										 * @default 'home_feed'
+										 * @type string
+										 */
+										surface: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum;
+										position: string | number;
+										/**
+										 * @minLength 1
+										 * @maxLength 64
+										 * @pattern \S
+										 * @type string
+										 */
+										policyVersion: string;
+										/**
+										 * @minLength 43
+										 * @maxLength 43
+										 * @pattern ^[A-Za-z0-9_-]{43}$
+										 * @type string
+										 */
+										signature: string;
+								  } | null)
+								| null;
+							/**
+							 * @type string
+							 */
+							itemType: "post";
+							/**
+							 * @type string
+							 */
+							unitKind: "post";
+							summary: (string | null) | null;
+							cover:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+							subjectId: (string | null) | null;
+							rootPostId: (string | null) | null;
+							parentPostId: (string | null) | null;
+							body:
+								| ({
+										/**
+										 * @type string
+										 */
+										_type: "portable-text";
+										/**
+										 * @pattern ^[0-9a-f]{12}$
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type array
+										 */
+										content: (
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: "block";
+													/**
+													 * @type array
+													 */
+													children: (
+														| {
+																/**
+																 * @type string
+																 */
+																_key: string;
+																/**
+																 * @type string
+																 */
+																_type: "span";
+																/**
+																 * @type string
+																 */
+																text: string;
+																/**
+																 * @type array | undefined
+																 */
+																marks?: string[];
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																_key: string;
+																/**
+																 * @type string
+																 */
+																_type: "unit-mention";
+																/**
+																 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+																 * @type string
+																 */
+																unitId: string;
+														  }
+													)[];
+													/**
+													 * @type array | undefined
+													 */
+													markDefs?: {
+														/**
+														 * @type string
+														 */
+														_key: string;
+														/**
+														 * @type string
+														 */
+														_type: string;
+														[key: string]: unknown;
+													}[];
+													/**
+													 * @type string | undefined
+													 */
+													listItem?: string;
+													/**
+													 * @type string | undefined
+													 */
+													style?: string;
+													/**
+													 * @minLength 1
+													 * @type integer | undefined
+													 */
+													level?: number;
+													[key: string]: unknown;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: "image";
+													/**
+													 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+													 * @type string
+													 */
+													assetId: string;
+													/**
+													 * @type string | undefined
+													 */
+													alt?: string;
+													/**
+													 * @type string | undefined
+													 */
+													caption?: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @pattern ^(?!(?:block|image)$).+
+													 * @type string
+													 */
+													_type: string;
+													[key: string]: unknown;
+											  }
+										)[];
+								  } | null)
+								| null;
+							replyCount: string | number;
+							latestRevisionId: (string | null) | null;
+							replyContext:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										rootPostId: string;
+										title: (string | null) | null;
+										/**
+										 * @type array
+										 */
+										attributions: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @default 'author'
+											 * @type string
+											 */
+											role: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsRoleEnum;
+											/**
+											 * @description
+											 * Format: `fractional-position`
+											 * @minLength 2
+											 * @maxLength 512
+											 * @type string
+											 */
+											position: string;
+											/**
+											 * @type object
+											 */
+											creditedUnit: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @default 'slug_namespace'
+												 * @type string
+												 */
+												kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum;
+												slugAddress:
+													| ({
+															/**
+															 * @minLength 1
+															 * @maxLength 63
+															 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+															 * @type string
+															 */
+															slug: string;
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															scopeUnitId: string;
+															/**
+															 * @type array
+															 */
+															canonicalPath: string[];
+													  } | null)
+													| null;
+												title: (string | null) | null;
+												summary: (string | null) | null;
+												avatar:
+													| (
+															| (
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			type: "image";
+																			/**
+																			 * @type object
+																			 */
+																			image: {
+																				/**
+																				 * @description
+																				 * Format: `uuid`
+																				 * @type string
+																				 */
+																				id: string;
+																				/**
+																				 * @type string
+																				 */
+																				url: string;
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			type: "emoji";
+																			/**
+																			 * @maxLength 64
+																			 * @type string
+																			 */
+																			emoji: string;
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			type: "icon";
+																			/**
+																			 * @type object
+																			 */
+																			icon: {
+																				/**
+																				 * @type string
+																				 */
+																				provider: "font-awesome";
+																				/**
+																				 * @type string
+																				 */
+																				prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																				/**
+																				 * @maxLength 128
+																				 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																				 * @type string
+																				 */
+																				name: string;
+																			};
+																	  }
+															  )
+															| null
+													  )
+													| null;
+											};
+										}[];
+										subjectId: (string | null) | null;
+								  } | null)
+								| null;
+							subject:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										type: string;
+										title: (string | null) | null;
+										summary: (string | null) | null;
+										cover:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+											  } | null)
+											| null;
+										/**
+										 * @type object
+										 */
+										scores: {
+											preferred:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														contextUnitId: string;
+														contextTitle: (string | null) | null;
+														totalScore: string | number;
+														totalCount: string | number;
+												  } | null)
+												| null;
+											global:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														contextUnitId: string;
+														contextTitle: (string | null) | null;
+														totalScore: string | number;
+														totalCount: string | number;
+												  } | null)
+												| null;
+										};
+								  } | null)
+								| null;
+							/**
+							 * @default 'post'
+							 * @type string
+							 */
+							postKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPostKindEnum;
+					  }
+					| {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							language: (("zh" | "en") | null) | null;
+							/**
+							 * @type array
+							 */
+							attributions: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'author'
+								 * @type string
+								 */
+								role: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum;
+								/**
+								 * @description
+								 * Format: `fractional-position`
+								 * @minLength 2
+								 * @maxLength 512
+								 * @type string
+								 */
+								position: string;
+								/**
+								 * @type object
+								 */
+								creditedUnit: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @default 'slug_namespace'
+									 * @type string
+									 */
+									kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum;
+									slugAddress:
+										| ({
+												/**
+												 * @minLength 1
+												 * @maxLength 63
+												 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+												 * @type string
+												 */
+												slug: string;
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												scopeUnitId: string;
+												/**
+												 * @type array
+												 */
+												canonicalPath: string[];
+										  } | null)
+										| null;
+									title: (string | null) | null;
+									summary: (string | null) | null;
+									avatar:
+										| (
+												| (
+														| {
+																/**
+																 * @type string
+																 */
+																type: "image";
+																/**
+																 * @type object
+																 */
+																image: {
+																	/**
+																	 * @description
+																	 * Format: `uuid`
+																	 * @type string
+																	 */
+																	id: string;
+																	/**
+																	 * @type string
+																	 */
+																	url: string;
+																};
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																type: "emoji";
+																/**
+																 * @maxLength 64
+																 * @type string
+																 */
+																emoji: string;
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																type: "icon";
+																/**
+																 * @type object
+																 */
+																icon: {
+																	/**
+																	 * @type string
+																	 */
+																	provider: "font-awesome";
+																	/**
+																	 * @type string
+																	 */
+																	prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum;
+																	/**
+																	 * @maxLength 128
+																	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																	 * @type string
+																	 */
+																	name: string;
+																};
+														  }
+												  )
+												| null
+										  )
+										| null;
+								};
+							}[];
+							realmId: (string | null) | null;
+							/**
+							 * @type array
+							 */
+							realms: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+								title: (string | null) | null;
+								summary: (string | null) | null;
+								avatar:
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
+									| null;
+							}[];
+							title: (string | null) | null;
+							/**
+							 * @description
+							 * Format: `date-time`
+							 * @type string
+							 */
+							createdAt: string;
+							/**
+							 * @description
+							 * Format: `date-time`
+							 * @type string
+							 */
+							updatedAt: string;
+							/**
+							 * @type object
+							 */
+							reactions: {
+								upvote: string | number;
+								downvote: string | number;
+							};
+							viewerReaction: (string | null) | null;
+							recommendationReason:
+								| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRecommendationReason | null)
+								| null;
+							tracking:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										requestId: string;
+										/**
+										 * @default 'home_feed'
+										 * @type string
+										 */
+										surface: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum;
+										position: string | number;
+										/**
+										 * @minLength 1
+										 * @maxLength 64
+										 * @pattern \S
+										 * @type string
+										 */
+										policyVersion: string;
+										/**
+										 * @minLength 43
+										 * @maxLength 43
+										 * @pattern ^[A-Za-z0-9_-]{43}$
+										 * @type string
+										 */
+										signature: string;
+								  } | null)
+								| null;
+							/**
+							 * @type string
+							 */
+							itemType: "post";
+							/**
+							 * @type string
+							 */
+							unitKind: "post";
+							summary: (string | null) | null;
+							cover:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+							subjectId: (string | null) | null;
+							rootPostId: (string | null) | null;
+							parentPostId: (string | null) | null;
+							body:
+								| ({
+										/**
+										 * @type string
+										 */
+										_type: "portable-text";
+										/**
+										 * @pattern ^[0-9a-f]{12}$
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type array
+										 */
+										content: (
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: "block";
+													/**
+													 * @type array
+													 */
+													children: (
+														| {
+																/**
+																 * @type string
+																 */
+																_key: string;
+																/**
+																 * @type string
+																 */
+																_type: "span";
+																/**
+																 * @type string
+																 */
+																text: string;
+																/**
+																 * @type array | undefined
+																 */
+																marks?: string[];
+														  }
+														| {
+																/**
+																 * @type string
+																 */
+																_key: string;
+																/**
+																 * @type string
+																 */
+																_type: "unit-mention";
+																/**
+																 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+																 * @type string
+																 */
+																unitId: string;
+														  }
+													)[];
+													/**
+													 * @type array | undefined
+													 */
+													markDefs?: {
+														/**
+														 * @type string
+														 */
+														_key: string;
+														/**
+														 * @type string
+														 */
+														_type: string;
+														[key: string]: unknown;
+													}[];
+													/**
+													 * @type string | undefined
+													 */
+													listItem?: string;
+													/**
+													 * @type string | undefined
+													 */
+													style?: string;
+													/**
+													 * @minLength 1
+													 * @type integer | undefined
+													 */
+													level?: number;
+													[key: string]: unknown;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @type string
+													 */
+													_type: "image";
+													/**
+													 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+													 * @type string
+													 */
+													assetId: string;
+													/**
+													 * @type string | undefined
+													 */
+													alt?: string;
+													/**
+													 * @type string | undefined
+													 */
+													caption?: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													_key: string;
+													/**
+													 * @pattern ^(?!(?:block|image)$).+
+													 * @type string
+													 */
+													_type: string;
+													[key: string]: unknown;
+											  }
+										)[];
+								  } | null)
+								| null;
+							replyCount: string | number;
+							latestRevisionId: (string | null) | null;
+							replyContext:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										rootPostId: string;
+										title: (string | null) | null;
+										/**
+										 * @type array
+										 */
+										attributions: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @default 'author'
+											 * @type string
+											 */
+											role: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsRoleEnum;
+											/**
+											 * @description
+											 * Format: `fractional-position`
+											 * @minLength 2
+											 * @maxLength 512
+											 * @type string
+											 */
+											position: string;
+											/**
+											 * @type object
+											 */
+											creditedUnit: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @default 'slug_namespace'
+												 * @type string
+												 */
+												kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum;
+												slugAddress:
+													| ({
+															/**
+															 * @minLength 1
+															 * @maxLength 63
+															 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+															 * @type string
+															 */
+															slug: string;
+															/**
+															 * @description
+															 * Format: `uuid`
+															 * @type string
+															 */
+															scopeUnitId: string;
+															/**
+															 * @type array
+															 */
+															canonicalPath: string[];
+													  } | null)
+													| null;
+												title: (string | null) | null;
+												summary: (string | null) | null;
+												avatar:
+													| (
+															| (
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			type: "image";
+																			/**
+																			 * @type object
+																			 */
+																			image: {
+																				/**
+																				 * @description
+																				 * Format: `uuid`
+																				 * @type string
+																				 */
+																				id: string;
+																				/**
+																				 * @type string
+																				 */
+																				url: string;
+																			};
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			type: "emoji";
+																			/**
+																			 * @maxLength 64
+																			 * @type string
+																			 */
+																			emoji: string;
+																	  }
+																	| {
+																			/**
+																			 * @type string
+																			 */
+																			type: "icon";
+																			/**
+																			 * @type object
+																			 */
+																			icon: {
+																				/**
+																				 * @type string
+																				 */
+																				provider: "font-awesome";
+																				/**
+																				 * @type string
+																				 */
+																				prefix: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum;
+																				/**
+																				 * @maxLength 128
+																				 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																				 * @type string
+																				 */
+																				name: string;
+																			};
+																	  }
+															  )
+															| null
+													  )
+													| null;
+											};
+										}[];
+										subjectId: (string | null) | null;
+								  } | null)
+								| null;
+							subject:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										type: string;
+										title: (string | null) | null;
+										summary: (string | null) | null;
+										cover:
+											| ({
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+											  } | null)
+											| null;
+										/**
+										 * @type object
+										 */
+										scores: {
+											preferred:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														contextUnitId: string;
+														contextTitle: (string | null) | null;
+														totalScore: string | number;
+														totalCount: string | number;
+												  } | null)
+												| null;
+											global:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														contextUnitId: string;
+														contextTitle: (string | null) | null;
+														totalScore: string | number;
+														totalCount: string | number;
+												  } | null)
+												| null;
+										};
+								  } | null)
+								| null;
+							/**
+							 * @type string
+							 */
+							postKind: "review";
+							/**
+							 * @type array
+							 */
+							scores: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scoreId: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								contextUnitId: string;
+								value: string | number;
+							}[];
+					  }
+			  );
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CollectionNotFound'
+		 * @type string
+		 */
+		code: "CollectionNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsOptions = {
+	body?: never;
+	path: GetApiCollectionsByCollectionIdItemsPath;
+	query?: GetApiCollectionsByCollectionIdItemsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemsResponses = {
+	"200": GetApiCollectionsByCollectionIdItemsStatus200;
+	"400": GetApiCollectionsByCollectionIdItemsStatus400;
+	"404": GetApiCollectionsByCollectionIdItemsStatus404;
+	"422": GetApiCollectionsByCollectionIdItemsStatus422;
+	"500": GetApiCollectionsByCollectionIdItemsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiCollectionsByCollectionIdItemsResponse =
+	| GetApiCollectionsByCollectionIdItemsStatus200
+	| GetApiCollectionsByCollectionIdItemsStatus400
+	| GetApiCollectionsByCollectionIdItemsStatus404
+	| GetApiCollectionsByCollectionIdItemsStatus422
+	| GetApiCollectionsByCollectionIdItemsStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiCollectionsByCollectionIdPath = {
 	/**
 	 * @description
@@ -68404,14 +70552,6 @@ export const GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPref
 
 export type GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum];
-
-export const GetApiCollectionsByCollectionIdStatus200ItemsLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type GetApiCollectionsByCollectionIdStatus200ItemsLanguageEnum =
-	(typeof GetApiCollectionsByCollectionIdStatus200ItemsLanguageEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus200ItemsLanguageEnum];
 
 /**
  * @type object
@@ -68896,6 +71036,12 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 	itemCount: string | number;
 	/**
 	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @description
 	 * Format: `date-time`
 	 * @type string
 	 */
@@ -69010,53 +71156,42 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 			| null;
 	}[];
 	/**
-	 * @type array
+	 * @type object
 	 */
-	items: {
+	capabilities: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type boolean
 		 */
-		targetId: string;
+		canEditDetails: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		kind: string;
+		canManageItems: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		language: GetApiCollectionsByCollectionIdStatus200ItemsLanguageEnum;
-		parentTargetId: (string | null) | null;
+		canEditPresentation: boolean;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		canManageLocalizations: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		type: string;
-		title: (string | null) | null;
-		cover:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
-			| null;
-		directItemCount: ((string | number) | null) | null;
-	}[];
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canViewHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canRestoreHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canDelete: boolean;
+	};
 };
 
 /**
@@ -69188,14 +71323,6 @@ export const PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPr
 
 export type PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum];
-
-export const PatchApiCollectionsByCollectionIdStatus200ItemsLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PatchApiCollectionsByCollectionIdStatus200ItemsLanguageEnum =
-	(typeof PatchApiCollectionsByCollectionIdStatus200ItemsLanguageEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus200ItemsLanguageEnum];
 
 /**
  * @type object
@@ -69680,6 +71807,12 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 	itemCount: string | number;
 	/**
 	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @description
 	 * Format: `date-time`
 	 * @type string
 	 */
@@ -69794,59 +71927,57 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 			| null;
 	}[];
 	/**
-	 * @type array
+	 * @type object
 	 */
-	items: {
+	capabilities: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type boolean
 		 */
-		targetId: string;
+		canEditDetails: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		kind: string;
+		canManageItems: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		language: PatchApiCollectionsByCollectionIdStatus200ItemsLanguageEnum;
-		parentTargetId: (string | null) | null;
+		canEditPresentation: boolean;
 		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
+		 * @type boolean
 		 */
-		position: string;
+		canManageLocalizations: boolean;
 		/**
-		 * @type string
+		 * @type boolean
 		 */
-		type: string;
-		title: (string | null) | null;
-		cover:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
-			| null;
-		directItemCount: ((string | number) | null) | null;
-	}[];
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canViewHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canRestoreHistory: boolean;
+		/**
+		 * @type boolean
+		 */
+		canDelete: boolean;
+	};
 };
 
 /**
  * @type object
  */
 export type PatchApiCollectionsByCollectionIdStatus400 = MalformedRequestBody;
+
+export const PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
@@ -69857,10 +71988,10 @@ export type PatchApiCollectionsByCollectionIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'CollectionOwnershipRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "CollectionOwnershipRequired";
+		code: PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -69912,33 +72043,55 @@ export type PatchApiCollectionsByCollectionIdStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiCollectionsByCollectionIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FavoritesEditForbidden'
-		 * @type string
-		 */
-		code: "FavoritesEditForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PatchApiCollectionsByCollectionIdStatus409 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FavoritesEditForbidden'
+				 * @type string
+				 */
+				code: "FavoritesEditForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitRevisionConflict'
+				 * @type string
+				 */
+				code: "UnitRevisionConflict";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -70030,6 +72183,12 @@ export type PatchApiCollectionsByCollectionIdRequestPresentationDocumentOrderEnu
  * @type object
  */
 export type PatchApiCollectionsByCollectionIdBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
 	/**
 	 * @type string | undefined
 	 */
@@ -70758,16 +72917,30 @@ export type DeleteApiCollectionsByCollectionIdStatus204 = void;
 /**
  * @type object
  */
+export type DeleteApiCollectionsByCollectionIdStatus400 = MalformedRequestBody;
+
+export const DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsByCollectionIdStatus403 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'CollectionOwnershipRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "CollectionOwnershipRequired";
+		code: DeleteApiCollectionsByCollectionIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -70783,33 +72956,55 @@ export type DeleteApiCollectionsByCollectionIdStatus403 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type DeleteApiCollectionsByCollectionIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FavoritesDeleteForbidden'
-		 * @type string
-		 */
-		code: "FavoritesDeleteForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type DeleteApiCollectionsByCollectionIdStatus409 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FavoritesDeleteForbidden'
+				 * @type string
+				 */
+				code: "FavoritesDeleteForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitRevisionConflict'
+				 * @type string
+				 */
+				code: "UnitRevisionConflict";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -70848,8 +73043,20 @@ export type DeleteApiCollectionsByCollectionIdStatus500 = InternalError;
 /**
  * @type object
  */
+export type DeleteApiCollectionsByCollectionIdBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsByCollectionIdOptions = {
-	body?: never;
+	body: DeleteApiCollectionsByCollectionIdBody;
 	path: DeleteApiCollectionsByCollectionIdPath;
 	query?: never;
 	headers?: never;
@@ -70860,6 +73067,7 @@ export type DeleteApiCollectionsByCollectionIdOptions = {
  */
 export type DeleteApiCollectionsByCollectionIdResponses = {
 	"204": DeleteApiCollectionsByCollectionIdStatus204;
+	"400": DeleteApiCollectionsByCollectionIdStatus400;
 	"403": DeleteApiCollectionsByCollectionIdStatus403;
 	"409": DeleteApiCollectionsByCollectionIdStatus409;
 	"422": DeleteApiCollectionsByCollectionIdStatus422;
@@ -70872,6 +73080,7 @@ export type DeleteApiCollectionsByCollectionIdResponses = {
  */
 export type DeleteApiCollectionsByCollectionIdResponse =
 	| DeleteApiCollectionsByCollectionIdStatus204
+	| DeleteApiCollectionsByCollectionIdStatus400
 	| DeleteApiCollectionsByCollectionIdStatus403
 	| DeleteApiCollectionsByCollectionIdStatus409
 	| DeleteApiCollectionsByCollectionIdStatus422
@@ -70925,6 +73134,15 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus200 = {
  */
 export type PostApiCollectionsByCollectionIdItemsBatchStatus400 = MalformedRequestBody;
 
+export const PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -70934,10 +73152,10 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'CollectionOwnershipRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "CollectionOwnershipRequired";
+		code: PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -70981,33 +73199,55 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiCollectionsByCollectionIdItemsBatchStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FavoritesEditForbidden'
-		 * @type string
-		 */
-		code: "FavoritesEditForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiCollectionsByCollectionIdItemsBatchStatus409 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FavoritesEditForbidden'
+				 * @type string
+				 */
+				code: "FavoritesEditForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitRevisionConflict'
+				 * @type string
+				 */
+				code: "UnitRevisionConflict";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 export type PostApiCollectionsByCollectionIdItemsBatchStatus422 =
 	| {
@@ -71065,10 +73305,25 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus429 = {
  */
 export type PostApiCollectionsByCollectionIdItemsBatchStatus500 = InternalError;
 
+export const PostApiCollectionsByCollectionIdItemsBatchRequestItemsRoleEnum = {
+	item: "item",
+	featured: "featured",
+	favorite: "favorite",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchRequestItemsRoleEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchRequestItemsRoleEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchRequestItemsRoleEnum];
+
 /**
  * @type object
  */
 export type PostApiCollectionsByCollectionIdItemsBatchBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
 	/**
 	 * @type array
 	 */
@@ -71080,11 +73335,10 @@ export type PostApiCollectionsByCollectionIdItemsBatchBody = {
 		 */
 		targetId: string;
 		/**
-		 * @minLength 1
-		 * @maxLength 32
+		 * @default 'item'
 		 * @type string | undefined
 		 */
-		kind?: string;
+		role?: PostApiCollectionsByCollectionIdItemsBatchRequestItemsRoleEnum;
 	}[];
 };
 
@@ -71158,6 +73412,15 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus200 = {
  */
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus400 = MalformedRequestBody;
 
+export const PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum =
+	(typeof PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum)[keyof typeof PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -71167,10 +73430,10 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'CollectionOwnershipRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "CollectionOwnershipRequired";
+		code: PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71213,6 +73476,56 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus404 = {
 	 */
 	requestId: string;
 };
+
+export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus409 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FavoritesEditForbidden'
+				 * @type string
+				 */
+				code: "FavoritesEditForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitRevisionConflict'
+				 * @type string
+				 */
+				code: "UnitRevisionConflict";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus422 =
 	| {
@@ -71270,15 +73583,43 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus429 = {
  */
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus500 = InternalError;
 
+export const PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum = {
+	direct: "direct",
+	"review-with-subject": "review-with-subject",
+} as const;
+
+export type PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum =
+	(typeof PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum)[keyof typeof PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum];
+
+export const PutApiCollectionsByCollectionIdItemsByTargetIdRequestRoleEnum = {
+	item: "item",
+	featured: "featured",
+	favorite: "favorite",
+} as const;
+
+export type PutApiCollectionsByCollectionIdItemsByTargetIdRequestRoleEnum =
+	(typeof PutApiCollectionsByCollectionIdItemsByTargetIdRequestRoleEnum)[keyof typeof PutApiCollectionsByCollectionIdItemsByTargetIdRequestRoleEnum];
+
 /**
  * @type object
  */
 export type PutApiCollectionsByCollectionIdItemsByTargetIdBody = {
 	/**
-	 * @maxLength 32
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+	/**
+	 * @default 'direct'
+	 * @type string
+	 */
+	placement: PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum;
+	/**
+	 * @default 'item'
 	 * @type string | undefined
 	 */
-	kind?: string;
+	role?: PutApiCollectionsByCollectionIdItemsByTargetIdRequestRoleEnum;
 	parentTargetId?: (string | null) | null;
 	/**
 	 * @description
@@ -71288,11 +73629,6 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdBody = {
 	 * @type string | undefined
 	 */
 	position?: string;
-	/**
-	 * @maxLength 1000
-	 * @type string | undefined
-	 */
-	searchText?: string;
 };
 
 /**
@@ -71313,6 +73649,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdResponses = {
 	"400": PutApiCollectionsByCollectionIdItemsByTargetIdStatus400;
 	"403": PutApiCollectionsByCollectionIdItemsByTargetIdStatus403;
 	"404": PutApiCollectionsByCollectionIdItemsByTargetIdStatus404;
+	"409": PutApiCollectionsByCollectionIdItemsByTargetIdStatus409;
 	"422": PutApiCollectionsByCollectionIdItemsByTargetIdStatus422;
 	"429": PutApiCollectionsByCollectionIdItemsByTargetIdStatus429;
 	"500": PutApiCollectionsByCollectionIdItemsByTargetIdStatus500;
@@ -71326,6 +73663,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdResponse =
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
+	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus409
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500;
@@ -71361,16 +73699,30 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200 = {
 /**
  * @type object
  */
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400 = MalformedRequestBody;
+
+export const DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'CollectionOwnershipRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "CollectionOwnershipRequired";
+		code: DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71385,6 +73737,56 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403 = {
 	 */
 	requestId: string;
 };
+
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FavoritesEditForbidden'
+				 * @type string
+				 */
+				code: "FavoritesEditForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitRevisionConflict'
+				 * @type string
+				 */
+				code: "UnitRevisionConflict";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -71423,8 +73825,20 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500 = Interna
 /**
  * @type object
  */
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions = {
-	body?: never;
+	body: DeleteApiCollectionsByCollectionIdItemsByTargetIdBody;
 	path: DeleteApiCollectionsByCollectionIdItemsByTargetIdPath;
 	query?: never;
 	headers?: never;
@@ -71435,7 +73849,9 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions = {
  */
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses = {
 	"200": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200;
+	"400": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400;
 	"403": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403;
+	"409": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409;
 	"422": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422;
 	"429": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429;
 	"500": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500;
@@ -71446,7 +73862,9 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses = {
  */
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponse =
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200
+	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500;
@@ -71482,6 +73900,11 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus200 = {
 /**
  * @type object
  */
+export type PutApiCollectionsFavoritesItemsByTargetIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiCollectionsFavoritesItemsByTargetIdStatus404 = {
 	/**
 	 * @type object
@@ -71492,6 +73915,34 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus404 = {
 		 * @type string
 		 */
 		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiCollectionsFavoritesItemsByTargetIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitRevisionConflict'
+		 * @type string
+		 */
+		code: "UnitRevisionConflict";
 		/**
 		 * @type string
 		 */
@@ -71544,8 +73995,20 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus500 = InternalError;
 /**
  * @type object
  */
+export type PutApiCollectionsFavoritesItemsByTargetIdBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiCollectionsFavoritesItemsByTargetIdOptions = {
-	body?: never;
+	body: PutApiCollectionsFavoritesItemsByTargetIdBody;
 	path: PutApiCollectionsFavoritesItemsByTargetIdPath;
 	query?: never;
 	headers?: never;
@@ -71556,7 +74019,9 @@ export type PutApiCollectionsFavoritesItemsByTargetIdOptions = {
  */
 export type PutApiCollectionsFavoritesItemsByTargetIdResponses = {
 	"200": PutApiCollectionsFavoritesItemsByTargetIdStatus200;
+	"400": PutApiCollectionsFavoritesItemsByTargetIdStatus400;
 	"404": PutApiCollectionsFavoritesItemsByTargetIdStatus404;
+	"409": PutApiCollectionsFavoritesItemsByTargetIdStatus409;
 	"422": PutApiCollectionsFavoritesItemsByTargetIdStatus422;
 	"429": PutApiCollectionsFavoritesItemsByTargetIdStatus429;
 	"500": PutApiCollectionsFavoritesItemsByTargetIdStatus500;
@@ -71567,7 +74032,9 @@ export type PutApiCollectionsFavoritesItemsByTargetIdResponses = {
  */
 export type PutApiCollectionsFavoritesItemsByTargetIdResponse =
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus200
+	| PutApiCollectionsFavoritesItemsByTargetIdStatus400
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus404
+	| PutApiCollectionsFavoritesItemsByTargetIdStatus409
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus422
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus500;
@@ -71598,6 +74065,39 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus200 = {
 	 * @type string
 	 */
 	collectionId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitRevisionConflict'
+		 * @type string
+		 */
+		code: "UnitRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -71637,8 +74137,20 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus500 = InternalErro
 /**
  * @type object
  */
+export type DeleteApiCollectionsFavoritesItemsByTargetIdBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsFavoritesItemsByTargetIdOptions = {
-	body?: never;
+	body: DeleteApiCollectionsFavoritesItemsByTargetIdBody;
 	path: DeleteApiCollectionsFavoritesItemsByTargetIdPath;
 	query?: never;
 	headers?: never;
@@ -71649,6 +74161,8 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdOptions = {
  */
 export type DeleteApiCollectionsFavoritesItemsByTargetIdResponses = {
 	"200": DeleteApiCollectionsFavoritesItemsByTargetIdStatus200;
+	"400": DeleteApiCollectionsFavoritesItemsByTargetIdStatus400;
+	"409": DeleteApiCollectionsFavoritesItemsByTargetIdStatus409;
 	"422": DeleteApiCollectionsFavoritesItemsByTargetIdStatus422;
 	"429": DeleteApiCollectionsFavoritesItemsByTargetIdStatus429;
 	"500": DeleteApiCollectionsFavoritesItemsByTargetIdStatus500;
@@ -71659,6 +74173,8 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdResponses = {
  */
 export type DeleteApiCollectionsFavoritesItemsByTargetIdResponse =
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus200
+	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
+	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500;

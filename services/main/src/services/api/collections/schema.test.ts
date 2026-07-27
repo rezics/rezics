@@ -1,7 +1,12 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CollectionDetailQuery, ListCollectionsQuery } from "./schema";
+import {
+	CollectionDetailQuery,
+	CollectionItemsQuery,
+	ListCollectionsQuery,
+	SaveCollectionItemBody,
+} from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
 
@@ -19,6 +24,34 @@ describe("collection list schema", () => {
 
 	it("requires target identities to be UUIDs", () => {
 		expect(Check(ListCollectionsQuery, { targetId: "book-1" })).toBe(false);
+	});
+});
+
+describe("collection item mutation schema", () => {
+	it("requires a base revision and an explicit placement", () => {
+		expect(
+			Check(SaveCollectionItemBody, {
+				baseRevisionId: targetId,
+				placement: "review-with-subject",
+				role: "item",
+			}),
+		).toBe(true);
+		expect(Check(SaveCollectionItemBody, { placement: "direct" })).toBe(false);
+	});
+
+	it("keeps Collection roles closed", () => {
+		expect(
+			Check(SaveCollectionItemBody, {
+				baseRevisionId: targetId,
+				placement: "direct",
+				role: "chapter",
+			}),
+		).toBe(false);
+	});
+
+	it("accepts bounded content pagination", () => {
+		expect(Check(CollectionItemsQuery, { limit: 100 })).toBe(true);
+		expect(Check(CollectionItemsQuery, { limit: 101 })).toBe(false);
 	});
 });
 

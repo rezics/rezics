@@ -1,5 +1,13 @@
 import { sql } from "drizzle-orm";
-import { check, index, pgEnum, primaryKey, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+	check,
+	foreignKey,
+	index,
+	pgEnum,
+	primaryKey,
+	uniqueIndex,
+	uuid,
+} from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -12,6 +20,7 @@ import { profile, unit } from "./core";
 
 export const collectionSource = pgEnum("collection_source", ["manual", "search", "system"]);
 export const collectionSystemKey = pgEnum("collection_system_key", ["favorites"]);
+export const collectionItemRole = pgEnum("collection_item_role", ["item", "featured", "favorite"]);
 
 export const collection = pgTable(
 	"collection",
@@ -56,7 +65,8 @@ export const collectionItem = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		role: text().default("item").notNull(),
+		parentUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		role: collectionItemRole().notNull(),
 		position: fractionalIndexPosition()
 			.default(sql`'a0'::text`)
 			.notNull(),
@@ -74,8 +84,17 @@ export const collectionItem = pgTable(
 			table.unitId,
 		),
 		index("collection_item_unit_idx").on(table.unitId),
+		index("collection_item_parent_idx").on(table.collectionId, table.parentUnitId),
 		index("collection_item_added_by_idx").on(table.addedByProfileId),
-		check("collection_item_role_not_blank", sql`btrim(${table.role}) <> ''`),
+		foreignKey({
+			name: "collection_item_parent_membership_fk",
+			columns: [table.collectionId, table.parentUnitId],
+			foreignColumns: [table.collectionId, table.unitId],
+		}),
 		check("collection_item_not_self_check", sql`${table.collectionId} <> ${table.unitId}`),
+		check(
+			"collection_item_parent_not_self_check",
+			sql`${table.parentUnitId} is null or ${table.parentUnitId} <> ${table.unitId}`,
+		),
 	],
 );

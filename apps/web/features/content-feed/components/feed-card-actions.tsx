@@ -1,13 +1,9 @@
 "use client";
 
 import {
-	getApiCollectionsFavoritesQueryKey,
 	getApiReactionsUnitsByUnitIdQueryKey,
-	useDeleteApiCollectionsFavoritesItemsByTargetId,
 	useDeleteApiReactionsUnitsByUnitId,
-	useGetApiCollectionsFavorites,
 	useGetApiReactionsUnitsByUnitId,
-	usePutApiCollectionsFavoritesItemsByTargetId,
 	usePutApiReactionsSharesByUnitId,
 	usePutApiReactionsUnitsByUnitId,
 } from "@rezics/openapi-tanstack-query";
@@ -19,7 +15,6 @@ import {
 	CheckIcon,
 	EllipsisIcon,
 	EyeOffIcon,
-	LibraryIcon,
 	LinkIcon,
 	MessageCircleIcon,
 	Share2Icon,
@@ -43,10 +38,12 @@ import {
 	cn,
 } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal";
-import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
+import {
+	CollectionPickerButton,
+	type CollectionSavePlacement,
+} from "@/features/collections/components/collection-picker-button";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -122,6 +119,7 @@ export function FeedVoteControl({
 
 export function FeedEngagementBar({
 	actions,
+	collectionPlacement = "direct",
 	href,
 	initialReaction,
 	itemId,
@@ -135,6 +133,7 @@ export function FeedEngagementBar({
 	showErrors = true,
 }: {
 	actions?: ReactNode;
+	collectionPlacement?: CollectionSavePlacement;
 	href?: string;
 	initialReaction: FeedReaction;
 	itemId: string;
@@ -212,7 +211,11 @@ export function FeedEngagementBar({
 					</Button>
 				) : null}
 				{policy.primary === "collect" ? (
-					<CollectionPickerButton targetId={itemId} triggerVariant="secondary" />
+					<CollectionPickerButton
+						placement={collectionPlacement}
+						targetId={itemId}
+						triggerVariant="secondary"
+					/>
 				) : null}
 				{policy.primary === "follow" ? (
 					<FollowButton
@@ -290,59 +293,36 @@ export function FeedOverflowMenu({
 	children,
 	itemId,
 	onNotInterested,
+	placement = "direct",
 }: {
 	canExclude: boolean;
 	children?: ReactNode;
 	itemId: string;
 	onNotInterested?: () => void;
+	placement?: CollectionSavePlacement;
 }) {
 	const { data: session } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
-	const queryClient = useQueryClient();
 	const [collectionOpen, setCollectionOpen] = useState(false);
-	const localizationLanguages = useLocalizationLanguages();
-	const favorites = useGetApiCollectionsFavorites(
-		{ query: { localizationLanguages } },
-		{ query: { enabled: Boolean(session) } },
-	);
-	const addFavorite = usePutApiCollectionsFavoritesItemsByTargetId();
-	const removeFavorite = useDeleteApiCollectionsFavoritesItemsByTargetId();
-	const saved = favorites.data?.items.some((item) => item.targetId === itemId) ?? false;
-
-	async function toggleSaved() {
-		if (!session) {
-			openAuthPortal("login");
-			return;
-		}
-		try {
-			if (saved) await removeFavorite.mutateAsync({ path: { targetId: itemId } });
-			else await addFavorite.mutateAsync({ path: { targetId: itemId } });
-			await queryClient.invalidateQueries({ queryKey: getApiCollectionsFavoritesQueryKey() });
-		} catch {
-			// The query and mutation retain the last confirmed server state.
-		}
-	}
-	function openCollectionPicker() {
-		if (!session) openAuthPortal("login");
-		else setCollectionOpen(true);
-	}
+	const openCollectionPicker = () => {
+		if (session) setCollectionOpen(true);
+		else openAuthPortal("login");
+	};
 
 	return (
 		<>
 			<FeedOverflowMenuView
 				canExclude={canExclude}
-				onAddToCollection={openCollectionPicker}
 				onNotInterested={onNotInterested}
-				onToggleSaved={() => void toggleSaved()}
-				savePending={addFavorite.isPending || removeFavorite.isPending}
-				saved={saved}
+				onSave={openCollectionPicker}
 			>
 				{children}
 			</FeedOverflowMenuView>
 			<CollectionPickerButton
-				targetId={itemId}
 				onOpenChange={setCollectionOpen}
 				open={collectionOpen}
+				placement={placement}
+				targetId={itemId}
 			/>
 		</>
 	);
@@ -351,21 +331,15 @@ export function FeedOverflowMenu({
 export function FeedOverflowMenuView({
 	canExclude,
 	children,
-	onAddToCollection,
 	onNotInterested,
-	onToggleSaved,
-	savePending = false,
-	saved,
+	onSave,
 }: {
 	canExclude: boolean;
 	children?: ReactNode;
-	onAddToCollection: () => void;
 	onNotInterested?: () => void;
-	onToggleSaved: () => void;
-	savePending?: boolean;
-	saved: boolean;
+	onSave: () => void;
 }) {
-	const { t } = useTranslation(["feed", "ui"]);
+	const { t } = useTranslation(["collections", "feed"]);
 	return (
 		<Menu>
 			<MenuTrigger asChild>
@@ -380,13 +354,9 @@ export function FeedOverflowMenuView({
 				</Button>
 			</MenuTrigger>
 			<MenuContent>
-				<MenuItem disabled={savePending} onSelect={onToggleSaved} value="save">
-					<BookmarkIcon aria-hidden fill={saved ? "currentColor" : "none"} />
-					{saved ? t.feed.actions.saved : t.ui.save}
-				</MenuItem>
-				<MenuItem onSelect={onAddToCollection} value="add-to-collection">
-					<LibraryIcon aria-hidden />
-					{t.feed.actions.addToCollection}
+				<MenuItem onSelect={onSave} value="save">
+					<BookmarkIcon aria-hidden />
+					{t.collections.save.action}
 				</MenuItem>
 				{canExclude && onNotInterested ? (
 					<MenuItem onSelect={onNotInterested} value="not-interested">

@@ -455,9 +455,13 @@ export const CollectionListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			ownerId: Uuid,
+			source: t.UnionEnum(["manual", "search", "system"]),
+			systemKey: t.Nullable(t.Literal("favorites")),
 			language: ContentLanguage,
 			itemCount: t.Integer(),
 			containsTarget: t.Boolean(),
+			acceptsItems: t.Boolean(),
+			latestRevisionId: Uuid,
 			title: NullableText,
 			summary: NullableText,
 			cover: ImageAssetResponse,
@@ -827,22 +831,35 @@ export const CollectionDetailResponse = t.Object({
 	presentationDocument: CollectionPresentationDocument,
 	ownerId: Uuid,
 	itemCount: t.Integer(),
+	latestRevisionId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	localizations: t.Array(LocalizationSummary),
+	capabilities: t.Object({
+		canEditDetails: t.Boolean(),
+		canManageItems: t.Boolean(),
+		canEditPresentation: t.Boolean(),
+		canManageLocalizations: t.Boolean(),
+		canManageAccess: t.Boolean(),
+		canViewHistory: t.Boolean(),
+		canRestoreHistory: t.Boolean(),
+		canDelete: t.Boolean(),
+	}),
+});
+export const CollectionContentResponse = t.Object({
 	items: t.Array(
 		t.Object({
-			targetId: Uuid,
-			kind: t.String(),
-			language: ContentLanguage,
-			parentTargetId: t.Nullable(Uuid),
-			position: FractionalPosition,
-			type: t.String(),
-			title: NullableText,
-			cover: ImageAssetResponse,
-			directItemCount: t.Nullable(t.Integer({ minimum: 0 })),
+			membership: t.Object({
+				targetId: Uuid,
+				role: t.UnionEnum(["item", "featured", "favorite"]),
+				parentTargetId: t.Nullable(Uuid),
+				position: FractionalPosition,
+				createdAt: DateTime,
+			}),
+			content: t.Union([FeedUnitItemResponse, FeedPostItemResponse]),
 		}),
 	),
+	nextCursor: NullableText,
 });
 export const RealmDetailResponse = t.Object({
 	id: Uuid,

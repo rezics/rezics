@@ -4,7 +4,20 @@ import { TranslationBoundary } from "@/i18n/translation-boundary";
 
 export default function ZoneLayout({ children }: { children: ReactNode }) {
 	return (
-		<TranslationBoundary namespaces={["errors", "locale", "search", "ui", "zones"]}>
+		<TranslationBoundary
+			namespaces={[
+				"engagement",
+				"errors",
+				"feed",
+				"locale",
+				"posts",
+				"realms",
+				"search",
+				"ui",
+				"units",
+				"zones",
+			]}
+		>
 			{children}
 		</TranslationBoundary>
 	);

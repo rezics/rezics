@@ -1,1 +1,1 @@
-export { CollectionCreate as default } from "@/features/collections/collections";
+export { CollectionCreatePage as default } from "@/features/collections/pages/collection-create-page";

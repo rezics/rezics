@@ -6,7 +6,13 @@ import { create } from "native-i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { FeedPostCard, type FeedPost, FeedUnitCard, type FeedUnit } from "./feed-item-card";
+import {
+	collectionPlacementForFeedItem,
+	FeedPostCard,
+	type FeedPost,
+	FeedUnitCard,
+	type FeedUnit,
+} from "./feed-item-card";
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
@@ -54,6 +60,18 @@ const translation = await create(resources).getTranslation(
 );
 
 afterEach(cleanup);
+
+describe("Feed item Collection placement", () => {
+	it("places Reviews below their reviewed subject and keeps other content direct", () => {
+		expect(collectionPlacementForFeedItem({ itemType: "post", postKind: "review" })).toBe(
+			"review-with-subject",
+		);
+		expect(collectionPlacementForFeedItem({ itemType: "post", postKind: "excerpt" })).toBe(
+			"direct",
+		);
+		expect(collectionPlacementForFeedItem({ itemType: "unit", postKind: null })).toBe("direct");
+	});
+});
 
 const excerpt = {
 	id: "019f9872-bd49-7bb4-a6b7-ec621fca2032",

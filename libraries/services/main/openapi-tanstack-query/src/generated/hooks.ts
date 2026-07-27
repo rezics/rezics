@@ -1412,6 +1412,12 @@ import type {
 	GetApiCollectionsFavoritesStatus422,
 	GetApiCollectionsFavoritesStatus429,
 	GetApiCollectionsFavoritesStatus500,
+	GetApiCollectionsByCollectionIdItemsOptions,
+	GetApiCollectionsByCollectionIdItemsStatus200,
+	GetApiCollectionsByCollectionIdItemsStatus400,
+	GetApiCollectionsByCollectionIdItemsStatus404,
+	GetApiCollectionsByCollectionIdItemsStatus422,
+	GetApiCollectionsByCollectionIdItemsStatus500,
 	GetApiCollectionsByCollectionIdOptions,
 	GetApiCollectionsByCollectionIdStatus200,
 	GetApiCollectionsByCollectionIdStatus404,
@@ -1428,6 +1434,7 @@ import type {
 	PatchApiCollectionsByCollectionIdStatus500,
 	DeleteApiCollectionsByCollectionIdOptions,
 	DeleteApiCollectionsByCollectionIdStatus204,
+	DeleteApiCollectionsByCollectionIdStatus400,
 	DeleteApiCollectionsByCollectionIdStatus403,
 	DeleteApiCollectionsByCollectionIdStatus409,
 	DeleteApiCollectionsByCollectionIdStatus422,
@@ -1447,23 +1454,30 @@ import type {
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus400,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus403,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus404,
+	PutApiCollectionsByCollectionIdItemsByTargetIdStatus409,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus422,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus429,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus500,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
+	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403,
+	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500,
 	PutApiCollectionsFavoritesItemsByTargetIdOptions,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus200,
+	PutApiCollectionsFavoritesItemsByTargetIdStatus400,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus404,
+	PutApiCollectionsFavoritesItemsByTargetIdStatus409,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus422,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus429,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus500,
 	DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
+	DeleteApiCollectionsFavoritesItemsByTargetIdStatus400,
+	DeleteApiCollectionsFavoritesItemsByTargetIdStatus409,
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus422,
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus429,
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus500,
@@ -2241,6 +2255,7 @@ import {
 	getApiCollections,
 	postApiCollections,
 	getApiCollectionsFavorites,
+	getApiCollectionsByCollectionIdItems,
 	getApiCollectionsByCollectionId,
 	patchApiCollectionsByCollectionId,
 	deleteApiCollectionsByCollectionId,
@@ -24064,6 +24079,118 @@ export function useGetApiCollectionsFavorites<
 	return queryResult;
 }
 
+export const getApiCollectionsByCollectionIdItemsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiCollectionsByCollectionIdItemsOptions, "headers">) =>
+	[
+		{ url: "/api/collections/:collectionId/items", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiCollectionsByCollectionIdItemsQueryKey = ReturnType<
+	typeof getApiCollectionsByCollectionIdItemsQueryKey
+>;
+
+export function getApiCollectionsByCollectionIdItemsQueryOptions(
+	{ path, query }: GetApiCollectionsByCollectionIdItemsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiCollectionsByCollectionIdItemsQueryKey({ path, query });
+	return queryOptions<
+		GetApiCollectionsByCollectionIdItemsStatus200,
+		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemsStatus400
+			| GetApiCollectionsByCollectionIdItemsStatus404
+			| GetApiCollectionsByCollectionIdItemsStatus422
+			| GetApiCollectionsByCollectionIdItemsStatus500
+		>,
+		GetApiCollectionsByCollectionIdItemsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiCollectionsByCollectionIdItems({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List hydrated collection content
+ * {@link /api/collections/:collectionId/items}
+ */
+export function useGetApiCollectionsByCollectionIdItems<
+	TData = GetApiCollectionsByCollectionIdItemsStatus200,
+	TQueryData = GetApiCollectionsByCollectionIdItemsStatus200,
+	TQueryKey extends QueryKey = GetApiCollectionsByCollectionIdItemsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiCollectionsByCollectionIdItemsOptions["path"]
+			| (() => GetApiCollectionsByCollectionIdItemsOptions["path"]);
+		query?:
+			| GetApiCollectionsByCollectionIdItemsOptions["query"]
+			| (() => GetApiCollectionsByCollectionIdItemsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiCollectionsByCollectionIdItemsStatus200,
+				ResponseErrorConfig<
+					| GetApiCollectionsByCollectionIdItemsStatus400
+					| GetApiCollectionsByCollectionIdItemsStatus404
+					| GetApiCollectionsByCollectionIdItemsStatus422
+					| GetApiCollectionsByCollectionIdItemsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiCollectionsByCollectionIdItemsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiCollectionsByCollectionIdItemsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemsStatus400
+			| GetApiCollectionsByCollectionIdItemsStatus404
+			| GetApiCollectionsByCollectionIdItemsStatus422
+			| GetApiCollectionsByCollectionIdItemsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const getApiCollectionsByCollectionIdQueryKey = ({
 	path,
 	query,
@@ -24295,6 +24422,7 @@ export function deleteApiCollectionsByCollectionIdMutationOptions<TContext = unk
 	return mutationOptions<
 		DeleteApiCollectionsByCollectionIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdStatus400
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
@@ -24305,10 +24433,11 @@ export function deleteApiCollectionsByCollectionIdMutationOptions<TContext = unk
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiCollectionsByCollectionId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -24325,6 +24454,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiCollectionsByCollectionIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiCollectionsByCollectionIdStatus400
 				| DeleteApiCollectionsByCollectionIdStatus403
 				| DeleteApiCollectionsByCollectionIdStatus409
 				| DeleteApiCollectionsByCollectionIdStatus422
@@ -24347,6 +24477,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiCollectionsByCollectionIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdStatus400
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
@@ -24360,6 +24491,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 	return useMutation<
 		DeleteApiCollectionsByCollectionIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdStatus400
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
@@ -24378,6 +24510,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 	) as UseMutationResult<
 		DeleteApiCollectionsByCollectionIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdStatus400
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
@@ -24517,6 +24650,7 @@ export function putApiCollectionsByCollectionIdItemsByTargetIdMutationOptions<TC
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24549,6 +24683,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
+				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus409
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24572,6 +24707,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24586,6 +24722,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24605,6 +24742,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24624,7 +24762,9 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions
 	return mutationOptions<
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24633,10 +24773,11 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiCollectionsByCollectionIdItemsByTargetId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -24653,7 +24794,9 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24675,7 +24818,9 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24687,7 +24832,9 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	return useMutation<
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24704,7 +24851,9 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	) as UseMutationResult<
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
@@ -24724,7 +24873,9 @@ export function putApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContex
 	return mutationOptions<
 		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24733,10 +24884,11 @@ export function putApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContex
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await putApiCollectionsFavoritesItemsByTargetId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -24753,7 +24905,9 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiCollectionsFavoritesItemsByTargetIdStatus200,
 			ResponseErrorConfig<
+				| PutApiCollectionsFavoritesItemsByTargetIdStatus400
 				| PutApiCollectionsFavoritesItemsByTargetIdStatus404
+				| PutApiCollectionsFavoritesItemsByTargetIdStatus409
 				| PutApiCollectionsFavoritesItemsByTargetIdStatus422
 				| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 				| PutApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24774,7 +24928,9 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 	) as UseMutationOptions<
 		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24786,7 +24942,9 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 	return useMutation<
 		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24803,7 +24961,9 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 	) as UseMutationResult<
 		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24823,6 +24983,8 @@ export function deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions<TCon
 	return mutationOptions<
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24831,10 +24993,11 @@ export function deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions<TCon
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiCollectionsFavoritesItemsByTargetId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -24851,6 +25014,8 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
+				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
 				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
 				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24871,6 +25036,8 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24882,6 +25049,8 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 	return useMutation<
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
@@ -24898,6 +25067,8 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 	) as UseMutationResult<
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500

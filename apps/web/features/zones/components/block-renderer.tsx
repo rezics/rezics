@@ -17,7 +17,7 @@ import {
 	type SimpleFeedContentKind,
 } from "@rezics/filter";
 import {
-	useGetApiCollectionsByCollectionId,
+	useGetApiCollectionsByCollectionIdItems,
 	useGetApiSearchFeaturesByTemplate,
 	useGetApiSearchZonesByZoneIdFeature,
 	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
@@ -903,37 +903,22 @@ function CollectionUnitList({
 }) {
 	const { t } = useTranslation("zones");
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiCollectionsByCollectionId({
+	const query = useGetApiCollectionsByCollectionIdItems({
 		path: { collectionId },
-		query: { localizationLanguages },
+		query: { limit, localizationLanguages },
 	});
 	if (query.isPending) return null;
 	if (query.isError) return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
-	const items = query.data?.items.slice(0, limit) ?? [];
+	const items = query.data?.items ?? [];
 	if (items.length === 0)
 		return <p className="my-4 text-muted-foreground text-sm">{t.searchEmpty}</p>;
 	return (
 		<ul aria-label={t.contentList} className={unitListClasses(layout)}>
-			{items.map((item) => {
-				const href = unitIdHref(item.type, item.targetId);
-				const content = (
-					<div className="flex min-w-0 items-center gap-3 rounded-xl border border-border-weak bg-card p-4">
-						{item.cover ? (
-							<IdentityAvatar
-								avatar={{ type: "image", image: item.cover }}
-								className="size-10 rounded-lg"
-								fallback={item.title?.slice(0, 1) ?? ""}
-							/>
-						) : null}
-						<p className="truncate font-semibold">{item.title ?? t.untitledResult}</p>
-					</div>
-				);
-				return (
-					<li key={item.targetId}>
-						{href ? <AppLink href={href}>{content}</AppLink> : content}
-					</li>
-				);
-			})}
+			{items.map((item) => (
+				<li key={item.membership.targetId}>
+					<FeedItemCard item={item.content} />
+				</li>
+			))}
 		</ul>
 	);
 }

@@ -431,6 +431,8 @@ import type {
 	PostApiCollectionsResponses,
 	GetApiCollectionsFavoritesOptions,
 	GetApiCollectionsFavoritesResponses,
+	GetApiCollectionsByCollectionIdItemsOptions,
+	GetApiCollectionsByCollectionIdItemsResponses,
 	GetApiCollectionsByCollectionIdOptions,
 	GetApiCollectionsByCollectionIdResponses,
 	PatchApiCollectionsByCollectionIdOptions,
@@ -4915,6 +4917,22 @@ export function getApiCollectionsFavorites<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<GetApiCollectionsFavoritesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List hydrated collection content
+ * {@link /api/collections/:collectionId/items}
+ */
+export function getApiCollectionsByCollectionIdItems<ThrowOnError extends boolean = true>(
+	options: Options<GetApiCollectionsByCollectionIdItemsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiCollectionsByCollectionIdItemsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/collections/{collectionId}/items",
+		...config,
+	}) as Promise<RequestResult<GetApiCollectionsByCollectionIdItemsResponses, ThrowOnError>>;
 }
 
 /**

@@ -8,6 +8,9 @@ import {
 	Uuid,
 } from "../schema";
 
+export const CollectionItemRole = t.UnionEnum(["item", "featured", "favorite"]);
+export type CollectionItemRole = Static<typeof CollectionItemRole>;
+
 export const ListCollectionsQuery = t.Object(
 	{
 		ownerId: t.Optional(Uuid),
@@ -34,33 +37,52 @@ export const CollectionDetailQuery = t.Object(LocalizationLanguageQuery, {
 });
 export type CollectionDetailQuery = Static<typeof CollectionDetailQuery>;
 
-export const UpdateCollectionBody = t.Object({
-	status: LifecycleInput.status,
-	visibility: LifecycleInput.visibility,
-	localization: t.Optional(LocalizationInput),
-	definitionDocument: t.Optional(CollectionDefinitionDocument),
-	presentationDocument: t.Optional(CollectionPresentationDocument),
-});
+export const CollectionItemsQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ maxLength: 4_096 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
+export type CollectionItemsQuery = Static<typeof CollectionItemsQuery>;
+
+export const UpdateCollectionBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		status: LifecycleInput.status,
+		visibility: LifecycleInput.visibility,
+		localization: t.Optional(LocalizationInput),
+		definitionDocument: t.Optional(CollectionDefinitionDocument),
+		presentationDocument: t.Optional(CollectionPresentationDocument),
+	},
+	{ additionalProperties: false },
+);
 export type UpdateCollectionBody = Static<typeof UpdateCollectionBody>;
 
 export const CollectionItemParams = t.Object({ collectionId: Uuid, targetId: Uuid });
 export type CollectionItemParams = Static<typeof CollectionItemParams>;
 
-export const SaveCollectionItemBody = t.Object({
-	kind: t.Optional(t.String({ maxLength: 32 })),
-	parentTargetId: t.Optional(t.Nullable(Uuid)),
-	position: t.Optional(FractionalPosition),
-	searchText: t.Optional(t.String({ maxLength: 1_000 })),
-});
+export const SaveCollectionItemBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		placement: t.UnionEnum(["direct", "review-with-subject"]),
+		role: t.Optional(CollectionItemRole),
+		parentTargetId: t.Optional(t.Nullable(Uuid)),
+		position: t.Optional(FractionalPosition),
+	},
+	{ additionalProperties: false },
+);
 export type SaveCollectionItemBody = Static<typeof SaveCollectionItemBody>;
 
 export const AddCollectionItemsBatchBody = t.Object(
 	{
+		baseRevisionId: Uuid,
 		items: t.Array(
 			t.Object(
 				{
 					targetId: Uuid,
-					kind: t.Optional(t.String({ minLength: 1, maxLength: 32 })),
+					role: t.Optional(CollectionItemRole),
 				},
 				{ additionalProperties: false },
 			),
@@ -70,6 +92,12 @@ export const AddCollectionItemsBatchBody = t.Object(
 	{ additionalProperties: false },
 );
 export type AddCollectionItemsBatchBody = Static<typeof AddCollectionItemsBatchBody>;
+
+export const CollectionRevisionBody = t.Object(
+	{ baseRevisionId: Uuid },
+	{ additionalProperties: false },
+);
+export type CollectionRevisionBody = Static<typeof CollectionRevisionBody>;
 
 export const AddCollectionItemsBatchResponse = t.Object({
 	items: t.Array(

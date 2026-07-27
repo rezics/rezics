@@ -13,7 +13,7 @@ import {
 	type PostApiUnitsPresentationsStatus200,
 	type GetApiRealmsByRealmIdNavigationStatus200,
 	postApiUnitsPresentations,
-	useGetApiCollectionsByCollectionId,
+	useGetApiCollectionsByCollectionIdItems,
 	useGetApiRealmsByRealmIdNavigation,
 	useGetApiUnitsByIdByUnitIdDocksByKind,
 } from "@rezics/openapi-tanstack-query";
@@ -34,6 +34,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useMemo } from "react";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
+import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -388,9 +389,9 @@ function DockCollection({
 	readonly limit: number;
 }) {
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiCollectionsByCollectionId({
+	const query = useGetApiCollectionsByCollectionIdItems({
 		path: { collectionId },
-		query: { localizationLanguages },
+		query: { limit, localizationLanguages },
 	});
 	if (query.isPending) return null;
 	if (query.isError)
@@ -398,23 +399,9 @@ function DockCollection({
 	if (!query.data) return null;
 	return (
 		<div className={unitListClasses(layout)}>
-			{query.data.items.slice(0, limit).map((item) => {
-				const href = publicUnitHref(item.type, { id: item.targetId });
-				const content = (
-					<Card appearance="outlined">
-						<CardContent className="p-4">
-							<p className="font-semibold">{item.title}</p>
-						</CardContent>
-					</Card>
-				);
-				return href ? (
-					<AppLink href={href} key={item.targetId}>
-						{content}
-					</AppLink>
-				) : (
-					<div key={item.targetId}>{content}</div>
-				);
-			})}
+			{query.data.items.map((item) => (
+				<FeedItemCard item={item.content} key={item.membership.targetId} />
+			))}
 		</div>
 	);
 }

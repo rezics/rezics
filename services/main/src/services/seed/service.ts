@@ -1741,7 +1741,7 @@ async function seedStructure(
 					return {
 						collectionId: collectionUnit.id,
 						unitId: target.id,
-						role: index % 5 === 0 ? "featured" : "item",
+						role: index % 5 === 0 ? ("featured" as const) : ("item" as const),
 						position: fractionalPositionAt(index),
 						addedByProfileId: collectionUnit.ownerProfileId,
 						createdAt: collectionUnit.createdAt,
