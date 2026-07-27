@@ -4,7 +4,6 @@ import { PortableTextDocument } from "@rezics/block";
 
 import {
 	ContentLanguageValues,
-	ContentRatingValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
@@ -12,6 +11,7 @@ import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import {
 	AvatarInput,
 	ContentLanguage,
+	ContentRating,
 	DateTime,
 	FractionalPosition,
 	LocalizationLanguageQuery,
@@ -163,7 +163,8 @@ export const ReplacePreferencesBody = t.Object(
 		collectionConfig: t.Nullable(CollectionConfigV1),
 		personalizedFeed: t.Boolean({ default: true }),
 		filterFeedByPreferredLanguages: t.Boolean({ default: false }),
-		contentRatings: t.Array(t.Union(ContentRatingValues.map((value) => t.Literal(value))), {
+		contentRatings: t.Array(ContentRating, {
+			minItems: 1,
 			uniqueItems: true,
 		}),
 		preferredLanguages: t.Array(ContentLanguage, {

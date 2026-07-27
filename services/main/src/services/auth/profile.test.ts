@@ -123,6 +123,7 @@ describe("Profile registration defaults", () => {
 		expect(valuesByTable.get(profilePreference)).toEqual({
 			profileId: ProfileId,
 			defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+			contentRatings: ["general", "r15"],
 			preferredLanguages: ["en"],
 		});
 		expect(valuesByTable.get(realmMember)).toEqual({

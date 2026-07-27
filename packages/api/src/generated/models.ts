@@ -34998,6 +34998,16 @@ export const GetApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 export type GetApiUsersMePreferencesStatus200CollectionConfigViewEnum =
 	(typeof GetApiUsersMePreferencesStatus200CollectionConfigViewEnum)[keyof typeof GetApiUsersMePreferencesStatus200CollectionConfigViewEnum];
 
+export const GetApiUsersMePreferencesStatus200ContentRatingsEnum = {
+	general: "general",
+	r15: "r15",
+	r18: "r18",
+	r18g: "r18g",
+} as const;
+
+export type GetApiUsersMePreferencesStatus200ContentRatingsEnum =
+	(typeof GetApiUsersMePreferencesStatus200ContentRatingsEnum)[keyof typeof GetApiUsersMePreferencesStatus200ContentRatingsEnum];
+
 export const GetApiUsersMePreferencesStatus200PreferredLanguagesEnum = {
 	zh: "zh",
 	en: "en",
@@ -35059,7 +35069,7 @@ export type GetApiUsersMePreferencesStatus200 = {
 	/**
 	 * @type array
 	 */
-	contentRatings: string[];
+	contentRatings: GetApiUsersMePreferencesStatus200ContentRatingsEnum[];
 	/**
 	 * @type array
 	 */
@@ -35180,6 +35190,16 @@ export const PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 export type PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum =
 	(typeof PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum)[keyof typeof PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum];
 
+export const PatchApiUsersMePreferencesStatus200ContentRatingsEnum = {
+	general: "general",
+	r15: "r15",
+	r18: "r18",
+	r18g: "r18g",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200ContentRatingsEnum =
+	(typeof PatchApiUsersMePreferencesStatus200ContentRatingsEnum)[keyof typeof PatchApiUsersMePreferencesStatus200ContentRatingsEnum];
+
 export const PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum = {
 	zh: "zh",
 	en: "en",
@@ -35241,7 +35261,7 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	/**
 	 * @type array
 	 */
-	contentRatings: string[];
+	contentRatings: PatchApiUsersMePreferencesStatus200ContentRatingsEnum[];
 	/**
 	 * @type array
 	 */
@@ -35394,6 +35414,16 @@ export const PutApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 export type PutApiUsersMePreferencesStatus200CollectionConfigViewEnum =
 	(typeof PutApiUsersMePreferencesStatus200CollectionConfigViewEnum)[keyof typeof PutApiUsersMePreferencesStatus200CollectionConfigViewEnum];
 
+export const PutApiUsersMePreferencesStatus200ContentRatingsEnum = {
+	general: "general",
+	r15: "r15",
+	r18: "r18",
+	r18g: "r18g",
+} as const;
+
+export type PutApiUsersMePreferencesStatus200ContentRatingsEnum =
+	(typeof PutApiUsersMePreferencesStatus200ContentRatingsEnum)[keyof typeof PutApiUsersMePreferencesStatus200ContentRatingsEnum];
+
 export const PutApiUsersMePreferencesStatus200PreferredLanguagesEnum = {
 	zh: "zh",
 	en: "en",
@@ -35455,7 +35485,7 @@ export type PutApiUsersMePreferencesStatus200 = {
 	/**
 	 * @type array
 	 */
-	contentRatings: string[];
+	contentRatings: PutApiUsersMePreferencesStatus200ContentRatingsEnum[];
 	/**
 	 * @type array
 	 */

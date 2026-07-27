@@ -11,6 +11,7 @@ import {
 	usePutApiUsersMePreferences,
 	useReplaceOwnProfileSlugAddress,
 	type GetApiUsersMeStatus200,
+	type PutApiUsersMePreferencesRequestContentRatingsEnum as ContentRating,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -18,11 +19,9 @@ import Link from "next/link";
 import { useState, type DragEvent, type FormEvent } from "react";
 import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
 
-import { Alert, AlertDescription } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
-import { Checkbox, CheckboxGroup } from "@rezics/ui";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@rezics/ui";
+import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { EntityPicker } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
@@ -56,6 +55,7 @@ import { buildLocalizationLanguages, selectLocalization } from "@/lib/localizati
 import { SettingsOverviewHref } from "./routing/settings-routes";
 import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
 import { FeedQueryKey } from "@/features/content-feed/query";
+import { ContentRatingPreferenceField } from "./components/content-rating-preference-field";
 
 function SettingsFrame({ title, children }: { title: string; children: React.ReactNode }) {
 	const { t } = useTranslation(["settings"]);
@@ -72,16 +72,9 @@ function SettingsFrame({ title, children }: { title: string; children: React.Rea
 	);
 }
 
-const ContentRatings = ["general", "r15", "r18", "r18g"] as const;
-type ContentRating = (typeof ContentRatings)[number];
-
 interface PickedRealm {
 	readonly id: string;
 	readonly label: string;
-}
-
-function isContentRating(value: FormDataEntryValue): value is ContentRating {
-	return typeof value === "string" && ContentRatings.some((rating) => rating === value);
 }
 
 export function ProfileSettings() {
@@ -235,6 +228,7 @@ export function PreferenceSettings() {
 	const [invalid, setInvalid] = useState(false);
 	const [selectedDefaultScoreContext, setSelectedDefaultScoreContext] = useState<PickedRealm>();
 	const [editedPreferredLanguages, setEditedPreferredLanguages] = useState<ContentLanguage[]>();
+	const [editedContentRatings, setEditedContentRatings] = useState<ContentRating[]>();
 	const [pendingLanguage, setPendingLanguage] = useState<ContentLanguage>();
 	const [draggedLanguage, setDraggedLanguage] = useState<ContentLanguage>();
 	if (preferences.isPending) return <QueryPending />;
@@ -258,6 +252,7 @@ export function PreferenceSettings() {
 		label: storedDefaultScoreContextLocalization?.title ?? storedDefaultScoreContext.data.id,
 	};
 	const preferredLanguages = editedPreferredLanguages ?? preferences.data.preferredLanguages;
+	const contentRatings = editedContentRatings ?? preferences.data.contentRatings;
 	const availableLanguages = ContentLanguageValues.filter(
 		(language) => !preferredLanguages.includes(language),
 	);
@@ -304,10 +299,9 @@ export function PreferenceSettings() {
 		if (!current) return;
 		const data = new FormData(event.currentTarget);
 		const interfaceLocale = String(data.get("interfaceLocale"));
-		const selectedRatings = data.getAll("contentRating").filter(isContentRating);
 		const submittedDefaultLicense = data.get("defaultLicense");
 		if (
-			!selectedRatings.length ||
+			!contentRatings.length ||
 			!isStoredUiLocale(interfaceLocale) ||
 			!preferredLanguages.length ||
 			(submittedDefaultLicense !== null &&
@@ -330,7 +324,7 @@ export function PreferenceSettings() {
 					personalizedFeed: data.get("personalizedFeed") === "true",
 					filterFeedByPreferredLanguages:
 						data.get("filterFeedByPreferredLanguages") === "true",
-					contentRatings: selectedRatings,
+					contentRatings,
 					preferredLanguages,
 				},
 			});
@@ -492,32 +486,14 @@ export function PreferenceSettings() {
 							{t.settings.defaultScoreContextHint}
 						</p>
 					</Field>
-					<FieldSet>
-						<FieldLegend variant="label">{t.ui.contentRating}</FieldLegend>
-						<CheckboxGroup className="grid gap-2 sm:grid-cols-2">
-							{ContentRatings.map((rating) => (
-								<Field invalid={invalid} key={rating} orientation="horizontal">
-									<Checkbox
-										defaultChecked={preferences.data.contentRatings.includes(
-											rating,
-										)}
-										name="contentRating"
-										value={rating}
-									/>
-									<FieldLabel className="font-normal">
-										{rating === "general"
-											? t.settings.general
-											: rating.toUpperCase()}
-									</FieldLabel>
-								</Field>
-							))}
-						</CheckboxGroup>
-						{invalid && (
-							<Alert variant="destructive">
-								<AlertDescription>{t.errors.invalid}</AlertDescription>
-							</Alert>
-						)}
-					</FieldSet>
+					<ContentRatingPreferenceField
+						generalLabel={t.settings.general}
+						invalid={invalid}
+						invalidMessage={t.errors.invalid}
+						legend={t.ui.contentRating}
+						onChange={setEditedContentRatings}
+						value={contentRatings}
+					/>
 					<Field>
 						<FieldLabel>{t.feed.personalized}</FieldLabel>
 						<NativeSelect

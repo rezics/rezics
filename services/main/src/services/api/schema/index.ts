@@ -30,6 +30,10 @@ export const ContentLanguage = t.Union([
 ]);
 export type ContentLanguage = Static<typeof ContentLanguage>;
 
+/** A persisted content-visibility rating accepted and returned by the public API. */
+export const ContentRating = t.UnionEnum(ContentRatingValues, { default: undefined });
+export type ContentRating = Static<typeof ContentRating>;
+
 /**
  * Ordered localization lookup hints supplied by an API consumer.
  *
@@ -142,7 +146,7 @@ export type LocalizationInput = Static<typeof LocalizationInput>;
 export const LifecycleInput = {
 	status: t.Optional(t.Union(UnitStatusValues.map((value) => t.Literal(value)))),
 	visibility: t.Optional(t.Union(UnitVisibilityValues.map((value) => t.Literal(value)))),
-	contentRating: t.Optional(t.Union(ContentRatingValues.map((value) => t.Literal(value)))),
+	contentRating: t.Optional(ContentRating),
 	aiDisclosure: t.Optional(t.Union(AiDisclosureValues.map((value) => t.Literal(value)))),
 	license: t.Optional(t.Nullable(PublicationLicense)),
 };

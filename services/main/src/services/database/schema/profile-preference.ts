@@ -11,6 +11,7 @@ import {
 } from "./columns";
 import {
 	type ContentLanguage,
+	DefaultContentRatingValues,
 	DefaultPreferredLanguage,
 	DefaultStoredUiLocale,
 	type StoredUiLocale,
@@ -32,7 +33,11 @@ export const profilePreference = pgTable(
 		interfaceLocale: text().$type<StoredUiLocale>().default(DefaultStoredUiLocale).notNull(),
 		contentRatings: contentRating()
 			.array()
-			.default(sql`array[]::content_rating[]`)
+			.default(
+				sql.raw(
+					`array[${DefaultContentRatingValues.map((value) => `'${value}'`).join(", ")}]::content_rating[]`,
+				),
+			)
 			.notNull(),
 		preferredLanguages: text()
 			.$type<ContentLanguage>()
@@ -56,6 +61,10 @@ export const profilePreference = pgTable(
 				and ${table.preferredLanguages} <@ array['zh', 'en']::text[]
 				and cardinality(array_positions(${table.preferredLanguages}, 'zh')) <= 1
 				and cardinality(array_positions(${table.preferredLanguages}, 'en')) <= 1`,
+		),
+		check(
+			"profile_preference_content_ratings_check",
+			sql`cardinality(${table.contentRatings}) > 0`,
 		),
 		check(
 			"profile_preference_interface_locale_check",

@@ -448,6 +448,9 @@ describe("database schema contracts", () => {
 		expect(preference.indexes.map((index) => index.config.name)).toContain(
 			"profile_preference_default_score_context_unit_idx",
 		);
+		expect(preference.checks.map((constraint) => constraint.name)).toContain(
+			"profile_preference_content_ratings_check",
+		);
 	});
 
 	it("separates optional Unit slug addresses from ID-addressed Units", () => {

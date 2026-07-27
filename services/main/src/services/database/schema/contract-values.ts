@@ -160,6 +160,11 @@ export const UnitStatusValues = ["draft", "published", "archived"] as const;
 export const UnitStatusActorKindValues = ["profile", "system", "import"] as const;
 export const UnitVisibilityValues = ["public", "unlisted", "private"] as const;
 export const ContentRatingValues = ["general", "r15", "r18", "r18g"] as const;
+export type ContentRating = (typeof ContentRatingValues)[number];
+export const DefaultContentRatingValues = [
+	"general",
+	"r15",
+] as const satisfies readonly ContentRating[];
 export const AiDisclosureValues = [
 	"unknown",
 	"none",

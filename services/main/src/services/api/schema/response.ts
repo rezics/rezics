@@ -13,6 +13,7 @@ import {
 } from "@rezics/block";
 import {
 	ContentLanguage,
+	ContentRating,
 	DateTime,
 	FractionalPosition,
 	OrdinalPosition,
@@ -695,7 +696,10 @@ export const PreferencesResponse = t.Object({
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
 	filterFeedByPreferredLanguages: t.Boolean(),
-	contentRatings: t.Array(t.String()),
+	contentRatings: t.Array(ContentRating, {
+		minItems: 1,
+		uniqueItems: true,
+	}),
 	preferredLanguages: t.Array(ContentLanguage),
 });
 const ProgressStatusResponse = t.UnionEnum(ProgressStatusValues);

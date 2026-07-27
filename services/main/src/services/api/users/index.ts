@@ -294,7 +294,7 @@ export default new Elysia({ prefix: "/users" })
 				authorization,
 				body.defaultScoreContextUnitId,
 			);
-			await database.transaction(async (tx) => {
+			return database.transaction(async (tx) => {
 				const [preference] = await tx
 					.update(profilePreference)
 					.set({
@@ -309,13 +309,10 @@ export default new Elysia({ prefix: "/users" })
 						preferredLanguages: body.preferredLanguages,
 					})
 					.where(eq(profilePreference.profileId, profile.unitId))
-					.returning({ profileId: profilePreference.profileId });
+					.returning();
 				if (!preference) throw new PreferencesNotFound();
+				return presentPreferences(preference);
 			});
-			return {
-				profileId: profile.unitId,
-				...body,
-			};
 		},
 		{
 			access: "write:profile:update",

@@ -47716,8 +47716,13 @@
 										"personalizedFeed": { "type": "boolean" },
 										"filterFeedByPreferredLanguages": { "type": "boolean" },
 										"contentRatings": {
+											"minItems": 1,
+											"uniqueItems": true,
 											"type": "array",
-											"items": { "type": "string" }
+											"items": {
+												"type": "string",
+												"enum": ["general", "r15", "r18", "r18g"]
+											}
 										},
 										"preferredLanguages": {
 											"type": "array",
@@ -47896,8 +47901,13 @@
 										"personalizedFeed": { "type": "boolean" },
 										"filterFeedByPreferredLanguages": { "type": "boolean" },
 										"contentRatings": {
+											"minItems": 1,
+											"uniqueItems": true,
 											"type": "array",
-											"items": { "type": "string" }
+											"items": {
+												"type": "string",
+												"enum": ["general", "r15", "r18", "r18g"]
+											}
 										},
 										"preferredLanguages": {
 											"type": "array",
@@ -48077,6 +48087,7 @@
 										"type": "boolean"
 									},
 									"contentRatings": {
+										"minItems": 1,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -48170,8 +48181,13 @@
 										"personalizedFeed": { "type": "boolean" },
 										"filterFeedByPreferredLanguages": { "type": "boolean" },
 										"contentRatings": {
+											"minItems": 1,
+											"uniqueItems": true,
 											"type": "array",
-											"items": { "type": "string" }
+											"items": {
+												"type": "string",
+												"enum": ["general", "r15", "r18", "r18g"]
+											}
 										},
 										"preferredLanguages": {
 											"type": "array",

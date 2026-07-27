@@ -16,6 +16,7 @@ import {
 } from "../database/schema";
 import {
 	DefaultContentLanguage,
+	DefaultContentRatingValues,
 	DefaultPreferredLanguage,
 } from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";
@@ -80,6 +81,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			await tx.insert(profilePreference).values({
 				profileId: profileUnit.id,
 				defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+				contentRatings: [...DefaultContentRatingValues],
 				preferredLanguages: [preferredLanguage],
 			});
 			await tx.insert(realmMember).values({
