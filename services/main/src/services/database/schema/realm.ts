@@ -184,6 +184,12 @@ export const realmUnit = pgTable(
 			table.createdAt.desc(),
 			table.unitId,
 		),
+		index("realm_unit_moderation_queue_idx").on(
+			table.realmId,
+			table.status,
+			table.updatedAt.desc(),
+			table.unitId.desc(),
+		),
 		index("realm_unit_unit_realm_idx").on(table.unitId, table.realmId),
 		check("realm_unit_not_self_check", sql`${table.realmId} <> ${table.unitId}`),
 	],

@@ -86941,6 +86941,12 @@ export type GetApiRealmsByRealmIdUnitsQuery = {
 	 */
 	localizationLanguages?: GetApiRealmsByRealmIdUnitsLocalizationLanguagesEnum[];
 	/**
+	 * @minLength 1
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
 	 * @default 50
 	 */
 	limit?: string | number;
@@ -86963,6 +86969,19 @@ export const GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum = {
 
 export type GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum =
 	(typeof GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum)[keyof typeof GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum];
+
+export const GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum = {
+	approve: "approve",
+	hide: "hide",
+	remove: "remove",
+	restore: "restore",
+	lock_post_targeting: "lock_post_targeting",
+	unlock_post_targeting: "unlock_post_targeting",
+	note: "note",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum =
+	(typeof GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum)[keyof typeof GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum];
 
 /**
  * @type object
@@ -87002,6 +87021,10 @@ export type GetApiRealmsByRealmIdUnitsStatus200 = {
 		 */
 		postTargetingLocked: boolean;
 		/**
+		 * @type array
+		 */
+		allowedCommands: GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum[];
+		/**
 		 * @type string
 		 */
 		moderationStatus: string;
@@ -87018,6 +87041,35 @@ export type GetApiRealmsByRealmIdUnitsStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -87073,6 +87125,7 @@ export type GetApiRealmsByRealmIdUnitsOptions = {
  */
 export type GetApiRealmsByRealmIdUnitsResponses = {
 	"200": GetApiRealmsByRealmIdUnitsStatus200;
+	"400": GetApiRealmsByRealmIdUnitsStatus400;
 	"403": GetApiRealmsByRealmIdUnitsStatus403;
 	"422": GetApiRealmsByRealmIdUnitsStatus422;
 	"500": GetApiRealmsByRealmIdUnitsStatus500;
@@ -87083,6 +87136,7 @@ export type GetApiRealmsByRealmIdUnitsResponses = {
  */
 export type GetApiRealmsByRealmIdUnitsResponse =
 	| GetApiRealmsByRealmIdUnitsStatus200
+	| GetApiRealmsByRealmIdUnitsStatus400
 	| GetApiRealmsByRealmIdUnitsStatus403
 	| GetApiRealmsByRealmIdUnitsStatus422
 	| GetApiRealmsByRealmIdUnitsStatus500;
@@ -87534,6 +87588,29 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum = {
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum =
 	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum];
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum = {
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum];
+
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetAllowedCommandsEnum = {
+	approve: "approve",
+	hide: "hide",
+	remove: "remove",
+	restore: "restore",
+	lock_post_targeting: "lock_post_targeting",
+	unlock_post_targeting: "unlock_post_targeting",
+	note: "note",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetAllowedCommandsEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetAllowedCommandsEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetAllowedCommandsEnum];
+
 /**
  * @type object
  */
@@ -87591,6 +87668,29 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 	 * @type string
 	 */
 	createdAt: string;
+	/**
+	 * @type object
+	 */
+	target: {
+		/**
+		 * @type string
+		 */
+		status: PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetStatusEnum;
+		/**
+		 * @type boolean
+		 */
+		postTargetingLocked: boolean;
+		/**
+		 * @type array
+		 */
+		allowedCommands: PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetAllowedCommandsEnum[];
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	};
 };
 
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus400 =

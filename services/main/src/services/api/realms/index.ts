@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, isNull, max, notInArray, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lt, max, notInArray, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -99,6 +99,7 @@ import {
 	RealmTagContextResponse,
 	RealmUnitListResponse,
 	RealmUnitHistoryQuery,
+	RealmUnitModerationActionResponse,
 	RealmUnitModerationHistoryResponse,
 	RealmMemberParams,
 	RealmParams,
@@ -111,10 +112,15 @@ import {
 	UpdateRealmMemberBody,
 } from "./schema";
 import {
+	decodeRealmUnitModerationCursor,
+	encodeRealmUnitModerationCursor,
+} from "./moderation-pagination";
+import {
 	executeAuthorizedModerationAction,
 	loadModerationCaseForAction,
 } from "../governance/moderation-service";
-import { type CreateModerationActionBody, ModerationActionResponse } from "../governance/schema";
+import { getRealmUnitModerationCommands } from "../governance/moderation-contract";
+import { type CreateModerationActionBody } from "../governance/schema";
 import {
 	GovernanceReasonCodeValues,
 	RealmUnitStatusValues,
@@ -1531,7 +1537,13 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/units",
 		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
-			const items = await database
+			const limit = query.limit ?? 50;
+			const cursor = decodeRealmUnitModerationCursor(query.cursor, {
+				realmId: params.realmId,
+				filter: query.status,
+			});
+			const statusOrder = sql<number>`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`;
+			const rows = await database
 				.select({
 					realmId: realmUnit.realmId,
 					unitId: realmUnit.unitId,
@@ -1553,20 +1565,52 @@ export default new Elysia({ prefix: "/realms" })
 					and(
 						eq(realmUnit.realmId, params.realmId),
 						query.status ? eq(realmUnit.status, query.status) : undefined,
+						cursor
+							? or(
+									gt(statusOrder, cursor.statusOrder),
+									and(
+										eq(statusOrder, cursor.statusOrder),
+										or(
+											lt(realmUnit.updatedAt, cursor.updatedAt),
+											and(
+												eq(realmUnit.updatedAt, cursor.updatedAt),
+												lt(realmUnit.unitId, cursor.unitId),
+											),
+										),
+									),
+								)
+							: undefined,
 					),
 				)
-				.orderBy(
-					sql`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`,
-					desc(realmUnit.updatedAt),
-					desc(realmUnit.unitId),
-				)
-				.limit(query.limit ?? 50);
+				.orderBy(statusOrder, desc(realmUnit.updatedAt), desc(realmUnit.unitId))
+				.limit(limit + 1);
+			const hasMore = rows.length > limit;
+			const page = rows.slice(0, limit);
+			const items = page.map((item) => {
+				if (!item.language)
+					throw new Error(`Realm Unit ${item.unitId} has no localization`);
+				return {
+					...item,
+					language: item.language,
+					allowedCommands: [
+						...getRealmUnitModerationCommands(item.status, item.postTargetingLocked),
+					],
+				};
+			});
+			const last = page.at(-1);
 			return {
-				items: items.map((item) => {
-					if (!item.language)
-						throw new Error(`Realm Unit ${item.unitId} has no localization`);
-					return { ...item, language: item.language };
-				}),
+				items,
+				nextCursor:
+					hasMore && last
+						? encodeRealmUnitModerationCursor(
+								{ realmId: params.realmId, filter: query.status },
+								{
+									status: last.status,
+									updatedAt: last.updatedAt,
+									unitId: last.unitId,
+								},
+							)
+						: null,
 			};
 		},
 		{
@@ -1575,6 +1619,7 @@ export default new Elysia({ prefix: "/realms" })
 			query: ListRealmUnitsQuery,
 			response: {
 				[StatusCodes.OK]: RealmUnitListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 			},
 			detail: { summary: "List Realm Units for moderation", tags: ["Realms"] },
@@ -1772,20 +1817,47 @@ export default new Elysia({ prefix: "/realms" })
 								kind: body.command,
 								...(body.annotation ? { notes: [body.annotation] } : {}),
 							};
-				return executeAuthorizedModerationAction(tx, {
+				const executed = await executeAuthorizedModerationAction(tx, {
 					caseRow,
 					actorProfileId: profile.unitId,
 					body: actionBody,
 				});
+				const [updatedTarget] = await tx
+					.select({
+						status: realmUnit.status,
+						postTargetingLocked: realmUnit.postTargetingLocked,
+						updatedAt: realmUnit.updatedAt,
+					})
+					.from(realmUnit)
+					.where(
+						and(
+							eq(realmUnit.realmId, params.realmId),
+							eq(realmUnit.unitId, params.unitId),
+						),
+					)
+					.limit(1);
+				if (!updatedTarget) throw new RealmUnitNotFound();
+				return { action: executed.created, target: updatedTarget };
 			});
-			return result.created;
+			return {
+				...result.action,
+				target: {
+					...result.target,
+					allowedCommands: [
+						...getRealmUnitModerationCommands(
+							result.target.status,
+							result.target.postTargetingLocked,
+						),
+					],
+				},
+			};
 		},
 		{
 			access: "contribute:unit:update",
 			params: RealmUnitParams,
 			body: ModerateRealmUnitBody,
 			response: {
-				[StatusCodes.OK]: ModerationActionResponse,
+				[StatusCodes.OK]: RealmUnitModerationActionResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ModerationActionIncompatible"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),

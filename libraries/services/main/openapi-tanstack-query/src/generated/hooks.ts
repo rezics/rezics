@@ -1759,6 +1759,7 @@ import type {
 	DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500,
 	GetApiRealmsByRealmIdUnitsOptions,
 	GetApiRealmsByRealmIdUnitsStatus200,
+	GetApiRealmsByRealmIdUnitsStatus400,
 	GetApiRealmsByRealmIdUnitsStatus403,
 	GetApiRealmsByRealmIdUnitsStatus422,
 	GetApiRealmsByRealmIdUnitsStatus500,
@@ -29266,6 +29267,7 @@ export function getApiRealmsByRealmIdUnitsQueryOptions(
 	return queryOptions<
 		GetApiRealmsByRealmIdUnitsStatus200,
 		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsStatus400
 			| GetApiRealmsByRealmIdUnitsStatus403
 			| GetApiRealmsByRealmIdUnitsStatus422
 			| GetApiRealmsByRealmIdUnitsStatus500
@@ -29312,6 +29314,7 @@ export function useGetApiRealmsByRealmIdUnits<
 			QueryObserverOptions<
 				GetApiRealmsByRealmIdUnitsStatus200,
 				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdUnitsStatus400
 					| GetApiRealmsByRealmIdUnitsStatus403
 					| GetApiRealmsByRealmIdUnitsStatus422
 					| GetApiRealmsByRealmIdUnitsStatus500
@@ -29343,6 +29346,7 @@ export function useGetApiRealmsByRealmIdUnits<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsStatus400
 			| GetApiRealmsByRealmIdUnitsStatus403
 			| GetApiRealmsByRealmIdUnitsStatus422
 			| GetApiRealmsByRealmIdUnitsStatus500

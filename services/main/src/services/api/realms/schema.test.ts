@@ -7,6 +7,8 @@ import {
 	ListRealmUnitsQuery,
 	ModerateRealmUnitBody,
 	RealmRulesQuery,
+	RealmUnitListResponse,
+	RealmUnitModerationActionResponse,
 } from "./schema";
 
 describe("Realm member API contract", () => {
@@ -31,6 +33,36 @@ describe("Realm moderation API contract", () => {
 	it("treats an omitted status filter as all Realm Unit states", () => {
 		expect(ListRealmUnitsQuery.properties.status.default).toBeUndefined();
 		expect(Check(ListRealmUnitsQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
+		expect(
+			Check(ListRealmUnitsQuery, {
+				status: "pending",
+				cursor: "eyJ2IjoxfQ",
+				limit: 30,
+			}),
+		).toBe(true);
+	});
+
+	it("returns cursor pagination and server-authoritative commands", () => {
+		expect(
+			Check(RealmUnitListResponse, {
+				items: [
+					{
+						realmId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755d",
+						unitId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755e",
+						unitKind: "post",
+						language: "zh",
+						title: "待處理項目",
+						status: "pending",
+						postTargetingLocked: false,
+						allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
+						moderationStatus: "pending",
+						createdAt: "2026-07-27T12:00:00.000Z",
+						updatedAt: "2026-07-27T12:30:00.000Z",
+					},
+				],
+				nextCursor: "next-page",
+			}),
+		).toBe(true);
 	});
 
 	it("accepts commands and rejects client-authored resulting state", () => {
@@ -64,6 +96,32 @@ describe("Realm moderation API contract", () => {
 					role: "internal_note",
 					language: "zh",
 					content: createPortableTextDocument([], "0123456789ab"),
+				},
+			}),
+		).toBe(true);
+	});
+
+	it("returns the updated target snapshot after moderation", () => {
+		expect(
+			Check(RealmUnitModerationActionResponse, {
+				id: "019fa3ab-72a9-7792-b2e3-43aa8a9c755f",
+				caseId: "019fa3ab-72a9-7792-b2e3-43aa8a9c7560",
+				actorProfileId: "019fa3ab-72a9-7792-b2e3-43aa8a9c7561",
+				kind: "approve",
+				previousState: "pending",
+				resultingState: "visible",
+				previousPostTargetingLocked: null,
+				resultingStatus: "visible",
+				resultingPostTargetingLocked: null,
+				reasonCode: "realm_rules",
+				reversesActionId: null,
+				notes: [],
+				createdAt: "2026-07-27T12:30:00.000Z",
+				target: {
+					status: "visible",
+					postTargetingLocked: false,
+					allowedCommands: ["hide", "remove", "lock_post_targeting", "note"],
+					updatedAt: "2026-07-27T12:30:00.000Z",
 				},
 			}),
 		).toBe(true);

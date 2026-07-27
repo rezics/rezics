@@ -1,13 +1,12 @@
 import {
 	PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum,
+	type GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum,
 	type GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum,
-	type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum,
 } from "@rezics/openapi-tanstack-query";
 import { isPortableTextValueBlock, type PortableTextValue } from "@rezics/portable-text";
 
 export type RealmModerationStatus = GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum;
-export type RealmModerationCommand =
-	PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum | "note";
+export type RealmModerationCommand = GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum;
 
 export const RealmModerationStatuses = [
 	"pending",
@@ -19,27 +18,6 @@ export const RealmModerationStatuses = [
 export const GovernanceReasonCodes = Object.values(
 	PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum,
 );
-
-const StateCommands = {
-	pending: ["approve", "remove"],
-	visible: ["hide", "remove"],
-	hidden: ["restore", "remove"],
-	removed: ["restore"],
-} as const satisfies Record<
-	RealmModerationStatus,
-	readonly PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum[]
->;
-
-export function getRealmModerationCommands(
-	status: RealmModerationStatus,
-	postTargetingLocked: boolean,
-): readonly RealmModerationCommand[] {
-	return [
-		...StateCommands[status],
-		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
-		"note",
-	];
-}
 
 export function hasAuthoredAnnotation(value: PortableTextValue): boolean {
 	return value.some(

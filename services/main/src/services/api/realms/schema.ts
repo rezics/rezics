@@ -4,6 +4,7 @@ import { PortableTextDocument } from "@rezics/block";
 import {
 	GovernanceReasonCodeValues,
 	ModerationActionKindValues,
+	RealmModerationCommandValues,
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
@@ -20,6 +21,7 @@ import {
 	LocalizationInput,
 	Uuid,
 } from "../schema";
+import { ModerationActionResponse } from "../governance/schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -173,6 +175,7 @@ export const ListRealmUnitsQuery = t.Object(
 	{
 		status: t.Optional(RealmUnitStatus),
 		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ minLength: 1, maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 	},
 	{ additionalProperties: false },
@@ -217,6 +220,14 @@ export const ModerateRealmUnitBody = t.Union([
 ]);
 export type ModerateRealmUnitBody = Static<typeof ModerateRealmUnitBody>;
 
+const RealmModerationCommand = t.UnionEnum(RealmModerationCommandValues);
+const RealmUnitModerationTargetResponse = t.Object({
+	status: RealmUnitStatus,
+	postTargetingLocked: t.Boolean(),
+	allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),
+	updatedAt: DateTime,
+});
+
 export const RealmUnitListResponse = t.Object({
 	items: t.Array(
 		t.Object({
@@ -227,11 +238,18 @@ export const RealmUnitListResponse = t.Object({
 			title: t.Nullable(t.String()),
 			status: RealmUnitStatus,
 			postTargetingLocked: t.Boolean(),
+			allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),
 			moderationStatus: t.String(),
 			createdAt: DateTime,
 			updatedAt: DateTime,
 		}),
 	),
+	nextCursor: t.Nullable(t.String()),
+});
+
+export const RealmUnitModerationActionResponse = t.Object({
+	...ModerationActionResponse.properties,
+	target: RealmUnitModerationTargetResponse,
 });
 
 const RealmModerationNoteResponse = t.Object({

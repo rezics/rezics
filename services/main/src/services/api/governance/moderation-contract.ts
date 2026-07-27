@@ -8,17 +8,37 @@ import type {
 	ModerationCaseStateValues,
 	ModerationTargetKindValues,
 	RealmMemberStateValues,
+	RealmModerationCommandValues,
 	RealmUnitStatusValues,
 } from "../../database/schema/contract-values";
 
 export type ModerationActionCommand = CreateModerationActionBody["kind"];
 export type ModerationTargetKind = (typeof ModerationTargetKindValues)[number];
 export type RealmUnitStatus = (typeof RealmUnitStatusValues)[number];
+export type RealmModerationCommand = (typeof RealmModerationCommandValues)[number];
 export type RealmMemberState = (typeof RealmMemberStateValues)[number];
 export type ModerationCaseState = (typeof ModerationCaseStateValues)[number];
 export type UnitModerationStatus = "approved" | "pending" | "removed";
 
 const SharedAdministrativeActions = ["escalate", "reverse", "note"] as const;
+const RealmUnitStateCommands = {
+	pending: ["approve", "remove"],
+	visible: ["hide", "remove"],
+	hidden: ["restore", "remove"],
+	removed: ["restore"],
+} as const satisfies Record<RealmUnitStatus, readonly RealmModerationCommand[]>;
+
+export function getRealmUnitModerationCommands(
+	status: RealmUnitStatus,
+	postTargetingLocked: boolean,
+): readonly RealmModerationCommand[] {
+	return [
+		...RealmUnitStateCommands[status],
+		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
+		"note",
+	];
+}
+
 const ActionsByTarget = {
 	unit: [
 		"approve",

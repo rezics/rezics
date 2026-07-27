@@ -119651,6 +119651,12 @@
 						}
 					},
 					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 1024, "type": "string" }
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -119672,7 +119678,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "nextCursor"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -119686,6 +119692,7 @@
 													"title",
 													"status",
 													"postTargetingLocked",
+													"allowedCommands",
 													"moderationStatus",
 													"createdAt",
 													"updatedAt"
@@ -119721,6 +119728,23 @@
 														]
 													},
 													"postTargetingLocked": { "type": "boolean" },
+													"allowedCommands": {
+														"minItems": 1,
+														"type": "array",
+														"items": {
+															"default": "approve",
+															"type": "string",
+															"enum": [
+																"approve",
+																"hide",
+																"remove",
+																"restore",
+																"lock_post_targeting",
+																"unlock_post_targeting",
+																"note"
+															]
+														}
+													},
 													"moderationStatus": { "type": "string" },
 													"createdAt": {
 														"format": "date-time",
@@ -119732,7 +119756,38 @@
 													}
 												}
 											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -121083,7 +121138,8 @@
 										"reasonCode",
 										"reversesActionId",
 										"notes",
-										"createdAt"
+										"createdAt",
+										"target"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
@@ -121139,7 +121195,49 @@
 												}
 											}
 										},
-										"createdAt": { "format": "date-time", "type": "string" }
+										"createdAt": { "format": "date-time", "type": "string" },
+										"target": {
+											"type": "object",
+											"required": [
+												"status",
+												"postTargetingLocked",
+												"allowedCommands",
+												"updatedAt"
+											],
+											"properties": {
+												"status": {
+													"type": "string",
+													"enum": [
+														"pending",
+														"visible",
+														"hidden",
+														"removed"
+													]
+												},
+												"postTargetingLocked": { "type": "boolean" },
+												"allowedCommands": {
+													"minItems": 1,
+													"type": "array",
+													"items": {
+														"default": "approve",
+														"type": "string",
+														"enum": [
+															"approve",
+															"hide",
+															"remove",
+															"restore",
+															"lock_post_targeting",
+															"unlock_post_targeting",
+															"note"
+														]
+													}
+												},
+												"updatedAt": {
+													"format": "date-time",
+													"type": "string"
+												}
+											}
+										}
 									}
 								}
 							}

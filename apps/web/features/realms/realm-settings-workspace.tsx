@@ -39,7 +39,7 @@ import { realmHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
-import { RealmModeration } from "./realm-moderation";
+import { RealmModeration } from "./components/realm-moderation";
 import { RealmMembers } from "./realm-members";
 import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";

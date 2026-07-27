@@ -3,6 +3,7 @@ import { createPortableTextDocument } from "@rezics/block";
 
 import {
 	assertModerationActionCompatible,
+	getRealmUnitModerationCommands,
 	isModerationActionCompatible,
 	resolvePostTargetingLockState,
 	resolveModerationCaseState,
@@ -33,6 +34,26 @@ describe("moderation action contracts", () => {
 		expect(() => resolveRealmUnitStatus("visible", "approve")).toThrow(
 			"would not change the target",
 		);
+	});
+
+	it("presents only commands valid for the current Realm Unit snapshot", () => {
+		expect(getRealmUnitModerationCommands("pending", false)).toEqual([
+			"approve",
+			"remove",
+			"lock_post_targeting",
+			"note",
+		]);
+		expect(getRealmUnitModerationCommands("visible", true)).toEqual([
+			"hide",
+			"remove",
+			"unlock_post_targeting",
+			"note",
+		]);
+		expect(getRealmUnitModerationCommands("removed", false)).toEqual([
+			"restore",
+			"lock_post_targeting",
+			"note",
+		]);
 	});
 
 	it("derives Unit and Realm member transitions", () => {

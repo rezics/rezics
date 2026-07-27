@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	getRealmModerationCommands,
 	hasAuthoredAnnotation,
 	toGovernanceReasonCode,
 	toRealmModerationCommand,
@@ -9,17 +8,8 @@ import {
 } from "./moderation-contract";
 
 describe("Realm moderation UI contract", () => {
-	it.each([
-		["pending", false, ["approve", "remove", "lock_post_targeting", "note"]],
-		["visible", true, ["hide", "remove", "unlock_post_targeting", "note"]],
-		["hidden", false, ["restore", "remove", "lock_post_targeting", "note"]],
-		["removed", true, ["restore", "unlock_post_targeting", "note"]],
-	] as const)("derives valid commands for %s", (status, postTargetingLocked, expected) => {
-		expect(getRealmModerationCommands(status, postTargetingLocked)).toEqual(expected);
-	});
-
 	it("rejects stale select values at the generated contract boundary", () => {
-		const allowed = getRealmModerationCommands("visible", false);
+		const allowed = ["hide", "remove", "lock_post_targeting", "note"] as const;
 		expect(toRealmModerationCommand("approve", allowed)).toBe("hide");
 		expect(toGovernanceReasonCode("not_a_reason")).toBe("other");
 		expect(toRealmModerationStatus("not_a_status")).toBe("all");
