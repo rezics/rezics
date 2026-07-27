@@ -64,12 +64,11 @@ import { getContentStructureRevision } from "../../content-structure/service";
 import { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
 import { insertUnit } from "../../units/create";
 import {
-	firstUnitLocalizationCoverAssetId,
-	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	avatarReferenceFromColumns,
-	resolveUnitLocalizationAvatarFromOrdered,
-	resolveUnitLocalizationImageAssetIdFromOrdered,
+	resolveUnitLocalizationFromOrdered,
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
@@ -103,6 +102,7 @@ import {
 	SoftwareParams,
 	SoftwareRequirementParams,
 	SeriesParams,
+	SeriesReleaseListQuery,
 	SeriesReleaseListResponse,
 	SeriesReleaseParams,
 	SeriesReleaseResponse,
@@ -231,7 +231,7 @@ async function getZone(zoneId: string) {
 
 async function toZoneResponse(
 	record: Awaited<ReturnType<typeof getZone>>,
-	preferredLanguage?: string | null,
+	localizationLanguages: readonly ContentLanguage[] = [],
 	canManage = false,
 ) {
 	const localizations = await database
@@ -250,24 +250,15 @@ async function toZoneResponse(
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, record.id))
 		.orderBy(unitLocalization.position, unitLocalization.language);
-	const avatar = resolveUnitLocalizationAvatarFromOrdered(localizations, preferredLanguage);
-	const bannerAssetId = resolveUnitLocalizationImageAssetIdFromOrdered(
-		localizations,
-		"banner",
-		preferredLanguage,
-	);
-	const coverAssetId = resolveUnitLocalizationImageAssetIdFromOrdered(
-		localizations,
-		"cover",
-		preferredLanguage,
-	);
+	const selected = resolveUnitLocalizationFromOrdered(localizations, localizationLanguages);
+	if (!selected) throw new UnitNotFound("Zone");
 	return {
 		...record,
 		slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
-		language: localizations[0]?.language ?? null,
-		avatar: presentAvatar(avatar),
-		banner: presentImageAsset(bannerAssetId, "banner"),
-		cover: presentImageAsset(coverAssetId, "cover"),
+		language: selected.language,
+		avatar: presentAvatar(avatarReferenceFromColumns(selected)),
+		banner: presentImageAsset(selected.bannerAssetId, "banner"),
+		cover: presentImageAsset(selected.coverAssetId, "cover"),
 		localizations: localizations.map(
 			({
 				avatarType,
@@ -352,14 +343,12 @@ async function getReadableRenderLocalizationRows(ids: readonly string[], profile
 
 function presentRenderUnit(
 	rows: Awaited<ReturnType<typeof getReadableRenderLocalizationRows>>,
-	preferredLanguage?: string | null,
+	localizationLanguages: readonly ContentLanguage[] = [],
 	zonePageSlugs: ReadonlyMap<string, string | null> = new Map(),
 ) {
-	const selected =
-		(preferredLanguage
-			? rows.find((localization) => localization.language === preferredLanguage)
-			: undefined) ?? rows[0];
-	if (!selected) return null;
+	const resolved = resolveUnitLocalizationFromOrdered(rows, localizationLanguages);
+	if (!resolved) return null;
+	const selected = resolved;
 	return {
 		id: selected.id,
 		kind: selected.kind,
@@ -367,15 +356,9 @@ function presentRenderUnit(
 		language: selected.language,
 		title: selected.title,
 		summary: selected.summary,
-		avatar: presentAvatar(resolveUnitLocalizationAvatarFromOrdered(rows, preferredLanguage)),
-		banner: presentImageAsset(
-			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "banner", preferredLanguage),
-			"banner",
-		),
-		cover: presentImageAsset(
-			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "cover", preferredLanguage),
-			"cover",
-		),
+		avatar: presentAvatar(avatarReferenceFromColumns(selected)),
+		banner: presentImageAsset(selected.bannerAssetId, "banner"),
+		cover: presentImageAsset(selected.coverAssetId, "cover"),
 	};
 }
 
@@ -491,7 +474,8 @@ export default new Elysia()
 			)
 			.get(
 				"/:seriesId/releases",
-				async ({ params, request }) => {
+				async ({ params, query, request }) => {
+					const localizationLanguages = query.localizationLanguages ?? [];
 					const identity = await resolveIdentity(request.headers, "unit:read");
 					const { authorization } = identity;
 					await authorization.unit.ensureCanRead(
@@ -507,16 +491,27 @@ export default new Elysia()
 							createdAt: seriesRelease.createdAt,
 							updatedAt: seriesRelease.updatedAt,
 							type: unit.kind,
+							language: unitLocalization.language,
 							title: unitLocalization.title,
-							coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+							coverAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"cover",
+								localizationLanguages,
+							),
 						})
 						.from(seriesRelease)
 						.innerJoin(unit, eq(unit.id, seriesRelease.releaseUnitId))
-						.leftJoin(
+						.innerJoin(
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, unit.id),
-								isPrimaryUnitLocalization(unit.id),
+								eq(
+									unitLocalization.language,
+									resolvedUnitLocalizationLanguage(
+										unit.id,
+										localizationLanguages,
+									),
+								),
 							),
 						)
 						.where(
@@ -528,7 +523,7 @@ export default new Elysia()
 						)
 						.orderBy(seriesRelease.position, seriesRelease.releaseUnitId);
 					return {
-						items: rows.flatMap(({ type, title, coverAssetId, ...row }) =>
+						items: rows.flatMap(({ type, language, title, coverAssetId, ...row }) =>
 							type === "book" || type === "software" || type === "media"
 								? [
 										{
@@ -536,6 +531,7 @@ export default new Elysia()
 											release: {
 												id: row.releaseUnitId,
 												type,
+												language,
 												title,
 												cover: presentImageAsset(coverAssetId, "cover"),
 											},
@@ -547,6 +543,7 @@ export default new Elysia()
 				},
 				{
 					params: SeriesParams,
+					query: SeriesReleaseListQuery,
 					response: {
 						[StatusCodes.OK]: SeriesReleaseListResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
@@ -604,7 +601,7 @@ export default new Elysia()
 					);
 					return toZoneResponse(
 						await getZone(params.zoneId),
-						query.language,
+						query.localizationLanguages,
 						await authorization.unit.canUpdate(params.zoneId),
 					);
 				},
@@ -630,12 +627,17 @@ export default new Elysia()
 					if (query.page && query.pageId) throw new ZonePageNotFound();
 					const pageRecord = await database.transaction((tx) =>
 						query.pageId
-							? getZonePageUnitById(tx, params.zoneId, query.pageId, query.language)
+							? getZonePageUnitById(
+									tx,
+									params.zoneId,
+									query.pageId,
+									query.localizationLanguages,
+								)
 							: getZonePageUnitBySlug(
 									tx,
 									params.zoneId,
 									query.page ?? ZoneHomePageSlug,
-									query.language,
+									query.localizationLanguages,
 								),
 					);
 					if ((query.page || query.pageId) && !pageRecord) throw new ZonePageNotFound();
@@ -729,11 +731,11 @@ export default new Elysia()
 					);
 					const wikiPosts = [...wikiPostIds].flatMap((id) => {
 						const rows = wikiRows.filter((row) => row.id === id);
-						const presented = presentRenderUnit(rows, query.language);
-						const selected =
-							(query.language
-								? rows.find((row) => row.language === query.language)
-								: undefined) ?? rows[0];
+						const presented = presentRenderUnit(rows, query.localizationLanguages);
+						const selected = resolveUnitLocalizationFromOrdered(
+							rows,
+							query.localizationLanguages ?? [],
+						);
 						if (!presented || !selected?.content) return [];
 						assertWikiPostPortableTextDocument(selected.content);
 						mergeBlockReferences({ blocks: [selected.content] });
@@ -752,7 +754,7 @@ export default new Elysia()
 					const units = [...unitIds].flatMap((id) => {
 						const presented = presentRenderUnit(
 							referenceRows.filter((row) => row.id === id),
-							query.language,
+							query.localizationLanguages,
 							zonePageSlugs,
 						);
 						return presented ? [presented] : [];
@@ -779,7 +781,7 @@ export default new Elysia()
 					return {
 						zone: await toZoneResponse(
 							zoneRecord,
-							query.language,
+							query.localizationLanguages,
 							await identity.authorization.unit.canUpdate(params.zoneId),
 						),
 						page,
@@ -892,7 +894,7 @@ export default new Elysia()
 					});
 					return toZoneResponse(
 						await getZone(params.zoneId),
-						body.localization?.language,
+						body.localization ? [body.localization.language] : [],
 						true,
 					);
 				},

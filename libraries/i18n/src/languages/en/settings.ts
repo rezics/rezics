@@ -49,6 +49,17 @@ export default {
 	preferences: "Preferences",
 	interfaceLanguage: "Interface language",
 	contentLanguage: "Content language preference",
+	contentLanguages: "Preferred content languages",
+	contentLanguagesHint:
+		"Drag to reorder your languages. Content uses this order, then the interface language, before falling back to the Unit's own language order.",
+	addContentLanguage: "Add language",
+	dragContentLanguage: insert("Drag {{language}} to reorder", { language: String }),
+	moveContentLanguageUp: insert("Move {{language}} up", { language: String }),
+	moveContentLanguageDown: insert("Move {{language}} down", { language: String }),
+	removeContentLanguage: insert("Remove {{language}}", { language: String }),
+	filterFeedByPreferredLanguages: "Filter the Feed by preferred languages",
+	filterFeedByPreferredLanguagesHint:
+		"When enabled, the Feed only includes content available in at least one preferred language. Other lists continue to show all matching content with language fallback.",
 	account: "Account",
 	accountDescription: "Manage the current signed-in session.",
 	security: "Security",

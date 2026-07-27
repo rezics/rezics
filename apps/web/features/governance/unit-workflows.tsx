@@ -1,7 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
-
 import {
 	getApiEntitiesByUnitIdQueryKey,
 	getApiGovernanceUnitAccessInvitationsQueryKey,
@@ -37,6 +35,7 @@ import { QueryFailure, QueryPending } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
 	CreditAttributionRoles,
@@ -738,10 +737,11 @@ export function ReceivedAccessInvitationsPage() {
 }
 
 export function EntityGovernancePage({ id }: { id: string }) {
-	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
+	const { t } = useTranslation(["errors", "governance", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const entity = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
 	});
 	if (entity.isPending) return <QueryPending />;
 	if (entity.isError || !entity.data)

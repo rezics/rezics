@@ -106,7 +106,7 @@ const LocalizationImageResponse = {
 	cover: ImageAssetResponse,
 };
 
-const LocalizationResponse = t.Object({
+export const LocalizationResponse = t.Object({
 	unitId: Uuid,
 	language: ContentLanguage,
 	position: FractionalPosition,
@@ -117,7 +117,6 @@ const LocalizationResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-
 export const ContentMetricResponse = t.Object(
 	{
 		wordCount: t.Integer({ minimum: 0 }),
@@ -180,7 +179,7 @@ export const UnitListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			language: NullableText,
+			language: ContentLanguage,
 			contentRating: t.String(),
 			publishedAt: t.Nullable(DateTime),
 			createdAt: DateTime,
@@ -302,7 +301,7 @@ export const UnitDetailResponse = t.Object({
 	type: CatalogUnitTypeResponse,
 	status: t.String(),
 	visibility: t.String(),
-	language: NullableText,
+	language: t.Nullable(ContentLanguage),
 	contentRating: t.String(),
 	aiDisclosure: t.String(),
 	license: t.Nullable(PublicationLicense),
@@ -432,6 +431,7 @@ export const EntityListResponse = t.Object({
 			id: Uuid,
 			kind: t.String(),
 			verified: t.Boolean(),
+			language: ContentLanguage,
 			avatar: AvatarResponse,
 			banner: ImageAssetResponse,
 			cover: ImageAssetResponse,
@@ -441,13 +441,21 @@ export const EntityListResponse = t.Object({
 	),
 });
 export const TagListResponse = t.Object({
-	items: t.Array(t.Object({ id: Uuid, title: NullableText, summary: NullableText })),
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			language: ContentLanguage,
+			title: NullableText,
+			summary: NullableText,
+		}),
+	),
 });
 export const CollectionListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
 			ownerId: Uuid,
+			language: ContentLanguage,
 			itemCount: t.Integer(),
 			containsTarget: t.Boolean(),
 			title: NullableText,
@@ -463,6 +471,7 @@ export const RealmListResponse = t.Object({
 			id: Uuid,
 			slugAddress: NullablePublicSlugAddressResponse,
 			joinPolicy: t.String(),
+			language: ContentLanguage,
 			title: NullableText,
 			summary: NullableText,
 			avatar: AvatarResponse,
@@ -478,6 +487,7 @@ export const PostListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			postKind: OrdinaryPostKindResponse,
+			language: ContentLanguage,
 			attributions: t.Array(UnitAttributionSummaryResponse),
 			realmId: t.Nullable(Uuid),
 			subjectId: t.Nullable(Uuid),
@@ -656,7 +666,7 @@ export const PublicProfileResponse = t.Object({
 	slugAddress: NullablePublicSlugAddressResponse,
 	status: t.String(),
 	visibility: t.String(),
-	language: NullableText,
+	language: ContentLanguage,
 	name: NullableText,
 	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
@@ -685,6 +695,7 @@ export const PreferencesResponse = t.Object({
 	defaultScoreContextUnitId: Uuid,
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
+	filterFeedByPreferredLanguages: t.Boolean(),
 	contentRatings: t.Array(t.String()),
 	preferredLanguages: t.Array(ContentLanguage),
 });
@@ -702,6 +713,7 @@ export const ProgressListResponse = t.Object({
 			lastContentStructureNodeId: t.Nullable(Uuid),
 			lastReadAnchor: t.Nullable(t.Unknown()),
 			type: t.String(),
+			language: ContentLanguage,
 			title: NullableText,
 		}),
 	),
@@ -731,6 +743,7 @@ export const ProgressNodeListResponse = t.Object({
 });
 export const PollDetailResponse = t.Object({
 	id: Uuid,
+	language: ContentLanguage,
 	question: t.String(),
 	voteMode: t.String(),
 	anonymous: t.Boolean(),
@@ -770,6 +783,7 @@ export const EntityDetailResponse = t.Object({
 	id: Uuid,
 	kind: t.String(),
 	verified: t.Boolean(),
+	language: t.Nullable(ContentLanguage),
 	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
@@ -804,7 +818,7 @@ export const CollectionDetailResponse = t.Object({
 	id: Uuid,
 	status: t.String(),
 	visibility: t.String(),
-	language: NullableText,
+	language: ContentLanguage,
 	source: t.Union([t.Literal("manual"), t.Literal("search"), t.Literal("system")]),
 	systemKey: t.Nullable(t.Literal("favorites")),
 	definitionDocument: CollectionDefinitionDocument,
@@ -818,6 +832,7 @@ export const CollectionDetailResponse = t.Object({
 		t.Object({
 			targetId: Uuid,
 			kind: t.String(),
+			language: ContentLanguage,
 			parentTargetId: t.Nullable(Uuid),
 			position: FractionalPosition,
 			type: t.String(),
@@ -832,7 +847,7 @@ export const RealmDetailResponse = t.Object({
 	slugAddress: NullablePublicSlugAddressResponse,
 	status: t.String(),
 	visibility: t.String(),
-	language: NullableText,
+	language: t.Nullable(ContentLanguage),
 	joinPolicy: t.String(),
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -862,6 +877,7 @@ export const PostDetailResponse = t.Object({
 	rootPostId: t.Nullable(Uuid),
 	parentPostId: t.Nullable(Uuid),
 	replyCount: t.Integer(),
+	language: ContentLanguage,
 	title: NullableText,
 	body: PortableTextDocument,
 	latestRevisionId: t.Nullable(Uuid),
@@ -884,7 +900,7 @@ export const ReviewDetailResponse = t.Object({
 	realmId: t.Nullable(Uuid),
 	title: NullableText,
 	summary: NullableText,
-	language: NullableText,
+	language: ContentLanguage,
 	body: t.Nullable(PortableTextDocument),
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -1016,6 +1032,7 @@ export const ReplyListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			postKind: t.Literal("reply"),
+			language: ContentLanguage,
 			attributions: t.Array(UnitAttributionSummaryResponse),
 			rootPostId: Uuid,
 			parentPostId: t.Nullable(Uuid),

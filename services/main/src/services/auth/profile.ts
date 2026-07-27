@@ -14,7 +14,10 @@ import {
 	unitLocalization,
 	users,
 } from "../database/schema";
-import { DefaultContentLanguage } from "../database/schema/contract-values";
+import {
+	DefaultContentLanguage,
+	DefaultPreferredLanguage,
+} from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
 
@@ -49,6 +52,12 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name" | "image">) {
 	const existing = await findProfile(authUser.id);
 	if (existing) return existing;
+	const [registration] = await database
+		.select({ contentLanguage: users.registrationContentLanguage })
+		.from(users)
+		.where(eq(users.id, authUser.id))
+		.limit(1);
+	const preferredLanguage = registration?.contentLanguage ?? DefaultPreferredLanguage;
 
 	try {
 		return await database.transaction(async (tx) => {
@@ -71,6 +80,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			await tx.insert(profilePreference).values({
 				profileId: profileUnit.id,
 				defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+				preferredLanguages: [preferredLanguage],
 			});
 			await tx.insert(realmMember).values({
 				realmId: OfficialRealmUnitIds.score,

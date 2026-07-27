@@ -30,6 +30,10 @@ vi.mock("@/i18n/client", async () => {
 	return createReactI18n(resources);
 });
 
+vi.mock("@/i18n/use-localization-languages", () => ({
+	useLocalizationLanguages: () => ["zh", "en"],
+}));
+
 vi.mock("@rezics/ui", async () => {
 	const actual = await vi.importActual<typeof import("@rezics/ui")>("@rezics/ui");
 	return {

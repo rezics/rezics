@@ -1,7 +1,6 @@
 import { and, desc, eq, inArray, isNull, notInArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
-
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
@@ -22,8 +21,10 @@ import {
 } from "../database/schema";
 import { listVisibleUnitTagStructures } from "../tag-structures/service";
 import {
+	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
+	type LocalizationLanguageQuery,
 } from "../units/localization";
 import { selectPopulatedRealmTagSources } from "./landscape";
 import { compareGlobalTagRank } from "./ranking";
@@ -83,15 +84,25 @@ end`;
 export async function listGlobalUnitTags(input: {
 	readonly unitId: string;
 	readonly viewerProfileId?: string;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly limit: number;
 	readonly excludedTagIds?: readonly string[];
 }) {
 	const rows = await database
 		.select({
 			tagId: unitEffectiveTag.tagId,
-			title: resolvedUnitLocalizationTitle(unitEffectiveTag.tagId, input.language),
-			summary: resolvedUnitLocalizationSummary(unitEffectiveTag.tagId, input.language),
+			language: resolvedUnitLocalizationLanguage(
+				unitEffectiveTag.tagId,
+				input.localizationLanguages,
+			),
+			title: resolvedUnitLocalizationTitle(
+				unitEffectiveTag.tagId,
+				input.localizationLanguages,
+			),
+			summary: resolvedUnitLocalizationSummary(
+				unitEffectiveTag.tagId,
+				input.localizationLanguages,
+			),
 			pinned: sql<boolean>`coalesce(${unitTag.pinned}, false)`,
 			position: unitTag.position,
 			score: unitTagVoteStat.score,
@@ -156,13 +167,20 @@ export async function listGlobalUnitTags(input: {
 
 export async function listRealmTagSubscriptions(input: {
 	readonly profileId: string;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 }) {
 	return database
 		.select({
 			realmId: profileRealmTagSubscription.realmId,
-			title: resolvedUnitLocalizationTitle(realmSourceUnit.id, input.language),
-			summary: resolvedUnitLocalizationSummary(realmSourceUnit.id, input.language),
+			language: resolvedUnitLocalizationLanguage(
+				realmSourceUnit.id,
+				input.localizationLanguages,
+			),
+			title: resolvedUnitLocalizationTitle(realmSourceUnit.id, input.localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(
+				realmSourceUnit.id,
+				input.localizationLanguages,
+			),
 			canVote: sql<boolean>`coalesce(${realmMember.state} = 'active', false)`,
 			position: profileRealmTagSubscription.position,
 			createdAt: profileRealmTagSubscription.createdAt,
@@ -200,7 +218,7 @@ export async function upsertRealmTagSubscription(input: {
 	readonly profileId: string;
 	readonly realmId: string;
 	readonly position?: string;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 }) {
 	await database
 		.insert(profileRealmTagSubscription)
@@ -239,6 +257,7 @@ export async function deleteRealmTagSubscription(
 type RealmVotedTag = {
 	readonly realmId: string;
 	readonly tagId: string;
+	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
 	readonly contextPostId: string;
@@ -253,7 +272,7 @@ async function listRealmVotedTags(input: {
 	readonly unitId: string;
 	readonly viewerProfileId: string;
 	readonly realmIds: readonly string[];
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly perRealmLimit: number;
 }) {
 	if (input.realmIds.length === 0) return new Map<string, RealmVotedTag[]>();
@@ -261,8 +280,12 @@ async function listRealmVotedTags(input: {
 		.select({
 			realmId: realmTagContext.realmId,
 			tagId: realmTagContext.tagId,
-			title: resolvedUnitLocalizationTitle(votedTagUnit.id, input.language),
-			summary: resolvedUnitLocalizationSummary(votedTagUnit.id, input.language),
+			language: resolvedUnitLocalizationLanguage(
+				votedTagUnit.id,
+				input.localizationLanguages,
+			),
+			title: resolvedUnitLocalizationTitle(votedTagUnit.id, input.localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(votedTagUnit.id, input.localizationLanguages),
 			contextPostId: realmTagContext.contextPostId,
 			score: realmTagVoteStat.score,
 			voteCount: realmTagVoteStat.voteCount,
@@ -331,7 +354,7 @@ async function listRealmPolicyTags(input: {
 	readonly unitId: string;
 	readonly viewerProfileId: string;
 	readonly realmIds: readonly string[];
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly perRealmLimit: number;
 }) {
 	if (input.realmIds.length === 0) return new Map<string, RealmPolicyTag[]>();
@@ -339,8 +362,12 @@ async function listRealmPolicyTags(input: {
 		.select({
 			realmId: realmUnitTag.realmId,
 			tagId: realmUnitTag.tagId,
-			title: resolvedUnitLocalizationTitle(policyTagUnit.id, input.language),
-			summary: resolvedUnitLocalizationSummary(policyTagUnit.id, input.language),
+			language: resolvedUnitLocalizationLanguage(
+				policyTagUnit.id,
+				input.localizationLanguages,
+			),
+			title: resolvedUnitLocalizationTitle(policyTagUnit.id, input.localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(policyTagUnit.id, input.localizationLanguages),
 			position: realmUnitTag.position,
 			createdAt: realmUnitTag.createdAt,
 			updatedAt: realmUnitTag.updatedAt,
@@ -368,6 +395,7 @@ async function listRealmPolicyTags(input: {
 type RealmPolicyTag = {
 	readonly realmId: string;
 	readonly tagId: string;
+	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
 	readonly position: string;
@@ -378,7 +406,7 @@ type RealmPolicyTag = {
 export async function getUnitTagLandscape(input: {
 	readonly unitId: string;
 	readonly viewerProfileId?: string;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly globalLimit: number;
 	readonly structureLimit: number;
 	readonly sourceLimit: number;
@@ -387,14 +415,14 @@ export async function getUnitTagLandscape(input: {
 	if (!input.viewerProfileId) {
 		const structures = await listVisibleUnitTagStructures({
 			unitId: input.unitId,
-			language: input.language,
+			localizationLanguages: input.localizationLanguages,
 			limit: input.structureLimit,
 		});
 		return {
 			structures,
 			global: await listGlobalUnitTags({
 				unitId: input.unitId,
-				language: input.language,
+				localizationLanguages: input.localizationLanguages,
 				limit: input.globalLimit,
 				excludedTagIds: structures.flatMap(({ members }) =>
 					members.map(({ tagId }) => tagId),
@@ -407,18 +435,18 @@ export async function getUnitTagLandscape(input: {
 		listVisibleUnitTagStructures({
 			unitId: input.unitId,
 			viewerProfileId: input.viewerProfileId,
-			language: input.language,
+			localizationLanguages: input.localizationLanguages,
 			limit: input.structureLimit,
 		}),
 		listRealmTagSubscriptions({
 			profileId: input.viewerProfileId,
-			language: input.language,
+			localizationLanguages: input.localizationLanguages,
 		}),
 	]);
 	const global = await listGlobalUnitTags({
 		unitId: input.unitId,
 		viewerProfileId: input.viewerProfileId,
-		language: input.language,
+		localizationLanguages: input.localizationLanguages,
 		limit: input.globalLimit,
 		excludedTagIds: structures.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
 	});
@@ -428,14 +456,14 @@ export async function getUnitTagLandscape(input: {
 			unitId: input.unitId,
 			viewerProfileId: input.viewerProfileId,
 			realmIds,
-			language: input.language,
+			localizationLanguages: input.localizationLanguages,
 			perRealmLimit: input.perRealmLimit,
 		}),
 		listRealmPolicyTags({
 			unitId: input.unitId,
 			viewerProfileId: input.viewerProfileId,
 			realmIds,
-			language: input.language,
+			localizationLanguages: input.localizationLanguages,
 			perRealmLimit: input.perRealmLimit,
 		}),
 	]);

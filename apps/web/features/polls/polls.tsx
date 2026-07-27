@@ -27,6 +27,8 @@ import { RadioGroup, RadioGroupItem } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
@@ -241,13 +243,22 @@ export function PollCreate() {
 }
 
 export function PollDetail({ id }: { id: string }) {
-	const poll = useGetApiPollsByPollId({ path: { pollId: id } });
+	const localizationLanguages = useLocalizationLanguages();
+	const poll = useGetApiPollsByPollId({
+		path: { pollId: id },
+		query: { localizationLanguages },
+	});
 	const vote = usePutApiPollsByPollIdVote();
 	const retract = useDeleteApiPollsByPollIdVote();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const { t } = useTranslation(["actions", "engagement", "errors", "ui"]);
 	const [selected, setSelected] = useState<string[]>([]);
+	useLocalizationFallbackToast({
+		actualLanguage: poll.data?.language ?? null,
+		localizationLanguages,
+		unitId: id,
+	});
 	useEffect(() => {
 		if (poll.data) setSelected(poll.data.viewerOptionIds);
 	}, [poll.data]);

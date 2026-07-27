@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { cn, QueryFailure, QueryPending } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { PostDetailArticle } from "../components/post-detail-article";
 import { PostOverflowMenu } from "../components/post-overflow-menu";
 import {
@@ -22,10 +24,16 @@ import { postHref } from "../url";
 
 export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }) {
 	const { t } = useTranslation(["posts"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const router = useRouter();
 	const query = useGetApiPostsByPostId({
 		path: { postId: id },
-		query: { ...(realmId ? { realmId } : {}) },
+		query: { ...(realmId ? { realmId } : {}), localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: id,
 	});
 	const contextQuery = usePostDetailContext(id);
 	const realms = contextQuery.data?.realms ?? [];

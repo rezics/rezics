@@ -8,6 +8,7 @@ import { useState } from "react";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useDefaultScoreContext } from "../data/default-score-context";
 import {
@@ -34,11 +35,17 @@ export function UnitRatingsReviewsSection({
 	readonly writeReviewHref: string;
 }) {
 	const { t } = useTranslation(["engagement"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const defaultScoreContext = useDefaultScoreContext();
 	const [filters, setFilters] = useState<ReviewFilterModel>(EmptyReviewFilters);
 	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
 	const scoreContext = filters.realm ?? defaultScoreContext.context;
-	const baseReviewQuery = { targetId, limit: 3, sort: "best" } as const;
+	const baseReviewQuery = {
+		targetId,
+		localizationLanguages,
+		limit: 3,
+		sort: "best",
+	} as const;
 	const summaryQuery = useGetApiReviews({ query: baseReviewQuery });
 	const reviewsQuery = useGetApiReviews({
 		query: {

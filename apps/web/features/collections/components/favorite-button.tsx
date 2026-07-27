@@ -11,14 +11,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 export function FavoriteButton({ targetId }: { targetId: string }) {
 	const { data: session } = useHydratedSession();
-	const favorites = useGetApiCollectionsFavorites({
-		query: { enabled: Boolean(session) },
-	});
+	const localizationLanguages = useLocalizationLanguages();
+	const favorites = useGetApiCollectionsFavorites(
+		{ query: { localizationLanguages } },
+		{ query: { enabled: Boolean(session) } },
+	);
 	const add = usePutApiCollectionsFavoritesItemsByTargetId();
 	const remove = useDeleteApiCollectionsFavoritesItemsByTargetId();
 	const queryClient = useQueryClient();

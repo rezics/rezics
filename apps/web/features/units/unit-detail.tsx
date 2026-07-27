@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { PublicationLicenseRegistry } from "@rezics/license";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
@@ -15,6 +14,8 @@ import { PortableTextContent } from "@rezics/ui";
 import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { isKnownAttributionRole } from "./attribution-role";
 import { publicUnitHref } from "./routing/public-unit-route";
 import { readPortableText } from "@/lib/block";
@@ -49,6 +50,7 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 }
 
 export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
+	const localizationLanguages = useLocalizationLanguages();
 	const { t, locale } = useTranslation([
 		"engagement",
 		"feed",
@@ -59,7 +61,15 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		"ui",
 		"units",
 	]);
-	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId: unit } });
+	const query = useGetApiUnitsByTypeByUnitId({
+		path: { type, unitId: unit },
+		query: { localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: unit,
+	});
 
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
@@ -67,11 +77,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	if (!query.data) return <QueryPending />;
 
 	const item = query.data;
-	const localization = selectLocalization(
-		item.localizations,
-		toContentLanguage(locale.target),
-		item.language,
-	);
+	const localization = selectLocalization(item.localizations, item.language ?? "");
 	const Icon = Icons[type];
 	const rating =
 		item.contentRating === "r15"

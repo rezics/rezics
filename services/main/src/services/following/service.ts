@@ -33,7 +33,7 @@ type FollowAuthorization = Pick<UnitAuthorization<string>, "ensureCanRead">;
 type ListFollowingInput = {
 	readonly followerProfileId: string;
 	readonly kind?: UnitKind;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly cursor?: string;
 	readonly limit: number;
 };
@@ -53,15 +53,20 @@ function followingCursorCondition(cursor: FollowingCursorBoundary | undefined) {
 }
 
 export async function listFollowing(input: ListFollowingInput) {
-	const cursor = decodeFollowingCursor(input.cursor, input.kind, input.language);
+	const localizationLanguages = input.localizationLanguages ?? [];
+	const cursor = decodeFollowingCursor(input.cursor, input.kind, localizationLanguages);
 	const rows = await database
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			language: resolvedUnitLocalizationLanguage(unit.id, input.language),
-			title: resolvedUnitLocalizationTitle(unit.id, input.language),
-			avatar: resolvedUnitLocalizationAvatar(unit.id, input.language),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", input.language),
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"cover",
+				localizationLanguages,
+			),
 			position: unitFollow.position,
 			favorite: unitFollow.favorite,
 			createdAt: unitFollow.createdAt,
@@ -92,7 +97,7 @@ export async function listFollowing(input: ListFollowingInput) {
 		})),
 		nextCursor:
 			rows.length > input.limit && last
-				? encodeFollowingCursor(input.kind, input.language, {
+				? encodeFollowingCursor(input.kind, localizationLanguages, {
 						favorite: last.favorite,
 						position: last.position,
 						unitId: last.id,

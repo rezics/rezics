@@ -1,12 +1,13 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { useGetZoneRenderProjection } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending, cn } from "@rezics/ui";
 import { useMemo } from "react";
 
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { ZoneBlockProvider, ZoneDocument } from "./components/block-renderer";
 import { ZoneHeader } from "./components/zone-header";
@@ -27,14 +28,20 @@ export function ZonePage({
 	baseHref: string;
 	selection?: ZonePageSelection;
 }) {
-	const { t, locale } = useTranslation(["search", "ui", "zones"]);
+	const { t } = useTranslation(["search", "ui", "zones"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetZoneRenderProjection({
 		path: { zoneId: id },
 		query: {
-			language: toContentLanguage(locale.target),
+			localizationLanguages,
 			...(selection.by === "slug" ? { page: selection.slug } : {}),
 			...(selection.by === "id" ? { pageId: selection.pageId } : {}),
 		},
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.zone.language ?? null,
+		localizationLanguages,
+		unitId: id,
 	});
 	const projection = useMemo(
 		() => (query.data ? parseZoneRenderProjection(query.data) : null),
@@ -44,8 +51,7 @@ export function ZonePage({
 		if (!projection) return undefined;
 		const localization = selectLocalization(
 			projection.zone.localizations,
-			toContentLanguage(locale.target),
-			projection.zone.language,
+			projection.zone.language ?? "",
 		);
 		const title = localization?.title ?? t.ui.unnamed;
 		return {
@@ -55,7 +61,7 @@ export function ZonePage({
 			avatar: localization?.avatar ?? projection.zone.avatar,
 			avatarFallback: title.slice(0, 1).toUpperCase(),
 		};
-	}, [baseHref, locale.target, projection, t.search, t.ui.unnamed]);
+	}, [baseHref, projection, t.search, t.ui.unnamed]);
 	useHeaderSearchOverride(headerSearch);
 
 	if (query.isPending) return <QueryPending />;
@@ -65,8 +71,7 @@ export function ZonePage({
 
 	const localization = selectLocalization(
 		projection.zone.localizations,
-		toContentLanguage(locale.target),
-		projection.zone.language,
+		projection.zone.language ?? "",
 	);
 	const title = localization?.title ?? t.ui.unnamed;
 	const avatar = localization?.avatar ?? projection.zone.avatar;

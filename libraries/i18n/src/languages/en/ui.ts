@@ -46,6 +46,7 @@ export default {
 	displayName: "Display name",
 	introduction: "Introduction",
 	language: "Interface language",
+	preferredLanguageUnavailable: "This content is not yet available in your preferred languages.",
 	timezone: "Timezone",
 	contentRating: "Content rating",
 	profileVisibility: "Profile visibility",

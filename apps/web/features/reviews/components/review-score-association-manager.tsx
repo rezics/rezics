@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	useGetApiScoresByTargetIdViewer,
 	usePutApiPostsByPostIdScores,
@@ -25,18 +24,20 @@ import { useState, type FormEvent } from "react";
 
 import { useReviewManagement } from "@/features/posts/components/post-management-workspace";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { invalidateReviews } from "../data/review-cache";
 import { resolveReviewScoreAssociationOptions } from "../model/review-score-association";
 
 export function ReviewScoreAssociationManager() {
 	const { item: review } = useReviewManagement();
-	const { locale, t } = useTranslation(["engagement", "errors", "ui"]);
+	const { t } = useTranslation(["engagement", "errors", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
 	const replace = usePutApiPostsByPostIdScores();
 	const viewerScores = useGetApiScoresByTargetIdViewer({
 		path: { targetId: review.targetId },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
 	});
 	const [invalid, setInvalid] = useState(false);
 

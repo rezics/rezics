@@ -30,6 +30,23 @@ export const ContentLanguage = t.Union([
 ]);
 export type ContentLanguage = Static<typeof ContentLanguage>;
 
+/**
+ * Ordered localization lookup hints supplied by an API consumer.
+ *
+ * These are presentation preferences, not a collection filter. A lookup
+ * always falls back to the Unit's own localization order when none match.
+ */
+export const LocalizationLanguagePriority = t.Array(ContentLanguage, {
+	minItems: 1,
+	maxItems: ContentLanguageValues.length,
+	uniqueItems: true,
+});
+export type LocalizationLanguagePriority = Static<typeof LocalizationLanguagePriority>;
+
+export const LocalizationLanguageQuery = {
+	localizationLanguages: t.Optional(LocalizationLanguagePriority),
+};
+
 /** A lowercase UI locale value persisted in profile preferences. */
 export const StoredUiLocale = t.Union([
 	t.Literal(StoredUiLocaleValues[0]),

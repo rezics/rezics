@@ -25,6 +25,7 @@ import { Button, Menu, MenuContent, MenuItem, MenuTrigger, Skeleton } from "@rez
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -60,8 +61,10 @@ export function BookContents({ bookId }: { readonly bookId: string }) {
 	const { t } = useTranslation(["actions", "state", "ui", "units"]);
 	const { data: session } = useHydratedSession();
 	const queryClient = useQueryClient();
+	const localizationLanguages = useLocalizationLanguages();
 	const structure = useGetApiUnitsBookByUnitIdContentStructureNodes({
 		path: { unitId: bookId },
+		query: { localizationLanguages },
 	});
 	const completion = useGetApiProgressByUnitIdNodes(
 		{ path: { unitId: bookId } },

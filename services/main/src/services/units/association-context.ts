@@ -1,5 +1,6 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database, type DatabaseTransaction } from "../database";
@@ -49,7 +50,7 @@ export interface AssociationContextPostPresentation {
  */
 export async function getAssociationContextPostsByAssociationIds(
 	associationIds: readonly string[],
-	preferredLanguage?: string,
+	localizationLanguages: readonly ContentLanguage[] = [],
 	profileId?: string,
 ): Promise<Map<string, AssociationContextPostPresentation>> {
 	if (associationIds.length === 0) return new Map();
@@ -58,7 +59,7 @@ export async function getAssociationContextPostsByAssociationIds(
 			associationId: subjectAssociation.id,
 			id: post.id,
 			subjectId: post.subjectUnitId,
-			title: resolvedUnitLocalizationTitle(post.id, preferredLanguage),
+			title: resolvedUnitLocalizationTitle(post.id, localizationLanguages),
 		})
 		.from(subjectAssociation)
 		.innerJoin(post, eq(post.id, subjectAssociation.contextPostId))
@@ -78,7 +79,7 @@ export async function getAssociationContextPostsByAssociationIds(
 					.select({
 						postId: unitTag.unitId,
 						tagId: unitTag.tagId,
-						title: resolvedUnitLocalizationTitle(unitTag.tagId, preferredLanguage),
+						title: resolvedUnitLocalizationTitle(unitTag.tagId, localizationLanguages),
 						score: unitTagVoteStat.score,
 						voteCount: unitTagVoteStat.voteCount,
 						pinned: unitTag.pinned,

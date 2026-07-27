@@ -10,6 +10,7 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 	return {
 		id,
 		postKind: "reply",
+		language: "en",
 		attributions: [
 			{
 				id: "019b1234-1234-7000-8000-000000000002",

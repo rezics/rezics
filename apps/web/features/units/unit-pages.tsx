@@ -23,6 +23,7 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import type { UnitType, VariantUnitType } from "./unit-types";
 import {
@@ -32,12 +33,14 @@ import {
 
 export function UnitBrowsePage({ type }: { type: UnitType }) {
 	const { t } = useTranslation(["actions", "media", "ui", "units"]);
+	const localizationLanguages = useLocalizationLanguages();
+	const baseQuery = { limit: 20, localizationLanguages };
 	const query = useInfiniteQuery({
-		queryKey: getApiUnitsByTypeQueryKey({ path: { type } }),
+		queryKey: getApiUnitsByTypeQueryKey({ path: { type }, query: baseQuery }),
 		queryFn: async ({ pageParam, signal }) => {
 			const { data } = await getApiUnitsByType({
 				path: { type },
-				query: { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+				query: { ...baseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
 				signal,
 			});
 			return data;

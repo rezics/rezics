@@ -10,8 +10,8 @@ import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
-	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
+	resolvedUnitLocalizationLanguage,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
@@ -32,6 +32,7 @@ import {
 	AddCollectionItemsBatchResponse,
 	CollectionItemParams,
 	CollectionParams,
+	CollectionDetailQuery,
 	CreateCollectionBody,
 	FavoriteItemParams,
 	ListCollectionsQuery,
@@ -65,6 +66,7 @@ export default new Elysia({ prefix: "/collections" })
 	.get(
 		"",
 		async ({ query, request }) => {
+			const localizationLanguages = query.localizationLanguages ?? [];
 			const viewerId = query.ownerId
 				? (await resolveIdentity(request.headers, "unit:read")).profile?.unitId
 				: undefined;
@@ -76,6 +78,7 @@ export default new Elysia({ prefix: "/collections" })
 				.select({
 					id: collection.id,
 					ownerId: collection.ownerProfileId,
+					language: unitLocalization.language,
 					itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collection.id})::int`,
 					containsTarget: query.targetId
 						? sql<boolean>`exists(select 1 from ${collectionItem} selected_item where selected_item.collection_id = ${collection.id} and selected_item.unit_id = ${query.targetId})`
@@ -87,11 +90,17 @@ export default new Elysia({ prefix: "/collections" })
 				})
 				.from(collection)
 				.innerJoin(unit, eq(unit.id, collection.id))
-				.leftJoin(
+				.innerJoin(
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, unit.id),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(
+								unit.id,
+								localizationLanguages,
+							),
+						),
 					),
 				)
 				.where(
@@ -174,11 +183,16 @@ export default new Elysia({ prefix: "/collections" })
 	)
 	.get(
 		"/favorites",
-		async ({ profile }) => {
-			return getCollection(await ensureFavorites(profile.unitId), profile.unitId);
+		async ({ profile, query }) => {
+			return getCollection(
+				await ensureFavorites(profile.unitId),
+				profile.unitId,
+				query.localizationLanguages,
+			);
 		},
 		{
 			access: "write:unit:read",
+			query: CollectionDetailQuery,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
@@ -188,14 +202,16 @@ export default new Elysia({ prefix: "/collections" })
 	)
 	.get(
 		"/:collectionId",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
 			return getCollection(
 				params.collectionId,
 				(await resolveIdentity(request.headers, "unit:read")).profile?.unitId,
+				query.localizationLanguages,
 			);
 		},
 		{
 			params: CollectionParams,
+			query: CollectionDetailQuery,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,

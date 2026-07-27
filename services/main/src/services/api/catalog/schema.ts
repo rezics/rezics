@@ -7,7 +7,13 @@ import {
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
-import { FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
+import {
+	FractionalPosition,
+	ContentLanguage,
+	LocalizationLanguageQuery,
+	LocalizationInput,
+	Uuid,
+} from "../schema";
 import { CatalogUnitType, VariantUnitType } from "../units/schema";
 
 export const CreateCatalogUnitBody = t.Object(
@@ -19,22 +25,31 @@ export const CreateCatalogUnitBody = t.Object(
 );
 export type CreateCatalogUnitBody = Static<typeof CreateCatalogUnitBody>;
 
-export const ListEntityEntriesQuery = t.Object({
-	kind: t.Optional(t.String({ maxLength: 64 })),
-	language: t.Optional(ContentLanguage),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
+export const ListEntityEntriesQuery = t.Object(
+	{
+		kind: t.Optional(t.String({ maxLength: 64 })),
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListEntityEntriesQuery = Static<typeof ListEntityEntriesQuery>;
 
-export const EntityDetailQuery = t.Object({ language: t.Optional(ContentLanguage) });
+export const EntityDetailQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
 export type EntityDetailQuery = Static<typeof EntityDetailQuery>;
 
 export const EntityLocalizationParams = t.Object({ unitId: Uuid, language: ContentLanguage });
 export type EntityLocalizationParams = Static<typeof EntityLocalizationParams>;
 
-export const ListTagsQuery = t.Object({
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
+export const ListTagsQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListTagsQuery = Static<typeof ListTagsQuery>;
 
 export const AddUnitCreditBody = t.Object({

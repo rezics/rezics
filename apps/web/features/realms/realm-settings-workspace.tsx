@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	useGetApiRealmsByRealmId,
 	useGetApiRealmsByRealmIdMembers,
@@ -36,6 +35,7 @@ import { UnitRevisionCompare } from "@/features/history/components/unit-revision
 import { UnitRevisionHistory } from "@/features/history/components/unit-revision-history";
 import { realmHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./realm-moderation";
 import { RealmMemberAccess } from "./realm-member-access";
@@ -87,10 +87,11 @@ function RealmSettingsWorkspaceContent({
 	comparison?: { from: string | null; to: string | null };
 	memberProfileId?: string;
 }) {
-	const { t, locale } = useTranslation(["errors", "history", "realms"]);
+	const { t } = useTranslation(["errors", "history", "realms"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const realm = useGetApiRealmsByRealmId({
 		path: { realmId },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
 	});
 	if (realm.isPending) return <QueryPending />;
 	if (realm.isError || !realm.data)
@@ -160,9 +161,8 @@ function RealmSettingsWorkspaceContent({
 		(!section || visibleSectionIds.has(section)) &&
 		(!memberProfileId || capabilities.canManageMembers);
 	const localization =
-		realm.data.localizations.find(
-			(item) => item.language === toContentLanguage(locale.target),
-		) ?? realm.data.localizations[0];
+		realm.data.localizations.find((item) => item.language === realm.data.language) ??
+		realm.data.localizations[0];
 	return (
 		<ManagementWorkspace
 			header={
@@ -297,7 +297,11 @@ function RealmMembersSection({
 	realmId: string;
 	canManage: boolean;
 }) {
-	const query = useGetApiRealmsByRealmIdMembers({ path: { realmId }, query: { limit: 100 } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiRealmsByRealmIdMembers({
+		path: { realmId },
+		query: { limit: 100, localizationLanguages },
+	});
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="members">
 			<RealmMembers
@@ -313,7 +317,11 @@ function RealmMembersSection({
 }
 
 function RealmRulesSection({ baseHref, realmId }: { baseHref: string; realmId: string }) {
-	const query = useGetApiRealmsByRealmIdRules({ path: { realmId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiRealmsByRealmIdRules({
+		path: { realmId },
+		query: { localizationLanguages },
+	});
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="rules">
 			<RealmRules

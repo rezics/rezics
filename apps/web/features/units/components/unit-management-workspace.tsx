@@ -29,6 +29,7 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import {
 	canOpenUnitManagement,
@@ -86,7 +87,11 @@ function UnitManagementWorkspaceContent({
 }) {
 	const pathname = usePathname();
 	const { t, locale } = useTranslation(["errors", "units"]);
-	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiUnitsByTypeByUnitId({
+		path: { type, unitId },
+		query: { localizationLanguages },
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;

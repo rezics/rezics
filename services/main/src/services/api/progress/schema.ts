@@ -1,15 +1,19 @@
 import { type Static, t } from "elysia";
 
 import { ProgressStatusValues } from "../../database/schema/contract-values";
-import { Uuid } from "../schema";
+import { LocalizationLanguageQuery, Uuid } from "../schema";
 import { ProgressResponse } from "../schema/response";
 
 const ProgressStatus = t.Union(ProgressStatusValues.map((value) => t.Literal(value)));
 
-export const ListProgressQuery = t.Object({
-	status: t.Optional(ProgressStatus),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
-});
+export const ListProgressQuery = t.Object(
+	{
+		status: t.Optional(ProgressStatus),
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListProgressQuery = Static<typeof ListProgressQuery>;
 
 export const ProgressUnitParams = t.Object({ unitId: Uuid });

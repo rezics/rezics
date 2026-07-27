@@ -523,9 +523,12 @@ export function SearchFeature({
 
 	function resetFilters() {
 		const defaultQuery = "";
-		const preferredLanguages = languageControl
-			? (preferences.data?.preferredLanguages ?? [])
-			: [];
+		const preferredLanguages =
+			appearance === "feed" &&
+			languageControl &&
+			preferences.data?.filterFeedByPreferredLanguages
+				? (preferences.data?.preferredLanguages ?? [])
+				: [];
 		const languageDefault: SearchControlValue | undefined =
 			languageControl && preferredLanguages.length
 				? {

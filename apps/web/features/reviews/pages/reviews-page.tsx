@@ -5,10 +5,14 @@ import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import Link from "next/link";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { ReviewCards } from "../components/unit-review-list";
 
 export function ReviewsPage() {
-	const query = useGetApiReviews({ query: { limit: 50, sort: "best" } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiReviews({
+		query: { localizationLanguages, limit: 50, sort: "best" },
+	});
 	const { t } = useTranslation(["engagement"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)

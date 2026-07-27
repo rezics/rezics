@@ -4,6 +4,7 @@ import { useGetApiUnitsBookByUnitIdContentStructureNodes } from "@rezics/openapi
 import { Card, CardContent, QueryFailure, QueryPending } from "@rezics/ui";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { BookContentStructureEditor } from "../components/book-content-structure-editor";
 import { UnitSectionHeader } from "../components/unit-section-header";
 import type { UnitType } from "../unit-types";
@@ -24,9 +25,11 @@ export function ContentStructurePage({
 
 function BookContentStructurePage({ bookId }: { bookId: string }) {
 	const { t } = useTranslation(["ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiUnitsBookByUnitIdContentStructureNodes(
 		{
 			path: { unitId: bookId },
+			query: { localizationLanguages },
 		},
 		{
 			query: {

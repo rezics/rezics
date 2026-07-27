@@ -29,6 +29,7 @@ import {
 	listContentStructures,
 	updateContentStructureNode,
 } from "../content-structure/service";
+import { resolveUnitLocalizationFromOrdered } from "../units/localization";
 import {
 	ContentStructureInvalid,
 	ContentStructureRevisionConflict,
@@ -143,7 +144,7 @@ function parseLocalization(row: StoredZonePageLocalization) {
 export async function listZonePageUnits(
 	tx: DatabaseTransaction,
 	zoneId: string,
-	preferredLanguage?: ContentLanguage,
+	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<ZonePageProjection[]> {
 	const pages = await tx
 		.select({
@@ -223,10 +224,7 @@ export async function listZonePageUnits(
 		const localizations = localizationRows
 			.filter((row) => row.unitId === page.id)
 			.map(parseLocalization);
-		const selected =
-			(preferredLanguage
-				? localizations.find((localization) => localization.language === preferredLanguage)
-				: undefined) ?? localizations[0];
+		const selected = resolveUnitLocalizationFromOrdered(localizations, localizationLanguages);
 		if (!latestUnitRevisionId || !selected)
 			throw new ContentStructureInvalid("Zone Page Unit is incomplete");
 		const node = nodeByPageId.get(page.id);
@@ -263,9 +261,9 @@ export async function getZonePageUnitBySlug(
 	tx: DatabaseTransaction,
 	zoneId: string,
 	slug: string,
-	preferredLanguage?: ContentLanguage,
+	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<ZonePageProjection | null> {
-	const pages = await listZonePageUnits(tx, zoneId, preferredLanguage);
+	const pages = await listZonePageUnits(tx, zoneId, localizationLanguages);
 	return pages.find((page) => page.slug === slug) ?? null;
 }
 
@@ -273,9 +271,9 @@ export async function getZonePageUnitById(
 	tx: DatabaseTransaction,
 	zoneId: string,
 	pageId: string,
-	preferredLanguage?: ContentLanguage,
+	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<ZonePageProjection | null> {
-	const pages = await listZonePageUnits(tx, zoneId, preferredLanguage);
+	const pages = await listZonePageUnits(tx, zoneId, localizationLanguages);
 	return pages.find((page) => page.id === pageId) ?? null;
 }
 
@@ -475,12 +473,9 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 		const zonePages = await listZonePageUnits(tx, input.zoneId);
 		if (!pagesHaveReachableFeed(zonePages))
 			throw new ContentStructureInvalid("Every Zone requires at least one Feed Page");
-		const saved = await getZonePageUnitById(
-			tx,
-			input.zoneId,
-			pageId,
+		const saved = await getZonePageUnitById(tx, input.zoneId, pageId, [
 			input.localization.language,
-		);
+		]);
 		if (!saved) throw new Error("Zone Page Unit upsert did not produce a projection");
 		return saved;
 	});

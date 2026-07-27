@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	Button,
 	Cover,
@@ -39,12 +38,8 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 	readonly type: Type;
 	readonly unit: CatalogDetailUnitFor<Type>;
 }) {
-	const { locale, t } = useTranslation(["ui"]);
-	const localization = selectLocalization(
-		unit.localizations,
-		toContentLanguage(locale.target),
-		unit.language,
-	);
+	const { t } = useTranslation(["ui"]);
+	const localization = selectLocalization(unit.localizations, unit.language ?? "");
 
 	return (
 		<section className="grid items-start gap-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">

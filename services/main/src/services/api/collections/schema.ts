@@ -1,12 +1,22 @@
 import { type Static, t } from "elysia";
 import { CollectionDefinitionDocument, CollectionPresentationDocument } from "@rezics/block";
-import { FractionalPosition, LifecycleInput, LocalizationInput, Uuid } from "../schema";
+import {
+	FractionalPosition,
+	LifecycleInput,
+	LocalizationInput,
+	LocalizationLanguageQuery,
+	Uuid,
+} from "../schema";
 
-export const ListCollectionsQuery = t.Object({
-	ownerId: t.Optional(Uuid),
-	targetId: t.Optional(Uuid),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
+export const ListCollectionsQuery = t.Object(
+	{
+		ownerId: t.Optional(Uuid),
+		targetId: t.Optional(Uuid),
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListCollectionsQuery = Static<typeof ListCollectionsQuery>;
 
 export const CreateCollectionBody = t.Object({
@@ -19,6 +29,10 @@ export type CreateCollectionBody = Static<typeof CreateCollectionBody>;
 
 export const CollectionParams = t.Object({ collectionId: Uuid });
 export type CollectionParams = Static<typeof CollectionParams>;
+export const CollectionDetailQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type CollectionDetailQuery = Static<typeof CollectionDetailQuery>;
 
 export const UpdateCollectionBody = t.Object({
 	status: LifecycleInput.status,

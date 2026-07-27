@@ -1,22 +1,47 @@
 import { defineRelationsPart, sql } from "drizzle-orm";
-import { text, timestamp, boolean, integer, uuid, index, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+	text,
+	timestamp,
+	boolean,
+	check,
+	integer,
+	uuid,
+	index,
+	uniqueIndex,
+} from "drizzle-orm/pg-core";
+import type { ContentLanguage } from "@rezics/i18n";
 import { pgTable } from "./base";
 
-export const users = pgTable("users", {
-	id: uuid("id")
-		.default(sql`uuidv7()`)
-		.primaryKey(),
-	/** @UNIT_LOCALIZATION_EXEMPT Identity source: provider-owned sign-in name; public Profile titles remain Unit localizations. */
-	name: text("name").notNull(),
-	email: text("email").notNull().unique(),
-	emailVerified: boolean("email_verified").default(false).notNull(),
-	image: text("image"),
-	createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
-		.defaultNow()
-		.$onUpdate(() => /* @__PURE__ */ new Date())
-		.notNull(),
-});
+export const users = pgTable(
+	"users",
+	{
+		id: uuid("id")
+			.default(sql`uuidv7()`)
+			.primaryKey(),
+		/** @UNIT_LOCALIZATION_EXEMPT Identity source: provider-owned sign-in name; public Profile titles remain Unit localizations. */
+		name: text("name").notNull(),
+		email: text("email").notNull().unique(),
+		emailVerified: boolean("email_verified").default(false).notNull(),
+		image: text("image"),
+		registrationContentLanguage: text("registration_content_language")
+			.$type<ContentLanguage>()
+			.default("en")
+			.notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 })
+			.defaultNow()
+			.notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+	},
+	(table) => [
+		check(
+			"users_registration_content_language_check",
+			sql`${table.registrationContentLanguage} in ('zh', 'en')`,
+		),
+	],
+);
 
 export const sessions = pgTable(
 	"sessions",

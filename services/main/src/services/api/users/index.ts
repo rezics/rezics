@@ -9,6 +9,8 @@ import { database } from "../../database";
 import {
 	avatarReferenceToColumns,
 	isPrimaryUnitLocalization,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
@@ -54,6 +56,7 @@ import {
 	UpdateFollowingBody,
 	UserIdParams,
 	UserLookupParams,
+	PublicProfileQuery,
 } from "./schema";
 import { getProfile, presentProfile, PublicProfileSelection } from "./service";
 import {
@@ -63,7 +66,6 @@ import {
 	unfollowUnit,
 	updateFollowingPresentation,
 } from "../../following/service";
-import { primaryUnitTitle } from "../../units/localization";
 import {
 	PreferencesNotFound,
 	ProfileChanged,
@@ -111,6 +113,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 			preference.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score,
 		collectionConfig: parseCollectionConfig(preference.collectionConfig),
 		personalizedFeed: preference.personalizedFeed,
+		filterFeedByPreferredLanguages: preference.filterFeedByPreferredLanguages,
 		contentRatings: preference.contentRatings,
 		preferredLanguages: preference.preferredLanguages,
 	};
@@ -150,7 +153,11 @@ export default new Elysia({ prefix: "/users" })
 			const rows = await database
 				.select({
 					id: unit.id,
-					title: primaryUnitTitle(unit.id),
+					language: resolvedUnitLocalizationLanguage(
+						unit.id,
+						query.localizationLanguages,
+					),
+					title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
 					status: unit.status,
 					visibility: unit.visibility,
 					createdAt: unit.createdAt,
@@ -170,7 +177,10 @@ export default new Elysia({ prefix: "/users" })
 				.orderBy(desc(unit.createdAt), desc(unit.id))
 				.limit(query.limit ?? 50);
 			return {
-				items: rows.map((row) => ({ ...row, section: query.section })),
+				items: rows.map((row) => {
+					if (!row.language) throw new Error(`Studio Unit ${row.id} has no localization`);
+					return { ...row, language: row.language, section: query.section };
+				}),
 			};
 		},
 		{
@@ -321,6 +331,7 @@ export default new Elysia({ prefix: "/users" })
 						defaultScoreContextUnitId: defaultScoreContext.contextUnitId,
 						collectionConfig: body.collectionConfig,
 						personalizedFeed: body.personalizedFeed,
+						filterFeedByPreferredLanguages: body.filterFeedByPreferredLanguages,
 						contentRatings: body.contentRatings,
 						preferredLanguages: body.preferredLanguages,
 					})
@@ -356,7 +367,7 @@ export default new Elysia({ prefix: "/users" })
 			listFollowing({
 				followerProfileId: profile.unitId,
 				kind: query.kind,
-				language: query.language,
+				localizationLanguages: query.localizationLanguages,
 				cursor: query.cursor,
 				limit: query.limit ?? 30,
 			}),
@@ -437,16 +448,23 @@ export default new Elysia({ prefix: "/users" })
 	)
 	.get(
 		"/:id",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
+			const localizationLanguages = query.localizationLanguages ?? [];
 			const [result] = await database
 				.select(PublicProfileSelection)
 				.from(profileTable)
 				.innerJoin(unit, eq(unit.id, profileTable.id))
-				.leftJoin(
+				.innerJoin(
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, profileTable.id),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(
+								profileTable.id,
+								localizationLanguages,
+							),
+						),
 					),
 				)
 				.where(
@@ -480,6 +498,7 @@ export default new Elysia({ prefix: "/users" })
 		},
 		{
 			params: UserLookupParams,
+			query: PublicProfileQuery,
 			response: {
 				[StatusCodes.OK]: PublicProfileResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),

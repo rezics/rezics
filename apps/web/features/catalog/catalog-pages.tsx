@@ -42,6 +42,8 @@ import {
 } from "@/features/media/components/avatar-field";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { profileHref } from "@/features/profiles/profile-route";
 
@@ -73,16 +75,10 @@ function CatalogFrame({
 }
 
 export function EntitiesPage() {
-	const { t, locale } = useTranslation([
-		"actions",
-		"catalog",
-		"errors",
-		"governance",
-		"media",
-		"ui",
-	]);
+	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiEntities({
-		query: { language: toContentLanguage(locale.target), limit: 50 },
+		query: { localizationLanguages, limit: 50 },
 	});
 	return (
 		<CatalogFrame title={t.catalog.entities} createHref="/entities/new">
@@ -98,7 +94,8 @@ export function EntitiesPage() {
 
 export function TagsPage() {
 	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
-	const query = useGetApiTags({ query: { limit: 50 } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiTags({ query: { localizationLanguages, limit: 50 } });
 	return (
 		<CatalogFrame title={t.catalog.tags} createHref="/tags/new">
 			<UnitList
@@ -112,25 +109,21 @@ export function TagsPage() {
 }
 
 export function EntityDetailPage({ id }: { id: string }) {
-	const { t, locale } = useTranslation([
-		"actions",
-		"catalog",
-		"errors",
-		"governance",
-		"media",
-		"ui",
-	]);
+	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: id,
 	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	const localization = selectLocalization(
-		query.data.localizations,
-		toContentLanguage(locale.target),
-	);
+	const localization = selectLocalization(query.data.localizations, query.data.language ?? "");
 	const avatar = localization?.avatar ?? query.data.avatar;
 	const banner = localization?.banner ?? query.data.banner;
 	return (
@@ -205,9 +198,10 @@ function EntityEditContent({ id }: { id: string }) {
 		"media",
 		"ui",
 	]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
 	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
@@ -237,6 +231,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const localizationLanguages = useLocalizationLanguages();
 	const localization = entity.localizations.find(
 		(entry) => entry.language === toContentLanguage(locale.target),
 	);
@@ -277,7 +272,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 			await queryClient.invalidateQueries({
 				queryKey: getApiEntitiesByUnitIdQueryKey({
 					path: { unitId: entity.id },
-					query: { language: toContentLanguage(locale.target) },
+					query: { localizationLanguages },
 				}),
 			});
 			router.push(`/entities/${entity.id}`);

@@ -1,12 +1,19 @@
 import { type Static, t } from "elysia";
 
-import { ContentLanguage, DateTime, FractionalPosition, Uuid } from "../schema";
+import {
+	ContentLanguage,
+	LocalizationLanguageQuery,
+	DateTime,
+	FractionalPosition,
+	Uuid,
+} from "../schema";
 import { CatalogUnitType } from "../units/schema";
 
 const TagVoteValue = t.Nullable(t.Union([t.Literal(-1), t.Literal(1)]));
 const BinaryVote = t.Union([t.Literal(-1), t.Literal(1)]);
 const LocalizedTagSummary = {
 	tagId: Uuid,
+	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
 	createdAt: DateTime,
@@ -21,7 +28,7 @@ export type UnitTagLandscapeParams = Static<typeof UnitTagLandscapeParams>;
 
 export const UnitTagLandscapeQuery = t.Object(
 	{
-		language: t.Optional(ContentLanguage),
+		...LocalizationLanguageQuery,
 		globalLimit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 		structureLimit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 		sourceLimit: t.Optional(t.Integer({ minimum: 1, maximum: 30, default: 10 })),
@@ -43,6 +50,7 @@ const GlobalUnitTagResponse = t.Object({
 export const TagStructureMemberResponse = t.Object({
 	ordinal: t.Integer({ minimum: 0 }),
 	tagId: Uuid,
+	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
 });
@@ -78,6 +86,7 @@ const RealmPolicyTagResponse = t.Object({
 
 export const RealmTagSubscriptionResponse = t.Object({
 	realmId: Uuid,
+	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
 	canVote: t.Boolean(),
@@ -98,10 +107,9 @@ export const UnitTagLandscapeResponse = t.Object({
 	),
 });
 
-export const RealmTagSubscriptionListQuery = t.Object(
-	{ language: t.Optional(ContentLanguage) },
-	{ additionalProperties: false },
-);
+export const RealmTagSubscriptionListQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
 export type RealmTagSubscriptionListQuery = Static<typeof RealmTagSubscriptionListQuery>;
 
 export const RealmTagSubscriptionListResponse = t.Object({
@@ -127,7 +135,7 @@ export type TagIdParams = Static<typeof TagIdParams>;
 
 export const TagHierarchyQuery = t.Object(
 	{
-		language: t.Optional(ContentLanguage),
+		...LocalizationLanguageQuery,
 		childLimit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
 		grandchildLimit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 12 })),
 	},
@@ -137,6 +145,7 @@ export type TagHierarchyQuery = Static<typeof TagHierarchyQuery>;
 
 const TagHierarchyNode = t.Object({
 	tagId: Uuid,
+	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
 	score: t.Integer(),
@@ -145,6 +154,7 @@ const TagHierarchyNode = t.Object({
 
 export const TagHierarchyResponse = t.Object({
 	tagId: Uuid,
+	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
 	children: t.Array(
@@ -184,10 +194,9 @@ export type UpdateTagStructureBody = Static<typeof UpdateTagStructureBody>;
 export const TagStructureParams = t.Object({ structureId: Uuid });
 export type TagStructureParams = Static<typeof TagStructureParams>;
 
-export const TagStructureQuery = t.Object(
-	{ language: t.Optional(ContentLanguage) },
-	{ additionalProperties: false },
-);
+export const TagStructureQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
 export type TagStructureQuery = Static<typeof TagStructureQuery>;
 
 export const TagStructureResponse = t.Object({

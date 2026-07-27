@@ -14,6 +14,7 @@ import Link from "next/link";
 
 import { PreviewCapabilityBoundary } from "@/features/preview-access/components/preview-capability-boundary";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
 	StudioSectionCreateHrefs,
 	studioContentHref,
@@ -23,7 +24,10 @@ import { StudioOverviewHref } from "../routing/studio-routes";
 
 function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSectionId }) {
 	const { t } = useTranslation(["create"]);
-	const query = useListCurrentUserStudioContent({ query: { section: sectionId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useListCurrentUserStudioContent({
+		query: { section: sectionId, localizationLanguages },
+	});
 	const section = t.create.sections[sectionId];
 
 	if (query.isPending) return <QueryPending />;

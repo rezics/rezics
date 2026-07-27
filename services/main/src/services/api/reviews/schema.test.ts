@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	CreateReviewBody,
+	GetReviewQuery,
 	ListReviewsQuery,
 	ListViewerScoresQuery,
 	resolveReviewScoreFilter,
@@ -52,8 +53,9 @@ describe("review creation schema", () => {
 describe("viewer Score list schema", () => {
 	it("accepts supported content languages and rejects UI locale identifiers", () => {
 		expect(Check(ListViewerScoresQuery, {})).toBe(true);
-		expect(Check(ListViewerScoresQuery, { language: "zh" })).toBe(true);
-		expect(Check(ListViewerScoresQuery, { language: "zh-Hant" })).toBe(false);
+		expect(Check(ListViewerScoresQuery, { localizationLanguages: ["zh"] })).toBe(true);
+		expect(Check(ListViewerScoresQuery, { language: "zh" })).toBe(false);
+		expect(Check(ListViewerScoresQuery, { localizationLanguages: ["zh-Hant"] })).toBe(false);
 	});
 });
 
@@ -64,6 +66,7 @@ describe("review list schema", () => {
 				targetId,
 				realmIds: [realmId],
 				languages: ["zh", "en"],
+				localizationLanguages: ["en", "zh"],
 				scoreContextUnitId: realmId,
 				scores: [8, 9, 10],
 				sort: "best",
@@ -99,5 +102,14 @@ describe("review list schema", () => {
 		expect(Check(ListReviewsQuery, { realmId })).toBe(false);
 		expect(Check(ListReviewsQuery, { sort: "relevance" })).toBe(false);
 		expect(Check(ListReviewsQuery, { search: "review text" })).toBe(false);
+	});
+});
+
+describe("review localization query", () => {
+	it("uses the shared fallback list", () => {
+		expect(Check(GetReviewQuery, {})).toBe(true);
+		expect(Check(GetReviewQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
+		expect(Check(GetReviewQuery, { localizationLanguages: [] })).toBe(false);
+		expect(Check(GetReviewQuery, { unknown: true })).toBe(false);
 	});
 });

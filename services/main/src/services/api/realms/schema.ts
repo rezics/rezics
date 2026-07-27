@@ -15,7 +15,14 @@ import {
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
 import { RealmCapabilitySourceValues } from "../../realms/member-access";
-import { DateTime, FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
+import {
+	DateTime,
+	FractionalPosition,
+	ContentLanguage,
+	LocalizationLanguageQuery,
+	LocalizationInput,
+	Uuid,
+} from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -30,10 +37,13 @@ const RealmMemberState = t.Union(RealmMemberStateValues.map((value) => t.Literal
 const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues, { default: undefined });
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
 
-export const ListRealmsQuery = t.Object({
-	language: t.Optional(ContentLanguage),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
+export const ListRealmsQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListRealmsQuery = Static<typeof ListRealmsQuery>;
 
 export const CreateRealmBody = t.Object({
@@ -52,7 +62,9 @@ export const SetRealmScoreContextBody = t.Object(
 );
 export type SetRealmScoreContextBody = Static<typeof SetRealmScoreContextBody>;
 
-export const RealmDetailQuery = t.Object({ language: t.Optional(ContentLanguage) });
+export const RealmDetailQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
 export type RealmDetailQuery = Static<typeof RealmDetailQuery>;
 
 export const UpdateRealmBody = t.Object({
@@ -69,11 +81,15 @@ export const JoinRealmBody = t.Object({
 });
 export type JoinRealmBody = Static<typeof JoinRealmBody>;
 
-export const ListRealmMembersQuery = t.Object({
-	profileId: t.Optional(Uuid),
-	state: t.Optional(RealmMemberState),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
-});
+export const ListRealmMembersQuery = t.Object(
+	{
+		profileId: t.Optional(Uuid),
+		state: t.Optional(RealmMemberState),
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListRealmMembersQuery = Static<typeof ListRealmMembersQuery>;
 
 export const RealmMemberParams = t.Object({ realmId: Uuid, profileId: Uuid });
@@ -135,6 +151,11 @@ export const PublishRealmRulesBody = t.Object({
 });
 export type PublishRealmRulesBody = Static<typeof PublishRealmRulesBody>;
 
+export const RealmRulesQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type RealmRulesQuery = Static<typeof RealmRulesQuery>;
+
 export const RealmPinParams = t.Object({ realmId: Uuid, unitId: Uuid });
 export type RealmPinParams = Static<typeof RealmPinParams>;
 
@@ -189,6 +210,7 @@ export const RealmTagContextResponse = t.Object({
 export const ListRealmUnitsQuery = t.Object(
 	{
 		status: t.Optional(RealmUnitStatus),
+		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 	},
 	{ additionalProperties: false },
@@ -239,6 +261,7 @@ export const RealmUnitListResponse = t.Object({
 			realmId: Uuid,
 			unitId: Uuid,
 			unitKind: t.String(),
+			language: ContentLanguage,
 			title: t.Nullable(t.String()),
 			status: RealmUnitStatus,
 			postTargetingLocked: t.Boolean(),

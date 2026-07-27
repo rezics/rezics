@@ -16,6 +16,7 @@ import { useState } from "react";
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
@@ -36,6 +37,7 @@ export function CollectionPickerButton({
 	const { data: session } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
 	const queryClient = useQueryClient();
+	const localizationLanguages = useLocalizationLanguages();
 	const [internalOpen, setInternalOpen] = useState(false);
 	const open = controlledOpen ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
@@ -45,6 +47,7 @@ export function CollectionPickerButton({
 			query: {
 				...(me.data?.id ? { ownerId: me.data.id } : {}),
 				targetId,
+				localizationLanguages,
 				limit: 50,
 			},
 		},

@@ -18,6 +18,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { PostEditorFields } from "../components/post-editor-fields";
@@ -31,8 +32,12 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const create = usePostApiPosts();
+	const localizationLanguages = useLocalizationLanguages();
 	const defaultRealm = useGetApiRealmsByRealmId(
-		{ path: { realmId: defaultRealmId ?? "" } },
+		{
+			path: { realmId: defaultRealmId ?? "" },
+			query: { localizationLanguages },
+		},
 		{ query: { enabled: Boolean(defaultRealmId) } },
 	);
 	const [realm, setRealm] = useState<PickedEntity>();
@@ -43,14 +48,14 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 		if (!defaultRealm.data || realm) return;
 		const localization = selectLocalization(
 			defaultRealm.data.localizations,
-			toContentLanguage(locale.target),
+			defaultRealm.data.language,
 			defaultRealm.data.language,
 		);
 		setRealm({
 			id: defaultRealm.data.id,
 			label: localization?.title ?? defaultRealm.data.id,
 		});
-	}, [defaultRealm.data, locale.target, realm]);
+	}, [defaultRealm.data, realm]);
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();

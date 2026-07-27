@@ -14,6 +14,7 @@ import {
 	UnscopedFeedDisplayContext,
 } from "@/features/content-feed/model/feed-display-context";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import type { UnitScore } from "../model/score-value";
 
 interface UnitReviewListBaseProps {
@@ -39,9 +40,11 @@ export function UnitReviewList({
 	sort = "best",
 	targetId,
 }: UnitReviewListProps) {
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiReviews({
 		query: {
 			targetId,
+			localizationLanguages,
 			...(realmIds?.length ? { realmIds: [...realmIds] } : {}),
 			...(languages?.length ? { languages: [...languages] } : {}),
 			...(scores?.length && scoreContextUnitId

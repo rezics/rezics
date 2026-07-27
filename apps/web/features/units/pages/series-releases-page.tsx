@@ -26,6 +26,7 @@ import Link from "next/link";
 import { type FormEvent, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { UnitSectionHeader } from "../components/unit-section-header";
 import { useUnitManagement } from "../components/unit-management-workspace";
@@ -37,8 +38,13 @@ export function SeriesReleasesPage() {
 	const { type, unit } = useUnitManagement();
 	const queryClient = useQueryClient();
 	const [selectedUnit, setSelectedUnit] = useState<SelectedUnit>();
-	const query = useGetApiSeriesBySeriesIdReleases({ path: { seriesId: unit.id } });
-	const queryKey = getApiSeriesBySeriesIdReleasesQueryKey({ path: { seriesId: unit.id } });
+	const localizationLanguages = useLocalizationLanguages();
+	const queryParams = {
+		path: { seriesId: unit.id },
+		query: { localizationLanguages },
+	};
+	const query = useGetApiSeriesBySeriesIdReleases(queryParams);
+	const queryKey = getApiSeriesBySeriesIdReleasesQueryKey(queryParams);
 	const invalidate = async () => queryClient.invalidateQueries({ queryKey });
 	const update = usePutApiSeriesBySeriesIdReleasesByReleaseId({
 		mutation: { onSuccess: invalidate },

@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	getApiScoresByTargetIdViewerQueryKey,
 	useGetApiScoresByTargetIdViewer,
@@ -23,6 +22,7 @@ import { useMemo, useState } from "react";
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useDefaultScoreContext } from "../data/default-score-context";
@@ -43,12 +43,13 @@ export function UnitScoreControl({
 	const { openAuthPortal } = useAuthPortal();
 	const queryClient = useQueryClient();
 	const mutation = usePutApiScoresByTargetId();
-	const { locale, t } = useTranslation(["engagement", "ui"]);
+	const { t } = useTranslation(["engagement", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const defaultScoreContext = useDefaultScoreContext();
 	const viewerScores = useGetApiScoresByTargetIdViewer(
 		{
 			path: { targetId },
-			query: { language: toContentLanguage(locale.target) },
+			query: { localizationLanguages },
 		},
 		{ query: { enabled: !sessionPending && Boolean(session) } },
 	);

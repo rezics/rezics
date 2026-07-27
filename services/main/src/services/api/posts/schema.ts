@@ -1,13 +1,23 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
-import { DateTime, FractionalPosition, ContentLanguage, Uuid } from "../schema";
+import {
+	DateTime,
+	FractionalPosition,
+	ContentLanguage,
+	LocalizationLanguageQuery,
+	Uuid,
+} from "../schema";
 
-export const ListPostsQuery = t.Object({
-	realmId: t.Optional(Uuid),
-	subjectId: t.Optional(Uuid),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
+export const ListPostsQuery = t.Object(
+	{
+		realmId: t.Optional(Uuid),
+		subjectId: t.Optional(Uuid),
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListPostsQuery = Static<typeof ListPostsQuery>;
 
 export const CreatePostBody = t.Object({
@@ -21,7 +31,13 @@ export type CreatePostBody = Static<typeof CreatePostBody>;
 
 export const PostParams = t.Object({ postId: Uuid });
 export type PostParams = Static<typeof PostParams>;
-export const GetPostQuery = t.Object({ realmId: t.Optional(Uuid) });
+export const GetPostQuery = t.Object(
+	{
+		realmId: t.Optional(Uuid),
+		...LocalizationLanguageQuery,
+	},
+	{ additionalProperties: false },
+);
 export type GetPostQuery = Static<typeof GetPostQuery>;
 
 const PostScoreInput = t.Object({ scoreId: Uuid }, { additionalProperties: false });
@@ -52,12 +68,16 @@ export const UpdatePostBody = t.Object({
 });
 export type UpdatePostBody = Static<typeof UpdatePostBody>;
 
-export const ListRepliesQuery = t.Object({
-	realmId: t.Optional(Uuid),
-	parentPostId: t.Optional(Uuid),
-	cursor: t.Optional(t.String({ maxLength: 512 })),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 25 })),
-});
+export const ListRepliesQuery = t.Object(
+	{
+		realmId: t.Optional(Uuid),
+		parentPostId: t.Optional(Uuid),
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ maxLength: 512 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 25 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListRepliesQuery = Static<typeof ListRepliesQuery>;
 
 export const CreateReplyBody = t.Object({

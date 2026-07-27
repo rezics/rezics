@@ -10,6 +10,8 @@ import { createContext, useContext, type ReactNode } from "react";
 import { UnitProgressDialog } from "@/features/progress/components/unit-progress-dialog";
 import { UnitProgressProvider } from "@/features/progress/components/unit-progress-provider";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
 	CatalogDetailSections,
 	type CatalogDetailSectionIdFor,
@@ -63,7 +65,16 @@ function CatalogDetailWorkspaceContent<Type extends CatalogDetailUnitType>({
 	type: Type;
 	unitId: string;
 }) {
-	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiUnitsByTypeByUnitId({
+		path: { type, unitId },
+		query: { localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId,
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;

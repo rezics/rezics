@@ -1399,8 +1399,10 @@ import type {
 	PostApiCollectionsStatus422,
 	PostApiCollectionsStatus429,
 	PostApiCollectionsStatus500,
+	GetApiCollectionsFavoritesOptions,
 	GetApiCollectionsFavoritesStatus200,
 	GetApiCollectionsFavoritesStatus404,
+	GetApiCollectionsFavoritesStatus422,
 	GetApiCollectionsFavoritesStatus429,
 	GetApiCollectionsFavoritesStatus500,
 	GetApiCollectionsByCollectionIdOptions,
@@ -9642,18 +9644,19 @@ export function usePostApiSeries<TContext>(
 
 export const getApiSeriesBySeriesIdReleasesQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiSeriesBySeriesIdReleasesOptions, "headers">) =>
-	[{ url: "/api/series/:seriesId/releases", params: path }] as const;
+	[{ url: "/api/series/:seriesId/releases", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiSeriesBySeriesIdReleasesQueryKey = ReturnType<
 	typeof getApiSeriesBySeriesIdReleasesQueryKey
 >;
 
 export function getApiSeriesBySeriesIdReleasesQueryOptions(
-	{ path }: GetApiSeriesBySeriesIdReleasesOptions,
+	{ path, query }: GetApiSeriesBySeriesIdReleasesOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiSeriesBySeriesIdReleasesQueryKey({ path });
+	const queryKey = getApiSeriesBySeriesIdReleasesQueryKey({ path, query });
 	return queryOptions<
 		GetApiSeriesBySeriesIdReleasesStatus200,
 		ResponseErrorConfig<
@@ -9669,6 +9672,7 @@ export function getApiSeriesBySeriesIdReleasesQueryOptions(
 			const { data } = await getApiSeriesBySeriesIdReleases({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -9688,10 +9692,14 @@ export function useGetApiSeriesBySeriesIdReleases<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiSeriesBySeriesIdReleasesOptions["path"]
 			| (() => GetApiSeriesBySeriesIdReleasesOptions["path"]);
+		query?:
+			| GetApiSeriesBySeriesIdReleasesOptions["query"]
+			| (() => GetApiSeriesBySeriesIdReleasesOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -9712,7 +9720,10 @@ export function useGetApiSeriesBySeriesIdReleases<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey =
 		resolvedOptions?.queryKey ?? getApiSeriesBySeriesIdReleasesQueryKey(resolvedParams);
 
@@ -13909,16 +13920,16 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 	>;
 }
 
-export const getApiUsersByIdQueryKey = ({ path }: Omit<GetApiUsersByIdOptions, "headers">) =>
-	[{ url: "/api/users/:id", params: path }] as const;
+export const getApiUsersByIdQueryKey = ({ path, query }: Omit<GetApiUsersByIdOptions, "headers">) =>
+	[{ url: "/api/users/:id", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiUsersByIdQueryKey = ReturnType<typeof getApiUsersByIdQueryKey>;
 
 export function getApiUsersByIdQueryOptions(
-	{ path }: GetApiUsersByIdOptions,
+	{ path, query }: GetApiUsersByIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersByIdQueryKey({ path });
+	const queryKey = getApiUsersByIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiUsersByIdStatus200,
 		ResponseErrorConfig<
@@ -13932,6 +13943,7 @@ export function getApiUsersByIdQueryOptions(
 			const { data } = await getApiUsersById({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -13949,7 +13961,13 @@ export function useGetApiUsersById<
 	TQueryData = GetApiUsersByIdStatus200,
 	TQueryKey extends QueryKey = GetApiUsersByIdQueryKey,
 >(
-	{ path }: { path: GetApiUsersByIdOptions["path"] | (() => GetApiUsersByIdOptions["path"]) },
+	{
+		path,
+		query,
+	}: {
+		path: GetApiUsersByIdOptions["path"] | (() => GetApiUsersByIdOptions["path"]);
+		query?: GetApiUsersByIdOptions["query"] | (() => GetApiUsersByIdOptions["query"]);
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -13967,7 +13985,10 @@ export function useGetApiUsersById<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiUsersByIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
@@ -17453,16 +17474,17 @@ export function usePostApiUnitsByType<TContext>(
 
 export const getApiUnitsByTypeByUnitIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiUnitsByTypeByUnitIdOptions, "headers">) =>
-	[{ url: "/api/units/:type/:unitId", params: path }] as const;
+	[{ url: "/api/units/:type/:unitId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiUnitsByTypeByUnitIdQueryKey = ReturnType<typeof getApiUnitsByTypeByUnitIdQueryKey>;
 
 export function getApiUnitsByTypeByUnitIdQueryOptions(
-	{ path }: GetApiUnitsByTypeByUnitIdOptions,
+	{ path, query }: GetApiUnitsByTypeByUnitIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUnitsByTypeByUnitIdQueryKey({ path });
+	const queryKey = getApiUnitsByTypeByUnitIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiUnitsByTypeByUnitIdStatus200,
 		ResponseErrorConfig<
@@ -17478,6 +17500,7 @@ export function getApiUnitsByTypeByUnitIdQueryOptions(
 			const { data } = await getApiUnitsByTypeByUnitId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -17497,10 +17520,14 @@ export function useGetApiUnitsByTypeByUnitId<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiUnitsByTypeByUnitIdOptions["path"]
 			| (() => GetApiUnitsByTypeByUnitIdOptions["path"]);
+		query?:
+			| GetApiUnitsByTypeByUnitIdOptions["query"]
+			| (() => GetApiUnitsByTypeByUnitIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -17521,7 +17548,10 @@ export function useGetApiUnitsByTypeByUnitId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiUnitsByTypeByUnitIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
@@ -22439,18 +22469,22 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 
 export const getApiUnitsBookByUnitIdContentStructureNodesQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiUnitsBookByUnitIdContentStructureNodesOptions, "headers">) =>
-	[{ url: "/api/units/book/:unitId/content-structure/nodes", params: path }] as const;
+	[
+		{ url: "/api/units/book/:unitId/content-structure/nodes", params: path },
+		...(query ? [query] : []),
+	] as const;
 
 type GetApiUnitsBookByUnitIdContentStructureNodesQueryKey = ReturnType<
 	typeof getApiUnitsBookByUnitIdContentStructureNodesQueryKey
 >;
 
 export function getApiUnitsBookByUnitIdContentStructureNodesQueryOptions(
-	{ path }: GetApiUnitsBookByUnitIdContentStructureNodesOptions,
+	{ path, query }: GetApiUnitsBookByUnitIdContentStructureNodesOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUnitsBookByUnitIdContentStructureNodesQueryKey({ path });
+	const queryKey = getApiUnitsBookByUnitIdContentStructureNodesQueryKey({ path, query });
 	return queryOptions<
 		GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
@@ -22466,6 +22500,7 @@ export function getApiUnitsBookByUnitIdContentStructureNodesQueryOptions(
 			const { data } = await getApiUnitsBookByUnitIdContentStructureNodes({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -22485,10 +22520,14 @@ export function useGetApiUnitsBookByUnitIdContentStructureNodes<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiUnitsBookByUnitIdContentStructureNodesOptions["path"]
 			| (() => GetApiUnitsBookByUnitIdContentStructureNodesOptions["path"]);
+		query?:
+			| GetApiUnitsBookByUnitIdContentStructureNodesOptions["query"]
+			| (() => GetApiUnitsBookByUnitIdContentStructureNodesOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -22509,7 +22548,10 @@ export function useGetApiUnitsBookByUnitIdContentStructureNodes<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey =
 		resolvedOptions?.queryKey ??
 		getApiUnitsBookByUnitIdContentStructureNodesQueryKey(resolvedParams);
@@ -22703,7 +22745,7 @@ export function useGetApiChaptersByChapterId<
 		path:
 			| GetApiChaptersByChapterIdOptions["path"]
 			| (() => GetApiChaptersByChapterIdOptions["path"]);
-		query:
+		query?:
 			| GetApiChaptersByChapterIdOptions["query"]
 			| (() => GetApiChaptersByChapterIdOptions["query"]);
 	},
@@ -23809,19 +23851,23 @@ export function usePostApiCollections<TContext>(
 	>;
 }
 
-export const getApiCollectionsFavoritesQueryKey = () =>
-	[{ url: "/api/collections/favorites" }] as const;
+export const getApiCollectionsFavoritesQueryKey = ({
+	query,
+}: Omit<GetApiCollectionsFavoritesOptions, "headers"> = {}) =>
+	[{ url: "/api/collections/favorites" }, ...(query ? [query] : [])] as const;
 
 type GetApiCollectionsFavoritesQueryKey = ReturnType<typeof getApiCollectionsFavoritesQueryKey>;
 
 export function getApiCollectionsFavoritesQueryOptions(
+	{ query }: GetApiCollectionsFavoritesOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiCollectionsFavoritesQueryKey();
+	const queryKey = getApiCollectionsFavoritesQueryKey({ query });
 	return queryOptions<
 		GetApiCollectionsFavoritesStatus200,
 		ResponseErrorConfig<
 			| GetApiCollectionsFavoritesStatus404
+			| GetApiCollectionsFavoritesStatus422
 			| GetApiCollectionsFavoritesStatus429
 			| GetApiCollectionsFavoritesStatus500
 		>,
@@ -23832,6 +23878,7 @@ export function getApiCollectionsFavoritesQueryOptions(
 		queryFn: async ({ signal }) => {
 			const { data } = await getApiCollectionsFavorites({
 				...config,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -23849,12 +23896,20 @@ export function useGetApiCollectionsFavorites<
 	TQueryData = GetApiCollectionsFavoritesStatus200,
 	TQueryKey extends QueryKey = GetApiCollectionsFavoritesQueryKey,
 >(
+	{
+		query,
+	}: {
+		query?:
+			| GetApiCollectionsFavoritesOptions["query"]
+			| (() => GetApiCollectionsFavoritesOptions["query"]);
+	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiCollectionsFavoritesStatus200,
 				ResponseErrorConfig<
 					| GetApiCollectionsFavoritesStatus404
+					| GetApiCollectionsFavoritesStatus422
 					| GetApiCollectionsFavoritesStatus429
 					| GetApiCollectionsFavoritesStatus500
 				>,
@@ -23868,11 +23923,13 @@ export function useGetApiCollectionsFavorites<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiCollectionsFavoritesQueryKey();
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiCollectionsFavoritesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiCollectionsFavoritesQueryOptions(config),
+			...getApiCollectionsFavoritesQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -23881,6 +23938,7 @@ export function useGetApiCollectionsFavorites<
 		TData,
 		ResponseErrorConfig<
 			| GetApiCollectionsFavoritesStatus404
+			| GetApiCollectionsFavoritesStatus422
 			| GetApiCollectionsFavoritesStatus429
 			| GetApiCollectionsFavoritesStatus500
 		>
@@ -23893,18 +23951,19 @@ export function useGetApiCollectionsFavorites<
 
 export const getApiCollectionsByCollectionIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiCollectionsByCollectionIdOptions, "headers">) =>
-	[{ url: "/api/collections/:collectionId", params: path }] as const;
+	[{ url: "/api/collections/:collectionId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiCollectionsByCollectionIdQueryKey = ReturnType<
 	typeof getApiCollectionsByCollectionIdQueryKey
 >;
 
 export function getApiCollectionsByCollectionIdQueryOptions(
-	{ path }: GetApiCollectionsByCollectionIdOptions,
+	{ path, query }: GetApiCollectionsByCollectionIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiCollectionsByCollectionIdQueryKey({ path });
+	const queryKey = getApiCollectionsByCollectionIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiCollectionsByCollectionIdStatus200,
 		ResponseErrorConfig<
@@ -23920,6 +23979,7 @@ export function getApiCollectionsByCollectionIdQueryOptions(
 			const { data } = await getApiCollectionsByCollectionId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -23939,10 +23999,14 @@ export function useGetApiCollectionsByCollectionId<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiCollectionsByCollectionIdOptions["path"]
 			| (() => GetApiCollectionsByCollectionIdOptions["path"]);
+		query?:
+			| GetApiCollectionsByCollectionIdOptions["query"]
+			| (() => GetApiCollectionsByCollectionIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -23963,7 +24027,10 @@ export function useGetApiCollectionsByCollectionId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey =
 		resolvedOptions?.queryKey ?? getApiCollectionsByCollectionIdQueryKey(resolvedParams);
 
@@ -26139,16 +26206,17 @@ export function usePostApiPolls<TContext>(
 
 export const getApiPollsByPollIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiPollsByPollIdOptions, "headers">) =>
-	[{ url: "/api/polls/:pollId", params: path }] as const;
+	[{ url: "/api/polls/:pollId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiPollsByPollIdQueryKey = ReturnType<typeof getApiPollsByPollIdQueryKey>;
 
 export function getApiPollsByPollIdQueryOptions(
-	{ path }: GetApiPollsByPollIdOptions,
+	{ path, query }: GetApiPollsByPollIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiPollsByPollIdQueryKey({ path });
+	const queryKey = getApiPollsByPollIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiPollsByPollIdStatus200,
 		ResponseErrorConfig<
@@ -26164,6 +26232,7 @@ export function getApiPollsByPollIdQueryOptions(
 			const { data } = await getApiPollsByPollId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -26183,7 +26252,11 @@ export function useGetApiPollsByPollId<
 >(
 	{
 		path,
-	}: { path: GetApiPollsByPollIdOptions["path"] | (() => GetApiPollsByPollIdOptions["path"]) },
+		query,
+	}: {
+		path: GetApiPollsByPollIdOptions["path"] | (() => GetApiPollsByPollIdOptions["path"]);
+		query?: GetApiPollsByPollIdOptions["query"] | (() => GetApiPollsByPollIdOptions["query"]);
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -26203,7 +26276,10 @@ export function useGetApiPollsByPollId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiPollsByPollIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
@@ -29209,16 +29285,17 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 
 export const getApiRealmsByRealmIdRulesQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiRealmsByRealmIdRulesOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/rules", params: path }] as const;
+	[{ url: "/api/realms/:realmId/rules", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdRulesQueryKey = ReturnType<typeof getApiRealmsByRealmIdRulesQueryKey>;
 
 export function getApiRealmsByRealmIdRulesQueryOptions(
-	{ path }: GetApiRealmsByRealmIdRulesOptions,
+	{ path, query }: GetApiRealmsByRealmIdRulesOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiRealmsByRealmIdRulesQueryKey({ path });
+	const queryKey = getApiRealmsByRealmIdRulesQueryKey({ path, query });
 	return queryOptions<
 		GetApiRealmsByRealmIdRulesStatus200,
 		ResponseErrorConfig<
@@ -29234,6 +29311,7 @@ export function getApiRealmsByRealmIdRulesQueryOptions(
 			const { data } = await getApiRealmsByRealmIdRules({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -29253,10 +29331,14 @@ export function useGetApiRealmsByRealmIdRules<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			| GetApiRealmsByRealmIdRulesOptions["path"]
 			| (() => GetApiRealmsByRealmIdRulesOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdRulesOptions["query"]
+			| (() => GetApiRealmsByRealmIdRulesOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -29277,7 +29359,10 @@ export function useGetApiRealmsByRealmIdRules<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey =
 		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdRulesQueryKey(resolvedParams);
 

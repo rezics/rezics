@@ -6,6 +6,7 @@ import {
 	type PostKind,
 	type UnitKind,
 } from "../../database/schema/contract-values";
+import { LocalizationLanguageQuery } from "../schema";
 
 export const FeedSortSchema = t.UnionEnum(FeedSortValues, { default: "best" });
 
@@ -103,6 +104,7 @@ export const FeedRequest = t.Object(
 		sort: t.Optional(FeedSortSchema),
 		cursor: t.Optional(t.String({ maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+		...LocalizationLanguageQuery,
 	},
 	{ additionalProperties: false },
 );

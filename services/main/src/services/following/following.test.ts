@@ -11,19 +11,23 @@ describe("following cursors", () => {
 	} as const;
 
 	it("round-trips a typed boundary within its Unit-kind scope", () => {
-		const cursor = encodeFollowingCursor("zone", "zh", boundary);
-		expect(decodeFollowingCursor(cursor, "zone", "zh")).toEqual(boundary);
-		expect(decodeFollowingCursor(undefined, "zone", "zh")).toBeUndefined();
+		const cursor = encodeFollowingCursor("zone", ["zh", "en"], boundary);
+		expect(decodeFollowingCursor(cursor, "zone", ["zh", "en"])).toEqual(boundary);
+		expect(decodeFollowingCursor(undefined, "zone", ["zh", "en"])).toBeUndefined();
 	});
 
 	it("rejects malformed cursors and cursors from another filter scope", () => {
-		const cursor = encodeFollowingCursor("zone", "zh", boundary);
-		expect(() => decodeFollowingCursor(cursor, "realm", "zh")).toThrow(InvalidPaginationCursor);
-		expect(() => decodeFollowingCursor(cursor, "zone", "en")).toThrow(InvalidPaginationCursor);
-		expect(() => decodeFollowingCursor(cursor, undefined, "zh")).toThrow(
+		const cursor = encodeFollowingCursor("zone", ["zh", "en"], boundary);
+		expect(() => decodeFollowingCursor(cursor, "realm", ["zh", "en"])).toThrow(
 			InvalidPaginationCursor,
 		);
-		expect(() => decodeFollowingCursor("not-a-cursor", "zone", "zh")).toThrow(
+		expect(() => decodeFollowingCursor(cursor, "zone", ["en", "zh"])).toThrow(
+			InvalidPaginationCursor,
+		);
+		expect(() => decodeFollowingCursor(cursor, undefined, ["zh", "en"])).toThrow(
+			InvalidPaginationCursor,
+		);
+		expect(() => decodeFollowingCursor("not-a-cursor", "zone", ["zh", "en"])).toThrow(
 			InvalidPaginationCursor,
 		);
 	});

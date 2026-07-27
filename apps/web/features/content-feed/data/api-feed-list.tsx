@@ -2,7 +2,12 @@
 
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { createSimpleFeedFilter, type SimpleFeedContentKind } from "@rezics/filter";
-import { postApiFeedQuery, useGetApiRealms, useGetApiTags } from "@rezics/openapi-tanstack-query";
+import {
+	postApiFeedQuery,
+	useGetApiRealms,
+	useGetApiTags,
+	useGetApiUsersMePreferences,
+} from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListFilterIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -17,12 +22,14 @@ import {
 	type ChoiceOption,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedContentSelector } from "../components/feed-content-selector";
 import { FeedFiltersDialog } from "../components/feed-filters-dialog";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
 import { FeedSortValues, type FeedSort } from "../model/feed-sort";
+import { resolveFeedFilterLanguages } from "../model/feed-language-filter";
 import { FeedQueryKey } from "../query";
 
 export interface ApiFeedListProps {
@@ -53,15 +60,54 @@ export function ApiFeedList({
 	tagIds = [],
 }: ApiFeedListProps) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
-	const { data: session } = useHydratedSession();
+	const session = useHydratedSession();
+	const preferences = useGetApiUsersMePreferences({
+		query: { enabled: Boolean(session.data) },
+	});
+	const localizationLanguages = useLocalizationLanguages();
+	const languageDefaultProfileId = session.data?.user.id ?? "anonymous";
+	const initializedLanguageDefault = useRef<string | undefined>(undefined);
+	const preferencesReady = !session.isPending && (!session.data || !preferences.isPending);
+	const filterLanguages = resolveFeedFilterLanguages({
+		allowDefault: preferencesReady && Boolean(onLanguagesChange),
+		defaultInitialized: initializedLanguageDefault.current === languageDefaultProfileId,
+		filterByPreferredLanguages: preferences.data?.filterFeedByPreferredLanguages ?? false,
+		preferredLanguages: preferences.data?.preferredLanguages ?? [],
+		requestedLanguages: languages,
+	});
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
+	useEffect(() => {
+		if (
+			initializedLanguageDefault.current === languageDefaultProfileId ||
+			session.isPending ||
+			(session.data && preferences.isPending)
+		)
+			return;
+		initializedLanguageDefault.current = languageDefaultProfileId;
+		if (
+			onLanguagesChange &&
+			languages.length === 0 &&
+			preferences.data?.filterFeedByPreferredLanguages &&
+			preferences.data.preferredLanguages.length
+		)
+			onLanguagesChange(preferences.data.preferredLanguages);
+	}, [
+		languageDefaultProfileId,
+		languages.length,
+		onLanguagesChange,
+		preferences.data,
+		preferences.isPending,
+		session.data,
+		session.isPending,
+	]);
 	const baseBody = {
 		limit: 20,
+		localizationLanguages,
 		sort,
 		...(() => {
 			const filter = createSimpleFeedFilter({
 				contentKinds,
-				languages,
+				languages: filterLanguages,
 				realmIds,
 				tagIds,
 			});
@@ -77,6 +123,7 @@ export function ApiFeedList({
 			});
 			return data;
 		},
+		enabled: preferencesReady,
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
@@ -197,7 +244,7 @@ export function ApiFeedList({
 				getItemKey={(item) => item.id}
 				renderItem={(item, metadata) => (
 					<FeedItemCard
-						canExclude={Boolean(session)}
+						canExclude={Boolean(session.data)}
 						item={item}
 						onHiddenChange={(value) => setItemHidden(item.id, value)}
 						position={metadata.position}
@@ -243,13 +290,14 @@ export function FeedListControls({
 	| "tagIds"
 >) {
 	const { t } = useTranslation(["feed"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const [filtersOpen, setFiltersOpen] = useState(false);
 	const realms = useGetApiRealms(
-		{ query: { limit: 50 } },
+		{ query: { localizationLanguages, limit: 50 } },
 		{ query: { enabled: Boolean(onRealmIdsChange) } },
 	);
 	const tags = useGetApiTags(
-		{ query: { limit: 50 } },
+		{ query: { localizationLanguages, limit: 50 } },
 		{ query: { enabled: Boolean(onTagIdsChange) } },
 	);
 	const sortOptions = FeedSortValues.map((value) => ({

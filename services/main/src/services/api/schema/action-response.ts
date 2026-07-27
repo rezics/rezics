@@ -99,6 +99,7 @@ export const RealmMemberListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			profileId: Uuid,
+			language: ContentLanguage,
 			name: t.Nullable(t.String()),
 			slugAddress: NullablePublicSlugAddressResponse,
 			avatar: AvatarResponse,

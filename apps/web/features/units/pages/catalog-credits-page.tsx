@@ -1,12 +1,13 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { DetailedCreditAttributionGroups } from "../components/catalog-attribution-sections";
 import type { CatalogDetailUnitType } from "../model/catalog-detail-section";
@@ -20,8 +21,17 @@ export function CatalogCreditsPage({
 	type: CatalogDetailUnitType;
 	unitId: string;
 }) {
-	const { locale, t } = useTranslation(["state", "ui", "units"]);
-	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId } });
+	const { t } = useTranslation(["state", "ui", "units"]);
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiUnitsByTypeByUnitId({
+		path: { type, unitId },
+		query: { localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId,
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -35,7 +45,7 @@ export function CatalogCreditsPage({
 
 	const localization = selectLocalization(
 		query.data.localizations,
-		toContentLanguage(locale.target),
+		query.data.language,
 		query.data.language,
 	);
 	return (

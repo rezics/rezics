@@ -1,5 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
+import { and, asc, eq, exists, inArray, isNotNull, isNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import Elysia from "elysia";
 
 import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
@@ -8,7 +10,10 @@ import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { PlatformCapabilityRequired } from "../../authorization/errors";
 import { database, type DatabaseTransaction } from "../../database";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import {
+	localizationLanguageOrder,
+	resolvedUnitLocalizationLanguage,
+} from "../../units/localization";
 import {
 	contentStructure,
 	contentStructureNode,
@@ -40,6 +45,7 @@ import { ContentStructureNotFound } from "../../content-structure/errors";
 import { saveBookContentStructureDraft } from "../../content-structure/book-draft";
 import {
 	BookContentStructureParams,
+	BookContentStructureQuery,
 	ChapterLocalizationParams,
 	ChapterParams,
 	ReadChapterQuery,
@@ -152,6 +158,7 @@ async function readBookContentStructure(
 	tx: DatabaseTransaction,
 	bookId: string,
 	canEditBook: boolean,
+	localizationLanguages: readonly ContentLanguage[] = [],
 ) {
 	const [structure] = await tx
 		.select({ id: contentStructure.id })
@@ -187,7 +194,13 @@ async function readBookContentStructure(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
+				eq(
+					unitLocalization.language,
+					resolvedUnitLocalizationLanguage(
+						contentStructureNode.contentUnitId,
+						localizationLanguages,
+					),
+				),
 			),
 		)
 		.leftJoin(
@@ -630,16 +643,22 @@ export default new Elysia()
 	)
 	.get(
 		"/units/book/:unitId/content-structure/nodes",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request.headers, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
 			const canEditBook = await authorization.unit.canUpdate(params.unitId);
 			return database.transaction((tx) =>
-				readBookContentStructure(tx, params.unitId, canEditBook),
+				readBookContentStructure(
+					tx,
+					params.unitId,
+					canEditBook,
+					query.localizationLanguages,
+				),
 			);
 		},
 		{
 			params: BookContentStructureParams,
+			query: BookContentStructureQuery,
 			response: {
 				[StatusCodes.OK]: ContentStructureNodeListResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["BookNotFound"]),
@@ -721,9 +740,11 @@ export default new Elysia()
 			if (!node?.chapterId || !(await authorization.unit.canRead(node.bookId)))
 				throw new ChapterNotFound();
 			const canEditBook = await authorization.unit.canUpdate(node.bookId);
+			const localizationLanguages = query.localizationLanguages ?? [];
 			const [content] = await database
 				.select({
 					language: unitLocalization.language,
+					position: unitLocalization.position,
 					title: unitLocalization.title,
 					content: unitLocalization.content,
 					status: unitLocalization.contentStatus,
@@ -736,8 +757,20 @@ export default new Elysia()
 				.where(
 					and(
 						eq(unitLocalization.unitId, params.chapterId),
-						eq(unitLocalization.language, query.language),
+						isNotNull(unitLocalization.content),
+						canEditBook
+							? undefined
+							: and(
+									eq(unit.status, "published"),
+									inArray(unit.visibility, ["public", "unlisted"]),
+									eq(unitLocalization.contentStatus, "published"),
+								),
 					),
+				)
+				.orderBy(
+					localizationLanguageOrder(unitLocalization.language, localizationLanguages),
+					unitLocalization.position,
+					unitLocalization.language,
 				)
 				.limit(1);
 			if (
@@ -760,13 +793,11 @@ export default new Elysia()
 				throw new Error(
 					`Missing content metric for chapter ${params.chapterId} localization ${content.language}`,
 				);
+			const siblingLocalization = alias(unitLocalization, "readable_sibling_localization");
 			const siblings = await database
 				.select({
 					id: contentStructureNode.contentUnitId,
 					position: contentStructureNode.position,
-					unitStatus: unit.status,
-					unitVisibility: unit.visibility,
-					contentStatus: unitLocalization.contentStatus,
 				})
 				.from(contentStructureNode)
 				.innerJoin(
@@ -775,13 +806,6 @@ export default new Elysia()
 				)
 				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
 				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-						eq(unitLocalization.language, query.language),
-					),
-				)
 				.where(
 					and(
 						eq(contentStructureNode.ownerUnitId, node.bookId),
@@ -789,17 +813,33 @@ export default new Elysia()
 						isNull(contentStructure.deletedAt),
 						eq(post.kind, "chapter"),
 						isNull(contentStructureNode.deletedAt),
+						canEditBook
+							? undefined
+							: and(
+									eq(unit.status, "published"),
+									inArray(unit.visibility, ["public", "unlisted"]),
+								),
+						exists(
+							database
+								.select({ value: sql`1` })
+								.from(siblingLocalization)
+								.where(
+									and(
+										eq(
+											siblingLocalization.unitId,
+											contentStructureNode.contentUnitId,
+										),
+										isNotNull(siblingLocalization.content),
+										canEditBook
+											? undefined
+											: eq(siblingLocalization.contentStatus, "published"),
+									),
+								),
+						),
 					),
 				)
 				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
-			const readable = siblings.filter((item) =>
-				isContentStructureNodeReadable(
-					canEditBook,
-					item.unitStatus,
-					item.unitVisibility,
-					item.contentStatus,
-				),
-			);
+			const readable = siblings;
 			const index = readable.findIndex((item) => item.id === params.chapterId);
 			return {
 				...node,

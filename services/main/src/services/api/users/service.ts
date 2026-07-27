@@ -1,12 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { PortableTextDocument, parseNullableDocument } from "@rezics/block";
-import type { AvatarReference } from "@rezics/avatar";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { database } from "../../database";
 import {
-	isPrimaryUnitLocalization,
-	resolvedUnitLocalizationAvatar,
-	resolvedUnitLocalizationImageAssetId,
+	avatarReferenceFromColumns,
+	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
 import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
 import { presentAvatar } from "../../units/avatar";
@@ -20,25 +19,35 @@ export const PublicProfileSelection = {
 	visibility: unit.visibility,
 	language: unitLocalization.language,
 	name: unitLocalization.title,
-	avatar: resolvedUnitLocalizationAvatar(profileTable.id),
-	bannerAssetId: resolvedUnitLocalizationImageAssetId(profileTable.id, "banner"),
+	avatarType: unitLocalization.avatarType,
+	avatarAssetId: unitLocalization.avatarAssetId,
+	avatarEmoji: unitLocalization.avatarEmoji,
+	avatarIconPrefix: unitLocalization.avatarIconPrefix,
+	avatarIconName: unitLocalization.avatarIconName,
+	bannerAssetId: unitLocalization.bannerAssetId,
 	summary: unitLocalization.summary,
 	description: unitLocalization.description,
 	createdAt: unit.createdAt,
 	updatedAt: unit.updatedAt,
 };
 
-export async function getProfile(unitId: string) {
+export async function getProfile(
+	unitId: string,
+	localizationLanguages: readonly ContentLanguage[] = [],
+) {
 	const profile = (
 		await database
 			.select(PublicProfileSelection)
 			.from(profileTable)
 			.innerJoin(unit, eq(unit.id, profileTable.id))
-			.leftJoin(
+			.innerJoin(
 				unitLocalization,
 				and(
 					eq(unitLocalization.unitId, profileTable.id),
-					isPrimaryUnitLocalization(unitLocalization.unitId),
+					eq(
+						unitLocalization.language,
+						resolvedUnitLocalizationLanguage(profileTable.id, localizationLanguages),
+					),
 				),
 			)
 			.where(eq(profileTable.id, unitId))
@@ -51,21 +60,41 @@ export async function getProfile(unitId: string) {
 export async function presentProfile<
 	T extends {
 		id: string;
-		avatar: AvatarReference | null;
+		avatarType: typeof unitLocalization.$inferSelect.avatarType;
+		avatarAssetId: string | null;
+		avatarEmoji: string | null;
+		avatarIconPrefix: typeof unitLocalization.$inferSelect.avatarIconPrefix;
+		avatarIconName: string | null;
 		bannerAssetId: string | null;
 		status: string;
 		visibility: string;
 		description: unknown;
 	},
 >(profile: T) {
-	const { avatar, bannerAssetId, ...publicProfile } = profile;
+	const {
+		avatarType,
+		avatarAssetId,
+		avatarEmoji,
+		avatarIconPrefix,
+		avatarIconName,
+		bannerAssetId,
+		...publicProfile
+	} = profile;
 	return {
 		...publicProfile,
 		slugAddress: await getPublicCanonicalUnitSlugAddress(profile.id),
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
 		description: parseNullableDocument(PortableTextDocument, profile.description),
-		avatar: presentAvatar(avatar),
+		avatar: presentAvatar(
+			avatarReferenceFromColumns({
+				avatarType,
+				avatarAssetId,
+				avatarEmoji,
+				avatarIconPrefix,
+				avatarIconName,
+			}),
+		),
 		banner: presentImageAsset(bannerAssetId, "banner"),
 	};
 }

@@ -1,6 +1,7 @@
 export {
 	ContentLanguageValues,
 	DefaultContentLanguage,
+	DefaultPreferredLanguage,
 	DefaultStoredUiLocale,
 	StoredUiLocaleValues,
 } from "@rezics/i18n";

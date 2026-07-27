@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
+	ContentLanguageValues,
 	ContentRatingValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
@@ -12,6 +13,7 @@ import {
 	ContentLanguage,
 	DateTime,
 	FractionalPosition,
+	LocalizationLanguageQuery,
 	PublicationLicense,
 	StoredUiLocale,
 	UnitKind,
@@ -37,6 +39,7 @@ export type StudioSection = Static<typeof StudioSection>;
 export const StudioContentListQuery = t.Object(
 	{
 		section: StudioSection,
+		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 	},
 	{ additionalProperties: false },
@@ -48,6 +51,7 @@ export const StudioContentListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			section: StudioSection,
+			language: ContentLanguage,
 			title: t.Nullable(t.String()),
 			status: t.UnionEnum(UnitStatusValues),
 			visibility: t.UnionEnum(UnitVisibilityValues),
@@ -91,25 +95,35 @@ export const UpdateInterfaceLocaleBody = t.Object(
 );
 export type UpdateInterfaceLocaleBody = Static<typeof UpdateInterfaceLocaleBody>;
 
-export const ReplacePreferencesBody = t.Object({
-	interfaceLocale: StoredUiLocale,
-	defaultLicense: t.Nullable(PublicationLicense),
-	defaultRealmManageMode: t.Boolean({ default: false }),
-	defaultScoreContextUnitId: Uuid,
-	collectionConfig: t.Nullable(CollectionConfigV1),
-	personalizedFeed: t.Boolean({ default: true }),
-	contentRatings: t.Array(t.Union(ContentRatingValues.map((value) => t.Literal(value))), {
-		uniqueItems: true,
-	}),
-	preferredLanguages: t.Array(ContentLanguage, {
-		minItems: 1,
-		uniqueItems: true,
-	}),
-});
+export const ReplacePreferencesBody = t.Object(
+	{
+		interfaceLocale: StoredUiLocale,
+		defaultLicense: t.Nullable(PublicationLicense),
+		defaultRealmManageMode: t.Boolean({ default: false }),
+		defaultScoreContextUnitId: Uuid,
+		collectionConfig: t.Nullable(CollectionConfigV1),
+		personalizedFeed: t.Boolean({ default: true }),
+		filterFeedByPreferredLanguages: t.Boolean({ default: false }),
+		contentRatings: t.Array(t.Union(ContentRatingValues.map((value) => t.Literal(value))), {
+			uniqueItems: true,
+		}),
+		preferredLanguages: t.Array(ContentLanguage, {
+			minItems: 1,
+			maxItems: ContentLanguageValues.length,
+			uniqueItems: true,
+		}),
+	},
+	{ additionalProperties: false },
+);
 export type ReplacePreferencesBody = Static<typeof ReplacePreferencesBody>;
 
 export const UserLookupParams = t.Object({ id: Uuid });
 export type UserLookupParams = Static<typeof UserLookupParams>;
+
+export const PublicProfileQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type PublicProfileQuery = Static<typeof PublicProfileQuery>;
 
 export const UserIdParams = t.Object({ id: Uuid });
 export type UserIdParams = Static<typeof UserIdParams>;
@@ -117,12 +131,15 @@ export type UserIdParams = Static<typeof UserIdParams>;
 export const FollowingUnitParams = t.Object({ unitId: Uuid });
 export type FollowingUnitParams = Static<typeof FollowingUnitParams>;
 
-export const FollowingListQuery = t.Object({
-	kind: t.Optional(UnitKind),
-	language: t.Optional(ContentLanguage),
-	cursor: t.Optional(t.String({ maxLength: 1_024 })),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
-});
+export const FollowingListQuery = t.Object(
+	{
+		kind: t.Optional(UnitKind),
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ maxLength: 1_024 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
+	},
+	{ additionalProperties: false },
+);
 export type FollowingListQuery = Static<typeof FollowingListQuery>;
 
 export const UpdateFollowingBody = t.Object(

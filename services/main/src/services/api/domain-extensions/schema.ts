@@ -10,7 +10,14 @@ import {
 import { type Static, Type } from "@sinclair/typebox";
 import { t } from "elysia";
 
-import { DateTime, FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
+import {
+	DateTime,
+	FractionalPosition,
+	ContentLanguage,
+	LocalizationLanguageQuery,
+	LocalizationInput,
+	Uuid,
+} from "../schema";
 import { AvatarResponse, ImageAssetResponse } from "../schema/response";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
@@ -46,6 +53,9 @@ export const CreateSeriesBody = t.Object(
 	{ additionalProperties: false },
 );
 export const SeriesParams = t.Object({ seriesId: Uuid });
+export const SeriesReleaseListQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
 export const SeriesReleaseParams = t.Object({ seriesId: Uuid, releaseId: Uuid });
 export const UpsertSeriesReleaseBody = t.Object(
 	{
@@ -85,14 +95,19 @@ export const CreateZoneBody = t.Object(
 	{ additionalProperties: false },
 );
 export const ZoneParams = t.Object({ zoneId: Uuid });
-export const ZoneDetailQuery = t.Object({ language: t.Optional(ContentLanguage) });
-export const ZoneRenderQuery = t.Object({
-	language: t.Optional(ContentLanguage),
-	page: t.Optional(
-		t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
-	),
-	pageId: t.Optional(Uuid),
+export const ZoneDetailQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
 });
+export const ZoneRenderQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		page: t.Optional(
+			t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+		),
+		pageId: t.Optional(Uuid),
+	},
+	{ additionalProperties: false },
+);
 export const ZonePageIdParams = t.Object({ zoneId: Uuid, pageId: Uuid });
 export const ZoneNavigationParams = t.Object({
 	zoneId: Uuid,
@@ -177,6 +192,7 @@ export const SeriesReleaseListResponse = t.Object({
 				release: t.Object({
 					id: Uuid,
 					type: t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")]),
+					language: ContentLanguage,
 					title: t.Nullable(t.String()),
 					cover: ImageAssetResponse,
 				}),

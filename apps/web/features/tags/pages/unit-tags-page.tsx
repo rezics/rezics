@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { ArrowLeft } from "lucide-react";
@@ -11,6 +10,8 @@ import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detai
 import { isCatalogDetailUnitFor } from "@/features/units/model/catalog-detail-unit";
 import { catalogDetailHref } from "@/features/units/routing/catalog-detail-routes";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 
 export function UnitTagsPage({
@@ -20,8 +21,17 @@ export function UnitTagsPage({
 	readonly type: CatalogDetailUnitType;
 	readonly unitId: string;
 }) {
-	const { locale, t } = useTranslation(["tags", "ui", "units"]);
-	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId } });
+	const { t } = useTranslation(["tags", "ui", "units"]);
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiUnitsByTypeByUnitId({
+		path: { type, unitId },
+		query: { localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId,
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -35,7 +45,7 @@ export function UnitTagsPage({
 
 	const localization = selectLocalization(
 		query.data.localizations,
-		toContentLanguage(locale.target),
+		query.data.language,
 		query.data.language,
 	);
 	return (

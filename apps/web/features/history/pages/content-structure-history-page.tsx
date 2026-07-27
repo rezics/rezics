@@ -7,13 +7,16 @@ import Link from "next/link";
 import { useUnitManagement } from "@/features/units/components/unit-management-workspace";
 import { unitManagementSectionHref } from "@/features/units/routing/unit-management-routes";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { ContentStructureRevisionHistory } from "../components/content-structure-revision-history";
 
 export function ContentStructureHistoryPage() {
 	const { t } = useTranslation(["errors", "history", "units"]);
 	const { type, unit } = useUnitManagement();
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiUnitsBookByUnitIdContentStructureNodes({
 		path: { unitId: unit.id },
+		query: { localizationLanguages },
 	});
 	if (type !== "book" || !unit.capabilities.canEdit)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;

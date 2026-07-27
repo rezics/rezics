@@ -5,7 +5,7 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	pollOption,
 	poll,
@@ -17,7 +17,7 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
-import { CreatePollBody, PollParams, VotePollBody } from "./schema";
+import { CreatePollBody, PollDetailQuery, PollParams, VotePollBody } from "./schema";
 import { toApiErrorResponse, PollDetailResponse } from "../schema/response";
 import { IdResponse, PollVoteResponse } from "../schema/action-response";
 import {
@@ -119,10 +119,12 @@ export default new Elysia({ prefix: "/polls" })
 	)
 	.get(
 		"/:pollId",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
+			const localizationLanguages = query.localizationLanguages ?? [];
 			const [pollRecord] = await database
 				.select({
 					id: poll.id,
+					language: unitLocalization.language,
 					question: unitLocalization.title,
 					content: unitLocalization.content,
 					voteMode: poll.mode,
@@ -138,7 +140,10 @@ export default new Elysia({ prefix: "/polls" })
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, poll.id),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(poll.id, localizationLanguages),
+						),
 					),
 				)
 				.where(eq(poll.id, params.pollId))
@@ -209,6 +214,7 @@ export default new Elysia({ prefix: "/polls" })
 		},
 		{
 			params: PollParams,
+			query: PollDetailQuery,
 			response: {
 				[StatusCodes.OK]: PollDetailResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PollNotFound", "UnitNotFound"]),

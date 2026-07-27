@@ -15,7 +15,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useState, type DragEvent, type FormEvent } from "react";
+import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@rezics/ui";
 import { Button } from "@rezics/ui";
@@ -28,7 +29,14 @@ import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { isContentLanguage, isStoredUiLocale, toContentLanguage, toUiLocale } from "@rezics/i18n";
+import {
+	ContentLanguageValues,
+	isContentLanguage,
+	isStoredUiLocale,
+	toContentLanguage,
+	toUiLocale,
+	type ContentLanguage,
+} from "@rezics/i18n";
 import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
@@ -44,9 +52,10 @@ import {
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { authClient } from "@/lib/auth-client";
-import { selectLocalization } from "@/lib/localization";
+import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
 import { SettingsOverviewHref } from "./routing/settings-routes";
 import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
+import { FeedQueryKey } from "@/features/content-feed/query";
 
 function SettingsFrame({ title, children }: { title: string; children: React.ReactNode }) {
 	const { t } = useTranslation(["settings"]);
@@ -197,22 +206,37 @@ export function PreferenceSettings() {
 	]);
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences();
+	const localizationLanguages = buildLocalizationLanguages(
+		preferences.data?.preferredLanguages ?? [],
+		toContentLanguage(locale.target),
+	);
 	const storedDefaultScoreContextUnitId =
 		preferences.data?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score;
 	const storedDefaultScoreContext = useGetApiRealmsByRealmId(
-		{ path: { realmId: storedDefaultScoreContextUnitId } },
+		{
+			path: { realmId: storedDefaultScoreContextUnitId },
+			query: { localizationLanguages },
+		},
 		{ query: { enabled: Boolean(preferences.data) } },
 	);
 	const update = usePutApiUsersMePreferences({
 		mutation: {
 			onSuccess: () =>
-				queryClient.invalidateQueries({ queryKey: getApiUsersMePreferencesQueryKey() }),
+				Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: getApiUsersMePreferencesQueryKey(),
+					}),
+					queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
+				]),
 		},
 	});
 	const { setLocale } = useSetLocale();
 	const [saved, setSaved] = useState(false);
 	const [invalid, setInvalid] = useState(false);
 	const [selectedDefaultScoreContext, setSelectedDefaultScoreContext] = useState<PickedRealm>();
+	const [editedPreferredLanguages, setEditedPreferredLanguages] = useState<ContentLanguage[]>();
+	const [pendingLanguage, setPendingLanguage] = useState<ContentLanguage>();
+	const [draggedLanguage, setDraggedLanguage] = useState<ContentLanguage>();
 	if (preferences.isPending) return <QueryPending />;
 	if (preferences.isError || !preferences.data)
 		return <QueryFailure error={preferences.error} retry={() => void preferences.refetch()} />;
@@ -226,12 +250,51 @@ export function PreferenceSettings() {
 		);
 	const storedDefaultScoreContextLocalization = selectLocalization(
 		storedDefaultScoreContext.data.localizations,
-		toContentLanguage(locale.target),
+		storedDefaultScoreContext.data.language,
 		storedDefaultScoreContext.data.language,
 	);
 	const defaultScoreContext = selectedDefaultScoreContext ?? {
 		id: storedDefaultScoreContext.data.id,
 		label: storedDefaultScoreContextLocalization?.title ?? storedDefaultScoreContext.data.id,
+	};
+	const preferredLanguages = editedPreferredLanguages ?? preferences.data.preferredLanguages;
+	const availableLanguages = ContentLanguageValues.filter(
+		(language) => !preferredLanguages.includes(language),
+	);
+	const languageToAdd =
+		pendingLanguage && availableLanguages.includes(pendingLanguage)
+			? pendingLanguage
+			: availableLanguages[0];
+	const languageLabel = (language: ContentLanguage) =>
+		language === "zh" ? t.locale.zh : t.locale.en;
+	const moveLanguage = (language: ContentLanguage, offset: -1 | 1) => {
+		setEditedPreferredLanguages((edited) => {
+			const current = edited ?? preferences.data.preferredLanguages;
+			const from = current.indexOf(language);
+			const to = from + offset;
+			if (from < 0 || to < 0 || to >= current.length) return [...current];
+			const next = [...current];
+			const [moved] = next.splice(from, 1);
+			if (!moved) return next;
+			next.splice(to, 0, moved);
+			return next;
+		});
+	};
+	const dropLanguage = (event: DragEvent<HTMLLIElement>, targetLanguage: ContentLanguage) => {
+		event.preventDefault();
+		if (!draggedLanguage || draggedLanguage === targetLanguage) return;
+		setEditedPreferredLanguages((edited) => {
+			const current = edited ?? preferences.data.preferredLanguages;
+			const from = current.indexOf(draggedLanguage);
+			const to = current.indexOf(targetLanguage);
+			if (from < 0 || to < 0) return [...current];
+			const next = [...current];
+			const [moved] = next.splice(from, 1);
+			if (!moved) return next;
+			next.splice(to, 0, moved);
+			return next;
+		});
+		setDraggedLanguage(undefined);
 	};
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -241,13 +304,12 @@ export function PreferenceSettings() {
 		if (!current) return;
 		const data = new FormData(event.currentTarget);
 		const interfaceLocale = String(data.get("interfaceLocale"));
-		const contentLanguage = String(data.get("contentLanguage"));
 		const selectedRatings = data.getAll("contentRating").filter(isContentRating);
 		const submittedDefaultLicense = data.get("defaultLicense");
 		if (
 			!selectedRatings.length ||
 			!isStoredUiLocale(interfaceLocale) ||
-			!isContentLanguage(contentLanguage) ||
+			!preferredLanguages.length ||
 			(submittedDefaultLicense !== null &&
 				submittedDefaultLicense !== "" &&
 				!isPublicationLicenseId(submittedDefaultLicense))
@@ -266,13 +328,10 @@ export function PreferenceSettings() {
 					defaultScoreContextUnitId: defaultScoreContext.id,
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
+					filterFeedByPreferredLanguages:
+						data.get("filterFeedByPreferredLanguages") === "true",
 					contentRatings: selectedRatings,
-					preferredLanguages: [
-						contentLanguage,
-						...current.preferredLanguages.filter(
-							(language) => language !== contentLanguage,
-						),
-					],
+					preferredLanguages,
 				},
 			});
 			setLocale(toUiLocale(interfaceLocale));
@@ -296,14 +355,115 @@ export function PreferenceSettings() {
 						</NativeSelect>
 					</Field>
 					<Field>
-						<FieldLabel>{t.settings.contentLanguage}</FieldLabel>
-						<NativeSelect
-							name="contentLanguage"
-							defaultValue={preferences.data.preferredLanguages[0] ?? "zh"}
-						>
-							<NativeSelectOption value="zh">{t.locale.zh}</NativeSelectOption>
-							<NativeSelectOption value="en">{t.locale.en}</NativeSelectOption>
-						</NativeSelect>
+						<FieldLabel>{t.settings.contentLanguages}</FieldLabel>
+						<p className="text-sm text-muted-foreground">
+							{t.settings.contentLanguagesHint}
+						</p>
+						<ol className="grid gap-2">
+							{preferredLanguages.map((language, index) => (
+								<li
+									aria-label={t.settings.dragContentLanguage({
+										language: languageLabel(language),
+									})}
+									className="flex items-center gap-2 rounded-md border border-border-weak bg-surface px-2 py-2"
+									draggable
+									key={language}
+									onDragEnd={() => setDraggedLanguage(undefined)}
+									onDragOver={(event) => {
+										event.preventDefault();
+										event.dataTransfer.dropEffect = "move";
+									}}
+									onDragStart={(event) => {
+										event.dataTransfer.effectAllowed = "move";
+										event.dataTransfer.setData("text/plain", language);
+										setDraggedLanguage(language);
+									}}
+									onDrop={(event) => dropLanguage(event, language)}
+								>
+									<GripVertical
+										aria-hidden
+										className="size-4 shrink-0 cursor-grab text-muted-foreground"
+									/>
+									<span className="min-w-0 flex-1 text-sm font-medium">
+										{languageLabel(language)}
+									</span>
+									<Button
+										aria-label={t.settings.moveContentLanguageUp({
+											language: languageLabel(language),
+										})}
+										disabled={index === 0}
+										onClick={() => moveLanguage(language, -1)}
+										size="icon-sm"
+										type="button"
+										variant="quiet"
+									>
+										<ArrowUp aria-hidden />
+									</Button>
+									<Button
+										aria-label={t.settings.moveContentLanguageDown({
+											language: languageLabel(language),
+										})}
+										disabled={index === preferredLanguages.length - 1}
+										onClick={() => moveLanguage(language, 1)}
+										size="icon-sm"
+										type="button"
+										variant="quiet"
+									>
+										<ArrowDown aria-hidden />
+									</Button>
+									<Button
+										aria-label={t.settings.removeContentLanguage({
+											language: languageLabel(language),
+										})}
+										disabled={preferredLanguages.length === 1}
+										onClick={() =>
+											setEditedPreferredLanguages(
+												preferredLanguages.filter(
+													(candidate) => candidate !== language,
+												),
+											)
+										}
+										size="icon-sm"
+										type="button"
+										variant="quiet"
+									>
+										<Trash2 aria-hidden />
+									</Button>
+								</li>
+							))}
+						</ol>
+						{languageToAdd ? (
+							<div className="flex gap-2">
+								<NativeSelect
+									aria-label={t.settings.addContentLanguage}
+									onChange={(event) => {
+										if (isContentLanguage(event.currentTarget.value))
+											setPendingLanguage(event.currentTarget.value);
+									}}
+									value={languageToAdd}
+								>
+									{availableLanguages.map((language) => (
+										<NativeSelectOption key={language} value={language}>
+											{languageLabel(language)}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
+								<Button
+									onClick={() => {
+										setEditedPreferredLanguages([
+											...preferredLanguages,
+											languageToAdd,
+										]);
+										setPendingLanguage(undefined);
+									}}
+									type="button"
+									variant="outline"
+								>
+									<Plus aria-hidden />
+									{t.settings.addContentLanguage}
+								</Button>
+							</div>
+						) : null}
 					</Field>
 					<Field>
 						<FieldLabel>{t.settings.defaultLicense}</FieldLabel>
@@ -367,6 +527,19 @@ export function PreferenceSettings() {
 							<NativeSelectOption value="false">{t.settings.off}</NativeSelectOption>
 							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
 						</NativeSelect>
+					</Field>
+					<Field>
+						<FieldLabel>{t.settings.filterFeedByPreferredLanguages}</FieldLabel>
+						<NativeSelect
+							name="filterFeedByPreferredLanguages"
+							defaultValue={String(preferences.data.filterFeedByPreferredLanguages)}
+						>
+							<NativeSelectOption value="false">{t.settings.off}</NativeSelectOption>
+							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
+						</NativeSelect>
+						<p className="text-sm text-muted-foreground">
+							{t.settings.filterFeedByPreferredLanguagesHint}
+						</p>
 					</Field>
 					<Field>
 						<FieldLabel>{t.settings.realmManageMode}</FieldLabel>

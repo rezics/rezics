@@ -28,6 +28,7 @@ import { useState } from "react";
 
 import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 
 type RealmCapability =
@@ -55,12 +56,13 @@ function getInitialExpiry(
 
 export function RealmMemberAccess({ profileId, realmId }: { profileId: string; realmId: string }) {
 	const { t } = useTranslation(["errors"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const access = useGetApiRealmsByRealmIdMembersByProfileIdCapabilities({
 		path: { profileId, realmId },
 	});
 	const member = useGetApiRealmsByRealmIdMembers({
 		path: { realmId },
-		query: { profileId, limit: 1 },
+		query: { profileId, localizationLanguages, limit: 1 },
 	});
 	if (access.isPending || member.isPending) return <QueryPending />;
 	if (access.isError || member.isError || !access.data || !member.data)

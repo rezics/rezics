@@ -5,6 +5,7 @@ import {
 	FractionalPosition,
 	ContentLanguage,
 	LifecycleInput,
+	LocalizationLanguageQuery,
 	LocalizationInput,
 	Uuid,
 } from "../schema";
@@ -118,10 +119,14 @@ export const UpdateUnitBody = t.Object(
 );
 export type UpdateUnitBody = Static<typeof UpdateUnitBody>;
 
-export const ListUnitsQuery = t.Object({
-	cursor: t.Optional(t.String()),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
+export const ListUnitsQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String()),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
 export type ListUnitsQuery = Static<typeof ListUnitsQuery>;
 
 export const UnitLookupParams = t.Object({
@@ -129,6 +134,10 @@ export const UnitLookupParams = t.Object({
 	unitId: Uuid,
 });
 export type UnitLookupParams = Static<typeof UnitLookupParams>;
+export const UnitDetailQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type UnitDetailQuery = Static<typeof UnitDetailQuery>;
 
 export const UnitUnitIdParams = t.Object({ type: CatalogUnitType, unitId: Uuid });
 export type UnitUnitIdParams = Static<typeof UnitUnitIdParams>;

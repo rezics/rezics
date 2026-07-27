@@ -18,13 +18,11 @@ import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
-	isPrimaryUnitLocalization,
-	firstUnitLocalizationCoverAssetId,
-	primaryUnitSummary,
-	primaryUnitTitle,
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationSummary,
+	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
 import {
 	post,
@@ -109,6 +107,7 @@ interface FeedRealmContextSummary {
 
 async function getFeedRealmContextsByUnitIds(
 	unitIds: readonly string[],
+	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<Map<string, FeedRealmContextSummary[]>> {
 	const result = new Map<string, FeedRealmContextSummary[]>();
 	for (const unitId of unitIds) result.set(unitId, []);
@@ -117,9 +116,9 @@ async function getFeedRealmContextsByUnitIds(
 		.select({
 			unitId: realmUnit.unitId,
 			id: realmUnit.realmId,
-			title: primaryUnitTitle(feedContextRealm.id),
-			summary: primaryUnitSummary(feedContextRealm.id),
-			avatar: resolvedUnitLocalizationAvatar(feedContextRealm.id),
+			title: resolvedUnitLocalizationTitle(feedContextRealm.id, localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(feedContextRealm.id, localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(feedContextRealm.id, localizationLanguages),
 		})
 		.from(realmUnit)
 		.innerJoin(feedContextRealm, eq(feedContextRealm.id, realmUnit.realmId))
@@ -251,6 +250,7 @@ export function resolveFeedContentSelection(content?: readonly FeedContentKind[]
 interface FeedEligibilityBaseScope {
 	readonly content?: readonly FeedContentKind[];
 	readonly languages?: readonly ContentLanguage[];
+	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly realmIds?: readonly string[];
 	readonly subjectId?: string;
 	readonly filter?: UnitPredicate;
@@ -276,9 +276,13 @@ export type FeedEligibilityScope = FeedEligibilityBaseScope | FeedReviewEligibil
 
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(5),
+		v: t.Literal(7),
 		sort: FeedSortSchema,
 		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
+		filterLanguages: t.Array(t.UnionEnum(["zh", "en"]), { uniqueItems: true }),
+		localizationLanguages: t.Array(t.UnionEnum(["zh", "en"]), {
+			uniqueItems: true,
+		}),
 		personalized: t.Boolean(),
 		snapshotId: t.Nullable(t.String({ format: "uuid" })),
 		policyVersion: RecommendationPolicyVersionSchema,
@@ -303,6 +307,8 @@ function validateCursor(
 	cursor: FeedCursor | undefined,
 	query: FeedRequestType,
 	personalized: boolean,
+	filterLanguages: readonly ContentLanguage[],
+	localizationLanguages: readonly ContentLanguage[],
 ) {
 	if (!cursor) return;
 	const filterHash = query.filter
@@ -311,6 +317,12 @@ function validateCursor(
 	if (
 		cursor.sort !== (query.sort ?? "best") ||
 		cursor.filterHash !== filterHash ||
+		cursor.filterLanguages.length !== filterLanguages.length ||
+		cursor.filterLanguages.some((language, index) => language !== filterLanguages[index]) ||
+		cursor.localizationLanguages.length !== localizationLanguages.length ||
+		cursor.localizationLanguages.some(
+			(language, index) => language !== localizationLanguages[index],
+		) ||
 		cursor.personalized !== personalized ||
 		cursor.limit !== (query.limit ?? 20) ||
 		Number.isNaN(Date.parse(cursor.asOf))
@@ -784,9 +796,7 @@ export async function hydrateFeedItems(
 ): Promise<FeedItemResponseValue[]> {
 	const pageIds = page.map(({ id }) => id);
 	if (!pageIds.length) return [];
-	const displayLanguages = scope.languages?.length
-		? [...scope.languages]
-		: viewer.preferredLanguages;
+	const displayLanguages = scope.localizationLanguages ?? [];
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -910,14 +920,21 @@ export async function hydrateFeedItems(
 						type: unit.kind,
 						title: unitLocalization.title,
 						summary: unitLocalization.summary,
-						coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+						coverAssetId: resolvedUnitLocalizationImageAssetId(
+							unit.id,
+							"cover",
+							displayLanguages,
+						),
 					})
 					.from(unit)
 					.leftJoin(
 						unitLocalization,
 						and(
 							eq(unitLocalization.unitId, unit.id),
-							isPrimaryUnitLocalization(unitLocalization.unitId),
+							eq(
+								unitLocalization.language,
+								resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
+							),
 						),
 					)
 					.where(
@@ -949,7 +966,7 @@ export async function hydrateFeedItems(
 		database
 			.select({
 				id: unit.id,
-				title: primaryUnitTitle(unit.id),
+				title: resolvedUnitLocalizationTitle(unit.id, displayLanguages),
 			})
 			.from(unit)
 			.where(inArray(unit.id, scoreContextUnitIds)),
@@ -966,7 +983,10 @@ export async function hydrateFeedItems(
 						unitLocalization,
 						and(
 							eq(unitLocalization.unitId, post.id),
-							isPrimaryUnitLocalization(unitLocalization.unitId),
+							eq(
+								unitLocalization.language,
+								resolvedUnitLocalizationLanguage(post.id, displayLanguages),
+							),
 						),
 					)
 					.where(
@@ -1004,7 +1024,7 @@ export async function hydrateFeedItems(
 	const [attributions, rootAttributions, realmContexts] = await Promise.all([
 		getAttributionSummariesByUnitIds(validIds),
 		getAttributionSummariesByUnitIds(rootIds),
-		getFeedRealmContextsByUnitIds(validIds),
+		getFeedRealmContextsByUnitIds(validIds, displayLanguages),
 	]);
 	const subjects = new Map(
 		await Promise.all(
@@ -1215,14 +1235,17 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const identity = await resolveIdentity(request.headers, "unit:read");
 		const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
 		const cursor = decodeCursor(body.cursor);
-		validateCursor(cursor, body, viewer.personalized);
 		const simpleSelection = body.filter ? readSimpleFeedFilter(body.filter) : undefined;
+		const filterLanguages = simpleSelection?.languages ?? [];
+		const localizationLanguages = body.localizationLanguages ?? [];
+		validateCursor(cursor, body, viewer.personalized, filterLanguages, localizationLanguages);
 		const scope: FeedEligibilityScope = {
 			...(body.filter ? { filter: body.filter } : {}),
 			...(simpleSelection?.contentKinds.length
 				? { content: simpleSelection.contentKinds }
 				: {}),
-			...(simpleSelection?.languages.length ? { languages: simpleSelection.languages } : {}),
+			...(filterLanguages.length ? { languages: filterLanguages } : {}),
+			...(localizationLanguages.length ? { localizationLanguages } : {}),
 			...(simpleSelection?.realmIds.length ? { realmIds: simpleSelection.realmIds } : {}),
 		};
 		const snapshot = cursor?.snapshotId
@@ -1282,13 +1305,15 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 				start + page.length < ranked.length && last
 					? Buffer.from(
 							JSON.stringify({
-								v: 5,
+								v: 7,
 								sort,
 								filterHash: body.filter
 									? createHash("sha256")
 											.update(canonicalUnitPredicate(body.filter))
 											.digest("hex")
 									: null,
+								filterLanguages,
+								localizationLanguages,
 								personalized: viewer.personalized,
 								snapshotId: snapshotContext.id,
 								policyVersion: snapshotContext.policyVersion,

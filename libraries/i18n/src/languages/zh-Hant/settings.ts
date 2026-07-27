@@ -48,6 +48,17 @@ export default {
 	preferences: "偏好設定",
 	interfaceLanguage: "介面語言",
 	contentLanguage: "內容語言偏好",
+	contentLanguages: "偏好的內容語言",
+	contentLanguagesHint:
+		"拖曳即可調整語言順序。顯示內容時會依此順序查找，再查找介面語言，最後才依條目本身的語言順序回退。",
+	addContentLanguage: "新增語言",
+	dragContentLanguage: insert("拖曳{{language}}以調整順序", { language: String }),
+	moveContentLanguageUp: insert("將{{language}}上移", { language: String }),
+	moveContentLanguageDown: insert("將{{language}}下移", { language: String }),
+	removeContentLanguage: insert("移除{{language}}", { language: String }),
+	filterFeedByPreferredLanguages: "依偏好語言篩選動態消息",
+	filterFeedByPreferredLanguagesHint:
+		"開啟後，動態消息只會收錄至少有一種偏好語言的內容；其他清單仍會顯示所有符合條件的內容，並套用語言回退。",
 	account: "帳戶",
 	accountDescription: "管理目前的登入階段。",
 	security: "安全性",

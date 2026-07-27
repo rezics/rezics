@@ -53,6 +53,17 @@ export const auth = betterAuth({
 			deferUpdates: false,
 		}),
 	],
+	user: {
+		additionalFields: {
+			registrationContentLanguage: {
+				type: ["zh", "en"],
+				required: false,
+				defaultValue: "en",
+				input: true,
+				returned: false,
+			},
+		},
+	},
 	session: {
 		// Credential control-plane routes use this as their re-authentication window.
 		freshAge: CredentialControlFreshAgeSeconds,

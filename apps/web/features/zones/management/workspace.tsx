@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	type GetApiZonesByZoneIdStatus200,
 	useGetApiZonesByZoneId,
@@ -20,6 +19,7 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import {
 	parseZoneManagementSection,
@@ -65,8 +65,12 @@ function ZoneManagementWorkspaceContent({
 	children: ReactNode;
 }) {
 	const pathname = usePathname();
-	const { t, locale } = useTranslation(["ui", "zones"]);
-	const query = useGetApiZonesByZoneId({ path: { zoneId } });
+	const { t } = useTranslation(["ui", "zones"]);
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiZonesByZoneId({
+		path: { zoneId },
+		query: { localizationLanguages },
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -110,7 +114,7 @@ function ZoneManagementWorkspaceContent({
 	];
 	const localization = selectLocalization(
 		query.data.localizations,
-		toContentLanguage(locale.target),
+		query.data.language,
 		query.data.language,
 	);
 	return (

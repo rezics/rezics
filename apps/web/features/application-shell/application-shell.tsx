@@ -12,10 +12,11 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell as SharedAppShell } from "@rezics/ui";
-import { toContentLanguage, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
+import { toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
 import { followingManagementHref } from "@/features/following/routing/following-route";
 import { useSetLocale, useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AppLink } from "./components/app-link";
@@ -61,13 +62,13 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const queryClient = useQueryClient();
 	const currentProfile = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
-	const followingLanguage = toContentLanguage(locale.target);
+	const localizationLanguages = useLocalizationLanguages();
 	const followedZones = useGetApiUsersMeFollowing(
-		{ query: { kind: "zone", language: followingLanguage, limit: 50 } },
+		{ query: { kind: "zone", localizationLanguages, limit: 50 } },
 		{ query: { enabled: Boolean(session) } },
 	);
 	const followedRealms = useGetApiUsersMeFollowing(
-		{ query: { kind: "realm", language: followingLanguage, limit: 50 } },
+		{ query: { kind: "realm", localizationLanguages, limit: 50 } },
 		{ query: { enabled: Boolean(session) } },
 	);
 	const updateInterfaceLocale = usePatchApiUsersMePreferences({

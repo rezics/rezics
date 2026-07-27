@@ -5,7 +5,7 @@ import Elysia from "elysia";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import session from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	contentStructure,
 	contentStructureNodeProgress,
@@ -62,15 +62,19 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
 					deletedAt: unitProgress.deletedAt,
 					type: unit.kind,
+					language: unitLocalization.language,
 					title: unitLocalization.title,
 				})
 				.from(unitProgress)
 				.innerJoin(unit, eq(unit.id, unitProgress.unitId))
-				.leftJoin(
+				.innerJoin(
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, unit.id),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(unit.id, query.localizationLanguages),
+						),
 					),
 				)
 				.where(

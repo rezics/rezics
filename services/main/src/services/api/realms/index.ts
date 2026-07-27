@@ -17,11 +17,12 @@ import { createContentStructureHistory } from "../../content-structure/history";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	avatarReferenceFromColumns,
-	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	primaryUnitTitle,
+	resolveUnitLocalizationFromOrdered,
 	resolvedUnitLocalizationAvatar,
-	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
@@ -106,6 +107,7 @@ import {
 	RealmMemberCapabilityAccessResponse,
 	RealmParams,
 	RealmDetailQuery,
+	RealmRulesQuery,
 	SetRealmScoreContextBody,
 	RealmPinParams,
 	RemoveRealmPinQuery,
@@ -273,33 +275,34 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"",
 		async ({ query }) => {
+			const localizationLanguages = query.localizationLanguages ?? [];
 			const items = await database
 				.select({
 					id: realm.id,
 					joinPolicy: realm.joinPolicy,
+					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
-					avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
-					bannerAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
-						"banner",
-						query.language,
-					),
-					coverAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
-						"cover",
-						query.language,
-					),
+					avatarType: unitLocalization.avatarType,
+					avatarAssetId: unitLocalization.avatarAssetId,
+					avatarEmoji: unitLocalization.avatarEmoji,
+					avatarIconPrefix: unitLocalization.avatarIconPrefix,
+					avatarIconName: unitLocalization.avatarIconName,
+					bannerAssetId: unitLocalization.bannerAssetId,
+					coverAssetId: unitLocalization.coverAssetId,
 					createdAt: unit.createdAt,
 					updatedAt: unit.updatedAt,
 				})
 				.from(realm)
 				.innerJoin(unit, eq(unit.id, realm.id))
-				.leftJoin(
+				.innerJoin(
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, unit.id),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+						),
 					),
 				)
 				.where(and(eq(unit.status, "published"), eq(unit.visibility, "public")))
@@ -309,13 +312,32 @@ export default new Elysia({ prefix: "/realms" })
 				items.map((item) => item.id),
 			);
 			return {
-				items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
-					...item,
-					slugAddress: slugAddresses.get(item.id) ?? null,
-					avatar: presentAvatar(avatar),
-					banner: presentImageAsset(bannerAssetId, "banner"),
-					cover: presentImageAsset(coverAssetId, "cover"),
-				})),
+				items: items.map(
+					({
+						avatarType,
+						avatarAssetId,
+						avatarEmoji,
+						avatarIconPrefix,
+						avatarIconName,
+						bannerAssetId,
+						coverAssetId,
+						...item
+					}) => ({
+						...item,
+						slugAddress: slugAddresses.get(item.id) ?? null,
+						avatar: presentAvatar(
+							avatarReferenceFromColumns({
+								avatarType,
+								avatarAssetId,
+								avatarEmoji,
+								avatarIconPrefix,
+								avatarIconName,
+							}),
+						),
+						banner: presentImageAsset(bannerAssetId, "banner"),
+						cover: presentImageAsset(coverAssetId, "cover"),
+					}),
+				),
 			};
 		},
 		{
@@ -433,6 +455,7 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId",
 		async ({ params, query, request }) => {
+			const localizationLanguages = query.localizationLanguages ?? [];
 			const { profile: viewer, authorization } = await ensureRealmVisible(
 				params.realmId,
 				request.headers,
@@ -443,17 +466,6 @@ export default new Elysia({ prefix: "/realms" })
 					status: unit.status,
 					visibility: unit.visibility,
 					joinPolicy: realm.joinPolicy,
-					avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
-					bannerAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
-						"banner",
-						query.language,
-					),
-					coverAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
-						"cover",
-						query.language,
-					),
 					createdAt: unit.createdAt,
 					updatedAt: unit.updatedAt,
 				})
@@ -465,6 +477,7 @@ export default new Elysia({ prefix: "/realms" })
 			const localizations = await database
 				.select({
 					language: unitLocalization.language,
+					position: unitLocalization.position,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
 					avatarType: unitLocalization.avatarType,
@@ -478,6 +491,11 @@ export default new Elysia({ prefix: "/realms" })
 				.from(unitLocalization)
 				.where(eq(unitLocalization.unitId, params.realmId))
 				.orderBy(unitLocalization.position, unitLocalization.language);
+			const selectedLocalization = resolveUnitLocalizationFromOrdered(
+				localizations,
+				localizationLanguages,
+			);
+			if (!selectedLocalization) throw new RealmNotFound();
 			const [viewerMembership, following] = viewer
 				? await Promise.all([
 						findRealmMembership(params.realmId, viewer.unitId),
@@ -504,14 +522,14 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.decide(params.realmId, "unit.access.manage"),
 				authorization.unit.decide(params.realmId, "unit.history.restore"),
 			]);
-			const { avatar, bannerAssetId, coverAssetId, ...realmRecord } = record;
+			const realmRecord = record;
 			return {
 				...realmRecord,
 				slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
-				language: localizations[0]?.language ?? null,
-				avatar: presentAvatar(avatar),
-				banner: presentImageAsset(bannerAssetId, "banner"),
-				cover: presentImageAsset(coverAssetId, "cover"),
+				language: selectedLocalization.language,
+				avatar: presentAvatar(avatarReferenceFromColumns(selectedLocalization)),
+				banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
+				cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
 				localizations: localizations.map(
 					({
 						avatarType,
@@ -521,6 +539,7 @@ export default new Elysia({ prefix: "/realms" })
 						avatarIconName,
 						bannerAssetId,
 						coverAssetId,
+						position: _position,
 						...localization
 					}) => ({
 						...localization,
@@ -887,8 +906,18 @@ export default new Elysia({ prefix: "/realms" })
 			const members = await database
 				.select({
 					profileId: realmMember.profileId,
-					name: primaryUnitTitle(profileTable.id),
-					avatar: resolvedUnitLocalizationAvatar(profileTable.id),
+					language: resolvedUnitLocalizationLanguage(
+						profileTable.id,
+						query.localizationLanguages,
+					),
+					name: resolvedUnitLocalizationTitle(
+						profileTable.id,
+						query.localizationLanguages,
+					),
+					avatar: resolvedUnitLocalizationAvatar(
+						profileTable.id,
+						query.localizationLanguages,
+					),
 					role: realmMember.role,
 					state: realmMember.state,
 					joinedAt: realmMember.joinedAt,
@@ -908,11 +937,16 @@ export default new Elysia({ prefix: "/realms" })
 				members.map((member) => member.profileId),
 			);
 			return {
-				items: members.map(({ avatar, ...member }) => ({
-					...member,
-					slugAddress: slugAddresses.get(member.profileId) ?? null,
-					avatar: presentAvatar(avatar),
-				})),
+				items: members.map(({ avatar, ...member }) => {
+					if (!member.language)
+						throw new Error(`Realm member ${member.profileId} has no localization`);
+					return {
+						...member,
+						language: member.language,
+						slugAddress: slugAddresses.get(member.profileId) ?? null,
+						avatar: presentAvatar(avatar),
+					};
+				}),
 			};
 		},
 		{
@@ -1117,7 +1151,7 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.get(
 		"/:realmId/rules",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
 			await ensureRealmVisible(params.realmId, request.headers);
 			const current = await getCurrentRealmRules(params.realmId);
 			if (!current)
@@ -1142,7 +1176,13 @@ export default new Elysia({ prefix: "/realms" })
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, realmRule.id),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(
+								realmRule.id,
+								query.localizationLanguages,
+							),
+						),
 					),
 				)
 				.where(eq(realmRule.revisionId, current.revisionId))
@@ -1162,6 +1202,7 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		{
 			params: RealmParams,
+			query: RealmRulesQuery,
 			response: {
 				[StatusCodes.OK]: RealmRulesResponse,
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
@@ -1522,33 +1563,42 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/units",
 		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+			const items = await database
+				.select({
+					realmId: realmUnit.realmId,
+					unitId: realmUnit.unitId,
+					unitKind: unit.kind,
+					language: resolvedUnitLocalizationLanguage(
+						unit.id,
+						query.localizationLanguages,
+					),
+					title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
+					status: realmUnit.status,
+					postTargetingLocked: realmUnit.postTargetingLocked,
+					moderationStatus: unit.moderationStatus,
+					createdAt: realmUnit.createdAt,
+					updatedAt: realmUnit.updatedAt,
+				})
+				.from(realmUnit)
+				.innerJoin(unit, eq(unit.id, realmUnit.unitId))
+				.where(
+					and(
+						eq(realmUnit.realmId, params.realmId),
+						query.status ? eq(realmUnit.status, query.status) : undefined,
+					),
+				)
+				.orderBy(
+					sql`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`,
+					desc(realmUnit.updatedAt),
+					desc(realmUnit.unitId),
+				)
+				.limit(query.limit ?? 50);
 			return {
-				items: await database
-					.select({
-						realmId: realmUnit.realmId,
-						unitId: realmUnit.unitId,
-						unitKind: unit.kind,
-						title: primaryUnitTitle(unit.id),
-						status: realmUnit.status,
-						postTargetingLocked: realmUnit.postTargetingLocked,
-						moderationStatus: unit.moderationStatus,
-						createdAt: realmUnit.createdAt,
-						updatedAt: realmUnit.updatedAt,
-					})
-					.from(realmUnit)
-					.innerJoin(unit, eq(unit.id, realmUnit.unitId))
-					.where(
-						and(
-							eq(realmUnit.realmId, params.realmId),
-							query.status ? eq(realmUnit.status, query.status) : undefined,
-						),
-					)
-					.orderBy(
-						sql`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`,
-						desc(realmUnit.updatedAt),
-						desc(realmUnit.unitId),
-					)
-					.limit(query.limit ?? 50),
+				items: items.map((item) => {
+					if (!item.language)
+						throw new Error(`Realm Unit ${item.unitId} has no localization`);
+					return { ...item, language: item.language };
+				}),
 			};
 		},
 		{

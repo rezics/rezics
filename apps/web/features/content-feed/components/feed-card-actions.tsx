@@ -46,6 +46,7 @@ import { useAuthPortal } from "@/features/auth/auth-portal";
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -299,7 +300,11 @@ export function FeedOverflowMenu({
 	const { openAuthPortal } = useAuthPortal();
 	const queryClient = useQueryClient();
 	const [collectionOpen, setCollectionOpen] = useState(false);
-	const favorites = useGetApiCollectionsFavorites({ query: { enabled: Boolean(session) } });
+	const localizationLanguages = useLocalizationLanguages();
+	const favorites = useGetApiCollectionsFavorites(
+		{ query: { localizationLanguages } },
+		{ query: { enabled: Boolean(session) } },
+	);
 	const addFavorite = usePutApiCollectionsFavoritesItemsByTargetId();
 	const removeFavorite = useDeleteApiCollectionsFavoritesItemsByTargetId();
 	const saved = favorites.data?.items.some((item) => item.targetId === itemId) ?? false;

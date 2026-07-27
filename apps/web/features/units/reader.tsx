@@ -47,6 +47,8 @@ import { cn } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { hasErrorCode } from "@/i18n/errors";
 import { readPortableText, writePortableText } from "@/lib/block";
@@ -169,14 +171,21 @@ function getExpandedNodeIds(nodes: readonly ReadTreeNode[]): string[] {
 }
 
 export function Reader({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t, locale } = useTranslation(["actions", "brand", "errors", "state", "ui", "units"]);
+	const { t } = useTranslation(["actions", "brand", "errors", "state", "ui", "units"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const [fontSize, setFontSize] = useState(1);
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: chapterId,
 	});
 	const outline = useGetApiUnitsBookByUnitIdContentStructureNodes({
 		path: { unitId: bookId },
+		query: { localizationLanguages },
 	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
@@ -375,7 +384,11 @@ function ChapterLocalizationEditorContent({
 	chapterId: string;
 }) {
 	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
-	const book = useGetApiUnitsByTypeByUnitId({ path: { type: "book", unitId: bookId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const book = useGetApiUnitsByTypeByUnitId({
+		path: { type: "book", unitId: bookId },
+		query: { localizationLanguages },
+	});
 	if (book.isPending) return <QueryPending />;
 	if (book.isError) return <QueryFailure error={book.error} retry={() => void book.refetch()} />;
 	if (!book.data) return <QueryPending />;
@@ -393,10 +406,11 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
-		query: { language },
+		query: { localizationLanguages: [language] },
 	});
 	const missingLocalization =
 		query.isError && hasErrorCode(query.error, "ChapterLanguageNotFound");
+	const chapter = query.data?.language === language ? query.data : undefined;
 	if (query.isPending) return <QueryPending />;
 	if (query.isError && !missingLocalization)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -451,7 +465,7 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 					<ChapterLocalizationForm
 						key={`${chapterId}:${language}:${query.data?.updatedAt ?? "new"}`}
 						bookId={bookId}
-						chapter={query.data}
+						chapter={chapter}
 						chapterId={chapterId}
 						language={language}
 					/>
@@ -483,7 +497,7 @@ function ChapterLocalizationForm({
 	);
 	const update = usePutApiChaptersByChapterIdLocalizationsByLanguageContent({
 		mutation: {
-			onSuccess: async () => invalidateChapterContent(queryClient, chapterId, language),
+			onSuccess: async () => invalidateChapterContent(queryClient, chapterId),
 		},
 	});
 	async function submit(event: FormEvent<HTMLFormElement>) {

@@ -18,13 +18,10 @@ import { createContentStructureHistory } from "../content-structure/history";
 import {
 	avatarReferenceFromColumns,
 	avatarReferenceToColumns,
-	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
-	firstUnitLocalizationCoverAssetId,
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationAvatar,
+	resolveUnitLocalizationFromOrdered,
+	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
-	resolveUnitLocalizationAvatarFromOrdered,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "./localization";
@@ -66,6 +63,7 @@ import { getAssociationContextPostsByAssociationIds } from "./association-contex
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
+type StoredUnitLocalization = typeof unitLocalization.$inferSelect;
 
 export interface CreateUnitInput {
 	localization: {
@@ -118,6 +116,36 @@ export function presentImageAsset(assetId: string | null, role?: "avatar" | "ban
 					: imageAssetContentUrl(assetId),
 			}
 		: null;
+}
+
+export function presentUnitLocalization({
+	content: _content,
+	contentStatus: _status,
+	description,
+	avatarType,
+	avatarAssetId,
+	avatarEmoji,
+	avatarIconPrefix,
+	avatarIconName,
+	bannerAssetId,
+	coverAssetId,
+	...row
+}: StoredUnitLocalization) {
+	return {
+		...row,
+		description: parseNullableDocument(PortableTextDocument, description),
+		avatar: presentAvatar(
+			avatarReferenceFromColumns({
+				avatarType,
+				avatarAssetId,
+				avatarEmoji,
+				avatarIconPrefix,
+				avatarIconName,
+			}),
+		),
+		banner: presentImageAsset(bannerAssetId, "banner"),
+		cover: presentImageAsset(coverAssetId, "cover"),
+	};
 }
 
 export async function createUnit(
@@ -242,6 +270,7 @@ export async function getUnit(
 	kind: CatalogUnitKind,
 	unitId: string,
 	authorization: Authorization,
+	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<UnitDetail> {
 	const [base] = await database
 		.select()
@@ -256,6 +285,12 @@ export async function getUnit(
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, base.id))
 		.orderBy(unitLocalization.position, unitLocalization.language);
+	const resolvedLocalization = resolveUnitLocalizationFromOrdered(
+		localizations,
+		localizationLanguages,
+	);
+	if (!resolvedLocalization) throw new UnitNotFound();
+	const selectedLocalization = resolvedLocalization;
 	const primaryLanguage = localizations[0]?.language ?? null;
 	const attributions =
 		(await getAttributionSummariesWithStatisticsByUnitIds([base.id])).get(base.id) ?? [];
@@ -265,7 +300,10 @@ export async function getUnit(
 			entityEntryId: subjectAssociation.entityId,
 			role: subjectAssociation.role,
 			position: subjectAssociation.position,
-			title: resolvedUnitLocalizationTitle(subjectAssociation.entityId, primaryLanguage),
+			title: resolvedUnitLocalizationTitle(
+				subjectAssociation.entityId,
+				localizationLanguages,
+			),
 		})
 		.from(subjectAssociation)
 		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
@@ -273,7 +311,7 @@ export async function getUnit(
 		.orderBy(subjectAssociation.position, subjectAssociation.id);
 	const contextPosts = await getAssociationContextPostsByAssociationIds(
 		subjectAssociationRows.map(({ id }) => id),
-		primaryLanguage ?? undefined,
+		localizationLanguages,
 		authorization.profileId,
 	);
 	const subjectAssociations = subjectAssociationRows.map((association) => ({
@@ -292,7 +330,7 @@ export async function getUnit(
 			voteCount: unitTagVoteStat.voteCount,
 			pinned: unitTag.pinned,
 			position: unitTag.position,
-			title: resolvedUnitLocalizationTitle(unitTag.tagId, primaryLanguage),
+			title: resolvedUnitLocalizationTitle(unitTag.tagId, localizationLanguages),
 		})
 		.from(unitTag)
 		.leftJoin(
@@ -328,7 +366,7 @@ export async function getUnit(
 		type: kind,
 		status: base.status,
 		visibility: base.visibility,
-		language: primaryLanguage,
+		language: selectedLocalization.language,
 		contentRating: base.contentRating,
 		aiDisclosure: base.aiDisclosure,
 		license: parseNullablePublicationLicenseId(base.license),
@@ -345,44 +383,18 @@ export async function getUnit(
 					? details.releaseDate
 					: null,
 		details,
-		avatar: presentAvatar(resolveUnitLocalizationAvatarFromOrdered(localizations)),
-		banner: presentImageAsset(
-			localizations.find(({ bannerAssetId }) => bannerAssetId)?.bannerAssetId ?? null,
-			"banner",
-		),
-		cover: presentImageAsset(
-			localizations.find(({ coverAssetId }) => coverAssetId)?.coverAssetId ?? null,
-			"cover",
-		),
-		localizations: localizations.map(
-			({
-				content: _content,
-				contentStatus: _status,
-				description,
-				avatarType,
-				avatarAssetId,
-				avatarEmoji,
-				avatarIconPrefix,
-				avatarIconName,
-				bannerAssetId,
-				coverAssetId,
-				...row
-			}) => ({
-				...row,
-				description: parseNullableDocument(PortableTextDocument, description),
-				avatar: presentAvatar(
-					avatarReferenceFromColumns({
-						avatarType,
-						avatarAssetId,
-						avatarEmoji,
-						avatarIconPrefix,
-						avatarIconName,
-					}),
-				),
-				banner: presentImageAsset(bannerAssetId, "banner"),
-				cover: presentImageAsset(coverAssetId, "cover"),
+		avatar: presentAvatar(
+			avatarReferenceFromColumns({
+				avatarType: selectedLocalization.avatarType,
+				avatarAssetId: selectedLocalization.avatarAssetId,
+				avatarEmoji: selectedLocalization.avatarEmoji,
+				avatarIconPrefix: selectedLocalization.avatarIconPrefix,
+				avatarIconName: selectedLocalization.avatarIconName,
 			}),
 		),
+		banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
+		cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
+		localizations: localizations.map(presentUnitLocalization),
 		subjectAssociations,
 		links: links.map((link) => ({
 			...link,
@@ -433,7 +445,12 @@ export async function getUnit(
 	};
 }
 
-export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string], limit = 20) {
+export async function listUnits(
+	kind: CatalogUnitKind,
+	cursor?: [string, string],
+	limit = 20,
+	localizationLanguages: readonly ContentLanguage[] = [],
+) {
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -444,14 +461,24 @@ export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string]
 			updatedAt: unit.updatedAt,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
-			avatar: resolvedUnitLocalizationAvatar(unit.id),
-			bannerAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "banner"),
-			coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+			avatarType: unitLocalization.avatarType,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			avatarEmoji: unitLocalization.avatarEmoji,
+			avatarIconPrefix: unitLocalization.avatarIconPrefix,
+			avatarIconName: unitLocalization.avatarIconName,
+			bannerAssetId: unitLocalization.bannerAssetId,
+			coverAssetId: unitLocalization.coverAssetId,
 		})
 		.from(unit)
-		.leftJoin(
+		.innerJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), isPrimaryUnitLocalization(unit.id)),
+			and(
+				eq(unitLocalization.unitId, unit.id),
+				eq(
+					unitLocalization.language,
+					resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+				),
+			),
 		)
 		.where(
 			and(
@@ -480,13 +507,32 @@ export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string]
 		.limit(limit + 1);
 	const attributions = await getAttributionSummariesByUnitIds(rows.map(({ id }) => id));
 	return Promise.all(
-		rows.map(async ({ avatar, bannerAssetId, coverAssetId, ...row }) => ({
-			...row,
-			attributions: attributions.get(row.id) ?? [],
-			avatar: presentAvatar(avatar),
-			banner: presentImageAsset(bannerAssetId, "banner"),
-			cover: presentImageAsset(coverAssetId, "cover"),
-		})),
+		rows.map(
+			async ({
+				avatarType,
+				avatarAssetId,
+				avatarEmoji,
+				avatarIconPrefix,
+				avatarIconName,
+				bannerAssetId,
+				coverAssetId,
+				...row
+			}) => ({
+				...row,
+				attributions: attributions.get(row.id) ?? [],
+				avatar: presentAvatar(
+					avatarReferenceFromColumns({
+						avatarType,
+						avatarAssetId,
+						avatarEmoji,
+						avatarIconPrefix,
+						avatarIconName,
+					}),
+				),
+				banner: presentImageAsset(bannerAssetId, "banner"),
+				cover: presentImageAsset(coverAssetId, "cover"),
+			}),
+		),
 	);
 }
 

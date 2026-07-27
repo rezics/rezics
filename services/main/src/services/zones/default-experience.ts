@@ -146,7 +146,7 @@ export async function ensureZoneDefaultExperienceInTransaction(
 			actorProfileId: input.actorProfileId,
 			message: "Repair required Zone Search Feature",
 		});
-	const pages = await listZonePageUnits(tx, input.zoneId, input.language);
+	const pages = await listZonePageUnits(tx, input.zoneId, [input.language]);
 	const hasFeed = pages.some((page) => {
 		if (!page.placement) return false;
 		let found = false;

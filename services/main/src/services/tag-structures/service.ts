@@ -1,7 +1,6 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
-
 import type { PlatformAuthorization } from "../authorization/platform/authorization";
 import { createCommunityOwnedUnitAccess } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
@@ -25,8 +24,10 @@ import {
 import { insertUnit } from "../units/create";
 import { lockUnitHistory, recordUnitRevision } from "../units/history";
 import {
+	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
+	type LocalizationLanguageQuery,
 } from "../units/localization";
 import {
 	InvalidTagStructure,
@@ -335,15 +336,19 @@ export async function deleteTagStructureVote(input: {
 	return getDefinitionVoteSummary(input.structureId, null);
 }
 
-async function listStructureMembers(structureIds: readonly string[], language?: ContentLanguage) {
+async function listStructureMembers(
+	structureIds: readonly string[],
+	localizationLanguages?: LocalizationLanguageQuery,
+) {
 	if (structureIds.length === 0) return new Map<string, TagStructureMember[]>();
 	const rows = await database
 		.select({
 			structureId: unitStructureMember.structureId,
 			ordinal: unitStructureMember.ordinal,
 			tagId: unitStructureMember.memberUnitId,
-			title: resolvedUnitLocalizationTitle(memberUnit.id, language),
-			summary: resolvedUnitLocalizationSummary(memberUnit.id, language),
+			language: resolvedUnitLocalizationLanguage(memberUnit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(memberUnit.id, localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(memberUnit.id, localizationLanguages),
 		})
 		.from(unitStructureMember)
 		.innerJoin(memberUnit, eq(memberUnit.id, unitStructureMember.memberUnitId))
@@ -355,6 +360,7 @@ async function listStructureMembers(structureIds: readonly string[], language?: 
 		items.push({
 			ordinal: row.ordinal,
 			tagId: row.tagId,
+			language: row.language,
 			title: row.title,
 			summary: row.summary,
 		});
@@ -366,6 +372,7 @@ async function listStructureMembers(structureIds: readonly string[], language?: 
 export type TagStructureMember = {
 	readonly ordinal: number;
 	readonly tagId: string;
+	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
 };
@@ -373,7 +380,7 @@ export type TagStructureMember = {
 export async function getTagStructure(input: {
 	readonly structureId: string;
 	readonly viewerProfileId?: string;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 }) {
 	const [record] = await database
 		.select({
@@ -425,7 +432,7 @@ export async function getTagStructure(input: {
 	if (!record) throw new TagStructureNotFound();
 	if (record.definitionVersion !== 1)
 		throw new Error("Unsupported Tag structure definition version");
-	const members = await listStructureMembers([record.id], input.language);
+	const members = await listStructureMembers([record.id], input.localizationLanguages);
 	return {
 		...record,
 		definitionVersion: 1 as const,
@@ -617,7 +624,7 @@ export async function deleteTagStructureApplicationVote(input: {
 export async function listVisibleUnitTagStructures(input: {
 	readonly unitId: string;
 	readonly viewerProfileId?: string;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly limit: number;
 }) {
 	const rows = await database
@@ -692,7 +699,7 @@ export async function listVisibleUnitTagStructures(input: {
 		.limit(input.limit);
 	const members = await listStructureMembers(
 		rows.map(({ structureId }) => structureId),
-		input.language,
+		input.localizationLanguages,
 	);
 	return rows.map((row) => ({
 		...row,
@@ -768,23 +775,35 @@ async function listRankedHierarchyEdges(parentTagIds: readonly string[]): Promis
 	);
 }
 
-async function hydrateHierarchyTags(tagIds: readonly string[], language?: ContentLanguage) {
+async function hydrateHierarchyTags(
+	tagIds: readonly string[],
+	localizationLanguages?: LocalizationLanguageQuery,
+) {
 	if (tagIds.length === 0)
-		return new Map<string, { title: string | null; summary: string | null }>();
+		return new Map<
+			string,
+			{ language: ContentLanguage | null; title: string | null; summary: string | null }
+		>();
 	const rows = await database
 		.select({
 			tagId: unit.id,
-			title: resolvedUnitLocalizationTitle(unit.id, language),
-			summary: resolvedUnitLocalizationSummary(unit.id, language),
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(unit.id, localizationLanguages),
 		})
 		.from(unit)
 		.where(inArray(unit.id, [...new Set(tagIds)]));
-	return new Map(rows.map((row) => [row.tagId, { title: row.title, summary: row.summary }]));
+	return new Map(
+		rows.map((row) => [
+			row.tagId,
+			{ language: row.language, title: row.title, summary: row.summary },
+		]),
+	);
 }
 
 export async function getTagHierarchy(input: {
 	readonly tagId: string;
-	readonly language?: ContentLanguage;
+	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly childLimit: number;
 	readonly grandchildLimit: number;
 }) {
@@ -821,8 +840,9 @@ export async function getTagHierarchy(input: {
 			(byParent.get(childTagId) ?? []).map((edge) => edge.childTagId),
 		),
 	];
-	const localized = await hydrateHierarchyTags(allIds, input.language);
-	const localization = (tagId: string) => localized.get(tagId) ?? { title: null, summary: null };
+	const localized = await hydrateHierarchyTags(allIds, input.localizationLanguages);
+	const localization = (tagId: string) =>
+		localized.get(tagId) ?? { language: null, title: null, summary: null };
 	return {
 		tagId: input.tagId,
 		...localization(input.tagId),

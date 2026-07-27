@@ -12,9 +12,11 @@ import { isFractionalPosition } from "../ordering/position";
 
 const FollowingCursor = t.Object(
 	{
-		v: t.Literal(1),
+		v: t.Literal(2),
 		kind: t.Nullable(t.UnionEnum(UnitKindValues)),
-		language: t.Nullable(t.UnionEnum(ContentLanguageValues)),
+		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues), {
+			uniqueItems: true,
+		}),
 		favorite: t.Boolean(),
 		position: t.String({ minLength: 2, maxLength: 512 }),
 		unitId: t.String({ format: "uuid" }),
@@ -30,23 +32,34 @@ export type FollowingCursorBoundary = {
 
 export function encodeFollowingCursor(
 	kind: UnitKind | undefined,
-	language: ContentLanguage | undefined,
+	localizationLanguages: readonly ContentLanguage[],
 	boundary: FollowingCursorBoundary,
 ): string {
 	return Buffer.from(
-		JSON.stringify({ v: 1, kind: kind ?? null, language: language ?? null, ...boundary }),
+		JSON.stringify({
+			v: 2,
+			kind: kind ?? null,
+			localizationLanguages,
+			...boundary,
+		}),
 	).toString("base64url");
 }
 
 export function decodeFollowingCursor(
 	value: string | undefined,
 	kind: UnitKind | undefined,
-	language: ContentLanguage | undefined,
+	localizationLanguages: readonly ContentLanguage[],
 ): FollowingCursorBoundary | undefined {
 	if (!value) return undefined;
 	try {
 		const cursor = parseJsonCursor(value, FollowingCursor);
-		if (cursor.kind !== (kind ?? null) || cursor.language !== (language ?? null))
+		if (
+			cursor.kind !== (kind ?? null) ||
+			cursor.localizationLanguages.length !== localizationLanguages.length ||
+			cursor.localizationLanguages.some(
+				(language, index) => language !== localizationLanguages[index],
+			)
+		)
 			throw new InvalidPaginationCursor();
 		if (!isFractionalPosition(cursor.position)) throw new InvalidPaginationCursor();
 		return {

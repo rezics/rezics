@@ -47,6 +47,8 @@ import { tagDetailHref } from "@/features/tags/routing/tag-links";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { RequestFailure } from "@/i18n/request-failure";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
@@ -57,9 +59,10 @@ import { RealmPinnedContentSection } from "./components/realm-pinned-content-sec
 import { RealmRulesCard } from "./components/realm-rules-card";
 
 export function RealmsPage() {
-	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
+	const { t } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiRealms({
-		query: { language: toContentLanguage(locale.target), limit: 20 },
+		query: { localizationLanguages, limit: 20 },
 	});
 	return (
 		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
@@ -229,16 +232,21 @@ export function RealmDetailPage({ id }: { id: string }) {
 		"state",
 		"ui",
 	]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiRealmsByRealmId({
 		path: { realmId: id },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: id,
 	});
 	const headerSearch = useMemo(() => {
 		if (!query.data) return undefined;
 		const localization = selectLocalization(
 			query.data.localizations,
-			toContentLanguage(locale.target),
-			query.data.language,
+			query.data.language ?? "",
 		);
 		const title = localization?.title ?? t.realms.untitled;
 		return {
@@ -251,7 +259,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 	}, [locale.target, query.data, t.realms.untitled, t.search]);
 	useHeaderSearchOverride(headerSearch);
 	const rules = useGetApiRealmsByRealmIdRules(
-		{ path: { realmId: id } },
+		{ path: { realmId: id }, query: { localizationLanguages } },
 		{
 			query: { enabled: Boolean(query.data) },
 		},
@@ -266,11 +274,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const realm = query.data;
-	const localization = selectLocalization(
-		realm.localizations,
-		toContentLanguage(locale.target),
-		realm.language,
-	);
+	const localization = selectLocalization(realm.localizations, realm.language);
 	const canManage = canOpenRealmSettings(realm.capabilities);
 	const canPost = realm.viewerMembership?.state === "active";
 	return (

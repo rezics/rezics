@@ -130,56 +130,73 @@ const mediaAssetKeys = {
 	cover: "coverAssetId",
 } as const satisfies Record<UnitLocalizationImageRole, keyof UnitLocalizationImageAssetInput>;
 
-type LocalizationLanguagePreference = string | readonly string[] | null | undefined;
+export type LocalizationLanguageQuery = readonly ContentLanguage[];
 
-function preferredLanguageOrder(
+export function localizationLanguageOrder(
 	languageColumn: SQLWrapper,
-	preference: LocalizationLanguagePreference,
+	languages: LocalizationLanguageQuery = [],
 ): SQL {
-	const languages =
-		typeof preference === "string" ? [preference] : preference ? [...preference] : [];
 	if (!languages.length) return sql`0::int`;
-	return sql`case ${languageColumn}
-		${sql.join(
-			languages.map((language, index) => sql`when ${language}::text then ${index}`),
-			sql` `,
-		)}
-		else ${languages.length}
-	end`;
+	const languageArray = sql`array[${sql.join(
+		languages.map((language) => sql`${language}`),
+		sql`, `,
+	)}]::text[]`;
+	return sql`coalesce(
+		array_position(${languageArray}, ${languageColumn}),
+		${languages.length + 1}
+	)`;
+}
+
+export function resolveUnitLocalizationFromOrdered<
+	Localization extends { readonly language: ContentLanguage },
+>(
+	localizations: readonly Localization[],
+	languages: LocalizationLanguageQuery,
+): Localization | undefined {
+	const localizationsByLanguage = new Map(
+		localizations.map((localization) => [localization.language, localization]),
+	);
+	for (const language of languages) {
+		const localization = localizationsByLanguage.get(language);
+		if (localization) return localization;
+	}
+	return localizations[0];
 }
 
 /** Resolve from rows already ordered by position and language. */
 export function resolveUnitLocalizationImageAssetIdFromOrdered(
-	localizations: readonly (UnitLocalizationImageAssetInput & { language: string })[],
+	localizations: readonly (UnitLocalizationImageAssetInput & {
+		language: ContentLanguage;
+	})[],
 	role: UnitLocalizationImageRole,
-	preferredLanguage?: string | null,
+	languages: LocalizationLanguageQuery = [],
 ): string | null {
 	const assetKey = mediaAssetKeys[role];
-	const preferred = preferredLanguage
-		? localizations.find(
-				(localization) =>
-					localization.language === preferredLanguage && Boolean(localization[assetKey]),
-			)
-		: undefined;
-	return (
-		preferred?.[assetKey] ??
-		localizations.find((localization) => localization[assetKey])?.[assetKey] ??
-		null
-	);
+	for (const language of languages) {
+		const assetId = localizations.find(
+			(localization) => localization.language === language && Boolean(localization[assetKey]),
+		)?.[assetKey];
+		if (assetId) return assetId;
+	}
+	return localizations.find((localization) => localization[assetKey])?.[assetKey] ?? null;
 }
 
 /** Resolve a complete avatar override from rows already ordered by position and language. */
 export function resolveUnitLocalizationAvatarFromOrdered(
-	localizations: readonly (UnitLocalizationAvatarColumns & { language: string })[],
-	preferredLanguage?: string | null,
+	localizations: readonly (UnitLocalizationAvatarColumns & {
+		language: ContentLanguage;
+	})[],
+	languages: LocalizationLanguageQuery = [],
 ): AvatarReference | null {
-	const preferred = preferredLanguage
-		? localizations.find(
-				(localization) =>
-					localization.language === preferredLanguage && localization.avatarType !== null,
-			)
-		: undefined;
-	const resolved = preferred ?? localizations.find(({ avatarType }) => avatarType !== null);
+	let resolved: (UnitLocalizationAvatarColumns & { language: ContentLanguage }) | undefined;
+	for (const language of languages) {
+		resolved = localizations.find(
+			(localization) =>
+				localization.language === language && localization.avatarType !== null,
+		);
+		if (resolved) break;
+	}
+	resolved ??= localizations.find(({ avatarType }) => avatarType !== null);
 	return resolved ? avatarReferenceFromColumns(resolved) : null;
 }
 
@@ -202,7 +219,7 @@ export function isPrimaryUnitLocalization(unitId: SQLWrapper): SQL {
 export function resolvedUnitLocalizationImageAssetId(
 	unitId: SQLWrapper,
 	role: UnitLocalizationImageRole,
-	preferredLanguage?: LocalizationLanguagePreference,
+	languages: LocalizationLanguageQuery = [],
 ): SQL<string | null> {
 	const assetColumn = mediaAssetColumns[role];
 	return sql<string | null>`(
@@ -211,7 +228,7 @@ export function resolvedUnitLocalizationImageAssetId(
 		where ${mediaLocalization.unitId} = ${unitId}
 			and ${assetColumn} is not null
 		order by
-			${preferredLanguageOrder(mediaLocalization.language, preferredLanguage)},
+			${localizationLanguageOrder(mediaLocalization.language, languages)},
 			${mediaLocalization.position},
 			${mediaLocalization.language}
 		limit 1
@@ -221,7 +238,7 @@ export function resolvedUnitLocalizationImageAssetId(
 /** Resolve a locale override, then the first complete avatar in localization order. */
 export function resolvedUnitLocalizationAvatar(
 	unitId: SQLWrapper,
-	preferredLanguage?: LocalizationLanguagePreference,
+	languages: LocalizationLanguageQuery = [],
 ): SQL<AvatarReference | null> {
 	return sql<AvatarReference | null>`(
 		select case ${mediaLocalization.avatarType}
@@ -246,7 +263,7 @@ export function resolvedUnitLocalizationAvatar(
 		where ${mediaLocalization.unitId} = ${unitId}
 			and ${mediaLocalization.avatarType} is not null
 		order by
-			${preferredLanguageOrder(mediaLocalization.language, preferredLanguage)},
+			${localizationLanguageOrder(mediaLocalization.language, languages)},
 			${mediaLocalization.position},
 			${mediaLocalization.language}
 		limit 1
@@ -314,14 +331,14 @@ export function primaryUnitSummary(unitId: SQLWrapper): SQL<string | null> {
 /** Resolve the requested localization, then fall back to the primary localization. */
 export function resolvedUnitLocalizationLanguage(
 	unitId: SQLWrapper,
-	preferredLanguage?: LocalizationLanguagePreference,
+	languages: LocalizationLanguageQuery = [],
 ): SQL<ContentLanguage | null> {
 	return sql<ContentLanguage | null>`(
 		select ${unitLocalization.language}
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 		order by
-			${preferredLanguageOrder(unitLocalization.language, preferredLanguage)},
+			${localizationLanguageOrder(unitLocalization.language, languages)},
 			${unitLocalization.position},
 			${unitLocalization.language}
 		limit 1
@@ -331,14 +348,14 @@ export function resolvedUnitLocalizationLanguage(
 /** Resolve the requested localization's title, then fall back to the primary localization. */
 export function resolvedUnitLocalizationTitle(
 	unitId: SQLWrapper,
-	preferredLanguage?: LocalizationLanguagePreference,
+	languages: LocalizationLanguageQuery = [],
 ): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.title}
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 		order by
-			${preferredLanguageOrder(unitLocalization.language, preferredLanguage)},
+			${localizationLanguageOrder(unitLocalization.language, languages)},
 			${unitLocalization.position},
 			${unitLocalization.language}
 		limit 1
@@ -348,14 +365,14 @@ export function resolvedUnitLocalizationTitle(
 /** Resolve the requested localization's summary, then fall back to the primary localization. */
 export function resolvedUnitLocalizationSummary(
 	unitId: SQLWrapper,
-	preferredLanguage?: LocalizationLanguagePreference,
+	languages: LocalizationLanguageQuery = [],
 ): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.summary}
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 		order by
-			${preferredLanguageOrder(unitLocalization.language, preferredLanguage)},
+			${localizationLanguageOrder(unitLocalization.language, languages)},
 			${unitLocalization.position},
 			${unitLocalization.language}
 		limit 1

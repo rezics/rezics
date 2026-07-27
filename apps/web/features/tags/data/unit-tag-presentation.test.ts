@@ -12,6 +12,7 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 		global: [
 			{
 				tagId: "global-tag",
+				language: "en",
 				title: "Fantasy",
 				summary: null,
 				createdAt: Timestamp,
@@ -26,6 +27,7 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 		realms: [
 			{
 				realmId: "realm-a",
+				language: "en",
 				title: "Readers",
 				summary: null,
 				canVote: true,
@@ -36,6 +38,7 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 					{
 						realmId: "realm-a",
 						tagId: "shared-tag",
+						language: "en",
 						title: "Policy title",
 						summary: null,
 						position: "a0",
@@ -47,6 +50,7 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 					{
 						realmId: "realm-a",
 						tagId: "shared-tag",
+						language: "en",
 						title: "Voted title",
 						summary: "Contextual summary",
 						contextPostId: "post-a",

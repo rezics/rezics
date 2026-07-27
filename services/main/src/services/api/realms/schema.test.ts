@@ -2,24 +2,35 @@ import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { ListRealmMembersQuery, ListRealmUnitsQuery, ModerateRealmUnitBody } from "./schema";
+import {
+	ListRealmMembersQuery,
+	ListRealmUnitsQuery,
+	ModerateRealmUnitBody,
+	RealmRulesQuery,
+} from "./schema";
 
 describe("Realm member API contract", () => {
 	it("accepts an exact Profile identity filter", () => {
 		expect(
 			Check(ListRealmMembersQuery, {
 				profileId: "019f995d-7595-7c99-9183-250790bbfe2f",
+				localizationLanguages: ["zh", "en"],
 				limit: 1,
 			}),
 		).toBe(true);
 		expect(Check(ListRealmMembersQuery, { profileId: "not-a-profile-id" })).toBe(false);
+	});
+
+	it("uses the shared localization fallback query for Realm rules", () => {
+		expect(Check(RealmRulesQuery, { localizationLanguages: ["en", "zh"] })).toBe(true);
+		expect(Check(RealmRulesQuery, { localizationLanguages: [] })).toBe(false);
 	});
 });
 
 describe("Realm moderation API contract", () => {
 	it("treats an omitted status filter as all Realm Unit states", () => {
 		expect(ListRealmUnitsQuery.properties.status.default).toBeUndefined();
-		expect(Check(ListRealmUnitsQuery, {})).toBe(true);
+		expect(Check(ListRealmUnitsQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
 	});
 
 	it("accepts commands and rejects client-authored resulting state", () => {

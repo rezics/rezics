@@ -36,6 +36,7 @@ import {
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import {
@@ -66,9 +67,10 @@ export function RealmModeration({
 	embedded?: boolean;
 }) {
 	const { t } = useTranslation(["posts", "realms", "state"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const units = useGetApiRealmsByRealmIdUnits({
 		path: { realmId },
-		query: RealmModerationListQuery,
+		query: { ...RealmModerationListQuery, localizationLanguages },
 	});
 	const [filter, setFilter] = useState<RealmModerationStatus | "all">("all");
 	const [selectedUnitId, setSelectedUnitId] = useState<string>();

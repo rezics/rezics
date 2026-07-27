@@ -1,23 +1,30 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { useGetApiTagsByTagId } from "@rezics/openapi-tanstack-query";
 import { Badge, Card, CardContent, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import Link from "next/link";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { tagDetailHref } from "../routing/tag-links";
 
 export function TagDetailPage({ tagId }: { readonly tagId: string }) {
-	const { locale, t } = useTranslation(["tags", "ui"]);
+	const { t } = useTranslation(["tags", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiTagsByTagId({
 		path: { tagId },
 		query: {
-			language: toContentLanguage(locale.target),
+			localizationLanguages,
 			childLimit: 100,
 			grandchildLimit: 50,
 		},
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: tagId,
 	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)

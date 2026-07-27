@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { useGetApiRealmsByRealmId } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useMemo } from "react";
@@ -9,20 +8,21 @@ import { useHeaderSearchOverride } from "@/features/application-shell/header-sea
 import { ScopedSearchPage } from "@/features/search/search-page";
 import { realmHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 
 export function RealmSearchPage({ realmId }: { readonly realmId: string }) {
-	const { locale, t } = useTranslation(["realms", "search"]);
+	const { t } = useTranslation(["realms", "search"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiRealmsByRealmId({
 		path: { realmId },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
 	});
 	const headerSearch = useMemo(() => {
 		if (!query.data) return undefined;
 		const localization = selectLocalization(
 			query.data.localizations,
-			toContentLanguage(locale.target),
-			query.data.language,
+			query.data.language ?? "",
 		);
 		const name = localization?.title ?? t.realms.untitled;
 		return {
@@ -32,7 +32,7 @@ export function RealmSearchPage({ realmId }: { readonly realmId: string }) {
 			avatar: query.data.avatar,
 			avatarFallback: name.slice(0, 1).toUpperCase(),
 		};
-	}, [locale.target, query.data, t.realms.untitled, t.search]);
+	}, [query.data, t.realms.untitled, t.search]);
 	useHeaderSearchOverride(headerSearch);
 
 	if (query.isPending) return <QueryPending />;

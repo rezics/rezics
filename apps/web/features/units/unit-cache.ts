@@ -5,7 +5,6 @@ import {
 	getApiUnitsByTypeQueryKey,
 } from "@rezics/openapi-tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
-import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 
 import type { UnitType } from "./unit-types";
 
@@ -37,28 +36,14 @@ export async function invalidateBookContentStructure(queryClient: QueryClient, b
 	});
 }
 
-export async function invalidateChapterContent(
-	queryClient: QueryClient,
-	chapterId: string,
-	language: ContentLanguage,
-) {
+export async function invalidateChapterContent(queryClient: QueryClient, chapterId: string) {
 	await queryClient.invalidateQueries({
 		queryKey: getApiChaptersByChapterIdQueryKey({
 			path: { chapterId },
-			query: { language },
 		}),
 	});
 }
 
 export async function invalidateChapter(queryClient: QueryClient, chapterId: string) {
-	await Promise.all(
-		ContentLanguageValues.map((language) =>
-			queryClient.invalidateQueries({
-				queryKey: getApiChaptersByChapterIdQueryKey({
-					path: { chapterId },
-					query: { language },
-				}),
-			}),
-		),
-	);
+	await invalidateChapterContent(queryClient, chapterId);
 }

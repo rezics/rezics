@@ -8,7 +8,7 @@ import {
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { useTranslation } from "@/i18n/client";
-import { selectLocalization } from "@/lib/localization";
+import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 export interface ScoreContextSelection {
@@ -22,21 +22,21 @@ export function useDefaultScoreContext() {
 		query: { enabled: !session.isPending && Boolean(session.data) },
 	});
 	const contextUnitId = preferences.data?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score;
+	const { locale } = useTranslation(["ui"]);
+	const localizationLanguages = buildLocalizationLanguages(
+		preferences.data?.preferredLanguages ?? [],
+		toContentLanguage(locale.target),
+	);
 	const realm = useGetApiRealmsByRealmId(
-		{ path: { realmId: contextUnitId } },
+		{ path: { realmId: contextUnitId }, query: { localizationLanguages } },
 		{
 			query: {
 				enabled: !session.isPending && (!session.data || !preferences.isPending),
 			},
 		},
 	);
-	const { locale } = useTranslation(["ui"]);
 	const localization = realm.data
-		? selectLocalization(
-				realm.data.localizations,
-				toContentLanguage(locale.target),
-				realm.data.language,
-			)
+		? selectLocalization(realm.data.localizations, realm.data.language, realm.data.language)
 		: undefined;
 	const selection = realm.data
 		? {

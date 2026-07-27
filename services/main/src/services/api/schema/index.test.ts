@@ -2,7 +2,13 @@ import { TypeCompiler } from "@sinclair/typebox/compiler";
 import Elysia, { t } from "elysia";
 import { describe, expect, it } from "vitest";
 
-import { DisplayPosition, FractionalPosition, ContentLanguage, OrdinalPosition } from ".";
+import {
+	DisplayPosition,
+	FractionalPosition,
+	ContentLanguage,
+	LocalizationLanguagePriority,
+	OrdinalPosition,
+} from ".";
 
 describe("position schemas", () => {
 	it("keep fractional, ordinal, and display position contracts distinct", () => {
@@ -59,5 +65,17 @@ describe("ContentLanguage", () => {
 
 		expect(valid.status).toBe(200);
 		expect(invalid.status).toBe(422);
+	});
+});
+
+describe("LocalizationLanguagePriority", () => {
+	it("accepts a non-empty, unique, ordered list of supported languages", () => {
+		const check = TypeCompiler.Compile(LocalizationLanguagePriority);
+
+		expect(check.Check(["zh", "en"])).toBe(true);
+		expect(check.Check(["en"])).toBe(true);
+		expect(check.Check([])).toBe(false);
+		expect(check.Check(["en", "en"])).toBe(false);
+		expect(check.Check(["ja"])).toBe(false);
 	});
 });

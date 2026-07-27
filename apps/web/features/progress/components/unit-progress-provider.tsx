@@ -22,6 +22,7 @@ import {
 } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { invalidateProgressQueries } from "../data/progress-cache";
@@ -87,12 +88,13 @@ export function UnitProgressProvider({
 }) {
 	const session = useHydratedSession();
 	const authenticated = Boolean(session.data);
+	const localizationLanguages = useLocalizationLanguages();
 	const recordQuery = useGetApiProgressByUnitId(
 		{ path: { unitId: domain.unitId } },
 		{ query: { enabled: authenticated } },
 	);
 	const chaptersQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
-		{ path: { unitId: domain.unitId } },
+		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
 		{ query: { enabled: authenticated && domain.type === "book" } },
 	);
 	const saveMutation = usePutApiProgressByUnitId();

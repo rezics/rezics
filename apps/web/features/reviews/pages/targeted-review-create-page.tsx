@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,8 @@ import { RequireSession } from "@/features/auth/require-session";
 import { isCatalogDetailUnitFor } from "@/features/units/model/catalog-detail-unit";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { ReviewComposer } from "../components/review-composer";
 
@@ -19,9 +20,18 @@ export function TargetedReviewCreatePage({
 	readonly targetId: string;
 	readonly type: CatalogDetailUnitType;
 }) {
-	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId: targetId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiUnitsByTypeByUnitId({
+		path: { type, unitId: targetId },
+		query: { localizationLanguages },
+	});
 	const router = useRouter();
-	const { locale, t } = useTranslation(["engagement", "ui"]);
+	const { t } = useTranslation(["engagement", "ui"]);
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: targetId,
+	});
 
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
@@ -36,7 +46,7 @@ export function TargetedReviewCreatePage({
 
 	const title = selectLocalization(
 		query.data.localizations,
-		toContentLanguage(locale.target),
+		query.data.language,
 		query.data.language,
 	)?.title;
 

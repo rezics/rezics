@@ -8,6 +8,7 @@ import { toSafeInteger } from "../../database/integer";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
+	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
 import {
@@ -91,9 +92,13 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 
 const ReviewListCursor = t.Object(
 	{
-		v: t.Literal(1),
+		v: t.Literal(2),
 		targetId: t.Nullable(Uuid),
 		languages: t.Array(ContentLanguage, { maxItems: 50, uniqueItems: true }),
+		localizationLanguages: t.Array(ContentLanguage, {
+			maxItems: 50,
+			uniqueItems: true,
+		}),
 		realmIds: t.Array(Uuid, { maxItems: 50, uniqueItems: true }),
 		scoreContextUnitId: t.Nullable(Uuid),
 		scores: t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
@@ -140,6 +145,7 @@ function validateReviewListCursor(
 	if (
 		cursor.targetId !== (query.targetId ?? null) ||
 		!equalOrderedValues(cursor.languages, query.languages ?? []) ||
+		!equalOrderedValues(cursor.localizationLanguages, query.localizationLanguages ?? []) ||
 		!equalOrderedValues(cursor.realmIds, query.realmIds ?? []) ||
 		cursor.scoreContextUnitId !== scoreContextUnitId ||
 		!equalOrderedValues(cursor.scores, scores) ||
@@ -184,6 +190,9 @@ export default new Elysia()
 						content: ["post:review"] as const,
 						...(query.realmIds?.length ? { realmIds: query.realmIds } : {}),
 						...(query.languages?.length ? { languages: query.languages } : {}),
+						...(query.localizationLanguages?.length
+							? { localizationLanguages: query.localizationLanguages }
+							: {}),
 						...(query.targetId ? { subjectId: query.targetId } : {}),
 					};
 					const scope: FeedEligibilityScope =
@@ -279,9 +288,10 @@ export default new Elysia()
 						nextCursor:
 							ranked.length > limit && last
 								? encodeReviewListCursor({
-										v: 1,
+										v: 2,
 										targetId: query.targetId ?? null,
 										languages: query.languages ?? [],
+										localizationLanguages: query.localizationLanguages ?? [],
 										realmIds: query.realmIds ?? [],
 										scoreContextUnitId,
 										scores: [...scores],
@@ -444,6 +454,7 @@ export default new Elysia()
 						params.reviewId,
 						() => new UnitNotFound("Review"),
 					);
+					const localizationLanguages = query.localizationLanguages ?? [];
 					const [review] = await database
 						.select({
 							id: post.id,
@@ -457,11 +468,17 @@ export default new Elysia()
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
-						.leftJoin(
+						.innerJoin(
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, post.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
+								eq(
+									unitLocalization.language,
+									resolvedUnitLocalizationLanguage(
+										post.id,
+										localizationLanguages,
+									),
+								),
 							),
 						)
 						.where(
@@ -478,7 +495,11 @@ export default new Elysia()
 					const targetId = review.targetId;
 					const subjectPromise = authorization.unit
 						.canRead(targetId)
-						.then((canRead) => (canRead ? getPostSubjectPresentation(targetId) : null));
+						.then((canRead) =>
+							canRead
+								? getPostSubjectPresentation(targetId, localizationLanguages)
+								: null,
+						);
 					const [
 						attributionMap,
 						scores,
@@ -678,7 +699,7 @@ export default new Elysia()
 							value: score.value,
 							contextUnitTitle: resolvedUnitLocalizationTitle(
 								score.contextUnitId,
-								query.language,
+								query.localizationLanguages,
 							),
 							updatedAt: score.updatedAt,
 						})

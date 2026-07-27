@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { unit } from "../database/schema";
 import {
 	avatarReferenceToColumns,
+	resolveUnitLocalizationFromOrdered,
 	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
 	resolvedUnitLocalizationAvatar,
@@ -35,9 +36,25 @@ const localizations = [
 	},
 ] as const;
 
+describe("resolveUnitLocalizationFromOrdered", () => {
+	it("matches the ordered language query against the ordered Unit localization list", () => {
+		expect(resolveUnitLocalizationFromOrdered(localizations, ["zh", "en"])?.language).toBe(
+			"zh",
+		);
+		expect(resolveUnitLocalizationFromOrdered(localizations, ["en", "zh"])?.language).toBe(
+			"en",
+		);
+	});
+
+	it("falls back to the Unit's position-language order when the query has no match", () => {
+		expect(resolveUnitLocalizationFromOrdered([localizations[0]], ["zh"])?.language).toBe("en");
+		expect(resolveUnitLocalizationFromOrdered(localizations, [])?.language).toBe("en");
+	});
+});
+
 describe("resolveUnitLocalizationAvatarFromOrdered", () => {
 	it("prefers a requested localization override as one complete union value", () => {
-		expect(resolveUnitLocalizationAvatarFromOrdered(localizations, "zh")).toEqual({
+		expect(resolveUnitLocalizationAvatarFromOrdered(localizations, ["zh"])).toEqual({
 			type: "emoji",
 			emoji: "🦈",
 		});
@@ -51,7 +68,7 @@ describe("resolveUnitLocalizationAvatarFromOrdered", () => {
 						? { ...localization, avatarType: null, avatarEmoji: null }
 						: localization,
 				),
-				"zh",
+				["zh"],
 			),
 		).toEqual({ type: "image", image: { assetId: "avatar-default" } });
 	});
@@ -70,8 +87,9 @@ describe("resolvedUnitLocalizationAvatar", () => {
 			resolvedUnitLocalizationTitle(unit.id, ["zh", "en"]),
 		);
 
-		expect(query.sql).toContain("case");
-		expect(query.params.slice(0, 4)).toEqual(["zh", 0, "en", 1]);
+		expect(query.sql).toContain("array_position");
+		expect(query.sql).toContain("array[$1, $2]::text[]");
+		expect(query.params).toEqual(["zh", "en", 3]);
 	});
 });
 
@@ -115,9 +133,9 @@ describe("avatar storage", () => {
 
 describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
 	it("inherits the first available asset when the requested localization is empty", () => {
-		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", "zh")).toBe(
-			"banner-default",
-		);
+		expect(
+			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", ["zh"]),
+		).toBe("banner-default");
 	});
 
 	it("falls forward when the primary localization has no asset", () => {

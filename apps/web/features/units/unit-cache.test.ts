@@ -48,7 +48,7 @@ describe("unit cache invalidation", () => {
 		const { queryClient, invalidateQueries } = createQueryClient();
 
 		await invalidateBookContentStructure(queryClient, "book-1");
-		await invalidateChapterContent(queryClient, "chapter-1", "zh");
+		await invalidateChapterContent(queryClient, "chapter-1");
 
 		expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
 			queryKey: [
@@ -59,10 +59,7 @@ describe("unit cache invalidation", () => {
 			],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
-			queryKey: [
-				{ url: "/api/chapters/:chapterId", params: { chapterId: "chapter-1" } },
-				{ language: "zh" },
-			],
+			queryKey: [{ url: "/api/chapters/:chapterId", params: { chapterId: "chapter-1" } }],
 		});
 	});
 });

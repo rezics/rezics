@@ -45,6 +45,7 @@ export const ContentLanguageValues = ["zh", "en"] as const;
 export type ContentLanguage = (typeof ContentLanguageValues)[number];
 
 export const DefaultContentLanguage = "zh" satisfies ContentLanguage;
+export const DefaultPreferredLanguage = "en" satisfies ContentLanguage;
 
 const ContentLanguageSet = new Set<string>(ContentLanguageValues);
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	getApiUsersMeTagRealmSubscriptionsQueryKey,
 	useDeleteApiUsersMeTagRealmSubscriptionsByRealmId,
@@ -24,6 +23,7 @@ import { useState } from "react";
 
 import { SettingsOverviewHref } from "@/features/settings/routing/settings-routes";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 
 interface PickedRealm {
@@ -32,11 +32,13 @@ interface PickedRealm {
 }
 
 export function TagSourcesSettingsPage() {
-	const { locale, t } = useTranslation(["settings", "tags", "ui"]);
+	const { t } = useTranslation(["settings", "tags", "ui"]);
 	const queryClient = useQueryClient();
-	const language = toContentLanguage(locale.target);
+	const localizationLanguages = useLocalizationLanguages();
 	const [selectedRealm, setSelectedRealm] = useState<PickedRealm>();
-	const query = useGetApiUsersMeTagRealmSubscriptions({ query: { language } });
+	const query = useGetApiUsersMeTagRealmSubscriptions({
+		query: { localizationLanguages },
+	});
 	const invalidate = () =>
 		queryClient.invalidateQueries({
 			queryKey: getApiUsersMeTagRealmSubscriptionsQueryKey(),
@@ -58,7 +60,7 @@ export function TagSourcesSettingsPage() {
 		try {
 			await upsert.mutateAsync({
 				path: { realmId: selectedRealm.id },
-				query: { language },
+				query: { localizationLanguages },
 				body: {
 					position: generateKeyBetween(items.at(-1)?.position ?? null, null),
 				},
@@ -85,7 +87,7 @@ export function TagSourcesSettingsPage() {
 		try {
 			await upsert.mutateAsync({
 				path: { realmId: item.realmId },
-				query: { language },
+				query: { localizationLanguages },
 				body: { position },
 			});
 		} catch {

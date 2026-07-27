@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
-import type { Translation } from "@rezics/i18n";
+import { toContentLanguage, type Translation } from "@rezics/i18n";
 import {
 	createContext,
 	useCallback,
@@ -364,7 +364,7 @@ function RegisterForm({
 }: {
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 }) {
-	const { t } = useTranslation([
+	const { locale, t } = useTranslation([
 		"actions",
 		"auth",
 		"betterAuthErrorCodes",
@@ -389,6 +389,7 @@ function RegisterForm({
 				email,
 				name: String(formData.get("name")),
 				password: String(formData.get("password")),
+				registrationContentLanguage: toContentLanguage(locale.target),
 			});
 			if (result.error) setError(getErrorText(t, result.error, t.auth.registerFailed));
 			else onModeChange("verify-email", { email });

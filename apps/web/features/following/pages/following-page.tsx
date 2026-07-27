@@ -1,6 +1,5 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
 import {
 	getApiUsersMeFollowing,
 	getApiUsersMeFollowingQueryKey,
@@ -24,6 +23,7 @@ import { useQueryState } from "nuqs";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { invalidateFollowingQueries } from "../data/following-cache";
 import {
@@ -43,11 +43,12 @@ export function FollowingPage() {
 }
 
 function FollowingContent() {
-	const { t, locale } = useTranslation(["actions", "nav", "ui"]);
+	const { t } = useTranslation(["actions", "nav", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
 	const [kind, setKind] = useQueryState("kind", followingFilterParser);
 	const baseQuery = {
-		language: toContentLanguage(locale.target),
+		localizationLanguages,
 		limit: 30,
 		...(kind === AllFollowingKinds ? {} : { kind }),
 	} satisfies GetApiUsersMeFollowingQuery;

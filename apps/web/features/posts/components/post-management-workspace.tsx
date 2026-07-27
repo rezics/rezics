@@ -22,6 +22,7 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
 	canOpenPostManagement,
 	getPostManagementSectionIds,
@@ -100,12 +101,13 @@ function PostManagementWorkspaceLoader({
 	postId: string;
 	children: ReactNode;
 }) {
+	const localizationLanguages = useLocalizationLanguages();
 	const postQuery = useGetApiPostsByPostId(
-		{ path: { postId } },
+		{ path: { postId }, query: { localizationLanguages } },
 		{ query: { enabled: kind === "post" } },
 	);
 	const reviewQuery = useGetApiReviewsByReviewId(
-		{ path: { reviewId: postId } },
+		{ path: { reviewId: postId }, query: { localizationLanguages } },
 		{ query: { enabled: kind === "review" } },
 	);
 

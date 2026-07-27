@@ -21792,6 +21792,13 @@
 												"type": "integer"
 											}
 										]
+									},
+									"localizationLanguages": {
+										"minItems": 1,
+										"maxItems": 2,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "type": "string", "enum": ["zh", "en"] }
 									}
 								}
 							}
@@ -39436,6 +39443,18 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -39503,6 +39522,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"cover"
 																],
@@ -39523,6 +39543,18 @@
 																			},
 																			{
 																				"const": "media",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"language": {
+																		"anyOf": [
+																			{
+																				"const": "zh",
+																				"type": "string"
+																			},
+																			{
+																				"const": "en",
 																				"type": "string"
 																			}
 																		]
@@ -39915,10 +39947,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -41316,10 +41354,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					},
 					{
 						"name": "page",
@@ -48024,10 +48068,9 @@
 												"status": { "type": "string" },
 												"visibility": { "type": "string" },
 												"language": {
-													"nullable": true,
 													"anyOf": [
-														{ "type": "string" },
-														{ "type": "null" }
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
 													]
 												},
 												"name": {
@@ -48968,10 +49011,7 @@
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"name": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -49536,6 +49576,18 @@
 						}
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -49566,6 +49618,7 @@
 												"required": [
 													"id",
 													"section",
+													"language",
 													"title",
 													"status",
 													"visibility",
@@ -49590,6 +49643,10 @@
 															"review",
 															"poll"
 														]
+													},
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
 													},
 													"title": {
 														"nullable": true,
@@ -49725,6 +49782,7 @@
 										"defaultScoreContextUnitId",
 										"collectionConfig",
 										"personalizedFeed",
+										"filterFeedByPreferredLanguages",
 										"contentRatings",
 										"preferredLanguages"
 									],
@@ -49780,6 +49838,7 @@
 											]
 										},
 										"personalizedFeed": { "type": "boolean" },
+										"filterFeedByPreferredLanguages": { "type": "boolean" },
 										"contentRatings": {
 											"type": "array",
 											"items": { "type": "string" }
@@ -49903,6 +49962,7 @@
 										"defaultScoreContextUnitId",
 										"collectionConfig",
 										"personalizedFeed",
+										"filterFeedByPreferredLanguages",
 										"contentRatings",
 										"preferredLanguages"
 									],
@@ -49958,6 +50018,7 @@
 											]
 										},
 										"personalizedFeed": { "type": "boolean" },
+										"filterFeedByPreferredLanguages": { "type": "boolean" },
 										"contentRatings": {
 											"type": "array",
 											"items": { "type": "string" }
@@ -50068,6 +50129,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
+								"additionalProperties": false,
 								"type": "object",
 								"required": [
 									"interfaceLocale",
@@ -50076,6 +50138,7 @@
 									"defaultScoreContextUnitId",
 									"collectionConfig",
 									"personalizedFeed",
+									"filterFeedByPreferredLanguages",
 									"contentRatings",
 									"preferredLanguages"
 								],
@@ -50133,6 +50196,10 @@
 										]
 									},
 									"personalizedFeed": { "default": true, "type": "boolean" },
+									"filterFeedByPreferredLanguages": {
+										"default": false,
+										"type": "boolean"
+									},
 									"contentRatings": {
 										"uniqueItems": true,
 										"type": "array",
@@ -50143,6 +50210,7 @@
 									},
 									"preferredLanguages": {
 										"minItems": 1,
+										"maxItems": 2,
 										"uniqueItems": true,
 										"type": "array",
 										"items": { "type": "string", "enum": ["zh", "en"] }
@@ -50168,6 +50236,7 @@
 										"defaultScoreContextUnitId",
 										"collectionConfig",
 										"personalizedFeed",
+										"filterFeedByPreferredLanguages",
 										"contentRatings",
 										"preferredLanguages"
 									],
@@ -50223,6 +50292,7 @@
 											]
 										},
 										"personalizedFeed": { "type": "boolean" },
+										"filterFeedByPreferredLanguages": { "type": "boolean" },
 										"contentRatings": {
 											"type": "array",
 											"items": { "type": "string" }
@@ -50415,10 +50485,16 @@
 						}
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					},
 					{
 						"name": "cursor",
@@ -51279,6 +51355,18 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -51344,10 +51432,7 @@
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"name": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -52930,10 +53015,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					},
 					{
 						"name": "childLimit",
@@ -52971,9 +53062,27 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["tagId", "title", "summary", "children"],
+									"required": [
+										"tagId",
+										"language",
+										"title",
+										"summary",
+										"children"
+									],
 									"properties": {
 										"tagId": { "format": "uuid", "type": "string" },
+										"language": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
 										"title": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -52988,6 +53097,7 @@
 												"type": "object",
 												"required": [
 													"tagId",
+													"language",
 													"title",
 													"summary",
 													"score",
@@ -52996,6 +53106,24 @@
 												],
 												"properties": {
 													"tagId": { "format": "uuid", "type": "string" },
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -53037,6 +53165,7 @@
 															"type": "object",
 															"required": [
 																"tagId",
+																"language",
 																"title",
 																"summary",
 																"score",
@@ -53046,6 +53175,24 @@
 																"tagId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"language": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"anyOf": [
+																				{
+																					"const": "zh",
+																					"type": "string"
+																				},
+																				{
+																					"const": "en",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"title": {
 																	"nullable": true,
@@ -53312,10 +53459,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -53386,6 +53539,7 @@
 												"required": [
 													"ordinal",
 													"tagId",
+													"language",
 													"title",
 													"summary"
 												],
@@ -53402,6 +53556,24 @@
 														]
 													},
 													"tagId": { "format": "uuid", "type": "string" },
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -53485,10 +53657,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"requestBody": {
@@ -53582,6 +53760,7 @@
 												"required": [
 													"ordinal",
 													"tagId",
+													"language",
 													"title",
 													"summary"
 												],
@@ -53598,6 +53777,24 @@
 														]
 													},
 													"tagId": { "format": "uuid", "type": "string" },
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -54125,10 +54322,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					},
 					{
 						"name": "globalLimit",
@@ -54296,6 +54499,7 @@
 															"required": [
 																"ordinal",
 																"tagId",
+																"language",
 																"title",
 																"summary"
 															],
@@ -54317,6 +54521,24 @@
 																"tagId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"language": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"anyOf": [
+																				{
+																					"const": "zh",
+																					"type": "string"
+																				},
+																				{
+																					"const": "en",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"title": {
 																	"nullable": true,
@@ -54352,6 +54574,7 @@
 												"type": "object",
 												"required": [
 													"tagId",
+													"language",
 													"title",
 													"summary",
 													"createdAt",
@@ -54364,6 +54587,24 @@
 												],
 												"properties": {
 													"tagId": { "format": "uuid", "type": "string" },
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -54444,6 +54685,7 @@
 												"type": "object",
 												"required": [
 													"realmId",
+													"language",
 													"title",
 													"summary",
 													"canVote",
@@ -54457,6 +54699,24 @@
 													"realmId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -54493,6 +54753,7 @@
 															"type": "object",
 															"required": [
 																"tagId",
+																"language",
 																"title",
 																"summary",
 																"createdAt",
@@ -54507,6 +54768,24 @@
 																"tagId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"language": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"anyOf": [
+																				{
+																					"const": "zh",
+																					"type": "string"
+																				},
+																				{
+																					"const": "en",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"title": {
 																	"nullable": true,
@@ -54589,6 +54868,7 @@
 															"type": "object",
 															"required": [
 																"tagId",
+																"language",
 																"title",
 																"summary",
 																"createdAt",
@@ -54600,6 +54880,24 @@
 																"tagId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"language": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"anyOf": [
+																				{
+																					"const": "zh",
+																					"type": "string"
+																				},
+																				{
+																					"const": "en",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"title": {
 																	"nullable": true,
@@ -55415,10 +55713,16 @@
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -55436,6 +55740,7 @@
 												"type": "object",
 												"required": [
 													"realmId",
+													"language",
 													"title",
 													"summary",
 													"canVote",
@@ -55447,6 +55752,24 @@
 													"realmId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -55553,10 +55876,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"requestBody": {
@@ -55587,6 +55916,7 @@
 									"type": "object",
 									"required": [
 										"realmId",
+										"language",
 										"title",
 										"summary",
 										"canVote",
@@ -55596,6 +55926,18 @@
 									],
 									"properties": {
 										"realmId": { "format": "uuid", "type": "string" },
+										"language": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
 										"title": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -58138,6 +58480,18 @@
 						}
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "cursor",
 						"in": "query",
 						"required": false,
@@ -58188,11 +58542,8 @@
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"language": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+														"type": "string",
+														"enum": ["zh", "en"]
 													},
 													"contentRating": { "type": "string" },
 													"publishedAt": {
@@ -59132,7 +59483,15 @@
 										"visibility": { "type": "string" },
 										"language": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -61022,6 +61381,18 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -61070,7 +61441,15 @@
 										"visibility": { "type": "string" },
 										"language": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -63093,7 +63472,15 @@
 										"visibility": { "type": "string" },
 										"language": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -65277,7 +65664,15 @@
 										"visibility": { "type": "string" },
 										"language": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -67255,7 +67650,15 @@
 										"visibility": { "type": "string" },
 										"language": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -69579,7 +69982,15 @@
 										"visibility": { "type": "string" },
 										"language": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -73212,10 +73623,16 @@
 						"schema": { "maxLength": 64, "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					},
 					{
 						"name": "limit",
@@ -73249,6 +73666,7 @@
 													"id",
 													"kind",
 													"verified",
+													"language",
 													"avatar",
 													"banner",
 													"cover",
@@ -73259,6 +73677,10 @@
 													"id": { "format": "uuid", "type": "string" },
 													"kind": { "type": "string" },
 													"verified": { "type": "boolean" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"avatar": {
 														"nullable": true,
 														"anyOf": [
@@ -73930,10 +74352,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -73947,6 +74375,7 @@
 										"id",
 										"kind",
 										"verified",
+										"language",
 										"avatar",
 										"banner",
 										"cover",
@@ -73963,6 +74392,18 @@
 										"id": { "format": "uuid", "type": "string" },
 										"kind": { "type": "string" },
 										"verified": { "type": "boolean" },
+										"language": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
 										"avatar": {
 											"nullable": true,
 											"anyOf": [
@@ -75742,6 +76183,18 @@
 				"tags": ["Tags"],
 				"parameters": [
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -75769,9 +76222,13 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["id", "title", "summary"],
+												"required": ["id", "language", "title", "summary"],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -81983,6 +82440,18 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -82919,10 +83388,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
-						"required": true,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -83743,6 +84218,18 @@
 						}
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -83781,6 +84268,7 @@
 													"lastContentStructureNodeId",
 													"lastReadAnchor",
 													"type",
+													"language",
 													"title"
 												],
 												"properties": {
@@ -83840,6 +84328,10 @@
 														"anyOf": [{}, { "type": "null" }]
 													},
 													"type": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -84960,6 +85452,18 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -84990,6 +85494,7 @@
 												"required": [
 													"id",
 													"ownerId",
+													"language",
 													"itemCount",
 													"containsTarget",
 													"title",
@@ -85002,6 +85507,10 @@
 													"ownerId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
 													},
 													"itemCount": {
 														"anyOf": [
@@ -86930,10 +87439,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -88575,6 +89081,7 @@
 												"required": [
 													"targetId",
 													"kind",
+													"language",
 													"parentTargetId",
 													"position",
 													"type",
@@ -88588,6 +89095,10 @@
 														"type": "string"
 													},
 													"kind": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"parentTargetId": {
 														"nullable": true,
 														"anyOf": [
@@ -88752,6 +89263,20 @@
 				"summary": "Get Favorites collection",
 				"tags": ["Collections"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -88779,10 +89304,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -90424,6 +90946,7 @@
 												"required": [
 													"targetId",
 													"kind",
+													"language",
 													"parentTargetId",
 													"position",
 													"type",
@@ -90437,6 +90960,10 @@
 														"type": "string"
 													},
 													"kind": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"parentTargetId": {
 														"nullable": true,
 														"anyOf": [
@@ -90530,6 +91057,14 @@
 							}
 						}
 					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
 					"429": {
 						"description": "API token resource limit exceeded",
 						"headers": {
@@ -90587,6 +91122,18 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -90616,10 +91163,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -92261,6 +92805,7 @@
 												"required": [
 													"targetId",
 													"kind",
+													"language",
 													"parentTargetId",
 													"position",
 													"type",
@@ -92274,6 +92819,10 @@
 														"type": "string"
 													},
 													"kind": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"parentTargetId": {
 														"nullable": true,
 														"anyOf": [
@@ -94251,10 +94800,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -95896,6 +96442,7 @@
 												"required": [
 													"targetId",
 													"kind",
+													"language",
 													"parentTargetId",
 													"position",
 													"type",
@@ -95909,6 +96456,10 @@
 														"type": "string"
 													},
 													"kind": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"parentTargetId": {
 														"nullable": true,
 														"anyOf": [
@@ -97028,6 +97579,18 @@
 						"schema": {
 							"minItems": 1,
 							"maxItems": 50,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
 							"uniqueItems": true,
 							"type": "array",
 							"items": { "type": "string", "enum": ["zh", "en"] }
@@ -99150,6 +99713,18 @@
 						"in": "query",
 						"required": false,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -99431,10 +100006,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"language": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"body": {
 											"nullable": true,
 											"anyOf": [
@@ -100786,10 +101358,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -101702,6 +102280,18 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -101713,6 +102303,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"language",
 										"question",
 										"voteMode",
 										"anonymous",
@@ -101725,6 +102316,7 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"question": { "type": "string" },
 										"voteMode": { "type": "string" },
 										"anonymous": { "type": "boolean" },
@@ -102841,6 +103433,18 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -102871,6 +103475,7 @@
 												"required": [
 													"id",
 													"postKind",
+													"language",
 													"attributions",
 													"realmId",
 													"subjectId",
@@ -102888,6 +103493,10 @@
 													"postKind": {
 														"type": "string",
 														"enum": ["post", "reply"]
+													},
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
 													},
 													"attributions": {
 														"type": "array",
@@ -103923,6 +104532,18 @@
 						"in": "query",
 						"required": false,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -103941,6 +104562,7 @@
 										"rootPostId",
 										"parentPostId",
 										"replyCount",
+										"language",
 										"title",
 										"body",
 										"latestRevisionId",
@@ -104228,6 +104850,7 @@
 												{ "type": "integer" }
 											]
 										},
+										"language": { "type": "string", "enum": ["zh", "en"] },
 										"title": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -104602,7 +105225,11 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "PostNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"PostNotFound",
+														"PostLocalizationNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -105211,6 +105838,18 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "cursor",
 						"in": "query",
 						"required": false,
@@ -105247,6 +105886,7 @@
 												"required": [
 													"id",
 													"postKind",
+													"language",
 													"attributions",
 													"rootPostId",
 													"parentPostId",
@@ -105265,6 +105905,10 @@
 													"postKind": {
 														"const": "reply",
 														"type": "string"
+													},
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
 													},
 													"attributions": {
 														"type": "array",
@@ -106913,10 +107557,16 @@
 				"tags": ["Realms"],
 				"parameters": [
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					},
 					{
 						"name": "limit",
@@ -106950,6 +107600,7 @@
 													"id",
 													"slugAddress",
 													"joinPolicy",
+													"language",
 													"title",
 													"summary",
 													"avatar",
@@ -106999,6 +107650,10 @@
 														]
 													},
 													"joinPolicy": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -107968,10 +108623,16 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "language",
+						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -108041,7 +108702,15 @@
 										"visibility": { "type": "string" },
 										"language": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "zh", "type": "string" },
+														{ "const": "en", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"joinPolicy": { "type": "string" },
 										"createdAt": { "format": "date-time", "type": "string" },
@@ -109615,6 +110284,18 @@
 						}
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -109644,6 +110325,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"language",
 													"name",
 													"slugAddress",
 													"avatar",
@@ -109655,6 +110337,10 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
 													},
 													"name": {
 														"nullable": true,
@@ -110993,6 +111679,18 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
 					}
 				],
 				"responses": {
@@ -116732,6 +117430,18 @@
 						}
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -116763,6 +117473,7 @@
 													"realmId",
 													"unitId",
 													"unitKind",
+													"language",
 													"title",
 													"status",
 													"postTargetingLocked",
@@ -116780,6 +117491,10 @@
 														"type": "string"
 													},
 													"unitKind": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": ["zh", "en"]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [

@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import type { UnwrapSchema } from "elysia";
+import type { ContentLanguage } from "@rezics/i18n";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
@@ -10,7 +11,11 @@ import {
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
-import { avatarReferenceFromColumns, isPrimaryUnitLocalization } from "../../units/localization";
+import {
+	avatarReferenceFromColumns,
+	resolveUnitLocalizationFromOrdered,
+	resolvedUnitLocalizationLanguage,
+} from "../../units/localization";
 import {
 	collection as collectionTable,
 	collectionItem,
@@ -88,13 +93,13 @@ export async function ensureFavorites(ownerId: string) {
 export async function getCollection(
 	collectionId: string,
 	viewerId?: string,
+	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<UnwrapSchema<typeof CollectionDetailResponse>> {
 	const [record] = await database
 		.select({
 			id: unit.id,
 			status: unit.status,
 			visibility: unit.visibility,
-			language: unitLocalization.language,
 			ownerId: collectionTable.ownerProfileId,
 			source: collectionTable.source,
 			systemKey: collectionTable.systemKey,
@@ -106,13 +111,6 @@ export async function getCollection(
 		})
 		.from(collectionTable)
 		.innerJoin(unit, eq(unit.id, collectionTable.id))
-		.leftJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, unit.id),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
-			),
-		)
 		.where(eq(collectionTable.id, collectionId))
 		.limit(1);
 	if (
@@ -133,6 +131,7 @@ export async function getCollection(
 	const localizations = await database
 		.select({
 			language: unitLocalization.language,
+			position: unitLocalization.position,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
 			avatarType: unitLocalization.avatarType,
@@ -146,10 +145,16 @@ export async function getCollection(
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, collectionId))
 		.orderBy(unitLocalization.position, unitLocalization.language);
+	const selectedLocalization = resolveUnitLocalizationFromOrdered(
+		localizations,
+		localizationLanguages,
+	);
+	if (!selectedLocalization) throw new CollectionNotFound();
 	const items = await database
 		.select({
 			targetId: collectionItem.unitId,
 			kind: collectionItem.role,
+			language: unitLocalization.language,
 			position: collectionItem.position,
 			type: unit.kind,
 			title: unitLocalization.title,
@@ -160,17 +165,24 @@ export async function getCollection(
 		})
 		.from(collectionItem)
 		.innerJoin(unit, eq(unit.id, collectionItem.unitId))
-		.leftJoin(
+		.innerJoin(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, unit.id),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
+				eq(
+					unitLocalization.language,
+					resolvedUnitLocalizationLanguage(
+						collectionItem.unitId,
+						localizationLanguages,
+					),
+				),
 			),
 		)
 		.where(and(eq(collectionItem.collectionId, collectionId), getUnitReadCondition(viewerId)))
 		.orderBy(collectionItem.position, collectionItem.unitId);
 	return {
 		...record,
+		language: selectedLocalization.language,
 		definitionDocument,
 		presentationDocument,
 		localizations: localizations.map(
@@ -182,6 +194,7 @@ export async function getCollection(
 				avatarIconName,
 				bannerAssetId,
 				coverAssetId,
+				position: _position,
 				...localization
 			}) => ({
 				...localization,

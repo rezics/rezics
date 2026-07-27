@@ -1,11 +1,15 @@
 import { StatusCodes } from "http-status-codes";
+import type { ContentLanguage } from "@rezics/i18n";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import {
+	isPrimaryUnitLocalization,
+	resolvedUnitLocalizationLanguage,
+} from "../../units/localization";
 import {
 	creditAttribution,
 	post,
@@ -86,6 +90,7 @@ const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'post'::post_k
 function toReplyResponse<
 	T extends {
 		id: string;
+		language: ContentLanguage;
 		rootPostId: string;
 		parentPostId: string | null;
 		depth: number;
@@ -101,6 +106,7 @@ function toReplyResponse<
 	return {
 		id: row.id,
 		postKind: "reply" as const,
+		language: row.language,
 		attributions: [...attributions],
 		rootPostId: row.rootPostId,
 		parentPostId: row.parentPostId,
@@ -115,6 +121,7 @@ function toReplyResponse<
 
 const replySelection = {
 	id: postReply.postId,
+	language: unitLocalization.language,
 	rootPostId: postReply.rootPostId,
 	parentPostId: postReply.parentPostId,
 	depth: postReply.depth,
@@ -209,10 +216,12 @@ export default new Elysia()
 			.get(
 				"",
 				async ({ query }) => {
+					const localizationLanguages = query.localizationLanguages ?? [];
 					const rows = await database
 						.select({
 							id: post.id,
 							postKind: ordinaryPostKind,
+							language: unitLocalization.language,
 							subjectId: post.subjectUnitId,
 							rootPostId: postReply.rootPostId,
 							parentPostId: postReply.parentPostId,
@@ -228,11 +237,17 @@ export default new Elysia()
 						.leftJoin(postReply, eq(postReply.postId, post.id))
 						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
-						.leftJoin(
+						.innerJoin(
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, post.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
+								eq(
+									unitLocalization.language,
+									resolvedUnitLocalizationLanguage(
+										post.id,
+										localizationLanguages,
+									),
+								),
 							),
 						)
 						.where(
@@ -367,6 +382,7 @@ export default new Elysia()
 				async ({ params, query, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
+					const localizationLanguages = query.localizationLanguages ?? [];
 					await authorization.unit.ensureCanRead(
 						params.postId,
 						() => new UnitNotFound("Post"),
@@ -379,6 +395,7 @@ export default new Elysia()
 							rootPostId: postReply.rootPostId,
 							parentPostId: postReply.parentPostId,
 							replyCount,
+							language: unitLocalization.language,
 							title: unitLocalization.title,
 							body: unitLocalization.content,
 							latestRevisionId: unitRevisionHead.revisionId,
@@ -394,7 +411,13 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, post.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
+								eq(
+									unitLocalization.language,
+									resolvedUnitLocalizationLanguage(
+										post.id,
+										localizationLanguages,
+									),
+								),
 							),
 						)
 						.where(
@@ -408,12 +431,19 @@ export default new Elysia()
 						)
 						.limit(1);
 					if (!row) throw new PostNotFound();
+					if (!row.language) throw new PostLocalizationNotFound();
+					const language = row.language;
 					const subjectId = row.subjectId;
 					const subjectPromise = subjectId
 						? authorization.unit
 								.canRead(subjectId)
 								.then((canRead) =>
-									canRead ? getPostSubjectPresentation(subjectId) : null,
+									canRead
+										? getPostSubjectPresentation(
+												subjectId,
+												localizationLanguages,
+											)
+										: null,
 								)
 						: Promise.resolve(null);
 					const [
@@ -450,6 +480,7 @@ export default new Elysia()
 					]);
 					return {
 						...row,
+						language,
 						realmId: query.realmId ?? null,
 						attributions: attributionMap.get(row.id) ?? [],
 						replyCount: toSafeInteger(row.replyCount, "reply count"),
@@ -472,6 +503,7 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"PostNotFound",
+							"PostLocalizationNotFound",
 						]),
 					},
 					detail: { summary: "Get post", tags: ["Posts"] },
@@ -593,6 +625,7 @@ export default new Elysia()
 						() => new UnitNotFound("Post"),
 					);
 					await ensureRootPost(params.postId, query.realmId);
+					const localizationLanguages = query.localizationLanguages ?? [];
 					const selection = await selectReplyTree({
 						rootPostId: params.postId,
 						...(query.realmId ? { realmId: query.realmId } : {}),
@@ -607,11 +640,17 @@ export default new Elysia()
 						.from(postReply)
 						.innerJoin(post, eq(post.id, postReply.postId))
 						.innerJoin(unit, eq(unit.id, postReply.postId))
-						.leftJoin(
+						.innerJoin(
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, postReply.postId),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
+								eq(
+									unitLocalization.language,
+									resolvedUnitLocalizationLanguage(
+										postReply.postId,
+										localizationLanguages,
+									),
+								),
 							),
 						)
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, postReply.postId))

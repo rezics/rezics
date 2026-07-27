@@ -5,6 +5,7 @@ import { filterRealmMembers } from "./model/realm-member-filters";
 const members: Parameters<typeof filterRealmMembers>[0] = [
 	{
 		profileId: "019f995d-7595-7c99-9183-250790bbfe2f",
+		language: "en",
 		name: "Edge Coordinates",
 		slugAddress: {
 			slug: "edge",
@@ -18,6 +19,7 @@ const members: Parameters<typeof filterRealmMembers>[0] = [
 	},
 	{
 		profileId: "019f995d-7595-7c99-9183-250790bbfe31",
+		language: "zh",
 		name: "Jety",
 		slugAddress: {
 			slug: "jetywolf",

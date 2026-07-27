@@ -30,6 +30,7 @@ import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
@@ -56,8 +57,10 @@ export function ReplyPostThread({
 	canReply: boolean;
 }) {
 	const { t } = useTranslation(["actions", "posts", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const baseQuery = {
 		limit: 25,
+		localizationLanguages,
 		...(realmId ? { realmId } : {}),
 		...(parentPostId ? { parentPostId } : {}),
 	};

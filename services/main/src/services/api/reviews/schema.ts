@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
-import { ContentLanguage, Uuid } from "../schema";
+import { ContentLanguage, LocalizationLanguageQuery, Uuid } from "../schema";
 
 export const ReviewSortValues = ["best", "new"] as const;
 export const ReviewSortSchema = t.UnionEnum(ReviewSortValues, { default: "best" });
@@ -13,6 +13,7 @@ const ListReviewsCommonQuery = {
 	languages: t.Optional(
 		t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true }),
 	),
+	...LocalizationLanguageQuery,
 	sort: t.Optional(ReviewSortSchema),
 	cursor: t.Optional(t.String({ maxLength: 1024 })),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
@@ -77,7 +78,13 @@ export type CreateReviewBody = Static<typeof CreateReviewBody>;
 
 export const ReviewParams = t.Object({ reviewId: Uuid });
 export type ReviewParams = Static<typeof ReviewParams>;
-export const GetReviewQuery = t.Object({ realmId: t.Optional(Uuid) });
+export const GetReviewQuery = t.Object(
+	{
+		realmId: t.Optional(Uuid),
+		...LocalizationLanguageQuery,
+	},
+	{ additionalProperties: false },
+);
 export type GetReviewQuery = Static<typeof GetReviewQuery>;
 
 export const UpdateReviewBody = t.Object({
@@ -100,7 +107,7 @@ export type SetScoreBody = Static<typeof SetScoreBody>;
 export const ScoreAggregateQuery = t.Object({ contextUnitId: Uuid });
 export type ScoreAggregateQuery = Static<typeof ScoreAggregateQuery>;
 
-export const ListViewerScoresQuery = t.Object({
-	language: t.Optional(ContentLanguage),
+export const ListViewerScoresQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
 });
 export type ListViewerScoresQuery = Static<typeof ListViewerScoresQuery>;

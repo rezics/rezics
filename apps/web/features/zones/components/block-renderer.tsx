@@ -62,6 +62,7 @@ import { FeedList } from "@/features/content-feed/components/feed-list";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 import { zonePageHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { catalogZoneFeedContentKinds } from "../model/catalog-zone-feed";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
 
@@ -901,7 +902,11 @@ function CollectionUnitList({
 	limit: number;
 }) {
 	const { t } = useTranslation("zones");
-	const query = useGetApiCollectionsByCollectionId({ path: { collectionId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiCollectionsByCollectionId({
+		path: { collectionId },
+		query: { localizationLanguages },
+	});
 	if (query.isPending) return null;
 	if (query.isError) return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
 	const items = query.data?.items.slice(0, limit) ?? [];

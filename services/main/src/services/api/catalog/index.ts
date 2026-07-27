@@ -11,9 +11,8 @@ import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
 	avatarReferenceFromColumns,
-	isPrimaryUnitLocalization,
-	resolvedUnitLocalizationAvatar,
-	resolvedUnitLocalizationImageAssetId,
+	resolveUnitLocalizationFromOrdered,
+	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
@@ -180,32 +179,36 @@ export default new Elysia()
 			.get(
 				"",
 				async ({ query }) => {
+					const localizationLanguages = query.localizationLanguages ?? [];
 					const items = await database
 						.select({
 							id: unit.id,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
-							bannerAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"banner",
-								query.language,
-							),
-							coverAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"cover",
-								query.language,
-							),
+							language: unitLocalization.language,
+							avatarType: unitLocalization.avatarType,
+							avatarAssetId: unitLocalization.avatarAssetId,
+							avatarEmoji: unitLocalization.avatarEmoji,
+							avatarIconPrefix: unitLocalization.avatarIconPrefix,
+							avatarIconName: unitLocalization.avatarIconName,
+							bannerAssetId: unitLocalization.bannerAssetId,
+							coverAssetId: unitLocalization.coverAssetId,
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 						})
 						.from(entity)
 						.innerJoin(unit, eq(unit.id, entity.id))
-						.leftJoin(
+						.innerJoin(
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, unit.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
+								eq(
+									unitLocalization.language,
+									resolvedUnitLocalizationLanguage(
+										unit.id,
+										localizationLanguages,
+									),
+								),
 							),
 						)
 						.where(
@@ -217,13 +220,32 @@ export default new Elysia()
 						.orderBy(desc(unit.createdAt))
 						.limit(query.limit ?? 20);
 					return {
-						items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
-							...item,
-							kind: item.kind ?? "unknown",
-							avatar: presentAvatar(avatar),
-							banner: presentImageAsset(bannerAssetId, "banner"),
-							cover: presentImageAsset(coverAssetId, "cover"),
-						})),
+						items: items.map(
+							({
+								avatarType,
+								avatarAssetId,
+								avatarEmoji,
+								avatarIconPrefix,
+								avatarIconName,
+								bannerAssetId,
+								coverAssetId,
+								...item
+							}) => ({
+								...item,
+								kind: item.kind ?? "unknown",
+								avatar: presentAvatar(
+									avatarReferenceFromColumns({
+										avatarType,
+										avatarAssetId,
+										avatarEmoji,
+										avatarIconPrefix,
+										avatarIconName,
+									}),
+								),
+								banner: presentImageAsset(bannerAssetId, "banner"),
+								cover: presentImageAsset(coverAssetId, "cover"),
+							}),
+						),
 					};
 				},
 				{
@@ -251,22 +273,12 @@ export default new Elysia()
 				"/:unitId",
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request.headers, "unit:read");
+					const localizationLanguages = query.localizationLanguages ?? [];
 					const [entry] = await database
 						.select({
 							id: unit.id,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
-							bannerAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"banner",
-								query.language,
-							),
-							coverAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"cover",
-								query.language,
-							),
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
 						})
@@ -275,13 +287,17 @@ export default new Elysia()
 						.where(and(eq(entity.id, params.unitId), publiclyReadableUnitCondition()))
 						.limit(1);
 					if (!entry) throw new EntityEntryNotFound();
-					const localizations = (
-						await database
-							.select()
-							.from(unitLocalization)
-							.where(eq(unitLocalization.unitId, params.unitId))
-							.orderBy(asc(unitLocalization.position), asc(unitLocalization.language))
-					).map((row) => ({
+					const storedLocalizations = await database
+						.select()
+						.from(unitLocalization)
+						.where(eq(unitLocalization.unitId, params.unitId))
+						.orderBy(asc(unitLocalization.position), asc(unitLocalization.language));
+					const selectedLocalization = resolveUnitLocalizationFromOrdered(
+						storedLocalizations,
+						localizationLanguages,
+					);
+					if (!selectedLocalization) throw new EntityEntryNotFound();
+					const localizations = storedLocalizations.map((row) => ({
 						unitId: row.unitId,
 						language: row.language,
 						position: row.position,
@@ -327,7 +343,7 @@ export default new Elysia()
 						);
 					const contextPosts = await getAssociationContextPostsByAssociationIds(
 						subjectAssociations.map(({ id }) => id),
-						query.language,
+						localizationLanguages,
 						identity.authorization.profileId,
 					);
 					const presentedSubjectAssociations = subjectAssociations.map((association) => ({
@@ -350,7 +366,7 @@ export default new Elysia()
 							),
 						)
 						.limit(1);
-					const { avatar, bannerAssetId, coverAssetId, ...entityEntry } = entry;
+					const entityEntry = entry;
 					const ownerSummary = owner?.profileId
 						? ((await getPublicUnitSummariesByIds([owner.profileId])).get(
 								owner.profileId,
@@ -374,9 +390,10 @@ export default new Elysia()
 					return {
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
-						avatar: presentAvatar(avatar),
-						banner: presentImageAsset(bannerAssetId, "banner"),
-						cover: presentImageAsset(coverAssetId, "cover"),
+						language: selectedLocalization.language,
+						avatar: presentAvatar(avatarReferenceFromColumns(selectedLocalization)),
+						banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
+						cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
 						localizations,
 						associationPolicy: await getEntityAssociationPolicy(params.unitId),
 						owner: ownerSummary,
@@ -505,31 +522,41 @@ export default new Elysia()
 		app
 			.get(
 				"",
-				async ({ query }) => ({
-					items: await database
-						.select({
-							id: unit.id,
-							title: unitLocalization.title,
-							summary: unitLocalization.summary,
-						})
-						.from(unit)
-						.leftJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, unit.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
-							),
-						)
-						.where(
-							and(
-								eq(unit.kind, "tag"),
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
-							),
-						)
-						.orderBy(desc(unit.createdAt))
-						.limit(query.limit ?? 20),
-				}),
+				async ({ query }) => {
+					const localizationLanguages = query.localizationLanguages ?? [];
+					return {
+						items: await database
+							.select({
+								id: unit.id,
+								language: unitLocalization.language,
+								title: unitLocalization.title,
+								summary: unitLocalization.summary,
+							})
+							.from(unit)
+							.innerJoin(
+								unitLocalization,
+								and(
+									eq(unitLocalization.unitId, unit.id),
+									eq(
+										unitLocalization.language,
+										resolvedUnitLocalizationLanguage(
+											unit.id,
+											localizationLanguages,
+										),
+									),
+								),
+							)
+							.where(
+								and(
+									eq(unit.kind, "tag"),
+									eq(unit.status, "published"),
+									eq(unit.visibility, "public"),
+								),
+							)
+							.orderBy(desc(unit.createdAt))
+							.limit(query.limit ?? 20),
+					};
+				},
 				{
 					query: ListTagsQuery,
 					response: { [StatusCodes.OK]: TagListResponse },

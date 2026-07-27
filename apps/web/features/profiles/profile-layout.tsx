@@ -17,6 +17,8 @@ import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { profileHref, type ProfileSection } from "./profile-route";
 
@@ -38,8 +40,17 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 	const pathname = usePathname();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const profile = useGetApiUsersById({ path: { id: profileId } });
+	const localizationLanguages = useLocalizationLanguages();
+	const profile = useGetApiUsersById({
+		path: { id: profileId },
+		query: { localizationLanguages },
+	});
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
+	useLocalizationFallbackToast({
+		actualLanguage: profile.data?.language ?? null,
+		localizationLanguages,
+		unitId: profileId,
+	});
 	const headerSearch = useMemo(() => {
 		if (!profile.data) return undefined;
 		const name = profile.data.name ?? t.ui.unnamed;

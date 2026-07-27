@@ -27,6 +27,7 @@ import {
 } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { invalidateProgressQueries } from "../data/progress-cache";
@@ -41,7 +42,10 @@ export function ProgressPage() {
 }
 
 function ProgressList() {
-	const query = useGetApiProgress({ query: { limit: 100 } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiProgress({
+		query: { limit: 100, localizationLanguages },
+	});
 	const remove = useDeleteApiProgressByUnitId();
 	const queryClient = useQueryClient();
 	const { t } = useTranslation(["engagement", "ui"]);

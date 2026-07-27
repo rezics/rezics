@@ -11,7 +11,7 @@ import {
 } from "./columns";
 import {
 	type ContentLanguage,
-	DefaultContentLanguage,
+	DefaultPreferredLanguage,
 	DefaultStoredUiLocale,
 	type StoredUiLocale,
 } from "./contract-values";
@@ -27,6 +27,7 @@ export const profilePreference = pgTable(
 		defaultRealmManageMode: boolean().default(false).notNull(),
 		defaultScoreContextUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
 		personalizedFeed: boolean().default(true).notNull(),
+		filterFeedByPreferredLanguages: boolean().default(false).notNull(),
 		collectionConfig: createJsonObjectColumn(),
 		interfaceLocale: text().$type<StoredUiLocale>().default(DefaultStoredUiLocale).notNull(),
 		contentRatings: contentRating()
@@ -36,7 +37,7 @@ export const profilePreference = pgTable(
 		preferredLanguages: text()
 			.$type<ContentLanguage>()
 			.array()
-			.default(sql.raw(`array['${DefaultContentLanguage}']::text[]`))
+			.default(sql.raw(`array['${DefaultPreferredLanguage}']::text[]`))
 			.notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

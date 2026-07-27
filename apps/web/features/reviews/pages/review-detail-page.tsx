@@ -30,6 +30,8 @@ import { PostSubjectHero } from "@/features/posts/components/post-subject-hero";
 import { canOpenPostManagement } from "@/features/posts/model/post-management-section";
 import { RelatedPostRecommendations } from "@/features/posts/post-list";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 
 export function ReviewDetailPage({
@@ -39,9 +41,18 @@ export function ReviewDetailPage({
 	readonly id: string;
 	readonly realmId?: string;
 }) {
+	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiReviewsByReviewId({
 		path: { reviewId: id },
-		query: { ...(realmId ? { realmId } : {}) },
+		query: {
+			localizationLanguages,
+			...(realmId ? { realmId } : {}),
+		},
+	});
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: id,
 	});
 	const remove = useDeleteApiReviewsByReviewId();
 	const queryClient = useQueryClient();

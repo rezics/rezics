@@ -60,7 +60,7 @@ export default new Elysia()
 			async ({ params, query }) =>
 				getTagHierarchy({
 					tagId: params.tagId,
-					language: query.language,
+					localizationLanguages: query.localizationLanguages,
 					childLimit: query.childLimit ?? 30,
 					grandchildLimit: query.grandchildLimit ?? 12,
 				}),
@@ -110,7 +110,7 @@ export default new Elysia()
 					return getTagStructure({
 						structureId: params.structureId,
 						viewerProfileId: identity.profile?.unitId,
-						language: query.language,
+						localizationLanguages: query.localizationLanguages,
 					});
 				},
 				{
@@ -137,7 +137,7 @@ export default new Elysia()
 					return getTagStructure({
 						structureId: params.structureId,
 						viewerProfileId: profile.unitId,
-						language: query.language,
+						localizationLanguages: query.localizationLanguages,
 					});
 				},
 				{
@@ -217,7 +217,7 @@ export default new Elysia()
 					return getUnitTagLandscape({
 						unitId: params.unitId,
 						viewerProfileId: identity.profile?.unitId,
-						language: query.language,
+						localizationLanguages: query.localizationLanguages,
 						globalLimit: query.globalLimit ?? 50,
 						structureLimit: query.structureLimit ?? 20,
 						sourceLimit: query.sourceLimit ?? 10,
@@ -350,7 +350,7 @@ export default new Elysia()
 				async ({ profile, query }) => ({
 					items: await listRealmTagSubscriptions({
 						profileId: profile.unitId,
-						language: query.language,
+						localizationLanguages: query.localizationLanguages,
 					}),
 				}),
 				{
@@ -379,7 +379,7 @@ export default new Elysia()
 						profileId: profile.unitId,
 						realmId: params.realmId,
 						position: body.position,
-						language: query.language,
+						localizationLanguages: query.localizationLanguages,
 					});
 				},
 				{

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const findProfileLimit = vi.hoisted(() => vi.fn());
+const registrationLanguageLimit = vi.hoisted(() => vi.fn());
 const insert = vi.hoisted(() => vi.fn());
 const insertUnit = vi.hoisted(() => vi.fn());
 const onConflictDoNothing = vi.hoisted(() => vi.fn());
@@ -9,17 +10,25 @@ const valuesByTable = vi.hoisted(() => new Map<unknown, unknown>());
 
 vi.mock("../database", () => ({
 	database: {
-		select: vi.fn(() => ({
-			from: vi.fn(() => ({
-				innerJoin: vi.fn(() => ({
-					innerJoin: vi.fn(() => ({
-						leftJoin: vi.fn(() => ({
-							where: vi.fn(() => ({ limit: findProfileLimit })),
+		select: vi.fn((selection: Record<string, unknown>) =>
+			"contentLanguage" in selection
+				? {
+						from: vi.fn(() => ({
+							where: vi.fn(() => ({ limit: registrationLanguageLimit })),
 						})),
-					})),
-				})),
-			})),
-		})),
+					}
+				: {
+						from: vi.fn(() => ({
+							innerJoin: vi.fn(() => ({
+								innerJoin: vi.fn(() => ({
+									leftJoin: vi.fn(() => ({
+										where: vi.fn(() => ({ limit: findProfileLimit })),
+									})),
+								})),
+							})),
+						})),
+					},
+		),
 		transaction: vi.fn(async (operation: (tx: { insert: typeof insert }) => unknown) =>
 			operation({ insert }),
 		),
@@ -41,6 +50,8 @@ describe("Profile registration defaults", () => {
 	beforeEach(() => {
 		findProfileLimit.mockReset();
 		findProfileLimit.mockResolvedValue([]);
+		registrationLanguageLimit.mockReset();
+		registrationLanguageLimit.mockResolvedValue([]);
 		insert.mockReset();
 		valuesByTable.clear();
 		insert.mockImplementation((table) => ({
@@ -115,6 +126,7 @@ describe("Profile registration defaults", () => {
 		expect(valuesByTable.get(profilePreference)).toEqual({
 			profileId: ProfileId,
 			defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+			preferredLanguages: ["en"],
 		});
 		expect(valuesByTable.get(realmMember)).toEqual({
 			realmId: OfficialRealmUnitIds.score,
@@ -122,5 +134,20 @@ describe("Profile registration defaults", () => {
 			role: "member",
 			state: "active",
 		});
+	});
+
+	it("uses the registration language when the frontend supplies one", async () => {
+		registrationLanguageLimit.mockResolvedValue([{ contentLanguage: "zh" }]);
+
+		await ensureProfile({
+			id: "019f82aa-db8f-7962-9924-7369b17f5501",
+			email: "reader@example.com",
+			name: "Reader",
+			image: null,
+		});
+
+		expect(valuesByTable.get(profilePreference)).toEqual(
+			expect.objectContaining({ preferredLanguages: ["zh"] }),
+		);
 	});
 });

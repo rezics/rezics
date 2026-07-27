@@ -1,6 +1,6 @@
 "use client";
 
-import { toContentLanguage } from "@rezics/i18n";
+import type { ContentLanguage } from "@rezics/i18n";
 import {
 	getApiTagStructuresByStructureIdQueryKey,
 	useDeleteApiTagStructuresByStructureIdVote,
@@ -24,6 +24,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -37,13 +38,13 @@ import { TagVoteControls } from "../components/tag-vote-controls";
 function TagStructureAdminEditor({
 	structureId,
 	updatedAt,
-	language,
+	localizationLanguages,
 	initialMembers,
 	onUpdated,
 }: {
 	readonly structureId: string;
 	readonly updatedAt: string;
-	readonly language: ReturnType<typeof toContentLanguage>;
+	readonly localizationLanguages: readonly ContentLanguage[];
 	readonly initialMembers: readonly EditableTagStructureMember[];
 	readonly onUpdated: () => Promise<unknown>;
 }) {
@@ -62,7 +63,7 @@ function TagStructureAdminEditor({
 		if (!hasChanged || members.length < 2 || !normalizedReason) return;
 		update.mutate({
 			path: { structureId },
-			query: { language },
+			query: { localizationLanguages: [...localizationLanguages] },
 			body: {
 				memberTagIds: members.map(({ id }) => id),
 				updatedAt,
@@ -108,11 +109,12 @@ function TagStructureAdminEditor({
 
 export function TagStructureDetailPage({ structureId }: { readonly structureId: string }) {
 	const { data: session } = useHydratedSession();
-	const { locale, t } = useTranslation(["tags", "ui"]);
+	const { t } = useTranslation(["tags", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
 	const queryInput = {
 		path: { structureId },
-		query: { language: toContentLanguage(locale.target) },
+		query: { localizationLanguages },
 	} as const;
 	const query = useGetApiTagStructuresByStructureId(queryInput);
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
@@ -172,7 +174,7 @@ export function TagStructureDetailPage({ structureId }: { readonly structureId: 
 						label: member.title ?? t.tags.structures.memberFallback,
 					}))}
 					key={query.data.updatedAt}
-					language={queryInput.query.language}
+					localizationLanguages={localizationLanguages}
 					onUpdated={invalidate}
 					structureId={structureId}
 					updatedAt={query.data.updatedAt}

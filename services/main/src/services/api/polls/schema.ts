@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 
 import { PollModeValues, PollResultVisibilityValues } from "../../database/schema/contract-values";
-import { ContentLanguage, Uuid } from "../schema";
+import { ContentLanguage, LocalizationLanguageQuery, Uuid } from "../schema";
 
 const PollOptionLabel = t.String({ minLength: 1, maxLength: 500 });
 
@@ -40,6 +40,11 @@ export type CreatePollBody = Static<typeof CreatePollBody>;
 
 export const PollParams = t.Object({ pollId: Uuid });
 export type PollParams = Static<typeof PollParams>;
+
+export const PollDetailQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type PollDetailQuery = Static<typeof PollDetailQuery>;
 
 export const VotePollBody = t.Object({
 	optionIds: t.Array(Uuid, { minItems: 1, maxItems: 50 }),

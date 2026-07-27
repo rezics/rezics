@@ -48,6 +48,8 @@ import {
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 import { useTranslation } from "@/i18n/client";
+import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -184,7 +186,10 @@ function CollectionFields({
 }
 
 export function CollectionsPage() {
-	const query = useGetApiCollections({ query: { limit: 50 } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiCollections({
+		query: { limit: 50, localizationLanguages },
+	});
 	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
@@ -256,10 +261,14 @@ export function CollectionCreate() {
 }
 
 export function CollectionDetail({ id }: { id: string }) {
-	const query = useGetApiCollectionsByCollectionId({ path: { collectionId: id } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiCollectionsByCollectionId({
+		path: { collectionId: id },
+		query: { localizationLanguages },
+	});
 	const { data: session } = useHydratedSession();
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
-	const { locale, t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
+	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	const queryClient = useQueryClient();
 	const addItem = usePutApiCollectionsByCollectionIdItemsByTargetId();
 	const removeItem = useDeleteApiCollectionsByCollectionIdItemsByTargetId();
@@ -267,17 +276,18 @@ export function CollectionDetail({ id }: { id: string }) {
 	const router = useRouter();
 	const [target, setTarget] = useState<{ id: string; label: string }>();
 	const [kind, setKind] = useState("item");
+	useLocalizationFallbackToast({
+		actualLanguage: query.data?.language ?? null,
+		localizationLanguages,
+		unitId: id,
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return null;
 	const collection = query.data;
 	const canManage = me.data?.id === collection.ownerId;
-	const localization = selectLocalization(
-		collection.localizations,
-		toContentLanguage(locale.target),
-		collection.language,
-	);
+	const localization = selectLocalization(collection.localizations, collection.language);
 	async function addSelectedItem() {
 		if (!target) return;
 		try {
@@ -414,7 +424,11 @@ export function CollectionDetail({ id }: { id: string }) {
 }
 
 export function CollectionEdit({ id }: { id: string }) {
-	const query = useGetApiCollectionsByCollectionId({ path: { collectionId: id } });
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiCollectionsByCollectionId({
+		path: { collectionId: id },
+		query: { localizationLanguages },
+	});
 	const { data: session } = useHydratedSession();
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const update = usePatchApiCollectionsByCollectionId();
@@ -506,7 +520,10 @@ export function FavoritesPage() {
 }
 
 function FavoritesList() {
-	const query = useGetApiCollectionsFavorites();
+	const localizationLanguages = useLocalizationLanguages();
+	const query = useGetApiCollectionsFavorites({
+		query: { localizationLanguages },
+	});
 	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
