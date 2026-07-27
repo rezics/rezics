@@ -3,6 +3,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
 	workspace: {
@@ -22,6 +23,10 @@ export default {
 		realm: {
 			label: realmTerms.label,
 			description: `View and create your ${realmTerms.label}.`,
+		},
+		zone: {
+			label: zoneTerms.label,
+			description: `View and create your ${zoneTerms.label}.`,
 		},
 		post: { label: postTerms.label, description: `View and create your ${postTerms.label}.` },
 		collection: { label: "Collections", description: "View and create your collections." },

@@ -1,7 +1,7 @@
 import { hashPassword } from "better-auth/crypto";
 import type { AvatarReference } from "@rezics/avatar";
 import { walkBlockTree } from "@rezics/block";
-import { and, count, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -541,21 +541,6 @@ async function ensureBootstrapProfiles(
 
 async function ensureBootstrapSuperAdminGrants(tx: DatabaseTransaction): Promise<void> {
 	await lockPlatformAccessGrants(tx);
-	const [externalPermanentGrantManager] = await tx
-		.select({ profileId: capabilityGrant.profileId })
-		.from(capabilityGrant)
-		.where(
-			and(
-				eq(capabilityGrant.authority, "platform"),
-				isNull(capabilityGrant.realmId),
-				eq(capabilityGrant.capability, "platform.grants.manage"),
-				ne(capabilityGrant.profileId, BootstrapSuperAdminProfile.profileId),
-				isNull(capabilityGrant.expiresAt),
-				isNull(capabilityGrant.revokedAt),
-			),
-		)
-		.limit(1);
-	if (externalPermanentGrantManager) return;
 	const createdAt = bootstrapEpoch();
 	for (const capability of BootstrapSuperAdminProfile.capabilities) {
 		const [current] = await tx
@@ -563,6 +548,7 @@ async function ensureBootstrapSuperAdminGrants(tx: DatabaseTransaction): Promise
 				grantedByProfileId: capabilityGrant.grantedByProfileId,
 				expiresAt: capabilityGrant.expiresAt,
 				revokedAt: capabilityGrant.revokedAt,
+				revokedByProfileId: capabilityGrant.revokedByProfileId,
 			})
 			.from(capabilityGrant)
 			.where(
@@ -578,7 +564,8 @@ async function ensureBootstrapSuperAdminGrants(tx: DatabaseTransaction): Promise
 			!current ||
 			current.grantedByProfileId !== BootstrapSuperAdminProfile.profileId ||
 			current.expiresAt !== null ||
-			current.revokedAt !== null;
+			current.revokedAt !== null ||
+			current.revokedByProfileId !== null;
 		await tx
 			.insert(capabilityGrant)
 			.values({
@@ -1417,7 +1404,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		accountCount,
 		profileCount,
 		bootstrapProfileOwners,
-		permanentGrantManagers,
+		bootstrapSuperAdminGrants,
 		officialRealms,
 		officialZones,
 		officialZoneSearchFeatures,
@@ -1480,18 +1467,24 @@ async function isBootstrapReady(): Promise<boolean> {
 				),
 			),
 		database
-			.select({ profileId: capabilityGrant.profileId })
+			.select({
+				capability: capabilityGrant.capability,
+				grantedByProfileId: capabilityGrant.grantedByProfileId,
+				expiresAt: capabilityGrant.expiresAt,
+				revokedAt: capabilityGrant.revokedAt,
+				revokedByProfileId: capabilityGrant.revokedByProfileId,
+			})
 			.from(capabilityGrant)
 			.where(
 				and(
 					eq(capabilityGrant.authority, "platform"),
 					isNull(capabilityGrant.realmId),
-					eq(capabilityGrant.capability, "platform.grants.manage"),
-					isNull(capabilityGrant.expiresAt),
-					isNull(capabilityGrant.revokedAt),
+					eq(capabilityGrant.profileId, BootstrapSuperAdminProfile.profileId),
+					inArray(capabilityGrant.capability, [
+						...BootstrapSuperAdminProfile.capabilities,
+					]),
 				),
-			)
-			.groupBy(capabilityGrant.profileId),
+			),
 		database
 			.select({ id: realm.id })
 			.from(realm)
@@ -1678,7 +1671,17 @@ async function isBootstrapReady(): Promise<boolean> {
 				owner.scope.length === 0 &&
 				owner.expiresAt === null,
 		) &&
-		permanentGrantManagers.length > 0 &&
+		bootstrapSuperAdminGrants.length === BootstrapSuperAdminProfile.capabilities.length &&
+		BootstrapSuperAdminProfile.capabilities.every((capability) =>
+			bootstrapSuperAdminGrants.some(
+				(grant) =>
+					grant.capability === capability &&
+					grant.grantedByProfileId === BootstrapSuperAdminProfile.profileId &&
+					grant.expiresAt === null &&
+					grant.revokedAt === null &&
+					grant.revokedByProfileId === null,
+			),
+		) &&
 		officialRealms.length === BootstrapRealmManifest.length &&
 		BootstrapRealmManifest.every((expected) =>
 			officialRealms.some((actual) => actual.id === expected.id),

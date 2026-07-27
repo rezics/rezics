@@ -14,6 +14,7 @@ import {
 	Folder,
 	Landmark,
 	MessageSquareText,
+	PanelsTopLeft,
 	Shapes,
 	Tags,
 	Vote,
@@ -83,6 +84,13 @@ export function StudioWorkspace({ children }: { readonly children: ReactNode }) 
 			label: labels.realm.label,
 			description: labels.realm.description,
 			icon: Landmark,
+		},
+		{
+			id: "zone",
+			href: studioSectionHref("zone"),
+			label: labels.zone.label,
+			description: labels.zone.description,
+			icon: PanelsTopLeft,
 			badge: t.create.developmentBadge,
 		},
 		{

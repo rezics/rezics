@@ -25,6 +25,7 @@ export const StudioSectionValues = [
 	"entity",
 	"tag",
 	"realm",
+	"zone",
 	"post",
 	"collection",
 	"review",

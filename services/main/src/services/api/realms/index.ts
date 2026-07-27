@@ -120,7 +120,6 @@ import {
 import { type CreateModerationActionBody, ModerationActionResponse } from "../governance/schema";
 import {
 	GovernanceReasonCodeValues,
-	RealmPreviewCapability,
 	RealmUnitStatusValues,
 } from "../../database/schema/contract-values";
 import {
@@ -151,7 +150,6 @@ const RealmMutationForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
 	"UnitProtected",
 ]);
-const RealmPreviewRequiredResponse = toApiErrorResponse(["PlatformCapabilityRequired"]);
 
 function presentRealmUnitStatus(value: string | null) {
 	if (value === null) return null;
@@ -328,8 +326,7 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.post(
 		"",
-		async ({ profile, authorization, body }) => {
-			await authorization.platform.ensureCapability(RealmPreviewCapability);
+		async ({ profile, body }) => {
 			const id = await database.transaction(async (tx) => {
 				await ensureImageAssetsAttachable(
 					tx,
@@ -394,7 +391,6 @@ export default new Elysia({ prefix: "/realms" })
 			body: CreateRealmBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.FORBIDDEN]: RealmPreviewRequiredResponse,
 				[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },

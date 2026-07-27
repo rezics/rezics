@@ -7,6 +7,7 @@ export const StudioSectionIds = [
 	"entity",
 	"tag",
 	"realm",
+	"zone",
 	"post",
 	"collection",
 	"review",
@@ -29,6 +30,7 @@ export const StudioSectionCreateHrefs = {
 	entity: "/entities/new",
 	tag: "/tags/new",
 	realm: "/realms/new",
+	zone: "/zones/new",
 	post: "/posts/new",
 	collection: "/collections/new",
 	review: "/reviews/new",
@@ -47,6 +49,8 @@ export function studioContentHref(sectionId: StudioSectionId, unitId: string): s
 			return `/tags/${unitId}`;
 		case "realm":
 			return `/realm/${unitId}`;
+		case "zone":
+			return `/zone/${unitId}`;
 		case "post":
 			return `/posts/${unitId}`;
 		case "collection":

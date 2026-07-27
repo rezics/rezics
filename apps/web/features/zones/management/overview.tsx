@@ -37,21 +37,8 @@ import {
 } from "@/features/media/components/avatar-field";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { toApiDateTime, toLocalDateTime } from "../model/zone-form";
 import { useZoneManagement } from "./workspace";
-
-function toLocalDateTime(value: string | null): string {
-	if (!value) return "";
-	const date = new Date(value);
-	if (Number.isNaN(date.getTime())) return "";
-	const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
-	return local.toISOString().slice(0, 16);
-}
-
-function toApiDateTime(value: string): string | null {
-	if (!value) return null;
-	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? null : date.toISOString();
-}
 
 export function ZoneManagementOverview() {
 	const { t, locale } = useTranslation(["errors", "locale", "media", "ui", "zones"]);

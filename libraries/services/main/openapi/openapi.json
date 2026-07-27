@@ -38593,7 +38593,6 @@
 											"entity.associations.override",
 											"unit.edit",
 											"unit.content_structure.preview",
-											"unit.realm.preview",
 											"unit.zone.preview",
 											"unit.ownership.transfer",
 											"unit.slug.manage",
@@ -48465,7 +48464,6 @@
 															"entity.associations.override",
 															"unit.edit",
 															"unit.content_structure.preview",
-															"unit.realm.preview",
 															"unit.zone.preview",
 															"unit.ownership.transfer",
 															"unit.slug.manage",
@@ -49529,6 +49527,7 @@
 								"entity",
 								"tag",
 								"realm",
+								"zone",
 								"post",
 								"collection",
 								"review",
@@ -49585,6 +49584,7 @@
 															"entity",
 															"tag",
 															"realm",
+															"zone",
 															"post",
 															"collection",
 															"review",
@@ -52111,7 +52111,6 @@
 													"entity.associations.override",
 													"unit.edit",
 													"unit.content_structure.preview",
-													"unit.realm.preview",
 													"unit.zone.preview",
 													"unit.ownership.transfer",
 													"unit.slug.manage",
@@ -52256,7 +52255,6 @@
 																		"entity.associations.override",
 																		"unit.edit",
 																		"unit.content_structure.preview",
-																		"unit.realm.preview",
 																		"unit.zone.preview",
 																		"unit.ownership.transfer",
 																		"unit.slug.manage",
@@ -52407,7 +52405,6 @@
 																		"entity.associations.override",
 																		"unit.edit",
 																		"unit.content_structure.preview",
-																		"unit.realm.preview",
 																		"unit.zone.preview",
 																		"unit.ownership.transfer",
 																		"unit.slug.manage",
@@ -52514,7 +52511,7 @@
 								"required": ["capabilities", "expiresAt"],
 								"properties": {
 									"capabilities": {
-										"maxItems": 20,
+										"maxItems": 19,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -52524,7 +52521,6 @@
 												"entity.associations.override",
 												"unit.edit",
 												"unit.content_structure.preview",
-												"unit.realm.preview",
 												"unit.zone.preview",
 												"unit.ownership.transfer",
 												"unit.slug.manage",
@@ -52595,7 +52591,6 @@
 															"entity.associations.override",
 															"unit.edit",
 															"unit.content_structure.preview",
-															"unit.realm.preview",
 															"unit.zone.preview",
 															"unit.ownership.transfer",
 															"unit.slug.manage",
@@ -107589,33 +107584,6 @@
 						"content": {
 							"application/json": {
 								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
 							}
 						}
 					},

@@ -65,7 +65,6 @@ describe("database bootstrap manifest", () => {
 				"platform.grants.manage",
 				"unit.edit",
 				"unit.content_structure.preview",
-				"unit.realm.preview",
 				"unit.zone.preview",
 			]),
 		);

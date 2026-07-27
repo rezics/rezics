@@ -8,13 +8,14 @@ describe("Studio routes", () => {
 		expect(studioSectionHref("realm")).toBe("/create/realm");
 		expect(parseStudioSection("/create/review")).toBe("review");
 		expect(parseStudioSection("/create/review/")).toBe("review");
-		expect(parseStudioSection("/create/zone")).toBeUndefined();
+		expect(parseStudioSection("/create/zone")).toBe("zone");
 		expect(parseStudioSection("/create")).toBeUndefined();
 	});
 
 	it("links every section to its released detail route", () => {
 		expect(studioContentHref("book", "unit-id")).toBe("/units/book/unit-id");
 		expect(studioContentHref("realm", "unit-id")).toBe("/realm/unit-id");
+		expect(studioContentHref("zone", "unit-id")).toBe("/zone/unit-id");
 		expect(studioContentHref("review", "unit-id")).toBe("/reviews/unit-id");
 	});
 });

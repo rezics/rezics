@@ -3,6 +3,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
 	workspace: {
@@ -20,6 +21,7 @@ export default {
 		entity: { label: "目錄條目", description: "查看及建立您的目錄條目。" },
 		tag: { label: "標籤", description: "查看及建立您的標籤。" },
 		realm: { label: realmTerms.label, description: `查看及建立您的${realmTerms.label}。` },
+		zone: { label: zoneTerms.label, description: `查看及建立您的${zoneTerms.label}。` },
 		post: { label: postTerms.label, description: `查看及建立您的${postTerms.label}。` },
 		collection: { label: "收藏集", description: "查看及建立您的收藏集。" },
 		review: { label: "評論", description: "查看及建立您的評論。" },

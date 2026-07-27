@@ -1663,7 +1663,6 @@ import type {
 	PostApiRealmsOptions,
 	PostApiRealmsStatus200,
 	PostApiRealmsStatus400,
-	PostApiRealmsStatus403,
 	PostApiRealmsStatus404,
 	PostApiRealmsStatus422,
 	PostApiRealmsStatus429,
@@ -27755,7 +27754,6 @@ export function postApiRealmsMutationOptions<TContext = unknown>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
-			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -27782,7 +27780,6 @@ export function usePostApiRealms<TContext>(
 			PostApiRealmsStatus200,
 			ResponseErrorConfig<
 				| PostApiRealmsStatus400
-				| PostApiRealmsStatus403
 				| PostApiRealmsStatus404
 				| PostApiRealmsStatus422
 				| PostApiRealmsStatus429
@@ -27802,7 +27799,6 @@ export function usePostApiRealms<TContext>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
-			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -27816,7 +27812,6 @@ export function usePostApiRealms<TContext>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
-			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429
@@ -27835,7 +27830,6 @@ export function usePostApiRealms<TContext>(
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
 			| PostApiRealmsStatus400
-			| PostApiRealmsStatus403
 			| PostApiRealmsStatus404
 			| PostApiRealmsStatus422
 			| PostApiRealmsStatus429

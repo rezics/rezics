@@ -26561,7 +26561,6 @@ export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.realm.preview": "unit.realm.preview",
 	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
@@ -35470,7 +35469,6 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.realm.preview": "unit.realm.preview",
 	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
@@ -36533,6 +36531,7 @@ export const ListCurrentUserStudioContentSection = {
 	entity: "entity",
 	tag: "tag",
 	realm: "realm",
+	zone: "zone",
 	post: "post",
 	collection: "collection",
 	review: "review",
@@ -36564,6 +36563,7 @@ export const ListCurrentUserStudioContentStatus200ItemsSectionEnum = {
 	entity: "entity",
 	tag: "tag",
 	realm: "realm",
+	zone: "zone",
 	post: "post",
 	collection: "collection",
 	review: "review",
@@ -38997,7 +38997,6 @@ export const GetApiStaffAccessPolicyStatus200CapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.realm.preview": "unit.realm.preview",
 	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
@@ -39109,7 +39108,6 @@ export const GetApiStaffProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.realm.preview": "unit.realm.preview",
 	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
@@ -39247,7 +39245,6 @@ export const GetApiStaffMembersStatus200ItemsGrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.realm.preview": "unit.realm.preview",
 	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
@@ -39388,7 +39385,6 @@ export const PutApiStaffMembersByProfileIdStatus200GrantsCapabilityEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.realm.preview": "unit.realm.preview",
 	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
@@ -39583,7 +39579,6 @@ export const PutApiStaffMembersByProfileIdRequestCapabilitiesEnum = {
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.content_structure.preview": "unit.content_structure.preview",
-	"unit.realm.preview": "unit.realm.preview",
 	"unit.zone.preview": "unit.zone.preview",
 	"unit.ownership.transfer": "unit.ownership.transfer",
 	"unit.slug.manage": "unit.slug.manage",
@@ -79179,34 +79174,6 @@ export type PostApiRealmsStatus400 = MalformedRequestBody;
 /**
  * @type object
  */
-export type PostApiRealmsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type PostApiRealmsStatus404 = {
 	/**
 	 * @type object
@@ -79543,7 +79510,6 @@ export type PostApiRealmsOptions = {
 export type PostApiRealmsResponses = {
 	"200": PostApiRealmsStatus200;
 	"400": PostApiRealmsStatus400;
-	"403": PostApiRealmsStatus403;
 	"404": PostApiRealmsStatus404;
 	"422": PostApiRealmsStatus422;
 	"429": PostApiRealmsStatus429;
@@ -79556,7 +79522,6 @@ export type PostApiRealmsResponses = {
 export type PostApiRealmsResponse =
 	| PostApiRealmsStatus200
 	| PostApiRealmsStatus400
-	| PostApiRealmsStatus403
 	| PostApiRealmsStatus404
 	| PostApiRealmsStatus422
 	| PostApiRealmsStatus429

@@ -79,9 +79,9 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 }
 
 export function StudioSectionPage({ sectionId }: { readonly sectionId: StudioSectionId }) {
-	if (sectionId === "realm")
+	if (sectionId === "zone")
 		return (
-			<PreviewCapabilityBoundary capability="unit.realm.preview">
+			<PreviewCapabilityBoundary capability="unit.zone.preview">
 				<StudioSectionContent sectionId={sectionId} />
 			</PreviewCapabilityBoundary>
 		);

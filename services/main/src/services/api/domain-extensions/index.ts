@@ -32,7 +32,6 @@ import { assertUnitPredicate, FilterSchemaModels } from "@rezics/filter";
 import { ZoneHomePageSlug } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
-import { PlatformCapabilityRequired } from "../../authorization/errors";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
@@ -1583,8 +1582,7 @@ export default new Elysia()
 		app.post(
 			"",
 			async ({ profile, authorization, body }) => {
-				if (!(await authorization.platform.hasCapability(ZonePreviewCapability)))
-					throw new PlatformCapabilityRequired();
+				await authorization.platform.ensureCapability(ZonePreviewCapability);
 				if (body.boundaryDocument.filter)
 					try {
 						assertUnitPredicate(body.boundaryDocument.filter);

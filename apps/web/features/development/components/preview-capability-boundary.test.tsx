@@ -44,24 +44,24 @@ describe("PreviewCapabilityBoundary", () => {
 
 	it("shows the development notice without the required capability", () => {
 		render(
-			<PreviewCapabilityBoundary capability="unit.realm.preview">
-				<div>realm-content</div>
+			<PreviewCapabilityBoundary capability="unit.zone.preview">
+				<div>zone-content</div>
 			</PreviewCapabilityBoundary>,
 		);
 
 		expect(screen.getByText("development-notice")).toBeTruthy();
-		expect(screen.queryByText("realm-content")).toBeNull();
+		expect(screen.queryByText("zone-content")).toBeNull();
 	});
 
 	it("renders protected content when the capability is present", () => {
-		mocks.profile.data.platformCapabilities = ["unit.realm.preview"];
+		mocks.profile.data.platformCapabilities = ["unit.zone.preview"];
 		render(
-			<PreviewCapabilityBoundary capability="unit.realm.preview">
-				<div>realm-content</div>
+			<PreviewCapabilityBoundary capability="unit.zone.preview">
+				<div>zone-content</div>
 			</PreviewCapabilityBoundary>,
 		);
 
-		expect(screen.getByText("realm-content")).toBeTruthy();
+		expect(screen.getByText("zone-content")).toBeTruthy();
 		expect(screen.queryByText("development-notice")).toBeNull();
 	});
 });

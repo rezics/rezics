@@ -1,13 +1,19 @@
 "use client";
 
-import { useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
+import {
+	useGetApiUsersMe,
+	type GetApiUsersMeStatus200PlatformCapabilitiesEnum,
+} from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import type { ReactNode } from "react";
 
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { DevelopmentPage } from "./development-page";
 
-export type PreviewCapability = "unit.realm.preview";
+export type PreviewCapability = Extract<
+	GetApiUsersMeStatus200PlatformCapabilitiesEnum,
+	`unit.${string}.preview`
+>;
 
 export function PreviewCapabilityBoundary({
 	capability,

@@ -18,7 +18,7 @@ import {
 	unitFollow,
 	profilePreference,
 	PlatformCapabilityValues,
-	RealmPreviewCapability,
+	ZonePreviewCapability,
 	post as postTable,
 	unitStatusEvent,
 	unitLocalization,
@@ -91,6 +91,7 @@ function getStudioSectionCondition(section: StudioSection) {
 		case "entity":
 		case "tag":
 		case "realm":
+		case "zone":
 		case "collection":
 		case "poll":
 			return eq(unit.kind, section);
@@ -144,8 +145,8 @@ export default new Elysia({ prefix: "/users" })
 	.get(
 		"/me/studio",
 		async ({ authorization, profile, query }) => {
-			if (query.section === "realm")
-				await authorization.platform.ensureCapability(RealmPreviewCapability);
+			if (query.section === "zone")
+				await authorization.platform.ensureCapability(ZonePreviewCapability);
 			const rows = await database
 				.select({
 					id: unit.id,
