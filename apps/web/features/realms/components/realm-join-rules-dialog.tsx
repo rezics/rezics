@@ -1,16 +1,9 @@
 "use client";
 
+import { Square, SquareCheckBig } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
-import {
-	Button,
-	Checkbox,
-	Dialog,
-	DialogBody,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-} from "@rezics/ui";
+import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { RealmRulesCard, type RealmRulePresentation } from "./realm-rules-card";
 
@@ -47,15 +40,17 @@ export function RealmJoinRulesDialog({
 				/>
 				<DialogBody className="grid gap-5">
 					<RealmRulesCard rules={rules} title={t.realms.rules} />
-					<div className="flex items-start gap-3 text-sm leading-6">
-						<Checkbox
-							aria-label={t.realms.joinRulesAgreement}
-							checked={accepted}
-							disabled={isPending}
-							onCheckedChange={({ checked }) => setAccepted(checked === true)}
-						/>
+					<Button
+						aria-pressed={accepted}
+						className="h-auto w-full justify-start whitespace-normal px-3 py-2 text-start leading-6"
+						disabled={isPending}
+						onClick={() => setAccepted((current) => !current)}
+						type="button"
+						variant="quiet"
+					>
+						{accepted ? <SquareCheckBig aria-hidden /> : <Square aria-hidden />}
 						<span>{t.realms.joinRulesAgreement}</span>
-					</div>
+					</Button>
 					{error}
 				</DialogBody>
 				<DialogFooter>
