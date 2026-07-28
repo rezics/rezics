@@ -582,9 +582,20 @@ export interface CompiledSearchFeature {
 	}[];
 }
 
+/**
+ * Keeps result ordering independent from how a response's work is budgeted
+ * across category cursors.
+ *
+ * @internal
+ */
+export interface SearchExecutionPolicy {
+	readonly sortProfile: SearchFeatureSurface;
+	readonly pageBudget: "per-category" | "shared";
+}
+
 export function compileSearchFeatureInput(
 	inputValue: unknown,
-	surface: SearchFeatureSurface,
+	execution: SearchExecutionPolicy,
 	hasDevelopmentPreviewAccess = true,
 ): CompiledSearchFeature {
 	let input: SearchFeatureInput;
@@ -613,7 +624,7 @@ export function compileSearchFeatureInput(
 		throw new InvalidSearch("This Search document does not accept a query");
 	if (input.document.query.required && !query.trim())
 		throw new InvalidSearch("Search query is required");
-	const sortConfiguration = searchSortConfiguration(input.document, surface);
+	const sortConfiguration = searchSortConfiguration(input.document, execution.sortProfile);
 	const sort = input.state.sort ?? defaultSearchSort(sortConfiguration, query);
 	if (!sortConfiguration.options.includes(sort))
 		throw new InvalidSearch(`Search sort ${sort} is unavailable`);
@@ -622,11 +633,11 @@ export function compileSearchFeatureInput(
 	const requestedPageSize = input.state.pageSize ?? input.document.results.pageSize;
 	if (requestedPageSize > input.document.results.maxPageSize)
 		throw new InvalidSearch("Search page size exceeds the configured maximum");
-	// Search executes one authorized cursor per category. On the Feed surface,
-	// distribute the requested page budget across those cursors so a mixed page
+	// Search executes one authorized cursor per category. Shared presentations
+	// distribute their requested budget across those cursors so a mixed page
 	// does not multiply the configured size by the number of categories.
 	const pageSize =
-		surface === "feed"
+		execution.pageBudget === "shared"
 			? Math.max(1, Math.floor(requestedPageSize / input.document.categories.length))
 			: requestedPageSize;
 
@@ -692,7 +703,9 @@ export function compileSearchFeatureInput(
 			facets: [...new Set(facets.map((facet) => facet.field))],
 		},
 		...(context.enforcedZoneId ? { enforcedZoneId: context.enforcedZoneId } : {}),
-		inputIdentity: `${surface}:${canonicalSearchFeatureInput(withoutCursor(input))}`,
+		inputIdentity: `${execution.sortProfile}:${execution.pageBudget}:${canonicalSearchFeatureInput(
+			withoutCursor(input),
+		)}`,
 		facetBindings: facets,
 	};
 }
@@ -723,11 +736,11 @@ export function mapSearchFeatureFacets(
 
 export async function executeSearchFeatureInput(
 	input: unknown,
-	surface: SearchFeatureSurface,
+	execution: SearchExecutionPolicy,
 	profileId: string | undefined,
 	hasDevelopmentPreviewAccess: boolean,
 ) {
-	const compiled = compileSearchFeatureInput(input, surface, hasDevelopmentPreviewAccess);
+	const compiled = compileSearchFeatureInput(input, execution, hasDevelopmentPreviewAccess);
 	const { executeCompiledSearch } = await import("./execution");
 	const result = await executeCompiledSearch(
 		compiled.request,

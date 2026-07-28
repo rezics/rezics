@@ -160,6 +160,12 @@ function meilisearchSort(sort: SearchSort): string[] {
 	return [`${attribute}:${direction}`, "id:asc"];
 }
 
+function meilisearchMatchingStrategy(sort: SearchSort): "frequency" | "last" {
+	// Search relevance should relax common terms before distinctive title terms.
+	// Feed and field ordering prioritize recall because text only selects candidates.
+	return sort === "relevance" ? "frequency" : "last";
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -222,6 +228,7 @@ async function executeCandidateSearch(
 				q: query.query,
 				filter: filters,
 				sort: meilisearchSort(query.sort),
+				matchingStrategy: meilisearchMatchingStrategy(query.sort),
 				offset: query.offset,
 				limit: query.limit,
 				attributesToRetrieve: ["id", "revision", "category", "unitType"],

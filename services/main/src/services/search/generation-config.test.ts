@@ -27,6 +27,13 @@ describe("current search generation deployment wiring", () => {
 		expect(SearchProjectionSettings.current.rankingRules[0]).toBe("sort");
 	});
 
+	it("treats every localized title as first-class relevance input", () => {
+		expect(SearchProjectionSettings.current.searchableAttributes.slice(0, 2)).toEqual([
+			"search.titles",
+			"search.primaryTitles",
+		]);
+	});
+
 	it("keeps the versioned index, sink, settings, and enrichment configuration aligned", async () => {
 		const [environment, compose, sequin, enrichment, settings, rootTaskfile, appHostTaskfile] =
 			await Promise.all([

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SearchTemplateIdValues, parseSharedSearchQueryDocument } from "@rezics/filter";
 
 import {
-	compileSearchFeatureInput as compileSearchFeatureInputForSurface,
+	compileSearchFeatureInput as compileSearchFeatureInputForPolicy,
 	createDefaultSearchDocument,
 	resolveSearchDocument,
 } from "./templates";
@@ -11,9 +11,15 @@ const TagId = "019b0000-0000-7000-8000-000000000001";
 const RealmId = "019b0000-0000-7000-8000-000000000002";
 const SecondTagId = "019b0000-0000-7000-8000-000000000003";
 const ProfileId = "019b0000-0000-7000-8000-000000000004";
+const GroupedSearchPolicy = {
+	sortProfile: "search",
+	pageBudget: "per-category",
+} as const;
+const SharedSearchPolicy = { sortProfile: "search", pageBudget: "shared" } as const;
+const SharedFeedPolicy = { sortProfile: "feed", pageBudget: "shared" } as const;
 
 function compileSearchFeatureInput(input: unknown) {
-	return compileSearchFeatureInputForSurface(input, "search");
+	return compileSearchFeatureInputForPolicy(input, GroupedSearchPolicy);
 }
 
 describe("Search Feature v1", () => {
@@ -40,9 +46,9 @@ describe("Search Feature v1", () => {
 
 	it("removes the Tag-path category before compiling an ordinary user's request", () => {
 		const document = createDefaultSearchDocument("global");
-		const compiled = compileSearchFeatureInputForSurface(
+		const compiled = compileSearchFeatureInputForPolicy(
 			{ document, contexts: [], injections: [], state: { pageSize: 19 } },
-			"feed",
+			SharedFeedPolicy,
 			false,
 		);
 
@@ -61,9 +67,9 @@ describe("Search Feature v1", () => {
 		} as const;
 
 		expect(() =>
-			compileSearchFeatureInputForSurface(
+			compileSearchFeatureInputForPolicy(
 				{ document, contexts: [], injections: [], state: {} },
-				"search",
+				GroupedSearchPolicy,
 				false,
 			),
 		).toThrow("no available categories");
@@ -136,26 +142,30 @@ describe("Search Feature v1", () => {
 			options: ["best", "createdAt:asc", "createdAt:desc", "updatedAt:asc", "updatedAt:desc"],
 		});
 		expect(
-			compileSearchFeatureInputForSurface({ ...input, state: emptyState }, "search").request
-				.sort,
+			compileSearchFeatureInputForPolicy({ ...input, state: emptyState }, GroupedSearchPolicy)
+				.request.sort,
 		).toBe("best");
 		expect(
-			compileSearchFeatureInputForSurface({ ...input, state: textState }, "search").request
-				.sort,
+			compileSearchFeatureInputForPolicy({ ...input, state: textState }, GroupedSearchPolicy)
+				.request.sort,
 		).toBe("relevance");
 		expect(
-			compileSearchFeatureInputForSurface({ ...input, state: textState }, "feed").request
-				.sort,
+			compileSearchFeatureInputForPolicy({ ...input, state: textState }, SharedSearchPolicy)
+				.request.sort,
+		).toBe("relevance");
+		expect(
+			compileSearchFeatureInputForPolicy({ ...input, state: textState }, SharedFeedPolicy)
+				.request.sort,
 		).toBe("best");
 		expect(() =>
-			compileSearchFeatureInputForSurface(
+			compileSearchFeatureInputForPolicy(
 				{ ...input, state: { ...textState, sort: "relevance" } },
-				"feed",
+				SharedFeedPolicy,
 			),
 		).toThrow("Search sort relevance is unavailable");
 	});
 
-	it("distributes the Feed page budget across configured categories", () => {
+	it("distributes a shared page budget independently from the sort profile", () => {
 		const globalDocument = createDefaultSearchDocument("global");
 		const globalInput = {
 			document: globalDocument,
@@ -164,26 +174,30 @@ describe("Search Feature v1", () => {
 			state: {},
 		};
 
-		expect(compileSearchFeatureInputForSurface(globalInput, "search").request.pageSize).toBe(
-			globalDocument.results.pageSize,
+		const grouped = compileSearchFeatureInputForPolicy(globalInput, GroupedSearchPolicy);
+		const sharedSearch = compileSearchFeatureInputForPolicy(globalInput, SharedSearchPolicy);
+		const sharedFeed = compileSearchFeatureInputForPolicy(globalInput, SharedFeedPolicy);
+		const expectedSharedPageSize = Math.max(
+			1,
+			Math.floor(globalDocument.results.pageSize / globalDocument.categories.length),
 		);
-		expect(compileSearchFeatureInputForSurface(globalInput, "feed").request.pageSize).toBe(
-			Math.max(
-				1,
-				Math.floor(globalDocument.results.pageSize / globalDocument.categories.length),
-			),
-		);
+
+		expect(grouped.request.pageSize).toBe(globalDocument.results.pageSize);
+		expect(sharedSearch.request.pageSize).toBe(expectedSharedPageSize);
+		expect(sharedFeed.request.pageSize).toBe(expectedSharedPageSize);
+		expect(sharedSearch.inputIdentity).not.toBe(grouped.inputIdentity);
+		expect(sharedSearch.inputIdentity).not.toBe(sharedFeed.inputIdentity);
 
 		const realmDocument = createDefaultSearchDocument("realm");
 		expect(
-			compileSearchFeatureInputForSurface(
+			compileSearchFeatureInputForPolicy(
 				{
 					document: realmDocument,
 					contexts: [],
 					injections: [],
 					state: {},
 				},
-				"feed",
+				SharedSearchPolicy,
 			).request.pageSize,
 		).toBe(realmDocument.results.pageSize);
 	});

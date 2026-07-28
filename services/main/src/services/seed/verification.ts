@@ -246,7 +246,7 @@ export async function verifySeedSearch(): Promise<void> {
 					pageSize: 5,
 				},
 			},
-			"search",
+			{ sortProfile: "search", pageBudget: "per-category" },
 			undefined,
 			true,
 		);

@@ -32,7 +32,7 @@ function validateDocument(value: unknown): SharedSearchQueryDocument {
 			injections: [],
 			state: document.state,
 		},
-		"search",
+		{ sortProfile: "search", pageBudget: "per-category" },
 	);
 	return document;
 }

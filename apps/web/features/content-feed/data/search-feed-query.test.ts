@@ -32,6 +32,7 @@ describe("Search Feed page requests", () => {
 			request,
 			signal,
 			source: { kind: "template", template: "global" },
+			surface: "search",
 		});
 
 		expect(api.postApiSearchFeaturesByTemplateFeed).toHaveBeenCalledWith({
@@ -39,6 +40,7 @@ describe("Search Feed page requests", () => {
 			body: {
 				...request,
 				state: { sort: "best", cursor: "s2_cursor" },
+				surface: "search",
 			},
 			signal,
 		});
@@ -55,6 +57,7 @@ describe("Search Feed page requests", () => {
 			request,
 			signal,
 			source: { kind: "zone", zoneId: "00000000-0000-7000-8000-000000000002" },
+			surface: "feed",
 		});
 
 		expect(api.postApiSearchZonesByZoneIdFeatureFeed).toHaveBeenCalledWith({
@@ -62,6 +65,7 @@ describe("Search Feed page requests", () => {
 			body: {
 				injections: request.injections,
 				state: request.state,
+				surface: "feed",
 			},
 			signal,
 		});

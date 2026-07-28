@@ -83,8 +83,8 @@ export default {
 	scope: "검색 범위",
 	sort: "정렬",
 	sortOptions: {
-		best: "최고",
-		relevance: "관련성",
+		best: "추천",
+		relevance: "관련성 높은 순",
 		"createdAt:asc": "가장 오래된 생성",
 		"createdAt:desc": "최신 생성",
 		"updatedAt:asc": "가장 최근에 업데이트되지 않음",

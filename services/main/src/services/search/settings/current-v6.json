@@ -1,7 +1,7 @@
 {
 	"searchableAttributes": [
-		"search.primaryTitles",
 		"search.titles",
+		"search.primaryTitles",
 		"search.aliases",
 		"search.summaries",
 		"search.descriptions",

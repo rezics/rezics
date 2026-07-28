@@ -83,8 +83,8 @@ export default {
 	scope: "検索範囲",
 	sort: "並べ替え",
 	sortOptions: {
-		best: "ベスト",
-		relevance: "関連性",
+		best: "おすすめ",
+		relevance: "関連度順",
 		"createdAt:asc": "作成日が古い順",
 		"createdAt:desc": "最新作成",
 		"updatedAt:asc": "最終更新が古い",

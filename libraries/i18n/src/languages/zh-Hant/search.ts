@@ -83,8 +83,8 @@ export default {
 	scope: "搜尋範圍",
 	sort: "排序",
 	sortOptions: {
-		best: "最佳",
-		relevance: "相關性",
+		best: "推薦",
+		relevance: "最相關",
 		"createdAt:asc": "建立時間最早",
 		"createdAt:desc": "建立時間最新",
 		"updatedAt:asc": "最久未更新",

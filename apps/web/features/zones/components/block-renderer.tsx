@@ -13,6 +13,7 @@ import {
 	mergeUnitFilter,
 	parseSearchFeatureDefinition,
 	type SearchControlValue,
+	type SearchFeatureSurface,
 	type SearchTemplateId,
 	type SimpleFeedContentKind,
 } from "@rezics/filter";
@@ -535,6 +536,7 @@ function ZoneSearchFeature({
 	unitListLayout,
 	initialPageSize,
 	appearance = "page",
+	surface,
 	initialValues = [],
 	renderToolbarFilters,
 }: {
@@ -551,6 +553,7 @@ function ZoneSearchFeature({
 	unitListLayout?: UnitListLayout;
 	initialPageSize?: number;
 	appearance?: "feed" | "page";
+	surface: SearchFeatureSurface;
 	initialValues?: readonly SearchControlValue[];
 	renderToolbarFilters?: (template: SearchTemplateId) => ReactNode;
 }) {
@@ -608,6 +611,7 @@ function ZoneSearchFeature({
 					? (context.units.get(value)?.title ?? undefined)
 					: undefined
 			}
+			surface={surface}
 			toolbarFilters={renderToolbarFilters?.(definition.document.template.id)}
 		>
 			{results ? (
@@ -786,6 +790,7 @@ function ZoneFeedBlock({
 				onExecute={(nextRequest) => run(nextRequest, contentKinds, false)}
 				pending={pending}
 				presentation={{ results: "list", showResultCount: presentation.showResultCount }}
+				surface="feed"
 				total={page?.total}
 				renderToolbarFilters={(template) => {
 					const options = catalogZoneFeedContentKinds(template);
@@ -985,6 +990,7 @@ function ZoneSearchUnitListBlock({
 			pending={pending}
 			presentation={presentation}
 			results={page?.results.slice(0, limit)}
+			surface="search"
 			total={page?.total}
 			unitListLayout={layout}
 		/>

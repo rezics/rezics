@@ -128126,7 +128126,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["contexts", "injections", "state"],
+								"required": ["contexts", "injections", "state", "surface"],
 								"properties": {
 									"contexts": {
 										"maxItems": 4,
@@ -130902,7 +130902,8 @@
 												]
 											}
 										}
-									}
+									},
+									"surface": { "type": "string", "enum": ["search", "feed"] }
 								}
 							}
 						}
@@ -138849,7 +138850,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state"],
+								"required": ["injections", "state", "surface"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -141548,7 +141549,8 @@
 												]
 											}
 										}
-									}
+									},
+									"surface": { "type": "string", "enum": ["search", "feed"] }
 								}
 							}
 						}

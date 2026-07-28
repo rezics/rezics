@@ -95996,6 +95996,14 @@ export const PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum = {
 export type PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedRequestStateSortEnum];
 
+export const PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum = {
+	search: "search",
+	feed: "feed",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum];
+
 /**
  * @type object
  */
@@ -96841,6 +96849,10 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 					clause: unknown;
 			  };
 	};
+	/**
+	 * @type string
+	 */
+	surface: PostApiSearchFeaturesByTemplateFeedRequestSurfaceEnum;
 };
 
 /**
@@ -100784,6 +100796,14 @@ export const PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum = {
 export type PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestStateSortEnum];
 
+export const PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum = {
+	search: "search",
+	feed: "feed",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum];
+
 /**
  * @type object
  */
@@ -101575,6 +101595,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 					clause: unknown;
 			  };
 	};
+	/**
+	 * @type string
+	 */
+	surface: PostApiSearchZonesByZoneIdFeatureFeedRequestSurfaceEnum;
 };
 
 /**

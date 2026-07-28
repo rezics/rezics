@@ -1,4 +1,4 @@
-import type { SearchTemplateId } from "@rezics/filter";
+import type { SearchFeatureSurface, SearchTemplateId } from "@rezics/filter";
 import {
 	postApiSearchFeaturesByTemplateFeed,
 	postApiSearchZonesByZoneIdFeatureFeed,
@@ -19,11 +19,13 @@ export async function fetchSearchFeedPage({
 	request,
 	signal,
 	source,
+	surface,
 }: {
 	readonly cursor?: string;
 	readonly request: SearchFeedRequest;
 	readonly signal?: AbortSignal;
 	readonly source: SearchFeedSource;
+	readonly surface: SearchFeatureSurface;
 }) {
 	const state = {
 		...request.state,
@@ -32,7 +34,7 @@ export async function fetchSearchFeedPage({
 	if (source.kind === "template") {
 		const { data } = await postApiSearchFeaturesByTemplateFeed({
 			path: { template: source.template },
-			body: { ...request, state },
+			body: { ...request, state, surface },
 			signal,
 		});
 		return data;
@@ -42,6 +44,7 @@ export async function fetchSearchFeedPage({
 		body: {
 			injections: request.injections,
 			state,
+			surface,
 		},
 		signal,
 	});

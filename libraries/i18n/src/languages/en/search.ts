@@ -83,8 +83,8 @@ export default {
 	scope: "Search scope",
 	sort: "Sort",
 	sortOptions: {
-		best: "Best",
-		relevance: "Relevance",
+		best: "Recommended",
+		relevance: "Most relevant",
 		"createdAt:asc": "Oldest created",
 		"createdAt:desc": "Newest created",
 		"updatedAt:asc": "Least recently updated",

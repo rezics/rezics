@@ -84,8 +84,8 @@ export default {
 	scope: "Alcance de la búsqueda",
 	sort: "Orden",
 	sortOptions: {
-		best: "Mejor",
-		relevance: "Relevancia",
+		best: "Recomendado",
+		relevance: "Más relevante",
 		"createdAt:asc": "Creado primero",
 		"createdAt:desc": "Creado más recientemente",
 		"updatedAt:asc": "Actualizado hace más tiempo",

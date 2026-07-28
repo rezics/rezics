@@ -126,7 +126,44 @@ describe("Meilisearch expression compiler", () => {
 			queries: [
 				{
 					q: "book",
+					matchingStrategy: "last",
 					sort: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"],
+				},
+			],
+		});
+	});
+
+	it("keeps relevance free of business sorting and relaxes common terms first", async () => {
+		const fetchMock = vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					results: [{ hits: [], estimatedTotalHits: 0, processingTimeMs: 1 }],
+				}),
+				{ status: 200, headers: { "Content-Type": "application/json" } },
+			),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		await searchCandidates([
+			{
+				indexUid: "rezics_units_v6_20260725",
+				category: "units",
+				query: "the complete title",
+				offset: 0,
+				limit: 20,
+				sort: "relevance",
+			},
+		]);
+
+		const request = fetchMock.mock.calls[0]?.[1];
+		if (!request || typeof request.body !== "string")
+			throw new TypeError("Expected a JSON multi-search request body");
+		expect(JSON.parse(request.body)).toMatchObject({
+			queries: [
+				{
+					q: "the complete title",
+					matchingStrategy: "frequency",
+					sort: [],
 				},
 			],
 		});

@@ -10,6 +10,7 @@ import {
 	type SearchControlExpression,
 	type SearchControlValue,
 	type SearchFeatureDefinition,
+	type SearchFeatureSurface,
 	type SearchFeatureState,
 	type SearchField,
 	type SearchInjection,
@@ -261,6 +262,7 @@ export function SearchFeature({
 	resolveLabel,
 	resolveOptionLabel,
 	appearance = "page",
+	surface,
 	toolbarFilters,
 }: {
 	readonly id: string;
@@ -282,6 +284,7 @@ export function SearchFeature({
 		value: SearchScalar,
 	) => string | undefined;
 	readonly appearance?: "feed" | "page";
+	readonly surface: SearchFeatureSurface;
 	readonly toolbarFilters?: ReactNode;
 }) {
 	const { t } = useTranslation("search");
@@ -365,10 +368,7 @@ export function SearchFeature({
 	const [filterOpen, setFilterOpen] = useState(false);
 	const [sortOverride, setSortOverride] = useState<SearchSort | undefined>(initialState?.sort);
 	const [shareState, setShareState] = useState<"idle" | "copied" | "failed">("idle");
-	const sortConfiguration = searchSortConfiguration(
-		document,
-		appearance === "feed" ? "feed" : "search",
-	);
+	const sortConfiguration = searchSortConfiguration(document, surface);
 	const availableSorts = sortConfiguration.options.filter((value) =>
 		isSearchSortAvailable(value, query),
 	);

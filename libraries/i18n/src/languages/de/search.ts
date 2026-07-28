@@ -84,8 +84,8 @@ export default {
 	scope: "Suchbereich",
 	sort: "Sortierung",
 	sortOptions: {
-		best: "Beste",
-		relevance: "Relevanz",
+		best: "Empfohlen",
+		relevance: "Höchste Relevanz",
 		"createdAt:asc": "Zuerst erstellt",
 		"createdAt:desc": "Zuletzt erstellt",
 		"updatedAt:asc": "Am längsten nicht aktualisiert",

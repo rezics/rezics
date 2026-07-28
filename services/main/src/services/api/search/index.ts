@@ -12,9 +12,9 @@ import {
 	SearchFeatureDefinition,
 	SearchFeatureInput,
 	SearchDocument,
+	SearchFeatureSurface,
 	SharedSearchQueryDocument,
 	SearchTemplateId,
-	type SearchFeatureSurface,
 } from "@rezics/filter";
 import { FilterSchemaModels } from "@rezics/filter";
 import { getActiveObservability } from "@rezics/observability";
@@ -37,6 +37,7 @@ import {
 	createDefaultSearchDocument,
 	executeSearchFeatureInput,
 	resolveSearchDocument,
+	type SearchExecutionPolicy,
 } from "../../search/templates";
 import {
 	createSharedSearchQuery,
@@ -98,8 +99,22 @@ const SharedSearchQueryResponse = t.Object({
 	createdAt: DateTime,
 });
 const SearchFeatureExecutionBody = t.Omit(SearchFeatureInput, ["document"]);
+const SearchFeatureFeedPresentationBody = t.Object(
+	{
+		...SearchFeatureExecutionBody.properties,
+		surface: SearchFeatureSurface,
+	},
+	{ additionalProperties: false },
+);
 const ZoneSearchFeatureParams = t.Object({ zoneId: Uuid });
 const ZoneSearchFeatureExecutionBody = t.Pick(SearchFeatureInput, ["injections", "state"]);
+const ZoneSearchFeatureFeedPresentationBody = t.Object(
+	{
+		...ZoneSearchFeatureExecutionBody.properties,
+		surface: SearchFeatureSurface,
+	},
+	{ additionalProperties: false },
+);
 const ZoneFeedBlockExecutionBody = t.Object(
 	{
 		...ZoneSearchFeatureExecutionBody.properties,
@@ -201,7 +216,7 @@ async function executeZoneBlock(input: {
 	blockKey: string;
 	document: { readonly blocks: readonly Block[] };
 	body: unknown;
-	surface: SearchFeatureSurface;
+	execution: SearchExecutionPolicy;
 	profileId?: string;
 	hasDevelopmentPreviewAccess: boolean;
 	source?: SearchFeatureSource;
@@ -223,7 +238,7 @@ async function executeZoneBlock(input: {
 			injections: request.injections,
 			state: request.state,
 		},
-		input.surface,
+		input.execution,
 		input.profileId,
 		input.hasDevelopmentPreviewAccess,
 	);
@@ -241,7 +256,7 @@ async function executeZoneFeedBlock(input: {
 	const result = await executeZoneBlock({
 		...input,
 		source: block.feature,
-		surface: "feed",
+		execution: { sortProfile: "feed", pageBudget: "shared" },
 	});
 	return presentSearchResultAsFeed(result, input.profileId);
 }
@@ -308,7 +323,7 @@ export default new Elysia({ prefix: "/search" })
 						document: createDefaultSearchDocument(params.template),
 						...body,
 					},
-					"search",
+					{ sortProfile: "search", pageBudget: "per-category" },
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
@@ -342,9 +357,11 @@ export default new Elysia({ prefix: "/search" })
 				const result = await executeSearchFeatureInput(
 					{
 						document: createDefaultSearchDocument(params.template),
-						...body,
+						contexts: body.contexts,
+						injections: body.injections,
+						state: body.state,
 					},
-					"feed",
+					{ sortProfile: body.surface, pageBudget: "shared" },
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
@@ -362,7 +379,7 @@ export default new Elysia({ prefix: "/search" })
 		},
 		{
 			params: SearchFeatureTemplateParams,
-			body: SearchFeatureExecutionBody,
+			body: SearchFeatureFeedPresentationBody,
 			response: {
 				[StatusCodes.OK]: SearchFeedResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
@@ -458,7 +475,7 @@ export default new Elysia({ prefix: "/search" })
 					injections: body.injections,
 					state: body.state,
 				},
-				"search",
+				{ sortProfile: "search", pageBudget: "per-category" },
 				identity.authorization.profileId,
 				hasDevelopmentPreviewAccess,
 			);
@@ -502,7 +519,7 @@ export default new Elysia({ prefix: "/search" })
 						injections: body.injections,
 						state: body.state,
 					},
-					"feed",
+					{ sortProfile: body.surface, pageBudget: "shared" },
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
@@ -525,7 +542,7 @@ export default new Elysia({ prefix: "/search" })
 		},
 		{
 			params: ZoneSearchFeatureParams,
-			body: ZoneSearchFeatureExecutionBody,
+			body: ZoneSearchFeatureFeedPresentationBody,
 			response: {
 				[StatusCodes.OK]: SearchFeedResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -634,7 +651,7 @@ export default new Elysia({ prefix: "/search" })
 					...params,
 					document: parseDocument(DockDocument, record.document),
 					body,
-					surface: "search",
+					execution: { sortProfile: "search", pageBudget: "per-category" },
 					profileId: identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				});
@@ -692,7 +709,7 @@ export default new Elysia({ prefix: "/search" })
 					...params,
 					document: record.document,
 					body,
-					surface: "search",
+					execution: { sortProfile: "search", pageBudget: "per-category" },
 					profileId: identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				});

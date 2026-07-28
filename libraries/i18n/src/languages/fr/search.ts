@@ -83,8 +83,8 @@ export default {
 	scope: "Étendue de la recherche",
 	sort: "Tri",
 	sortOptions: {
-		best: "Meilleur",
-		relevance: "Pertinence",
+		best: "Recommandé",
+		relevance: "Plus pertinent",
 		"createdAt:asc": "Créé en premier",
 		"createdAt:desc": "Créé en dernier",
 		"updatedAt:asc": "Mis à jour le moins récemment",

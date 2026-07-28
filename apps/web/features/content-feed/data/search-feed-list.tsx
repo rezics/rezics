@@ -3,7 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
-import type { SearchTemplateId } from "@rezics/filter";
+import type { SearchFeatureSurface, SearchTemplateId } from "@rezics/filter";
 import { Alert, AlertAction, AlertDescription, Button } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -22,20 +22,23 @@ export function useSearchFeedQuery({
 	enabled = true,
 	request,
 	source,
+	surface,
 }: {
 	readonly enabled?: boolean;
 	readonly request: SearchFeedRequest;
 	readonly source: SearchFeedSource;
+	readonly surface: SearchFeatureSurface;
 }) {
 	return useInfiniteQuery({
 		enabled,
-		queryKey: ["search-feature-feed", source, request],
+		queryKey: ["search-feature-feed", surface, source, request],
 		queryFn: ({ pageParam, signal }) =>
 			fetchSearchFeedPage({
 				...(pageParam ? { cursor: pageParam } : {}),
 				request,
 				signal,
 				source,
+				surface,
 			}),
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
@@ -193,6 +196,7 @@ export function SearchFeedList({
 	const query = useSearchFeedQuery({
 		request,
 		source: resolvedSource,
+		surface: "feed",
 	});
 	return (
 		<SearchFeedResults

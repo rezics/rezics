@@ -51,6 +51,20 @@ recommendation order; `relevance` is text-query ranking and is invalid without
 a non-empty query. A document may select strategies but cannot define raw
 index fields or engine ranking expressions.
 
+The current Search projection implements `best` as descending global
+`recommendationBest`, then descending update time, then ascending Unit ID for
+a stable tie-break. `recommendationBest` is the active recommendation
+snapshot's positive weighted engagement accumulated over the previous 24
+hours, with a missing score represented as zero. This order is not
+viewer-personalized.
+
+Execution surface and result presentation are independent contracts. A Search
+surface may hydrate its mixed results into canonical Feed items without
+acquiring Feed sorting semantics, while a Feed surface may reuse the same
+filter editor without acquiring Search relevance. Every shared presentation
+adapter must receive the execution surface explicitly; visual appearance must
+never select a sort profile.
+
 Full-text query text remains request state inside the Filter. It is never
 stored as initial text in a SearchDocument, because stored query copy would
 bypass the localization ownership model. Search-index expressions, cursor
@@ -113,6 +127,15 @@ therefore emits no explicit sort, while `best` and field orders emit a sort
 whose ranking rule precedes text-ranking rules. Text may still select the
 candidate set for a Feed, but it cannot silently turn that Feed into a
 relevance-ranked Search result.
+
+For `relevance`, matching relaxes frequent query words before distinctive
+words. The remaining candidates follow the engine's words, typo, proximity,
+searchable-attribute, and exactness rules. Every localized title occupies the
+highest searchable-attribute tier; the Unit's display fallback order does not
+make one language more relevant than another. Composed fallback-path titles,
+aliases, summaries, descriptions, and published content follow in that order.
+Recommendation score, recent update time, and Unit ID act only as deterministic
+tie-breaks after text relevance.
 
 ## Rationale
 

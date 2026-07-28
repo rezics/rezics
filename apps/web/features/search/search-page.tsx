@@ -96,6 +96,7 @@ export function SearchSurface({
 		enabled: Boolean(lastRequest),
 		request: feedRequest,
 		source,
+		surface: "search",
 	});
 	const rawDefinition =
 		source.kind === "template" ? templateDefinition.data : zoneDefinition.data?.definition;
@@ -171,6 +172,7 @@ export function SearchSurface({
 			onShare={source.kind === "template" ? share : undefined}
 			pending={executionPending}
 			resolveOptionLabel={resolveOptionLabel}
+			surface="search"
 		>
 			{lastRequest ? (
 				<section className="grid gap-4">

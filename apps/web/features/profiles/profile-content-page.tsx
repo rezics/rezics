@@ -32,6 +32,7 @@ export function ProfileContentPage() {
 			profileId: profile.id,
 		}),
 		source: ProfileContentFeedSource,
+		surface: "feed",
 	});
 
 	return (
