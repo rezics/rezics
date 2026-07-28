@@ -1,82 +1,57 @@
-import { MDXProvider } from "@mdx-js/react";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Head } from "vike-react/Head";
 import { useConfig } from "vike-react/useConfig";
 import { useData } from "vike-react/useData";
+
 import { GlobalFooter } from "../src/components/products/GlobalFooter";
 import { GlobalHeader } from "../src/components/products/GlobalHeader";
 import { getLocaleContent } from "../src/content/locales";
-import { getProductById } from "../src/content/productRegistry";
 import { ABOUT_LOCALE_META, ABOUT_SITE_ORIGIN, DEFAULT_LOCALE } from "../src/i18n/locales";
-import { mdxComponents } from "../src/mdxComponents";
 import type { AboutPageData } from "../src/pageData";
-import { useReveal } from "../src/hooks/useReveal";
+
+import "@rezics/ui/styles.css";
 import "../src/styles/site.css";
-import "../src/styles/products.css";
 
-const themeScript =
-	"(function(){try{var t=localStorage.getItem('rezics-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}})()";
+const initialThemeScript = `(function(){try{var saved=localStorage.getItem("rezics-theme");var dark=saved==="dark"||(saved!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",dark);}catch{}})();`;
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: { readonly children: ReactNode }) {
 	const data = useData<AboutPageData>();
 	const setConfig = useConfig();
 	const locale = data.kind === "root" ? DEFAULT_LOCALE : data.locale;
 	const meta = data.metadata;
+	const copy = getLocaleContent(locale).common;
+	const canonical = new URL(meta.canonicalPath, ABOUT_SITE_ORIGIN).toString();
+
 	setConfig({
 		title: meta.title,
 		description: meta.description,
 		lang: ABOUT_LOCALE_META[locale].htmlLang,
 	});
-	useReveal(meta.canonicalPath);
-	useEffect(() => {
-		document.documentElement.lang = ABOUT_LOCALE_META[locale].htmlLang;
-	}, [locale]);
-
-	const canonical = new URL(meta.canonicalPath, ABOUT_SITE_ORIGIN).toString();
-	const product = data.kind === "product" ? getProductById(data.productId) : undefined;
-	const active =
-		data.kind === "product" && data.productId === "history"
-			? "history"
-			: data.kind === "product"
-				? product?.navGroup === "platform"
-					? "platform"
-					: "products"
-				: data.kind === "products"
-					? "products"
-					: "home";
-	const copy = getLocaleContent(locale).common;
 
 	return (
-		<MDXProvider components={mdxComponents}>
+		<>
 			<Head>
-				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
+				<meta name="color-scheme" content="light dark" />
+				<script dangerouslySetInnerHTML={{ __html: initialThemeScript }} />
 				<link rel="canonical" href={canonical} />
-				{Object.entries(meta.alternates).map(([alternateLocale, path]) => (
-					<link
-						key={alternateLocale}
-						rel="alternate"
-						hrefLang={alternateLocale}
-						href={new URL(path, ABOUT_SITE_ORIGIN).toString()}
-					/>
-				))}
 				<link
 					rel="alternate"
-					hrefLang="x-default"
-					href={new URL(meta.alternates[DEFAULT_LOCALE], ABOUT_SITE_ORIGIN).toString()}
+					hrefLang={ABOUT_LOCALE_META[locale].htmlLang}
+					href={canonical}
 				/>
-				<meta
-					property="og:type"
-					content={data.kind === "product" ? "product" : "website"}
-				/>
+				<link rel="alternate" hrefLang="x-default" href={canonical} />
+				<meta property="og:type" content="website" />
 				<meta property="og:url" content={canonical} />
 				<meta property="og:site_name" content={copy.siteName} />
+				<meta property="og:title" content={meta.title} />
+				<meta property="og:description" content={meta.description} />
 				<meta name="twitter:card" content="summary" />
-				{meta.jsonLd && (
+				{meta.jsonLd ? (
 					<script
 						type="application/ld+json"
 						dangerouslySetInnerHTML={{ __html: JSON.stringify(meta.jsonLd) }}
 					/>
-				)}
+				) : null}
 			</Head>
 			{data.kind === "root" ? (
 				children
@@ -85,13 +60,19 @@ export default function Layout({ children }: { children: ReactNode }) {
 					<GlobalHeader
 						locale={locale}
 						copy={copy}
-						active={active}
+						active={
+							data.kind === "home"
+								? "home"
+								: data.kind === "products" || data.kind === "product"
+									? "products"
+									: undefined
+						}
 						alternatePathByLocale={meta.alternates}
 					/>
 					<main id="main-content">{children}</main>
 					<GlobalFooter locale={locale} />
 				</>
 			)}
-		</MDXProvider>
+		</>
 	);
 }

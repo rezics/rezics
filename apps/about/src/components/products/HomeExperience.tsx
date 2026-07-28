@@ -1,234 +1,125 @@
 import { ArrowRight, ExternalLink } from "lucide-react";
-import { PRODUCT_DEFINITIONS, type ProductId } from "../../content/productRegistry";
-import { getLocaleContent } from "../../content/locales";
-import type { AboutLocale } from "../../i18n/locales";
-import { getProductPath, getProductsPath } from "../../i18n/productPaths";
-import { HomeProductStage } from "./HomeProductStage";
-import { InteractiveProductDirectory } from "./InteractiveProductDirectory";
-import { ProductDemo } from "./ProductDemo";
 
-export function HomeExperience({ locale }: { locale: AboutLocale }) {
-	const { common, components, home, products: productContent } = getLocaleContent(locale);
-	const { Hero, Stage, Products, Platform, Composition, History, OpenSource } = home.sections;
-	const { book: HistoryBook, post: HistoryPost, zone: HistoryZone } = home.historyConsumers;
-	const { outline: OpenOutline, api: OpenApi, github: OpenGithub } = home.openDescriptions;
-	const select = (ids: readonly ProductId[]) =>
-		ids.map((id) => {
-			const product = PRODUCT_DEFINITIONS.find((entry) => entry.id === id);
-			if (!product) throw new Error("Unknown product: " + id);
-			return product;
-		});
-	const productNames = productContent.common.names;
-	const productEntries = select([
-		"content-structure",
-		"collection",
-		"realm",
-		"zone",
-		"tag",
-		"entity",
-	]);
-	const platform = select(["history", "editor", "feed", "progress", "api-oauth"]);
-	const formulas = [
-		[productNames.book, components.book.contentStructure, home.labels.formulaResults.chapters],
-		[productNames.book, components.book.gameContentStructure, productNames.gamebook],
-		[
-			components.generic.unit,
-			components.attribution.credit,
-			home.labels.formulaResults.credits,
-		],
-		[
-			components.generic.unit,
-			components.attribution.subject,
-			home.labels.formulaResults.subjects,
-		],
-	];
+import { getLocaleContent } from "../../content/locales";
+import { PRODUCT_FAMILY_IDS } from "../../content/productTypes";
+import type { AboutLocale } from "../../i18n/locales";
+import { getContactPath, getProductsPath } from "../../i18n/productPaths";
+
+const githubUrl = "https://github.com/rezics";
+
+export function HomeExperience({ locale }: { readonly locale: AboutLocale }) {
+	const copy = getLocaleContent(locale);
+	const productsPath = getProductsPath(locale);
+	const contactPath = getContactPath(locale);
 
 	return (
 		<>
-			<section className="site-section">
-				<div className="site-container">
-					<div className="section-heading">
-						<p className="eyebrow">{home.labels.eyebrow}</p>
-						<h1 className="display-title">{home.labels.title}</h1>
-						<div className="section-lead">
-							<Hero />
-						</div>
-						<div
-							style={{
-								display: "flex",
-								flexWrap: "wrap",
-								gap: ".75rem",
-								marginTop: ".5rem",
-							}}
-						>
-							<a className="primary-action" href={getProductsPath(locale)}>
-								{common.nav.products}
-								<ArrowRight width={16} height={16} aria-hidden />
-							</a>
-							<a
-								className="secondary-action"
-								href="https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent"
-								target="_blank"
-								rel="noreferrer"
-							>
-								{common.nav.docs}
-								<ExternalLink width={15} height={15} aria-hidden />
-							</a>
-						</div>
-					</div>
-				</div>
-			</section>
-
-			<section className="site-section" style={{ paddingTop: 0 }}>
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">01 · {home.labels.eyebrows.stage}</p>
-						<h2 className="section-title">{home.labels.stageTitle}</h2>
-						<div className="section-lead">
-							<Stage />
-						</div>
-					</div>
-					<HomeProductStage locale={locale} />
-				</div>
-			</section>
-
-			<section className="site-section">
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">02 · {home.labels.eyebrows.products}</p>
-						<h2 className="section-title">{home.labels.productsTitle}</h2>
-						<div className="section-lead">
-							<Products />
-						</div>
-					</div>
-					<InteractiveProductDirectory
-						locale={locale}
-						products={productEntries}
-						instanceId="home-products"
-					/>
-					<div style={{ marginTop: "2rem" }}>
-						<a className="text-link" href={getProductsPath(locale)}>
-							{common.labels.viewAll} →
+			<section className="home-hero">
+				<div className="wide-shell home-hero__inner">
+					<h1>{copy.home.hero.title}</h1>
+					<p>{copy.home.hero.description}</p>
+					<div className="home-hero__actions">
+						<a className="action-link action-link--primary" href={productsPath}>
+							{copy.common.actions.exploreProducts}
+							<ArrowRight aria-hidden size={16} />
+						</a>
+						<a className="action-link" href="#about">
+							{copy.common.actions.learnAbout}
 						</a>
 					</div>
 				</div>
 			</section>
 
-			<section className="site-section" id="platform">
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">03 · {home.labels.eyebrows.platform}</p>
-						<h2 className="section-title">{home.labels.platformTitle}</h2>
-						<div className="section-lead">
-							<Platform />
-						</div>
+			<section className="home-origin page-section" id="about">
+				<div className="page-shell">
+					<div className="large-statement">
+						<h2>{copy.home.origin.title}</h2>
+						<p>{copy.home.origin.body}</p>
 					</div>
-					<InteractiveProductDirectory
-						locale={locale}
-						products={platform}
-						instanceId="home-platform"
-					/>
-				</div>
-			</section>
-
-			<section className="site-section">
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">04 · {home.labels.eyebrows.composition}</p>
-						<h2 className="section-title">{home.labels.formulaTitle}</h2>
-						<div className="section-lead">
-							<Composition />
-						</div>
-					</div>
-					<div className="formula-grid">
-						{formulas.map(([left, capability, result]) => (
-							<div key={left + capability} className="formula-row reveal">
-								<span className="formula-token">{left}</span>
-								<span className="formula-symbol">+</span>
-								<span className="formula-token">{capability}</span>
-								<span className="formula-symbol">→</span>
-								<strong className="formula-token">{result}</strong>
-							</div>
+					<div className="principle-list">
+						{copy.home.origin.principles.map((principle) => (
+							<article key={principle.title}>
+								<h3>{principle.title}</h3>
+								<p>{principle.body}</p>
+							</article>
 						))}
 					</div>
 				</div>
+				<div className="wide-shell origin-image">
+					<img
+						src="/images/about-origin-still-life.webp"
+						alt={copy.home.origin.imageAlt}
+						width="1536"
+						height="1080"
+					/>
+				</div>
 			</section>
 
-			<section className="site-section">
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">05 · {home.labels.eyebrows.history}</p>
-						<h2 className="section-title">{home.labels.historyTitle}</h2>
-						<div className="section-lead">
-							<History />
-						</div>
+			<section className="page-section home-products">
+				<div className="page-shell">
+					<div className="section-intro">
+						<h2>{copy.home.products.title}</h2>
+						<p>{copy.home.products.description}</p>
 					</div>
-					<ProductDemo
-						kind="history"
-						productName={productNames.history}
-						locale={locale}
-						label={common.labels.conceptPreview}
-						caption={common.labels.conceptCaption}
-					/>
-					<div className="info-columns" style={{ marginTop: "2rem" }}>
-						<article className="info-column">
-							<h3>{productNames.book}</h3>
-							<HistoryBook />
-						</article>
-						<article className="info-column">
-							<h3>{productNames.post}</h3>
-							<HistoryPost />
-						</article>
-						<article className="info-column">
-							<h3>{productNames.zone}</h3>
-							<HistoryZone />
-						</article>
+					<div className="guide-list">
+						{PRODUCT_FAMILY_IDS.map((familyId) => {
+							const family = copy.products.families[familyId];
+							return (
+								<a
+									className="guide-row"
+									key={familyId}
+									href={`${productsPath}#${familyId}`}
+								>
+									<span className="guide-row__index">{family.index}</span>
+									<span className="guide-row__content">
+										<strong>{family.title}</strong>
+										<span>{family.prompt}</span>
+									</span>
+									<ArrowRight aria-hidden size={22} />
+								</a>
+							);
+						})}
 					</div>
-					<a
-						className="text-link"
-						style={{ marginTop: "1.5rem" }}
-						href={getProductPath(locale, "history")}
-					>
-						{common.labels.learnMore} · {productNames.history} →
+					<a className="text-action" href={productsPath}>
+						{copy.common.actions.viewAllProducts}
+						<ArrowRight aria-hidden size={17} />
 					</a>
 				</div>
 			</section>
 
-			<section className="site-section">
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">06 · {home.labels.eyebrows.openSource}</p>
-						<h2 className="section-title">{home.labels.openTitle}</h2>
-						<div className="section-lead">
-							<OpenSource />
-						</div>
+			<section className="page-section open-section">
+				<div className="page-shell split-statement">
+					<h2>{copy.home.open.title}</h2>
+					<div>
+						<p>{copy.home.open.body}</p>
+						<a
+							className="text-action"
+							href={githubUrl}
+							target="_blank"
+							rel="noreferrer"
+						>
+							{copy.common.actions.visitGithub}
+							<ExternalLink aria-hidden size={16} />
+						</a>
 					</div>
-					<div className="info-columns">
-						<article className="info-column">
-							<h3>{common.labels.documentation}</h3>
-							<OpenOutline />
-							<a
-								className="text-link"
-								href="https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent"
-							>
-								{common.nav.docs} →
-							</a>
-						</article>
-						<article className="info-column">
-							<h3>{productNames["api-oauth"]}</h3>
-							<OpenApi />
-							<a className="text-link" href={getProductPath(locale, "api-oauth")}>
-								{common.labels.learnMore} →
-							</a>
-						</article>
-						<article className="info-column">
-							<h3>{common.nav.github}</h3>
-							<OpenGithub />
-							<a className="text-link" href="https://github.com/rezics">
-								{common.nav.github} →
-							</a>
-						</article>
+				</div>
+			</section>
+
+			<section className="page-section contact-section" id="contact">
+				<div className="page-shell contact-section__inner">
+					<div>
+						<h2>{copy.home.contact.title}</h2>
+						<p>{copy.home.contact.introduction}</p>
 					</div>
+					<ul>
+						{copy.home.contact.reasons.map((reason) => (
+							<li key={reason}>{reason}</li>
+						))}
+					</ul>
+					<a className="action-link action-link--primary" href={contactPath}>
+						{copy.common.actions.contact}
+						<ArrowRight aria-hidden size={16} />
+					</a>
 				</div>
 			</section>
 		</>

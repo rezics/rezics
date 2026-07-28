@@ -1,4 +1,0 @@
-/:locale/product/:slug /:locale/products/:slug/ 301
-/:locale/product/:slug/ /:locale/products/:slug/ 301
-/:locale/product /:locale/products/ 301
-/:locale/product/ /:locale/products/ 301

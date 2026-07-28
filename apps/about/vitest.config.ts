@@ -1,4 +1,3 @@
-import { markdownPlugin } from "./src/markdownPlugin";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { defineProject } from "vitest/config";
@@ -7,7 +6,7 @@ const root = fileURLToPath(new URL("./", import.meta.url));
 
 export default defineProject({
 	root,
-	plugins: [markdownPlugin(), react()],
+	plugins: [react()],
 	resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
 	test: {
 		name: "about",

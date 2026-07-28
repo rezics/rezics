@@ -1,1 +1,0 @@
-Produktentscheidungen und aktuelle Domänendokumente.

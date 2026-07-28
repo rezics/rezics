@@ -1,1 +1,0 @@
-It should not receive the token in the conversation. The agent can prepare a dedicated workspace and an empty `.env`; the user then enters the value locally. The agent should consume it through the process environment without reading, displaying, logging, or committing it.

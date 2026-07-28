@@ -1,24 +1,37 @@
 # @rezics/about
 
-The static multilingual product site for `about.rezics.com`, built with React 19, Vike, `vike-react`, MDX, and Tailwind CSS.
+The static brand and product site for `about.rezics.com`, built with React 19, Vike,
+`vike-react`, SharkUI, and Tailwind CSS.
+
+## Current publication scope
+
+The site currently publishes region-neutral Traditional Chinese only:
+
+```text
+/zh-hant/
+/zh-hant/contact-us/
+/zh-hant/products/
+/zh-hant/products/[slug]/
+```
+
+The root and unlocalized product routes redirect to `zh-hant`. Additional locales should only
+be added after their complete, typed content resource is ready.
 
 ## Architecture
 
-- `src/content/`: Copy in six languages, the product registry, page facts, and the media inventory.
-- `pages/`: Vike file-based routes; global configuration enables SSR, client-side routing, trailing slashes, and full prerendering.
-- `src/components/products/`: React pages and interactive components.
-- `pages/_error/+Page.mdx`: MDX error page; MDX in this repository can import React components directly.
-- `functions/_middleware.ts` and `public/_redirects`: Cloudflare language negotiation and permanent redirects for legacy URLs.
+- `src/content/locales/zh-hant/content.ts`: all user-visible copy and product explanations.
+- `src/content/productRegistry.ts`: the 26 product identities, four guided paths, relations,
+  and the three products with meaningful interactive demonstrations.
+- `src/components/products/`: the site shell, real homepage, guided Products directory,
+  product explanations, and focused demonstrations.
+- `src/components/contact/`: the dedicated Contact Us experience.
+- `pages/`: Vike file-based routes with SSR, client-side routing, trailing slashes, and full
+  prerendering.
+- `functions/_middleware.ts`: default-locale redirects for unlocalized public routes.
 
-Public URLs remain:
-
-```text
-/[locale]/
-/[locale]/products/
-/[locale]/products/[slug]/
-```
-
-The legacy singular `product` route permanently redirects. A single registry generates canonical URLs, hreflang, Open Graph, JSON-LD, and the sitemap for every public page.
+The homepage owns the brand narrative and Contact Us invitation, while `/contact-us/` owns the
+actual contact channels. The Products directory starts from visitor intent rather than exposing
+the registry as an undifferentiated feature list.
 
 ## Commands
 
@@ -33,4 +46,5 @@ task apps-about:test:dist
 task apps-about:preview
 ```
 
-Cloudflare Pages uses `apps/about/dist/client` as its build output. Deployment does not depend on `dist/server`.
+Cloudflare Pages uses `apps/about/dist/client` as its build output. Deployment does not depend
+on `dist/server`.

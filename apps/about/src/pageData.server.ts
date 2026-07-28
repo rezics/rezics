@@ -1,4 +1,4 @@
-import { PRODUCT_DEFINITIONS, type ProductId, type ProductSlug } from "./content/productRegistry";
+import { PRODUCT_DEFINITIONS, type RegisteredProduct } from "./content/productRegistry";
 import { getLocaleContent } from "./content/locales";
 import { ABOUT_LOCALES, DEFAULT_LOCALE, type AboutLocale } from "./i18n/locales";
 import {
@@ -27,7 +27,7 @@ export function createRootPageData(): AboutPageData {
 	return {
 		kind: "root",
 		metadata: makeMetadata(
-			content.common.siteName,
+			content.home.meta.title,
 			content.home.meta.description,
 			getHomePath(DEFAULT_LOCALE),
 			"home",
@@ -55,8 +55,8 @@ export function createProductsPageData(locale: AboutLocale): AboutPageData {
 		kind: "products",
 		locale,
 		metadata: makeMetadata(
-			content.products.directory.meta.title,
-			content.products.directory.meta.description,
+			content.products.meta.title,
+			content.products.meta.description,
 			getProductsPath(locale),
 			"products",
 		),
@@ -79,33 +79,29 @@ export function createContactPageData(locale: AboutLocale): AboutPageData {
 
 export function createProductPageData(
 	locale: AboutLocale,
-	productId: ProductId,
-	slug: ProductSlug,
+	product: RegisteredProduct,
 ): AboutPageData {
-	const product = PRODUCT_DEFINITIONS.find((entry) => entry.id === productId);
-	if (!product) throw new Error("Unknown product: " + productId);
 	const localeContent = getLocaleContent(locale);
-	const summary = localeContent.products.byId[productId].summaryText;
-	const productName = localeContent.products.common.names[productId];
-	const canonicalPath = getProductPath(locale, slug);
+	const summary = localeContent.products.byId[product.id].summary;
+	const productName = localeContent.products.common.names[product.id];
+	const canonicalPath = getProductPath(locale, product.slug);
 	return {
 		kind: "product",
 		locale,
-		productId,
-		slug,
+		productId: product.id,
+		slug: product.slug,
 		metadata: makeMetadata(
 			productName + " — " + localeContent.common.siteName,
 			summary,
 			canonicalPath,
 			"product",
-			slug,
+			product.slug,
 			{
 				"@context": "https://schema.org",
-				"@type": "SoftwareApplication",
+				"@type": "WebPage",
 				name: productName,
 				description: summary,
 				url: new URL(canonicalPath, "https://about.rezics.com").toString(),
-				applicationCategory: "WebApplication",
 			},
 		),
 	};

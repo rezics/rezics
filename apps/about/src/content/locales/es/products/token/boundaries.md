@@ -1,5 +1,0 @@
-- La autenticación, las comprobaciones de permisos, los límites de seguridad y los límites de uso son responsabilidades independientes del middleware.
-- Los límites efectivos se resuelven a partir de un perfil de políticas, una sobrescritura por token y una sobrescritura por operación, mientras permanecen vigentes los límites inmutables del servidor.
-- Las configuraciones Standard y Privileged usan esquemas validados distintos. Su configuración JSON se almacena en la base de datos y vuelve a validarse cada vez que se lee.
-- Una política Privileged solo aumenta la capacidad de procesamiento. No añade permisos, exige una fecha de caducidad y un motivo de auditoría, y vuelve de forma segura al perfil anterior si caduca o deja de ser válida.
-- Los secretos de los tokens se muestran una sola vez y se almacenan únicamente como hashes. La autoinspección nunca devuelve hashes, referencias a secretos ni material de credenciales.

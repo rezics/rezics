@@ -1,47 +1,78 @@
-import { PRODUCT_GROUPS } from "../../content/productRegistry";
-import { getLocaleContent } from "../../content/locales";
-import type { AboutLocale } from "../../i18n/locales";
-import { InteractiveProductDirectory } from "./InteractiveProductDirectory";
+import { ArrowDown, ArrowRight } from "lucide-react";
 
-export function ProductsDirectoryPage({ locale }: { locale: AboutLocale }) {
-	const { directory } = getLocaleContent(locale).products;
+import { getLocaleContent } from "../../content/locales";
+import { getProductsByFamily } from "../../content/productRegistry";
+import { PRODUCT_FAMILY_IDS } from "../../content/productTypes";
+import type { AboutLocale } from "../../i18n/locales";
+import { getProductPath } from "../../i18n/productPaths";
+
+export function ProductsDirectoryPage({ locale }: { readonly locale: AboutLocale }) {
+	const copy = getLocaleContent(locale);
+
 	return (
 		<>
-			<section className="site-section">
-				<div className="site-container">
-					<div className="section-heading">
-						<p className="eyebrow">{directory.labels.eyebrow}</p>
-						<h1 className="display-title">{directory.labels.title}</h1>
-						<div className="section-lead">
-							<directory.Lead />
-						</div>
-					</div>
+			<section className="directory-hero">
+				<div className="wide-shell directory-hero__inner">
+					<h1>{copy.products.hero.title}</h1>
+					<p>{copy.products.hero.description}</p>
+					<a className="directory-hero__jump" href="#discover">
+						{copy.products.familiesTitle}
+						<ArrowDown aria-hidden size={17} />
+					</a>
 				</div>
 			</section>
-			<section className="site-section" style={{ paddingTop: 0 }}>
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">01</p>
-						<h2 className="section-title">{directory.labels.productsTitle}</h2>
-					</div>
-					<InteractiveProductDirectory
-						locale={locale}
-						products={PRODUCT_GROUPS.products}
-						instanceId="all-products"
-					/>
-				</div>
-			</section>
-			<section className="site-section" id="platform">
-				<div className="site-container">
-					<div className="section-heading reveal">
-						<p className="eyebrow">02</p>
-						<h2 className="section-title">{directory.labels.platformTitle}</h2>
-					</div>
-					<InteractiveProductDirectory
-						locale={locale}
-						products={PRODUCT_GROUPS.platform}
-						instanceId="all-platform"
-					/>
+
+			<nav className="family-index page-shell" aria-label={copy.products.familiesTitle}>
+				{PRODUCT_FAMILY_IDS.map((familyId) => {
+					const family = copy.products.families[familyId];
+					return (
+						<a href={`#${familyId}`} key={familyId}>
+							<span>{family.index}</span>
+							<strong>{family.title}</strong>
+						</a>
+					);
+				})}
+			</nav>
+
+			<section className="product-families page-section">
+				<div className="page-shell">
+					<h2 className="visually-hidden">{copy.products.allTitle}</h2>
+					{PRODUCT_FAMILY_IDS.map((familyId) => {
+						const family = copy.products.families[familyId];
+						const products = getProductsByFamily(familyId);
+
+						return (
+							<section className="product-family" id={familyId} key={familyId}>
+								<header className="product-family__header">
+									<span>{family.index}</span>
+									<div>
+										<h2>{family.title}</h2>
+										<p className="product-family__prompt">{family.prompt}</p>
+										<p>{family.description}</p>
+									</div>
+								</header>
+								<div className="product-link-list">
+									{products.map((product) => {
+										const productId = product.id;
+										const name = copy.products.common.names[productId];
+										const productCopy = copy.products.byId[productId];
+
+										return (
+											<a
+												className="product-link-row"
+												href={getProductPath(locale, product.slug)}
+												key={product.id}
+											>
+												<strong>{name}</strong>
+												<span>{productCopy.summary}</span>
+												<ArrowRight aria-hidden size={19} />
+											</a>
+										);
+									})}
+								</div>
+							</section>
+						);
+					})}
 				</div>
 			</section>
 		</>

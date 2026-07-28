@@ -1,305 +1,135 @@
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
+
 import { getLocaleContent } from "../../content/locales";
 import {
-	getConsumedCapabilities,
-	getProductById,
+	getParentProduct,
 	getRelatedProducts,
-	type ProductId,
+	type RegisteredProduct,
 } from "../../content/productRegistry";
-import type { ProductDefinition } from "../../content/productTypes";
 import type { AboutLocale } from "../../i18n/locales";
 import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
 import { ProductDemo } from "./ProductDemo";
 
-export function ProductPage({
-	locale,
-	product,
-}: {
-	locale: AboutLocale;
-	product: ProductDefinition;
-}) {
-	const { common, products } = getLocaleContent(locale);
-	const page = products.common;
-	const localized = products.byId[product.id as ProductId];
-	const productName = page.names[product.id as ProductId];
-	const localizedName = (entry: ProductDefinition) => page.names[entry.id as ProductId];
-	const { Summary, Scenarios, Workflow, Boundaries } = localized;
-	const parent = product.canonicalParentId
-		? getProductById(product.canonicalParentId)
-		: undefined;
-	const capabilities = getConsumedCapabilities(product);
+type ProductPageProps = {
+	readonly locale: AboutLocale;
+	readonly product: RegisteredProduct;
+};
+
+export function ProductPage({ locale, product }: ProductPageProps) {
+	const copy = getLocaleContent(locale);
+	const productId = product.id;
+	const productCopy = copy.products.byId[productId];
+	const productName = copy.products.common.names[productId];
+	const family = copy.products.families[product.family];
+	const parent = getParentProduct(product);
 	const related = getRelatedProducts(product);
-	const has = (section: string) => product.sections.some((item) => item === section);
-	const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
 
 	return (
 		<>
-			<section className="site-section">
-				<div className="site-container">
-					<nav className="breadcrumbs" aria-label={common.a11y.breadcrumb}>
-						<a href={getHomePath(locale)}>{page.breadcrumbsHome}</a>
-						<span aria-hidden>/</span>
-						<a href={getProductsPath(locale)}>{page.breadcrumbsProducts}</a>
-						{parent && (
-							<>
-								<span aria-hidden>/</span>
-								<a href={getProductPath(locale, parent.slug)}>
-									{localizedName(parent)}
-								</a>
-							</>
-						)}
-						<span aria-hidden>/</span>
+			<section className="product-hero-section">
+				<div className="page-shell">
+					<nav className="breadcrumbs" aria-label={copy.common.a11y.breadcrumb}>
+						<a href={getHomePath(locale)}>{copy.common.nav.home}</a>
+						<ChevronRight aria-hidden size={14} />
+						<a href={getProductsPath(locale)}>{copy.common.nav.products}</a>
+						<ChevronRight aria-hidden size={14} />
 						<span aria-current="page">{productName}</span>
 					</nav>
+
 					<div className="product-hero">
 						<div>
-							<p className="eyebrow">{common.classes[product.pageClass]}</p>
-							<h1 className="display-title">{productName}</h1>
-							<div className="product-hero__lead markdown-copy">
-								<Summary />
-							</div>
-							{product.manifestation && (
-								<p className="formula-token" style={{ marginTop: "1.5rem" }}>
-									{page.manifestationFormulas[product.manifestation.kind]}
-								</p>
-							)}
+							<a
+								className="product-family-link"
+								href={`${getProductsPath(locale)}#${product.family}`}
+							>
+								<span>{family.index}</span>
+								{family.title}
+							</a>
+							<h1>{productName}</h1>
 						</div>
-						<dl className="product-facts">
-							<div className="product-fact">
-								<dt>{page.statusLabel}</dt>
-								<dd>{common.status[product.implementationStatus]}</dd>
-							</div>
-							<div className="product-fact">
-								<dt>{page.classificationLabel}</dt>
-								<dd>{common.classes[product.pageClass]}</dd>
-							</div>
-							<div className="product-fact">
-								<dt>{common.labels.parentProduct}</dt>
-								<dd>
-									{parent ? (
-										<a href={getProductPath(locale, parent.slug)}>
-											{localizedName(parent)}
-										</a>
-									) : (
-										common.labels.noParent
-									)}
-								</dd>
-							</div>
-							{product.capabilityModes && (
-								<div className="product-fact">
-									<dt>{common.a11y.modes}</dt>
-									<dd>
-										{product.capabilityModes
-											.map((mode) => page.capabilityModeLabels[mode])
-											.join(" · ")}
-									</dd>
-								</div>
-							)}
-						</dl>
+						<div className="product-hero__copy">
+							<p className="product-summary">{productCopy.summary}</p>
+							<p>{productCopy.introduction}</p>
+							{parent ? (
+								<p className="product-parent">
+									<span>{copy.products.common.labels.parent}</span>
+									<a href={getProductPath(locale, parent.slug)}>
+										{copy.products.common.names[parent.id]}
+										<ArrowRight aria-hidden size={15} />
+									</a>
+								</p>
+							) : null}
+						</div>
 					</div>
 				</div>
 			</section>
 
-			{has("stage") && (
-				<section className="site-section" style={{ paddingTop: 0 }}>
-					<div className="site-container">
-						<ProductDemo
-							kind={product.demoKind}
-							productName={productName}
-							locale={locale}
-							label={common.labels.conceptPreview}
-							caption={common.labels.conceptCaption}
-						/>
-						{product.id === "book" && (
-							<div style={{ display: "grid", gap: "2rem", marginTop: "2rem" }}>
-								<ProductDemo
-									kind="attribution"
-									productName={`${page.names.book} · ${page.names.entity}`}
-									locale={locale}
-									label={common.labels.conceptPreview}
-									caption={common.labels.conceptCaption}
-								/>
-								<ProductDemo
-									kind="history"
-									productName={`${page.names.book} · ${page.names.history}`}
-									locale={locale}
-									label={common.labels.conceptPreview}
-									caption={common.labels.conceptCaption}
-								/>
-							</div>
-						)}
+			{product.demoKind ? (
+				<section className="product-demo-section">
+					<div className="page-shell">
+						<p className="section-label">{copy.products.common.labels.demo}</p>
+						<ProductDemo kind={product.demoKind} locale={locale} />
 					</div>
 				</section>
-			)}
+			) : null}
 
-			{has("scenarios") && (
-				<section className="site-section">
-					<div className="site-container">
-						<div className="section-heading reveal">
-							<p className="eyebrow">01 · {page.sectionEyebrows.use}</p>
-							<h2 className="section-title">{page.scenarios}</h2>
-						</div>
-						<div className="markdown-section reveal">
-							<Scenarios />
-						</div>
-					</div>
-				</section>
-			)}
-
-			{has("workflow") && (
-				<section className="site-section">
-					<div className="site-container">
-						<div className="section-heading reveal">
-							<p className="eyebrow">02 · {page.sectionEyebrows.workflow}</p>
-							<h2 className="section-title">{page.workflow}</h2>
-						</div>
-						<div className="markdown-section reveal">
-							<Workflow />
-						</div>
-					</div>
-				</section>
-			)}
-
-			{has("capabilities") && (
-				<section className="site-section">
-					<div className="site-container">
-						<div className="section-heading reveal">
-							<p className="eyebrow">03 · {page.sectionEyebrows.platform}</p>
-							<h2 className="section-title">
-								{capabilities.length ? page.capabilities : page.consumers}
-							</h2>
-						</div>
-						<div className="capability-list">
-							{(capabilities.length ? capabilities : related).map((item) => {
-								const ItemSummary = products.byId[item.id as ProductId].Summary;
-								return (
-									<a
-										className="capability-link reveal"
-										href={getProductPath(locale, item.slug)}
-										key={item.id}
-									>
-										<span className="demo-status">{localizedName(item)}</span>
-										<div>
-											<strong>{localizedName(item)}</strong>
-											<div className="markdown-copy">
-												<ItemSummary />
-											</div>
-										</div>
-										<span className="text-link">
-											{common.labels.learnMore}
-											<ArrowRight width={15} height={15} aria-hidden />
-										</span>
-									</a>
-								);
-							})}
-						</div>
-					</div>
-				</section>
-			)}
-
-			{has("boundaries") && (
-				<section className="site-section">
-					<div className="site-container">
-						<div className="section-heading reveal">
-							<p className="eyebrow">04 · {page.sectionEyebrows.scope}</p>
-							<h2 className="section-title">{page.boundaries}</h2>
-						</div>
-						<div className="markdown-section reveal">
-							<Boundaries />
-						</div>
-					</div>
-				</section>
-			)}
-
-			{has("faq") && (
-				<section className="site-section">
-					<div className="site-container">
-						<div className="section-heading reveal">
-							<p className="eyebrow">05 · {page.sectionEyebrows.faq}</p>
-							<h2 className="section-title">{page.faq}</h2>
-						</div>
-						<div className="accordion-list">
-							{localized.faq.map(({ question, Answer }) => (
-								<details className="accordion-item" key={question}>
-									<summary>{question}</summary>
-									<div className="accordion-answer markdown-copy">
-										<Answer />
-									</div>
-								</details>
+			<section className="product-explanation page-section">
+				<div className="page-shell">
+					<article className="explanation-block">
+						<h2>{copy.products.common.labels.uses}</h2>
+						<ol>
+							{productCopy.uses.map((item, index) => (
+								<li key={item}>
+									<span>{String(index + 1).padStart(2, "0")}</span>
+									<p>{item}</p>
+								</li>
 							))}
-						</div>
-					</div>
-				</section>
-			)}
+						</ol>
+					</article>
 
-			{has("related") && (
-				<section className="site-section">
-					<div className="site-container">
-						<div className="section-heading reveal">
-							<p className="eyebrow">06 · {page.sectionEyebrows.next}</p>
-							<h2 className="section-title">{common.labels.relatedProducts}</h2>
-						</div>
-						<div className="product-rows">
-							{related.map((item, index) => {
-								const ItemSummary = products.byId[item.id as ProductId].Summary;
-								return (
-									<a
-										className="product-row reveal"
-										href={getProductPath(locale, item.slug)}
-										key={item.id}
-									>
-										<span className="product-row__name">
-											<span className="product-row__index">
-												{String(index + 1).padStart(2, "0")}
-											</span>
-											{localizedName(item)}
-										</span>
-										<div className="product-row__summary markdown-copy">
-											<ItemSummary />
-										</div>
-										<span className="product-row__meta">
-											{common.status[item.implementationStatus]}
-											<ArrowRight width={16} height={16} aria-hidden />
-										</span>
-									</a>
-								);
-							})}
-						</div>
-						<div
-							style={{
-								display: "grid",
-								gap: "1rem",
-								marginTop: "3rem",
-								borderTop: "1px solid var(--colors-border-defined)",
-								paddingTop: "1.5rem",
-							}}
-						>
-							<p className="eyebrow">{common.labels.sourceBasis}</p>
-							<p className="demo-muted">{product.sourceDocuments.join(" · ")}</p>
-							<div style={{ display: "flex", flexWrap: "wrap", gap: ".75rem" }}>
+					<article className="explanation-block">
+						<h2>{copy.products.common.labels.operation}</h2>
+						<ol>
+							{productCopy.operation.map((item, index) => (
+								<li key={item}>
+									<span>{String(index + 1).padStart(2, "0")}</span>
+									<p>{item}</p>
+								</li>
+							))}
+						</ol>
+					</article>
+
+					<article className="boundary-block">
+						<h2>{copy.products.common.labels.boundary}</h2>
+						<p>{productCopy.boundary}</p>
+					</article>
+				</div>
+			</section>
+
+			<section className="related-products page-section">
+				<div className="page-shell">
+					<h2>{copy.products.common.labels.related}</h2>
+					<div className="related-product-list">
+						{related.map((relatedProduct) => {
+							const relatedId = relatedProduct.id;
+							return (
 								<a
-									className="secondary-action"
-									href={outlineUrl}
-									target="_blank"
-									rel="noreferrer"
+									href={getProductPath(locale, relatedProduct.slug)}
+									key={relatedProduct.id}
 								>
-									{common.labels.documentation}
-									<ExternalLink width={15} height={15} aria-hidden />
+									<strong>{copy.products.common.names[relatedId]}</strong>
+									<span>{copy.products.byId[relatedId].summary}</span>
+									<ArrowRight aria-hidden size={18} />
 								</a>
-								<a
-									className="secondary-action"
-									href="https://github.com/rezics"
-									target="_blank"
-									rel="noreferrer"
-								>
-									{common.labels.sourceCode}
-									<ExternalLink width={15} height={15} aria-hidden />
-								</a>
-							</div>
-						</div>
+							);
+						})}
 					</div>
-				</section>
-			)}
+					<a className="text-action product-back" href={getProductsPath(locale)}>
+						<ArrowLeft aria-hidden size={17} />
+						{copy.common.actions.viewAllProducts}
+					</a>
+				</div>
+			</section>
 		</>
 	);
 }

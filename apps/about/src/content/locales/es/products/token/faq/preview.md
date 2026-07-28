@@ -1,1 +1,0 @@
-El agente no debe recibir el token en la conversación. Puede preparar un espacio de trabajo dedicado y un archivo `.env` vacío; después, el usuario introduce el valor localmente. El agente debe consumirlo mediante el entorno del proceso sin leerlo, mostrarlo, registrarlo ni incorporarlo a un commit.

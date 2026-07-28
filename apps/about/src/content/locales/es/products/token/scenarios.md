@@ -1,3 +1,0 @@
-- Concede a un agente únicamente los permisos necesarios para completar metadatos de libros o una traducción.
-- Ejecuta un importador o una herramienta local con una credencial específica para su propósito, que pueda desactivarse o revocarse de forma independiente.
-- Concede temporalmente una política Privileged cuando una carga de trabajo auditada necesite más capacidad, sin otorgar permisos adicionales sobre los datos.

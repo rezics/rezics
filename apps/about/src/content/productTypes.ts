@@ -1,101 +1,33 @@
-export type ProductClass = "surface" | "capability" | "manifestation" | "protocol";
-export type ProductNavGroup = "products" | "platform";
+export const PRODUCT_FAMILY_IDS = ["discover", "create", "continue", "open"] as const;
+
+export type ProductFamilyId = (typeof PRODUCT_FAMILY_IDS)[number];
+
+export type ProductClass = "surface" | "capability" | "manifestation";
+
 export type ImplementationStatus = "implemented" | "documented" | "planned" | "research";
-export type ProductDemoKind =
-	| "book"
-	| "gamebook"
-	| "structure"
-	| "history"
-	| "attribution"
-	| "zone"
-	| "feed"
-	| "catalog"
-	| "editor"
-	| "progress"
-	| "generic";
 
-export type ProductClaim = {
-	id: string;
-	productId: string;
-	sourceType: "user-confirmed" | "outline" | "schema";
-	sourceReference: string;
-	status: "confirmed" | "planned" | "research";
-};
-
-export type ProductManifestationKind = "gamebook" | "wiki" | "picture" | "review" | "library";
-export type ProductManifestation = { kind: ProductManifestationKind };
-
-export type ProductCapabilityMode =
-	| "ContentStructure"
-	| "GameContentStructure"
-	| "Entity"
-	| "CreditAttribution"
-	| "SubjectAssociation";
-
-export type ProductSectionId =
-	| "identity"
-	| "stage"
-	| "scenarios"
-	| "workflow"
-	| "capabilities"
-	| "boundaries"
-	| "faq"
-	| "related";
+export type ProductDemoKind = "gamebook" | "structure" | "history";
 
 export type ProductDefinition = {
-	id: string;
-	slug: string;
-	name: string;
-	pageClass: ProductClass;
-	navGroup: ProductNavGroup;
-	canonicalParentId?: string;
-	capabilityModes?: readonly ProductCapabilityMode[];
-	consumesCapabilities: readonly string[];
-	manifestation?: ProductManifestation;
-	relatedProductIds: readonly string[];
-	implementationStatus: ImplementationStatus;
-	sourceDocuments: readonly string[];
-	mediaIds: readonly string[];
-	demoKind: ProductDemoKind;
-	sections: readonly ProductSectionId[];
+	readonly id: string;
+	readonly slug: string;
+	readonly family: ProductFamilyId;
+	readonly pageClass: ProductClass;
+	readonly implementationStatus: ImplementationStatus;
+	readonly relatedProductIds: readonly string[];
+	readonly canonicalParentId?: string;
+	readonly demoKind?: ProductDemoKind;
 };
 
-export type ProtocolDefinition = {
-	id: string;
-	name: string;
-	pageClass: "protocol";
-	describedByProductIds: readonly string[];
+export type ProductPageCopy = {
+	readonly summary: string;
+	readonly introduction: string;
+	readonly uses: readonly [string, string, string];
+	readonly operation: readonly [string, string, string];
+	readonly boundary: string;
 };
 
-export type ProductMediaBase = {
-	id: string;
-	productId: string;
-	purpose: "hero" | "workflow" | "capability" | "directory";
-	fidelity: "real" | "concept";
-	themes: readonly ("light" | "dark")[];
-	viewports: readonly ("desktop" | "mobile")[];
-	width: number;
-	height: number;
-	altKey: string;
-	captionKey: string;
-	replaceable: boolean;
-	source: string;
-	featureVersion: string;
+export type AboutPageMeta = {
+	readonly title: string;
+	readonly description: string;
 };
-
-export type ScreenshotMedia = ProductMediaBase & {
-	kind: "screenshot";
-	sourcePath: string;
-};
-export type VideoMedia = ProductMediaBase & {
-	kind: "video";
-	sourcePath: string;
-	posterPath: string;
-};
-export type ConceptComponentMedia = ProductMediaBase & {
-	kind: "concept-component";
-	componentId: ProductDemoKind;
-};
-export type ProductMedia = ScreenshotMedia | VideoMedia | ConceptComponentMedia;
-
-export type AboutPageMeta = { title: string; description: string };

@@ -1,106 +1,69 @@
-import brandMarkUrl from "@rezics/brand/mark.svg?url&no-inline";
-import { ChevronRight, Languages, Menu, Moon, Settings, Sun, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import type { LocaleContent } from "../../content/locales";
-import { ABOUT_LOCALE_META, ABOUT_LOCALES, type AboutLocale } from "../../i18n/locales";
-import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
+import GithubIcon from "@rezics/icons/components/brand/GithubIcon";
+import { Logo } from "@rezics/ui/custom/logo";
+import { Languages, Moon, Sun, SunMoon } from "lucide-react";
+import { useEffect, useState } from "react";
 
-type Props = {
-	locale: AboutLocale;
-	copy: LocaleContent["common"];
-	active: "home" | "products" | "platform" | "history";
-	alternatePathByLocale: Record<AboutLocale, string>;
+import type { LocaleContent } from "../../content/locales";
+import { ABOUT_LOCALES, ABOUT_LOCALE_META, type AboutLocale } from "../../i18n/locales";
+import { getHomePath, getProductsPath } from "../../i18n/productPaths";
+
+type ColorTheme = "light" | "dark";
+
+type GlobalHeaderProps = {
+	readonly locale: AboutLocale;
+	readonly copy: LocaleContent["common"];
+	readonly active?: "home" | "products";
+	readonly alternatePathByLocale: Record<AboutLocale, string>;
 };
 
-const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
 const githubUrl = "https://github.com/rezics";
 
-function readTheme(): "light" | "dark" {
+function readTheme(): ColorTheme {
 	if (typeof document === "undefined") return "light";
-	return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+	return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Props) {
-	const [theme, setTheme] = useState<"light" | "dark" | null>(null);
-	const [drawerOpen, setDrawerOpen] = useState(false);
-	const toggleRef = useRef<HTMLButtonElement>(null);
-	const firstDrawerLinkRef = useRef<HTMLAnchorElement>(null);
-	const headerRef = useRef<HTMLElement>(null);
+export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: GlobalHeaderProps) {
+	const [theme, setTheme] = useState<ColorTheme | null>(null);
 	const links = [
-		{ label: copy.nav.products, href: getProductsPath(locale), active: active === "products" },
 		{
-			label: copy.nav.platform,
-			href: getProductsPath(locale) + "#platform",
-			active: active === "platform",
+			label: copy.nav.home,
+			href: getHomePath(locale),
+			active: active === "home",
 		},
 		{
-			label: copy.nav.history,
-			href: getProductPath(locale, "history"),
-			active: active === "history",
+			label: copy.nav.products,
+			href: getProductsPath(locale),
+			active: active === "products",
 		},
-	];
+	] as const;
 
 	useEffect(() => setTheme(readTheme()), []);
 
 	useEffect(() => {
 		if (!theme) return;
-		document.documentElement.dataset.theme = theme;
+		document.documentElement.classList.toggle("dark", theme === "dark");
 		localStorage.setItem("rezics-theme", theme);
 	}, [theme]);
 
-	useEffect(() => {
-		if (!drawerOpen) return;
-		firstDrawerLinkRef.current?.focus();
-		const close = (event: KeyboardEvent) => {
-			if (event.key !== "Escape") return;
-			setDrawerOpen(false);
-			toggleRef.current?.focus();
-		};
-		window.addEventListener("keydown", close);
-		return () => window.removeEventListener("keydown", close);
-	}, [drawerOpen]);
-
-	useEffect(() => {
-		const closeDetails = (event: PointerEvent) => {
-			if (headerRef.current?.contains(event.target as Node)) return;
-			headerRef.current
-				?.querySelectorAll("details[open]")
-				.forEach((details) => details.removeAttribute("open"));
-		};
-		window.addEventListener("pointerdown", closeDetails);
-		return () => window.removeEventListener("pointerdown", closeDetails);
-	}, []);
-
-	const currentTheme = theme ?? "light";
 	const toggleTheme = () =>
-		setTheme((value) => ((value ?? readTheme()) === "light" ? "dark" : "light"));
-	const ThemeControl = () => (
-		<button type="button" onClick={toggleTheme} aria-pressed={currentTheme === "dark"}>
-			<span>{currentTheme === "dark" ? copy.theme.dark : copy.theme.light}</span>
-			<span>
-				{currentTheme === "dark" ? (
-					<Moon width={17} height={17} aria-hidden />
-				) : (
-					<Sun width={17} height={17} aria-hidden />
-				)}
-			</span>
-		</button>
-	);
+		setTheme((current) => ((current ?? readTheme()) === "dark" ? "light" : "dark"));
 
 	return (
 		<>
 			<a className="skip-link" href="#main-content">
 				{copy.a11y.skipContent}
 			</a>
-			<header className="global-header" ref={headerRef}>
-				<div className="site-container global-header__inner">
+			<header className="global-header">
+				<div className="wide-shell global-header__inner">
 					<a
 						className="global-logo"
 						href={getHomePath(locale)}
 						aria-label={copy.a11y.home}
 					>
-						<img src={brandMarkUrl} width="34" height="24" alt="" />
+						<Logo alt="" aria-hidden="true" />
 					</a>
+
 					<nav className="global-nav" aria-label={copy.a11y.primaryNavigation}>
 						{links.map((link) => (
 							<a
@@ -111,17 +74,21 @@ export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Pr
 								{link.label}
 							</a>
 						))}
-						<a href={outlineUrl} target="_blank" rel="noreferrer">
-							{copy.nav.docs}
-						</a>
-						<a href={githubUrl} target="_blank" rel="noreferrer">
-							{copy.nav.github}
-						</a>
 					</nav>
-					<div className="header-tools header-tools--desktop">
-						<details className="relative">
+
+					<nav className="header-tools" aria-label={copy.a11y.utilityNavigation}>
+						<a
+							className="header-icon-button"
+							href={githubUrl}
+							target="_blank"
+							rel="noreferrer"
+							aria-label={copy.nav.github}
+						>
+							<GithubIcon aria-hidden />
+						</a>
+						<details className="language-switcher">
 							<summary className="header-icon-button" aria-label={copy.nav.language}>
-								<Languages width={18} height={18} aria-hidden />
+								<Languages aria-hidden size={18} />
 							</summary>
 							<div className="header-popover">
 								{ABOUT_LOCALES.map((item) => (
@@ -132,79 +99,27 @@ export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Pr
 										aria-current={item === locale ? "true" : undefined}
 									>
 										<span>{ABOUT_LOCALE_META[item].nativeName}</span>
-										{item === locale && <span aria-hidden>✓</span>}
+										{item === locale ? <span aria-hidden>✓</span> : null}
 									</a>
 								))}
 							</div>
 						</details>
-						<details className="relative">
-							<summary className="header-icon-button" aria-label={copy.nav.theme}>
-								<Settings width={18} height={18} aria-hidden />
-							</summary>
-							<div className="header-popover">
-								<ThemeControl />
-							</div>
-						</details>
-					</div>
-					<div className="header-tools header-tools--mobile">
 						<button
-							ref={toggleRef}
 							className="header-icon-button"
 							type="button"
-							aria-expanded={drawerOpen}
-							aria-controls="product-mobile-drawer"
-							aria-label={drawerOpen ? copy.nav.closeMenu : copy.nav.openMenu}
-							onClick={() => setDrawerOpen((value) => !value)}
+							onClick={toggleTheme}
+							aria-label={copy.theme.toggle}
+							aria-pressed={theme === "dark"}
+							title={theme === "dark" ? copy.theme.dark : copy.theme.light}
 						>
-							{drawerOpen ? (
-								<X width={20} height={20} aria-hidden />
+							{theme === null ? (
+								<SunMoon aria-hidden size={18} />
+							) : theme === "dark" ? (
+								<Moon aria-hidden size={18} />
 							) : (
-								<Menu width={20} height={20} aria-hidden />
+								<Sun aria-hidden size={18} />
 							)}
 						</button>
-					</div>
-				</div>
-				<div id="product-mobile-drawer" className="mobile-drawer" hidden={!drawerOpen}>
-					<nav className="site-container" aria-label={copy.a11y.mobileNavigation}>
-						{links.map((link, index) => (
-							<a
-								ref={index === 0 ? firstDrawerLinkRef : undefined}
-								key={link.href}
-								href={link.href}
-								aria-current={link.active ? "page" : undefined}
-								onClick={() => setDrawerOpen(false)}
-							>
-								<span>{link.label}</span>
-								<ChevronRight width={17} height={17} aria-hidden />
-							</a>
-						))}
-						<a href={outlineUrl} target="_blank" rel="noreferrer">
-							<span>{copy.nav.docs}</span>
-							<ChevronRight width={17} height={17} aria-hidden />
-						</a>
-						<a href={githubUrl} target="_blank" rel="noreferrer">
-							<span>{copy.nav.github}</span>
-							<ChevronRight width={17} height={17} aria-hidden />
-						</a>
-						<ThemeControl />
-						<details>
-							<summary>
-								<span>{copy.nav.language}</span>
-								<Languages width={17} height={17} aria-hidden />
-							</summary>
-							<div>
-								{ABOUT_LOCALES.map((item) => (
-									<a
-										key={item}
-										href={alternatePathByLocale[item]}
-										lang={ABOUT_LOCALE_META[item].htmlLang}
-										aria-current={item === locale ? "true" : undefined}
-									>
-										<span>{ABOUT_LOCALE_META[item].nativeName}</span>
-									</a>
-								))}
-							</div>
-						</details>
 					</nav>
 				</div>
 			</header>

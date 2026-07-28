@@ -1,5 +1,5 @@
 import { PRODUCT_DEFINITIONS } from "../src/content/productRegistry";
-import { isAboutLocale, negotiateAboutLocale, type AboutLocale } from "../src/i18n/locales";
+import { DEFAULT_LOCALE } from "../src/i18n/locales";
 import {
 	getContactPath,
 	getHomePath,
@@ -8,8 +8,8 @@ import {
 } from "../src/i18n/productPaths";
 
 type PagesMiddlewareContext = {
-	request: Request;
-	next: () => Response | Promise<Response>;
+	readonly request: Request;
+	readonly next: () => Response | Promise<Response>;
 };
 
 const publicProductSlugs: ReadonlySet<string> = new Set(
@@ -20,71 +20,39 @@ function normalizePathname(pathname: string): string {
 	return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
 }
 
-function resolveLocalizedEntry(pathname: string, locale: AboutLocale): string | undefined {
+function resolveDefaultLocaleEntry(pathname: string): string | undefined {
 	const normalized = normalizePathname(pathname);
 
-	if (normalized === "/") return getHomePath(locale);
-	if (normalized === "/product" || normalized === "/products") {
-		return getProductsPath(locale);
-	}
-	if (normalized === "/contact-us") return getContactPath(locale);
+	if (normalized === "/") return getHomePath(DEFAULT_LOCALE);
+	if (normalized === "/products") return getProductsPath(DEFAULT_LOCALE);
+	if (normalized === "/contact-us") return getContactPath(DEFAULT_LOCALE);
 
-	const detail = normalized.match(/^\/(?:product|products)\/([^/]+)$/);
-	if (!detail?.[1] || !publicProductSlugs.has(detail[1])) return undefined;
+	const detail = normalized.match(/^\/products\/([^/]+)$/);
+	const slug = detail?.[1];
+	if (!slug || !publicProductSlugs.has(slug)) return undefined;
 
-	return getProductPath(locale, detail[1]);
+	return getProductPath(DEFAULT_LOCALE, slug);
 }
 
-function resolveLocalizedLegacyPath(pathname: string): string | undefined {
-	const normalized = normalizePathname(pathname);
-
-	const legacyDirectory = normalized.match(/^\/([^/]+)\/product$/);
-	if (legacyDirectory?.[1] && isAboutLocale(legacyDirectory[1])) {
-		return getProductsPath(legacyDirectory[1]);
-	}
-
-	const legacyDetail = normalized.match(/^\/([^/]+)\/product\/([^/]+)$/);
-	if (
-		legacyDetail?.[1] &&
-		legacyDetail[2] &&
-		isAboutLocale(legacyDetail[1]) &&
-		publicProductSlugs.has(legacyDetail[2])
-	) {
-		return getProductPath(legacyDetail[1], legacyDetail[2]);
-	}
-
-	return undefined;
-}
-
-function redirectResponse(requestUrl: URL, targetPath: string, status: 301 | 302): Response {
+function redirectResponse(requestUrl: URL, targetPath: string): Response {
 	const location = new URL(targetPath, requestUrl);
 	location.search = requestUrl.search;
 
 	return new Response(null, {
-		status,
+		status: 302,
 		headers: {
-			"Cache-Control": status === 301 ? "public, max-age=86400" : "no-store",
+			"Cache-Control": "no-store",
 			Location: location.toString(),
-			...(status === 302 ? { Vary: "Accept-Language" } : {}),
 		},
 	});
 }
 
 export async function onRequest(context: PagesMiddlewareContext): Promise<Response> {
-	const url = new URL(context.request.url);
-
-	if (!["GET", "HEAD"].includes(context.request.method)) {
+	if (context.request.method !== "GET" && context.request.method !== "HEAD") {
 		return context.next();
 	}
 
-	const permanentTargetPath = resolveLocalizedLegacyPath(url.pathname);
-	if (permanentTargetPath) {
-		return redirectResponse(url, permanentTargetPath, 301);
-	}
-
-	const locale = negotiateAboutLocale(context.request.headers.get("accept-language"));
-	const targetPath = resolveLocalizedEntry(url.pathname, locale);
-	if (!targetPath) return context.next();
-
-	return redirectResponse(url, targetPath, 302);
+	const url = new URL(context.request.url);
+	const targetPath = resolveDefaultLocaleEntry(url.pathname);
+	return targetPath ? redirectResponse(url, targetPath) : context.next();
 }

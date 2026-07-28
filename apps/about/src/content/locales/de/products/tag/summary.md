@@ -1,1 +1,0 @@
-Geteilte, abfragbare Schlagwort-Infrastruktur.

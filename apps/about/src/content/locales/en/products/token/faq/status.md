@@ -1,1 +1,0 @@
-Privileged selects a separately validated, database-configurable limit profile with higher hard caps. It does not bypass permission checks. Every assignment is token-specific, time-limited, revisioned, and recorded with an actor and reason.

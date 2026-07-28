@@ -7,6 +7,5 @@ export default function Page() {
 	const data = useData<AboutPageData>();
 	if (data.kind !== "product") return null;
 	const product = getProductById(data.productId);
-	if (!product) return null;
 	return <ProductPage locale={data.locale} product={product} />;
 }
