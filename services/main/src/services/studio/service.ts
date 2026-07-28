@@ -26,10 +26,12 @@ import type {
 	StudioWorkState,
 } from "../api/users/schema";
 import {
+	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
+import { presentImageAsset } from "../units/service";
 import { decodeStudioCursor, encodeStudioCursor, type StudioCursorBoundary } from "./cursor";
 import { resolveStudioResourceUnitId } from "./projection";
 
@@ -98,6 +100,7 @@ type PresentedCandidate = {
 	readonly section: StudioSection;
 	readonly language: ContentLanguage;
 	readonly title: string | null;
+	readonly cover: { readonly id: string; readonly url: string } | null;
 	readonly status: "draft" | "published" | "archived";
 	readonly visibility: "public" | "unlisted" | "private";
 	readonly relations: StudioRelation[];
@@ -477,6 +480,11 @@ async function presentCandidate(input: {
 			id: unit.id,
 			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(
+				unit.id,
+				"cover",
+				localizationLanguages,
+			),
 			status: unit.status,
 			visibility: unit.visibility,
 			createdAt: unit.createdAt,
@@ -540,6 +548,7 @@ async function presentCandidate(input: {
 		section: input.query.section,
 		language: resource.language,
 		title: resource.title,
+		cover: presentImageAsset(resource.coverAssetId, "cover"),
 		status: resource.status,
 		visibility: resource.visibility,
 		relations: relationValues,

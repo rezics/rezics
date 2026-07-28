@@ -7,10 +7,10 @@ import { BookOpenIcon, ChevronRightIcon, StarIcon } from "lucide-react";
 
 import {
 	Button,
-	Card,
 	CardContent,
 	CardFooter,
 	CardHeader,
+	ContentCard,
 	Cover,
 	HoverCard,
 	HoverCardContent,
@@ -72,18 +72,16 @@ export type FeedTargetRating =
 
 export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 	return (
-		<Card
-			asChild
+		<ContentCard
 			className={cn(
-				"group/feed-card gap-0 rounded-none py-0 sm:rounded-2xl",
-				"transition-colors hover:bg-surface-hover focus-within:bg-surface-hover",
+				"group/feed-card",
 				"has-[[data-slot=feed-card-target-link]:hover]:bg-transparent",
 				"has-[[data-slot=feed-card-target-link]:focus-visible]:bg-transparent",
 				className,
 			)}
-		>
-			<article data-slot="feed-card" {...props} />
-		</Card>
+			data-slot="feed-card"
+			{...props}
+		/>
 	);
 }
 

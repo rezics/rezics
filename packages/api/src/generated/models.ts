@@ -34494,6 +34494,20 @@ export type ListCurrentUserStudioContentStatus200 = {
 		 */
 		language: ListCurrentUserStudioContentStatus200ItemsLanguageEnum;
 		title: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @default 'draft'
 		 * @type string

@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 
@@ -53,6 +55,13 @@ export default {
 		create: "생성",
 		empty: "현재 필터와 일치하는 콘텐츠가 없습니다",
 		untitled: "제목 없는 콘텐츠",
+		contributionCount: insert("기여 {{count}}회", { count: Number }),
+		activity: {
+			visited: "방문",
+			updated: "업데이트",
+			created: "생성",
+			relevant: "관련",
+		},
 	},
 	filters: {
 		viewLabel: "작업 관계",
@@ -62,6 +71,10 @@ export default {
 		visibilityLabel: "가시성",
 		sortLabel: "정렬 순서",
 		any: "모든",
+		more: "필터 더 보기",
+		clear: "필터 지우기",
+		cancel: "취소",
+		apply: "필터 적용",
 		views: {
 			all: "내 작업",
 			created: "내가 생성",

@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 
@@ -65,6 +67,13 @@ export default {
 		create: "Créer",
 		empty: "Aucun contenu ne correspond aux filtres actuels.",
 		untitled: "Contenu sans titre",
+		contributionCount: insert("Contributions : {{count}}", { count: Number }),
+		activity: {
+			visited: "Consulté",
+			updated: "Mis à jour",
+			created: "Créé",
+			relevant: "Pertinent",
+		},
 	},
 	filters: {
 		viewLabel: "Lien avec le travail",
@@ -74,6 +83,10 @@ export default {
 		visibilityLabel: "Visibilité",
 		sortLabel: "Ordre de tri",
 		any: "Tous",
+		more: "Plus de filtres",
+		clear: "Effacer les filtres",
+		cancel: "Annuler",
+		apply: "Appliquer les filtres",
 		views: {
 			all: "Mon travail",
 			created: "Créé par moi",

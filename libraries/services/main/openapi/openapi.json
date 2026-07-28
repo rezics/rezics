@@ -46273,6 +46273,7 @@
 													"section",
 													"language",
 													"title",
+													"cover",
 													"status",
 													"visibility",
 													"relations",
@@ -46361,6 +46362,23 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},

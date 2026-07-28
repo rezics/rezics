@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
@@ -53,6 +55,13 @@ export default {
 		create: "Create",
 		empty: "No content matches the current filters.",
 		untitled: "Untitled content",
+		contributionCount: insert("Contributions: {{count}}", { count: Number }),
+		activity: {
+			visited: "Visited",
+			updated: "Updated",
+			created: "Created",
+			relevant: "Relevant",
+		},
 	},
 	filters: {
 		viewLabel: "Work relationship",
@@ -62,6 +71,10 @@ export default {
 		visibilityLabel: "Visibility",
 		sortLabel: "Sort order",
 		any: "Any",
+		more: "More filters",
+		clear: "Clear filters",
+		cancel: "Cancel",
+		apply: "Apply filters",
 		views: {
 			all: "My work",
 			created: "Created by me",

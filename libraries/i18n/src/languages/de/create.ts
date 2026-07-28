@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { deTerminology } from "@rezics/i18n/terminology/de";
 
@@ -66,6 +68,13 @@ export default {
 		create: "Erstellen",
 		empty: "Keine Inhalte entsprechen den aktuellen Filtern.",
 		untitled: "Inhalt ohne Titel",
+		contributionCount: insert("Mitwirkungen: {{count}}", { count: Number }),
+		activity: {
+			visited: "Besucht",
+			updated: "Aktualisiert",
+			created: "Erstellt",
+			relevant: "Relevant",
+		},
 	},
 	filters: {
 		viewLabel: "Arbeitsbeziehung",
@@ -75,6 +84,10 @@ export default {
 		visibilityLabel: "Sichtbarkeit",
 		sortLabel: "Sortierung",
 		any: "Alle",
+		more: "Weitere Filter",
+		clear: "Filter zurücksetzen",
+		cancel: "Abbrechen",
+		apply: "Filter anwenden",
 		views: {
 			all: "Meine Arbeit",
 			created: "Von mir erstellt",

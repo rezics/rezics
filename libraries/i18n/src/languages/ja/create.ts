@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
@@ -59,6 +61,13 @@ export default {
 		create: "作成",
 		empty: "現在のフィルターに一致するコンテンツはありません。",
 		untitled: "タイトルなしコンテンツ",
+		contributionCount: insert("貢献 {{count}} 件", { count: Number }),
+		activity: {
+			visited: "閲覧",
+			updated: "更新",
+			created: "作成",
+			relevant: "関連",
+		},
 	},
 	filters: {
 		viewLabel: "作業関係",
@@ -68,6 +77,10 @@ export default {
 		visibilityLabel: "表示状態",
 		sortLabel: "並べ替え順",
 		any: "すべて",
+		more: "その他のフィルター",
+		clear: "フィルターを解除",
+		cancel: "キャンセル",
+		apply: "フィルターを適用",
 		views: {
 			all: "私の作業",
 			created: "私が作成",

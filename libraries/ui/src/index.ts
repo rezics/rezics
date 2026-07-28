@@ -95,6 +95,7 @@ export * from "./custom/banner";
 export * from "./custom/button";
 export * from "./custom/card";
 export * from "./custom/choice-select";
+export * from "./custom/content-card";
 export * from "./custom/cover";
 export * from "./custom/entity-picker";
 export * from "./custom/identity-avatar";

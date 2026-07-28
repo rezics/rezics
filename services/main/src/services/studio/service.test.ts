@@ -17,6 +17,7 @@ import { listStudioContent } from "./service";
 const ProfileId = "019b76da-a800-7300-8000-000000000001";
 const UnitId = "019b76da-a800-7300-8000-000000000002";
 const AuthorizationUnitId = "019b76da-a800-7300-8000-000000000003";
+const CoverId = "019b76da-a800-7300-8000-000000000005";
 const RelevantAt = new Date("2026-07-27T08:00:00.000Z");
 
 function resourceSelect() {
@@ -28,6 +29,7 @@ function resourceSelect() {
 						id: UnitId,
 						language: "en",
 						title: "Public work",
+						coverAssetId: CoverId,
 						status: "published",
 						visibility: "public",
 						createdAt: new Date("2026-01-01T00:00:00.000Z"),
@@ -104,6 +106,10 @@ describe("Studio work presentation", () => {
 			workState: "blocked",
 			permissions: [],
 			contributionCount: 3,
+			cover: {
+				id: CoverId,
+				url: `/image-assets/${CoverId}/presentations/cover/content`,
+			},
 		});
 	});
 

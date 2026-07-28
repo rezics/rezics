@@ -50,6 +50,15 @@ export const studioSortParser = parseAsStringLiteral(StudioSorts)
 	.withDefault("recent")
 	.withOptions(queryStateOptions);
 
+export const studioFilterParsers = {
+	view: studioViewParser,
+	permission: studioPermissionParser,
+	workState: studioWorkStateParser,
+	status: studioStatusParser,
+	visibility: studioVisibilityParser,
+	sort: studioSortParser,
+} as const;
+
 export type {
 	StudioPermission,
 	StudioSort,

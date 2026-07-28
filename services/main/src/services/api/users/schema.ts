@@ -94,6 +94,7 @@ export const StudioContentListResponse = t.Object({
 			section: StudioSection,
 			language: ContentLanguage,
 			title: t.Nullable(t.String()),
+			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			status: t.UnionEnum(UnitStatusValues),
 			visibility: t.UnionEnum(UnitVisibilityValues),
 			relations: t.Array(StudioRelation, { minItems: 1, uniqueItems: true }),

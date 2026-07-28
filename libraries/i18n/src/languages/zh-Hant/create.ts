@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
@@ -35,6 +37,13 @@ export default {
 		create: "建立",
 		empty: "沒有符合目前篩選條件的內容。",
 		untitled: "未命名內容",
+		contributionCount: insert("貢獻 {{count}} 次", { count: Number }),
+		activity: {
+			visited: "最近瀏覽",
+			updated: "最近更新",
+			created: "建立",
+			relevant: "最近與我相關",
+		},
 	},
 	filters: {
 		viewLabel: "工作關係",
@@ -44,6 +53,10 @@ export default {
 		visibilityLabel: "可見性",
 		sortLabel: "排序方式",
 		any: "不限",
+		more: "更多篩選",
+		clear: "清除篩選",
+		cancel: "取消",
+		apply: "套用篩選",
 		views: {
 			all: "我的工作",
 			created: "我建立的",
