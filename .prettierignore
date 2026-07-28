@@ -9,6 +9,7 @@ references/
 journals/
 .agents/
 .codex/
+.loclens/
 *.tsbuildinfo
 yarn.lock
 .yarn/

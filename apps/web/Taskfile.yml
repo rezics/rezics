@@ -12,6 +12,11 @@ tasks:
             - yarn run generate:offline
             - yarn exec vinext build
 
+    offline:check:
+        desc: Verify the committed offline page matches its formatted generated output.
+        cmds:
+            - yarn run generate:offline:check
+
     typecheck:
         desc: Type-check the frontend.
         cmds:

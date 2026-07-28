@@ -14,16 +14,22 @@
 				background: #ffffff;
 			}
 			:root:lang(zh-Hans) {
-				font-family: Inter, "Noto Sans CJK SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+				font-family:
+					Inter, "Noto Sans CJK SC", "Microsoft YaHei", ui-sans-serif, system-ui,
+					sans-serif;
 			}
 			:root:lang(zh-Hant) {
-				font-family: Inter, "Noto Sans CJK TC", "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
+				font-family:
+					Inter, "Noto Sans CJK TC", "Microsoft JhengHei", ui-sans-serif, system-ui,
+					sans-serif;
 			}
 			:root:lang(ja) {
-				font-family: Inter, "Noto Sans CJK JP", "Yu Gothic", ui-sans-serif, system-ui, sans-serif;
+				font-family:
+					Inter, "Noto Sans CJK JP", "Yu Gothic", ui-sans-serif, system-ui, sans-serif;
 			}
 			:root:lang(ko) {
-				font-family: Inter, "Noto Sans CJK KR", "Malgun Gothic", ui-sans-serif, system-ui, sans-serif;
+				font-family:
+					Inter, "Noto Sans CJK KR", "Malgun Gothic", ui-sans-serif, system-ui, sans-serif;
 			}
 			body {
 				min-height: 100svh;
@@ -83,21 +89,83 @@
 			<a href="/" id="retry"></a>
 		</main>
 		<script>
-			const messages = {"de":{"title":"Offline","heading":"Du bist offline","description":"Stelle die Verbindung wieder her, um weiterzusuchen.","retry":"Erneut versuchen"},"en":{"title":"Offline","heading":"You’re offline","description":"Reconnect to continue browsing.","retry":"Retry"},"es":{"title":"Sin conexión","heading":"Estás sin conexión","description":"Vuelve a conectarte para continuar navegando.","retry":"Reintentar"},"fr":{"title":"Hors connexion","heading":"Vous êtes hors connexion","description":"Rétablissez la connexion pour poursuivre votre navigation.","retry":"Réessayer"},"ja":{"title":"オフライン","heading":"現在オフラインです","description":"再接続すると閲覧を続けられます。","retry":"再試行"},"ko":{"title":"오프라인","heading":"현재 오프라인 상태입니다","description":"다시 연결하면 계속 탐색할 수 있습니다.","retry":"재시도"},"zh-Hans":{"title":"离线","heading":"当前处于离线状态","description":"重新连接后即可继续浏览。","retry":"重试"},"zh-Hant":{"title":"離線","heading":"目前處於離線狀態","description":"重新連線後即可繼續瀏覽。","retry":"重試"}};
+			const messages = {
+				de: {
+					title: "Offline",
+					heading: "Du bist offline",
+					description: "Stelle die Verbindung wieder her, um weiterzusuchen.",
+					retry: "Erneut versuchen",
+				},
+				en: {
+					title: "Offline",
+					heading: "You’re offline",
+					description: "Reconnect to continue browsing.",
+					retry: "Retry",
+				},
+				es: {
+					title: "Sin conexión",
+					heading: "Estás sin conexión",
+					description: "Vuelve a conectarte para continuar navegando.",
+					retry: "Reintentar",
+				},
+				fr: {
+					title: "Hors connexion",
+					heading: "Vous êtes hors connexion",
+					description: "Rétablissez la connexion pour poursuivre votre navigation.",
+					retry: "Réessayer",
+				},
+				ja: {
+					title: "オフライン",
+					heading: "現在オフラインです",
+					description: "再接続すると閲覧を続けられます。",
+					retry: "再試行",
+				},
+				ko: {
+					title: "오프라인",
+					heading: "현재 오프라인 상태입니다",
+					description: "다시 연결하면 계속 탐색할 수 있습니다.",
+					retry: "재시도",
+				},
+				"zh-Hans": {
+					title: "离线",
+					heading: "当前处于离线状态",
+					description: "重新连接后即可继续浏览。",
+					retry: "重试",
+				},
+				"zh-Hant": {
+					title: "離線",
+					heading: "目前處於離線狀態",
+					description: "重新連線後即可繼續瀏覽。",
+					retry: "重試",
+				},
+			};
 			const requested = [...(navigator.languages || []), navigator.language || ""];
-			const match = requested.map((value) => {
-				try {
-					const locale = new Intl.Locale(value.replaceAll("_", "-"));
-					if (locale.language === "zh") {
-						if (locale.script === "Hant" || ["TW", "HK", "MO"].includes(locale.region)) return "zh-Hant";
-						if (locale.script === "Hans" || ["CN", "SG"].includes(locale.region)) return "zh-Hans";
-						return "zh-Hant";
-					}
-					return Object.hasOwn(messages, locale.language) ? locale.language : undefined;
-				} catch {
-					return undefined;
-				}
-			}).find(Boolean) || "zh-Hant";
+			const match =
+				requested
+					.map((value) => {
+						try {
+							const locale = new Intl.Locale(value.replaceAll("_", "-"));
+							if (locale.language === "zh") {
+								if (
+									locale.script === "Hant" ||
+									["TW", "HK", "MO"].includes(locale.region)
+								)
+									return "zh-Hant";
+								if (
+									locale.script === "Hans" ||
+									["CN", "SG"].includes(locale.region)
+								)
+									return "zh-Hans";
+								return "zh-Hant";
+							}
+							return Object.hasOwn(messages, locale.language)
+								? locale.language
+								: undefined;
+						} catch {
+							return undefined;
+						}
+					})
+					.find(Boolean) || "zh-Hant";
 			const copy = messages[match];
 			document.documentElement.lang = match;
 			document.title = copy.title + " · " + "REZICS";

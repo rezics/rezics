@@ -29,6 +29,7 @@ jobs:
                   key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock', '.yarnrc.yml', '.yarn/releases/*.cjs') }}
                   restore-keys: yarn-${{ runner.os }}-
             - run: devenv shell yarn install --immutable
+            - run: devenv shell task apps-web:offline:check
             - run: devenv shell task format:check
             - run: devenv shell task db:check
             - name: Start Seed contract infrastructure

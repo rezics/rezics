@@ -1,6 +1,7 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { format, resolveConfig } from "prettier";
 
 import deState from "../../../libraries/i18n/src/languages/de/state.ts";
 import enState from "../../../libraries/i18n/src/languages/en/state.ts";
@@ -25,6 +26,16 @@ const messages = {
 const serializedMessages = JSON.stringify(messages).replaceAll("<", "\\u003c");
 const serializedBrandName = JSON.stringify(verbatimTerms.rezics.value);
 const outputPath = fileURLToPath(new URL("../public/offline.html", import.meta.url));
+
+type GenerationMode = "check" | "write";
+
+function parseGenerationMode(args: readonly string[]): GenerationMode {
+	if (args.length === 0) return "write";
+	if (args.length === 1 && args[0] === "--check") return "check";
+	throw new Error("Usage: generate-offline-page.ts [--check]");
+}
+
+const generationMode = parseGenerationMode(process.argv.slice(2));
 
 const html = `<!doctype html>
 <html lang="zh-Hant">
@@ -137,4 +148,18 @@ const html = `<!doctype html>
 </html>
 `;
 
-await writeFile(outputPath, html);
+const prettierConfig = await resolveConfig(outputPath);
+const formattedHtml = await format(html, {
+	...(prettierConfig ?? {}),
+	filepath: outputPath,
+});
+
+if (generationMode === "check") {
+	const currentHtml = await readFile(outputPath, "utf8");
+	if (currentHtml !== formattedHtml)
+		throw new Error(
+			`${outputPath} is stale; run yarn workspace @rezics/frontend generate:offline`,
+		);
+} else {
+	await writeFile(outputPath, formattedHtml);
+}
