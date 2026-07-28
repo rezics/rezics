@@ -61,7 +61,6 @@ export const ReplacePublicUnitSlugAddressBody = t.Object(
 	{ slug: SlugLabelInput },
 	{ additionalProperties: false },
 );
-export const ReplaceOwnProfileSlugAddressBody = ReplacePublicUnitSlugAddressBody;
 
 export const UnitSlugAddressParams = t.Object({ unitId: Uuid });
 
@@ -110,7 +109,6 @@ export const ReleaseSlugRedirectBody = t.Object(
 export type ResolveSlugAddressBody = Static<typeof ResolveSlugAddressBody>;
 export type ScopedSlugAddressParams = Static<typeof ScopedSlugAddressParams>;
 export type ResolveScopedSlugAddressQuery = Static<typeof ResolveScopedSlugAddressQuery>;
-export type ReplaceOwnProfileSlugAddressBody = Static<typeof ReplaceOwnProfileSlugAddressBody>;
 export type ReplacePublicUnitSlugAddressBody = Static<typeof ReplacePublicUnitSlugAddressBody>;
 export type UnitSlugAddressParams = Static<typeof UnitSlugAddressParams>;
 export type ReplaceUnitSlugAddressBody = Static<typeof ReplaceUnitSlugAddressBody>;

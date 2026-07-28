@@ -184,6 +184,8 @@ export default {
 	UnitLastLocalizationRemovalForbidden: "A Unit must keep at least one content language.",
 	InvalidSlug: `${unitSlugTerms.label} must be a 1-63 character lowercase ${verbatimTerms.ascii.value} hyphenated label.`,
 	SlugTaken: `That ${unitSlugTerms.inline} is already used in this Unit namespace.`,
+	SlugReserved: `That ${unitSlugTerms.inline} is reserved and cannot be assigned.`,
+	ProfileSlugChangeUnavailable: `Your Profile ${unitSlugTerms.inline} cannot currently be changed after it has been set.`,
 	SlugScopeNotFound: `The Unit namespace for this ${unitSlugTerms.inline} could not be found.`,
 	SlugScopeUnavailable: `Unaddressed and deleted Units cannot be canonical ${unitSlugTerms.inline} namespaces.`,
 	SlugScopeCycle: `This move would create a ${unitSlugTerms.inline} namespace cycle.`,

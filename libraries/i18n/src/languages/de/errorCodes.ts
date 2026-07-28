@@ -199,6 +199,8 @@ export default {
 	UnitLastLocalizationRemovalForbidden: "Eine Unit muss mindestens eine Inhaltssprache behalten.",
 	InvalidSlug: `${unitSlugTerms.label} muss eine 1 bis 63 Zeichen lange, kleingeschriebene und mit Bindestrichen getrennte ${verbatimTerms.ascii.value}-Bezeichnung sein.`,
 	SlugTaken: `Diese ${unitSlugTerms.inline} wird in diesem Unit-Namensraum bereits verwendet.`,
+	SlugReserved: `Diese ${unitSlugTerms.inline} ist reserviert und kann nicht verwendet werden.`,
+	ProfileSlugChangeUnavailable: `Die ${unitSlugTerms.inline} deines Profils kann nach dem Festlegen derzeit nicht geändert werden.`,
 	SlugScopeNotFound: `Der Unit-Namensraum für diese ${unitSlugTerms.inline} wurde nicht gefunden.`,
 	SlugScopeUnavailable: `Nicht adressierte und gelöschte Units können keine kanonischen Namensräume für ${unitSlugTerms.plural} sein.`,
 	SlugScopeCycle: `Diese Verschiebung würde einen Zyklus im Namensraum der ${unitSlugTerms.inline}en erzeugen.`,

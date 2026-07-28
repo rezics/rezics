@@ -146,6 +146,24 @@ export class SlugTaken extends Data.TaggedError("SlugTaken") {
 	}
 }
 
+export class SlugReserved extends Data.TaggedError("SlugReserved") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = SlugReserved.status;
+	readonly message = "Slug is reserved from self-service assignment";
+	readonly details: { readonly slug: string };
+
+	constructor(slug: string) {
+		super();
+		this.details = { slug };
+	}
+}
+
+export class ProfileSlugChangeUnavailable extends Data.TaggedError("ProfileSlugChangeUnavailable") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ProfileSlugChangeUnavailable.status;
+	readonly message = "The Profile slug cannot be changed after assignment";
+}
+
 export class SlugScopeNotFound extends Data.TaggedError("SlugScopeNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = SlugScopeNotFound.status;
@@ -247,6 +265,8 @@ export const UnitErrors = [
 	UnitVariantMainUnavailable,
 	InvalidSlug,
 	SlugTaken,
+	SlugReserved,
+	ProfileSlugChangeUnavailable,
 	SlugScopeNotFound,
 	SlugScopeUnavailable,
 	SlugScopeCycle,

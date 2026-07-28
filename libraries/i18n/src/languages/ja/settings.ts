@@ -48,6 +48,10 @@ export default {
 	profile: "プロフィール",
 	slugAddress: unitSlugTerms.label,
 	slugAddressHint: `小文字の${verbatimTerms.ascii.value}文字、数字、またはハイフンを1～63文字使用します。変更後、古い${verbatimTerms.url.value}は新しい${verbatimTerms.url.value}に永久にリダイレクトされます。`,
+	profileSlugAddressHint: `慎重に選んでください。現在は一度だけ設定でき、設定後は変更できません。小文字の${verbatimTerms.ascii.value}文字、数字、またはハイフンを1～63文字使用します。プラットフォームが予約している名前は使用できません。`,
+	profileSlugAddressAssignedHint:
+		"このプロフィールのアドレスは設定済みで、現在は変更できません。",
+	profileSlugReserved: "このプロフィールのアドレスは予約されているため使用できません。",
 	preferences: "設定",
 	interfaceLanguage: "インターフェース言語",
 	contentLanguage: "コンテンツ言語の優先設定",

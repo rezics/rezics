@@ -1,4 +1,4 @@
-import { RealmUnitCreatePermissionValues } from "@rezics/access";
+import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, gt, inArray, isNull, lt, max, notInArray, or, sql } from "drizzle-orm";
@@ -155,6 +155,10 @@ const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
 const RealmMutationNotFoundResponse = toApiErrorResponse(["RealmNotFound", "ImageAssetNotFound"]);
 const RealmMutationForbiddenResponse = toApiErrorResponse(["RealmCapabilityRequired"]);
+const RealmSlugMutationForbiddenResponse = toApiErrorResponse([
+	"RealmCapabilityRequired",
+	"PlatformCapabilityRequired",
+]);
 
 function presentRealmUnitStatus(value: string | null) {
 	if (value === null) return null;
@@ -447,6 +451,7 @@ export default new Elysia({ prefix: "/realms" })
 	.put(
 		"/:realmId/slug-address",
 		async ({ params, authorization, body }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			const result = await replaceRealmSlugAddress(authorization, {
 				realmId: params.realmId,
 				slug: body.slug,
@@ -460,7 +465,7 @@ export default new Elysia({ prefix: "/realms" })
 			response: {
 				[StatusCodes.OK]: SlugAddressMutationResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: RealmSlugMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound", "UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"SlugTaken",
@@ -473,7 +478,7 @@ export default new Elysia({ prefix: "/realms" })
 				operationId: "replaceRealmSlugAddress",
 				summary: "Replace a Realm slug address",
 				description:
-					"Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.",
+					"Development preview. Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.",
 				tags: ["Realms", "Slug Addresses"],
 			},
 		},

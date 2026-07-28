@@ -25,6 +25,7 @@ import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { ensureScoreContextParticipation } from "../../scores/context";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
+import { assignCurrentProfileSlugAddress } from "../../units/slug-address";
 import {
 	BlockResponse,
 	FollowResponse,
@@ -39,7 +40,9 @@ import {
 	PreferencesResponse,
 	PublicProfileResponse,
 } from "../schema/response";
+import { PublicSlugAddressResponse } from "../slug-addresses/schema";
 import {
+	AssignCurrentProfileSlugBody,
 	ReplacePreferencesBody,
 	parseCollectionConfig,
 	FollowingListQuery,
@@ -121,6 +124,35 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.NOT_FOUND]: ProfileNotFoundResponse,
 			},
 			detail: { summary: "Current user profile", tags: ["Users"] },
+		},
+	)
+	.put(
+		"/me/profile-slug",
+		async ({ body, profile }) => assignCurrentProfileSlugAddress(profile.unitId, body),
+		{
+			access: "session-only",
+			body: AssignCurrentProfileSlugBody,
+			response: {
+				[StatusCodes.OK]: PublicSlugAddressResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["InteractiveSessionRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"ProfileSlugChangeUnavailable",
+					"SlugTaken",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"SlugReserved",
+					"SlugDepthExceeded",
+				]),
+			},
+			detail: {
+				operationId: "assignCurrentProfileSlug",
+				summary: "Assign the current Profile slug once",
+				description:
+					"Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.",
+				tags: ["Users", "First-party Preview"],
+			},
 		},
 	)
 	.get(

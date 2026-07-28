@@ -1,3 +1,4 @@
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
 
@@ -8,7 +9,6 @@ import {
 	getCanonicalUnitSlugAddressWithPlatformAccess,
 	getPublicCanonicalUnitSlugAddress,
 	releaseSlugRedirect,
-	replaceOwnProfileSlugAddress,
 	replaceUnitSlugAddressWithPlatformAccess,
 	resolveScopedUnitAddress,
 	resolveUnitPath,
@@ -19,7 +19,6 @@ import {
 	CanonicalSlugAddressResponse,
 	CreateSlugNamespaceBody,
 	ReleaseSlugRedirectBody,
-	ReplaceOwnProfileSlugAddressBody,
 	ReplaceUnitSlugAddressBody,
 	ResolvedSlugAddressResponse,
 	ResolveSlugAddressBody,
@@ -123,40 +122,12 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			},
 		},
 	)
-	.put(
-		"/profile",
-		async ({ authorization, body }) =>
-			presentPath(await replaceOwnProfileSlugAddress(authorization, body)),
-		{
-			access: "write:unit:update",
-			body: ReplaceOwnProfileSlugAddressBody,
-			response: {
-				[StatusCodes.OK]: SlugAddressMutationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"ApiTokenPermissionRequired",
-					"EmailVerificationRequired",
-					"AccountRestricted",
-					"UnitAddressMutationForbidden",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: SlugMutationConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
-			},
-			detail: {
-				operationId: "replaceOwnProfileSlugAddress",
-				summary: "Replace the current Profile slug address",
-				description:
-					"Sets or replaces the authenticated Profile's optional slug label. The server always uses the permanent users namespace; callers cannot choose a scope. Repeating the same replacement is idempotent.",
-				tags: ["Slug Addresses"],
-			},
-		},
-	)
 	.get(
 		"/units/:unitId",
-		async ({ params, authorization }) =>
-			getCanonicalUnitSlugAddressWithPlatformAccess(authorization, params.unitId),
+		async ({ params, authorization }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return getCanonicalUnitSlugAddressWithPlatformAccess(authorization, params.unitId);
+		},
 		{
 			access: "session-only",
 			params: UnitSlugAddressParams,
@@ -173,20 +144,22 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				operationId: "getUnitSlugAddressWithPlatformAccess",
 				summary: "Get a Unit canonical slug address with platform access",
 				description:
-					"Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
+					"Development-preview control plane. Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
 				tags: ["Slug Addresses"],
 			},
 		},
 	)
 	.put(
 		"/units/:unitId",
-		async ({ params, authorization, body }) =>
-			presentPath(
+		async ({ params, authorization, body }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return presentPath(
 				await replaceUnitSlugAddressWithPlatformAccess(authorization, {
 					unitId: params.unitId,
 					...body,
 				}),
-			),
+			);
+		},
 		{
 			access: "session-only",
 			params: UnitSlugAddressParams,
@@ -204,18 +177,20 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				operationId: "replaceUnitSlugAddressWithPlatformAccess",
 				summary: "Replace any Unit slug address with platform access",
 				description:
-					"Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.",
+					"Development-preview control plane. Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.",
 				tags: ["Slug Addresses"],
 			},
 		},
 	)
 	.post(
 		"/namespaces",
-		async ({ authorization, body, status }) =>
-			status(
+		async ({ authorization, body, status }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return status(
 				StatusCodes.CREATED,
 				presentPath(await createSlugNamespace(authorization, body)),
-			),
+			);
+		},
 		{
 			access: "session-only",
 			body: CreateSlugNamespaceBody,
@@ -232,7 +207,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				operationId: "createSlugNamespaceWithPlatformAccess",
 				summary: "Create an explicitly addressed namespace with platform access",
 				description:
-					"Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.",
+					"Development-preview control plane. Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.",
 				tags: ["Slug Addresses"],
 			},
 		},
@@ -240,6 +215,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 	.delete(
 		"/redirects/:redirectAddressId",
 		async ({ params, authorization, body, status }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await releaseSlugRedirect(authorization, {
 				redirectAddressId: params.redirectAddressId,
 				reasonCode: body.reasonCode,
@@ -260,7 +236,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				operationId: "releaseSlugRedirectWithPlatformAccess",
 				summary: "Release a retained slug redirect with platform access",
 				description:
-					"Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.",
+					"Development-preview control plane. Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.",
 				tags: ["Slug Addresses"],
 				responses: NoContentResponse,
 			},

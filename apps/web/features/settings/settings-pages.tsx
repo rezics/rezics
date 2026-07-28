@@ -9,7 +9,7 @@ import {
 	useGetApiUsersMePreferences,
 	usePatchApiUsersMe,
 	usePutApiUsersMePreferences,
-	useReplaceOwnProfileSlugAddress,
+	useAssignCurrentProfileSlug,
 	type GetApiUsersMeStatus200,
 	type PutApiUsersMePreferencesRequestContentRatingsEnum as ContentRating,
 } from "@rezics/openapi-tanstack-query";
@@ -149,8 +149,10 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 				]),
 		},
 	});
-	const replaceSlug = useReplaceOwnProfileSlugAddress({
+	const assignSlug = useAssignCurrentProfileSlug({
 		mutation: {
+			retry: false,
+			throwOnError: false,
 			onSuccess: () =>
 				Promise.all([
 					queryClient.invalidateQueries({ queryKey: getApiUsersMeQueryKey() }),
@@ -241,10 +243,11 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 			<Card>
 				<CardContent className="p-5">
 					<SlugAddressForm
-						error={replaceSlug.error}
+						error={assignSlug.error}
 						initialSlug={current.slugAddress?.slug}
-						isPending={replaceSlug.isPending}
-						onSubmit={(slug) => replaceSlug.mutateAsync({ body: { slug } })}
+						isPending={assignSlug.isPending}
+						mode="assign-once"
+						onSubmit={(slug) => assignSlug.mutateAsync({ body: { slug } })}
 					/>
 				</CardContent>
 			</Card>

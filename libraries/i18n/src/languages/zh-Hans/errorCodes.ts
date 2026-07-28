@@ -174,6 +174,8 @@ export default {
 	UnitLastLocalizationRemovalForbidden: "作品必须保留至少一种内容语言。",
 	InvalidSlug: `${unitSlugTerms.label}必须是 1 至 63 个字符的小写 ${verbatimTerms.ascii.value} 短横线标签。`,
 	SlugTaken: `这个条目命名空间中的${unitSlugTerms.inline}已被使用。`,
+	SlugReserved: `这个${unitSlugTerms.inline}是平台保留名称，无法使用。`,
+	ProfileSlugChangeUnavailable: `个人资料的${unitSlugTerms.inline}设置后目前无法更改。`,
 	SlugScopeNotFound: `找不到${unitSlugTerms.inline}所属的条目命名空间。`,
 	SlugScopeUnavailable: `没有地址或已删除的条目，不能作为${unitSlugTerms.inline}的标准命名空间。`,
 	SlugScopeCycle: `这次移动会形成${unitSlugTerms.inline}命名空间循环。`,

@@ -9176,6 +9176,8 @@
 					"UnitVariantMainUnavailable",
 					"InvalidSlug",
 					"SlugTaken",
+					"SlugReserved",
+					"ProfileSlugChangeUnavailable",
 					"SlugScopeNotFound",
 					"SlugScopeUnavailable",
 					"SlugScopeCycle",
@@ -36981,7 +36983,7 @@
 			"put": {
 				"operationId": "replaceZoneSlugAddress",
 				"summary": "Replace a Zone slug address",
-				"description": "Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.",
+				"description": "Development preview. Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.",
 				"tags": ["Zones", "Slug Addresses"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -37113,7 +37115,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"PlatformCapabilityRequired"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -40111,7 +40116,7 @@
 				"x-rezics-policy-operation-id": "getApiZonesByZoneIdPages"
 			},
 			"post": {
-				"summary": "Create Zone page",
+				"summary": "Create Zone page in development preview",
 				"tags": ["Zones"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -40347,7 +40352,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"PlatformCapabilityRequired"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -40663,7 +40671,7 @@
 				"x-rezics-policy-operation-id": "getApiZonesByZoneIdPagesByPageId"
 			},
 			"put": {
-				"summary": "Replace Zone page",
+				"summary": "Replace Zone page in development preview",
 				"tags": ["Zones"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -40905,7 +40913,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"PlatformCapabilityRequired"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -46996,6 +47007,229 @@
 				},
 				"operationId": "patchApiUsersMe",
 				"x-rezics-policy-operation-id": "patchApiUsersMe"
+			}
+		},
+		"/api/users/me/profile-slug": {
+			"put": {
+				"operationId": "assignCurrentProfileSlug",
+				"summary": "Assign the current Profile slug once",
+				"description": "Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.",
+				"tags": ["Users", "First-party Preview"],
+				"security": [{ "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["slug"],
+								"properties": {
+									"slug": {
+										"minLength": 1,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["slug", "scopeUnitId", "canonicalPath"],
+									"properties": {
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										},
+										"scopeUnitId": { "format": "uuid", "type": "string" },
+										"canonicalPath": {
+											"minItems": 2,
+											"maxItems": 3,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "InvalidSlug",
+															"type": "string",
+															"enum": ["InvalidSlug"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InteractiveSessionRequired",
+													"type": "string",
+													"enum": ["InteractiveSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ProfileSlugChangeUnavailable",
+													"type": "string",
+													"enum": [
+														"ProfileSlugChangeUnavailable",
+														"SlugTaken"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SlugReserved",
+															"type": "string",
+															"enum": [
+																"SlugReserved",
+																"SlugDepthExceeded"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"x-rezics-policy-operation-id": "putApiUsersMeProfile-slug"
 			}
 		},
 		"/api/users/me/studio": {
@@ -56355,319 +56589,11 @@
 				"x-rezics-policy-operation-id": "getApiSlug-addressesScopesByScopeUnitIdBySlug"
 			}
 		},
-		"/api/slug-addresses/profile": {
-			"put": {
-				"operationId": "replaceOwnProfileSlugAddress",
-				"summary": "Replace the current Profile slug address",
-				"description": "Sets or replaces the authenticated Profile's optional slug label. The server always uses the permanent users namespace; callers cannot choose a scope. Repeating the same replacement is idempotent.",
-				"tags": ["Slug Addresses"],
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["slug"],
-								"properties": {
-									"slug": {
-										"minLength": 1,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
-										"type": "string"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": [
-										"addressId",
-										"unitId",
-										"scopeUnitId",
-										"slug",
-										"redirectAddressId",
-										"canonicalPath"
-									],
-									"properties": {
-										"addressId": { "format": "uuid", "type": "string" },
-										"unitId": { "format": "uuid", "type": "string" },
-										"scopeUnitId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"slug": {
-											"minLength": 1,
-											"maxLength": 63,
-											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
-											"type": "string"
-										},
-										"redirectAddressId": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "uuid", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"canonicalPath": {
-											"minItems": 1,
-											"maxItems": 3,
-											"type": "array",
-											"items": {
-												"minLength": 1,
-												"maxLength": 63,
-												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
-												"type": "string"
-											}
-										}
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Response for status 400",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "InvalidSlug",
-															"type": "string",
-															"enum": ["InvalidSlug"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/MalformedRequestBody" }
-									]
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Response for status 401",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "AuthenticationRequired",
-													"type": "string",
-													"enum": ["AuthenticationRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ApiTokenPermissionRequired",
-													"type": "string",
-													"enum": [
-														"ApiTokenPermissionRequired",
-														"EmailVerificationRequired",
-														"AccountRestricted",
-														"UnitAddressMutationForbidden"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "SlugTaken",
-													"type": "string",
-													"enum": [
-														"SlugTaken",
-														"SlugScopeUnavailable",
-														"SlugScopeCycle"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Response for status 422",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "SlugDepthExceeded",
-															"type": "string",
-															"enum": ["SlugDepthExceeded"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/ValidationError" }
-									]
-								}
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"x-rezics-policy-operation-id": "putApiSlug-addressesProfile"
-			}
-		},
 		"/api/slug-addresses/units/{unitId}": {
 			"get": {
 				"operationId": "getUnitSlugAddressWithPlatformAccess",
 				"summary": "Get a Unit canonical slug address with platform access",
-				"description": "Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
+				"description": "Development-preview control plane. Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
 				"tags": ["Slug Addresses"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -56813,7 +56739,7 @@
 			"put": {
 				"operationId": "replaceUnitSlugAddressWithPlatformAccess",
 				"summary": "Replace any Unit slug address with platform access",
-				"description": "Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.",
+				"description": "Development-preview control plane. Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.",
 				"tags": ["Slug Addresses"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -57117,7 +57043,7 @@
 			"post": {
 				"operationId": "createSlugNamespaceWithPlatformAccess",
 				"summary": "Create an explicitly addressed namespace with platform access",
-				"description": "Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.",
+				"description": "Development-preview control plane. Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.",
 				"tags": ["Slug Addresses"],
 				"security": [{ "SessionCookie": [] }],
 				"requestBody": {
@@ -57413,7 +57339,7 @@
 			"delete": {
 				"operationId": "releaseSlugRedirectWithPlatformAccess",
 				"summary": "Release a retained slug redirect with platform access",
-				"description": "Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.",
+				"description": "Development-preview control plane. Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.",
 				"tags": ["Slug Addresses"],
 				"responses": {
 					"204": {
@@ -117869,7 +117795,7 @@
 			"put": {
 				"operationId": "replaceRealmSlugAddress",
 				"summary": "Replace a Realm slug address",
-				"description": "Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.",
+				"description": "Development preview. Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.",
 				"tags": ["Realms", "Slug Addresses"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -118001,7 +117927,10 @@
 												"code": {
 													"default": "RealmCapabilityRequired",
 													"type": "string",
-													"enum": ["RealmCapabilityRequired"]
+													"enum": [
+														"RealmCapabilityRequired",
+														"PlatformCapabilityRequired"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}

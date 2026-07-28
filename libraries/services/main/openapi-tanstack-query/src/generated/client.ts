@@ -5,8 +5,8 @@
 
 import type { Options, RequestResult } from "./.kubb/client";
 import type {
-	CreateSlugNamespaceWithPlatformAccessOptions,
-	CreateSlugNamespaceWithPlatformAccessResponses,
+	AssignCurrentProfileSlugOptions,
+	AssignCurrentProfileSlugResponses,
 	DeleteApiApiTokensByTokenIdOptions,
 	DeleteApiApiTokensByTokenIdResponses,
 	DeleteApiMessagesByMessageIdOptions,
@@ -287,12 +287,12 @@ import type {
 	GetPublicUnitSlugAddressResponses,
 	ResolveScopedUnitSlugAddressOptions,
 	ResolveScopedUnitSlugAddressResponses,
-	ReplaceOwnProfileSlugAddressOptions,
-	ReplaceOwnProfileSlugAddressResponses,
 	GetUnitSlugAddressWithPlatformAccessOptions,
 	GetUnitSlugAddressWithPlatformAccessResponses,
 	ReplaceUnitSlugAddressWithPlatformAccessOptions,
 	ReplaceUnitSlugAddressWithPlatformAccessResponses,
+	CreateSlugNamespaceWithPlatformAccessOptions,
+	CreateSlugNamespaceWithPlatformAccessResponses,
 	ReleaseSlugRedirectWithPlatformAccessOptions,
 	ReleaseSlugRedirectWithPlatformAccessResponses,
 	PostApiUnitsPresentationsOptions,
@@ -1930,7 +1930,7 @@ export function getApiSeriesBySeriesIdReleases<ThrowOnError extends boolean = tr
 }
 
 /**
- * @description Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
+ * @description Development preview. Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
  * @summary Replace a Zone slug address
  * {@link /api/zones/:zoneId/slug-address}
  */
@@ -2013,7 +2013,7 @@ export function getApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Create Zone page
+ * @summary Create Zone page in development preview
  * {@link /api/zones/:zoneId/pages}
  */
 export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
@@ -2049,7 +2049,7 @@ export function getApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = 
 }
 
 /**
- * @summary Replace Zone page
+ * @summary Replace Zone page in development preview
  * {@link /api/zones/:zoneId/pages/:pageId}
  */
 export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
@@ -2559,6 +2559,24 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiUsersMeResponses, ThrowOnError>>;
+}
+
+/**
+ * @description Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.
+ * @summary Assign the current Profile slug once
+ * {@link /api/users/me/profile-slug}
+ */
+export function assignCurrentProfileSlug<ThrowOnError extends boolean = true>(
+	options: Options<AssignCurrentProfileSlugOptions, ThrowOnError>,
+): Promise<RequestResult<AssignCurrentProfileSlugResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/users/me/profile-slug",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<AssignCurrentProfileSlugResponses, ThrowOnError>>;
 }
 
 /**
@@ -3372,28 +3390,7 @@ export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true
 }
 
 /**
- * @description Sets or replaces the authenticated Profile's optional slug label. The server always uses the permanent users namespace; callers cannot choose a scope. Repeating the same replacement is idempotent.
- * @summary Replace the current Profile slug address
- * {@link /api/slug-addresses/profile}
- */
-export function replaceOwnProfileSlugAddress<ThrowOnError extends boolean = true>(
-	options: Options<ReplaceOwnProfileSlugAddressOptions, ThrowOnError>,
-): Promise<RequestResult<ReplaceOwnProfileSlugAddressResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/slug-addresses/profile",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReplaceOwnProfileSlugAddressResponses, ThrowOnError>>;
-}
-
-/**
- * @description Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
+ * @description Development-preview control plane. Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
  * @summary Get a Unit canonical slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
@@ -3411,7 +3408,7 @@ export function getUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolea
 }
 
 /**
- * @description Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
+ * @description Development-preview control plane. Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
  * @summary Replace any Unit slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
@@ -3429,7 +3426,7 @@ export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends bo
 }
 
 /**
- * @description Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
+ * @description Development-preview control plane. Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
  * @summary Create an explicitly addressed namespace with platform access
  * {@link /api/slug-addresses/namespaces}
  */
@@ -3447,7 +3444,7 @@ export function createSlugNamespaceWithPlatformAccess<ThrowOnError extends boole
 }
 
 /**
- * @description Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
+ * @description Development-preview control plane. Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
  * @summary Release a retained slug redirect with platform access
  * {@link /api/slug-addresses/redirects/:redirectAddressId}
  */
@@ -5668,7 +5665,7 @@ export function postApiRealms<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @description Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
+ * @description Development preview. Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
  * @summary Replace a Realm slug address
  * {@link /api/realms/:realmId/slug-address}
  */

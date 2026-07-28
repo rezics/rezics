@@ -11,6 +11,7 @@ export default function ZoneLayout({ children }: { children: ReactNode }) {
 				"feed",
 				"locale",
 				"posts",
+				"previewAccess",
 				"realms",
 				"search",
 				"ui",

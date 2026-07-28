@@ -5,15 +5,14 @@
 
 import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import type {
-	CreateSlugNamespaceWithPlatformAccessOptions,
-	CreateSlugNamespaceWithPlatformAccessStatus201,
-	CreateSlugNamespaceWithPlatformAccessStatus400,
-	CreateSlugNamespaceWithPlatformAccessStatus401,
-	CreateSlugNamespaceWithPlatformAccessStatus403,
-	CreateSlugNamespaceWithPlatformAccessStatus404,
-	CreateSlugNamespaceWithPlatformAccessStatus409,
-	CreateSlugNamespaceWithPlatformAccessStatus422,
-	CreateSlugNamespaceWithPlatformAccessStatus500,
+	AssignCurrentProfileSlugOptions,
+	AssignCurrentProfileSlugStatus200,
+	AssignCurrentProfileSlugStatus400,
+	AssignCurrentProfileSlugStatus401,
+	AssignCurrentProfileSlugStatus404,
+	AssignCurrentProfileSlugStatus409,
+	AssignCurrentProfileSlugStatus422,
+	AssignCurrentProfileSlugStatus500,
 	DeleteApiApiTokensByTokenIdOptions,
 	DeleteApiApiTokensByTokenIdStatus204,
 	DeleteApiApiTokensByTokenIdStatus401,
@@ -929,16 +928,6 @@ import type {
 	ResolveScopedUnitSlugAddressStatus404,
 	ResolveScopedUnitSlugAddressStatus422,
 	ResolveScopedUnitSlugAddressStatus500,
-	ReplaceOwnProfileSlugAddressOptions,
-	ReplaceOwnProfileSlugAddressStatus200,
-	ReplaceOwnProfileSlugAddressStatus400,
-	ReplaceOwnProfileSlugAddressStatus401,
-	ReplaceOwnProfileSlugAddressStatus403,
-	ReplaceOwnProfileSlugAddressStatus404,
-	ReplaceOwnProfileSlugAddressStatus409,
-	ReplaceOwnProfileSlugAddressStatus422,
-	ReplaceOwnProfileSlugAddressStatus429,
-	ReplaceOwnProfileSlugAddressStatus500,
 	GetUnitSlugAddressWithPlatformAccessOptions,
 	GetUnitSlugAddressWithPlatformAccessStatus200,
 	GetUnitSlugAddressWithPlatformAccessStatus401,
@@ -955,6 +944,15 @@ import type {
 	ReplaceUnitSlugAddressWithPlatformAccessStatus409,
 	ReplaceUnitSlugAddressWithPlatformAccessStatus422,
 	ReplaceUnitSlugAddressWithPlatformAccessStatus500,
+	CreateSlugNamespaceWithPlatformAccessOptions,
+	CreateSlugNamespaceWithPlatformAccessStatus201,
+	CreateSlugNamespaceWithPlatformAccessStatus400,
+	CreateSlugNamespaceWithPlatformAccessStatus401,
+	CreateSlugNamespaceWithPlatformAccessStatus403,
+	CreateSlugNamespaceWithPlatformAccessStatus404,
+	CreateSlugNamespaceWithPlatformAccessStatus409,
+	CreateSlugNamespaceWithPlatformAccessStatus422,
+	CreateSlugNamespaceWithPlatformAccessStatus500,
 	ReleaseSlugRedirectWithPlatformAccessOptions,
 	ReleaseSlugRedirectWithPlatformAccessStatus204,
 	ReleaseSlugRedirectWithPlatformAccessStatus400,
@@ -2065,7 +2063,7 @@ import type {
 	UseMutationResult,
 } from "@tanstack/react-query";
 import {
-	createSlugNamespaceWithPlatformAccess,
+	assignCurrentProfileSlug,
 	deleteApiApiTokensByTokenId,
 	deleteApiMessagesByMessageId,
 	deleteApiRecommendationsExclusionsByUnitId,
@@ -2206,9 +2204,9 @@ import {
 	resolveUnitSlugAddress,
 	getPublicUnitSlugAddress,
 	resolveScopedUnitSlugAddress,
-	replaceOwnProfileSlugAddress,
 	getUnitSlugAddressWithPlatformAccess,
 	replaceUnitSlugAddressWithPlatformAccess,
+	createSlugNamespaceWithPlatformAccess,
 	releaseSlugRedirectWithPlatformAccess,
 	postApiUnitsPresentations,
 	getApiUnitsByIdByUnitIdSeriesMemberships,
@@ -9217,7 +9215,7 @@ export function replaceZoneSlugAddressMutationOptions<TContext = unknown>(
 }
 
 /**
- * @description Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
+ * @description Development preview. Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
  * @summary Replace a Zone slug address
  * {@link /api/zones/:zoneId/slug-address}
  */
@@ -9731,7 +9729,7 @@ export function postApiZonesByZoneIdPagesMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Create Zone page
+ * @summary Create Zone page in development preview
  * {@link /api/zones/:zoneId/pages}
  */
 export function usePostApiZonesByZoneIdPages<TContext>(
@@ -9940,7 +9938,7 @@ export function putApiZonesByZoneIdPagesByPageIdMutationOptions<TContext = unkno
 }
 
 /**
- * @summary Replace Zone page
+ * @summary Replace Zone page in development preview
  * {@link /api/zones/:zoneId/pages/:pageId}
  */
 export function usePutApiZonesByZoneIdPagesByPageId<TContext>(
@@ -12483,6 +12481,113 @@ export function usePatchApiUsersMe<TContext>(
 			| PatchApiUsersMeStatus500
 		>,
 		PatchApiUsersMeOptions,
+		TContext
+	>;
+}
+
+export const assignCurrentProfileSlugMutationKey = () =>
+	[{ url: "/api/users/me/profile-slug" }] as const;
+
+export function assignCurrentProfileSlugMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = assignCurrentProfileSlugMutationKey();
+	return mutationOptions<
+		AssignCurrentProfileSlugStatus200,
+		ResponseErrorConfig<
+			| AssignCurrentProfileSlugStatus400
+			| AssignCurrentProfileSlugStatus401
+			| AssignCurrentProfileSlugStatus404
+			| AssignCurrentProfileSlugStatus409
+			| AssignCurrentProfileSlugStatus422
+			| AssignCurrentProfileSlugStatus500
+		>,
+		AssignCurrentProfileSlugOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await assignCurrentProfileSlug({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @description Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.
+ * @summary Assign the current Profile slug once
+ * {@link /api/users/me/profile-slug}
+ */
+export function useAssignCurrentProfileSlug<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			AssignCurrentProfileSlugStatus200,
+			ResponseErrorConfig<
+				| AssignCurrentProfileSlugStatus400
+				| AssignCurrentProfileSlugStatus401
+				| AssignCurrentProfileSlugStatus404
+				| AssignCurrentProfileSlugStatus409
+				| AssignCurrentProfileSlugStatus422
+				| AssignCurrentProfileSlugStatus500
+			>,
+			AssignCurrentProfileSlugOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? assignCurrentProfileSlugMutationKey();
+
+	const baseOptions = assignCurrentProfileSlugMutationOptions(config) as UseMutationOptions<
+		AssignCurrentProfileSlugStatus200,
+		ResponseErrorConfig<
+			| AssignCurrentProfileSlugStatus400
+			| AssignCurrentProfileSlugStatus401
+			| AssignCurrentProfileSlugStatus404
+			| AssignCurrentProfileSlugStatus409
+			| AssignCurrentProfileSlugStatus422
+			| AssignCurrentProfileSlugStatus500
+		>,
+		AssignCurrentProfileSlugOptions,
+		TContext
+	>;
+
+	return useMutation<
+		AssignCurrentProfileSlugStatus200,
+		ResponseErrorConfig<
+			| AssignCurrentProfileSlugStatus400
+			| AssignCurrentProfileSlugStatus401
+			| AssignCurrentProfileSlugStatus404
+			| AssignCurrentProfileSlugStatus409
+			| AssignCurrentProfileSlugStatus422
+			| AssignCurrentProfileSlugStatus500
+		>,
+		AssignCurrentProfileSlugOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		AssignCurrentProfileSlugStatus200,
+		ResponseErrorConfig<
+			| AssignCurrentProfileSlugStatus400
+			| AssignCurrentProfileSlugStatus401
+			| AssignCurrentProfileSlugStatus404
+			| AssignCurrentProfileSlugStatus409
+			| AssignCurrentProfileSlugStatus422
+			| AssignCurrentProfileSlugStatus500
+		>,
+		AssignCurrentProfileSlugOptions,
 		TContext
 	>;
 }
@@ -16605,123 +16710,6 @@ export function useResolveScopedUnitSlugAddress<
 	return queryResult;
 }
 
-export const replaceOwnProfileSlugAddressMutationKey = () =>
-	[{ url: "/api/slug-addresses/profile" }] as const;
-
-export function replaceOwnProfileSlugAddressMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = replaceOwnProfileSlugAddressMutationKey();
-	return mutationOptions<
-		ReplaceOwnProfileSlugAddressStatus200,
-		ResponseErrorConfig<
-			| ReplaceOwnProfileSlugAddressStatus400
-			| ReplaceOwnProfileSlugAddressStatus401
-			| ReplaceOwnProfileSlugAddressStatus403
-			| ReplaceOwnProfileSlugAddressStatus404
-			| ReplaceOwnProfileSlugAddressStatus409
-			| ReplaceOwnProfileSlugAddressStatus422
-			| ReplaceOwnProfileSlugAddressStatus429
-			| ReplaceOwnProfileSlugAddressStatus500
-		>,
-		ReplaceOwnProfileSlugAddressOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await replaceOwnProfileSlugAddress({
-				...config,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @description Sets or replaces the authenticated Profile's optional slug label. The server always uses the permanent users namespace; callers cannot choose a scope. Repeating the same replacement is idempotent.
- * @summary Replace the current Profile slug address
- * {@link /api/slug-addresses/profile}
- */
-export function useReplaceOwnProfileSlugAddress<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			ReplaceOwnProfileSlugAddressStatus200,
-			ResponseErrorConfig<
-				| ReplaceOwnProfileSlugAddressStatus400
-				| ReplaceOwnProfileSlugAddressStatus401
-				| ReplaceOwnProfileSlugAddressStatus403
-				| ReplaceOwnProfileSlugAddressStatus404
-				| ReplaceOwnProfileSlugAddressStatus409
-				| ReplaceOwnProfileSlugAddressStatus422
-				| ReplaceOwnProfileSlugAddressStatus429
-				| ReplaceOwnProfileSlugAddressStatus500
-			>,
-			ReplaceOwnProfileSlugAddressOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? replaceOwnProfileSlugAddressMutationKey();
-
-	const baseOptions = replaceOwnProfileSlugAddressMutationOptions(config) as UseMutationOptions<
-		ReplaceOwnProfileSlugAddressStatus200,
-		ResponseErrorConfig<
-			| ReplaceOwnProfileSlugAddressStatus400
-			| ReplaceOwnProfileSlugAddressStatus401
-			| ReplaceOwnProfileSlugAddressStatus403
-			| ReplaceOwnProfileSlugAddressStatus404
-			| ReplaceOwnProfileSlugAddressStatus409
-			| ReplaceOwnProfileSlugAddressStatus422
-			| ReplaceOwnProfileSlugAddressStatus429
-			| ReplaceOwnProfileSlugAddressStatus500
-		>,
-		ReplaceOwnProfileSlugAddressOptions,
-		TContext
-	>;
-
-	return useMutation<
-		ReplaceOwnProfileSlugAddressStatus200,
-		ResponseErrorConfig<
-			| ReplaceOwnProfileSlugAddressStatus400
-			| ReplaceOwnProfileSlugAddressStatus401
-			| ReplaceOwnProfileSlugAddressStatus403
-			| ReplaceOwnProfileSlugAddressStatus404
-			| ReplaceOwnProfileSlugAddressStatus409
-			| ReplaceOwnProfileSlugAddressStatus422
-			| ReplaceOwnProfileSlugAddressStatus429
-			| ReplaceOwnProfileSlugAddressStatus500
-		>,
-		ReplaceOwnProfileSlugAddressOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		ReplaceOwnProfileSlugAddressStatus200,
-		ResponseErrorConfig<
-			| ReplaceOwnProfileSlugAddressStatus400
-			| ReplaceOwnProfileSlugAddressStatus401
-			| ReplaceOwnProfileSlugAddressStatus403
-			| ReplaceOwnProfileSlugAddressStatus404
-			| ReplaceOwnProfileSlugAddressStatus409
-			| ReplaceOwnProfileSlugAddressStatus422
-			| ReplaceOwnProfileSlugAddressStatus429
-			| ReplaceOwnProfileSlugAddressStatus500
-		>,
-		ReplaceOwnProfileSlugAddressOptions,
-		TContext
-	>;
-}
-
 export const getUnitSlugAddressWithPlatformAccessQueryKey = ({
 	path,
 }: Omit<GetUnitSlugAddressWithPlatformAccessOptions, "headers">) =>
@@ -16762,7 +16750,7 @@ export function getUnitSlugAddressWithPlatformAccessQueryOptions(
 }
 
 /**
- * @description Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
+ * @description Development-preview control plane. Returns canonical address registry details for authorized platform workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
  * @summary Get a Unit canonical slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
@@ -16861,7 +16849,7 @@ export function replaceUnitSlugAddressWithPlatformAccessMutationOptions<TContext
 }
 
 /**
- * @description Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
+ * @description Development-preview control plane. Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
  * @summary Replace any Unit slug address with platform access
  * {@link /api/slug-addresses/units/:unitId}
  */
@@ -16976,7 +16964,7 @@ export function createSlugNamespaceWithPlatformAccessMutationOptions<TContext = 
 }
 
 /**
- * @description Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
+ * @description Development-preview control plane. Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
  * @summary Create an explicitly addressed namespace with platform access
  * {@link /api/slug-addresses/namespaces}
  */
@@ -17091,7 +17079,7 @@ export function releaseSlugRedirectWithPlatformAccessMutationOptions<TContext = 
 }
 
 /**
- * @description Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
+ * @description Development-preview control plane. Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
  * @summary Release a retained slug redirect with platform access
  * {@link /api/slug-addresses/redirects/:redirectAddressId}
  */
@@ -28542,7 +28530,7 @@ export function replaceRealmSlugAddressMutationOptions<TContext = unknown>(
 }
 
 /**
- * @description Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
+ * @description Development preview. Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
  * @summary Replace a Realm slug address
  * {@link /api/realms/:realmId/slug-address}
  */

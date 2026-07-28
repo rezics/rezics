@@ -50,6 +50,10 @@ export default {
 	profile: "Perfil",
 	slugAddress: unitSlugTerms.label,
 	slugAddressHint: `Usa entre 1 y 63 letras ${verbatimTerms.ascii.value} minúsculas, números o guiones. Después de un cambio, la ${verbatimTerms.url.value} anterior redirige de forma permanente a la nueva ${verbatimTerms.url.value}.`,
+	profileSlugAddressHint: `Elige con cuidado: actualmente solo puedes definir esta dirección una vez y no podrás cambiarla después. Usa entre 1 y 63 letras ${verbatimTerms.ascii.value} minúsculas, números o guiones. Los nombres reservados por la plataforma no están disponibles.`,
+	profileSlugAddressAssignedHint:
+		"Esta dirección de perfil ya está definida y actualmente no se puede cambiar.",
+	profileSlugReserved: "Esta dirección de perfil está reservada y no se puede utilizar.",
 	preferences: "Preferencias",
 	interfaceLanguage: "Idioma de la interfaz",
 	contentLanguage: "Idioma de contenido preferido",

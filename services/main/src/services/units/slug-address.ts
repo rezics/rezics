@@ -30,6 +30,7 @@ import {
 } from "./errors";
 import { insertUnit } from "./create";
 import { recordUnitRevision } from "./history";
+import { decideProfileSlugAssignment, parseAssignableProfileSlug } from "./profile-slug-policy";
 import {
 	SystemSlugNamespaceUnitIds,
 	TopLevelSlugNamespaceSlugByUnitId,
@@ -677,25 +678,40 @@ export async function resolveScopedUnitAddress(
 }
 
 /**
- * Replaces the current Profile's canonical slug address.
+ * Assigns the current Profile's canonical slug address once.
  *
  * @remarks
- * The caller supplies only the label; the backend proves Profile ownership
- * from the session and fixes the scope to the permanent `users` namespace.
- * Repeating the same replacement is idempotent.
+ * This is a temporary first-party governance command. The route proves the
+ * Profile identity from an interactive session, while this transaction fixes
+ * the permanent `users` namespace, rejects reserved labels, and permits only
+ * an initial assignment or an idempotent repeat. The one-time rule is not a
+ * database constraint and may be replaced by a future audited rename flow.
+ *
+ * @alpha
  */
-export async function replaceOwnProfileSlugAddress(
-	authorization: Authorization<string>,
+export async function assignCurrentProfileSlugAddress(
+	profileId: string,
 	input: { readonly slug: string },
-): Promise<UnitAddressMutationResult> {
-	const slug = parseSlugLabel(input.slug);
+): Promise<PublicCanonicalUnitSlugAddress> {
+	const slug = parseAssignableProfileSlug(input.slug);
 	const mutation = await database.transaction(async (tx) => {
+		await lockSlugTree(tx);
 		const [ownedProfile] = await tx
 			.select({ id: profile.id })
 			.from(profile)
-			.where(eq(profile.id, authorization.profileId))
+			.where(eq(profile.id, profileId))
 			.limit(1);
 		if (!ownedProfile) throw new UnitNotFound();
+		const current = await loadCanonicalAddress(tx, ownedProfile.id);
+		decideProfileSlugAssignment(
+			current
+				? {
+						scopeUnitId: current.scopeUnitId,
+						slug: parseSlugLabel(current.slug),
+					}
+				: null,
+			slug,
+		);
 		const result = await replaceCanonicalAddress(tx, {
 			unitId: ownedProfile.id,
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
@@ -705,9 +721,9 @@ export async function replaceOwnProfileSlugAddress(
 			await recordAuditEvent(tx, {
 				category: "admin_activity",
 				outcome: "succeeded",
-				actor: { kind: "profile", profileId: authorization.profileId },
+				actor: { kind: "profile", profileId },
 				authority: { kind: "unit", id: ownedProfile.id },
-				action: result.before ? "unit.slug.rename" : "unit.slug.assign",
+				action: "unit.slug.assign",
 				target: { kind: "unit", id: ownedProfile.id },
 				details: {
 					before: result.before,
@@ -718,12 +734,9 @@ export async function replaceOwnProfileSlugAddress(
 		return result;
 	});
 	return {
-		addressId: mutation.addressId,
-		unitId: authorization.profileId,
-		scopeUnitId: mutation.after.scopeUnitId,
+		scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
 		slug: mutation.after.slug,
-		redirectAddressId: mutation.redirectAddressId,
-		canonicalPath: await loadCanonicalUnitPath(authorization.profileId, false),
+		canonicalPath: [...(await loadCanonicalUnitPath(profileId, false))],
 	};
 }
 

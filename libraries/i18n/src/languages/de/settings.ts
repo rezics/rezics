@@ -48,6 +48,10 @@ export default {
 	profile: "Profil",
 	slugAddress: unitSlugTerms.label,
 	slugAddressHint: `Verwende 1–63 kleingeschriebene ${verbatimTerms.ascii.value}-Buchstaben, Ziffern oder Bindestriche. Nach einer Änderung leitet die alte ${verbatimTerms.url.value} dauerhaft auf die neue ${verbatimTerms.url.value} weiter.`,
+	profileSlugAddressHint: `Wähle sorgfältig: Diese Adresse kann derzeit nur einmal festgelegt und danach nicht geändert werden. Verwende 1–63 kleingeschriebene ${verbatimTerms.ascii.value}-Buchstaben, Ziffern oder Bindestriche. Von der Plattform reservierte Namen sind nicht verfügbar.`,
+	profileSlugAddressAssignedHint:
+		"Diese Profiladresse wurde festgelegt und kann derzeit nicht geändert werden.",
+	profileSlugReserved: "Diese Profiladresse ist reserviert und kann nicht verwendet werden.",
 	preferences: "Voreinstellungen",
 	interfaceLanguage: "Oberflächensprache",
 	contentLanguage: "Bevorzugte Inhaltssprache",

@@ -3,8 +3,42 @@ export const SlugLabelPattern = new RegExp(SlugLabelPatternSource);
 export const SlugAddressMaximumDepth = 3;
 export const ZoneHomePageSlug = "home";
 export const ZoneReservedPageSlugs = ["manage", "page", "posts", "search"] as const;
+/**
+ * Profile labels held back from ordinary self-service assignment.
+ *
+ * @remarks
+ * This is a temporary product-governance list, not part of the persisted slug
+ * label format. It may be revised as first-party Profile addressing matures.
+ *
+ * @alpha
+ */
+export const ProfileReservedSlugs = [
+	"about",
+	"admin",
+	"administrator",
+	"api",
+	"auth",
+	"console",
+	"contact",
+	"help",
+	"login",
+	"logout",
+	"me",
+	"moderator",
+	"official",
+	"register",
+	"rezics",
+	"root",
+	"security",
+	"settings",
+	"staff",
+	"support",
+	"system",
+	"www",
+] as const;
 
 const ZoneReservedPageSlugSet: ReadonlySet<string> = new Set(ZoneReservedPageSlugs);
+const ProfileReservedSlugSet: ReadonlySet<string> = new Set(ProfileReservedSlugs);
 
 declare const slugLabelBrand: unique symbol;
 export type SlugLabel = string & { readonly [slugLabelBrand]: true };
@@ -15,6 +49,16 @@ export function isSlugLabel(value: string): value is SlugLabel {
 
 export function isAvailableZonePageSlug(value: string): value is SlugLabel {
 	return isSlugLabel(value) && !ZoneReservedPageSlugSet.has(value);
+}
+
+/** Returns whether a label is held back from ordinary Profile assignment. */
+export function isProfileSlugReserved(value: string): boolean {
+	return ProfileReservedSlugSet.has(value);
+}
+
+/** Proves that a label satisfies both the storage format and Profile policy. */
+export function isAvailableProfileSlug(value: string): value is SlugLabel {
+	return isSlugLabel(value) && !isProfileSlugReserved(value);
 }
 
 export const TopLevelSlugNamespaceUnitIds = {

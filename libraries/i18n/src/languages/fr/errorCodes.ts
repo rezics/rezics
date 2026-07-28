@@ -204,6 +204,8 @@ export default {
 	UnitLastLocalizationRemovalForbidden: "Une Unit doit conserver au moins une langue de contenu.",
 	InvalidSlug: `L’${unitSlugTerms.inline} doit être un libellé ${verbatimTerms.ascii.value} en minuscules, séparé par des traits d’union et comportant entre 1 et 63 caractères.`,
 	SlugTaken: `Cet ${unitSlugTerms.inline} est déjà utilisé dans ce périmètre de nommage de Unit.`,
+	SlugReserved: `Cet ${unitSlugTerms.inline} est réservé et ne peut pas être utilisé.`,
+	ProfileSlugChangeUnavailable: `L’${unitSlugTerms.inline} de votre profil ne peut actuellement plus être modifié après sa définition.`,
 	SlugScopeNotFound: `Le périmètre de nommage de Unit associé à cet ${unitSlugTerms.inline} est introuvable.`,
 	SlugScopeUnavailable: `Les Units sans adresse ou supprimées ne peuvent pas servir de périmètres de nommage canoniques pour les ${unitSlugTerms.plural}.`,
 	SlugScopeCycle: `Ce déplacement créerait une boucle dans le périmètre de nommage des ${unitSlugTerms.plural}.`,

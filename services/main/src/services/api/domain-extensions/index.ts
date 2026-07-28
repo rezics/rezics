@@ -143,6 +143,10 @@ import {
 } from "./errors";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
+const ZonePreviewMutationForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"PlatformCapabilityRequired",
+]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 function presentSystemRequirement<Requirement extends { hardware: Record<string, unknown> }>(
@@ -551,6 +555,7 @@ export default new Elysia()
 			.put(
 				"/:zoneId/slug-address",
 				async ({ params, authorization, body }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					const result = await replaceZoneSlugAddress(authorization, {
 						zoneId: params.zoneId,
 						slug: body.slug,
@@ -564,7 +569,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: SlugAddressMutationResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"SlugTaken",
@@ -579,7 +584,7 @@ export default new Elysia()
 						operationId: "replaceZoneSlugAddress",
 						summary: "Replace a Zone slug address",
 						description:
-							"Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.",
+							"Development preview. Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.",
 						tags: ["Zones", "Slug Addresses"],
 					},
 				},
@@ -944,6 +949,7 @@ export default new Elysia()
 			.post(
 				"/:zoneId/pages",
 				async ({ params, profile, authorization, body }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page",
@@ -978,14 +984,17 @@ export default new Elysia()
 							"InvalidSlug",
 							"ZoneDocumentInvalid",
 						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"SlugTaken",
 							"UnitRevisionConflict",
 						]),
 					},
-					detail: { summary: "Create Zone page", tags: ["Zones"] },
+					detail: {
+						summary: "Create Zone page in development preview",
+						tags: ["Zones"],
+					},
 				},
 			)
 			.get(
@@ -1018,6 +1027,7 @@ export default new Elysia()
 			.put(
 				"/:zoneId/pages/:pageId",
 				async ({ params, profile, authorization, body }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"page",
@@ -1054,14 +1064,17 @@ export default new Elysia()
 							"InvalidSlug",
 							"ZoneDocumentInvalid",
 						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"SlugTaken",
 							"UnitRevisionConflict",
 						]),
 					},
-					detail: { summary: "Replace Zone page", tags: ["Zones"] },
+					detail: {
+						summary: "Replace Zone page in development preview",
+						tags: ["Zones"],
+					},
 				},
 			)
 			.put(

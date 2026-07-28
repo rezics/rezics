@@ -49,6 +49,10 @@ export default {
 	profile: "Profil",
 	slugAddress: unitSlugTerms.label,
 	slugAddressHint: `Utilisez entre 1 et 63 lettres ${verbatimTerms.ascii.value} minuscules, chiffres ou traits d’union. Après une modification, l’ancienne ${verbatimTerms.url.value} redirige définitivement vers la nouvelle ${verbatimTerms.url.value}.`,
+	profileSlugAddressHint: `Choisissez avec soin : cette adresse ne peut actuellement être définie qu’une seule fois et ne peut plus être modifiée ensuite. Utilisez entre 1 et 63 lettres ${verbatimTerms.ascii.value} minuscules, chiffres ou traits d’union. Les noms réservés par la plateforme ne sont pas disponibles.`,
+	profileSlugAddressAssignedHint:
+		"Cette adresse de profil a été définie et ne peut actuellement plus être modifiée.",
+	profileSlugReserved: "Cette adresse de profil est réservée et ne peut pas être utilisée.",
 	preferences: "Préférences",
 	interfaceLanguage: "Langue de l’interface",
 	contentLanguage: "Langue de contenu préférée",

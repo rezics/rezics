@@ -182,6 +182,8 @@ export default {
 	UnitLastLocalizationRemovalForbidden: "유닛은 적어도 하나의 콘텐츠 언어를 유지해야 합니다.",
 	InvalidSlug: `${unitSlugTerms.label}는 1-63자 길이의 소문자 ${verbatimTerms.ascii.value} 하이픈으로 연결된 레이블이어야 합니다.`,
 	SlugTaken: `해당 ${unitSlugTerms.inline}는 이미 이 유닛 네임스페이스에서 사용 중입니다.`,
+	SlugReserved: `해당 ${unitSlugTerms.inline}는 예약되어 있어 사용할 수 없습니다.`,
+	ProfileSlugChangeUnavailable: `프로필 ${unitSlugTerms.inline}는 설정 후 현재 변경할 수 없습니다.`,
 	SlugScopeNotFound: `이 ${unitSlugTerms.inline}의 유닛 네임스페이스를 찾을 수 없습니다.`,
 	SlugScopeUnavailable: `응답되지 않거나 삭제된 유닛은 정식 ${unitSlugTerms.inline} 네임스페이스가 될 수 없습니다.`,
 	SlugScopeCycle: `이 이동은 ${unitSlugTerms.inline} 네임스페이스 순환을 생성합니다.`,

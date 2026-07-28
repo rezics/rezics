@@ -125,9 +125,13 @@ describe("API root", () => {
 		]);
 		expect(document.paths["/api/api-tokens"]?.get?.security).toEqual([{ SessionCookie: [] }]);
 		expect(document.paths["/api/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
+		expect(document.paths["/api/users/me/profile-slug"]?.put?.security).toEqual([
+			{ SessionCookie: [] },
+		]);
+		expect(document.paths["/api/slug-addresses/profile"]).toBeUndefined();
 	});
 
-	it("limits the Zone preview capability requirement to Zone creation", () => {
+	it("documents the development preview gate on unreleased Zone address writes", () => {
 		const document = toOpenAPISchema(api);
 		const methods = ["delete", "get", "patch", "post", "put"] as const;
 		const previewProtectedZoneOperations = Object.entries(document.paths).flatMap(
@@ -143,7 +147,47 @@ describe("API root", () => {
 					: [],
 		);
 
-		expect(previewProtectedZoneOperations).toEqual(["POST /api/zones"]);
+		expect(previewProtectedZoneOperations.toSorted()).toEqual([
+			"POST /api/zones",
+			"POST /api/zones/{zoneId}/pages",
+			"PUT /api/zones/{zoneId}/pages/{pageId}",
+			"PUT /api/zones/{zoneId}/slug-address",
+		]);
+	});
+
+	it("documents the development preview gate on non-Profile slug control planes", () => {
+		const document = toOpenAPISchema(api);
+		const expected = [
+			["get", "/api/slug-addresses/units/{unitId}"],
+			["put", "/api/slug-addresses/units/{unitId}"],
+			["post", "/api/slug-addresses/namespaces"],
+			["delete", "/api/slug-addresses/redirects/{redirectAddressId}"],
+			["put", "/api/realms/{realmId}/slug-address"],
+		] as const;
+
+		for (const [method, path] of expected) {
+			const forbidden = document.paths[path]?.[method]?.responses?.[StatusCodes.FORBIDDEN];
+			expect(JSON.stringify(forbidden)).toContain("PlatformCapabilityRequired");
+		}
+	});
+
+	it("rejects API tokens before the first-party Profile slug handler", async () => {
+		const response = await api.handle(
+			new Request("http://localhost/api/users/me/profile-slug", {
+				method: "PUT",
+				headers: {
+					Authorization: "Bearer rz_api_test_credential",
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ slug: "alice" }),
+			}),
+		);
+
+		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+		expect((await readErrorBody(response)).error).toEqual({
+			code: "InteractiveSessionRequired",
+			message: "An interactive session is required",
+		});
 	});
 
 	it("requires authentication before checking the Tag hierarchy preview capability", async () => {

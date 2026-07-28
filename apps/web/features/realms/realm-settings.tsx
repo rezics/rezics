@@ -50,6 +50,7 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
+import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { invalidateRealmDetails } from "./query";
@@ -259,17 +260,19 @@ export function RealmProfileSettings({
 			</Card>
 			<Card>
 				<CardContent className="p-5">
-					<SlugAddressForm
-						error={replaceSlug.error}
-						initialSlug={realm.slugAddress?.slug}
-						isPending={replaceSlug.isPending}
-						onSubmit={(slug) =>
-							replaceSlug.mutateAsync({
-								path: { realmId: realm.id },
-								body: { slug },
-							})
-						}
-					/>
+					<DevelopmentPreviewBoundary>
+						<SlugAddressForm
+							error={replaceSlug.error}
+							initialSlug={realm.slugAddress?.slug}
+							isPending={replaceSlug.isPending}
+							onSubmit={(slug) =>
+								replaceSlug.mutateAsync({
+									path: { realmId: realm.id },
+									body: { slug },
+								})
+							}
+						/>
+					</DevelopmentPreviewBoundary>
 				</CardContent>
 			</Card>
 		</section>

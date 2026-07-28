@@ -4849,6 +4849,8 @@ export const ApiErrorCode = {
 	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
 	InvalidSlug: "InvalidSlug",
 	SlugTaken: "SlugTaken",
+	SlugReserved: "SlugReserved",
+	ProfileSlugChangeUnavailable: "ProfileSlugChangeUnavailable",
 	SlugScopeNotFound: "SlugScopeNotFound",
 	SlugScopeUnavailable: "SlugScopeUnavailable",
 	SlugScopeCycle: "SlugScopeCycle",
@@ -25670,6 +25672,14 @@ export type ReplaceZoneSlugAddressStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const ReplaceZoneSlugAddressStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type ReplaceZoneSlugAddressStatus403ErrorCodeEnum =
+	(typeof ReplaceZoneSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceZoneSlugAddressStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -25682,7 +25692,7 @@ export type ReplaceZoneSlugAddressStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: ReplaceZoneSlugAddressStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -28355,6 +28365,14 @@ export type PostApiZonesByZoneIdPagesStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum =
+	(typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -28367,7 +28385,7 @@ export type PostApiZonesByZoneIdPagesStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -28999,6 +29017,14 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -29011,7 +29037,7 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -43620,303 +43646,6 @@ export type ResolveScopedUnitSlugAddressResponse =
 	| ResolveScopedUnitSlugAddressStatus404
 	| ResolveScopedUnitSlugAddressStatus422
 	| ResolveScopedUnitSlugAddressStatus500;
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	addressId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	scopeUnitId: (string | null) | null;
-	/**
-	 * @minLength 1
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
-	 * @type string
-	 */
-	slug: string;
-	redirectAddressId: (string | null) | null;
-	/**
-	 * @type array
-	 */
-	canonicalPath: string[];
-};
-
-export type ReplaceOwnProfileSlugAddressStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'InvalidSlug'
-				 * @type string
-				 */
-				code: "InvalidSlug";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus401 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'AuthenticationRequired'
-		 * @type string
-		 */
-		code: "AuthenticationRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum = {
-	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
-	EmailVerificationRequired: "EmailVerificationRequired",
-	AccountRestricted: "AccountRestricted",
-	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
-} as const;
-
-export type ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum =
-	(typeof ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ApiTokenPermissionRequired'
-		 * @type string
-		 */
-		code: ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum = {
-	SlugTaken: "SlugTaken",
-	SlugScopeUnavailable: "SlugScopeUnavailable",
-	SlugScopeCycle: "SlugScopeCycle",
-} as const;
-
-export type ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum =
-	(typeof ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum)[keyof typeof ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'SlugTaken'
-		 * @type string
-		 */
-		code: ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type ReplaceOwnProfileSlugAddressStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'SlugDepthExceeded'
-				 * @type string
-				 */
-				code: "SlugDepthExceeded";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressBody = {
-	/**
-	 * @minLength 1
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
-	 * @type string
-	 */
-	slug: string;
-};
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressOptions = {
-	body: ReplaceOwnProfileSlugAddressBody;
-	path?: never;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type ReplaceOwnProfileSlugAddressResponses = {
-	"200": ReplaceOwnProfileSlugAddressStatus200;
-	"400": ReplaceOwnProfileSlugAddressStatus400;
-	"401": ReplaceOwnProfileSlugAddressStatus401;
-	"403": ReplaceOwnProfileSlugAddressStatus403;
-	"404": ReplaceOwnProfileSlugAddressStatus404;
-	"409": ReplaceOwnProfileSlugAddressStatus409;
-	"422": ReplaceOwnProfileSlugAddressStatus422;
-	"429": ReplaceOwnProfileSlugAddressStatus429;
-	"500": ReplaceOwnProfileSlugAddressStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type ReplaceOwnProfileSlugAddressResponse =
-	| ReplaceOwnProfileSlugAddressStatus200
-	| ReplaceOwnProfileSlugAddressStatus400
-	| ReplaceOwnProfileSlugAddressStatus401
-	| ReplaceOwnProfileSlugAddressStatus403
-	| ReplaceOwnProfileSlugAddressStatus404
-	| ReplaceOwnProfileSlugAddressStatus409
-	| ReplaceOwnProfileSlugAddressStatus422
-	| ReplaceOwnProfileSlugAddressStatus429
-	| ReplaceOwnProfileSlugAddressStatus500;
 
 /**
  * @type object
@@ -87174,6 +86903,14 @@ export type ReplaceRealmSlugAddressStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const ReplaceRealmSlugAddressStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type ReplaceRealmSlugAddressStatus403ErrorCodeEnum =
+	(typeof ReplaceRealmSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceRealmSlugAddressStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -87186,7 +86923,7 @@ export type ReplaceRealmSlugAddressStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: "RealmCapabilityRequired";
+		code: ReplaceRealmSlugAddressStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */

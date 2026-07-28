@@ -12,6 +12,7 @@ export default function SlugRealmLayout({ children }: { children: ReactNode }) {
 				"history",
 				"media",
 				"posts",
+				"previewAccess",
 				"realms",
 				"units",
 			]}

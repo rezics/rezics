@@ -178,9 +178,16 @@ may only target that Profile's system Favorites Collection.
 
 ## Assignment contract
 
-- A signed-in Profile may assign or rename only its own label in `users`.
-- A Realm settings authority may assign or rename that Realm only in `realms`.
-- A Zone update authority may assign or rename that Zone only in `zones`.
+- A signed-in Profile may assign only its own label in `users` through the
+  temporary first-party `/api/users/me/profile-slug` command. This command
+  requires an interactive session but no additional Unit permission or platform
+  capability.
+- Temporary self-service governance rejects the Profile reserved-label list
+  owned by `@rezics/slug`. It accepts the first assignment and an idempotent
+  repeat, but rejects a later rename.
+- Realm, Zone, Zone Page, and platform slug mutations remain behind the
+  development-preview capability in addition to their ordinary resource or
+  platform authority.
 - Callers provide a label, never a scope, for these resource-specific commands;
   the backend fixes and proves the namespace.
 - Platform-authorized commands cannot move an enabled Profile, Realm, or Zone outside its
@@ -194,10 +201,14 @@ may only target that Profile's system Favorites Collection.
 
 - Slugs are explicitly assigned; localized titles do not silently generate or
   rename addresses.
-- An unaddressed Unit remains ID-only. After a top-level public address is
-  assigned it may be renamed, but not removed; this preserves link durability.
-  Zone Page addresses are the documented exception: they may be removed because
-  the Page retains its stable `/zone/{zoneId}/page/{pageId}` route.
+- The current Profile reserved-label and assign-once rules are removable
+  service-level governance. They are deliberately not database constraints. A
+  later release may replace them with a supported, audited rename lifecycle.
+- An unaddressed Unit remains ID-only. The registry supports retaining former
+  top-level addresses during authorized renames, but ordinary Profile
+  self-service currently cannot invoke that lifecycle. Zone Page addresses are
+  the documented exception: they may be removed because the Page retains its
+  stable `/zone/{zoneId}/page/{pageId}` route.
 - Renames retain the former address as a temporary Redirect record. Retained
   addresses issue temporary redirects and may be released for reuse through an
   audited platform action. The automated retention and quarantine schedule remains

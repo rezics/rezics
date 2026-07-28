@@ -7,7 +7,7 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
+import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addresses/schema";
 import {
 	AvatarInput,
 	ChineseContentDisplay,
@@ -150,6 +150,22 @@ export const UpdateProfileBody = t.Object(
 	{ additionalProperties: false },
 );
 export type UpdateProfileBody = Static<typeof UpdateProfileBody>;
+
+/**
+ * Temporary first-party request for assigning the current Profile slug.
+ *
+ * @remarks
+ * This contract is intended for the interactive REZICS application while
+ * Profile slug governance remains assign-once. It is excluded from the public
+ * API-token SDK.
+ *
+ * @alpha
+ */
+export const AssignCurrentProfileSlugBody = t.Object(
+	{ slug: SlugLabelInput },
+	{ additionalProperties: false },
+);
+export type AssignCurrentProfileSlugBody = Static<typeof AssignCurrentProfileSlugBody>;
 
 export const UpdateDisplayPreferencesBody = t.Object(
 	{

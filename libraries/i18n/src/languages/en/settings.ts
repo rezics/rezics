@@ -47,6 +47,10 @@ export default {
 	profile: "Profile",
 	slugAddress: unitSlugTerms.label,
 	slugAddressHint: `Use 1–63 lowercase ${verbatimTerms.ascii.value} letters, numbers, or hyphens. After a change, the old ${verbatimTerms.url.value} permanently redirects to the new ${verbatimTerms.url.value}.`,
+	profileSlugAddressHint: `Choose carefully: you can currently set this address only once and cannot change it afterward. Use 1–63 lowercase ${verbatimTerms.ascii.value} letters, numbers, or hyphens. Some platform-reserved labels are unavailable.`,
+	profileSlugAddressAssignedHint:
+		"This Profile address has been set and cannot currently be changed.",
+	profileSlugReserved: "This Profile address is reserved and cannot be assigned.",
 	preferences: "Preferences",
 	interfaceLanguage: "Interface language",
 	contentLanguage: "Content language preference",
