@@ -124,7 +124,7 @@ export default {
 			notification: "알림",
 			recommendation: "추천",
 			upload: "업로드",
-			feedback: "피드백",
+			report: "신고",
 		},
 		permissionActions: {
 			read: "읽기",
@@ -153,7 +153,7 @@ export default {
 			recommendationWrite: "추천 상호작용 제출",
 			uploadRead: "업로드 읽기",
 			uploadWrite: "업로드 생성",
-			feedbackWrite: "피드백 제출",
+			reportWrite: "신고 제출",
 		},
 		limits: "사용 한도",
 		standardLimitsDescription: `생성하는 토큰은 항상 표준 정책을 사용합니다. 할당량은 아래 범위 내에서만 구성할 수 있습니다. ${verbatimTerms.privilegedTokenPolicy.value} 정책을 부여하려면 플랫폼 접근 권한이 필요합니다.`,

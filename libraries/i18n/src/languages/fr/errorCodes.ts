@@ -93,8 +93,9 @@ export default {
 	ModerationIdempotencyConflict:
 		"Cette clé de nouvelle tentative a déjà été utilisée pour une autre demande de modération.",
 	ModerationNoteRoleDuplicate: "Ajoutez au maximum une note interne et un avis public.",
-	FeedbackNotFound: "Ce retour est introuvable.",
-	FeedbackAlreadyResolved: "Ce retour a déjà été traité.",
+	ReportAlreadySubmitted: "Vous avez déjà signalé cette unité pour le dossier en cours.",
+	ReportTargetRevisionUnavailable:
+		"Cette unité ne possède aucune révision pouvant être signalée.",
 	EnforcementExpiryInvalid: "L’expiration de la mesure doit se situer dans le futur.",
 	EnforcementNotFound: "Cette mesure est introuvable.",
 	EnforcementAlreadyRevoked: "Cette mesure a déjà été révoquée.",
@@ -116,7 +117,7 @@ export default {
 	BookNotFound: "Ce livre est introuvable.",
 	ChapterNotFound: "Ce chapitre est introuvable.",
 	ChapterLanguageNotFound: "Cette langue de chapitre est introuvable.",
-	FeedbackRealmMismatch: `La cible du retour n’appartient pas à ce ${realmTerms.inline}.`,
+	ReportRealmMismatch: `L’unité signalée n’appartient pas à ce ${realmTerms.inline}.`,
 	PostNotFound: `Cette ${postTerms.inline} est introuvable.`,
 	PostLocalizationNotFound: `Cette version linguistique de la ${postTerms.inline} est introuvable.`,
 	PostTargetingLocked: `Cette cible n’accepte pas de nouvelles ${postTerms.plural}.`,

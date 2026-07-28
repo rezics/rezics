@@ -3,6 +3,7 @@
 import {
 	getApiRealmsByRealmIdUnits,
 	getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey,
+	getApiRealmsByRealmIdReportsQueryKey,
 	getApiRealmsByRealmIdUnitsQueryKey,
 	type GetApiRealmsByRealmIdUnitsQuery,
 } from "@rezics/openapi-tanstack-query";
@@ -12,6 +13,8 @@ import { invalidatePostQueries } from "@/features/posts/query";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
 	AllRealmModerationStatuses,
+	ReportedRealmUnits,
+	type RealmReportFilter,
 	type RealmModerationFilter,
 } from "../routing/realm-moderation-route";
 import {
@@ -29,12 +32,17 @@ export type {
 	RealmModerationUnit,
 } from "../model/realm-moderation-cache";
 
-export function useRealmModerationQueue(realmId: string, filter: RealmModerationFilter) {
+export function useRealmModerationQueue(
+	realmId: string,
+	filter: RealmModerationFilter,
+	reportFilter: RealmReportFilter,
+) {
 	const localizationLanguages = useLocalizationLanguages();
 	const baseQuery = {
 		localizationLanguages,
 		limit: RealmModerationPageSize,
 		...(filter === AllRealmModerationStatuses ? {} : { status: filter }),
+		...(reportFilter === ReportedRealmUnits ? { reported: true } : {}),
 	} satisfies GetApiRealmsByRealmIdUnitsQuery;
 
 	const queue = useInfiniteQuery({
@@ -62,12 +70,13 @@ export function updateRealmModerationQueueCache(
 	realmId: string,
 	query: GetApiRealmsByRealmIdUnitsQuery,
 	filter: RealmModerationFilter,
+	reportFilter: RealmReportFilter,
 	unitId: string,
 	target: RealmModerationTarget,
 ): void {
 	queryClient.setQueryData<RealmModerationPages>(
 		getApiRealmsByRealmIdUnitsQueryKey({ path: { realmId }, query }),
-		(data) => updateRealmModerationPages(data, unitId, target, filter),
+		(data) => updateRealmModerationPages(data, unitId, target, filter, reportFilter),
 	);
 }
 
@@ -84,6 +93,12 @@ export function refreshRealmModerationData(
 			queryKey: getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey({
 				path: { realmId, unitId },
 				query: RealmModerationHistoryQuery,
+			}),
+		}),
+		queryClient.invalidateQueries({
+			queryKey: getApiRealmsByRealmIdReportsQueryKey({
+				path: { realmId },
+				query: { unitId, limit: 100 },
 			}),
 		}),
 		invalidatePostQueries(queryClient, unitId),

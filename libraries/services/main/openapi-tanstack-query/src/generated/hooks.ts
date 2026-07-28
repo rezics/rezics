@@ -258,18 +258,30 @@ import type {
 	PostApiFeedQueryStatus400,
 	PostApiFeedQueryStatus422,
 	PostApiFeedQueryStatus500,
-	GetApiFeedbackMeOptions,
-	GetApiFeedbackMeStatus200,
-	GetApiFeedbackMeStatus422,
-	GetApiFeedbackMeStatus429,
-	GetApiFeedbackMeStatus500,
-	PostApiFeedbackOptions,
-	PostApiFeedbackStatus200,
-	PostApiFeedbackStatus400,
-	PostApiFeedbackStatus404,
-	PostApiFeedbackStatus422,
-	PostApiFeedbackStatus429,
-	PostApiFeedbackStatus500,
+	GetApiReportsMeOptions,
+	GetApiReportsMeStatus200,
+	GetApiReportsMeStatus422,
+	GetApiReportsMeStatus429,
+	GetApiReportsMeStatus500,
+	GetApiReportsUnitsByUnitIdRealmsOptions,
+	GetApiReportsUnitsByUnitIdRealmsStatus200,
+	GetApiReportsUnitsByUnitIdRealmsStatus404,
+	GetApiReportsUnitsByUnitIdRealmsStatus422,
+	GetApiReportsUnitsByUnitIdRealmsStatus429,
+	GetApiReportsUnitsByUnitIdRealmsStatus500,
+	GetApiRealmsByRealmIdReportsOptions,
+	GetApiRealmsByRealmIdReportsStatus200,
+	GetApiRealmsByRealmIdReportsStatus403,
+	GetApiRealmsByRealmIdReportsStatus422,
+	GetApiRealmsByRealmIdReportsStatus500,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500,
 	GetApiGovernanceUnitByUnitIdAccessOptions,
 	GetApiGovernanceUnitByUnitIdAccessStatus200,
 	GetApiGovernanceUnitByUnitIdAccessStatus403,
@@ -385,14 +397,6 @@ import type {
 	PostApiGovernanceModerationActionsStatus409,
 	PostApiGovernanceModerationActionsStatus422,
 	PostApiGovernanceModerationActionsStatus500,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500,
 	PostApiGovernanceModerationEnforcementsOptions,
 	PostApiGovernanceModerationEnforcementsStatus200,
 	PostApiGovernanceModerationEnforcementsStatus400,
@@ -2043,8 +2047,10 @@ import {
 	patchApiApiTokenPoliciesByPolicyKey,
 	putApiApiTokenPoliciesBindingsByTokenId,
 	postApiFeedQuery,
-	getApiFeedbackMe,
-	postApiFeedback,
+	getApiReportsMe,
+	getApiReportsUnitsByUnitIdRealms,
+	getApiRealmsByRealmIdReports,
+	postApiRealmsByRealmIdUnitsByUnitIdReports,
 	getApiGovernanceUnitByUnitIdAccess,
 	putApiGovernanceUnitByUnitIdAccess,
 	getApiGovernanceUnitByUnitIdAccessCandidates,
@@ -2063,7 +2069,6 @@ import {
 	getApiGovernanceModerationCasesByCaseId,
 	patchApiGovernanceModerationCasesByCaseId,
 	postApiGovernanceModerationActions,
-	patchApiGovernanceFeedbackByFeedbackIdResolve,
 	postApiGovernanceModerationEnforcements,
 	postApiGovernanceModerationEnforcementsByEnforcementIdRevoke,
 	getApiAuditEvents,
@@ -6190,29 +6195,27 @@ export function usePostApiFeedQuery<TContext>(
 	>;
 }
 
-export const getApiFeedbackMeQueryKey = ({
-	query,
-}: Omit<GetApiFeedbackMeOptions, "headers"> = {}) =>
-	[{ url: "/api/feedback/me" }, ...(query ? [query] : [])] as const;
+export const getApiReportsMeQueryKey = ({ query }: Omit<GetApiReportsMeOptions, "headers"> = {}) =>
+	[{ url: "/api/reports/me" }, ...(query ? [query] : [])] as const;
 
-type GetApiFeedbackMeQueryKey = ReturnType<typeof getApiFeedbackMeQueryKey>;
+type GetApiReportsMeQueryKey = ReturnType<typeof getApiReportsMeQueryKey>;
 
-export function getApiFeedbackMeQueryOptions(
-	{ query }: GetApiFeedbackMeOptions = {},
+export function getApiReportsMeQueryOptions(
+	{ query }: GetApiReportsMeOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiFeedbackMeQueryKey({ query });
+	const queryKey = getApiReportsMeQueryKey({ query });
 	return queryOptions<
-		GetApiFeedbackMeStatus200,
+		GetApiReportsMeStatus200,
 		ResponseErrorConfig<
-			GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus429 | GetApiFeedbackMeStatus500
+			GetApiReportsMeStatus422 | GetApiReportsMeStatus429 | GetApiReportsMeStatus500
 		>,
-		GetApiFeedbackMeStatus200,
+		GetApiReportsMeStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiFeedbackMe({
+			const { data } = await getApiReportsMe({
 				...config,
 				query,
 				signal: config.signal ?? signal,
@@ -6224,25 +6227,23 @@ export function getApiFeedbackMeQueryOptions(
 }
 
 /**
- * @summary List current user's feedback
- * {@link /api/feedback/me}
+ * @summary List current user's Unit reports
+ * {@link /api/reports/me}
  */
-export function useGetApiFeedbackMe<
-	TData = GetApiFeedbackMeStatus200,
-	TQueryData = GetApiFeedbackMeStatus200,
-	TQueryKey extends QueryKey = GetApiFeedbackMeQueryKey,
+export function useGetApiReportsMe<
+	TData = GetApiReportsMeStatus200,
+	TQueryData = GetApiReportsMeStatus200,
+	TQueryKey extends QueryKey = GetApiReportsMeQueryKey,
 >(
 	{
 		query,
-	}: { query?: GetApiFeedbackMeOptions["query"] | (() => GetApiFeedbackMeOptions["query"]) } = {},
+	}: { query?: GetApiReportsMeOptions["query"] | (() => GetApiReportsMeOptions["query"]) } = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiFeedbackMeStatus200,
+				GetApiReportsMeStatus200,
 				ResponseErrorConfig<
-					| GetApiFeedbackMeStatus422
-					| GetApiFeedbackMeStatus429
-					| GetApiFeedbackMeStatus500
+					GetApiReportsMeStatus422 | GetApiReportsMeStatus429 | GetApiReportsMeStatus500
 				>,
 				TData,
 				TQueryData,
@@ -6255,11 +6256,11 @@ export function useGetApiFeedbackMe<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiFeedbackMeQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiReportsMeQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiFeedbackMeQueryOptions(resolvedParams, config),
+			...getApiReportsMeQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -6267,7 +6268,7 @@ export function useGetApiFeedbackMe<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus429 | GetApiFeedbackMeStatus500
+			GetApiReportsMeStatus422 | GetApiReportsMeStatus429 | GetApiReportsMeStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -6276,48 +6277,272 @@ export function useGetApiFeedbackMe<
 	return queryResult;
 }
 
-export const postApiFeedbackMutationKey = () => [{ url: "/api/feedback" }] as const;
+export const getApiReportsUnitsByUnitIdRealmsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiReportsUnitsByUnitIdRealmsOptions, "headers">) =>
+	[
+		{ url: "/api/reports/units/:unitId/realms", params: path },
+		...(query ? [query] : []),
+	] as const;
 
-export function postApiFeedbackMutationOptions<TContext = unknown>(
+type GetApiReportsUnitsByUnitIdRealmsQueryKey = ReturnType<
+	typeof getApiReportsUnitsByUnitIdRealmsQueryKey
+>;
+
+export function getApiReportsUnitsByUnitIdRealmsQueryOptions(
+	{ path, query }: GetApiReportsUnitsByUnitIdRealmsOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiFeedbackMutationKey();
-	return mutationOptions<
-		PostApiFeedbackStatus200,
+	const queryKey = getApiReportsUnitsByUnitIdRealmsQueryKey({ path, query });
+	return queryOptions<
+		GetApiReportsUnitsByUnitIdRealmsStatus200,
 		ResponseErrorConfig<
-			| PostApiFeedbackStatus400
-			| PostApiFeedbackStatus404
-			| PostApiFeedbackStatus422
-			| PostApiFeedbackStatus429
-			| PostApiFeedbackStatus500
+			| GetApiReportsUnitsByUnitIdRealmsStatus404
+			| GetApiReportsUnitsByUnitIdRealmsStatus422
+			| GetApiReportsUnitsByUnitIdRealmsStatus429
+			| GetApiReportsUnitsByUnitIdRealmsStatus500
 		>,
-		PostApiFeedbackOptions,
-		TContext
+		GetApiReportsUnitsByUnitIdRealmsStatus200,
+		typeof queryKey
 	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiFeedback({ ...config, body, throwOnError: true });
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiReportsUnitsByUnitIdRealms({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
 }
 
 /**
- * @summary Submit feedback or report
- * {@link /api/feedback}
+ * @summary List readable Realm report destinations for a Unit
+ * {@link /api/reports/units/:unitId/realms}
  */
-export function usePostApiFeedback<TContext>(
+export function useGetApiReportsUnitsByUnitIdRealms<
+	TData = GetApiReportsUnitsByUnitIdRealmsStatus200,
+	TQueryData = GetApiReportsUnitsByUnitIdRealmsStatus200,
+	TQueryKey extends QueryKey = GetApiReportsUnitsByUnitIdRealmsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiReportsUnitsByUnitIdRealmsOptions["path"]
+			| (() => GetApiReportsUnitsByUnitIdRealmsOptions["path"]);
+		query?:
+			| GetApiReportsUnitsByUnitIdRealmsOptions["query"]
+			| (() => GetApiReportsUnitsByUnitIdRealmsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiReportsUnitsByUnitIdRealmsStatus200,
+				ResponseErrorConfig<
+					| GetApiReportsUnitsByUnitIdRealmsStatus404
+					| GetApiReportsUnitsByUnitIdRealmsStatus422
+					| GetApiReportsUnitsByUnitIdRealmsStatus429
+					| GetApiReportsUnitsByUnitIdRealmsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiReportsUnitsByUnitIdRealmsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiReportsUnitsByUnitIdRealmsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiReportsUnitsByUnitIdRealmsStatus404
+			| GetApiReportsUnitsByUnitIdRealmsStatus422
+			| GetApiReportsUnitsByUnitIdRealmsStatus429
+			| GetApiReportsUnitsByUnitIdRealmsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiRealmsByRealmIdReportsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdReportsOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/reports", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiRealmsByRealmIdReportsQueryKey = ReturnType<typeof getApiRealmsByRealmIdReportsQueryKey>;
+
+export function getApiRealmsByRealmIdReportsQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdReportsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdReportsQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdReportsStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdReportsStatus403
+			| GetApiRealmsByRealmIdReportsStatus422
+			| GetApiRealmsByRealmIdReportsStatus500
+		>,
+		GetApiRealmsByRealmIdReportsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdReports({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List reports for a Realm
+ * {@link /api/realms/:realmId/reports}
+ */
+export function useGetApiRealmsByRealmIdReports<
+	TData = GetApiRealmsByRealmIdReportsStatus200,
+	TQueryData = GetApiRealmsByRealmIdReportsStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdReportsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdReportsOptions["path"]
+			| (() => GetApiRealmsByRealmIdReportsOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdReportsOptions["query"]
+			| (() => GetApiRealmsByRealmIdReportsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdReportsStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdReportsStatus403
+					| GetApiRealmsByRealmIdReportsStatus422
+					| GetApiRealmsByRealmIdReportsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdReportsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdReportsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdReportsStatus403
+			| GetApiRealmsByRealmIdReportsStatus422
+			| GetApiRealmsByRealmIdReportsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiRealmsByRealmIdUnitsByUnitIdReportsMutationKey = () =>
+	[{ url: "/api/realms/:realmId/units/:unitId/reports" }] as const;
+
+export function postApiRealmsByRealmIdUnitsByUnitIdReportsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiRealmsByRealmIdUnitsByUnitIdReportsMutationKey();
+	return mutationOptions<
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500
+		>,
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiRealmsByRealmIdUnitsByUnitIdReports({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Report a Unit to a Realm
+ * {@link /api/realms/:realmId/units/:unitId/reports}
+ */
+export function usePostApiRealmsByRealmIdUnitsByUnitIdReports<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiFeedbackStatus200,
+			PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200,
 			ResponseErrorConfig<
-				| PostApiFeedbackStatus400
-				| PostApiFeedbackStatus404
-				| PostApiFeedbackStatus422
-				| PostApiFeedbackStatus429
-				| PostApiFeedbackStatus500
+				| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400
+				| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404
+				| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409
+				| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422
+				| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429
+				| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500
 			>,
-			PostApiFeedbackOptions,
+			PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -6325,31 +6550,36 @@ export function usePostApiFeedback<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiFeedbackMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiRealmsByRealmIdUnitsByUnitIdReportsMutationKey();
 
-	const baseOptions = postApiFeedbackMutationOptions(config) as UseMutationOptions<
-		PostApiFeedbackStatus200,
+	const baseOptions = postApiRealmsByRealmIdUnitsByUnitIdReportsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200,
 		ResponseErrorConfig<
-			| PostApiFeedbackStatus400
-			| PostApiFeedbackStatus404
-			| PostApiFeedbackStatus422
-			| PostApiFeedbackStatus429
-			| PostApiFeedbackStatus500
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500
 		>,
-		PostApiFeedbackOptions,
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiFeedbackStatus200,
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200,
 		ResponseErrorConfig<
-			| PostApiFeedbackStatus400
-			| PostApiFeedbackStatus404
-			| PostApiFeedbackStatus422
-			| PostApiFeedbackStatus429
-			| PostApiFeedbackStatus500
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500
 		>,
-		PostApiFeedbackOptions,
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
 		TContext
 	>(
 		{
@@ -6359,15 +6589,16 @@ export function usePostApiFeedback<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiFeedbackStatus200,
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200,
 		ResponseErrorConfig<
-			| PostApiFeedbackStatus400
-			| PostApiFeedbackStatus404
-			| PostApiFeedbackStatus422
-			| PostApiFeedbackStatus429
-			| PostApiFeedbackStatus500
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429
+			| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500
 		>,
-		PostApiFeedbackOptions,
+		PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
 		TContext
 	>;
 }
@@ -8275,116 +8506,6 @@ export function usePostApiGovernanceModerationActions<TContext>(
 			| PostApiGovernanceModerationActionsStatus500
 		>,
 		PostApiGovernanceModerationActionsOptions,
-		TContext
-	>;
-}
-
-export const patchApiGovernanceFeedbackByFeedbackIdResolveMutationKey = () =>
-	[{ url: "/api/governance/feedback/:feedbackId/resolve" }] as const;
-
-export function patchApiGovernanceFeedbackByFeedbackIdResolveMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = patchApiGovernanceFeedbackByFeedbackIdResolveMutationKey();
-	return mutationOptions<
-		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
-		ResponseErrorConfig<
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
-		>,
-		PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiGovernanceFeedbackByFeedbackIdResolve({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Resolve feedback
- * {@link /api/governance/feedback/:feedbackId/resolve}
- */
-export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
-			ResponseErrorConfig<
-				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
-				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
-				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
-				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
-				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
-				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
-			>,
-			PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiGovernanceFeedbackByFeedbackIdResolveMutationKey();
-
-	const baseOptions = patchApiGovernanceFeedbackByFeedbackIdResolveMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
-		ResponseErrorConfig<
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
-		>,
-		PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
-		ResponseErrorConfig<
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
-		>,
-		PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
-		ResponseErrorConfig<
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
-			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
-		>,
-		PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
 		TContext
 	>;
 }

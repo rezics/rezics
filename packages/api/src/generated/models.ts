@@ -4942,9 +4942,9 @@ export const ApiErrorCode = {
 	UnitAccessInvitationSelfForbidden: "UnitAccessInvitationSelfForbidden",
 	UnitAccessConfigurationInvalid: "UnitAccessConfigurationInvalid",
 	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
-	FeedbackRealmMismatch: "FeedbackRealmMismatch",
-	FeedbackNotFound: "FeedbackNotFound",
-	FeedbackAlreadyResolved: "FeedbackAlreadyResolved",
+	ReportRealmMismatch: "ReportRealmMismatch",
+	ReportAlreadySubmitted: "ReportAlreadySubmitted",
+	ReportTargetRevisionUnavailable: "ReportTargetRevisionUnavailable",
 	PostNotFound: "PostNotFound",
 	PostLocalizationNotFound: "PostLocalizationNotFound",
 	PostTargetingLocked: "PostTargetingLocked",
@@ -7607,6 +7607,7 @@ export const GetApiNotificationsStatus200ItemsPayloadActionKindEnum = {
 	escalate: "escalate",
 	reverse: "reverse",
 	note: "note",
+	dismiss: "dismiss",
 } as const;
 
 export type GetApiNotificationsStatus200ItemsPayloadActionKindEnum =
@@ -7629,24 +7630,6 @@ export const GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum = {
 
 export type GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum =
 	(typeof GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum)[keyof typeof GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum];
-
-export const GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum =
-	(typeof GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum)[keyof typeof GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum];
 
 /**
  * @type object
@@ -7829,17 +7812,27 @@ export type GetApiNotificationsStatus200 = {
 							/**
 							 * @type string
 							 */
-							type: "feedback_resolution";
+							type: "report_resolution";
 							/**
 							 * @description
 							 * Format: `uuid`
 							 * @type string
 							 */
-							feedbackId: string;
+							reportId: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							actionId: string;
 							/**
 							 * @type string
 							 */
-							resolutionCode: GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum;
+							actionKind: GetApiNotificationsStatus200ItemsPayloadActionKindEnum;
+							/**
+							 * @type string
+							 */
+							reasonCode: GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum;
 							/**
 							 * @description
 							 * Format: `uuid`
@@ -12227,7 +12220,7 @@ export const GetApiApiTokensStatus200ItemsPermissionsEnum = {
 	"recommendation:write": "recommendation:write",
 	"upload:read": "upload:read",
 	"upload:write": "upload:write",
-	"feedback:write": "feedback:write",
+	"report:write": "report:write",
 } as const;
 
 export type GetApiApiTokensStatus200ItemsPermissionsEnum =
@@ -12447,7 +12440,7 @@ export const PostApiApiTokensStatus200PermissionsEnum = {
 	"recommendation:write": "recommendation:write",
 	"upload:read": "upload:read",
 	"upload:write": "upload:write",
-	"feedback:write": "feedback:write",
+	"report:write": "report:write",
 } as const;
 
 export type PostApiApiTokensStatus200PermissionsEnum =
@@ -12669,7 +12662,7 @@ export const PostApiApiTokensRequestPermissionsEnum = {
 	"recommendation:write": "recommendation:write",
 	"upload:read": "upload:read",
 	"upload:write": "upload:write",
-	"feedback:write": "feedback:write",
+	"report:write": "report:write",
 } as const;
 
 export type PostApiApiTokensRequestPermissionsEnum =
@@ -12782,7 +12775,7 @@ export const PatchApiApiTokensByTokenIdStatus200PermissionsEnum = {
 	"recommendation:write": "recommendation:write",
 	"upload:read": "upload:read",
 	"upload:write": "upload:write",
-	"feedback:write": "feedback:write",
+	"report:write": "report:write",
 } as const;
 
 export type PatchApiApiTokensByTokenIdStatus200PermissionsEnum =
@@ -13006,7 +12999,7 @@ export const PatchApiApiTokensByTokenIdRequestPermissionsEnum = {
 	"recommendation:write": "recommendation:write",
 	"upload:read": "upload:read",
 	"upload:write": "upload:write",
-	"feedback:write": "feedback:write",
+	"report:write": "report:write",
 } as const;
 
 export type PatchApiApiTokensByTokenIdRequestPermissionsEnum =
@@ -13243,7 +13236,7 @@ export const PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum = {
 	"recommendation:write": "recommendation:write",
 	"upload:read": "upload:read",
 	"upload:write": "upload:write",
-	"feedback:write": "feedback:write",
+	"report:write": "report:write",
 } as const;
 
 export type PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum =
@@ -13584,7 +13577,7 @@ export const GetCurrentApiTokenStatus200PermissionsEnum = {
 	"recommendation:write": "recommendation:write",
 	"upload:read": "upload:read",
 	"upload:write": "upload:write",
-	"feedback:write": "feedback:write",
+	"report:write": "report:write",
 } as const;
 
 export type GetCurrentApiTokenStatus200PermissionsEnum =
@@ -16728,61 +16721,43 @@ export type PostApiFeedQueryResponse =
 /**
  * @type object
  */
-export type GetApiFeedbackMeQuery = {
+export type GetApiReportsMeQuery = {
 	/**
 	 * @default 30
 	 */
 	limit?: string | number;
 };
 
-export const GetApiFeedbackMeStatus200ItemsEvidenceLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type GetApiFeedbackMeStatus200ItemsEvidenceLanguageEnum =
-	(typeof GetApiFeedbackMeStatus200ItemsEvidenceLanguageEnum)[keyof typeof GetApiFeedbackMeStatus200ItemsEvidenceLanguageEnum];
-
-export const GetApiFeedbackMeStatus200ItemsResolutionCode = {
-	content_policy: "content_policy",
+export const GetApiReportsMeStatus200ItemsReasonEnum = {
 	realm_rules: "realm_rules",
 	spam: "spam",
 	harassment: "harassment",
 	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
 	other: "other",
 } as const;
 
-export type GetApiFeedbackMeStatus200ItemsResolutionCode =
-	(typeof GetApiFeedbackMeStatus200ItemsResolutionCode)[keyof typeof GetApiFeedbackMeStatus200ItemsResolutionCode];
+export type GetApiReportsMeStatus200ItemsReasonEnum =
+	(typeof GetApiReportsMeStatus200ItemsReasonEnum)[keyof typeof GetApiReportsMeStatus200ItemsReasonEnum];
 
-export const GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
+export const GetApiReportsMeStatus200ItemsCaseStateEnum = {
+	new: "new",
+	triaged: "triaged",
+	assigned: "assigned",
+	actioned: "actioned",
+	resolved: "resolved",
+	duplicate: "duplicate",
+	rejected: "rejected",
+	escalated: "escalated",
+	reviewing: "reviewing",
 } as const;
 
-export type GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum =
-	(typeof GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum)[keyof typeof GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum];
+export type GetApiReportsMeStatus200ItemsCaseStateEnum =
+	(typeof GetApiReportsMeStatus200ItemsCaseStateEnum)[keyof typeof GetApiReportsMeStatus200ItemsCaseStateEnum];
 
 /**
  * @type object
  */
-export type GetApiFeedbackMeStatus200 = {
+export type GetApiReportsMeStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -16794,329 +16769,56 @@ export type GetApiFeedbackMeStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		type: string;
+		caseId: string;
 		/**
-		 * @type object
+		 * @description
+		 * Format: `uuid`
+		 * @type string
 		 */
-		evidence: {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			postId: string;
-			/**
-			 * @type string
-			 */
-			language: GetApiFeedbackMeStatus200ItemsEvidenceLanguageEnum;
-			/**
-			 * @type object
-			 */
-			content: {
-				/**
-				 * @type string
-				 */
-				_type: "portable-text";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type array
-				 */
-				content: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "block";
-							/**
-							 * @type array
-							 */
-							children: (
-								| {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: "span";
-										/**
-										 * @type string
-										 */
-										text: string;
-										/**
-										 * @type array | undefined
-										 */
-										marks?: string[];
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: "unit-mention";
-										/**
-										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-										 * @type string
-										 */
-										unitId: string;
-								  }
-							)[];
-							/**
-							 * @type array | undefined
-							 */
-							markDefs?: {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-							}[];
-							/**
-							 * @type string | undefined
-							 */
-							listItem?: string;
-							/**
-							 * @type string | undefined
-							 */
-							style?: string;
-							/**
-							 * @minLength 1
-							 * @type integer | undefined
-							 */
-							level?: number;
-							[key: string]: unknown;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "image";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							assetId: string;
-							/**
-							 * @type string | undefined
-							 */
-							alt?: string;
-							/**
-							 * @type string | undefined
-							 */
-							caption?: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @pattern ^(?!(?:block|image)$).+
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-					  }
-				)[];
-			};
-		};
-		url: (string | null) | null;
-		subjectUnitId: (string | null) | null;
+		realmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
 		/**
 		 * @type string
 		 */
-		status: string;
-		resolutionCode: (GetApiFeedbackMeStatus200ItemsResolutionCode | null) | null;
-		publicNotice:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					postId: string;
-					/**
-					 * @type string
-					 */
-					language: GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum;
-					/**
-					 * @type object
-					 */
-					content: {
-						/**
-						 * @type string
-						 */
-						_type: "portable-text";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type array
-						 */
-						content: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "unit-mention";
-												/**
-												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-												 * @type string
-												 */
-												unitId: string;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
-									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "image";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									assetId: string;
-									/**
-									 * @type string | undefined
-									 */
-									alt?: string;
-									/**
-									 * @type string | undefined
-									 */
-									caption?: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @pattern ^(?!(?:block|image)$).+
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-							  }
-						)[];
-					};
-			  } | null)
-			| null;
+		reason: GetApiReportsMeStatus200ItemsReasonEnum;
+		details: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		reportedRevisionId: string;
+		/**
+		 * @type string
+		 */
+		caseState: GetApiReportsMeStatus200ItemsCaseStateEnum;
 		/**
 		 * @description
 		 * Format: `date-time`
 		 * @type string
 		 */
 		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
 	}[];
 };
 
 /**
  * @type object
  */
-export type GetApiFeedbackMeStatus422 = ValidationError;
+export type GetApiReportsMeStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiFeedbackMeStatus429 = {
+export type GetApiReportsMeStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -17140,436 +16842,115 @@ export type GetApiFeedbackMeStatus429 = {
 /**
  * @type object
  */
-export type GetApiFeedbackMeStatus500 = InternalError;
+export type GetApiReportsMeStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiFeedbackMeOptions = {
+export type GetApiReportsMeOptions = {
 	body?: never;
 	path?: never;
-	query?: GetApiFeedbackMeQuery;
+	query?: GetApiReportsMeQuery;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiFeedbackMeResponses = {
-	"200": GetApiFeedbackMeStatus200;
-	"422": GetApiFeedbackMeStatus422;
-	"429": GetApiFeedbackMeStatus429;
-	"500": GetApiFeedbackMeStatus500;
+export type GetApiReportsMeResponses = {
+	"200": GetApiReportsMeStatus200;
+	"422": GetApiReportsMeStatus422;
+	"429": GetApiReportsMeStatus429;
+	"500": GetApiReportsMeStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiFeedbackMeResponse =
-	| GetApiFeedbackMeStatus200
-	| GetApiFeedbackMeStatus422
-	| GetApiFeedbackMeStatus429
-	| GetApiFeedbackMeStatus500;
-
-export const PostApiFeedbackStatus200EvidenceLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type PostApiFeedbackStatus200EvidenceLanguageEnum =
-	(typeof PostApiFeedbackStatus200EvidenceLanguageEnum)[keyof typeof PostApiFeedbackStatus200EvidenceLanguageEnum];
-
-export const PostApiFeedbackStatus200ResolutionCode = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiFeedbackStatus200ResolutionCode =
-	(typeof PostApiFeedbackStatus200ResolutionCode)[keyof typeof PostApiFeedbackStatus200ResolutionCode];
-
-export const PostApiFeedbackStatus200PublicNoticeLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type PostApiFeedbackStatus200PublicNoticeLanguageEnum =
-	(typeof PostApiFeedbackStatus200PublicNoticeLanguageEnum)[keyof typeof PostApiFeedbackStatus200PublicNoticeLanguageEnum];
+export type GetApiReportsMeResponse =
+	| GetApiReportsMeStatus200
+	| GetApiReportsMeStatus422
+	| GetApiReportsMeStatus429
+	| GetApiReportsMeStatus500;
 
 /**
  * @type object
  */
-export type PostApiFeedbackStatus200 = {
+export type GetApiReportsUnitsByUnitIdRealmsPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	id: string;
+	unitId: string;
+};
+
+export const GetApiReportsUnitsByUnitIdRealmsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReportsUnitsByUnitIdRealmsLocalizationLanguagesEnum =
+	(typeof GetApiReportsUnitsByUnitIdRealmsLocalizationLanguagesEnum)[keyof typeof GetApiReportsUnitsByUnitIdRealmsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiReportsUnitsByUnitIdRealmsQuery = {
 	/**
-	 * @type string
+	 * @type array | undefined
 	 */
-	type: string;
+	localizationLanguages?: GetApiReportsUnitsByUnitIdRealmsLocalizationLanguagesEnum[];
 	/**
-	 * @type object
+	 * @default 100
 	 */
-	evidence: {
+	limit?: string | number;
+};
+
+export const GetApiReportsUnitsByUnitIdRealmsStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReportsUnitsByUnitIdRealmsStatus200ItemsLanguageEnum =
+	(typeof GetApiReportsUnitsByUnitIdRealmsStatus200ItemsLanguageEnum)[keyof typeof GetApiReportsUnitsByUnitIdRealmsStatus200ItemsLanguageEnum];
+
+/**
+ * @type object
+ */
+export type GetApiReportsUnitsByUnitIdRealmsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
 		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
 		 */
-		postId: string;
+		id: string;
 		/**
 		 * @type string
 		 */
-		language: PostApiFeedbackStatus200EvidenceLanguageEnum;
-		/**
-		 * @type object
-		 */
-		content: {
-			/**
-			 * @type string
-			 */
-			_type: "portable-text";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			content: (
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "block";
-						/**
-						 * @type array
-						 */
-						children: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "unit-mention";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									unitId: string;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
-		};
-	};
-	url: (string | null) | null;
-	subjectUnitId: (string | null) | null;
-	/**
-	 * @type string
-	 */
-	status: string;
-	resolutionCode: (PostApiFeedbackStatus200ResolutionCode | null) | null;
-	publicNotice:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				postId: string;
-				/**
-				 * @type string
-				 */
-				language: PostApiFeedbackStatus200PublicNoticeLanguageEnum;
-				/**
-				 * @type object
-				 */
-				content: {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "unit-mention";
-											/**
-											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-											 * @type string
-											 */
-											unitId: string;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "image";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								assetId: string;
-								/**
-								 * @type string | undefined
-								 */
-								alt?: string;
-								/**
-								 * @type string | undefined
-								 */
-								caption?: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!(?:block|image)$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-				};
-		  } | null)
-		| null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
+		language: GetApiReportsUnitsByUnitIdRealmsStatus200ItemsLanguageEnum;
+		title: (string | null) | null;
+	}[];
 };
-
-export type PostApiFeedbackStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'FeedbackRealmMismatch'
-				 * @type string
-				 */
-				code: "FeedbackRealmMismatch";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
 
 /**
  * @type object
  */
-export type PostApiFeedbackStatus404 = {
+export type GetApiReportsUnitsByUnitIdRealmsStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -17597,12 +16978,12 @@ export type PostApiFeedbackStatus404 = {
 /**
  * @type object
  */
-export type PostApiFeedbackStatus422 = ValidationError;
+export type GetApiReportsUnitsByUnitIdRealmsStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PostApiFeedbackStatus429 = {
+export type GetApiReportsUnitsByUnitIdRealmsStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -17626,200 +17007,488 @@ export type PostApiFeedbackStatus429 = {
 /**
  * @type object
  */
-export type PostApiFeedbackStatus500 = InternalError;
-
-export const PostApiFeedbackRequestTypeEnum = {
-	report: "report",
-	bug: "bug",
-	feature: "feature",
-	other: "other",
-} as const;
-
-export type PostApiFeedbackRequestTypeEnum =
-	(typeof PostApiFeedbackRequestTypeEnum)[keyof typeof PostApiFeedbackRequestTypeEnum];
-
-export const PostApiFeedbackRequestLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type PostApiFeedbackRequestLanguageEnum =
-	(typeof PostApiFeedbackRequestLanguageEnum)[keyof typeof PostApiFeedbackRequestLanguageEnum];
+export type GetApiReportsUnitsByUnitIdRealmsStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiFeedbackBody = {
-	/**
-	 * @type string
-	 */
-	type: PostApiFeedbackRequestTypeEnum;
-	/**
-	 * @type string
-	 */
-	language: PostApiFeedbackRequestLanguageEnum;
-	/**
-	 * @type object
-	 */
-	content: {
-		/**
-		 * @type string
-		 */
-		_type: "portable-text";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		content: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "unit-mention";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								unitId: string;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "image";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					assetId: string;
-					/**
-					 * @type string | undefined
-					 */
-					alt?: string;
-					/**
-					 * @type string | undefined
-					 */
-					caption?: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @pattern ^(?!(?:block|image)$).+
-					 * @type string
-					 */
-					_type: string;
-					[key: string]: unknown;
-			  }
-		)[];
-	};
-	/**
-	 * @description
-	 * Format: `uri`
-	 * @maxLength 2000
-	 * @type string | undefined
-	 */
-	url?: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	subjectUnitId?: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	realmId?: string;
+export type GetApiReportsUnitsByUnitIdRealmsOptions = {
+	body?: never;
+	path: GetApiReportsUnitsByUnitIdRealmsPath;
+	query?: GetApiReportsUnitsByUnitIdRealmsQuery;
+	headers?: never;
 };
 
 /**
  * @type object
  */
-export type PostApiFeedbackOptions = {
-	body: PostApiFeedbackBody;
-	path?: never;
+export type GetApiReportsUnitsByUnitIdRealmsResponses = {
+	"200": GetApiReportsUnitsByUnitIdRealmsStatus200;
+	"404": GetApiReportsUnitsByUnitIdRealmsStatus404;
+	"422": GetApiReportsUnitsByUnitIdRealmsStatus422;
+	"429": GetApiReportsUnitsByUnitIdRealmsStatus429;
+	"500": GetApiReportsUnitsByUnitIdRealmsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiReportsUnitsByUnitIdRealmsResponse =
+	| GetApiReportsUnitsByUnitIdRealmsStatus200
+	| GetApiReportsUnitsByUnitIdRealmsStatus404
+	| GetApiReportsUnitsByUnitIdRealmsStatus422
+	| GetApiReportsUnitsByUnitIdRealmsStatus429
+	| GetApiReportsUnitsByUnitIdRealmsStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetApiRealmsByRealmIdReportsState = {
+	new: "new",
+	triaged: "triaged",
+	assigned: "assigned",
+	actioned: "actioned",
+	resolved: "resolved",
+	duplicate: "duplicate",
+	rejected: "rejected",
+	escalated: "escalated",
+	reviewing: "reviewing",
+} as const;
+
+export type GetApiRealmsByRealmIdReportsState =
+	(typeof GetApiRealmsByRealmIdReportsState)[keyof typeof GetApiRealmsByRealmIdReportsState];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	unitId?: string;
+	/**
+	 * @type string | undefined
+	 */
+	state?: GetApiRealmsByRealmIdReportsState;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiRealmsByRealmIdReportsStatus200ItemsReasonEnum = {
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	other: "other",
+} as const;
+
+export type GetApiRealmsByRealmIdReportsStatus200ItemsReasonEnum =
+	(typeof GetApiRealmsByRealmIdReportsStatus200ItemsReasonEnum)[keyof typeof GetApiRealmsByRealmIdReportsStatus200ItemsReasonEnum];
+
+export const GetApiRealmsByRealmIdReportsStatus200ItemsCaseStateEnum = {
+	new: "new",
+	triaged: "triaged",
+	assigned: "assigned",
+	actioned: "actioned",
+	resolved: "resolved",
+	duplicate: "duplicate",
+	rejected: "rejected",
+	escalated: "escalated",
+	reviewing: "reviewing",
+} as const;
+
+export type GetApiRealmsByRealmIdReportsStatus200ItemsCaseStateEnum =
+	(typeof GetApiRealmsByRealmIdReportsStatus200ItemsCaseStateEnum)[keyof typeof GetApiRealmsByRealmIdReportsStatus200ItemsCaseStateEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		caseId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		reason: GetApiRealmsByRealmIdReportsStatus200ItemsReasonEnum;
+		details: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		reportedRevisionId: string;
+		/**
+		 * @type string
+		 */
+		caseState: GetApiRealmsByRealmIdReportsStatus200ItemsCaseStateEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdReportsPath;
+	query?: GetApiRealmsByRealmIdReportsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdReportsResponses = {
+	"200": GetApiRealmsByRealmIdReportsStatus200;
+	"403": GetApiRealmsByRealmIdReportsStatus403;
+	"422": GetApiRealmsByRealmIdReportsStatus422;
+	"500": GetApiRealmsByRealmIdReportsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdReportsResponse =
+	| GetApiRealmsByRealmIdReportsStatus200
+	| GetApiRealmsByRealmIdReportsStatus403
+	| GetApiRealmsByRealmIdReportsStatus422
+	| GetApiRealmsByRealmIdReportsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200ReasonEnum = {
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	other: "other",
+} as const;
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200ReasonEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200ReasonEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200ReasonEnum];
+
+export const PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200CaseStateEnum = {
+	new: "new",
+	triaged: "triaged",
+	assigned: "assigned",
+	actioned: "actioned",
+	resolved: "resolved",
+	duplicate: "duplicate",
+	rejected: "rejected",
+	escalated: "escalated",
+	reviewing: "reviewing",
+} as const;
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200CaseStateEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200CaseStateEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200CaseStateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	caseId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @type string
+	 */
+	reason: PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200ReasonEnum;
+	details: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	reportedRevisionId: string;
+	/**
+	 * @type string
+	 */
+	caseState: PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200CaseStateEnum;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+};
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ReportRealmMismatch'
+				 * @type string
+				 */
+				code: "ReportRealmMismatch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409ErrorCodeEnum = {
+	ReportAlreadySubmitted: "ReportAlreadySubmitted",
+	ReportTargetRevisionUnavailable: "ReportTargetRevisionUnavailable",
+} as const;
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ReportAlreadySubmitted'
+		 * @type string
+		 */
+		code: PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500 = InternalError;
+
+export const PostApiRealmsByRealmIdUnitsByUnitIdReportsRequestReasonEnum = {
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	other: "other",
+} as const;
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsRequestReasonEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsRequestReasonEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdReportsRequestReasonEnum];
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsBody = {
+	/**
+	 * @type string
+	 */
+	reason: PostApiRealmsByRealmIdUnitsByUnitIdReportsRequestReasonEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	details?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions = {
+	body: PostApiRealmsByRealmIdUnitsByUnitIdReportsBody;
+	path: PostApiRealmsByRealmIdUnitsByUnitIdReportsPath;
 	query?: never;
 	headers?: never;
 };
@@ -17827,25 +17496,27 @@ export type PostApiFeedbackOptions = {
 /**
  * @type object
  */
-export type PostApiFeedbackResponses = {
-	"200": PostApiFeedbackStatus200;
-	"400": PostApiFeedbackStatus400;
-	"404": PostApiFeedbackStatus404;
-	"422": PostApiFeedbackStatus422;
-	"429": PostApiFeedbackStatus429;
-	"500": PostApiFeedbackStatus500;
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsResponses = {
+	"200": PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200;
+	"400": PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400;
+	"404": PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404;
+	"409": PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409;
+	"422": PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422;
+	"429": PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429;
+	"500": PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiFeedbackResponse =
-	| PostApiFeedbackStatus200
-	| PostApiFeedbackStatus400
-	| PostApiFeedbackStatus404
-	| PostApiFeedbackStatus422
-	| PostApiFeedbackStatus429
-	| PostApiFeedbackStatus500;
+export type PostApiRealmsByRealmIdUnitsByUnitIdReportsResponse =
+	| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus200
+	| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus400
+	| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus404
+	| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus409
+	| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus422
+	| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus429
+	| PostApiRealmsByRealmIdUnitsByUnitIdReportsStatus500;
 
 /**
  * @type object
@@ -21579,7 +21250,6 @@ export type GetApiGovernanceModerationCasesStatus200 = {
 		 */
 		targetId: string;
 		targetPath: (string | null) | null;
-		reporterProfileId: (string | null) | null;
 		assignedProfileId: (string | null) | null;
 		duplicateOfCaseId: (string | null) | null;
 		/**
@@ -21898,7 +21568,6 @@ export type GetApiGovernanceModerationCasesByCaseIdStatus200 = {
 	 */
 	targetId: string;
 	targetPath: (string | null) | null;
-	reporterProfileId: (string | null) | null;
 	assignedProfileId: (string | null) | null;
 	duplicateOfCaseId: (string | null) | null;
 	/**
@@ -22246,7 +21915,6 @@ export type PatchApiGovernanceModerationCasesByCaseIdStatus200 = {
 	 */
 	targetId: string;
 	targetPath: (string | null) | null;
-	reporterProfileId: (string | null) | null;
 	assignedProfileId: (string | null) | null;
 	duplicateOfCaseId: (string | null) | null;
 	/**
@@ -23142,6 +22810,7 @@ export type PostApiGovernanceModerationActionsBody =
 				| "remove_member"
 				| "ban_member"
 				| "restore_member"
+				| "dismiss"
 				| "escalate";
 	  }
 	| {
@@ -23509,345 +23178,6 @@ export type PostApiGovernanceModerationActionsResponse =
 	| PostApiGovernanceModerationActionsStatus409
 	| PostApiGovernanceModerationActionsStatus422
 	| PostApiGovernanceModerationActionsStatus500;
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolvePath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	feedbackId: string;
-};
-
-/**
- * @type void
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204 = void;
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400 = MalformedRequestBody;
-
-export const PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403ErrorCodeEnum =
-	(typeof PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403ErrorCodeEnum)[keyof typeof PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FeedbackNotFound'
-		 * @type string
-		 */
-		code: "FeedbackNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'FeedbackAlreadyResolved'
-		 * @type string
-		 */
-		code: "FeedbackAlreadyResolved";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500 = InternalError;
-
-export const PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum =
-	(typeof PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum)[keyof typeof PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum];
-
-export const PatchApiGovernanceFeedbackByFeedbackIdResolveRequestPublicNoticeLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveRequestPublicNoticeLanguageEnum =
-	(typeof PatchApiGovernanceFeedbackByFeedbackIdResolveRequestPublicNoticeLanguageEnum)[keyof typeof PatchApiGovernanceFeedbackByFeedbackIdResolveRequestPublicNoticeLanguageEnum];
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveBody = {
-	/**
-	 * @type string
-	 */
-	resolutionCode: PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum;
-	/**
-	 * @type object | undefined
-	 */
-	publicNotice?: {
-		/**
-		 * @type string
-		 */
-		language: PatchApiGovernanceFeedbackByFeedbackIdResolveRequestPublicNoticeLanguageEnum;
-		/**
-		 * @type object
-		 */
-		content: {
-			/**
-			 * @type string
-			 */
-			_type: "portable-text";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			content: (
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "block";
-						/**
-						 * @type array
-						 */
-						children: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "unit-mention";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									unitId: string;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
-		};
-	};
-};
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveOptions = {
-	body: PatchApiGovernanceFeedbackByFeedbackIdResolveBody;
-	path: PatchApiGovernanceFeedbackByFeedbackIdResolvePath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveResponses = {
-	"204": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204;
-	"400": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400;
-	"403": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403;
-	"404": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404;
-	"409": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409;
-	"422": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422;
-	"500": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PatchApiGovernanceFeedbackByFeedbackIdResolveResponse =
-	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204
-	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus400
-	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
-	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
-	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
-	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
-	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500;
 
 /**
  * @type object
@@ -91281,6 +90611,10 @@ export type GetApiRealmsByRealmIdUnitsQuery = {
 	 */
 	status?: GetApiRealmsByRealmIdUnitsStatus;
 	/**
+	 * @type boolean | undefined
+	 */
+	reported?: boolean;
+	/**
 	 * @type array | undefined
 	 */
 	localizationLanguages?: GetApiRealmsByRealmIdUnitsLocalizationLanguagesEnum[];
@@ -91326,6 +90660,7 @@ export const GetApiRealmsByRealmIdUnitsStatus200ItemsAllowedCommandsEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
+	dismiss: "dismiss",
 	note: "note",
 } as const;
 
@@ -91369,6 +90704,7 @@ export type GetApiRealmsByRealmIdUnitsStatus200 = {
 		 * @type boolean
 		 */
 		postTargetingLocked: boolean;
+		openReportCount: string | number;
 		/**
 		 * @type array
 		 */
@@ -91539,6 +90875,7 @@ export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum = {
 	escalate: "escalate",
 	reverse: "reverse",
 	note: "note",
+	dismiss: "dismiss",
 } as const;
 
 export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum =
@@ -91959,6 +91296,7 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200TargetAllowedCommandsE
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
+	dismiss: "dismiss",
 	note: "note",
 } as const;
 
@@ -92034,6 +91372,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		postTargetingLocked: boolean;
+		openReportCount: string | number;
 		/**
 		 * @type array
 		 */
@@ -92220,7 +91559,7 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum = {
 export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum =
 	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum];
 
-export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum = {
+export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommand = {
 	approve: "approve",
 	hide: "hide",
 	remove: "remove",
@@ -92229,8 +91568,8 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum = {
 	unlock_post_targeting: "unlock_post_targeting",
 } as const;
 
-export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum =
-	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum];
+export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommand =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommand)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommand];
 
 export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum = {
 	zh: "zh",
@@ -92258,11 +91597,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 			 * @type string | undefined
 			 */
 			idempotencyKey?: string;
-			/**
-			 * @default 'approve'
-			 * @type string
-			 */
-			command: PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum;
+			command: PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommand | "dismiss";
 			/**
 			 * @type object | undefined
 			 */

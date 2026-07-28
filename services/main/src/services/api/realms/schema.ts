@@ -181,6 +181,7 @@ export const RealmTagContextResponse = t.Object({
 export const ListRealmUnitsQuery = t.Object(
 	{
 		status: t.Optional(RealmUnitStatus),
+		reported: t.Optional(t.Boolean()),
 		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ minLength: 1, maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
@@ -211,7 +212,7 @@ export const ModerateRealmUnitBody = t.Union([
 	t.Object(
 		{
 			...RealmModerationCommon,
-			command: t.UnionEnum(RealmUnitMutationCommandValues),
+			command: t.Union([t.UnionEnum(RealmUnitMutationCommandValues), t.Literal("dismiss")]),
 			annotation: t.Optional(RealmModerationAnnotation),
 		},
 		{ additionalProperties: false },
@@ -231,6 +232,7 @@ const RealmModerationCommand = t.UnionEnum(RealmModerationCommandValues);
 const RealmUnitModerationTargetResponse = t.Object({
 	status: RealmUnitStatus,
 	postTargetingLocked: t.Boolean(),
+	openReportCount: t.Integer({ minimum: 0 }),
 	allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),
 	updatedAt: DateTime,
 });
@@ -245,6 +247,7 @@ export const RealmUnitListResponse = t.Object({
 			title: t.Nullable(t.String()),
 			status: RealmUnitStatus,
 			postTargetingLocked: t.Boolean(),
+			openReportCount: t.Integer({ minimum: 0 }),
 			allowedCommands: t.Array(RealmModerationCommand, { minItems: 1 }),
 			moderationStatus: t.String(),
 			createdAt: DateTime,

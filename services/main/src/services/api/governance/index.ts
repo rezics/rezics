@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
 
 import session from "../../auth/session";
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
@@ -8,7 +8,6 @@ import type { Authorization } from "../../authorization";
 import { database } from "../../database";
 import {
 	accountEnforcement,
-	feedback,
 	moderationAction,
 	moderationCase,
 	profile as profileTable,
@@ -22,16 +21,13 @@ import {
 import { createNotification } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
-import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
-import { FeedbackAlreadyResolved, FeedbackNotFound } from "../feedback/errors";
 import { ProfileNotFound } from "../users/errors";
 import {
 	AccountEnforcementParams,
 	CreateAccountEnforcementBody,
 	CreateModerationActionBody,
 	EnforcementResponse,
-	FeedbackParams,
 	GovernanceNoteParams,
 	GovernanceNoteResponse,
 	ListModerationCasesQuery,
@@ -39,7 +35,6 @@ import {
 	ModerationCaseListResponse,
 	ModerationCaseParams,
 	ModerationCaseResponse,
-	ResolveFeedbackBody,
 	RevokeAccountEnforcementBody,
 	UpdateModerationCaseBody,
 	UpdateGovernanceNoteBody,
@@ -73,7 +68,6 @@ const caseSelection = {
 	targetKind: moderationCase.targetKind,
 	targetId: moderationCase.targetId,
 	targetPath: moderationCase.targetPath,
-	reporterProfileId: moderationCase.reporterProfileId,
 	assignedProfileId: moderationCase.assignedProfileId,
 	duplicateOfCaseId: moderationCase.duplicateOfCaseId,
 	createdAt: moderationCase.createdAt,
@@ -105,22 +99,10 @@ async function presentModerationCases<T extends PresentableCase>(
 		subjectIds: rows.map((row) => row.id),
 		roles: ["internal_note"],
 	});
-	const feedbackIds = rows
-		.filter((row) => row.targetKind === "feedback")
-		.map((row) => row.targetId);
-	const feedbackNotes = await listGovernanceNotes(tx, {
-		subjectKind: "feedback",
-		subjectIds: feedbackIds,
-		roles: ["evidence", "public_notice"],
-	});
 	return rows.map((row) => ({
 		...row,
-		notes: [...caseNotes, ...feedbackNotes]
-			.filter(
-				(note) =>
-					(note.subjectId === row.id && note.role === "internal_note") ||
-					(row.targetKind === "feedback" && note.subjectId === row.targetId),
-			)
+		notes: caseNotes
+			.filter((note) => note.subjectId === row.id && note.role === "internal_note")
 			.sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())
 			.map(({ subjectId: _subjectId, ...note }) => note),
 	}));
@@ -334,8 +316,7 @@ export default new Elysia({ prefix: "/governance" })
 							actorProfileId: profile.unitId,
 							subjectKind: "moderation_case",
 							subjectId: current.id,
-							subjectUnitId:
-								current.targetKind === "feedback" ? undefined : current.targetId,
+							subjectUnitId: current.targetId,
 							realmId: current.realmId,
 							note: { role: "internal_note", ...internalNote },
 						})
@@ -407,105 +388,6 @@ export default new Elysia({ prefix: "/governance" })
 				]),
 			},
 			detail: { summary: "Apply moderation action", tags: ["Governance"] },
-		},
-	)
-	.patch(
-		"/feedback/:feedbackId/resolve",
-		async ({ authorization, profile, params, body }) => {
-			const [caseRow] = await database
-				.select()
-				.from(moderationCase)
-				.where(
-					and(
-						eq(moderationCase.targetKind, "feedback"),
-						eq(moderationCase.targetId, params.feedbackId),
-					),
-				)
-				.orderBy(desc(moderationCase.createdAt))
-				.limit(1);
-			await ensureCaseAccess(
-				authorization,
-				caseRow ?? { authority: "platform", realmId: null },
-			);
-			await database.transaction(async (tx) => {
-				const [current] = await tx
-					.select({
-						id: feedback.id,
-						profileId: feedback.profileId,
-						subjectUnitId: feedback.subjectUnitId,
-						resolvedAt: feedback.resolvedAt,
-					})
-					.from(feedback)
-					.where(eq(feedback.id, params.feedbackId))
-					.for("update")
-					.limit(1);
-				if (!current) throw new FeedbackNotFound();
-				if (current.resolvedAt) throw new FeedbackAlreadyResolved();
-				const [updated] = await tx
-					.update(feedback)
-					.set({
-						resolutionCode: body.resolutionCode,
-						resolvedByProfileId: profile.unitId,
-						resolvedAt: new Date(),
-					})
-					.where(and(eq(feedback.id, params.feedbackId), isNull(feedback.resolvedAt)))
-					.returning({ id: feedback.id, profileId: feedback.profileId });
-				if (!updated) throw new FeedbackAlreadyResolved();
-				const publicNotice = body.publicNotice
-					? await createGovernanceNotePost(tx, {
-							actorProfileId: profile.unitId,
-							subjectKind: "feedback",
-							subjectId: updated.id,
-							subjectUnitId: current.subjectUnitId ?? undefined,
-							realmId: caseRow?.realmId,
-							publicRecipientProfileIds: [updated.profileId],
-							note: { role: "public_notice", ...body.publicNotice },
-						})
-					: undefined;
-				if (caseRow)
-					await tx
-						.update(moderationCase)
-						.set({ state: "resolved" })
-						.where(eq(moderationCase.id, caseRow.id));
-				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
-					action: "feedback.resolve",
-					decisionCode: body.resolutionCode,
-					subjectKind: "feedback",
-					subjectId: updated.id,
-					authorityRealmId:
-						caseRow?.authority === "realm" ? (caseRow.realmId ?? undefined) : undefined,
-					metadata: { publicNoticePostId: publicNotice?.postId },
-				});
-				await createNotification(tx, {
-					recipientProfileId: updated.profileId,
-					actorProfileId: profile.unitId,
-					kind: "moderation",
-					payload: {
-						type: "feedback_resolution",
-						feedbackId: updated.id,
-						resolutionCode: body.resolutionCode,
-						publicNoticePostId: publicNotice?.postId,
-					},
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "session-only",
-			params: FeedbackParams,
-			body: ResolveFeedbackBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["FeedbackNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["FeedbackAlreadyResolved"]),
-			},
-			detail: {
-				summary: "Resolve feedback",
-				tags: ["Governance"],
-				responses: NoContentResponse,
-			},
 		},
 	)
 	.post(

@@ -38,6 +38,10 @@ export default {
 		title: `${verbatimTerms.rezics.value} 内容审核更新`,
 		body: "你的内容审核状态已变更。",
 	},
+	report_resolution: {
+		title: `${verbatimTerms.rezics.value} 举报处理结果`,
+		body: "你提交的举报已有处理结果。",
+	},
 	realm: {
 		title: `${verbatimTerms.rezics.value} ${realmTerms.inline}更新`,
 		body: `你所在${realmTerms.inline}的相关状态已变更。`,

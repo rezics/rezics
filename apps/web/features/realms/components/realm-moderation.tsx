@@ -18,7 +18,11 @@ import { realmModerationUnits } from "../model/realm-moderation-cache";
 import { RealmModerationStatuses, toRealmModerationStatus } from "../model/moderation-contract";
 import {
 	AllRealmModerationStatuses,
+	AllRealmReportStates,
+	ReportedRealmUnits,
 	realmModerationFilterParser,
+	realmReportFilterParser,
+	toRealmReportFilter,
 } from "../routing/realm-moderation-route";
 import { RealmModerationQueue } from "./realm-moderation-queue";
 import { RealmModerationSheet } from "./realm-moderation-sheet";
@@ -30,10 +34,11 @@ export function RealmModeration({
 	readonly realmId: string;
 	readonly embedded?: boolean;
 }) {
-	const { t } = useTranslation(["realms", "state"]);
+	const { t } = useTranslation(["realms", "reports", "state"]);
 	const [filter, setFilter] = useQueryState("status", realmModerationFilterParser);
+	const [reportFilter, setReportFilter] = useQueryState("reported", realmReportFilterParser);
 	const [selectedUnitId, setSelectedUnitId] = useState<string>();
-	const queue = useRealmModerationQueue(realmId, filter);
+	const queue = useRealmModerationQueue(realmId, filter, reportFilter);
 	const units = useMemo(() => realmModerationUnits(queue.data), [queue.data]);
 	const selectedUnit = units.find((unit) => unit.unitId === selectedUnitId);
 	const loadNextPage = useCallback(() => {
@@ -53,26 +58,49 @@ export function RealmModeration({
 						</p>
 					) : null}
 				</div>
-				<Field className="w-full sm:w-52">
-					<FieldLabel>{t.realms.moderationFilter}</FieldLabel>
-					<NativeSelect
-						value={filter}
-						onChange={(event) => {
-							const nextFilter = toRealmModerationStatus(event.currentTarget.value);
-							setSelectedUnitId(undefined);
-							void setFilter(nextFilter);
-						}}
-					>
-						<NativeSelectOption value={AllRealmModerationStatuses}>
-							{t.realms.allModerationStates}
-						</NativeSelectOption>
-						{RealmModerationStatuses.map((status) => (
-							<NativeSelectOption key={status} value={status}>
-								{t.realms.moderationStates[status]}
+				<div className="grid w-full gap-3 sm:w-auto sm:grid-cols-2">
+					<Field className="w-full sm:w-52">
+						<FieldLabel>{t.realms.moderationFilter}</FieldLabel>
+						<NativeSelect
+							value={filter}
+							onChange={(event) => {
+								const nextFilter = toRealmModerationStatus(
+									event.currentTarget.value,
+								);
+								setSelectedUnitId(undefined);
+								void setFilter(nextFilter);
+							}}
+						>
+							<NativeSelectOption value={AllRealmModerationStatuses}>
+								{t.realms.allModerationStates}
 							</NativeSelectOption>
-						))}
-					</NativeSelect>
-				</Field>
+							{RealmModerationStatuses.map((status) => (
+								<NativeSelectOption key={status} value={status}>
+									{t.realms.moderationStates[status]}
+								</NativeSelectOption>
+							))}
+						</NativeSelect>
+					</Field>
+					<Field className="w-full sm:w-52">
+						<FieldLabel>{t.reports.filter}</FieldLabel>
+						<NativeSelect
+							value={reportFilter}
+							onChange={(event) => {
+								setSelectedUnitId(undefined);
+								void setReportFilter(
+									toRealmReportFilter(event.currentTarget.value),
+								);
+							}}
+						>
+							<NativeSelectOption value={AllRealmReportStates}>
+								{t.reports.allContent}
+							</NativeSelectOption>
+							<NativeSelectOption value={ReportedRealmUnits}>
+								{t.reports.reportedContent}
+							</NativeSelectOption>
+						</NativeSelect>
+					</Field>
+				</div>
 			</div>
 
 			{queue.isPending ? (
@@ -93,9 +121,13 @@ export function RealmModeration({
 				<div className="grid min-h-48 place-items-center rounded-xl border border-dashed p-8 text-center">
 					<div className="grid gap-3">
 						<p className="text-muted-foreground text-sm">{t.state.empty}</p>
-						{filter === AllRealmModerationStatuses ? null : (
+						{filter === AllRealmModerationStatuses &&
+						reportFilter === AllRealmReportStates ? null : (
 							<Button
-								onClick={() => void setFilter(AllRealmModerationStatuses)}
+								onClick={() => {
+									void setFilter(AllRealmModerationStatuses);
+									void setReportFilter(AllRealmReportStates);
+								}}
 								size="sm"
 								type="button"
 								variant="outline"
@@ -111,6 +143,7 @@ export function RealmModeration({
 				<RealmModerationSheet
 					cacheQuery={queue.baseQuery}
 					filter={filter}
+					reportFilter={reportFilter}
 					key={selectedUnit.unitId}
 					onOpenChange={(open) => {
 						if (!open) setSelectedUnitId(undefined);

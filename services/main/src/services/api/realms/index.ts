@@ -30,6 +30,7 @@ import {
 } from "../../units/localization";
 import {
 	contentStructure,
+	ActiveReportCaseStateValues,
 	moderationAction,
 	moderationCase,
 	post,
@@ -41,6 +42,7 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
+	report,
 	realmScoreContext,
 	realmTagContext,
 	realmTagVote,
@@ -1609,7 +1611,8 @@ export default new Elysia({ prefix: "/realms" })
 			const limit = query.limit ?? 50;
 			const cursor = decodeRealmUnitModerationCursor(query.cursor, {
 				realmId: params.realmId,
-				filter: query.status,
+				status: query.status,
+				reported: query.reported,
 			});
 			const statusOrder = sql<number>`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`;
 			const rows = await database
@@ -1624,6 +1627,15 @@ export default new Elysia({ prefix: "/realms" })
 					title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
 					status: realmUnit.status,
 					postTargetingLocked: realmUnit.postTargetingLocked,
+					openReportCount: sql<number>`(
+						select count(*)::int
+						from ${report}
+						inner join ${moderationCase}
+							on ${moderationCase.id} = ${report.caseId}
+						where ${report.realmId} = ${realmUnit.realmId}
+							and ${report.unitId} = ${realmUnit.unitId}
+							and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
+					)`,
 					moderationStatus: unit.moderationStatus,
 					createdAt: realmUnit.createdAt,
 					updatedAt: realmUnit.updatedAt,
@@ -1634,6 +1646,17 @@ export default new Elysia({ prefix: "/realms" })
 					and(
 						eq(realmUnit.realmId, params.realmId),
 						query.status ? eq(realmUnit.status, query.status) : undefined,
+						query.reported
+							? sql`exists (
+									select 1
+									from ${report}
+									inner join ${moderationCase}
+										on ${moderationCase.id} = ${report.caseId}
+									where ${report.realmId} = ${realmUnit.realmId}
+										and ${report.unitId} = ${realmUnit.unitId}
+										and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
+								)`
+							: undefined,
 						cursor
 							? or(
 									gt(statusOrder, cursor.statusOrder),
@@ -1662,7 +1685,11 @@ export default new Elysia({ prefix: "/realms" })
 					...item,
 					language: item.language,
 					allowedCommands: [
-						...getRealmUnitModerationCommands(item.status, item.postTargetingLocked),
+						...getRealmUnitModerationCommands(
+							item.status,
+							item.postTargetingLocked,
+							item.openReportCount > 0,
+						),
 					],
 				};
 			});
@@ -1672,7 +1699,11 @@ export default new Elysia({ prefix: "/realms" })
 				nextCursor:
 					hasMore && last
 						? encodeRealmUnitModerationCursor(
-								{ realmId: params.realmId, filter: query.status },
+								{
+									realmId: params.realmId,
+									status: query.status,
+									reported: query.reported,
+								},
 								{
 									status: last.status,
 									updatedAt: last.updatedAt,
@@ -1845,11 +1876,23 @@ export default new Elysia({ prefix: "/realms" })
 								eq(moderationCase.realmId, params.realmId),
 								eq(moderationCase.targetKind, "realm_unit"),
 								eq(moderationCase.targetId, params.unitId),
-								notInArray(moderationCase.state, [
-									"resolved",
-									"duplicate",
-									"rejected",
-								]),
+								body.command === "dismiss"
+									? and(
+											inArray(
+												moderationCase.state,
+												ActiveReportCaseStateValues,
+											),
+											sql`exists (
+													select 1
+													from ${report}
+													where ${report.caseId} = ${moderationCase.id}
+												)`,
+										)
+									: notInArray(moderationCase.state, [
+											"resolved",
+											"duplicate",
+											"rejected",
+										]),
 							),
 						)
 						.orderBy(desc(moderationCase.updatedAt), desc(moderationCase.id))
@@ -1895,6 +1938,15 @@ export default new Elysia({ prefix: "/realms" })
 					.select({
 						status: realmUnit.status,
 						postTargetingLocked: realmUnit.postTargetingLocked,
+						openReportCount: sql<number>`(
+							select count(*)::int
+							from ${report}
+							inner join ${moderationCase}
+								on ${moderationCase.id} = ${report.caseId}
+							where ${report.realmId} = ${realmUnit.realmId}
+								and ${report.unitId} = ${realmUnit.unitId}
+								and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
+						)`,
 						updatedAt: realmUnit.updatedAt,
 					})
 					.from(realmUnit)
@@ -1916,6 +1968,7 @@ export default new Elysia({ prefix: "/realms" })
 						...getRealmUnitModerationCommands(
 							result.target.status,
 							result.target.postTargetingLocked,
+							result.target.openReportCount > 0,
 						),
 					],
 				},

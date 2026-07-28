@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
+
+const { forms: realmTerms } = jaTerminology.realm;
+export default {
+	action: "報告",
+	moreActions: "その他の操作",
+	title: "このユニットを報告",
+	description: `問題の種類を選択してください。選択した${realmTerms.label}のモデレーターが確認します。`,
+	currentRealmDescription: `この報告は、現在の${realmTerms.label}のモデレーターが確認します。`,
+	realm: `確認する${realmTerms.label}`,
+	chooseRealm: `${realmTerms.label}を選択`,
+	noRealms: `このユニットは現在、あなたがアクセスできる通報先の${realmTerms.label}に属していません。`,
+	reason: "問題の種類",
+	reasons: {
+		realm_rules: `${realmTerms.label}のルール違反`,
+		spam: "スパム",
+		harassment: "嫌がらせ",
+		unsafe_content: "危険なコンテンツ",
+		other: "その他",
+	},
+	details: "補足（任意）",
+	detailsPlaceholder: "何が起きたか、確認すべき箇所を説明してください。",
+	detailsHint: "補足はコンテンツ言語を付けず、プレーンテキストとして保存されます。",
+	cancel: "キャンセル",
+	submit: "報告を送信",
+	submitted: "報告を送信しました",
+	filter: "報告フィルター",
+	allContent: "すべてのコンテンツ",
+	reportedContent: "報告あり",
+	reportCount: insert("未処理の報告 {{count}} 件", { count: Number }),
+	heading: "報告",
+	empty: "このユニットへの報告はありません。",
+	reportedAt: insert("{{date}}に報告", { date: String }),
+	revision: "報告対象のリビジョン",
+	caseState: "ケースの状態",
+	caseStates: {
+		new: "新規",
+		triaged: "分類済み",
+		assigned: "担当者割り当て済み",
+		actioned: "対応済み",
+		resolved: "解決済み",
+		duplicate: "重複",
+		rejected: "却下",
+		escalated: "エスカレーション済み",
+		reviewing: "確認中",
+	},
+} satisfies typeof import("../zh-Hant/reports").default;

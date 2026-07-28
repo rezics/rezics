@@ -229,7 +229,14 @@ export const NotificationKindValues = [
 	"realm",
 	"system",
 ] as const;
-export const FeedbackKindValues = ["report", "bug", "feature", "other"] as const;
+export const ReportReasonValues = [
+	"realm_rules",
+	"spam",
+	"harassment",
+	"unsafe_content",
+	"other",
+] as const;
+export type ReportReason = (typeof ReportReasonValues)[number];
 export const EnforcementKindValues = [
 	"warning",
 	"silence",
@@ -270,7 +277,11 @@ export const RealmUnitMutationCommandValues = [
 	"lock_post_targeting",
 	"unlock_post_targeting",
 ] as const;
-export const RealmModerationCommandValues = [...RealmUnitMutationCommandValues, "note"] as const;
+export const RealmModerationCommandValues = [
+	...RealmUnitMutationCommandValues,
+	"dismiss",
+	"note",
+] as const;
 export const GovernanceReasonCodeValues = [
 	"content_policy",
 	"realm_rules",
@@ -287,7 +298,6 @@ export const GovernanceReasonCodeValues = [
 ] as const;
 export const GovernanceNoteRoleValues = ["evidence", "internal_note", "public_notice"] as const;
 export const GovernanceNoteSubjectKindValues = [
-	"feedback",
 	"moderation_case",
 	"moderation_action",
 	"unit_access_restriction",
@@ -299,7 +309,6 @@ export const ModerationTargetKindValues = [
 	"profile",
 	"realm_unit",
 	"realm_member",
-	"feedback",
 ] as const;
 export const ModerationActionKindValues = [
 	"approve",
@@ -317,6 +326,7 @@ export const ModerationActionKindValues = [
 	"escalate",
 	"reverse",
 	"note",
+	"dismiss",
 ] as const;
 export const AliasKindValues = [
 	"common",
@@ -366,6 +376,13 @@ export const ModerationCaseStateValues = [
 	"escalated",
 	"reviewing",
 ] as const;
+export const ActiveReportCaseStateValues = [
+	"new",
+	"triaged",
+	"assigned",
+	"escalated",
+	"reviewing",
+] as const satisfies readonly (typeof ModerationCaseStateValues)[number][];
 
 export const AssociationKindValues = ["credit", "subject"] as const;
 export type AssociationKind = (typeof AssociationKindValues)[number];

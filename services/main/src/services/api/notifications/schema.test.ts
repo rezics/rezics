@@ -29,9 +29,11 @@ describe("notification payload contracts", () => {
 	it("rejects uncontracted moderation reasons", () => {
 		expect(
 			Check(ModerationNotificationPayload, {
-				type: "feedback_resolution",
-				feedbackId: actionId,
-				resolutionCode: "free-form",
+				type: "report_resolution",
+				reportId: actionId,
+				actionId,
+				actionKind: "remove",
+				reasonCode: "free-form",
 			}),
 		).toBe(false);
 	});

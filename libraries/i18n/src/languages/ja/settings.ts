@@ -129,7 +129,7 @@ export default {
 			notification: "通知",
 			recommendation: "推奨",
 			upload: "アップロード",
-			feedback: "フィードバック",
+			report: "報告",
 		},
 		permissionActions: {
 			read: "読み取り",
@@ -158,7 +158,7 @@ export default {
 			recommendationWrite: "推奨インタラクションを送信",
 			uploadRead: "アップロードを読む",
 			uploadWrite: "アップロードを作成",
-			feedbackWrite: "フィードバックを送信",
+			reportWrite: "報告を送信",
 		},
 		limits: "使用制限",
 		standardLimitsDescription: `作成するトークンは常に標準ポリシーを使用します。クォータは以下の範囲内でのみ設定できます。${verbatimTerms.privilegedTokenPolicy.value}ポリシーを付与するにはプラットフォームのアクセスが必要です。`,

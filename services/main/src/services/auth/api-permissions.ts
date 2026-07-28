@@ -17,7 +17,7 @@ export const ApiPermissionValues = [
 	"recommendation:write",
 	"upload:read",
 	"upload:write",
-	"feedback:write",
+	"report:write",
 ] as const;
 
 export type ApiPermission = (typeof ApiPermissionValues)[number];
@@ -42,7 +42,7 @@ const permissionParts = {
 	"recommendation:write": ["recommendation", "write"],
 	"upload:read": ["upload", "read"],
 	"upload:write": ["upload", "write"],
-	"feedback:write": ["feedback", "write"],
+	"report:write": ["report", "write"],
 } as const satisfies Record<ApiPermission, readonly [string, string]>;
 
 const permissionSet: ReadonlySet<string> = new Set(ApiPermissionValues);

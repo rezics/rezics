@@ -39,6 +39,10 @@ export default {
 		title: `${verbatimTerms.rezics.value} moderation update`,
 		body: "The moderation status of your content changed.",
 	},
+	report_resolution: {
+		title: `${verbatimTerms.rezics.value} report decision`,
+		body: "A report you submitted has received a decision.",
+	},
 	realm: {
 		title: `${verbatimTerms.rezics.value} ${realmTerms.label} update`,
 		body: `Something changed in a ${realmTerms.inline} you belong to.`,

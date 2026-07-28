@@ -94,7 +94,7 @@ export const SeedPlan = {
 	conversationReads: 200,
 	notificationPreferences: 300,
 	notifications: 500,
-	feedback: 120,
+	reports: 120,
 	moderationCases: 60,
 	moderationActions: 90,
 	accountEnforcements: 20,

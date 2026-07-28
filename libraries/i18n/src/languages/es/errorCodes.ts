@@ -93,8 +93,9 @@ export default {
 	ModerationIdempotencyConflict:
 		"Esta clave de reintento ya se ha usado para otra solicitud de moderación.",
 	ModerationNoteRoleDuplicate: "Añade como máximo una nota interna y un aviso público.",
-	FeedbackNotFound: "No se ha encontrado este comentario.",
-	FeedbackAlreadyResolved: "Este comentario ya se ha resuelto.",
+	ReportAlreadySubmitted: "Ya has denunciado esta unidad para el caso activo.",
+	ReportTargetRevisionUnavailable:
+		"Esta unidad no tiene ninguna revisión que se pueda denunciar.",
 	EnforcementExpiryInvalid: "El vencimiento de la medida debe estar en el futuro.",
 	EnforcementNotFound: "No se ha encontrado esta medida.",
 	EnforcementAlreadyRevoked: "Esta medida ya se ha revocado.",
@@ -115,7 +116,7 @@ export default {
 	BookNotFound: "No se ha encontrado este libro.",
 	ChapterNotFound: "No se ha encontrado este capítulo.",
 	ChapterLanguageNotFound: "No se ha encontrado este idioma del capítulo.",
-	FeedbackRealmMismatch: `El destino del comentario no pertenece a este ${realmTerms.inline}.`,
+	ReportRealmMismatch: `La unidad denunciada no pertenece a este ${realmTerms.inline}.`,
 	PostNotFound: `No se ha encontrado esta ${postTerms.inline}.`,
 	PostLocalizationNotFound: `No se ha encontrado esta versión lingüística de la ${postTerms.inline}.`,
 	PostTargetingLocked: `Este destino no acepta nuevas ${postTerms.plural}.`,

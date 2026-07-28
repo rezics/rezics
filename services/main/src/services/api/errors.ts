@@ -15,7 +15,7 @@ import { CollectionErrors } from "./collections/errors";
 import { ContentStructureErrors } from "./content-structure/errors";
 import { DomainExtensionErrors } from "./domain-extensions/errors";
 import { DockErrors } from "./docks/errors";
-import { FeedbackErrors } from "./feedback/errors";
+import { ReportErrors } from "./reports/errors";
 import { FeedErrors } from "./feed/errors";
 import { GovernanceErrors } from "./governance/errors";
 import { HistoryErrors } from "./history/errors";
@@ -78,7 +78,7 @@ export const ApiErrors = [
 	...ContentStructureErrors,
 	...ReviewErrors,
 	...GovernanceErrors,
-	...FeedbackErrors,
+	...ReportErrors,
 	...PostErrors,
 	...NotificationErrors,
 	...CatalogErrors,

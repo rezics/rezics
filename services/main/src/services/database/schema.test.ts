@@ -12,7 +12,8 @@ import {
 	creditAttribution,
 	unitAssociationProposal,
 	subjectAssociation,
-	feedback,
+	report,
+	reportReason,
 	unit,
 	unitDock,
 	conversationParticipantStat,
@@ -42,6 +43,7 @@ import {
 	realmUnitStatusEvent,
 	RealmUnitMutationCommandValues,
 	RealmRuleAcknowledgementModeValues,
+	ReportReasonValues,
 	scoreStat,
 	score,
 	post,
@@ -410,7 +412,7 @@ describe("database schema contracts", () => {
 		const action = getTableConfig(moderationAction);
 		expect(governanceReasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(moderationAction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
-		expect(feedback.resolutionCode.enumValues).toEqual(GovernanceReasonCodeValues);
+		expect(reportReason.enumValues).toEqual(ReportReasonValues);
 		expect(unitAccessRestriction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
 			"moderation_action_actor_case_idempotency_key",
@@ -423,8 +425,26 @@ describe("database schema contracts", () => {
 				"moderation_action_request_fingerprint_check",
 			]),
 		);
-		expect(getTableConfig(feedback).columns.map((column) => column.name)).not.toEqual(
-			expect.arrayContaining(["content", "resolution"]),
+		const reportConfig = getTableConfig(report);
+		expect(reportConfig.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining([
+				"case_id",
+				"reporter_profile_id",
+				"realm_id",
+				"unit_id",
+				"reason",
+				"details",
+				"reported_revision_id",
+			]),
+		);
+		expect(reportConfig.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"report_case_reporter_key",
+		);
+		expect(reportConfig.foreignKeys.map((key) => key.getName())).toContain(
+			"report_revision_unit_fkey",
+		);
+		expect(reportConfig.foreignKeys.map((key) => key.getName())).toContain(
+			"report_realm_unit_fkey",
 		);
 		expect(getTableConfig(moderationCase).columns.map((column) => column.name)).not.toEqual(
 			expect.arrayContaining(["reason", "safe_summary"]),

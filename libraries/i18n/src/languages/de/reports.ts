@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { deTerminology } from "@rezics/i18n/terminology/de";
+
+const { forms: realmTerms } = deTerminology.realm;
+export default {
+	action: "Melden",
+	moreActions: "Weitere Aktionen",
+	title: "Diese Unit melden",
+	description: `Wähle den Verstoß aus. Die Moderation des gewählten ${realmTerms.label} prüft die Meldung.`,
+	currentRealmDescription: `Diese Meldung wird von der Moderation des aktuellen ${realmTerms.label} geprüft.`,
+	realm: `Prüfender ${realmTerms.label}`,
+	chooseRealm: `${realmTerms.label} auswählen`,
+	noRealms: `Diese Unit gehört derzeit keinem für dich zugänglichen ${realmTerms.label} an, der Meldungen annimmt.`,
+	reason: "Verstoß",
+	reasons: {
+		realm_rules: `Verstoß gegen ${realmTerms.label}-Regeln`,
+		spam: "Spam",
+		harassment: "Belästigung",
+		unsafe_content: "Gefährliche Inhalte",
+		other: "Sonstiges",
+	},
+	details: "Zusätzliche Angaben (optional)",
+	detailsPlaceholder: "Beschreibe, was passiert ist und welche Stelle geprüft werden soll.",
+	detailsHint: "Die Angaben werden ohne Inhaltssprache als Klartext gespeichert.",
+	cancel: "Abbrechen",
+	submit: "Meldung senden",
+	submitted: "Meldung gesendet",
+	filter: "Meldungsfilter",
+	allContent: "Alle Inhalte",
+	reportedContent: "Gemeldet",
+	reportCount: insert("{{count}} offene Meldungen", { count: Number }),
+	heading: "Meldungen",
+	empty: "Für diese Unit liegen keine Meldungen vor.",
+	reportedAt: insert("Gemeldet am {{date}}", { date: String }),
+	revision: "Gemeldete Revision",
+	caseState: "Fallstatus",
+	caseStates: {
+		new: "Neu",
+		triaged: "Eingeordnet",
+		assigned: "Zugewiesen",
+		actioned: "Maßnahme erfolgt",
+		resolved: "Abgeschlossen",
+		duplicate: "Duplikat",
+		rejected: "Abgelehnt",
+		escalated: "Eskaliert",
+		reviewing: "In Prüfung",
+	},
+} satisfies typeof import("../zh-Hant/reports").default;

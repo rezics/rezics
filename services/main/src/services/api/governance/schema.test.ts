@@ -6,7 +6,6 @@ import {
 	CreateAccountEnforcementBody,
 	CreateUnitAccessInvitationBody,
 	ReplaceUnitSubjectAccessBody,
-	ResolveFeedbackBody,
 	RevokeAccountEnforcementBody,
 	TransferUnitOwnershipBody,
 	UpdateModerationCaseBody,
@@ -21,16 +20,6 @@ describe("adjacent governance API contracts", () => {
 		expect(Check(UpdateModerationCaseBody, { internalNote })).toBe(true);
 		expect(Check(UpdateModerationCaseBody, { reason: "copied rationale" })).toBe(false);
 		expect(Check(UpdateModerationCaseBody, { safeSummary: "copied summary" })).toBe(false);
-	});
-
-	it("uses a resolution code plus an optional public-notice Post", () => {
-		expect(
-			Check(ResolveFeedbackBody, {
-				resolutionCode: "content_policy",
-				publicNotice: { language: "en", content },
-			}),
-		).toBe(true);
-		expect(Check(ResolveFeedbackBody, { resolution: "copied resolution" })).toBe(false);
 	});
 
 	it("replaces grants and restrictions for one Unit authorization subject", () => {

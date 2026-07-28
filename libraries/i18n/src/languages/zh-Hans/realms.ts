@@ -192,6 +192,7 @@ export default {
 		restore_member: "恢复成员",
 		escalate: "升级处理",
 		reverse: "撤销动作",
+		dismiss: "驳回举报",
 		note: "添加注解",
 	},
 	governanceReasons: {

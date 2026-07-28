@@ -27,4 +27,18 @@ describe("notification translation selection", () => {
 			}),
 		).toBe("reply");
 	});
+
+	it("uses dedicated copy for a Report decision", () => {
+		expect(
+			notificationTranslationKey("moderation", {
+				type: "report_resolution",
+				reportId: "0195c49b-8f3b-7e18-8c45-c2f36ee8d337",
+			}),
+		).toBe("report_resolution");
+		expect(
+			notificationTranslationKey("moderation", {
+				type: "moderation_action",
+			}),
+		).toBe("moderation");
+	});
 });

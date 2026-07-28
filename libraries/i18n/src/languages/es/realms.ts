@@ -214,6 +214,7 @@ export default {
 		restore_member: "Restaurar miembro",
 		escalate: "Escalar",
 		reverse: "Revertir acción",
+		dismiss: "Desestimar denuncia",
 		note: "Añadir anotación",
 	},
 	governanceReasons: {

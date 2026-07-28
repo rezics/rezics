@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: realmTerms } = enTerminology.realm;
+export default {
+	action: "Report",
+	moreActions: "More actions",
+	title: "Report this Unit",
+	description: `Choose the issue. The selected ${realmTerms.inline}’s moderators will review the report.`,
+	currentRealmDescription: `This report will be reviewed by the current ${realmTerms.inline}’s moderators.`,
+	realm: `Reviewing ${realmTerms.label}`,
+	chooseRealm: `Choose a ${realmTerms.inline}`,
+	noRealms: `This Unit is not currently in a ${realmTerms.inline} you can access for reporting.`,
+	reason: "Issue",
+	reasons: {
+		realm_rules: `Breaks ${realmTerms.label} rules`,
+		spam: "Spam",
+		harassment: "Harassment",
+		unsafe_content: "Unsafe content",
+		other: "Other",
+	},
+	details: "Additional details (optional)",
+	detailsPlaceholder: "Explain what happened and where moderators should look.",
+	detailsHint: "Details are stored as plain text without a content language.",
+	cancel: "Cancel",
+	submit: "Submit report",
+	submitted: "Report submitted",
+	filter: "Report filter",
+	allContent: "All content",
+	reportedContent: "Reported",
+	reportCount: insert("{{count}} open reports", { count: Number }),
+	heading: "Reports",
+	empty: "This Unit has no reports.",
+	reportedAt: insert("Reported {{date}}", { date: String }),
+	revision: "Reported revision",
+	caseState: "Case state",
+	caseStates: {
+		new: "New",
+		triaged: "Triaged",
+		assigned: "Assigned",
+		actioned: "Action taken",
+		resolved: "Resolved",
+		duplicate: "Duplicate",
+		rejected: "Rejected",
+		escalated: "Escalated",
+		reviewing: "Under review",
+	},
+} satisfies typeof import("../zh-Hant/reports").default;

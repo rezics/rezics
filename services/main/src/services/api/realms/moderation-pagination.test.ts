@@ -27,7 +27,7 @@ describe("Realm moderation pagination", () => {
 
 	it("binds a cursor to its Realm and status filter", () => {
 		const cursor = encodeRealmUnitModerationCursor(
-			{ realmId: RealmId, filter: "pending" },
+			{ realmId: RealmId, status: "pending", reported: true },
 			{
 				status: "pending",
 				updatedAt: new Date("2026-07-27T12:34:56.789Z"),
@@ -38,11 +38,23 @@ describe("Realm moderation pagination", () => {
 		expect(() =>
 			decodeRealmUnitModerationCursor(cursor, {
 				realmId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755f",
-				filter: "pending",
+				status: "pending",
+				reported: true,
 			}),
 		).toThrow(InvalidPaginationCursor);
 		expect(() =>
-			decodeRealmUnitModerationCursor(cursor, { realmId: RealmId, filter: "hidden" }),
+			decodeRealmUnitModerationCursor(cursor, {
+				realmId: RealmId,
+				status: "hidden",
+				reported: true,
+			}),
+		).toThrow(InvalidPaginationCursor);
+		expect(() =>
+			decodeRealmUnitModerationCursor(cursor, {
+				realmId: RealmId,
+				status: "pending",
+				reported: false,
+			}),
 		).toThrow(InvalidPaginationCursor);
 	});
 

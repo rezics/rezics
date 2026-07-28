@@ -2,11 +2,12 @@
 
 import { Badge, Button, Spinner } from "@rezics/ui";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ChevronRightIcon, LockIcon, LockOpenIcon } from "lucide-react";
+import { ChevronRightIcon, FlagIcon, LockIcon, LockOpenIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import type { RealmModerationUnit } from "../data/realm-moderation-query";
 import type { RealmModerationStatus } from "../model/moderation-contract";
 
@@ -34,7 +35,7 @@ export function RealmModerationQueue({
 	readonly onSelect: (unit: RealmModerationUnit) => void;
 	readonly onLoadNextPage: () => void;
 }) {
-	const { t, locale } = useTranslation(["posts", "realms"]);
+	const { t, locale } = useTranslation(["posts", "realms", "reports"]);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const count = units.length + (hasNextPage ? 1 : 0);
 	const virtualizer = useVirtualizer({
@@ -109,6 +110,7 @@ export function RealmModerationQueue({
 							);
 						const title = unit.title ?? t.posts.untitled;
 						const selected = selectedUnitId === unit.unitId;
+						const openReportCount = toNonNegativeApiInteger(unit.openReportCount);
 						return (
 							<div
 								aria-posinset={virtualRow.index + 1}
@@ -132,6 +134,14 @@ export function RealmModerationQueue({
 											<Badge variant={StatusBadgeVariants[unit.status]}>
 												{t.realms.moderationStates[unit.status]}
 											</Badge>
+											{openReportCount ? (
+												<Badge variant="warning">
+													<FlagIcon aria-hidden className="size-3" />
+													{t.reports.reportCount({
+														count: openReportCount,
+													})}
+												</Badge>
+											) : null}
 											<span className="truncate font-medium">{title}</span>
 										</span>
 										<span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">

@@ -252,6 +252,7 @@ export function FeedPostCard({
 							canExclude={canExclude}
 							item={post}
 							onHiddenChange={onHiddenChange}
+							realmId={realmId}
 						/>
 					}
 				/>
@@ -381,6 +382,7 @@ export function FeedUnitCard({
 							canExclude={canExclude}
 							item={unit}
 							onHiddenChange={onHiddenChange}
+							realmId={unit.realmId ?? undefined}
 						/>
 					}
 				/>
@@ -411,10 +413,12 @@ function FeedItemOverflowMenu({
 	canExclude,
 	item,
 	onHiddenChange,
+	realmId,
 }: {
 	canExclude: boolean;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
+	realmId?: string;
 }) {
 	const queryClient = useQueryClient();
 	const exclude = usePutApiRecommendationsExclusionsByUnitId({
@@ -446,6 +450,7 @@ function FeedItemOverflowMenu({
 			itemId={item.id}
 			onNotInterested={markNotInterested}
 			placement={collectionPlacementForFeedItem(item)}
+			reportTarget={{ unitId: item.id, realmId }}
 		/>
 	);
 }

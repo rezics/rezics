@@ -133,7 +133,7 @@ export default {
 			notification: "Notificaciones",
 			recommendation: "Recomendaciones",
 			upload: "Subidas",
-			feedback: "Comentarios",
+			report: "Denuncias",
 		},
 		permissionActions: {
 			read: "Leer",
@@ -162,7 +162,7 @@ export default {
 			recommendationWrite: "Enviar interacciones de recomendación",
 			uploadRead: "Leer subidas",
 			uploadWrite: "Crear subidas",
-			feedbackWrite: "Enviar comentarios",
+			reportWrite: "Enviar denuncias",
 		},
 		limits: "Límites de uso",
 		standardLimitsDescription: `Los tokens que crees siempre usan la política Estándar; solo puedes configurar cuotas dentro de los intervalos indicados a continuación. La concesión de políticas ${verbatimTerms.privilegedTokenPolicy.value} requiere acceso a la plataforma.`,

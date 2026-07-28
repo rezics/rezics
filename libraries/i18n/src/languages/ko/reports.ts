@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { koTerminology } from "@rezics/i18n/terminology/ko";
+
+const { forms: realmTerms } = koTerminology.realm;
+export default {
+	action: "신고",
+	moreActions: "더보기",
+	title: "이 유닛 신고",
+	description: `문제 유형을 선택하세요. 선택한 ${realmTerms.label}의 운영진이 신고를 검토합니다.`,
+	currentRealmDescription: `이 신고는 현재 ${realmTerms.label}의 운영진이 검토합니다.`,
+	realm: `검토할 ${realmTerms.label}`,
+	chooseRealm: `${realmTerms.label} 선택`,
+	noRealms: `이 유닛은 현재 접근 가능한 신고 대상 ${realmTerms.label}에 속해 있지 않습니다.`,
+	reason: "문제 유형",
+	reasons: {
+		realm_rules: `${realmTerms.label} 규칙 위반`,
+		spam: "스팸",
+		harassment: "괴롭힘",
+		unsafe_content: "유해 콘텐츠",
+		other: "기타",
+	},
+	details: "추가 설명(선택)",
+	detailsPlaceholder: "무슨 일이 있었고 어디를 확인해야 하는지 설명해 주세요.",
+	detailsHint: "설명은 콘텐츠 언어 없이 일반 텍스트로 저장됩니다.",
+	cancel: "취소",
+	submit: "신고 제출",
+	submitted: "신고가 제출되었습니다",
+	filter: "신고 필터",
+	allContent: "모든 콘텐츠",
+	reportedContent: "신고됨",
+	reportCount: insert("처리 대기 신고 {{count}}건", { count: Number }),
+	heading: "신고",
+	empty: "이 유닛에는 신고가 없습니다.",
+	reportedAt: insert("{{date}} 신고", { date: String }),
+	revision: "신고된 리비전",
+	caseState: "사건 상태",
+	caseStates: {
+		new: "신규",
+		triaged: "분류됨",
+		assigned: "담당자 배정됨",
+		actioned: "조치됨",
+		resolved: "해결됨",
+		duplicate: "중복",
+		rejected: "반려됨",
+		escalated: "상급 검토",
+		reviewing: "검토 중",
+	},
+} satisfies typeof import("../zh-Hant/reports").default;

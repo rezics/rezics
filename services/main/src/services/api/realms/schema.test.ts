@@ -123,6 +123,7 @@ describe("Realm moderation API contract", () => {
 						title: "待處理項目",
 						status: "pending",
 						postTargetingLocked: false,
+						openReportCount: 2,
 						allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
 						moderationStatus: "pending",
 						createdAt: "2026-07-27T12:00:00.000Z",
@@ -189,6 +190,7 @@ describe("Realm moderation API contract", () => {
 				target: {
 					status: "visible",
 					postTargetingLocked: false,
+					openReportCount: 0,
 					allowedCommands: ["hide", "remove", "lock_post_targeting", "note"],
 					updatedAt: "2026-07-27T12:30:00.000Z",
 				},

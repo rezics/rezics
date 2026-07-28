@@ -21,7 +21,7 @@ import messages from "./messages";
 import notifications from "./notifications";
 import recommendations from "./recommendations";
 import feed from "./feed";
-import feedback from "./feedback";
+import reports from "./reports";
 import governance from "./governance";
 import domainExtensions from "./domain-extensions";
 import docks from "./docks";
@@ -170,7 +170,7 @@ export default new Elysia({ normalize: "typebox" })
 				.use(tokenInfo)
 				.use(tokenPolicies)
 				.use(feed)
-				.use(feedback)
+				.use(reports)
 				.use(governance)
 				.use(audit)
 				.use(domainExtensions)

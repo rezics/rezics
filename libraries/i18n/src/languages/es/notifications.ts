@@ -40,6 +40,10 @@ export default {
 		title: `Actualización de moderación de ${verbatimTerms.rezics.value}`,
 		body: "El estado de moderación de tu contenido ha cambiado.",
 	},
+	report_resolution: {
+		title: `Decisión sobre una denuncia de ${verbatimTerms.rezics.value}`,
+		body: "Se ha tomado una decisión sobre una denuncia que enviaste.",
+	},
 	realm: {
 		title: `Actualización de un ${realmTerms.inline} en ${verbatimTerms.rezics.value}`,
 		body: `Algo ha cambiado en uno de los ${realmTerms.plural} a los que perteneces.`,

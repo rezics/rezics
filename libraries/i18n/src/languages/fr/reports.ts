@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { frTerminology } from "@rezics/i18n/terminology/fr";
+
+const { forms: realmTerms } = frTerminology.realm;
+export default {
+	action: "Signaler",
+	moreActions: "Plus d’actions",
+	title: "Signaler cette unité",
+	description: `Choisissez le problème. L’équipe de modération du ${realmTerms.inline} sélectionné examinera le signalement.`,
+	currentRealmDescription: `Ce signalement sera examiné par l’équipe de modération du ${realmTerms.inline} actuel.`,
+	realm: `${realmTerms.label} chargé de l’examen`,
+	chooseRealm: `Choisir un ${realmTerms.inline}`,
+	noRealms: `Cette unité n’appartient actuellement à aucun ${realmTerms.inline} auquel vous avez accès pour la signaler.`,
+	reason: "Problème",
+	reasons: {
+		realm_rules: `Non-respect des règles du ${realmTerms.inline}`,
+		spam: "Contenu indésirable",
+		harassment: "Harcèlement",
+		unsafe_content: "Contenu dangereux",
+		other: "Autre",
+	},
+	details: "Informations complémentaires (facultatif)",
+	detailsPlaceholder: "Décrivez ce qui s’est passé et l’endroit à examiner.",
+	detailsHint: "Ces informations sont enregistrées en texte brut, sans langue de contenu.",
+	cancel: "Annuler",
+	submit: "Envoyer le signalement",
+	submitted: "Signalement envoyé",
+	filter: "Filtre des signalements",
+	allContent: "Tous les contenus",
+	reportedContent: "Signalés",
+	reportCount: insert("{{count}} signalements ouverts", { count: Number }),
+	heading: "Signalements",
+	empty: "Cette unité n’a aucun signalement.",
+	reportedAt: insert("Signalé le {{date}}", { date: String }),
+	revision: "Révision signalée",
+	caseState: "État du dossier",
+	caseStates: {
+		new: "Nouveau",
+		triaged: "Classé",
+		assigned: "Attribué",
+		actioned: "Mesure prise",
+		resolved: "Résolu",
+		duplicate: "Doublon",
+		rejected: "Rejeté",
+		escalated: "Transmis",
+		reviewing: "En cours d’examen",
+	},
+} satisfies typeof import("../zh-Hant/reports").default;

@@ -87,7 +87,7 @@ type PermissionResource =
 	| "notification"
 	| "recommendation"
 	| "upload"
-	| "feedback";
+	| "report";
 type PermissionAction = "read" | "create" | "update" | "delete" | "write" | "manage";
 
 const PermissionGroups = [
@@ -158,9 +158,9 @@ const PermissionGroups = [
 		],
 	},
 	{
-		id: "feedback",
+		id: "report",
 		category: "platform",
-		actions: [["feedback:write", "write"]],
+		actions: [["report:write", "write"]],
 	},
 ] as const satisfies readonly {
 	id: PermissionResource;
@@ -234,7 +234,7 @@ function PermissionFields({
 								"recommendation:write": "recommendationWrite",
 								"upload:read": "uploadRead",
 								"upload:write": "uploadWrite",
-								"feedback:write": "feedbackWrite",
+								"report:write": "reportWrite",
 							} as const
 						)[value]
 					],

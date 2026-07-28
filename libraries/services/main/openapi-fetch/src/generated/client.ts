@@ -87,10 +87,14 @@ import type {
 	PutApiApiTokenPoliciesBindingsByTokenIdResponses,
 	PostApiFeedQueryOptions,
 	PostApiFeedQueryResponses,
-	GetApiFeedbackMeOptions,
-	GetApiFeedbackMeResponses,
-	PostApiFeedbackOptions,
-	PostApiFeedbackResponses,
+	GetApiReportsMeOptions,
+	GetApiReportsMeResponses,
+	GetApiReportsUnitsByUnitIdRealmsOptions,
+	GetApiReportsUnitsByUnitIdRealmsResponses,
+	GetApiRealmsByRealmIdReportsOptions,
+	GetApiRealmsByRealmIdReportsResponses,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
+	PostApiRealmsByRealmIdUnitsByUnitIdReportsResponses,
 	GetApiGovernanceUnitByUnitIdAccessOptions,
 	GetApiGovernanceUnitByUnitIdAccessResponses,
 	PutApiGovernanceUnitByUnitIdAccessOptions,
@@ -127,8 +131,6 @@ import type {
 	PatchApiGovernanceModerationCasesByCaseIdResponses,
 	PostApiGovernanceModerationActionsOptions,
 	PostApiGovernanceModerationActionsResponses,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
-	PatchApiGovernanceFeedbackByFeedbackIdResolveResponses,
 	PostApiGovernanceModerationEnforcementsOptions,
 	PostApiGovernanceModerationEnforcementsResponses,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeOptions,
@@ -1356,43 +1358,80 @@ export function postApiFeedQuery<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List current user's feedback
- * {@link /api/feedback/me}
+ * @summary List current user's Unit reports
+ * {@link /api/reports/me}
  */
-export function getApiFeedbackMe<ThrowOnError extends boolean = true>(
-	options: Options<GetApiFeedbackMeOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiFeedbackMeResponses, ThrowOnError>> {
+export function getApiReportsMe<ThrowOnError extends boolean = true>(
+	options: Options<GetApiReportsMeOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiReportsMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/feedback/me",
+		url: "/api/reports/me",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiFeedbackMeResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiReportsMeResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Submit feedback or report
- * {@link /api/feedback}
+ * @summary List readable Realm report destinations for a Unit
+ * {@link /api/reports/units/:unitId/realms}
  */
-export function postApiFeedback<ThrowOnError extends boolean = true>(
-	options: Options<PostApiFeedbackOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiFeedbackResponses, ThrowOnError>> {
+export function getApiReportsUnitsByUnitIdRealms<ThrowOnError extends boolean = true>(
+	options: Options<GetApiReportsUnitsByUnitIdRealmsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiReportsUnitsByUnitIdRealmsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/reports/units/{unitId}/realms",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiReportsUnitsByUnitIdRealmsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List reports for a Realm
+ * {@link /api/realms/:realmId/reports}
+ */
+export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdReportsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdReportsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/reports",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdReportsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Report a Unit to a Realm
+ * {@link /api/realms/:realmId/units/:unitId/reports}
+ */
+export function postApiRealmsByRealmIdUnitsByUnitIdReports<ThrowOnError extends boolean = true>(
+	options: Options<PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReportsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/feedback",
+		url: "/api/realms/{realmId}/units/{unitId}/reports",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiFeedbackResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReportsResponses, ThrowOnError>>;
 }
 
 /**
@@ -1755,25 +1794,6 @@ export function postApiGovernanceModerationActions<ThrowOnError extends boolean 
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiGovernanceModerationActionsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Resolve feedback
- * {@link /api/governance/feedback/:feedbackId/resolve}
- */
-export function patchApiGovernanceFeedbackByFeedbackIdResolve<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiGovernanceFeedbackByFeedbackIdResolveOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiGovernanceFeedbackByFeedbackIdResolveResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PATCH",
-		url: "/api/governance/feedback/{feedbackId}/resolve",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PatchApiGovernanceFeedbackByFeedbackIdResolveResponses, ThrowOnError>
-	>;
 }
 
 /**

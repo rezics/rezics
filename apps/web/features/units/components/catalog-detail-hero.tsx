@@ -16,6 +16,7 @@ import { FollowButton } from "@/features/following/components/follow-button";
 import { UnitProgressAction } from "@/features/progress/components/unit-progress-action";
 import { UnitProgressStatistics } from "@/features/progress/components/unit-progress-statistics";
 import { UnitScoreControl } from "@/features/reviews/components/unit-score-control";
+import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
@@ -90,6 +91,7 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 							</Tooltip>
 						) : null}
 						<CatalogShareAction unitId={unit.id} />
+						<UnitReportOverflowMenu unitId={unit.id} />
 					</div>
 				</div>
 

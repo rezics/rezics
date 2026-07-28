@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createPortableTextDocument } from "@rezics/block";
 
 import {
+	assertReportCaseDismissible,
 	assertModerationActionCompatible,
 	getRealmUnitModerationCommands,
 	isModerationActionCompatible,
@@ -18,7 +19,7 @@ describe("moderation action contracts", () => {
 		expect(isModerationActionCompatible("realm_unit", "hide")).toBe(true);
 		expect(isModerationActionCompatible("unit", "hide")).toBe(false);
 		expect(isModerationActionCompatible("realm_member", "approve")).toBe(false);
-		expect(() => assertModerationActionCompatible("feedback", "remove")).toThrow(
+		expect(() => assertModerationActionCompatible("unit", "hide")).toThrow(
 			"not valid for this target",
 		);
 	});
@@ -49,6 +50,13 @@ describe("moderation action contracts", () => {
 			"unlock_post_targeting",
 			"note",
 		]);
+		expect(getRealmUnitModerationCommands("visible", false, true)).toEqual([
+			"hide",
+			"remove",
+			"lock_post_targeting",
+			"dismiss",
+			"note",
+		]);
 		expect(getRealmUnitModerationCommands("removed", false)).toEqual([
 			"restore",
 			"lock_post_targeting",
@@ -73,6 +81,17 @@ describe("moderation action contracts", () => {
 		expect(resolveModerationCaseState("reviewing", "note")).toBe("reviewing");
 		expect(resolveModerationCaseState("reviewing", "escalate")).toBe("escalated");
 		expect(resolveModerationCaseState("reviewing", "remove")).toBe("actioned");
+		expect(resolveModerationCaseState("reviewing", "dismiss")).toBe("rejected");
+	});
+
+	it("only dismisses active cases backed by at least one report", () => {
+		expect(() => assertReportCaseDismissible("reviewing", 1)).not.toThrow();
+		expect(() => assertReportCaseDismissible("reviewing", 0)).toThrow(
+			"would not change the target",
+		);
+		expect(() => assertReportCaseDismissible("rejected", 1)).toThrow(
+			"would not change the target",
+		);
 	});
 
 	it("fingerprints request meaning independently from the idempotency key", () => {

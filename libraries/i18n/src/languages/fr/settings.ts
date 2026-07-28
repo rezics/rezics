@@ -133,7 +133,7 @@ export default {
 			notification: "Notifications",
 			recommendation: "Recommandations",
 			upload: "Importations",
-			feedback: "Retours",
+			report: "Signalements",
 		},
 		permissionActions: {
 			read: "Lire",
@@ -162,7 +162,7 @@ export default {
 			recommendationWrite: "Envoyer des interactions de recommandation",
 			uploadRead: "Lire les importations",
 			uploadWrite: "Créer des importations",
-			feedbackWrite: "Envoyer un retour",
+			reportWrite: "Envoyer des signalements",
 		},
 		limits: "Limites d’utilisation",
 		standardLimitsDescription: `Les jetons que vous créez utilisent toujours la règle Standard ; vous pouvez configurer les quotas uniquement dans les plages ci-dessous. L’attribution de règles ${verbatimTerms.privilegedTokenPolicy.value} exige un accès à la plateforme.`,

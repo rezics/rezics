@@ -13,16 +13,16 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { realm, realmUnitStatus } from "./realm";
+import { realm, realmUnit, realmUnitStatus } from "./realm";
 import {
 	EnforcementKindValues,
-	FeedbackKindValues,
 	GovernanceReasonCodeValues,
 	GovernanceNoteRoleValues,
 	GovernanceNoteSubjectKindValues,
 	ModerationActionKindValues,
 	ModerationCaseStateValues,
 	ModerationTargetKindValues,
+	ReportReasonValues,
 	toEnumValues,
 } from "./contract-values";
 import {
@@ -34,9 +34,10 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { moderationStatus, profile, unit } from "./core";
+import { unitRevision } from "./history";
 import { post } from "./post";
 
-export const feedbackKind = pgEnum("feedback_kind", toEnumValues(FeedbackKindValues));
+export const reportReason = pgEnum("report_reason", toEnumValues(ReportReasonValues));
 export const governanceReasonCode = pgEnum(
 	"governance_reason_code",
 	toEnumValues(GovernanceReasonCodeValues),
@@ -78,40 +79,6 @@ export const auditCredentialKind = pgEnum("audit_credential_kind", [
 ]);
 export const auditAuthorityKind = pgEnum("audit_authority_kind", ["platform", "realm", "unit"]);
 
-export const feedback = pgTable(
-	"feedback",
-	{
-		id: createUuidv7PrimaryKey(),
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		kind: feedbackKind().default("report").notNull(),
-		url: text(),
-		subjectUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
-		resolutionCode: governanceReasonCode(),
-		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
-		resolvedAt: createTimestampMsColumn(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		index("feedback_profile_created_at_idx").on(
-			table.profileId,
-			table.createdAt.desc(),
-			table.id.desc(),
-		),
-		index("feedback_open_created_at_idx")
-			.on(table.createdAt, table.id)
-			.where(sql`${table.resolvedAt} is null`),
-		index("feedback_subject_unit_idx").on(table.subjectUnitId),
-		index("feedback_resolved_by_idx").on(table.resolvedByProfileId),
-		check(
-			"feedback_resolution_check",
-			sql`(${table.resolvedAt} is null and ${table.resolvedByProfileId} is null and ${table.resolutionCode} is null) or (${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and ${table.resolutionCode} is not null)`,
-		),
-	],
-);
-
 export const moderationCase = pgTable(
 	"moderation_case",
 	{
@@ -122,7 +89,6 @@ export const moderationCase = pgTable(
 		targetKind: moderationTargetKind().notNull(),
 		targetId: uuid().notNull(),
 		targetPath: text(),
-		reporterProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		assignedProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		duplicateOfCaseId: uuid(),
 		createdAt: createCreatedAtColumn(),
@@ -153,7 +119,6 @@ export const moderationCase = pgTable(
 			table.id,
 		),
 		index("moderation_case_target_idx").on(table.targetKind, table.targetId),
-		index("moderation_case_reporter_idx").on(table.reporterProfileId),
 		index("moderation_case_duplicate_idx").on(table.duplicateOfCaseId),
 		check(
 			"moderation_case_authority_check",
@@ -170,6 +135,68 @@ export const moderationCase = pgTable(
 		check(
 			"moderation_case_not_self_duplicate",
 			sql`${table.duplicateOfCaseId} is null or ${table.duplicateOfCaseId} <> ${table.id}`,
+		),
+	],
+);
+
+export const report = pgTable(
+	"report",
+	{
+		id: createUuidv7PrimaryKey(),
+		caseId: uuid()
+			.notNull()
+			.references(() => moderationCase.id, { onDelete: "restrict" }),
+		reporterProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "restrict" }),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
+		reason: reportReason().notNull(),
+		/** Reporter-authored evidence, stored verbatim without content-language metadata. */
+		details: text(),
+		reportedRevisionId: uuid().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.realmId, table.unitId],
+			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
+			name: "report_realm_unit_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.reportedRevisionId, table.unitId],
+			foreignColumns: [unitRevision.id, unitRevision.unitId],
+			name: "report_revision_unit_fkey",
+		}).onDelete("restrict"),
+		unique("report_case_reporter_key").on(table.caseId, table.reporterProfileId),
+		index("report_realm_created_at_idx").on(
+			table.realmId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("report_realm_unit_created_at_idx").on(
+			table.realmId,
+			table.unitId,
+			table.createdAt.desc(),
+		),
+		index("report_unit_idx").on(table.unitId),
+		index("report_case_idx").on(table.caseId),
+		index("report_reporter_created_at_idx").on(
+			table.reporterProfileId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		check(
+			"report_details_not_blank",
+			sql`${table.details} is null or btrim(${table.details}) <> ''`,
+		),
+		check(
+			"report_details_length",
+			sql`${table.details} is null or char_length(${table.details}) <= 2000`,
 		),
 	],
 );

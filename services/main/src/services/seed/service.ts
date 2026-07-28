@@ -31,7 +31,6 @@ import {
 import { databaseBootstrapService } from "../bootstrap/service";
 import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
 import { database, type DatabaseTransaction } from "../database";
-import { createGovernanceNotePost } from "../governance/note-service";
 import { isFirstUnitLocalization } from "../units/localization";
 import {
 	accountEnforcement,
@@ -50,7 +49,6 @@ import {
 	conversationRead,
 	entity,
 	EnforcementKindValues,
-	feedback,
 	label,
 	software,
 	softwareRequirement,
@@ -79,6 +77,7 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
+	report,
 	realmScoreContext,
 	realmTagContext,
 	realmTagVote,
@@ -108,6 +107,7 @@ import {
 	unitReaction,
 	unitShare,
 	unitStatusEvent,
+	unitRevisionHead,
 	subjectAssociation,
 	unitTag,
 	unitTagVote,
@@ -2363,63 +2363,7 @@ async function seedGovernance(
 		...content.rootPosts,
 		...content.reviews,
 	];
-	const feedbackRows: (typeof feedback.$inferSelect)[] = [];
-	for (let index = 0; index < SeedPlan.feedback; index += 1) {
-		const createdAt = data.pastDate(365, 1);
-		const resolved = index % 3 === 0;
-		const reporter = itemAt(profiles, index * 7);
-		const resolver = resolved ? itemAt(profiles, index * 13 + 1) : undefined;
-		const subjectUnitId = itemAt(governanceTargets, index * 11).id;
-		const [row] = await tx
-			.insert(feedback)
-			.values({
-				profileId: reporter.id,
-				kind: itemAt(["report", "bug", "feature", "other"] as const, index),
-				url: index % 4 === 0 ? `https://example.test/feedback/${position(index)}` : null,
-				subjectUnitId,
-				resolutionCode: resolved ? "administrative" : null,
-				resolvedByProfileId: resolver?.id ?? null,
-				resolvedAt: resolved ? new Date(createdAt.getTime() + 3_600_000) : null,
-				createdAt,
-				updatedAt: createdAt,
-			})
-			.returning();
-		if (!row) throw new Error("Seed feedback insertion did not return a row");
-		feedbackRows.push(row);
-		await createGovernanceNotePost(tx, {
-			actorProfileId: reporter.id,
-			subjectKind: "feedback",
-			subjectId: row.id,
-			subjectUnitId,
-			note: {
-				role: "evidence",
-				language: "en",
-				content: createPortableTextDocument(data.portableText("en", 2)),
-			},
-		});
-		if (resolver)
-			await createGovernanceNotePost(tx, {
-				actorProfileId: resolver.id,
-				subjectKind: "feedback",
-				subjectId: row.id,
-				subjectUnitId,
-				publicRecipientProfileIds: [reporter.id],
-				note: {
-					role: "public_notice",
-					language: "en",
-					content: createPortableTextDocument(data.portableText("en", 1)),
-				},
-			});
-	}
-
-	const targetKinds = [
-		"unit",
-		"unit_field",
-		"profile",
-		"realm_unit",
-		"realm_member",
-		"feedback",
-	] as const;
+	const targetKinds = ["unit", "unit_field", "profile", "realm_unit", "realm_member"] as const;
 	const normalCases: (typeof moderationCase.$inferSelect)[] = [];
 	for (const batch of chunks(
 		Array.from({ length: SeedPlan.moderationCases - 10 }, (_, index) => {
@@ -2435,9 +2379,7 @@ async function seedGovernance(
 				? realmTarget.targetId
 				: targetKind === "profile"
 					? itemAt(profiles, index * 7).id
-					: targetKind === "feedback"
-						? itemAt(feedbackRows, index * 11).id
-						: itemAt(governanceTargets, index * 13).id;
+					: itemAt(governanceTargets, index * 13).id;
 			const createdAt = data.pastDate(180);
 			return {
 				state: itemAt(
@@ -2457,7 +2399,6 @@ async function seedGovernance(
 				targetKind,
 				targetId,
 				targetPath: targetKind === "unit_field" ? "/localizations/en/title" : null,
-				reporterProfileId: itemAt(profiles, index * 17).id,
 				assignedProfileId: index % 4 === 0 ? null : itemAt(profiles, index * 19 + 1).id,
 				createdAt,
 				updatedAt: createdAt,
@@ -2478,7 +2419,6 @@ async function seedGovernance(
 					targetKind: original.targetKind,
 					targetId: original.targetId,
 					targetPath: original.targetPath,
-					reporterProfileId: itemAt(profiles, index * 7 + 2).id,
 					assignedProfileId: original.assignedProfileId,
 					duplicateOfCaseId: original.id,
 					createdAt: data.pastDate(90),
@@ -2488,6 +2428,37 @@ async function seedGovernance(
 		)
 		.returning();
 	const cases = [...normalCases, ...duplicateCases];
+	const realmUnitCases = cases.filter(
+		(value) =>
+			value.authority === "realm" &&
+			value.realmId !== null &&
+			value.targetKind === "realm_unit",
+	);
+	for (let index = 0; index < SeedPlan.reports; index += 1) {
+		const caseRow = itemAt(realmUnitCases, index);
+		if (!caseRow.realmId) throw new Error("Seed Realm Unit case is missing its Realm");
+		const [revision] = await tx
+			.select({ id: unitRevisionHead.revisionId })
+			.from(unitRevisionHead)
+			.where(eq(unitRevisionHead.unitId, caseRow.targetId))
+			.limit(1);
+		if (!revision)
+			throw new Error(`Seed Report target ${caseRow.targetId} is missing its revision head`);
+		const reporterIndex = Math.floor(index / realmUnitCases.length);
+		await tx.insert(report).values({
+			caseId: caseRow.id,
+			reporterProfileId: itemAt(profiles, reporterIndex).id,
+			realmId: caseRow.realmId,
+			unitId: caseRow.targetId,
+			reason: itemAt(
+				["realm_rules", "spam", "harassment", "unsafe_content", "other"] as const,
+				index,
+			),
+			details: index % 4 === 0 ? null : `Seeded Unit report ${position(index)}`,
+			reportedRevisionId: revision.id,
+			createdAt: latestDate(data.pastDate(90), caseRow.createdAt),
+		});
+	}
 
 	const actionKinds = [
 		"approve",
@@ -3115,13 +3086,17 @@ export class DatabaseSeedService {
 					await seedCommunications(tx, data, profiles, content);
 				}
 				if (includesSeedScenario(options, "governance")) {
+					console.info("Seeding history scenario");
+					await seedHistory(tx, data, profiles, catalog, content);
 					console.info("Seeding governance scenario");
 					await seedGovernance(tx, data, profiles, catalog, content, structure);
 				}
 				console.info("Seeding recommendation scenario");
 				await seedRecommendations(tx, data, profiles, catalog, content);
-				console.info("Seeding history scenario");
-				await seedHistory(tx, data, profiles, catalog, content);
+				if (!includesSeedScenario(options, "governance")) {
+					console.info("Seeding history scenario");
+					await seedHistory(tx, data, profiles, catalog, content);
+				}
 			},
 			{ isolationLevel: "serializable" },
 		);

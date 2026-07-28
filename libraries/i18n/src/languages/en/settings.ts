@@ -127,7 +127,7 @@ export default {
 			notification: "Notifications",
 			recommendation: "Recommendations",
 			upload: "Uploads",
-			feedback: "Feedback",
+			report: "Reports",
 		},
 		permissionActions: {
 			read: "Read",
@@ -156,7 +156,7 @@ export default {
 			recommendationWrite: "Submit recommendation interactions",
 			uploadRead: "Read uploads",
 			uploadWrite: "Create uploads",
-			feedbackWrite: "Submit feedback",
+			reportWrite: "Submit reports",
 		},
 		limits: "Usage limits",
 		standardLimitsDescription: `Tokens you create always use the Standard policy; you can configure quotas only within the ranges below. Granting ${verbatimTerms.privilegedTokenPolicy.value} policies requires platform access.`,

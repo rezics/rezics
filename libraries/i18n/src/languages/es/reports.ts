@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { esTerminology } from "@rezics/i18n/terminology/es";
+
+const { forms: realmTerms } = esTerminology.realm;
+export default {
+	action: "Denunciar",
+	moreActions: "Más acciones",
+	title: "Denunciar esta unidad",
+	description: `Elige el problema. El equipo de moderación del ${realmTerms.inline} seleccionado revisará la denuncia.`,
+	currentRealmDescription: `El equipo de moderación del ${realmTerms.inline} actual revisará esta denuncia.`,
+	realm: `${realmTerms.label} revisor`,
+	chooseRealm: `Elegir un ${realmTerms.inline}`,
+	noRealms: `Esta unidad no pertenece actualmente a ningún ${realmTerms.inline} al que puedas acceder para denunciarla.`,
+	reason: "Problema",
+	reasons: {
+		realm_rules: `Incumple las reglas del ${realmTerms.inline}`,
+		spam: "Contenido no deseado",
+		harassment: "Acoso",
+		unsafe_content: "Contenido peligroso",
+		other: "Otro",
+	},
+	details: "Información adicional (opcional)",
+	detailsPlaceholder: "Explica qué ocurrió y dónde debe revisar el equipo de moderación.",
+	detailsHint: "La información se guarda como texto sin formato y sin idioma de contenido.",
+	cancel: "Cancelar",
+	submit: "Enviar denuncia",
+	submitted: "Denuncia enviada",
+	filter: "Filtro de denuncias",
+	allContent: "Todo el contenido",
+	reportedContent: "Denunciado",
+	reportCount: insert("{{count}} denuncias abiertas", { count: Number }),
+	heading: "Denuncias",
+	empty: "Esta unidad no tiene denuncias.",
+	reportedAt: insert("Denunciado el {{date}}", { date: String }),
+	revision: "Revisión denunciada",
+	caseState: "Estado del caso",
+	caseStates: {
+		new: "Nuevo",
+		triaged: "Clasificado",
+		assigned: "Asignado",
+		actioned: "Acción aplicada",
+		resolved: "Resuelto",
+		duplicate: "Duplicado",
+		rejected: "Rechazado",
+		escalated: "Escalado",
+		reviewing: "En revisión",
+	},
+} satisfies typeof import("../zh-Hant/reports").default;

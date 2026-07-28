@@ -215,6 +215,7 @@ export default {
 		restore_member: "Restaurer le membre",
 		escalate: "Transmettre",
 		reverse: "Annuler l’action",
+		dismiss: "Rejeter le signalement",
 		note: "Ajouter une annotation",
 	},
 	governanceReasons: {

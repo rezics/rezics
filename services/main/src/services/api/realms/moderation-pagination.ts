@@ -8,9 +8,10 @@ export type RealmUnitModerationStatus = (typeof RealmUnitStatusValues)[number];
 
 const RealmUnitModerationCursor = t.Object(
 	{
-		v: t.Literal(1),
+		v: t.Literal(2),
 		realmId: t.String({ format: "uuid" }),
-		filter: t.Nullable(t.UnionEnum(RealmUnitStatusValues)),
+		statusFilter: t.Nullable(t.UnionEnum(RealmUnitStatusValues)),
+		reported: t.Boolean(),
 		status: t.UnionEnum(RealmUnitStatusValues),
 		updatedAt: t.String({ format: "date-time" }),
 		unitId: t.String({ format: "uuid" }),
@@ -34,7 +35,8 @@ export type RealmUnitModerationCursorBoundary = {
 
 type RealmUnitModerationCursorScope = {
 	readonly realmId: string;
-	readonly filter?: RealmUnitModerationStatus;
+	readonly status?: RealmUnitModerationStatus;
+	readonly reported?: boolean;
 };
 
 export function encodeRealmUnitModerationCursor(
@@ -43,9 +45,10 @@ export function encodeRealmUnitModerationCursor(
 ): string {
 	return Buffer.from(
 		JSON.stringify({
-			v: 1,
+			v: 2,
 			realmId: scope.realmId,
-			filter: scope.filter ?? null,
+			statusFilter: scope.status ?? null,
+			reported: scope.reported ?? false,
 			status: boundary.status,
 			updatedAt: boundary.updatedAt.toISOString(),
 			unitId: boundary.unitId,
@@ -62,8 +65,9 @@ export function decodeRealmUnitModerationCursor(
 		const cursor = parseJsonCursor(value, RealmUnitModerationCursor);
 		if (
 			cursor.realmId !== scope.realmId ||
-			cursor.filter !== (scope.filter ?? null) ||
-			(scope.filter !== undefined && cursor.status !== scope.filter)
+			cursor.statusFilter !== (scope.status ?? null) ||
+			cursor.reported !== (scope.reported ?? false) ||
+			(scope.status !== undefined && cursor.status !== scope.status)
 		)
 			throw new InvalidPaginationCursor();
 		const updatedAt = new Date(cursor.updatedAt);

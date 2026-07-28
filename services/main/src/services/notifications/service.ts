@@ -35,9 +35,11 @@ export type NotificationInput = NotificationBase &
 							publicNoticePostId?: string;
 					  }
 					| {
-							type: "feedback_resolution";
-							feedbackId: string;
-							resolutionCode: GovernanceReasonCode;
+							type: "report_resolution";
+							reportId: string;
+							actionId: string;
+							actionKind: ModerationActionKind;
+							reasonCode: GovernanceReasonCode;
 							publicNoticePostId?: string;
 					  };
 		  }
@@ -55,12 +57,21 @@ export type NotificationInput = NotificationBase &
 		  }
 	);
 
-export type NotificationTranslationKey = NotificationInput["kind"] | "unit_access_invitation";
+export type NotificationTranslationKey =
+	NotificationInput["kind"] | "report_resolution" | "unit_access_invitation";
 
 export function notificationTranslationKey(
 	kind: NotificationInput["kind"],
 	payload: unknown,
 ): NotificationTranslationKey {
+	if (
+		kind === "moderation" &&
+		typeof payload === "object" &&
+		payload !== null &&
+		"type" in payload &&
+		payload.type === "report_resolution"
+	)
+		return "report_resolution";
 	if (
 		kind === "system" &&
 		typeof payload === "object" &&

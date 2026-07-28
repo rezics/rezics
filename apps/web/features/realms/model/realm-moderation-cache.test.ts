@@ -14,6 +14,7 @@ const page = {
 			title: "待處理項目",
 			status: "pending",
 			postTargetingLocked: false,
+			openReportCount: 1,
 			allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
 			moderationStatus: "pending",
 			createdAt: "2026-07-27T12:00:00.000Z",
@@ -31,6 +32,7 @@ const pages: InfiniteData<RealmModerationPage> = {
 const visibleTarget = {
 	status: "visible",
 	postTargetingLocked: false,
+	openReportCount: 0,
 	allowedCommands: ["hide", "remove", "lock_post_targeting", "note"],
 	updatedAt: "2026-07-27T12:31:00.000Z",
 } satisfies RealmModerationTarget;
@@ -42,6 +44,7 @@ describe("Realm moderation queue cache", () => {
 			page.items[0]?.unitId ?? "",
 			visibleTarget,
 			"all",
+			"all",
 		);
 		expect(updated?.pages[0]?.items[0]).toMatchObject(visibleTarget);
 	});
@@ -52,6 +55,18 @@ describe("Realm moderation queue cache", () => {
 			page.items[0]?.unitId ?? "",
 			visibleTarget,
 			"pending",
+			"all",
+		);
+		expect(updated?.pages[0]?.items).toEqual([]);
+	});
+
+	it("removes an item when its reported-only case is actioned", () => {
+		const updated = updateRealmModerationPages(
+			pages,
+			page.items[0]?.unitId ?? "",
+			visibleTarget,
+			"all",
+			"reported",
 		);
 		expect(updated?.pages[0]?.items).toEqual([]);
 	});

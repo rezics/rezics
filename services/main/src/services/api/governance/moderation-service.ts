@@ -5,13 +5,13 @@ import { and, eq, isNull } from "drizzle-orm";
 import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import {
-	feedback,
 	moderationAction,
 	moderationCase,
 	profile as profileTable,
 	realmMember,
 	realmUnit,
 	realmUnitStatusEvent,
+	report,
 	unit,
 	unitOwnership,
 } from "../../database/schema";
@@ -28,7 +28,9 @@ import {
 	ModerationTransitionInvalid,
 } from "./errors";
 import {
+	assertReportCaseDismissible,
 	assertModerationActionCompatible,
+	isActiveReportCaseState,
 	resolvePostTargetingLockState,
 	resolveModerationCaseState,
 	resolveRealmMemberState,
@@ -196,16 +198,7 @@ async function getModerationTargetContext(
 		if (!target) throw new ModerationTargetNotFound();
 		return { recipientProfileIds: [target.profileId], subjectUnitId: row.realmId };
 	}
-	const [target] = await tx
-		.select({ profileId: feedback.profileId, subjectUnitId: feedback.subjectUnitId })
-		.from(feedback)
-		.where(eq(feedback.id, row.targetId))
-		.limit(1);
-	if (!target) throw new ModerationTargetNotFound();
-	return {
-		recipientProfileIds: [target.profileId],
-		subjectUnitId: target.subjectUnitId ?? undefined,
-	};
+	throw new ModerationTargetNotFound();
 }
 
 async function loadUnitStatePlan(
@@ -620,6 +613,15 @@ export async function executeAuthorizedModerationAction(
 	const noteRoles = new Set(input.body.notes?.map((note) => note.role));
 	if (noteRoles.size !== (input.body.notes?.length ?? 0)) throw new ModerationNoteRoleDuplicate();
 	const target = await getModerationTargetContext(tx, input.caseRow);
+	const caseReports = await tx
+		.select({ id: report.id, reporterProfileId: report.reporterProfileId })
+		.from(report)
+		.where(eq(report.caseId, input.caseRow.id));
+	const reportRecipientProfileIds = presentProfileIds(
+		caseReports.map(({ reporterProfileId }) => ({ profileId: reporterProfileId })),
+	);
+	if (input.body.kind === "dismiss")
+		assertReportCaseDismissible(input.caseRow.state, caseReports.length);
 	const plan = await deriveActionPlan(tx, input.caseRow, input.body);
 	const previousState =
 		plan.type === "unit_state" ||
@@ -672,7 +674,9 @@ export async function executeAuthorizedModerationAction(
 				subjectId: created.id,
 				subjectUnitId: target.subjectUnitId,
 				realmId: input.caseRow.realmId,
-				publicRecipientProfileIds: target.recipientProfileIds,
+				publicRecipientProfileIds: [
+					...new Set([...target.recipientProfileIds, ...reportRecipientProfileIds]),
+				],
 				note,
 			});
 			noteBindings.push({ ...binding, role: note.role });
@@ -695,7 +699,7 @@ export async function executeAuthorizedModerationAction(
 	const publicNoticePostId = noteBindings.find(
 		(binding) => binding.role === "public_notice",
 	)?.postId;
-	if (input.body.kind !== "note" || publicNoticePostId)
+	if ((input.body.kind !== "note" || publicNoticePostId) && input.body.kind !== "dismiss")
 		for (const recipientProfileId of target.recipientProfileIds) {
 			await createNotification(tx, {
 				recipientProfileId,
@@ -704,6 +708,23 @@ export async function executeAuthorizedModerationAction(
 				subjectUnitId: target.subjectUnitId,
 				payload: {
 					type: "moderation_action",
+					actionId: created.id,
+					actionKind: input.body.kind,
+					reasonCode: input.body.reasonCode,
+					publicNoticePostId,
+				},
+			});
+		}
+	if (input.body.kind !== "note" && !isActiveReportCaseState(nextCaseState))
+		for (const caseReport of caseReports) {
+			await createNotification(tx, {
+				recipientProfileId: caseReport.reporterProfileId,
+				actorProfileId: input.actorProfileId,
+				kind: "moderation",
+				subjectUnitId: target.subjectUnitId,
+				payload: {
+					type: "report_resolution",
+					reportId: caseReport.id,
 					actionId: created.id,
 					actionKind: input.body.kind,
 					reasonCode: input.body.reasonCode,

@@ -60,9 +60,11 @@ export const ModerationNotificationPayload = t.Union([
 	),
 	t.Object(
 		{
-			type: t.Literal("feedback_resolution"),
-			feedbackId: Uuid,
-			resolutionCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+			type: t.Literal("report_resolution"),
+			reportId: Uuid,
+			actionId: Uuid,
+			actionKind: t.UnionEnum(ModerationActionKindValues, { default: undefined }),
+			reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
 			publicNoticePostId: t.Optional(Uuid),
 		},
 		{ additionalProperties: false },

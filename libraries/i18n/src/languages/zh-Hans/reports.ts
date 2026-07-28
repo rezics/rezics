@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+
+const { forms: realmTerms } = zhHansTerminology.realm;
+export default {
+	action: "举报",
+	moreActions: "更多操作",
+	title: "举报此条目",
+	description: `请选择违规类型；举报将交由所选${realmTerms.label}的治理人员处理。`,
+	currentRealmDescription: `这则举报将交由当前${realmTerms.label}的治理人员处理。`,
+	realm: `处理${realmTerms.label}`,
+	chooseRealm: `选择${realmTerms.label}`,
+	noRealms: `此条目目前不属于任何你可访问且能接收举报的${realmTerms.label}。`,
+	reason: "违规类型",
+	reasons: {
+		realm_rules: `违反${realmTerms.label}规则`,
+		spam: "垃圾内容",
+		harassment: "骚扰",
+		unsafe_content: "不安全内容",
+		other: "其他",
+	},
+	details: "补充说明（选填）",
+	detailsPlaceholder: "说明发生了什么，以及治理人员应注意的位置。",
+	detailsHint: "说明会以原始文本保存，不附加内容语言。",
+	cancel: "取消",
+	submit: "提交举报",
+	submitted: "举报已提交",
+	filter: "举报条件",
+	allContent: "全部内容",
+	reportedContent: "已被举报",
+	reportCount: insert("{{count}} 则待处理举报", { count: Number }),
+	heading: "举报内容",
+	empty: "此条目目前没有举报。",
+	reportedAt: insert("举报于 {{date}}", { date: String }),
+	revision: "被举报的修订",
+	caseState: "案件状态",
+	caseStates: {
+		new: "新案件",
+		triaged: "已分类",
+		assigned: "已指派",
+		actioned: "已采取行动",
+		resolved: "已结案",
+		duplicate: "重复案件",
+		rejected: "不予处理",
+		escalated: "已升级",
+		reviewing: "审核中",
+	},
+} satisfies typeof import("../zh-Hant/reports").default;

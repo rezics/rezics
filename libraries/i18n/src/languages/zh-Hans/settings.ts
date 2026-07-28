@@ -122,7 +122,7 @@ export default {
 			notification: "通知",
 			recommendation: "推荐",
 			upload: "上传",
-			feedback: "意见反馈",
+			report: "举报",
 		},
 		permissionActions: {
 			read: "读取",
@@ -151,7 +151,7 @@ export default {
 			recommendationWrite: "提交推荐交互",
 			uploadRead: "读取上传项目",
 			uploadWrite: "创建上传项目",
-			feedbackWrite: "提交意见反馈",
+			reportWrite: "提交举报",
 		},
 		limits: "用量限制",
 		standardLimitsDescription: `自行创建的令牌一律使用标准策略；你只能在下列范围内设置用量上限。${verbatimTerms.privilegedTokenPolicy.value} 策略需要平台权限才能授予。`,

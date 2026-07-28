@@ -208,6 +208,7 @@ export default {
 		restore_member: "구성원 복원",
 		escalate: "확대",
 		reverse: "조치 되돌리기",
+		dismiss: "신고 기각",
 		note: "주석 추가",
 	},
 	governanceReasons: {

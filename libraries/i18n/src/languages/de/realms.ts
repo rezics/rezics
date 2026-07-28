@@ -215,6 +215,7 @@ export default {
 		restore_member: "Mitglied wiederherstellen",
 		escalate: "Eskalieren",
 		reverse: "Aktion rückgängig machen",
+		dismiss: "Meldung zurückweisen",
 		note: "Anmerkung hinzufügen",
 	},
 	governanceReasons: {

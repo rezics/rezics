@@ -39,11 +39,13 @@ export function PostOverflowMenu({
 	canDelete,
 	editAction,
 	postId,
+	realmId,
 	rootPostId,
 }: {
 	readonly canDelete: boolean;
 	readonly editAction?: PostOverflowEditAction;
 	readonly postId: string;
+	readonly realmId?: string;
 	readonly rootPostId: string | null;
 }) {
 	const { t } = useTranslation(["errors", "posts", "ui"]);
@@ -74,7 +76,11 @@ export function PostOverflowMenu({
 
 	return (
 		<>
-			<FeedOverflowMenu canExclude={false} itemId={postId}>
+			<FeedOverflowMenu
+				canExclude={false}
+				itemId={postId}
+				reportTarget={{ unitId: postId, realmId }}
+			>
 				{editAction?.kind === "link" ? (
 					<MenuItem asChild value="edit-post">
 						<Link href={editAction.href}>

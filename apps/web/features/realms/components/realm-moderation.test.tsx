@@ -37,6 +37,7 @@ vi.mock("../data/realm-moderation-query", () => ({
 							title: "測試內容",
 							status: "pending",
 							postTargetingLocked: false,
+							openReportCount: 0,
 							allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
 							moderationStatus: "pending",
 							createdAt: "2026-07-27T12:00:00.000Z",
@@ -82,7 +83,7 @@ vi.mock("./realm-moderation-sheet", () => ({
 }));
 
 const translation = await create(resources).getTranslation(
-	["posts", "realms", "state"],
+	["posts", "realms", "reports", "state"],
 	["zh-Hant"],
 );
 

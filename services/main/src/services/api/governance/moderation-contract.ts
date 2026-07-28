@@ -4,12 +4,13 @@ import {
 	ModerationActionNoEffect,
 	ModerationTransitionInvalid,
 } from "./errors";
-import type {
-	ModerationCaseStateValues,
-	ModerationTargetKindValues,
-	RealmMemberStateValues,
-	RealmModerationCommandValues,
-	RealmUnitStatusValues,
+import {
+	ActiveReportCaseStateValues,
+	type ModerationCaseStateValues,
+	type ModerationTargetKindValues,
+	type RealmMemberStateValues,
+	type RealmModerationCommandValues,
+	type RealmUnitStatusValues,
 } from "../../database/schema/contract-values";
 
 export type ModerationActionCommand = CreateModerationActionBody["kind"];
@@ -19,6 +20,14 @@ export type RealmModerationCommand = (typeof RealmModerationCommandValues)[numbe
 export type RealmMemberState = (typeof RealmMemberStateValues)[number];
 export type ModerationCaseState = (typeof ModerationCaseStateValues)[number];
 export type UnitModerationStatus = "approved" | "pending" | "removed";
+
+export function isActiveReportCaseState(state: ModerationCaseState): boolean {
+	return ActiveReportCaseStateValues.some((candidate) => candidate === state);
+}
+
+export function assertReportCaseDismissible(state: ModerationCaseState, reportCount: number): void {
+	if (!isActiveReportCaseState(state) || reportCount < 1) throw new ModerationActionNoEffect();
+}
 
 const SharedAdministrativeActions = ["escalate", "reverse", "note"] as const;
 const RealmUnitStateCommands = {
@@ -31,10 +40,13 @@ const RealmUnitStateCommands = {
 export function getRealmUnitModerationCommands(
 	status: RealmUnitStatus,
 	postTargetingLocked: boolean,
+	hasOpenReports = false,
 ): readonly RealmModerationCommand[] {
+	const reportCommands: readonly RealmModerationCommand[] = hasOpenReports ? ["dismiss"] : [];
 	return [
 		...RealmUnitStateCommands[status],
 		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
+		...reportCommands,
 		"note",
 	];
 }
@@ -46,6 +58,7 @@ const ActionsByTarget = {
 		"restore",
 		"lock_post_targeting",
 		"unlock_post_targeting",
+		"dismiss",
 		...SharedAdministrativeActions,
 	],
 	unit_field: ["approve", "remove", "restore", ...SharedAdministrativeActions],
@@ -66,7 +79,6 @@ const ActionsByTarget = {
 		"restore_member",
 		...SharedAdministrativeActions,
 	],
-	feedback: SharedAdministrativeActions,
 } as const satisfies Record<ModerationTargetKind, readonly ModerationActionCommand[]>;
 
 export function isModerationActionCompatible(
@@ -164,5 +176,6 @@ export function resolveModerationCaseState(
 		if (current === "escalated") throw new ModerationActionNoEffect();
 		return "escalated";
 	}
+	if (action === "dismiss") return "rejected";
 	return "actioned";
 }

@@ -28,7 +28,10 @@ vi.mock("@tanstack/react-virtual", () => ({
 	}),
 }));
 
-const translation = await create(resources).getTranslation(["posts", "realms"], ["zh-Hant"]);
+const translation = await create(resources).getTranslation(
+	["posts", "realms", "reports"],
+	["zh-Hant"],
+);
 
 const unit = {
 	realmId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755d",
@@ -38,6 +41,7 @@ const unit = {
 	title: "測試內容",
 	status: "pending",
 	postTargetingLocked: false,
+	openReportCount: 0,
 	allowedCommands: ["approve", "remove", "lock_post_targeting", "note"],
 	moderationStatus: "pending",
 	createdAt: "2026-07-27T12:00:00.000Z",

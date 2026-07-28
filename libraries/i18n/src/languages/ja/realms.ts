@@ -210,6 +210,7 @@ export default {
 		restore_member: "メンバーを復元",
 		escalate: "エスカレート",
 		reverse: "アクションを元に戻す",
+		dismiss: "通報を却下",
 		note: "注釈を追加",
 	},
 	governanceReasons: {

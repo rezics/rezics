@@ -94,6 +94,7 @@ export const CreateModerationActionBody = t.Union([
 				t.Literal("remove_member"),
 				t.Literal("ban_member"),
 				t.Literal("restore_member"),
+				t.Literal("dismiss"),
 				t.Literal("escalate"),
 			]),
 		},
@@ -117,23 +118,6 @@ export const CreateModerationActionBody = t.Union([
 	),
 ]);
 export type CreateModerationActionBody = Static<typeof CreateModerationActionBody>;
-
-export const FeedbackParams = t.Object({ feedbackId: Uuid });
-export const ResolveFeedbackBody = t.Object(
-	{
-		resolutionCode: GovernanceReasonCode,
-		publicNotice: t.Optional(
-			t.Object(
-				{
-					language: ContentLanguage,
-					content: PortableTextDocument,
-				},
-				{ additionalProperties: false },
-			),
-		),
-	},
-	{ additionalProperties: false },
-);
 
 const AccountEnforcementKind = t.Union(EnforcementKindValues.map((value) => t.Literal(value)));
 export const CreateAccountEnforcementBody = t.Object(
@@ -244,7 +228,6 @@ export const ModerationCaseResponse = t.Object({
 	targetKind: t.String(),
 	targetId: Uuid,
 	targetPath: t.Nullable(t.String()),
-	reporterProfileId: t.Nullable(Uuid),
 	assignedProfileId: t.Nullable(Uuid),
 	duplicateOfCaseId: t.Nullable(Uuid),
 	notes: t.Array(GovernanceNoteResponse),

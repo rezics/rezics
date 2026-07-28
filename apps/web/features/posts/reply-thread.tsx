@@ -469,6 +469,7 @@ function ReplyPostNode({
 												: undefined
 										}
 										postId={reply.id}
+										realmId={realmId}
 										rootPostId={rootPostId}
 									/>
 								}

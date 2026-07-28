@@ -8,9 +8,11 @@ import {
 } from "@rezics/i18n";
 import {
 	useGetApiRealmsByRealmIdUnitsByUnitIdHistory,
+	useGetApiRealmsByRealmIdReports,
 	usePatchApiRealmsByRealmIdUnitsByUnitId,
 	type GetApiRealmsByRealmIdUnitsQuery,
 	type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	type GetApiRealmsByRealmIdReportsStatus200,
 	type PatchApiRealmsByRealmIdUnitsByUnitIdBody,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
@@ -58,10 +60,11 @@ import {
 	toRealmModerationCommand,
 	type RealmModerationCommand,
 } from "../model/moderation-contract";
-import type { RealmModerationFilter } from "../routing/realm-moderation-route";
+import type { RealmModerationFilter, RealmReportFilter } from "../routing/realm-moderation-route";
 
 type RealmModerationHistoryAction =
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200["items"][number];
+type RealmUnitReport = GetApiRealmsByRealmIdReportsStatus200["items"][number];
 type ModerationAnnotationRole = "internal_note" | "public_notice";
 
 export function RealmModerationSheet({
@@ -69,20 +72,26 @@ export function RealmModerationSheet({
 	unit,
 	cacheQuery,
 	filter,
+	reportFilter,
 	onOpenChange,
 }: {
 	readonly realmId: string;
 	readonly unit: RealmModerationUnit;
 	readonly cacheQuery: GetApiRealmsByRealmIdUnitsQuery;
 	readonly filter: RealmModerationFilter;
+	readonly reportFilter: RealmReportFilter;
 	readonly onOpenChange: (open: boolean) => void;
 }) {
-	const { t, locale } = useTranslation(["locale", "posts", "realms"]);
+	const { t, locale } = useTranslation(["locale", "posts", "realms", "reports"]);
 	const queryClient = useQueryClient();
 	const mutation = usePatchApiRealmsByRealmIdUnitsByUnitId();
 	const history = useGetApiRealmsByRealmIdUnitsByUnitIdHistory({
 		path: { realmId, unitId: unit.unitId },
 		query: RealmModerationHistoryQuery,
+	});
+	const reports = useGetApiRealmsByRealmIdReports({
+		path: { realmId },
+		query: { unitId: unit.unitId, limit: 100 },
 	});
 	const [command, setCommand] = useState<RealmModerationCommand>(
 		() => unit.allowedCommands[0] ?? "note",
@@ -143,6 +152,7 @@ export function RealmModerationSheet({
 				realmId,
 				cacheQuery,
 				filter,
+				reportFilter,
 				unit.unitId,
 				result.target,
 			);
@@ -300,6 +310,23 @@ export function RealmModerationSheet({
 						</form>
 
 						<div className="grid gap-3 border-t pt-5">
+							<h3 className="font-heading font-bold">{t.reports.heading}</h3>
+							{reports.isPending ? (
+								<Skeleton className="h-32 rounded-xl" />
+							) : reports.error ? (
+								<RequestFailure error={reports.error} />
+							) : reports.data?.items.length ? (
+								<div className="grid gap-3">
+									{reports.data.items.map((item) => (
+										<RealmReportItem key={item.id} report={item} />
+									))}
+								</div>
+							) : (
+								<p className="text-muted-foreground text-sm">{t.reports.empty}</p>
+							)}
+						</div>
+
+						<div className="grid gap-3 border-t pt-5">
 							<h3 className="font-heading font-bold">{t.realms.moderationHistory}</h3>
 							{history.isPending ? (
 								<Skeleton className="h-32 rounded-xl" />
@@ -371,6 +398,33 @@ export function RealmModerationSheet({
 				</AlertDialogContent>
 			</AlertDialog>
 		</>
+	);
+}
+
+function RealmReportItem({ report }: { readonly report: RealmUnitReport }) {
+	const { t, locale } = useTranslation(["reports"]);
+	return (
+		<article className="grid gap-3 rounded-lg border p-4 text-sm">
+			<div className="flex flex-wrap items-start justify-between gap-2">
+				<p className="font-medium">{t.reports.reasons[report.reason]}</p>
+				<time className="text-muted-foreground text-xs" dateTime={report.createdAt}>
+					{t.reports.reportedAt({
+						date: formatDateTime(report.createdAt, locale.current),
+					})}
+				</time>
+			</div>
+			<div className="grid gap-1 text-muted-foreground text-xs">
+				<p>
+					{t.reports.caseState}: {t.reports.caseStates[report.caseState]}
+				</p>
+				<p>
+					{t.reports.revision}: <code>{report.reportedRevisionId}</code>
+				</p>
+			</div>
+			{report.details ? (
+				<p className="whitespace-pre-wrap rounded-md bg-muted/35 p-3">{report.details}</p>
+			) : null}
+		</article>
 	);
 }
 

@@ -1,0 +1,48 @@
+import { insert } from "native-i18n";
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: realmTerms } = zhHantTerminology.realm;
+export default {
+	action: "檢舉",
+	moreActions: "更多動作",
+	title: "檢舉此條目",
+	description: `請選擇違規類型；檢舉將交由所選${realmTerms.label}的治理人員處理。`,
+	currentRealmDescription: `這則檢舉將交由目前${realmTerms.label}的治理人員處理。`,
+	realm: `處理${realmTerms.label}`,
+	chooseRealm: `選擇${realmTerms.label}`,
+	noRealms: `此條目目前不屬於任何你可存取且能接收檢舉的${realmTerms.label}。`,
+	reason: "違規類型",
+	reasons: {
+		realm_rules: `違反${realmTerms.label}規則`,
+		spam: "垃圾內容",
+		harassment: "騷擾",
+		unsafe_content: "不安全內容",
+		other: "其他",
+	},
+	details: "補充說明（選填）",
+	detailsPlaceholder: "說明發生了什麼事，以及治理人員應注意的位置。",
+	detailsHint: "說明會以原始文字保存，不附加內容語言。",
+	cancel: "取消",
+	submit: "提交檢舉",
+	submitted: "檢舉已提交",
+	filter: "檢舉條件",
+	allContent: "全部內容",
+	reportedContent: "已被檢舉",
+	reportCount: insert("{{count}} 則待處理檢舉", { count: Number }),
+	heading: "檢舉內容",
+	empty: "此條目目前沒有檢舉。",
+	reportedAt: insert("檢舉於 {{date}}", { date: String }),
+	revision: "被檢舉的修訂",
+	caseState: "案件狀態",
+	caseStates: {
+		new: "新案件",
+		triaged: "已分類",
+		assigned: "已指派",
+		actioned: "已採取行動",
+		resolved: "已結案",
+		duplicate: "重複案件",
+		rejected: "不予處理",
+		escalated: "已升級",
+		reviewing: "審查中",
+	},
+};

@@ -40,6 +40,10 @@ export default {
 		title: `Moderationsmeldung von ${verbatimTerms.rezics.value}`,
 		body: "Der Moderationsstatus deines Inhalts hat sich geändert.",
 	},
+	report_resolution: {
+		title: `Entscheidung zu einer Meldung von ${verbatimTerms.rezics.value}`,
+		body: "Zu einer von dir eingereichten Meldung liegt eine Entscheidung vor.",
+	},
 	realm: {
 		title: `${realmTerms.label}-Meldung von ${verbatimTerms.rezics.value}`,
 		body: `In einem ${realmTerms.inline}, dem du angehörst, hat sich etwas geändert.`,

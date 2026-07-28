@@ -128,6 +128,7 @@ export function PostDetailPage({
 										: undefined
 								}
 								postId={post.id}
+								realmId={realmId}
 								rootPostId={post.rootPostId}
 							/>
 						}

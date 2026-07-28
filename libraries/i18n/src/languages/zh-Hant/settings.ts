@@ -122,7 +122,7 @@ export default {
 			notification: "通知",
 			recommendation: "推薦",
 			upload: "上傳",
-			feedback: "意見回饋",
+			report: "檢舉",
 		},
 		permissionActions: {
 			read: "讀取",
@@ -151,7 +151,7 @@ export default {
 			recommendationWrite: "提交推薦互動",
 			uploadRead: "讀取上傳項目",
 			uploadWrite: "建立上傳項目",
-			feedbackWrite: "提交意見回饋",
+			reportWrite: "提交檢舉",
 		},
 		limits: "用量限制",
 		standardLimitsDescription: `自行建立的權杖一律使用標準策略；你只能在下列範圍內設定用量上限。${verbatimTerms.privilegedTokenPolicy.value} 策略需要平台權限才能授予。`,

@@ -5,6 +5,7 @@ import type {
 import type { InfiniteData } from "@tanstack/react-query";
 
 import type { RealmModerationFilter } from "../routing/realm-moderation-route";
+import { ReportedRealmUnits, type RealmReportFilter } from "../routing/realm-moderation-route";
 
 export type RealmModerationPage = GetApiRealmsByRealmIdUnitsStatus200;
 export type RealmModerationUnit = RealmModerationPage["items"][number];
@@ -26,9 +27,12 @@ export function updateRealmModerationPages(
 	unitId: string,
 	target: RealmModerationTarget,
 	filter: RealmModerationFilter,
+	reportFilter: RealmReportFilter,
 ): RealmModerationPages | undefined {
 	if (!data) return data;
-	const removeFromFilteredQueue = filter !== "all" && target.status !== filter;
+	const removeFromFilteredQueue =
+		(filter !== "all" && target.status !== filter) ||
+		(reportFilter === ReportedRealmUnits && Number(target.openReportCount) === 0);
 	return {
 		...data,
 		pages: data.pages.map((page) => ({

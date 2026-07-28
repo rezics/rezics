@@ -210,6 +210,7 @@ export default {
 		restore_member: "Restore member",
 		escalate: "Escalate",
 		reverse: "Reverse action",
+		dismiss: "Dismiss report",
 		note: "Add annotation",
 	},
 	governanceReasons: {

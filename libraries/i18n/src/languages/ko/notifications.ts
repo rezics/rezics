@@ -38,6 +38,10 @@ export default {
 		title: `${verbatimTerms.rezics.value} 모더레이션 업데이트`,
 		body: "콘텐츠의 모더레이션 상태가 변경되었습니다.",
 	},
+	report_resolution: {
+		title: `${verbatimTerms.rezics.value} 신고 처리 결과`,
+		body: "제출한 신고의 처리 결과가 결정되었습니다.",
+	},
 	realm: {
 		title: `${verbatimTerms.rezics.value} ${realmTerms.label} 업데이트`,
 		body: `당신이 속한 ${realmTerms.inline}에서 변경사항이 있었습니다.`,

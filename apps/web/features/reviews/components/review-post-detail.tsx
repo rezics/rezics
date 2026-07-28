@@ -62,62 +62,65 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 			<PostDetailArticle
 				commentsHref="#replies"
 				engagementOverflow={
-					editHref || review.capabilities.canEdit ? (
-						<>
-							<FeedOverflowMenu canExclude={false} itemId={review.id}>
-								{editHref ? (
-									<MenuItem asChild value="edit-review">
-										<Link href={editHref}>
-											<PencilIcon aria-hidden />
-											{t.ui.edit}
-										</Link>
-									</MenuItem>
-								) : null}
-								{review.capabilities.canEdit ? (
-									<MenuItem
-										onSelect={() => setDeleteOpen(true)}
-										value="delete-review"
-										variant="destructive"
-									>
-										<Trash2Icon aria-hidden />
-										{t.engagement.deleteReview}
-									</MenuItem>
-								) : null}
-							</FeedOverflowMenu>
-							{review.capabilities.canEdit ? (
-								<AlertDialog
-									onOpenChange={({ open }) => setDeleteOpen(open)}
-									open={deleteOpen}
-								>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>
-												{t.engagement.deleteReview}
-											</AlertDialogTitle>
-										</AlertDialogHeader>
-										<AlertDialogBody>
-											<AlertDialogDescription>
-												{t.engagement.deleteReviewPrompt}
-											</AlertDialogDescription>
-										</AlertDialogBody>
-										<AlertDialogFooter>
-											<AlertDialogCancel>
-												{t.engagement.cancel}
-											</AlertDialogCancel>
-											<Button
-												isLoading={remove.isPending}
-												onClick={() => void deleteReview()}
-												type="button"
-												variant="destructive"
-											>
-												{t.engagement.delete}
-											</Button>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
+					<>
+						<FeedOverflowMenu
+							canExclude={false}
+							itemId={review.id}
+							reportTarget={{
+								unitId: review.id,
+								realmId: review.realmId ?? undefined,
+							}}
+						>
+							{editHref ? (
+								<MenuItem asChild value="edit-review">
+									<Link href={editHref}>
+										<PencilIcon aria-hidden />
+										{t.ui.edit}
+									</Link>
+								</MenuItem>
 							) : null}
-						</>
-					) : undefined
+							{review.capabilities.canEdit ? (
+								<MenuItem
+									onSelect={() => setDeleteOpen(true)}
+									value="delete-review"
+									variant="destructive"
+								>
+									<Trash2Icon aria-hidden />
+									{t.engagement.deleteReview}
+								</MenuItem>
+							) : null}
+						</FeedOverflowMenu>
+						{review.capabilities.canEdit ? (
+							<AlertDialog
+								onOpenChange={({ open }) => setDeleteOpen(open)}
+								open={deleteOpen}
+							>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>
+											{t.engagement.deleteReview}
+										</AlertDialogTitle>
+									</AlertDialogHeader>
+									<AlertDialogBody>
+										<AlertDialogDescription>
+											{t.engagement.deleteReviewPrompt}
+										</AlertDialogDescription>
+									</AlertDialogBody>
+									<AlertDialogFooter>
+										<AlertDialogCancel>{t.engagement.cancel}</AlertDialogCancel>
+										<Button
+											isLoading={remove.isPending}
+											onClick={() => void deleteReview()}
+											type="button"
+											variant="destructive"
+										>
+											{t.engagement.delete}
+										</Button>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
+						) : null}
+					</>
 				}
 				post={{
 					id: review.id,

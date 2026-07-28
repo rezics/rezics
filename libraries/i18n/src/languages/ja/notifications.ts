@@ -38,6 +38,10 @@ export default {
 		title: `${verbatimTerms.rezics.value} のモデレーション更新`,
 		body: "コンテンツのモデレーション状況が変更されました。",
 	},
+	report_resolution: {
+		title: `${verbatimTerms.rezics.value} の報告対応結果`,
+		body: "送信した報告の対応結果が確定しました。",
+	},
 	realm: {
 		title: `${verbatimTerms.rezics.value} ${realmTerms.label} の更新`,
 		body: `所属している ${realmTerms.inline} に何か変更がありました。`,

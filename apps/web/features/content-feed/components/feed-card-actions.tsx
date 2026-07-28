@@ -39,6 +39,11 @@ import {
 } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import {
+	UnitReportDialog,
+	UnitReportMenuItem,
+	type UnitReportTarget,
+} from "@/features/reports/components/unit-report-dialog";
+import {
 	CollectionPickerButton,
 	type CollectionSavePlacement,
 } from "@/features/collections/components/collection-picker-button";
@@ -294,18 +299,25 @@ export function FeedOverflowMenu({
 	itemId,
 	onNotInterested,
 	placement = "direct",
+	reportTarget,
 }: {
 	canExclude: boolean;
 	children?: ReactNode;
 	itemId: string;
 	onNotInterested?: () => void;
 	placement?: CollectionSavePlacement;
+	reportTarget?: UnitReportTarget;
 }) {
 	const { data: session } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
 	const [collectionOpen, setCollectionOpen] = useState(false);
+	const [reportOpen, setReportOpen] = useState(false);
 	const openCollectionPicker = () => {
 		if (session) setCollectionOpen(true);
+		else openAuthPortal("login");
+	};
+	const openReport = () => {
+		if (session) setReportOpen(true);
 		else openAuthPortal("login");
 	};
 
@@ -316,6 +328,7 @@ export function FeedOverflowMenu({
 				onNotInterested={onNotInterested}
 				onSave={openCollectionPicker}
 			>
+				{reportTarget ? <UnitReportMenuItem onSelect={openReport} /> : null}
 				{children}
 			</FeedOverflowMenuView>
 			<CollectionPickerButton
@@ -324,6 +337,14 @@ export function FeedOverflowMenu({
 				placement={placement}
 				targetId={itemId}
 			/>
+			{reportTarget ? (
+				<UnitReportDialog
+					onOpenChange={setReportOpen}
+					open={reportOpen}
+					realmId={reportTarget.realmId}
+					unitId={reportTarget.unitId}
+				/>
+			) : null}
 		</>
 	);
 }

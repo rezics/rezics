@@ -38,6 +38,10 @@ export default {
 		title: `${verbatimTerms.rezics.value} 內容審核更新`,
 		body: "你的內容審核狀態已變更。",
 	},
+	report_resolution: {
+		title: `${verbatimTerms.rezics.value} 檢舉處理結果`,
+		body: "你提交的檢舉已有處理結果。",
+	},
 	realm: {
 		title: `${verbatimTerms.rezics.value} ${realmTerms.inline}更新`,
 		body: `你所在${realmTerms.inline}的相關狀態已變更。`,

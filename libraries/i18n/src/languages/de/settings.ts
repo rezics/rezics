@@ -131,7 +131,7 @@ export default {
 			notification: "Benachrichtigungen",
 			recommendation: "Empfehlungen",
 			upload: "Uploads",
-			feedback: "Rückmeldungen",
+			report: "Meldungen",
 		},
 		permissionActions: {
 			read: "Lesen",
@@ -160,7 +160,7 @@ export default {
 			recommendationWrite: "Empfehlungsinteraktionen übermitteln",
 			uploadRead: "Uploads lesen",
 			uploadWrite: "Uploads erstellen",
-			feedbackWrite: "Rückmeldung senden",
+			reportWrite: "Meldungen senden",
 		},
 		limits: "Nutzungsbegrenzungen",
 		standardLimitsDescription: `Von dir erstellte Token verwenden immer die Standardrichtlinie; du kannst Kontingente nur innerhalb der unten angegebenen Bereiche festlegen. Die Vergabe von ${verbatimTerms.privilegedTokenPolicy.value}-Richtlinien erfordert Plattformzugriff.`,
