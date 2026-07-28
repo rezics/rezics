@@ -28,6 +28,7 @@ export const TopLevelSlugNamespaceUnitIds = {
 export const OfficialRealmUnitIds = {
 	community: "019b76da-a800-7300-8000-000000000001",
 	score: "019b76da-a800-7300-8000-000000000002",
+	rule: "019b76da-a800-7300-8000-000000000003",
 } as const;
 
 export type TopLevelSlugNamespace = keyof typeof TopLevelSlugNamespaceUnitIds;

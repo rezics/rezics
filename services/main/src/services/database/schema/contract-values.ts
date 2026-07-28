@@ -229,14 +229,6 @@ export const NotificationKindValues = [
 	"realm",
 	"system",
 ] as const;
-export const ReportReasonValues = [
-	"realm_rules",
-	"spam",
-	"harassment",
-	"unsafe_content",
-	"other",
-] as const;
-export type ReportReason = (typeof ReportReasonValues)[number];
 export const EnforcementKindValues = [
 	"warning",
 	"silence",
@@ -279,6 +271,15 @@ export const RealmUnitMutationCommandValues = [
 ] as const;
 export const RealmModerationCommandValues = [
 	...RealmUnitMutationCommandValues,
+	"dismiss",
+	"note",
+] as const;
+export const PlatformUnitModerationCommandValues = [
+	"approve",
+	"remove",
+	"restore",
+	"lock_post_targeting",
+	"unlock_post_targeting",
 	"dismiss",
 	"note",
 ] as const;

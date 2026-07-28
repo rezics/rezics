@@ -37,6 +37,7 @@ export type NotificationInput = NotificationBase &
 					| {
 							type: "report_resolution";
 							reportId: string;
+							reportScope: "platform" | "realm";
 							actionId: string;
 							actionKind: ModerationActionKind;
 							reasonCode: GovernanceReasonCode;

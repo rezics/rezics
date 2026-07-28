@@ -4,6 +4,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: postTerms } = koTerminology.post;
 
 export default {
 	title: "관리 콘솔",
@@ -18,6 +19,11 @@ export default {
 			label: "플랫폼 접근",
 			description:
 				"각 권한의 만료 및 출처를 포함하여 프로필에 부여된 플랫폼 기능을 검사하거나 관리합니다.",
+		},
+		moderation: {
+			label: "전역 콘텐츠 거버넌스",
+			description:
+				"전역 규칙에 따라 제출된 신고를 처리하고 유닛의 플랫폼 수준 상태를 관리합니다.",
 		},
 		audit: {
 			label: "보안 감사",
@@ -53,6 +59,34 @@ export default {
 		revokeAllDescription:
 			"이는 모든 활성 권한 부여를 취소합니다. 만료되지 않는 마지막 플랫폼 접근 관리자 권한을 제거할 경우 서버에서 변경을 거부합니다.",
 		confirmRevokeAll: "전체 취소 확인",
+	},
+	moderation: {
+		filterState: "사건 상태",
+		allStates: "모든 상태",
+		queue: "전역 신고 사건",
+		empty: "현재 필터에 일치하는 전역 신고 사건이 없습니다.",
+		untitled: "제목 없는 유닛",
+		reports: "이 사건의 신고",
+		action: "거버넌스 작업",
+		reason: "거버넌스 사유",
+		internalNote: "내부 메모(선택)",
+		notePlaceholder: "판단 근거를 기록하세요. 메모 추가 작업에서는 필수입니다.",
+		submit: "거버넌스 작업 적용",
+		succeeded: "전역 거버넌스 작업을 완료했습니다",
+		confirmRemovalTitle: "이 콘텐츠를 플랫폼에서 삭제할까요?",
+		confirmRemovalDescription: insert("{{title}}이 플랫폼 수준에서 삭제됨으로 표시됩니다.", {
+			title: String,
+		}),
+		confirmRemoval: "콘텐츠 삭제",
+		reportCount: insert("신고 {{count}}건", { count: Number }),
+		moderationStatuses: {
+			approved: "승인됨",
+			pending: "검토 대기",
+			removed: "삭제됨",
+		},
+		targetingLocked: `새 ${postTerms.label} 연결 차단됨`,
+		targetingUnlocked: `새 ${postTerms.label} 연결 허용됨`,
+		openContent: "콘텐츠 열기",
 	},
 	audit: {
 		category: "이벤트 범주",

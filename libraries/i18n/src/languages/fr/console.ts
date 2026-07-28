@@ -4,6 +4,7 @@ import { frTerminology } from "@rezics/i18n/terminology/fr";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = frTerminology.realm;
+const { forms: postTerms } = frTerminology.post;
 
 export default {
 	title: "Console de gestion",
@@ -18,6 +19,11 @@ export default {
 			label: "Accès à la plateforme",
 			description:
 				"Consultez ou gérez les capacités de plateforme accordées aux profils, y compris l’expiration et l’origine de chaque attribution.",
+		},
+		moderation: {
+			label: "Gouvernance globale des contenus",
+			description:
+				"Traitez les signalements fondés sur les règles globales et gérez l’état des unités sur la plateforme.",
 		},
 		audit: {
 			label: "Audit de sécurité",
@@ -53,6 +59,35 @@ export default {
 		revokeAllDescription:
 			"Cette action révoque toutes les attributions actives. Le serveur refuse la modification si elle retire le dernier gestionnaire d’accès à la plateforme sans date d’expiration.",
 		confirmRevokeAll: "Confirmer la révocation complète",
+	},
+	moderation: {
+		filterState: "État du dossier",
+		allStates: "Tous les états",
+		queue: "Dossiers de signalement globaux",
+		empty: "Aucun dossier de signalement global ne correspond au filtre actuel.",
+		untitled: "Unité sans titre",
+		reports: "Signalements de ce dossier",
+		action: "Action de gouvernance",
+		reason: "Motif de gouvernance",
+		internalNote: "Note interne (facultatif)",
+		notePlaceholder: "Consignez la justification ; obligatoire pour ajouter une note.",
+		submit: "Appliquer l’action",
+		succeeded: "Action de gouvernance globale terminée",
+		confirmRemovalTitle: "Retirer ce contenu de la plateforme ?",
+		confirmRemovalDescription: insert(
+			"{{title}} sera marqué comme retiré à l’échelle de la plateforme.",
+			{ title: String },
+		),
+		confirmRemoval: "Retirer le contenu",
+		reportCount: insert("{{count}} signalements", { count: Number }),
+		moderationStatuses: {
+			approved: "Approuvé",
+			pending: "En attente d’examen",
+			removed: "Retiré",
+		},
+		targetingLocked: `Nouvelles références de ${postTerms.plural} bloquées`,
+		targetingUnlocked: `Nouvelles références de ${postTerms.plural} autorisées`,
+		openContent: "Ouvrir le contenu",
 	},
 	audit: {
 		category: "Catégorie d’événement",

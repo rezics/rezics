@@ -58,6 +58,7 @@ import {
 	moderationCase,
 	notification,
 	notificationPreference,
+	platformUnitReport,
 	poll,
 	pollOption,
 	pollVote,
@@ -77,7 +78,7 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
-	report,
+	realmUnitReport,
 	realmScoreContext,
 	realmTagContext,
 	realmTagVote,
@@ -2434,28 +2435,81 @@ async function seedGovernance(
 			value.realmId !== null &&
 			value.targetKind === "realm_unit",
 	);
-	for (let index = 0; index < SeedPlan.reports; index += 1) {
+	const platformUnitCases = cases.filter(
+		(value) => value.authority === "platform" && value.targetKind === "unit",
+	);
+	const realmReportCount = Math.floor(SeedPlan.reports / 2);
+	for (let index = 0; index < realmReportCount; index += 1) {
 		const caseRow = itemAt(realmUnitCases, index);
 		if (!caseRow.realmId) throw new Error("Seed Realm Unit case is missing its Realm");
-		const [revision] = await tx
+		const [reportedRevision] = await tx
 			.select({ id: unitRevisionHead.revisionId })
 			.from(unitRevisionHead)
 			.where(eq(unitRevisionHead.unitId, caseRow.targetId))
 			.limit(1);
-		if (!revision)
+		if (!reportedRevision)
 			throw new Error(`Seed Report target ${caseRow.targetId} is missing its revision head`);
+		const [ruleRevision] = await tx
+			.select({ id: realmRuleRevision.id })
+			.from(realmRuleRevision)
+			.where(eq(realmRuleRevision.realmId, caseRow.realmId))
+			.orderBy(sql`${realmRuleRevision.version} desc`)
+			.limit(1);
+		if (!ruleRevision)
+			throw new Error(`Seed Realm ${caseRow.realmId} is missing its rule revision`);
+		const [rule] = await tx
+			.select({ id: realmRule.id })
+			.from(realmRule)
+			.where(eq(realmRule.revisionId, ruleRevision.id))
+			.orderBy(realmRule.position, realmRule.id)
+			.limit(1);
+		if (!rule) throw new Error(`Seed Realm ${caseRow.realmId} is missing its rule`);
 		const reporterIndex = Math.floor(index / realmUnitCases.length);
-		await tx.insert(report).values({
+		await tx.insert(realmUnitReport).values({
 			caseId: caseRow.id,
 			reporterProfileId: itemAt(profiles, reporterIndex).id,
 			realmId: caseRow.realmId,
 			unitId: caseRow.targetId,
-			reason: itemAt(
-				["realm_rules", "spam", "harassment", "unsafe_content", "other"] as const,
-				index,
-			),
+			ruleRevisionId: ruleRevision.id,
+			ruleId: rule.id,
 			details: index % 4 === 0 ? null : `Seeded Unit report ${position(index)}`,
-			reportedRevisionId: revision.id,
+			reportedRevisionId: reportedRevision.id,
+			createdAt: latestDate(data.pastDate(90), caseRow.createdAt),
+		});
+	}
+	const [platformRuleRevision] = await tx
+		.select({ id: realmRuleRevision.id })
+		.from(realmRuleRevision)
+		.where(eq(realmRuleRevision.realmId, OfficialRealmUnitIds.rule))
+		.orderBy(sql`${realmRuleRevision.version} desc`)
+		.limit(1);
+	if (!platformRuleRevision) throw new Error("REZICS Rule is missing its rule revision");
+	const platformRules = await tx
+		.select({ id: realmRule.id })
+		.from(realmRule)
+		.where(eq(realmRule.revisionId, platformRuleRevision.id))
+		.orderBy(realmRule.position, realmRule.id);
+	if (platformRules.length === 0) throw new Error("REZICS Rule is missing its rules");
+	const platformReportCount = SeedPlan.reports - realmReportCount;
+	for (let index = 0; index < platformReportCount; index += 1) {
+		const caseRow = itemAt(platformUnitCases, index);
+		const [reportedRevision] = await tx
+			.select({ id: unitRevisionHead.revisionId })
+			.from(unitRevisionHead)
+			.where(eq(unitRevisionHead.unitId, caseRow.targetId))
+			.limit(1);
+		if (!reportedRevision)
+			throw new Error(`Seed Report target ${caseRow.targetId} is missing its revision head`);
+		const reporterIndex = Math.floor(index / platformUnitCases.length);
+		await tx.insert(platformUnitReport).values({
+			caseId: caseRow.id,
+			reporterProfileId: itemAt(profiles, reporterIndex).id,
+			unitId: caseRow.targetId,
+			ruleSourceRealmId: OfficialRealmUnitIds.rule,
+			ruleRevisionId: platformRuleRevision.id,
+			ruleId: itemAt(platformRules, index).id,
+			details: index % 4 === 0 ? null : `Seeded platform Unit report ${position(index)}`,
+			reportedRevisionId: reportedRevision.id,
 			createdAt: latestDate(data.pastDate(90), caseRow.createdAt),
 		});
 	}

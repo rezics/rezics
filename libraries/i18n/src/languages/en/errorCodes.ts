@@ -90,6 +90,8 @@ export default {
 	ModerationNoteRoleDuplicate: "Add at most one internal note and one public notice.",
 	ReportAlreadySubmitted: "You have already reported this Unit for the active case.",
 	ReportTargetRevisionUnavailable: "This Unit does not have a revision that can be reported.",
+	ReportRuleUnavailable: "The selected governance scope has no current rules.",
+	ReportRuleChanged: "The selected rule has changed. Choose a rule again before submitting.",
 	EnforcementExpiryInvalid: "The enforcement expiry must be in the future.",
 	EnforcementNotFound: "This enforcement could not be found.",
 	EnforcementAlreadyRevoked: "This enforcement has already been revoked.",

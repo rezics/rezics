@@ -4,6 +4,7 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: postTerms } = esTerminology.post;
 
 export default {
 	title: "Consola de gestión",
@@ -18,6 +19,11 @@ export default {
 			label: "Acceso a la plataforma",
 			description:
 				"Consulta o gestiona las capacidades de plataforma concedidas a los perfiles, incluidos el vencimiento y el origen de cada concesión.",
+		},
+		moderation: {
+			label: "Gobernanza global de contenido",
+			description:
+				"Resuelve denuncias basadas en reglas globales y gestiona el estado de las unidades en la plataforma.",
 		},
 		audit: {
 			label: "Auditoría de seguridad",
@@ -53,6 +59,35 @@ export default {
 		revokeAllDescription:
 			"Esta acción revoca todas las concesiones activas. El servidor rechaza el cambio si retiraría el último administrador de acceso a la plataforma sin vencimiento.",
 		confirmRevokeAll: "Confirmar la revocación completa",
+	},
+	moderation: {
+		filterState: "Estado del caso",
+		allStates: "Todos los estados",
+		queue: "Casos de denuncias globales",
+		empty: "Ningún caso de denuncia global coincide con el filtro actual.",
+		untitled: "Unidad sin título",
+		reports: "Denuncias de este caso",
+		action: "Acción de gobernanza",
+		reason: "Motivo de gobernanza",
+		internalNote: "Nota interna (opcional)",
+		notePlaceholder: "Registra la justificación; es obligatorio al añadir una nota.",
+		submit: "Aplicar la acción",
+		succeeded: "Acción de gobernanza global completada",
+		confirmRemovalTitle: "¿Retirar este contenido de la plataforma?",
+		confirmRemovalDescription: insert(
+			"{{title}} se marcará como retirado en toda la plataforma.",
+			{ title: String },
+		),
+		confirmRemoval: "Retirar contenido",
+		reportCount: insert("{{count}} denuncias", { count: Number }),
+		moderationStatuses: {
+			approved: "Aprobado",
+			pending: "Pendiente de revisión",
+			removed: "Retirado",
+		},
+		targetingLocked: `Nuevas referencias de ${postTerms.plural} bloqueadas`,
+		targetingUnlocked: `Nuevas referencias de ${postTerms.plural} permitidas`,
+		openContent: "Abrir contenido",
 	},
 	audit: {
 		category: "Categoría del evento",

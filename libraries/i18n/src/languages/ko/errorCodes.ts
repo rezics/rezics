@@ -89,6 +89,8 @@ export default {
 	ModerationNoteRoleDuplicate: "내부 메모 한 개와 공개 알림 한 개만 추가할 수 있습니다.",
 	ReportAlreadySubmitted: "진행 중인 사건에 이 유닛을 이미 신고했습니다.",
 	ReportTargetRevisionUnavailable: "이 유닛에는 신고할 수 있는 리비전이 없습니다.",
+	ReportRuleUnavailable: "선택한 거버넌스 범위에 현재 적용 가능한 규칙이 없습니다.",
+	ReportRuleChanged: "선택한 규칙이 변경되었습니다. 규칙을 다시 선택한 뒤 제출하세요.",
 	EnforcementExpiryInvalid: "집행 만료일은 미래여야 합니다.",
 	EnforcementNotFound: "이 집행을 찾을 수 없습니다.",
 	EnforcementAlreadyRevoked: "이 집행은 이미 취소되었습니다.",

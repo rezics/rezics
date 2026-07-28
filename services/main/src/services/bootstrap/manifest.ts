@@ -108,9 +108,23 @@ export const BootstrapProfileIdValues: readonly string[] = BootstrapProfileManif
 	(profile) => profile.profileId,
 );
 
+export const BootstrapPlatformAccessManifest = [
+	{
+		profileId: BootstrapPlatformAdministratorProfile.profileId,
+		grantedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
+		capabilities: BootstrapPlatformAdministratorProfile.capabilities,
+	},
+	{
+		profileId: OfficialProfileIds.moderation,
+		grantedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
+		capabilities: ["platform.moderate"],
+	},
+] as const;
+
 export const OfficialRealmManifest = {
 	id: OfficialRealmUnitIds.community,
 	slug: "rezics",
+	authenticatedContributions: true,
 	localizations: [
 		{
 			language: "zh",
@@ -163,6 +177,7 @@ export const OfficialRealmManifest = {
 export const RezicsScoreRealmManifest = {
 	id: OfficialRealmUnitIds.score,
 	slug: "score",
+	authenticatedContributions: true,
 	localizations: [
 		{
 			language: "zh",
@@ -212,7 +227,166 @@ export const RezicsScoreRealmManifest = {
 	] as const,
 } as const;
 
-export const BootstrapRealmManifest = [OfficialRealmManifest, RezicsScoreRealmManifest] as const;
+function bootstrapRuleContent(
+	text: string,
+	keys: readonly [documentKey: string, blockKey: string, spanKey: string],
+) {
+	const [documentKey, blockKey, spanKey] = keys;
+	return createPortableTextDocument(
+		[
+			{
+				_type: "block",
+				_key: blockKey,
+				style: "normal",
+				markDefs: [],
+				children: [{ _type: "span", _key: spanKey, text, marks: [] }],
+			},
+		],
+		documentKey,
+	);
+}
+
+export const RezicsRuleRealmManifest = {
+	id: OfficialRealmUnitIds.rule,
+	slug: "rule",
+	authenticatedContributions: false,
+	localizations: [
+		{
+			language: "zh",
+			title: `${RezicsBrandName} Rule`,
+			summary: `${RezicsBrandName} 的全域內容檢舉規則來源。`,
+		},
+		{
+			language: "en",
+			title: `${RezicsBrandName} Rule`,
+			summary: `The rule source for platform-wide content reports on ${RezicsBrandName}.`,
+		},
+	],
+	ownerProfileId: OfficialProfileIds.community,
+	members: [
+		OfficialProfileIds.community,
+		OfficialProfileIds.editorial,
+		OfficialProfileIds.moderation,
+	],
+	access: [
+		{
+			profileId: OfficialProfileIds.editorial,
+			permissions: [
+				"unit.read",
+				"unit.update",
+				"unit.status.update",
+				"unit.access.manage",
+				"realm.settings.update",
+				"realm.members.read",
+				"realm.members.manage",
+				"realm.rules.update",
+			],
+		},
+		{
+			profileId: OfficialProfileIds.moderation,
+			permissions: ["unit.read", "realm.members.read"],
+		},
+	] as const,
+	rules: {
+		revisionId: "019b76da-a800-7350-8000-000000000001",
+		version: 1,
+		acknowledgementMode: "explicit",
+		requireOnJoin: false,
+		requireOnPost: false,
+		items: [
+			{
+				id: "019b76da-a800-7360-8000-000000000001",
+				localizations: [
+					{
+						language: "zh",
+						title: "垃圾內容與操縱行為",
+						content: bootstrapRuleContent(
+							"請檢舉大量重複、誤導、未經請求的宣傳，或企圖操縱互動與排序的內容。",
+							["b00759010001", "b00759010002", "b00759010003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Spam and manipulation",
+						content: bootstrapRuleContent(
+							"Report repetitive, deceptive, unsolicited promotional content or attempts to manipulate engagement and ranking.",
+							["b00759010004", "b00759010005", "b00759010006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000002",
+				localizations: [
+					{
+						language: "zh",
+						title: "騷擾與仇恨行為",
+						content: bootstrapRuleContent(
+							"請檢舉針對個人或群體的威脅、持續騷擾、羞辱或仇恨內容。",
+							["b00759020001", "b00759020002", "b00759020003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Harassment and hateful conduct",
+						content: bootstrapRuleContent(
+							"Report threats, sustained harassment, humiliation, or hateful content targeting a person or group.",
+							["b00759020004", "b00759020005", "b00759020006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000003",
+				localizations: [
+					{
+						language: "zh",
+						title: "危險或違法內容",
+						content: bootstrapRuleContent(
+							"請檢舉鼓勵嚴重傷害、剝削、違法交易，或可能立即危及他人的內容。",
+							["b00759030001", "b00759030002", "b00759030003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Dangerous or unlawful content",
+						content: bootstrapRuleContent(
+							"Report content that encourages serious harm, exploitation, unlawful trade, or an immediate danger to others.",
+							["b00759030004", "b00759030005", "b00759030006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000004",
+				localizations: [
+					{
+						language: "zh",
+						title: "其他平台規則違規",
+						content: bootstrapRuleContent(
+							"若內容違反其他全域規則，請選擇此項並在補充說明中指出具體問題。",
+							["b00759040001", "b00759040002", "b00759040003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Other platform-rule violation",
+						content: bootstrapRuleContent(
+							"Choose this rule for another platform-wide violation and identify the specific issue in the additional details.",
+							["b00759040004", "b00759040005", "b00759040006"],
+						),
+					},
+				],
+			},
+		],
+	},
+} as const;
+
+export const BootstrapRealmManifest = [
+	OfficialRealmManifest,
+	RezicsScoreRealmManifest,
+	RezicsRuleRealmManifest,
+] as const;
 
 export const OfficialZoneAvatarAsset = {
 	id: "019b76da-a800-7800-8000-000000000001",
@@ -548,6 +722,7 @@ export const BootstrapUnitIds = [
 	...SlugNamespaceManifest.map((namespace) => namespace.id),
 	...BootstrapProfileManifest.map((profile) => profile.profileId),
 	...BootstrapRealmManifest.map((realm) => realm.id),
+	...RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
 	...OfficialZoneManifest.map((zone) => zone.id),
 	...OfficialZoneManifest.map((zone) => zone.wikiPost.id),
 	...OfficialZoneManifest.map((zone) => zone.homePage.id),
@@ -562,6 +737,7 @@ export const ReservedBootstrapUuidv7s = [
 	...BootstrapAccountIds,
 	...OfficialZoneManifest.map((zone) => zone.homePage.structureId),
 	...OfficialZoneManifest.map((zone) => zone.navigation.id),
+	RezicsRuleRealmManifest.rules.revisionId,
 	OfficialZoneAvatarAsset.id,
 	OfficialZoneAvatarAsset.objectId,
 ] as const;

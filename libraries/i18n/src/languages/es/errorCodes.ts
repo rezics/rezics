@@ -96,6 +96,9 @@ export default {
 	ReportAlreadySubmitted: "Ya has denunciado esta unidad para el caso activo.",
 	ReportTargetRevisionUnavailable:
 		"Esta unidad no tiene ninguna revisión que se pueda denunciar.",
+	ReportRuleUnavailable: "El alcance de gobernanza seleccionado no tiene reglas vigentes.",
+	ReportRuleChanged:
+		"La regla seleccionada ha cambiado. Vuelve a elegir una regla antes de enviar.",
 	EnforcementExpiryInvalid: "El vencimiento de la medida debe estar en el futuro.",
 	EnforcementNotFound: "No se ha encontrado esta medida.",
 	EnforcementAlreadyRevoked: "Esta medida ya se ha revocado.",

@@ -5,7 +5,7 @@ import { TranslationBoundary } from "@/i18n/translation-boundary";
 
 export default function ConsoleLayout({ children }: { readonly children: ReactNode }) {
 	return (
-		<TranslationBoundary namespaces={["console", "governance"]}>
+		<TranslationBoundary namespaces={["console", "errors", "governance", "realms", "reports"]}>
 			<ConsoleWorkspace>{children}</ConsoleWorkspace>
 		</TranslationBoundary>
 	);

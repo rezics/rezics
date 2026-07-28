@@ -4,6 +4,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
 	title: "管理主控台",
@@ -16,6 +17,10 @@ export default {
 		access: {
 			label: "平台存取權",
 			description: "檢視或管理使用者獲得的平台級權限，以及每筆授權的期限與來源。",
+		},
+		moderation: {
+			label: "全域內容治理",
+			description: "處理依全域規則提交的檢舉，並管理條目的平台級狀態。",
 		},
 		audit: {
 			label: "安全稽核",
@@ -51,6 +56,34 @@ export default {
 		revokeAllDescription:
 			"這項變更會撤銷每一筆有效授權。若因此移除最後一位無期限的平台存取權管理者，伺服器會拒絕變更。",
 		confirmRevokeAll: "確認全部撤銷",
+	},
+	moderation: {
+		filterState: "案件狀態",
+		allStates: "所有狀態",
+		queue: "全域檢舉案件",
+		empty: "沒有符合目前條件的全域檢舉案件。",
+		untitled: "未命名條目",
+		reports: "案件中的檢舉",
+		action: "治理動作",
+		reason: "治理原因",
+		internalNote: "內部註解（選填）",
+		notePlaceholder: "記錄判斷依據；選擇新增註解時必填。",
+		submit: "提交治理動作",
+		succeeded: "全域治理動作已完成",
+		confirmRemovalTitle: "要從平台移除此內容嗎？",
+		confirmRemovalDescription: insert("「{{title}}」將在平台層級標記為已移除。", {
+			title: String,
+		}),
+		confirmRemoval: "移除內容",
+		reportCount: insert("{{count}} 則檢舉", { count: Number }),
+		moderationStatuses: {
+			approved: "已核准",
+			pending: "待審查",
+			removed: "已移除",
+		},
+		targetingLocked: `已禁止新的${postTerms.label}指向`,
+		targetingUnlocked: `允許新的${postTerms.label}指向`,
+		openContent: "開啟內容",
 	},
 	audit: {
 		category: "事件類別",

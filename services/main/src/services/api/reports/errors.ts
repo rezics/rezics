@@ -21,8 +21,22 @@ export class ReportTargetRevisionUnavailable extends Data.TaggedError(
 	readonly message = "The reported Unit does not have a current revision";
 }
 
+export class ReportRuleUnavailable extends Data.TaggedError("ReportRuleUnavailable") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ReportRuleUnavailable.status;
+	readonly message = "The selected report destination does not have a current rule set";
+}
+
+export class ReportRuleChanged extends Data.TaggedError("ReportRuleChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ReportRuleChanged.status;
+	readonly message = "The selected report rule is not part of the current rule revision";
+}
+
 export const ReportErrors = [
 	ReportRealmMismatch,
 	ReportAlreadySubmitted,
 	ReportTargetRevisionUnavailable,
+	ReportRuleUnavailable,
+	ReportRuleChanged,
 ] as const;

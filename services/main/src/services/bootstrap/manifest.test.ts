@@ -5,12 +5,14 @@ import { generateBootstrapPassword, parseBootstrapCredentialMode } from "./crede
 import {
 	assertBootstrapManifest,
 	BootstrapEpochUnixMilliseconds,
+	BootstrapPlatformAccessManifest,
 	BootstrapProfileManifest,
 	BootstrapRealmManifest,
 	BootstrapPlatformAdministratorProfile,
 	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
+	RezicsRuleRealmManifest,
 	RezicsScoreRealmManifest,
 	ReservedBootstrapUuidv7s,
 	SlugNamespaceManifest,
@@ -70,6 +72,9 @@ describe("database bootstrap manifest", () => {
 		);
 		expect(new Set(BootstrapPlatformAdministratorProfile.capabilities).size).toBe(
 			BootstrapPlatformAdministratorProfile.capabilities.length,
+		);
+		expect(BootstrapPlatformAccessManifest).toContainEqual(
+			expect.objectContaining({ capabilities: ["platform.moderate"] }),
 		);
 	});
 
@@ -184,7 +189,11 @@ describe("database bootstrap manifest", () => {
 	});
 
 	it("bootstraps REZICS Score as a distinct fixed-identity Realm", () => {
-		expect(BootstrapRealmManifest).toEqual([OfficialRealmManifest, RezicsScoreRealmManifest]);
+		expect(BootstrapRealmManifest).toEqual([
+			OfficialRealmManifest,
+			RezicsScoreRealmManifest,
+			RezicsRuleRealmManifest,
+		]);
 		expect(RezicsScoreRealmManifest.id).toBe("019b76da-a800-7300-8000-000000000002");
 		expect(RezicsScoreRealmManifest.slug).toBe("score");
 		expect(RezicsScoreRealmManifest.localizations).toEqual([
@@ -192,6 +201,22 @@ describe("database bootstrap manifest", () => {
 			expect.objectContaining({ language: "en", title: "REZICS Score" }),
 		]);
 		expect(RezicsScoreRealmManifest.id).not.toBe(OfficialRealmManifest.id);
+	});
+
+	it("bootstraps REZICS Rule as a non-contribution global rule source", () => {
+		expect(RezicsRuleRealmManifest.id).toBe("019b76da-a800-7300-8000-000000000003");
+		expect(RezicsRuleRealmManifest.slug).toBe("rule");
+		expect(RezicsRuleRealmManifest.authenticatedContributions).toBe(false);
+		expect(RezicsRuleRealmManifest.localizations).toEqual([
+			expect.objectContaining({ language: "zh", title: "REZICS Rule" }),
+			expect.objectContaining({ language: "en", title: "REZICS Rule" }),
+		]);
+		expect(RezicsRuleRealmManifest.rules.items).toHaveLength(4);
+		expect(
+			RezicsRuleRealmManifest.access.find(
+				(value) => value.profileId === BootstrapPlatformAccessManifest[1].profileId,
+			)?.permissions,
+		).not.toContain("realm.units.moderate");
 	});
 
 	it("generates high-entropy URL-safe passwords without persisting them in the manifest", () => {

@@ -85,6 +85,8 @@ export default {
 	ModerationNoteRoleDuplicate: "内部注解和公开通知均最多添加一则。",
 	ReportAlreadySubmitted: "你已为当前案件举报过这个条目。",
 	ReportTargetRevisionUnavailable: "此条目目前没有可供举报的修订。",
+	ReportRuleUnavailable: "所选治理范围目前没有可用规则。",
+	ReportRuleChanged: "所选规则已更新，请重新选择后再提交。",
 	EnforcementExpiryInvalid: "管理措施的过期时间必须晚于当前时间。",
 	EnforcementNotFound: "找不到这项管理措施。",
 	EnforcementAlreadyRevoked: "这项管理措施已被撤销。",

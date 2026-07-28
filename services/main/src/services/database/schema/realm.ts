@@ -92,6 +92,7 @@ export const realmRuleRevision = pgTable(
 	},
 	(table) => [
 		unique("realm_rule_revision_realm_version_key").on(table.realmId, table.version),
+		unique("realm_rule_revision_realm_id_key").on(table.realmId, table.id),
 		index("realm_rule_revision_realm_published_idx").on(table.realmId, table.version.desc()),
 		index("realm_rule_revision_created_by_idx").on(table.createdByProfileId),
 		check("realm_rule_revision_version_check", sql`${table.version} > 0`),
@@ -111,6 +112,7 @@ export const realmRule = pgTable(
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
+		unique("realm_rule_id_revision_key").on(table.id, table.revisionId),
 		index("realm_rule_revision_position_idx").on(table.revisionId, table.position, table.id),
 	],
 );

@@ -42,7 +42,7 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
-	report,
+	realmUnitReport,
 	realmScoreContext,
 	realmTagContext,
 	realmTagVote,
@@ -1629,11 +1629,11 @@ export default new Elysia({ prefix: "/realms" })
 					postTargetingLocked: realmUnit.postTargetingLocked,
 					openReportCount: sql<number>`(
 						select count(*)::int
-						from ${report}
+						from ${realmUnitReport}
 						inner join ${moderationCase}
-							on ${moderationCase.id} = ${report.caseId}
-						where ${report.realmId} = ${realmUnit.realmId}
-							and ${report.unitId} = ${realmUnit.unitId}
+							on ${moderationCase.id} = ${realmUnitReport.caseId}
+						where ${realmUnitReport.realmId} = ${realmUnit.realmId}
+							and ${realmUnitReport.unitId} = ${realmUnit.unitId}
 							and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
 					)`,
 					moderationStatus: unit.moderationStatus,
@@ -1649,11 +1649,11 @@ export default new Elysia({ prefix: "/realms" })
 						query.reported
 							? sql`exists (
 									select 1
-									from ${report}
+									from ${realmUnitReport}
 									inner join ${moderationCase}
-										on ${moderationCase.id} = ${report.caseId}
-									where ${report.realmId} = ${realmUnit.realmId}
-										and ${report.unitId} = ${realmUnit.unitId}
+										on ${moderationCase.id} = ${realmUnitReport.caseId}
+									where ${realmUnitReport.realmId} = ${realmUnit.realmId}
+										and ${realmUnitReport.unitId} = ${realmUnit.unitId}
 										and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
 								)`
 							: undefined,
@@ -1884,8 +1884,8 @@ export default new Elysia({ prefix: "/realms" })
 											),
 											sql`exists (
 													select 1
-													from ${report}
-													where ${report.caseId} = ${moderationCase.id}
+													from ${realmUnitReport}
+													where ${realmUnitReport.caseId} = ${moderationCase.id}
 												)`,
 										)
 									: notInArray(moderationCase.state, [
@@ -1940,11 +1940,11 @@ export default new Elysia({ prefix: "/realms" })
 						postTargetingLocked: realmUnit.postTargetingLocked,
 						openReportCount: sql<number>`(
 							select count(*)::int
-							from ${report}
+							from ${realmUnitReport}
 							inner join ${moderationCase}
-								on ${moderationCase.id} = ${report.caseId}
-							where ${report.realmId} = ${realmUnit.realmId}
-								and ${report.unitId} = ${realmUnit.unitId}
+								on ${moderationCase.id} = ${realmUnitReport.caseId}
+							where ${realmUnitReport.realmId} = ${realmUnit.realmId}
+								and ${realmUnitReport.unitId} = ${realmUnit.unitId}
 								and ${inArray(moderationCase.state, ActiveReportCaseStateValues)}
 						)`,
 						updatedAt: realmUnit.updatedAt,

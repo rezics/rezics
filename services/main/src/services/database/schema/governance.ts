@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 import {
 	boolean,
 	check,
@@ -13,7 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { realm, realmUnit, realmUnitStatus } from "./realm";
+import { realm, realmRule, realmRuleRevision, realmUnit, realmUnitStatus } from "./realm";
 import {
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
@@ -22,7 +23,6 @@ import {
 	ModerationActionKindValues,
 	ModerationCaseStateValues,
 	ModerationTargetKindValues,
-	ReportReasonValues,
 	toEnumValues,
 } from "./contract-values";
 import {
@@ -37,7 +37,6 @@ import { moderationStatus, profile, unit } from "./core";
 import { unitRevision } from "./history";
 import { post } from "./post";
 
-export const reportReason = pgEnum("report_reason", toEnumValues(ReportReasonValues));
 export const governanceReasonCode = pgEnum(
 	"governance_reason_code",
 	toEnumValues(GovernanceReasonCodeValues),
@@ -139,8 +138,8 @@ export const moderationCase = pgTable(
 	],
 );
 
-export const report = pgTable(
-	"report",
+export const realmUnitReport = pgTable(
+	"realm_unit_report",
 	{
 		id: createUuidv7PrimaryKey(),
 		caseId: uuid()
@@ -155,7 +154,10 @@ export const report = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		reason: reportReason().notNull(),
+		ruleRevisionId: uuid().notNull(),
+		ruleId: uuid()
+			.notNull()
+			.references(() => realmRule.id, { onDelete: "restrict" }),
 		/** Reporter-authored evidence, stored verbatim without content-language metadata. */
 		details: text(),
 		reportedRevisionId: uuid().notNull(),
@@ -165,38 +167,115 @@ export const report = pgTable(
 		foreignKey({
 			columns: [table.realmId, table.unitId],
 			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
-			name: "report_realm_unit_fkey",
+			name: "realm_unit_report_realm_unit_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.realmId, table.ruleRevisionId],
+			foreignColumns: [realmRuleRevision.realmId, realmRuleRevision.id],
+			name: "realm_unit_report_rule_revision_realm_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.ruleId, table.ruleRevisionId],
+			foreignColumns: [realmRule.id, realmRule.revisionId],
+			name: "realm_unit_report_rule_revision_fkey",
 		}).onDelete("restrict"),
 		foreignKey({
 			columns: [table.reportedRevisionId, table.unitId],
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
-			name: "report_revision_unit_fkey",
+			name: "realm_unit_report_revision_unit_fkey",
 		}).onDelete("restrict"),
-		unique("report_case_reporter_key").on(table.caseId, table.reporterProfileId),
-		index("report_realm_created_at_idx").on(
+		unique("realm_unit_report_case_reporter_key").on(table.caseId, table.reporterProfileId),
+		index("realm_unit_report_realm_created_at_idx").on(
 			table.realmId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
-		index("report_realm_unit_created_at_idx").on(
+		index("realm_unit_report_realm_unit_created_at_idx").on(
 			table.realmId,
 			table.unitId,
 			table.createdAt.desc(),
 		),
-		index("report_unit_idx").on(table.unitId),
-		index("report_case_idx").on(table.caseId),
-		index("report_reporter_created_at_idx").on(
+		index("realm_unit_report_unit_idx").on(table.unitId),
+		index("realm_unit_report_case_idx").on(table.caseId),
+		index("realm_unit_report_rule_idx").on(table.ruleId),
+		index("realm_unit_report_reporter_created_at_idx").on(
 			table.reporterProfileId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
 		check(
-			"report_details_not_blank",
+			"realm_unit_report_details_not_blank",
 			sql`${table.details} is null or btrim(${table.details}) <> ''`,
 		),
 		check(
-			"report_details_length",
+			"realm_unit_report_details_length",
 			sql`${table.details} is null or char_length(${table.details}) <= 2000`,
+		),
+	],
+);
+
+export const platformUnitReport = pgTable(
+	"platform_unit_report",
+	{
+		id: createUuidv7PrimaryKey(),
+		caseId: uuid()
+			.notNull()
+			.references(() => moderationCase.id, { onDelete: "restrict" }),
+		reporterProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
+		ruleSourceRealmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "restrict" }),
+		ruleRevisionId: uuid().notNull(),
+		ruleId: uuid()
+			.notNull()
+			.references(() => realmRule.id, { onDelete: "restrict" }),
+		/** Reporter-authored evidence, stored verbatim without content-language metadata. */
+		details: text(),
+		reportedRevisionId: uuid().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.ruleSourceRealmId, table.ruleRevisionId],
+			foreignColumns: [realmRuleRevision.realmId, realmRuleRevision.id],
+			name: "platform_unit_report_rule_revision_realm_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.ruleId, table.ruleRevisionId],
+			foreignColumns: [realmRule.id, realmRule.revisionId],
+			name: "platform_unit_report_rule_revision_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.reportedRevisionId, table.unitId],
+			foreignColumns: [unitRevision.id, unitRevision.unitId],
+			name: "platform_unit_report_revision_unit_fkey",
+		}).onDelete("restrict"),
+		unique("platform_unit_report_case_reporter_key").on(table.caseId, table.reporterProfileId),
+		index("platform_unit_report_created_at_idx").on(table.createdAt.desc(), table.id.desc()),
+		index("platform_unit_report_unit_created_at_idx").on(table.unitId, table.createdAt.desc()),
+		index("platform_unit_report_case_idx").on(table.caseId),
+		index("platform_unit_report_rule_idx").on(table.ruleId),
+		index("platform_unit_report_reporter_created_at_idx").on(
+			table.reporterProfileId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		check(
+			"platform_unit_report_details_not_blank",
+			sql`${table.details} is null or btrim(${table.details}) <> ''`,
+		),
+		check(
+			"platform_unit_report_details_length",
+			sql`${table.details} is null or char_length(${table.details}) <= 2000`,
+		),
+		check(
+			"platform_unit_report_rule_source_check",
+			sql`${table.ruleSourceRealmId} = ${OfficialRealmUnitIds.rule}::uuid`,
 		),
 	],
 );

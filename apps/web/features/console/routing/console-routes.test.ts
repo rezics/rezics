@@ -5,11 +5,13 @@ import { consoleSectionHref, parseConsoleSection } from "./console-routes";
 describe("console routes", () => {
 	it("builds section routes", () => {
 		expect(consoleSectionHref("access")).toBe("/console/access");
+		expect(consoleSectionHref("moderation")).toBe("/console/moderation");
 		expect(consoleSectionHref("audit")).toBe("/console/audit");
 	});
 
 	it.each([
 		["/console/access", "access"],
+		["/console/moderation", "moderation"],
 		["/console/audit/", "audit"],
 		["/console", undefined],
 		["/console/access/nested", undefined],

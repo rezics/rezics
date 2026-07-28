@@ -8,6 +8,7 @@ import {
 	ActiveReportCaseStateValues,
 	type ModerationCaseStateValues,
 	type ModerationTargetKindValues,
+	type PlatformUnitModerationCommandValues,
 	type RealmMemberStateValues,
 	type RealmModerationCommandValues,
 	type RealmUnitStatusValues,
@@ -20,6 +21,7 @@ export type RealmModerationCommand = (typeof RealmModerationCommandValues)[numbe
 export type RealmMemberState = (typeof RealmMemberStateValues)[number];
 export type ModerationCaseState = (typeof ModerationCaseStateValues)[number];
 export type UnitModerationStatus = "approved" | "pending" | "removed";
+export type PlatformUnitModerationCommand = (typeof PlatformUnitModerationCommandValues)[number];
 
 export function isActiveReportCaseState(state: ModerationCaseState): boolean {
 	return ActiveReportCaseStateValues.some((candidate) => candidate === state);
@@ -45,6 +47,28 @@ export function getRealmUnitModerationCommands(
 	const reportCommands: readonly RealmModerationCommand[] = hasOpenReports ? ["dismiss"] : [];
 	return [
 		...RealmUnitStateCommands[status],
+		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
+		...reportCommands,
+		"note",
+	];
+}
+
+const PlatformUnitStateCommands = {
+	approved: ["remove"],
+	pending: ["approve", "remove"],
+	removed: ["restore"],
+} as const satisfies Record<UnitModerationStatus, readonly PlatformUnitModerationCommand[]>;
+
+export function getPlatformUnitModerationCommands(
+	status: UnitModerationStatus,
+	postTargetingLocked: boolean,
+	hasOpenReports = false,
+): readonly PlatformUnitModerationCommand[] {
+	const reportCommands: readonly PlatformUnitModerationCommand[] = hasOpenReports
+		? ["dismiss"]
+		: [];
+	return [
+		...PlatformUnitStateCommands[status],
 		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
 		...reportCommands,
 		"note",

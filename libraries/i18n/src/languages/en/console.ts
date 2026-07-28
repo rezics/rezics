@@ -4,6 +4,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: postTerms } = enTerminology.post;
 
 export default {
 	title: "Management console",
@@ -18,6 +19,11 @@ export default {
 			label: "Platform access",
 			description:
 				"Inspect or manage platform capabilities granted to Profiles, including each grant's expiry and provenance.",
+		},
+		moderation: {
+			label: "Global content governance",
+			description:
+				"Resolve reports submitted under global rules and manage platform-level Unit state.",
 		},
 		audit: {
 			label: "Security audit",
@@ -53,6 +59,35 @@ export default {
 		revokeAllDescription:
 			"This revokes every active grant. The server rejects the change if it would remove the final non-expiring platform access manager.",
 		confirmRevokeAll: "Confirm full revocation",
+	},
+	moderation: {
+		filterState: "Case state",
+		allStates: "All states",
+		queue: "Global report cases",
+		empty: "No global report cases match the current filter.",
+		untitled: "Untitled Unit",
+		reports: "Reports in this case",
+		action: "Governance action",
+		reason: "Governance reason",
+		internalNote: "Internal note (optional)",
+		notePlaceholder: "Record the rationale; required when adding a note.",
+		submit: "Apply governance action",
+		succeeded: "Global governance action completed",
+		confirmRemovalTitle: "Remove this content from the platform?",
+		confirmRemovalDescription: insert(
+			"{{title}} will be marked as removed at platform level.",
+			{ title: String },
+		),
+		confirmRemoval: "Remove content",
+		reportCount: insert("{{count}} reports", { count: Number }),
+		moderationStatuses: {
+			approved: "Approved",
+			pending: "Pending review",
+			removed: "Removed",
+		},
+		targetingLocked: `New ${postTerms.label} targeting locked`,
+		targetingUnlocked: `New ${postTerms.label} targeting allowed`,
+		openContent: "Open content",
 	},
 	audit: {
 		category: "Event category",

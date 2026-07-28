@@ -91,6 +91,8 @@ export default {
 	ModerationNoteRoleDuplicate: "内部メモは最大1件、公示通知も最大1件まで追加できます。",
 	ReportAlreadySubmitted: "進行中のケースについて、このユニットはすでに報告済みです。",
 	ReportTargetRevisionUnavailable: "このユニットには報告できるリビジョンがありません。",
+	ReportRuleUnavailable: "選択したガバナンスの範囲には現在のルールがありません。",
+	ReportRuleChanged: "選択したルールが更新されました。再度選択してから送信してください。",
 	EnforcementExpiryInvalid: "執行の有効期限は未来でなければなりません。",
 	EnforcementNotFound: "この執行は見つかりませんでした。",
 	EnforcementAlreadyRevoked: "この執行はすでに取り消されています。",

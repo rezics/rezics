@@ -4,6 +4,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: postTerms } = jaTerminology.post;
 
 export default {
 	title: "管理コンソール",
@@ -18,6 +19,11 @@ export default {
 			label: "プラットフォームアクセス",
 			description:
 				"プロファイルに付与されたプラットフォーム機能を確認または管理します。各付与の期限や由来を含みます。",
+		},
+		moderation: {
+			label: "グローバルコンテンツガバナンス",
+			description:
+				"グローバルルールに基づく報告を処理し、ユニットのプラットフォーム全体の状態を管理します。",
 		},
 		audit: {
 			label: "セキュリティ監査",
@@ -53,6 +59,35 @@ export default {
 		revokeAllDescription:
 			"これにより、すべてのアクティブな付与が取り消されます。最後の期限なしプラットフォームアクセス管理者を削除する場合、サーバーは変更を拒否します。",
 		confirmRevokeAll: "完全な取り消しを確認",
+	},
+	moderation: {
+		filterState: "ケースの状態",
+		allStates: "すべての状態",
+		queue: "グローバル報告ケース",
+		empty: "現在のフィルターに一致するグローバル報告ケースはありません。",
+		untitled: "無題のユニット",
+		reports: "このケースの報告",
+		action: "ガバナンス操作",
+		reason: "ガバナンス理由",
+		internalNote: "内部メモ（任意）",
+		notePlaceholder: "判断理由を記録します。メモを追加する場合は必須です。",
+		submit: "ガバナンス操作を実行",
+		succeeded: "グローバルガバナンス操作が完了しました",
+		confirmRemovalTitle: "このコンテンツをプラットフォームから削除しますか？",
+		confirmRemovalDescription: insert(
+			"{{title}} はプラットフォーム全体で削除済みとして扱われます。",
+			{ title: String },
+		),
+		confirmRemoval: "コンテンツを削除",
+		reportCount: insert("報告 {{count}} 件", { count: Number }),
+		moderationStatuses: {
+			approved: "承認済み",
+			pending: "確認待ち",
+			removed: "削除済み",
+		},
+		targetingLocked: `新しい${postTerms.label}からの参照を禁止`,
+		targetingUnlocked: `新しい${postTerms.label}からの参照を許可`,
+		openContent: "コンテンツを開く",
 	},
 	audit: {
 		category: "イベントカテゴリ",

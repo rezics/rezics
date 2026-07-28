@@ -21,6 +21,8 @@ import {
 	profilePreference,
 	realm,
 	realmMember,
+	realmRule,
+	realmRuleRevision,
 	realmUnit,
 	unit,
 	unitAccessGrant,
@@ -84,12 +86,13 @@ import {
 	BootstrapProfileIdValues,
 	BootstrapProfileManifest,
 	BootstrapRealmManifest,
-	BootstrapPlatformAdministratorProfile,
+	BootstrapPlatformAccessManifest,
 	BootstrapUnitIds,
 	OfficialProfileIds,
 	OfficialRealmManifest,
 	OfficialZoneAvatarAsset,
 	OfficialZoneManifest,
+	RezicsRuleRealmManifest,
 	RezicsScoreRealmManifest,
 	SlugNamespaceManifest,
 	TopLevelSlugNamespaceUnitIds,
@@ -544,67 +547,65 @@ async function ensureBootstrapProfiles(
 async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Promise<void> {
 	await lockPlatformAccess(tx);
 	const createdAt = bootstrapEpoch();
-	for (const capability of BootstrapPlatformAdministratorProfile.capabilities) {
-		const [current] = await tx
-			.select({
-				id: platformCapabilityGrant.id,
-				expiresAt: platformCapabilityGrant.expiresAt,
-			})
-			.from(platformCapabilityGrant)
-			.where(
-				and(
-					eq(
-						platformCapabilityGrant.profileId,
-						BootstrapPlatformAdministratorProfile.profileId,
+	for (const access of BootstrapPlatformAccessManifest)
+		for (const capability of access.capabilities) {
+			const [current] = await tx
+				.select({
+					id: platformCapabilityGrant.id,
+					expiresAt: platformCapabilityGrant.expiresAt,
+				})
+				.from(platformCapabilityGrant)
+				.where(
+					and(
+						eq(platformCapabilityGrant.profileId, access.profileId),
+						eq(platformCapabilityGrant.capability, capability),
+						isNull(platformCapabilityGrant.revokedAt),
 					),
-					eq(platformCapabilityGrant.capability, capability),
-					isNull(platformCapabilityGrant.revokedAt),
-				),
-			)
-			.limit(1);
-		if (current?.expiresAt === null) continue;
-		if (current)
-			await tx
-				.update(platformCapabilityGrant)
-				.set({
-					revokedAt: createdAt,
-					revokedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
+				)
+				.limit(1);
+			if (current?.expiresAt === null) continue;
+			if (current)
+				await tx
+					.update(platformCapabilityGrant)
+					.set({
+						revokedAt: createdAt,
+						revokedByProfileId: access.grantedByProfileId,
+						updatedAt: createdAt,
+					})
+					.where(eq(platformCapabilityGrant.id, current.id));
+			const [created] = await tx
+				.insert(platformCapabilityGrant)
+				.values({
+					profileId: access.profileId,
+					capability,
+					grantedByProfileId: access.grantedByProfileId,
+					createdAt,
 					updatedAt: createdAt,
 				})
-				.where(eq(platformCapabilityGrant.id, current.id));
-		const [created] = await tx
-			.insert(platformCapabilityGrant)
-			.values({
-				profileId: BootstrapPlatformAdministratorProfile.profileId,
-				capability,
-				grantedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
+				.returning({ id: platformCapabilityGrant.id });
+			await recordAuditEvent(tx, {
+				category: "system_event",
+				outcome: "succeeded",
+				actor: {
+					kind: "profile",
+					profileId: access.grantedByProfileId,
+					credentialKind: "bootstrap",
+				},
+				authority: { kind: "platform" },
+				action: "platform.access.bootstrap",
+				target: {
+					kind: "profile",
+					id: access.profileId,
+				},
+				details: {
+					capability,
+					grantId: created?.id,
+					replacedGrantId: current?.id,
+					source: "bootstrap",
+				},
 				createdAt,
-				updatedAt: createdAt,
-			})
-			.returning({ id: platformCapabilityGrant.id });
-		await recordAuditEvent(tx, {
-			category: "system_event",
-			outcome: "succeeded",
-			actor: {
-				kind: "profile",
-				profileId: BootstrapPlatformAdministratorProfile.profileId,
-				credentialKind: "bootstrap",
-			},
-			authority: { kind: "platform" },
-			action: "platform.access.bootstrap",
-			target: {
-				kind: "profile",
-				id: BootstrapPlatformAdministratorProfile.profileId,
-			},
-			details: {
-				capability,
-				grantId: created?.id,
-				replacedGrantId: current?.id,
-				source: "bootstrap",
-			},
-			createdAt,
-		});
-	}
+			});
+		}
 }
 
 async function prepareCredential(): Promise<PreparedCredential> {
@@ -714,7 +715,9 @@ async function ensureBootstrapRealm(
 			changed = true;
 		}
 	}
-	for (const permission of RealmUnitCreatePermissionValues) {
+	for (const permission of value.authenticatedContributions
+		? RealmUnitCreatePermissionValues
+		: []) {
 		const [stored] = await tx
 			.select({ id: unitAccessGrant.id })
 			.from(unitAccessGrant)
@@ -793,6 +796,7 @@ async function ensureBootstrapRealm(
 			state: "active",
 		});
 	}
+	if ("rules" in value) changed = (await ensureBootstrapRealmRules(tx, value)) || changed;
 	if (changed)
 		await recordUnitRevision(tx, {
 			unitId: value.id,
@@ -800,6 +804,110 @@ async function ensureBootstrapRealm(
 			event: "create",
 			message: "Bootstrap official Realm",
 		});
+}
+
+async function ensureBootstrapRealmRules(
+	tx: DatabaseTransaction,
+	value: typeof RezicsRuleRealmManifest,
+): Promise<boolean> {
+	const createdAt = bootstrapEpoch();
+	const definition = value.rules;
+	let changed = false;
+	const insertedRevision = await tx
+		.insert(realmRuleRevision)
+		.values({
+			id: definition.revisionId,
+			realmId: value.id,
+			version: definition.version,
+			acknowledgementMode: definition.acknowledgementMode,
+			requireOnJoin: definition.requireOnJoin,
+			requireOnPost: definition.requireOnPost,
+			createdByProfileId: value.ownerProfileId,
+			publishedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ id: realmRuleRevision.id });
+	changed ||= insertedRevision.length > 0;
+	const [storedRevision] = await tx
+		.select({
+			id: realmRuleRevision.id,
+			realmId: realmRuleRevision.realmId,
+			version: realmRuleRevision.version,
+			acknowledgementMode: realmRuleRevision.acknowledgementMode,
+			requireOnJoin: realmRuleRevision.requireOnJoin,
+			requireOnPost: realmRuleRevision.requireOnPost,
+			createdByProfileId: realmRuleRevision.createdByProfileId,
+		})
+		.from(realmRuleRevision)
+		.where(eq(realmRuleRevision.id, definition.revisionId))
+		.limit(1);
+	assertFields("REZICS Rule revision", storedRevision, {
+		id: definition.revisionId,
+		realmId: value.id,
+		version: definition.version,
+		acknowledgementMode: definition.acknowledgementMode,
+		requireOnJoin: definition.requireOnJoin,
+		requireOnPost: definition.requireOnPost,
+		createdByProfileId: value.ownerProfileId,
+	});
+
+	for (const [position, ruleDefinition] of definition.items.entries()) {
+		const createdRuleUnit = await insertUnitIfMissing(tx, {
+			id: ruleDefinition.id,
+			kind: "realm_rule",
+			status: "published",
+			visibility: "unlisted",
+			publishedAt: createdAt,
+			createdAt,
+			updatedAt: createdAt,
+			statusActor: { kind: "system" },
+		});
+		let ruleChanged = createdRuleUnit !== null;
+		for (const [localizationIndex, localization] of ruleDefinition.localizations.entries())
+			ruleChanged =
+				(await ensureLocalization(tx, {
+					unitId: ruleDefinition.id,
+					position: fractionalPositionAt(localizationIndex),
+					contentStatus: "published",
+					...localization,
+				})) || ruleChanged;
+		ruleChanged =
+			(await ensureOwnership(tx, ruleDefinition.id, value.ownerProfileId)) || ruleChanged;
+		const insertedRule = await tx
+			.insert(realmRule)
+			.values({
+				id: ruleDefinition.id,
+				revisionId: definition.revisionId,
+				position,
+				createdAt,
+			})
+			.onConflictDoNothing()
+			.returning({ id: realmRule.id });
+		ruleChanged ||= insertedRule.length > 0;
+		const [storedRule] = await tx
+			.select({
+				id: realmRule.id,
+				revisionId: realmRule.revisionId,
+				position: realmRule.position,
+			})
+			.from(realmRule)
+			.where(eq(realmRule.id, ruleDefinition.id))
+			.limit(1);
+		assertFields(`REZICS Rule item ${position + 1}`, storedRule, {
+			id: ruleDefinition.id,
+			revisionId: definition.revisionId,
+			position,
+		});
+		if (ruleChanged)
+			await recordUnitRevision(tx, {
+				unitId: ruleDefinition.id,
+				actorProfileId: value.ownerProfileId,
+				event: createdRuleUnit ? "create" : "update",
+				message: "Bootstrap REZICS Rule item",
+			});
+		changed ||= ruleChanged;
+	}
+	return changed;
 }
 
 async function ensureScoreContextProfileDefaults(tx: DatabaseTransaction): Promise<void> {
@@ -1418,6 +1526,20 @@ async function isBootstrapReady(): Promise<boolean> {
 				...localization,
 			})),
 		),
+		...RezicsRuleRealmManifest.rules.items.flatMap((rule) =>
+			rule.localizations.map((localization, index) => ({
+				unitId: rule.id,
+				position: fractionalPositionAt(index),
+				summary: null,
+				avatarType: null,
+				avatarAssetId: null,
+				avatarEmoji: null,
+				avatarIconPrefix: null,
+				avatarIconName: null,
+				contentStatus: "published" as const,
+				...localization,
+			})),
+		),
 		...OfficialZoneManifest.flatMap((officialZone) =>
 			officialZone.localizations.map((localization, index) => ({
 				unitId: officialZone.id,
@@ -1469,6 +1591,8 @@ async function isBootstrapReady(): Promise<boolean> {
 		bootstrapProfileOwners,
 		bootstrapPlatformAccess,
 		officialRealms,
+		bootstrapRuleRevision,
+		bootstrapRules,
 		officialZones,
 		officialZoneSearchFeatures,
 		officialZoneDocks,
@@ -1527,6 +1651,7 @@ async function isBootstrapReady(): Promise<boolean> {
 			),
 		database
 			.select({
+				profileId: platformCapabilityGrant.profileId,
 				capability: platformCapabilityGrant.capability,
 				grantedByProfileId: platformCapabilityGrant.grantedByProfileId,
 				expiresAt: platformCapabilityGrant.expiresAt,
@@ -1536,13 +1661,10 @@ async function isBootstrapReady(): Promise<boolean> {
 			.from(platformCapabilityGrant)
 			.where(
 				and(
-					eq(
+					inArray(
 						platformCapabilityGrant.profileId,
-						BootstrapPlatformAdministratorProfile.profileId,
+						BootstrapPlatformAccessManifest.map((access) => access.profileId),
 					),
-					inArray(platformCapabilityGrant.capability, [
-						...BootstrapPlatformAdministratorProfile.capabilities,
-					]),
 					isNull(platformCapabilityGrant.revokedAt),
 				),
 			),
@@ -1553,6 +1675,28 @@ async function isBootstrapReady(): Promise<boolean> {
 				inArray(
 					realm.id,
 					BootstrapRealmManifest.map((value) => value.id),
+				),
+			),
+		database
+			.select({
+				id: realmRuleRevision.id,
+				realmId: realmRuleRevision.realmId,
+				version: realmRuleRevision.version,
+			})
+			.from(realmRuleRevision)
+			.where(eq(realmRuleRevision.id, RezicsRuleRealmManifest.rules.revisionId))
+			.limit(1),
+		database
+			.select({
+				id: realmRule.id,
+				revisionId: realmRule.revisionId,
+				position: realmRule.position,
+			})
+			.from(realmRule)
+			.where(
+				inArray(
+					realmRule.id,
+					RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
 				),
 			),
 		database
@@ -1678,6 +1822,7 @@ async function isBootstrapReady(): Promise<boolean> {
 						(bootstrapProfile) => bootstrapProfile.profileId,
 					),
 					...BootstrapRealmManifest.map((bootstrapRealm) => bootstrapRealm.id),
+					...RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.wikiPost.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.homePage.id),
@@ -1727,21 +1872,37 @@ async function isBootstrapReady(): Promise<boolean> {
 		profileCount[0]?.value === BootstrapProfileIdValues.length &&
 		bootstrapProfileOwners.length === BootstrapProfileIdValues.length &&
 		bootstrapProfileOwners.every((owner) => owner.profileId === owner.unitId) &&
-		bootstrapPlatformAccess.length ===
-			BootstrapPlatformAdministratorProfile.capabilities.length &&
-		BootstrapPlatformAdministratorProfile.capabilities.every((capability) =>
-			bootstrapPlatformAccess.some(
-				(grant) =>
-					grant.capability === capability &&
-					grant.grantedByProfileId === BootstrapPlatformAdministratorProfile.profileId &&
-					grant.expiresAt === null &&
-					grant.revokedAt === null &&
-					grant.revokedByProfileId === null,
+		BootstrapPlatformAccessManifest.every((access) =>
+			access.capabilities.every((capability) =>
+				bootstrapPlatformAccess.some(
+					(grant) =>
+						grant.profileId === access.profileId &&
+						grant.capability === capability &&
+						grant.grantedByProfileId === access.grantedByProfileId &&
+						grant.expiresAt === null &&
+						grant.revokedAt === null &&
+						grant.revokedByProfileId === null,
+				),
 			),
 		) &&
 		officialRealms.length === BootstrapRealmManifest.length &&
 		BootstrapRealmManifest.every((expected) =>
 			officialRealms.some((actual) => actual.id === expected.id),
+		) &&
+		bootstrapRuleRevision.some(
+			(revision) =>
+				revision.id === RezicsRuleRealmManifest.rules.revisionId &&
+				revision.realmId === RezicsRuleRealmManifest.id &&
+				revision.version === RezicsRuleRealmManifest.rules.version,
+		) &&
+		bootstrapRules.length === RezicsRuleRealmManifest.rules.items.length &&
+		RezicsRuleRealmManifest.rules.items.every((expected, position) =>
+			bootstrapRules.some(
+				(actual) =>
+					actual.id === expected.id &&
+					actual.revisionId === RezicsRuleRealmManifest.rules.revisionId &&
+					actual.position === position,
+			),
 		) &&
 		officialZones.length === OfficialZoneManifest.length &&
 		OfficialZoneManifest.every((expected) =>

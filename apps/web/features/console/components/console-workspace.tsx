@@ -9,7 +9,7 @@ import {
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
-import { History, KeyRound } from "lucide-react";
+import { History, KeyRound, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
@@ -23,6 +23,7 @@ interface ConsoleWorkspaceModel {
 	readonly sections: readonly ManagementWorkspaceSection<ConsoleSectionId>[];
 	readonly canReadAccess: boolean;
 	readonly canManageAccess: boolean;
+	readonly canModerate: boolean;
 	readonly canReadAudit: boolean;
 }
 
@@ -53,6 +54,7 @@ function ConsoleWorkspaceContent({ children }: { children: ReactNode }) {
 	const capabilities = new Set(me.data.platformCapabilities);
 	const canReadAccess = capabilities.has("platform.access.read");
 	const canManageAccess = capabilities.has("platform.access.manage");
+	const canModerate = capabilities.has("platform.moderate");
 	const canReadAudit = capabilities.has("platform.audit.read");
 	const labels = t.console.sections;
 	const sections = [
@@ -64,6 +66,17 @@ function ConsoleWorkspaceContent({ children }: { children: ReactNode }) {
 						label: labels.access.label,
 						description: labels.access.description,
 						icon: KeyRound,
+					},
+				]
+			: []),
+		...(canModerate
+			? [
+					{
+						id: "moderation" as const,
+						href: consoleSectionHref("moderation"),
+						label: labels.moderation.label,
+						description: labels.moderation.description,
+						icon: ShieldCheck,
 					},
 				]
 			: []),
@@ -89,7 +102,13 @@ function ConsoleWorkspaceContent({ children }: { children: ReactNode }) {
 
 	return (
 		<ConsoleWorkspaceContext.Provider
-			value={{ sections, canReadAccess, canManageAccess, canReadAudit }}
+			value={{
+				sections,
+				canReadAccess,
+				canManageAccess,
+				canModerate,
+				canReadAudit,
+			}}
 		>
 			<ManagementWorkspace
 				header={

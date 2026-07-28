@@ -31,9 +31,32 @@ describe("notification payload contracts", () => {
 			Check(ModerationNotificationPayload, {
 				type: "report_resolution",
 				reportId: actionId,
+				reportScope: "platform",
 				actionId,
 				actionKind: "remove",
 				reasonCode: "free-form",
+			}),
+		).toBe(false);
+	});
+
+	it("identifies the report table scope in resolution notifications", () => {
+		expect(
+			Check(ModerationNotificationPayload, {
+				type: "report_resolution",
+				reportId: actionId,
+				reportScope: "realm",
+				actionId,
+				actionKind: "dismiss",
+				reasonCode: "realm_rules",
+			}),
+		).toBe(true);
+		expect(
+			Check(ModerationNotificationPayload, {
+				type: "report_resolution",
+				reportId: actionId,
+				actionId,
+				actionKind: "dismiss",
+				reasonCode: "realm_rules",
 			}),
 		).toBe(false);
 	});

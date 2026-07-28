@@ -62,6 +62,7 @@ export const ModerationNotificationPayload = t.Union([
 		{
 			type: t.Literal("report_resolution"),
 			reportId: Uuid,
+			reportScope: t.Union([t.Literal("platform"), t.Literal("realm")]),
 			actionId: Uuid,
 			actionKind: t.UnionEnum(ModerationActionKindValues, { default: undefined }),
 			reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),

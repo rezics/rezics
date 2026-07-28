@@ -9254,6 +9254,8 @@
 					"ReportRealmMismatch",
 					"ReportAlreadySubmitted",
 					"ReportTargetRevisionUnavailable",
+					"ReportRuleUnavailable",
+					"ReportRuleChanged",
 					"PostNotFound",
 					"PostLocalizationNotFound",
 					"PostTargetingLocked",
@@ -12057,6 +12059,7 @@
 																		"required": [
 																			"type",
 																			"reportId",
+																			"reportScope",
 																			"actionId",
 																			"actionKind",
 																			"reasonCode"
@@ -12069,6 +12072,18 @@
 																			"reportId": {
 																				"format": "uuid",
 																				"type": "string"
+																			},
+																			"reportScope": {
+																				"anyOf": [
+																					{
+																						"const": "platform",
+																						"type": "string"
+																					},
+																					{
+																						"const": "realm",
+																						"type": "string"
+																					}
+																				]
 																			},
 																			"actionId": {
 																				"format": "uuid",
@@ -26205,16 +26220,31 @@
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
 						"schema": {
 							"minimum": 1,
 							"maximum": 100,
-							"default": 30,
+							"default": 50,
 							"anyOf": [
 								{ "format": "integer", "default": 0, "type": "string" },
-								{ "minimum": 1, "maximum": 100, "default": 30, "type": "integer" }
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
 							]
 						}
 					}
@@ -26231,72 +26261,204 @@
 										"items": {
 											"type": "array",
 											"items": {
-												"type": "object",
-												"required": [
-													"id",
-													"caseId",
-													"realmId",
-													"unitId",
-													"reason",
-													"details",
-													"reportedRevisionId",
-													"caseState",
-													"createdAt"
-												],
-												"properties": {
-													"id": { "format": "uuid", "type": "string" },
-													"caseId": {
-														"format": "uuid",
-														"type": "string"
+												"anyOf": [
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"caseId",
+															"unitId",
+															"rule",
+															"details",
+															"reportedRevisionId",
+															"caseState",
+															"createdAt",
+															"scope",
+															"realmId"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"unitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"rule": {
+																"type": "object",
+																"required": [
+																	"id",
+																	"revisionId",
+																	"language",
+																	"title"
+																],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"revisionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
+																		]
+																	},
+																	"title": { "type": "string" }
+																}
+															},
+															"details": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"reportedRevisionId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseState": {
+																"type": "string",
+																"enum": [
+																	"new",
+																	"triaged",
+																	"assigned",
+																	"actioned",
+																	"resolved",
+																	"duplicate",
+																	"rejected",
+																	"escalated",
+																	"reviewing"
+																]
+															},
+															"createdAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"scope": {
+																"const": "realm",
+																"type": "string"
+															},
+															"realmId": {
+																"format": "uuid",
+																"type": "string"
+															}
+														}
 													},
-													"realmId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"unitId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"reason": {
-														"type": "string",
-														"enum": [
-															"realm_rules",
-															"spam",
-															"harassment",
-															"unsafe_content",
-															"other"
-														]
-													},
-													"details": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"reportedRevisionId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"caseState": {
-														"type": "string",
-														"enum": [
-															"new",
-															"triaged",
-															"assigned",
-															"actioned",
-															"resolved",
-															"duplicate",
-															"rejected",
-															"escalated",
-															"reviewing"
-														]
-													},
-													"createdAt": {
-														"format": "date-time",
-														"type": "string"
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"caseId",
+															"unitId",
+															"rule",
+															"details",
+															"reportedRevisionId",
+															"caseState",
+															"createdAt",
+															"scope",
+															"ruleSourceRealmId"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"unitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"rule": {
+																"type": "object",
+																"required": [
+																	"id",
+																	"revisionId",
+																	"language",
+																	"title"
+																],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"revisionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
+																		]
+																	},
+																	"title": { "type": "string" }
+																}
+															},
+															"details": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"reportedRevisionId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseState": {
+																"type": "string",
+																"enum": [
+																	"new",
+																	"triaged",
+																	"assigned",
+																	"actioned",
+																	"resolved",
+																	"duplicate",
+																	"rejected",
+																	"escalated",
+																	"reviewing"
+																]
+															},
+															"createdAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"scope": {
+																"const": "platform",
+																"type": "string"
+															},
+															"ruleSourceRealmId": {
+																"format": "uuid",
+																"type": "string"
+															}
+														}
 													}
-												}
+												]
 											}
 										}
 									}
@@ -26359,9 +26521,9 @@
 				"x-rezics-policy-operation-id": "getApiReportsMe"
 			}
 		},
-		"/api/reports/units/{unitId}/realms": {
+		"/api/reports/units/{unitId}/destinations": {
 			"get": {
-				"summary": "List readable Realm report destinations for a Unit",
+				"summary": "List rule Realms that can receive a Unit report",
 				"tags": ["Reports"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -26413,30 +26575,84 @@
 										"items": {
 											"type": "array",
 											"items": {
-												"type": "object",
-												"required": ["id", "language", "title"],
-												"properties": {
-													"id": { "format": "uuid", "type": "string" },
-													"language": {
-														"type": "string",
-														"enum": [
-															"zh",
-															"en",
-															"ja",
-															"ko",
-															"de",
-															"fr",
-															"es"
-														]
+												"anyOf": [
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"scope",
+															"language",
+															"title"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"scope": {
+																"const": "platform",
+																"type": "string"
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															"title": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															}
+														}
 													},
-													"title": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"scope",
+															"language",
+															"title"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"scope": {
+																"const": "realm",
+																"type": "string"
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															"title": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															}
+														}
 													}
-												}
+												]
 											}
 										}
 									}
@@ -26522,8 +26738,8 @@
 						}
 					}
 				},
-				"operationId": "getApiReportsUnitsByUnitIdRealms",
-				"x-rezics-policy-operation-id": "getApiReportsUnitsByUnitIdRealms"
+				"operationId": "getApiReportsUnitsByUnitIdDestinations",
+				"x-rezics-policy-operation-id": "getApiReportsUnitsByUnitIdDestinations"
 			}
 		},
 		"/api/realms/{realmId}/reports": {
@@ -26564,6 +26780,21 @@
 						}
 					},
 					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -26590,72 +26821,204 @@
 										"items": {
 											"type": "array",
 											"items": {
-												"type": "object",
-												"required": [
-													"id",
-													"caseId",
-													"realmId",
-													"unitId",
-													"reason",
-													"details",
-													"reportedRevisionId",
-													"caseState",
-													"createdAt"
-												],
-												"properties": {
-													"id": { "format": "uuid", "type": "string" },
-													"caseId": {
-														"format": "uuid",
-														"type": "string"
+												"anyOf": [
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"caseId",
+															"unitId",
+															"rule",
+															"details",
+															"reportedRevisionId",
+															"caseState",
+															"createdAt",
+															"scope",
+															"realmId"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"unitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"rule": {
+																"type": "object",
+																"required": [
+																	"id",
+																	"revisionId",
+																	"language",
+																	"title"
+																],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"revisionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
+																		]
+																	},
+																	"title": { "type": "string" }
+																}
+															},
+															"details": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"reportedRevisionId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseState": {
+																"type": "string",
+																"enum": [
+																	"new",
+																	"triaged",
+																	"assigned",
+																	"actioned",
+																	"resolved",
+																	"duplicate",
+																	"rejected",
+																	"escalated",
+																	"reviewing"
+																]
+															},
+															"createdAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"scope": {
+																"const": "realm",
+																"type": "string"
+															},
+															"realmId": {
+																"format": "uuid",
+																"type": "string"
+															}
+														}
 													},
-													"realmId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"unitId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"reason": {
-														"type": "string",
-														"enum": [
-															"realm_rules",
-															"spam",
-															"harassment",
-															"unsafe_content",
-															"other"
-														]
-													},
-													"details": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"reportedRevisionId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"caseState": {
-														"type": "string",
-														"enum": [
-															"new",
-															"triaged",
-															"assigned",
-															"actioned",
-															"resolved",
-															"duplicate",
-															"rejected",
-															"escalated",
-															"reviewing"
-														]
-													},
-													"createdAt": {
-														"format": "date-time",
-														"type": "string"
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"caseId",
+															"unitId",
+															"rule",
+															"details",
+															"reportedRevisionId",
+															"caseState",
+															"createdAt",
+															"scope",
+															"ruleSourceRealmId"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"unitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"rule": {
+																"type": "object",
+																"required": [
+																	"id",
+																	"revisionId",
+																	"language",
+																	"title"
+																],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"revisionId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
+																		]
+																	},
+																	"title": { "type": "string" }
+																}
+															},
+															"details": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"reportedRevisionId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"caseState": {
+																"type": "string",
+																"enum": [
+																	"new",
+																	"triaged",
+																	"assigned",
+																	"actioned",
+																	"resolved",
+																	"duplicate",
+																	"rejected",
+																	"escalated",
+																	"reviewing"
+																]
+															},
+															"createdAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"scope": {
+																"const": "platform",
+																"type": "string"
+															},
+															"ruleSourceRealmId": {
+																"format": "uuid",
+																"type": "string"
+															}
+														}
 													}
-												}
+												]
 											}
 										}
 									}
@@ -26711,23 +27074,359 @@
 				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdReports"
 			}
 		},
-		"/api/realms/{realmId}/units/{unitId}/reports": {
+		"/api/reports/platform/cases": {
+			"get": {
+				"summary": "List platform-governed Unit report cases",
+				"tags": ["Reports"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "state",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"new",
+								"triaged",
+								"assigned",
+								"actioned",
+								"resolved",
+								"duplicate",
+								"rejected",
+								"escalated",
+								"reviewing"
+							]
+						}
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"caseId",
+													"caseState",
+													"unitId",
+													"unitKind",
+													"language",
+													"title",
+													"moderationStatus",
+													"postTargetingLocked",
+													"openReportCount",
+													"allowedCommands",
+													"reports",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"caseId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"caseState": {
+														"type": "string",
+														"enum": [
+															"new",
+															"triaged",
+															"assigned",
+															"actioned",
+															"resolved",
+															"duplicate",
+															"rejected",
+															"escalated",
+															"reviewing"
+														]
+													},
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"unitKind": { "type": "string" },
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"moderationStatus": {
+														"type": "string",
+														"enum": ["approved", "pending", "removed"]
+													},
+													"postTargetingLocked": { "type": "boolean" },
+													"openReportCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"allowedCommands": {
+														"minItems": 1,
+														"type": "array",
+														"items": {
+															"default": "approve",
+															"type": "string",
+															"enum": [
+																"approve",
+																"remove",
+																"restore",
+																"lock_post_targeting",
+																"unlock_post_targeting",
+																"dismiss",
+																"note"
+															]
+														}
+													},
+													"reports": {
+														"minItems": 1,
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"id",
+																"caseId",
+																"unitId",
+																"rule",
+																"details",
+																"reportedRevisionId",
+																"caseState",
+																"createdAt",
+																"scope",
+																"ruleSourceRealmId"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"caseId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"unitId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"rule": {
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"revisionId",
+																		"language",
+																		"title"
+																	],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"revisionId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
+																		},
+																		"title": {
+																			"type": "string"
+																		}
+																	}
+																},
+																"details": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"reportedRevisionId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"caseState": {
+																	"type": "string",
+																	"enum": [
+																		"new",
+																		"triaged",
+																		"assigned",
+																		"actioned",
+																		"resolved",
+																		"duplicate",
+																		"rejected",
+																		"escalated",
+																		"reviewing"
+																	]
+																},
+																"createdAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"scope": {
+																	"const": "platform",
+																	"type": "string"
+																},
+																"ruleSourceRealmId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														}
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiReportsPlatformCases",
+				"x-rezics-policy-operation-id": "getApiReportsPlatformCases"
+			}
+		},
+		"/api/reports/units/{unitId}": {
 			"post": {
-				"summary": "Report a Unit to a Realm",
+				"summary": "Report a Unit under a selected Realm rule",
 				"tags": ["Reports"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					},
 					{
 						"name": "unitId",
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
+						}
 					}
 				],
 				"requestBody": {
@@ -26736,18 +27435,10 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["reason"],
+								"required": ["ruleRealmId", "ruleId"],
 								"properties": {
-									"reason": {
-										"type": "string",
-										"enum": [
-											"realm_rules",
-											"spam",
-											"harassment",
-											"unsafe_content",
-											"other"
-										]
-									},
+									"ruleRealmId": { "format": "uuid", "type": "string" },
+									"ruleId": { "format": "uuid", "type": "string" },
 									"details": {
 										"minLength": 1,
 										"maxLength": 2000,
@@ -26765,57 +27456,177 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"required": [
-										"id",
-										"caseId",
-										"realmId",
-										"unitId",
-										"reason",
-										"details",
-										"reportedRevisionId",
-										"caseState",
-										"createdAt"
-									],
-									"properties": {
-										"id": { "format": "uuid", "type": "string" },
-										"caseId": { "format": "uuid", "type": "string" },
-										"realmId": { "format": "uuid", "type": "string" },
-										"unitId": { "format": "uuid", "type": "string" },
-										"reason": {
-											"type": "string",
-											"enum": [
-												"realm_rules",
-												"spam",
-												"harassment",
-												"unsafe_content",
-												"other"
-											]
+									"anyOf": [
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"caseId",
+												"unitId",
+												"rule",
+												"details",
+												"reportedRevisionId",
+												"caseState",
+												"createdAt",
+												"scope",
+												"realmId"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"caseId": { "format": "uuid", "type": "string" },
+												"unitId": { "format": "uuid", "type": "string" },
+												"rule": {
+													"type": "object",
+													"required": [
+														"id",
+														"revisionId",
+														"language",
+														"title"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"revisionId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"language": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														},
+														"title": { "type": "string" }
+													}
+												},
+												"details": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"reportedRevisionId": {
+													"format": "uuid",
+													"type": "string"
+												},
+												"caseState": {
+													"type": "string",
+													"enum": [
+														"new",
+														"triaged",
+														"assigned",
+														"actioned",
+														"resolved",
+														"duplicate",
+														"rejected",
+														"escalated",
+														"reviewing"
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"scope": { "const": "realm", "type": "string" },
+												"realmId": { "format": "uuid", "type": "string" }
+											}
 										},
-										"details": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
-										"reportedRevisionId": {
-											"format": "uuid",
-											"type": "string"
-										},
-										"caseState": {
-											"type": "string",
-											"enum": [
-												"new",
-												"triaged",
-												"assigned",
-												"actioned",
-												"resolved",
-												"duplicate",
-												"rejected",
-												"escalated",
-												"reviewing"
-											]
-										},
-										"createdAt": { "format": "date-time", "type": "string" }
-									}
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"caseId",
+												"unitId",
+												"rule",
+												"details",
+												"reportedRevisionId",
+												"caseState",
+												"createdAt",
+												"scope",
+												"ruleSourceRealmId"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"caseId": { "format": "uuid", "type": "string" },
+												"unitId": { "format": "uuid", "type": "string" },
+												"rule": {
+													"type": "object",
+													"required": [
+														"id",
+														"revisionId",
+														"language",
+														"title"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"revisionId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"language": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														},
+														"title": { "type": "string" }
+													}
+												},
+												"details": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"reportedRevisionId": {
+													"format": "uuid",
+													"type": "string"
+												},
+												"caseState": {
+													"type": "string",
+													"enum": [
+														"new",
+														"triaged",
+														"assigned",
+														"actioned",
+														"resolved",
+														"duplicate",
+														"rejected",
+														"escalated",
+														"reviewing"
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"scope": { "const": "platform", "type": "string" },
+												"ruleSourceRealmId": {
+													"format": "uuid",
+													"type": "string"
+												}
+											}
+										}
+									]
 								}
 							}
 						}
@@ -26896,7 +27707,9 @@
 													"type": "string",
 													"enum": [
 														"ReportAlreadySubmitted",
-														"ReportTargetRevisionUnavailable"
+														"ReportTargetRevisionUnavailable",
+														"ReportRuleUnavailable",
+														"ReportRuleChanged"
 													]
 												},
 												"message": { "type": "string" },
@@ -26960,8 +27773,8 @@
 						}
 					}
 				},
-				"operationId": "postApiRealmsByRealmIdUnitsByUnitIdReports",
-				"x-rezics-policy-operation-id": "postApiRealmsByRealmIdUnitsByUnitIdReports"
+				"operationId": "postApiReportsUnitsByUnitId",
+				"x-rezics-policy-operation-id": "postApiReportsUnitsByUnitId"
 			}
 		},
 		"/api/governance/unit/{unitId}/access": {

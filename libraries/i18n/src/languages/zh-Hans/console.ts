@@ -4,6 +4,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
 	title: "管理主控台",
@@ -16,6 +17,10 @@ export default {
 		access: {
 			label: "平台访问权",
 			description: "查看或管理用户获得的平台级权限，以及每笔授权的期限与来源。",
+		},
+		moderation: {
+			label: "全局内容治理",
+			description: "处理依全局规则提交的举报，并管理条目的平台级状态。",
 		},
 		audit: {
 			label: "安全审计",
@@ -51,6 +56,34 @@ export default {
 		revokeAllDescription:
 			"这项变更会撤销每一笔有效授权。若因此移除最后一位无期限的平台访问权管理者，服务器会拒绝变更。",
 		confirmRevokeAll: "确认全部撤销",
+	},
+	moderation: {
+		filterState: "案件状态",
+		allStates: "所有状态",
+		queue: "全局举报案件",
+		empty: "没有符合当前条件的全局举报案件。",
+		untitled: "未命名条目",
+		reports: "案件中的举报",
+		action: "治理操作",
+		reason: "治理原因",
+		internalNote: "内部注解（选填）",
+		notePlaceholder: "记录判断依据；选择添加注解时必填。",
+		submit: "提交治理操作",
+		succeeded: "全局治理操作已完成",
+		confirmRemovalTitle: "要从平台移除此内容吗？",
+		confirmRemovalDescription: insert("“{{title}}”将在平台层级标记为已移除。", {
+			title: String,
+		}),
+		confirmRemoval: "移除内容",
+		reportCount: insert("{{count}} 则举报", { count: Number }),
+		moderationStatuses: {
+			approved: "已批准",
+			pending: "待审核",
+			removed: "已移除",
+		},
+		targetingLocked: `已禁止新的${postTerms.label}指向`,
+		targetingUnlocked: `允许新的${postTerms.label}指向`,
+		openContent: "打开内容",
 	},
 	audit: {
 		category: "事件类别",

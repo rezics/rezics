@@ -406,7 +406,7 @@ function RealmReportItem({ report }: { readonly report: RealmUnitReport }) {
 	return (
 		<article className="grid gap-3 rounded-lg border p-4 text-sm">
 			<div className="flex flex-wrap items-start justify-between gap-2">
-				<p className="font-medium">{t.reports.reasons[report.reason]}</p>
+				<p className="font-medium">{report.rule.title}</p>
 				<time className="text-muted-foreground text-xs" dateTime={report.createdAt}>
 					{t.reports.reportedAt({
 						date: formatDateTime(report.createdAt, locale.current),

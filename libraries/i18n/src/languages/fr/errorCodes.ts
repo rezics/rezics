@@ -96,6 +96,10 @@ export default {
 	ReportAlreadySubmitted: "Vous avez déjà signalé cette unité pour le dossier en cours.",
 	ReportTargetRevisionUnavailable:
 		"Cette unité ne possède aucune révision pouvant être signalée.",
+	ReportRuleUnavailable:
+		"Le périmètre de gouvernance sélectionné ne comporte aucune règle en vigueur.",
+	ReportRuleChanged:
+		"La règle sélectionnée a changé. Sélectionnez-en une à nouveau avant l’envoi.",
 	EnforcementExpiryInvalid: "L’expiration de la mesure doit se situer dans le futur.",
 	EnforcementNotFound: "Cette mesure est introuvable.",
 	EnforcementAlreadyRevoked: "Cette mesure a déjà été révoquée.",

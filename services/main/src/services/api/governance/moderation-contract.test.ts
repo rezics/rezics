@@ -4,6 +4,7 @@ import { createPortableTextDocument } from "@rezics/block";
 import {
 	assertReportCaseDismissible,
 	assertModerationActionCompatible,
+	getPlatformUnitModerationCommands,
 	getRealmUnitModerationCommands,
 	isModerationActionCompatible,
 	resolvePostTargetingLockState,
@@ -58,6 +59,26 @@ describe("moderation action contracts", () => {
 			"note",
 		]);
 		expect(getRealmUnitModerationCommands("removed", false)).toEqual([
+			"restore",
+			"lock_post_targeting",
+			"note",
+		]);
+	});
+
+	it("presents only commands valid for the current platform Unit snapshot", () => {
+		expect(getPlatformUnitModerationCommands("pending", false)).toEqual([
+			"approve",
+			"remove",
+			"lock_post_targeting",
+			"note",
+		]);
+		expect(getPlatformUnitModerationCommands("approved", true, true)).toEqual([
+			"remove",
+			"unlock_post_targeting",
+			"dismiss",
+			"note",
+		]);
+		expect(getPlatformUnitModerationCommands("removed", false)).toEqual([
 			"restore",
 			"lock_post_targeting",
 			"note",

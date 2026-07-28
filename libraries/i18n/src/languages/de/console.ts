@@ -4,6 +4,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: postTerms } = deTerminology.post;
 
 export default {
 	title: "Verwaltungskonsole",
@@ -18,6 +19,11 @@ export default {
 			label: "Plattformzugriff",
 			description:
 				"Prüfe oder verwalte Plattformberechtigungen für Profile einschließlich Ablauf und Herkunft jeder Vergabe.",
+		},
+		moderation: {
+			label: "Globale Inhaltsmoderation",
+			description:
+				"Bearbeite Meldungen nach globalen Regeln und verwalte den plattformweiten Status von Units.",
 		},
 		audit: {
 			label: "Sicherheitsprotokoll",
@@ -53,6 +59,35 @@ export default {
 		revokeAllDescription:
 			"Dadurch werden alle aktiven Vergaben entzogen. Der Server lehnt die Änderung ab, wenn damit die letzte nicht ablaufende Verwaltung des Plattformzugriffs entfernt würde.",
 		confirmRevokeAll: "Vollständigen Entzug bestätigen",
+	},
+	moderation: {
+		filterState: "Fallstatus",
+		allStates: "Alle Status",
+		queue: "Globale Meldungsfälle",
+		empty: "Keine globalen Meldungsfälle entsprechen dem aktuellen Filter.",
+		untitled: "Unbenannte Unit",
+		reports: "Meldungen in diesem Fall",
+		action: "Moderationsaktion",
+		reason: "Moderationsgrund",
+		internalNote: "Interne Notiz (optional)",
+		notePlaceholder: "Begründung festhalten; beim Hinzufügen einer Notiz erforderlich.",
+		submit: "Moderationsaktion anwenden",
+		succeeded: "Globale Moderationsaktion abgeschlossen",
+		confirmRemovalTitle: "Diesen Inhalt von der Plattform entfernen?",
+		confirmRemovalDescription: insert(
+			"{{title}} wird auf Plattformebene als entfernt markiert.",
+			{ title: String },
+		),
+		confirmRemoval: "Inhalt entfernen",
+		reportCount: insert("{{count}} Meldungen", { count: Number }),
+		moderationStatuses: {
+			approved: "Freigegeben",
+			pending: "Ausstehende Prüfung",
+			removed: "Entfernt",
+		},
+		targetingLocked: `Neue ${postTerms.label}-Verweise gesperrt`,
+		targetingUnlocked: `Neue ${postTerms.label}-Verweise erlaubt`,
+		openContent: "Inhalt öffnen",
 	},
 	audit: {
 		category: "Ereigniskategorie",

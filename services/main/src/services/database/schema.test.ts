@@ -12,8 +12,8 @@ import {
 	creditAttribution,
 	unitAssociationProposal,
 	subjectAssociation,
-	report,
-	reportReason,
+	platformUnitReport,
+	realmUnitReport,
 	unit,
 	unitDock,
 	conversationParticipantStat,
@@ -43,7 +43,6 @@ import {
 	realmUnitStatusEvent,
 	RealmUnitMutationCommandValues,
 	RealmRuleAcknowledgementModeValues,
-	ReportReasonValues,
 	scoreStat,
 	score,
 	post,
@@ -412,7 +411,6 @@ describe("database schema contracts", () => {
 		const action = getTableConfig(moderationAction);
 		expect(governanceReasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(moderationAction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
-		expect(reportReason.enumValues).toEqual(ReportReasonValues);
 		expect(unitAccessRestriction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
 			"moderation_action_actor_case_idempotency_key",
@@ -425,26 +423,55 @@ describe("database schema contracts", () => {
 				"moderation_action_request_fingerprint_check",
 			]),
 		);
-		const reportConfig = getTableConfig(report);
-		expect(reportConfig.columns.map((column) => column.name)).toEqual(
+		const realmReportConfig = getTableConfig(realmUnitReport);
+		expect(realmReportConfig.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
 				"case_id",
 				"reporter_profile_id",
 				"realm_id",
 				"unit_id",
-				"reason",
+				"rule_revision_id",
+				"rule_id",
 				"details",
 				"reported_revision_id",
 			]),
 		);
-		expect(reportConfig.uniqueConstraints.map((constraint) => constraint.name)).toContain(
-			"report_case_reporter_key",
+		expect(realmReportConfig.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"realm_unit_report_case_reporter_key",
 		);
-		expect(reportConfig.foreignKeys.map((key) => key.getName())).toContain(
-			"report_revision_unit_fkey",
+		expect(realmReportConfig.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"realm_unit_report_revision_unit_fkey",
+				"realm_unit_report_realm_unit_fkey",
+				"realm_unit_report_rule_revision_realm_fkey",
+				"realm_unit_report_rule_revision_fkey",
+			]),
 		);
-		expect(reportConfig.foreignKeys.map((key) => key.getName())).toContain(
-			"report_realm_unit_fkey",
+		const platformReportConfig = getTableConfig(platformUnitReport);
+		expect(platformReportConfig.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining([
+				"case_id",
+				"reporter_profile_id",
+				"unit_id",
+				"rule_source_realm_id",
+				"rule_revision_id",
+				"rule_id",
+				"details",
+				"reported_revision_id",
+			]),
+		);
+		expect(
+			platformReportConfig.uniqueConstraints.map((constraint) => constraint.name),
+		).toContain("platform_unit_report_case_reporter_key");
+		expect(platformReportConfig.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"platform_unit_report_revision_unit_fkey",
+				"platform_unit_report_rule_revision_realm_fkey",
+				"platform_unit_report_rule_revision_fkey",
+			]),
+		);
+		expect(platformReportConfig.checks.map((constraint) => constraint.name)).toContain(
+			"platform_unit_report_rule_source_check",
 		);
 		expect(getTableConfig(moderationCase).columns.map((column) => column.name)).not.toEqual(
 			expect.arrayContaining(["reason", "safe_summary"]),

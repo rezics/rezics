@@ -7,11 +7,12 @@ import type { DatabaseTransaction } from "../../database";
 import {
 	moderationAction,
 	moderationCase,
+	platformUnitReport,
 	profile as profileTable,
 	realmMember,
 	realmUnit,
+	realmUnitReport,
 	realmUnitStatusEvent,
-	report,
 	unit,
 	unitOwnership,
 } from "../../database/schema";
@@ -613,10 +614,26 @@ export async function executeAuthorizedModerationAction(
 	const noteRoles = new Set(input.body.notes?.map((note) => note.role));
 	if (noteRoles.size !== (input.body.notes?.length ?? 0)) throw new ModerationNoteRoleDuplicate();
 	const target = await getModerationTargetContext(tx, input.caseRow);
-	const caseReports = await tx
-		.select({ id: report.id, reporterProfileId: report.reporterProfileId })
-		.from(report)
-		.where(eq(report.caseId, input.caseRow.id));
+	const caseReports =
+		input.caseRow.authority === "platform"
+			? (
+					await tx
+						.select({
+							id: platformUnitReport.id,
+							reporterProfileId: platformUnitReport.reporterProfileId,
+						})
+						.from(platformUnitReport)
+						.where(eq(platformUnitReport.caseId, input.caseRow.id))
+				).map((row) => ({ ...row, scope: "platform" as const }))
+			: (
+					await tx
+						.select({
+							id: realmUnitReport.id,
+							reporterProfileId: realmUnitReport.reporterProfileId,
+						})
+						.from(realmUnitReport)
+						.where(eq(realmUnitReport.caseId, input.caseRow.id))
+				).map((row) => ({ ...row, scope: "realm" as const }));
 	const reportRecipientProfileIds = presentProfileIds(
 		caseReports.map(({ reporterProfileId }) => ({ profileId: reporterProfileId })),
 	);
@@ -725,6 +742,7 @@ export async function executeAuthorizedModerationAction(
 				payload: {
 					type: "report_resolution",
 					reportId: caseReport.id,
+					reportScope: caseReport.scope,
 					actionId: created.id,
 					actionKind: input.body.kind,
 					reasonCode: input.body.reasonCode,

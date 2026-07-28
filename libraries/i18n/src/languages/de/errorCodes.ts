@@ -95,6 +95,9 @@ export default {
 		"Füge höchstens eine interne Notiz und eine öffentliche Mitteilung hinzu.",
 	ReportAlreadySubmitted: "Du hast diese Unit für den laufenden Fall bereits gemeldet.",
 	ReportTargetRevisionUnavailable: "Diese Unit hat keine Revision, die gemeldet werden kann.",
+	ReportRuleUnavailable:
+		"Für den gewählten Zuständigkeitsbereich gibt es keine aktuellen Regeln.",
+	ReportRuleChanged: "Die gewählte Regel wurde geändert. Wähle sie vor dem Senden erneut aus.",
 	EnforcementExpiryInvalid: "Der Ablauf der Maßnahme muss in der Zukunft liegen.",
 	EnforcementNotFound: "Diese Maßnahme wurde nicht gefunden.",
 	EnforcementAlreadyRevoked: "Diese Maßnahme wurde bereits aufgehoben.",

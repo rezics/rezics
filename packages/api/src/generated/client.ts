@@ -89,12 +89,14 @@ import type {
 	PostApiFeedQueryResponses,
 	GetApiReportsMeOptions,
 	GetApiReportsMeResponses,
-	GetApiReportsUnitsByUnitIdRealmsOptions,
-	GetApiReportsUnitsByUnitIdRealmsResponses,
+	GetApiReportsUnitsByUnitIdDestinationsOptions,
+	GetApiReportsUnitsByUnitIdDestinationsResponses,
 	GetApiRealmsByRealmIdReportsOptions,
 	GetApiRealmsByRealmIdReportsResponses,
-	PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions,
-	PostApiRealmsByRealmIdUnitsByUnitIdReportsResponses,
+	GetApiReportsPlatformCasesOptions,
+	GetApiReportsPlatformCasesResponses,
+	PostApiReportsUnitsByUnitIdOptions,
+	PostApiReportsUnitsByUnitIdResponses,
 	GetApiGovernanceUnitByUnitIdAccessOptions,
 	GetApiGovernanceUnitByUnitIdAccessResponses,
 	PutApiGovernanceUnitByUnitIdAccessOptions,
@@ -1378,23 +1380,23 @@ export function getApiReportsMe<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List readable Realm report destinations for a Unit
- * {@link /api/reports/units/:unitId/realms}
+ * @summary List rule Realms that can receive a Unit report
+ * {@link /api/reports/units/:unitId/destinations}
  */
-export function getApiReportsUnitsByUnitIdRealms<ThrowOnError extends boolean = true>(
-	options: Options<GetApiReportsUnitsByUnitIdRealmsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiReportsUnitsByUnitIdRealmsResponses, ThrowOnError>> {
+export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends boolean = true>(
+	options: Options<GetApiReportsUnitsByUnitIdDestinationsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiReportsUnitsByUnitIdDestinationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/reports/units/{unitId}/realms",
+		url: "/api/reports/units/{unitId}/destinations",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiReportsUnitsByUnitIdRealmsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiReportsUnitsByUnitIdDestinationsResponses, ThrowOnError>>;
 }
 
 /**
@@ -1415,23 +1417,40 @@ export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true
 }
 
 /**
- * @summary Report a Unit to a Realm
- * {@link /api/realms/:realmId/units/:unitId/reports}
+ * @summary List platform-governed Unit report cases
+ * {@link /api/reports/platform/cases}
  */
-export function postApiRealmsByRealmIdUnitsByUnitIdReports<ThrowOnError extends boolean = true>(
-	options: Options<PostApiRealmsByRealmIdUnitsByUnitIdReportsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReportsResponses, ThrowOnError>> {
+export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
+	options: Options<GetApiReportsPlatformCasesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiReportsPlatformCasesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/reports/platform/cases",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiReportsPlatformCasesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Report a Unit under a selected Realm rule
+ * {@link /api/reports/units/:unitId}
+ */
+export function postApiReportsUnitsByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PostApiReportsUnitsByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiReportsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/realms/{realmId}/units/{unitId}/reports",
+		url: "/api/reports/units/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReportsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiReportsUnitsByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
