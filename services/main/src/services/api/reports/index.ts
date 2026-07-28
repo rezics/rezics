@@ -37,6 +37,10 @@ import {
 	ReportTargetRevisionUnavailable,
 } from "./errors";
 import {
+	platformUnitReportCaseAdvisoryLock,
+	realmUnitReportCaseAdvisoryLock,
+} from "./advisory-lock";
+import {
 	CreateReportBody,
 	CreateReportQuery,
 	ListMyReportsQuery,
@@ -493,9 +497,7 @@ export default new Elysia().use(session).group("", (app) =>
 					};
 
 					if (body.ruleRealmId === OfficialRealmUnitIds.rule) {
-						await tx.execute(
-							sql`select pg_advisory_xact_lock(hashtextextended(concat('platform-report:', ${params.unitId}), 0))`,
-						);
+						await tx.execute(platformUnitReportCaseAdvisoryLock(params.unitId));
 						let [activeCase] = await tx
 							.select({ id: moderationCase.id, state: moderationCase.state })
 							.from(moderationCase)
@@ -568,7 +570,7 @@ export default new Elysia().use(session).group("", (app) =>
 					}
 
 					await tx.execute(
-						sql`select pg_advisory_xact_lock(hashtextextended(concat(${body.ruleRealmId}, ':', ${params.unitId}), 0))`,
+						realmUnitReportCaseAdvisoryLock(body.ruleRealmId, params.unitId),
 					);
 					const [membership] = await tx
 						.select({ unitId: realmUnit.unitId })

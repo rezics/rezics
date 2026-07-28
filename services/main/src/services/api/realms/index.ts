@@ -86,6 +86,7 @@ import {
 	RealmListResponse,
 	toPortableTextResponse,
 } from "../schema/response";
+import { realmUnitReportCaseAdvisoryLock } from "../reports/advisory-lock";
 import {
 	AcknowledgeRealmRulesBody,
 	CreateRealmBody,
@@ -1833,9 +1834,7 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(concat(${params.realmId}, ':', ${params.unitId}), 0))`,
-				);
+				await tx.execute(realmUnitReportCaseAdvisoryLock(params.realmId, params.unitId));
 				const [target] = await tx
 					.select({ unitId: realmUnit.unitId })
 					.from(realmUnit)
