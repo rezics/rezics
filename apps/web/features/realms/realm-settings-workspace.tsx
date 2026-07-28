@@ -31,7 +31,6 @@ import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { RequireSession } from "@/features/auth/require-session";
-import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import {
 	ContentLanguageEditorProvider,
 	useContentLanguageEditor,
@@ -185,11 +184,6 @@ function RealmSettingsWorkspaceContent({
 			<ManagementWorkspace
 				header={
 					<ManagementWorkspaceHeader
-						action={
-							capabilities.canUpdateSettings && section === "profile" ? (
-								<ContentLanguageControl />
-							) : undefined
-						}
 						backHref={realmHref(realm.data)}
 						backLabel={t.realms.backToRealm}
 						description={t.realms.settingsWorkspace.description}

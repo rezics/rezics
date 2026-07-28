@@ -25,6 +25,7 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -369,7 +370,7 @@ export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }
 	return (
 		<Card>
 			<CardContent className="grid gap-6 p-6">
-				<h2 className="font-heading text-xl font-bold">{t.units.editor.content}</h2>
+				<ContentLanguageControl />
 				{selectedLanguageIsPending ? (
 					<p className="text-sm text-muted-foreground">
 						{t.units.contentLanguages.addDescription}

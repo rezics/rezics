@@ -217,7 +217,6 @@ export default {
 	editor: {
 		title: "Modifier la Unit",
 		settings: "Réglages",
-		content: "Contenu",
 		languageCode: "Code de langue",
 		relationships: "Relations de catalogue",
 		creditRole: "Rôle de crédit",

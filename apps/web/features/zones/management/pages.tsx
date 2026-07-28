@@ -529,16 +529,14 @@ function PageEditor({
 
 	return (
 		<Card appearance="outlined">
-			<CardContent className="p-6">
+			<CardContent className="grid gap-6 p-6">
+				{page ? <ContentLanguageControl /> : null}
 				<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
-					<div className="flex flex-wrap items-center justify-between gap-3">
-						<h2 className="font-semibold text-xl">
-							{page
-								? t.zones.management.pages.editPage
-								: t.zones.management.pages.newPage}
-						</h2>
-						{page ? <ContentLanguageControl /> : null}
-					</div>
+					<h2 className="font-semibold text-xl">
+						{page
+							? t.zones.management.pages.editPage
+							: t.zones.management.pages.newPage}
+					</h2>
 					<FieldGroup className="grid gap-4 sm:grid-cols-2">
 						<Field>
 							<FieldLabel>{t.zones.management.pages.slugOptional}</FieldLabel>

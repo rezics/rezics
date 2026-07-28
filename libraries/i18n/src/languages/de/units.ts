@@ -219,7 +219,6 @@ export default {
 	editor: {
 		title: "Unit bearbeiten",
 		settings: "Einstellungen",
-		content: "Inhalt",
 		languageCode: "Sprachcode",
 		relationships: "Katalogbeziehungen",
 		creditRole: "Mitwirkendenrolle",

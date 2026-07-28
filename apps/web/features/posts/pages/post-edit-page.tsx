@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -38,11 +39,14 @@ export function PostEditPage() {
 				description={description}
 				title={post.postKind === "reply" ? t.posts.editReplyTitle : t.posts.editTitle}
 			/>
-			{post.postKind === "reply" ? (
-				<ReplyPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
-			) : (
-				<OrdinaryPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
-			)}
+			<div className="grid gap-6">
+				<ContentLanguageControl />
+				{post.postKind === "reply" ? (
+					<ReplyPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
+				) : (
+					<OrdinaryPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
+				)}
+			</div>
 		</section>
 	);
 }

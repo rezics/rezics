@@ -54,12 +54,12 @@ export default {
 	attributions: "Credits",
 	viewRealm: `View ${realmTerms.inline}`,
 	workspace: {
-		description: "Edit the main content, credit relationships, access, and revision history.",
+		description: "Edit content, credit relationships, access, and revision history.",
 		backToContent: "Back to content",
 		navigation: "Content management navigation",
 		sections: {
 			main: {
-				label: "Main content",
+				label: "Content",
 				postDescription: `Edit the ${postTerms.inline} title and body.`,
 				replyDescription: `Edit the reply ${postTerms.inline} body.`,
 				reviewDescription: "Edit the review title, summary, body, and Score association.",

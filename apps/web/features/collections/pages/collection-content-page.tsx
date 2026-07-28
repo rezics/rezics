@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import type { LocalizationImageAssetValue } from "@/features/media/components/localization-image-upload-field";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
@@ -35,6 +36,7 @@ export function CollectionContentPage() {
 				link={Link}
 				title={t.collections.workspace.sections.content.label}
 			/>
+			<ContentLanguageControl />
 			<CollectionLocalizationEditor
 				collection={collection}
 				initial={localization}

@@ -55,12 +55,12 @@ export default {
 	viewRealm: `Ver el ${realmTerms.inline}`,
 	workspace: {
 		description:
-			"Edita el contenido principal, las relaciones de atribución, el acceso y el historial de versiones.",
+			"Edita el contenido, las relaciones de atribución, el acceso y el historial de versiones.",
 		backToContent: "Volver al contenido",
 		navigation: "Navegación de gestión de contenido",
 		sections: {
 			main: {
-				label: "Contenido principal",
+				label: "Contenido",
 				postDescription: `Edita el título y el contenido de la ${postTerms.inline}.`,
 				replyDescription: `Edita el contenido de la ${postTerms.inline} de respuesta.`,
 				reviewDescription:

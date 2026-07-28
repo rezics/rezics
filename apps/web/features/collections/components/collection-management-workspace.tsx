@@ -26,7 +26,6 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
-import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -174,11 +173,6 @@ function CollectionManagementWorkspaceContent({
 				<ManagementWorkspace
 					header={
 						<ManagementWorkspaceHeader
-							action={
-								collection.capabilities.canManageLocalizations ? (
-									<ContentLanguageControl />
-								) : undefined
-							}
 							backHref={collectionHref(collectionId)}
 							backLabel={t.collections.workspace.backToCollection}
 							description={t.collections.workspace.description}

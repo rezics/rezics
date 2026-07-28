@@ -18,7 +18,6 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
-import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -132,12 +131,6 @@ function ZoneManagementWorkspaceContent({
 				<ManagementWorkspace
 					header={
 						<ManagementWorkspaceHeader
-							action={
-								query.data.capabilities.canManage &&
-								currentSectionId === "overview" ? (
-									<ContentLanguageControl />
-								) : undefined
-							}
 							backHref={`/zone/${zoneId}`}
 							backLabel={t.zones.management.backToZone}
 							description={t.zones.management.description}

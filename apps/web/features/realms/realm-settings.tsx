@@ -39,6 +39,7 @@ import {
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import {
 	AvatarField,
 	type AvatarFieldOption,
@@ -150,8 +151,9 @@ export function RealmProfileSettings({
 				<h2 className="font-heading text-xl font-bold">{t.realms.profile}</h2>
 			)}
 			<Card>
-				<CardContent className="p-5">
-					<form onChange={() => setDirty(true)} onSubmit={submit}>
+				<CardContent className="grid gap-6 p-5">
+					<ContentLanguageControl />
+					<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
 						<FieldGroup>
 							<Field required>
 								<FieldLabel>{t.ui.title}</FieldLabel>

@@ -218,7 +218,6 @@ export default {
 	editor: {
 		title: "Editar Unit",
 		settings: "Configuración",
-		content: "Contenido",
 		languageCode: "Código de idioma",
 		relationships: "Relaciones de catálogo",
 		creditRole: "Función de crédito",

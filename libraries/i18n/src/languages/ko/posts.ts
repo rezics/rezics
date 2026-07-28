@@ -54,12 +54,12 @@ export default {
 	attributions: "크레딧",
 	viewRealm: `${realmTerms.inline} 보기`,
 	workspace: {
-		description: "주요 내용, 크레딧 관계, 접근 권한, 수정 기록 편집",
+		description: "콘텐츠, 크레딧 관계, 접근 권한, 수정 기록 편집",
 		backToContent: "콘텐츠로 돌아가기",
 		navigation: "콘텐츠 관리 내비게이션",
 		sections: {
 			main: {
-				label: "주요 콘텐츠",
+				label: "콘텐츠",
 				postDescription: `${postTerms.inline} 제목과 본문 편집`,
 				replyDescription: `답글 ${postTerms.inline} 본문 편집`,
 				reviewDescription: "리뷰 제목, 요약, 본문 및 점수 연관편집",

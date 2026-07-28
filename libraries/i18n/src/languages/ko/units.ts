@@ -208,7 +208,6 @@ export default {
 	editor: {
 		title: "편집 유닛",
 		settings: "설정",
-		content: "콘텐츠",
 		languageCode: "언어 코드",
 		relationships: "카탈로그 관계",
 		creditRole: "크레딧 역할",

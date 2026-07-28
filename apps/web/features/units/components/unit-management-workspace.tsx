@@ -29,7 +29,6 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
-import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useDockManagementAccess, type DockKind } from "@/features/docks";
 import { useTranslation } from "@/i18n/client";
@@ -208,7 +207,6 @@ function UnitManagementWorkspaceContent({
 				<ManagementWorkspace
 					header={
 						<ManagementWorkspaceHeader
-							action={capabilities.canEdit ? <ContentLanguageControl /> : undefined}
 							backHref={unitHref(type, unitId)}
 							backLabel={t.units.workspace.backToUnit}
 							description={t.units.workspace.description}

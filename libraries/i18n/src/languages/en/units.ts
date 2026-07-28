@@ -210,7 +210,6 @@ export default {
 	editor: {
 		title: "Edit unit",
 		settings: "Settings",
-		content: "Content",
 		languageCode: "Language code",
 		relationships: "Catalog relationships",
 		creditRole: "Credit role",

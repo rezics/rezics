@@ -22,7 +22,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
-import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -247,11 +246,6 @@ function LoadedPostManagementWorkspace({
 			<ManagementWorkspace
 				header={
 					<ManagementWorkspaceHeader
-						action={
-							resource.item.capabilities.canEdit ? (
-								<ContentLanguageControl />
-							) : undefined
-						}
 						backHref={postDetailHref(resource.kind, postId)}
 						backLabel={t.posts.workspace.backToContent}
 						description={t.posts.workspace.description}

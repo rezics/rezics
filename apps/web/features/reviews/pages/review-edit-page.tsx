@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { PostManagementSectionHeader } from "@/features/posts/components/post-management-section-header";
 import { useReviewManagement } from "@/features/posts/components/post-management-workspace";
@@ -36,7 +37,10 @@ export function ReviewEditPage() {
 			/>
 			<div className="grid gap-8">
 				{capabilities.canEdit ? (
-					<ReviewEditForm key={`${review.id}:${selectedLanguage}`} review={review} />
+					<>
+						<ContentLanguageControl />
+						<ReviewEditForm key={`${review.id}:${selectedLanguage}`} review={review} />
+					</>
 				) : null}
 				{capabilities.canManageScores ? <ReviewScoreAssociationManager /> : null}
 			</div>

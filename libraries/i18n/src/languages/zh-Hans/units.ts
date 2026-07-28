@@ -200,7 +200,6 @@ export default {
 	editor: {
 		title: "编辑作品",
 		settings: "基本设置",
-		content: "内容",
 		languageCode: "语言代码",
 		relationships: "目录关系",
 		creditRole: "署名角色",

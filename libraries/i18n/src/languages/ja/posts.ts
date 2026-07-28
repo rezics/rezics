@@ -54,12 +54,12 @@ export default {
 	attributions: "クレジット",
 	viewRealm: `${realmTerms.inline}を見る`,
 	workspace: {
-		description: "本文、クレジット関係、アクセス、改訂履歴を編集する。",
+		description: "コンテンツ、クレジット関係、アクセス、改訂履歴を編集する。",
 		backToContent: "コンテンツに戻る",
 		navigation: "コンテンツ管理ナビゲーション",
 		sections: {
 			main: {
-				label: "本文",
+				label: "コンテンツ",
 				postDescription: `${postTerms.inline}のタイトルと本文を編集`,
 				replyDescription: `返信${postTerms.inline}本文を編集`,
 				reviewDescription: "レビューのタイトル、概要、本文、およびスコア関連を編集",

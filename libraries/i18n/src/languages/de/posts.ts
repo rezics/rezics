@@ -54,12 +54,12 @@ export default {
 	attributions: "Zuordnungen",
 	viewRealm: `${realmTerms.label} anzeigen`,
 	workspace: {
-		description: "Bearbeite Hauptinhalt, Zuordnungen, Zugriff und Versionsverlauf.",
+		description: "Bearbeite Inhalt, Zuordnungen, Zugriff und Versionsverlauf.",
 		backToContent: "Zurück zum Inhalt",
 		navigation: "Navigation der Inhaltsverwaltung",
 		sections: {
 			main: {
-				label: "Hauptinhalt",
+				label: "Inhalt",
 				postDescription: `Titel und Text des ${postTerms.inline}s bearbeiten.`,
 				replyDescription: `Text des Antwort-${postTerms.inline}s bearbeiten.`,
 				reviewDescription:

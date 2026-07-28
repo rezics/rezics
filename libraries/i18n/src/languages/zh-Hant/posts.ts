@@ -54,12 +54,12 @@ export default {
 	attributions: "署名",
 	viewRealm: `檢視${realmTerms.label}`,
 	workspace: {
-		description: "編輯主要內容、署名關係、權限與修訂記錄。",
+		description: "編輯內容、署名關係、權限與修訂記錄。",
 		backToContent: "返回內容",
 		navigation: "內容管理導覽",
 		sections: {
 			main: {
-				label: "主要內容",
+				label: "內容",
 				postDescription: `編輯${postTerms.label}的標題與內容。`,
 				replyDescription: `編輯回覆${postTerms.label}的內容。`,
 				reviewDescription: "編輯評論的標題、摘要、內容與評分關聯。",
