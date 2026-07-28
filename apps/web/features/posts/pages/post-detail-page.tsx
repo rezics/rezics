@@ -1,10 +1,15 @@
 "use client";
 
-import { useGetApiPostsByPostId } from "@rezics/openapi-tanstack-query";
+import {
+	type GetApiPostsByPostIdStatus200,
+	useGetApiPostsByPostId,
+} from "@rezics/openapi-tanstack-query";
 import { useRouter } from "next/navigation";
+import { useEffect, type ReactNode } from "react";
 
 import { cn, QueryFailure, QueryPending } from "@rezics/ui";
 import { UnitDockRenderer } from "@/features/docks";
+import { ReviewPostDetail } from "@/features/reviews/components/review-post-detail";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -17,16 +22,28 @@ import {
 } from "../components/post-realm-context";
 import { PostSubjectHero } from "../components/post-subject-hero";
 import { usePostDetailContext } from "../data/post-detail-context";
-import { canOpenPostManagement } from "../model/post-management-section";
+import { getPostManagementSectionIds } from "../model/post-management-section";
 import { selectPostRealmContext } from "../model/post-realm-context";
 import { RelatedPostRecommendations } from "../post-list";
 import { ReplyPostThread } from "../reply-thread";
-import { postHref } from "../url";
+import { postManagementSectionHref } from "../routing/post-management-routes";
+import { postHref, type PostInteractionContext } from "../url";
 
-export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }) {
+type WikiPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "wiki" }>;
+
+export function PostDetailPage({
+	context,
+	id,
+	renderWikiBody,
+}: {
+	readonly context?: PostInteractionContext;
+	readonly id: string;
+	readonly renderWikiBody?: (post: WikiPost) => ReactNode;
+}) {
 	const { t } = useTranslation(["posts"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const router = useRouter();
+	const realmId = context?.kind === "realm" ? context.realmId : undefined;
 	const query = useGetApiPostsByPostId({
 		path: { postId: id },
 		query: { ...(realmId ? { realmId } : {}), localizationLanguages },
@@ -38,20 +55,41 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 	});
 	const contextQuery = usePostDetailContext(id);
 	const realms = contextQuery.data?.realms ?? [];
-	const selectedRealm = selectPostRealmContext(realms, realmId);
+	const selectedRealm =
+		context?.kind === "zone" ? undefined : selectPostRealmContext(realms, realmId);
+	const wikiZone =
+		query.data?.postKind === "wiki" && query.data.subject?.type === "zone"
+			? query.data.subject
+			: undefined;
+	useEffect(() => {
+		if (!wikiZone || context?.kind === "zone") return;
+		router.replace(postHref(id, { kind: "zone", zone: { id: wikiZone.id } }));
+	}, [context?.kind, id, router, wikiZone]);
 
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const post = query.data;
+	if (wikiZone && context?.kind !== "zone") return <QueryPending />;
+	if (post.postKind === "review")
+		return (
+			<main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+				{post.subject ? <PostSubjectHero subject={post.subject} /> : null}
+				<div className="grid min-w-0 items-start gap-10">
+					<div className="flex min-w-0 flex-col gap-8">
+						<ReviewPostDetail review={post} />
+						<RelatedPostRecommendations postId={post.id} />
+					</div>
+				</div>
+			</main>
+		);
 	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
-	const canManage = canOpenPostManagement({
-		kind: "post",
-		capabilities: post.capabilities,
-	});
+	const managementSectionId = getPostManagementSectionIds(post)[0];
 	const changeRealm = (nextRealmId: string) => {
 		if (nextRealmId === realmId) return;
-		router.replace(postHref(post.id, nextRealmId), { scroll: false });
+		router.replace(postHref(post.id, { kind: "realm", realmId: nextRealmId }), {
+			scroll: false,
+		});
 	};
 
 	return (
@@ -65,12 +103,23 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 			>
 				<div className="flex min-w-0 flex-col gap-8">
 					<PostDetailArticle
+						bodyContent={
+							post.postKind === "wiki" && renderWikiBody
+								? renderWikiBody(post)
+								: undefined
+						}
 						engagementOverflow={
 							<PostOverflowMenu
-								canDelete={post.capabilities.canEdit}
+								canDelete={post.postKind !== "wiki" && post.capabilities.canEdit}
 								editAction={
-									canManage
-										? { kind: "link", href: `/posts/${post.id}/edit` }
+									managementSectionId
+										? {
+												kind: "link",
+												href: postManagementSectionHref(
+													post.id,
+													managementSectionId,
+												),
+											}
 										: undefined
 								}
 								postId={post.id}
@@ -92,7 +141,7 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 						replyCount={Number(post.replyCount)}
 						variant="thread"
 					/>
-					{selectedRealm ? (
+					{selectedRealm && post.postKind !== "wiki" ? (
 						<div className="grid gap-3 border-border-weak border-y py-4 lg:hidden">
 							<PostRealmContextSelector
 								onValueChange={changeRealm}
@@ -106,15 +155,17 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 							/>
 						</div>
 					) : null}
-					<ReplyPostThread
-						canReply={post.capabilities.canReply}
-						parentPostId={post.postKind === "reply" ? post.id : undefined}
-						realmId={realmId}
-						rootPostId={post.rootPostId ?? post.id}
-					/>
+					{post.postKind !== "wiki" ? (
+						<ReplyPostThread
+							canReply={post.capabilities.canReply}
+							parentPostId={post.postKind === "reply" ? post.id : undefined}
+							realmId={realmId}
+							rootPostId={post.rootPostId ?? post.id}
+						/>
+					) : null}
 					<RelatedPostRecommendations postId={post.id} />
 				</div>
-				{selectedRealm ? (
+				{selectedRealm && post.postKind !== "wiki" ? (
 					<aside className="sticky top-20 hidden min-w-0 flex-col gap-3 lg:flex">
 						<PostRealmContextSelector
 							onValueChange={changeRealm}

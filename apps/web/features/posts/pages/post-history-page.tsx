@@ -1,9 +1,6 @@
 "use client";
 
-import {
-	getApiReviewsByReviewIdQueryKey,
-	getApiReviewsQueryKey,
-} from "@rezics/openapi-tanstack-query";
+import { getApiReviewsQueryKey } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { FeedQueryKey } from "@/features/content-feed/query";
@@ -18,23 +15,19 @@ export function PostHistoryPage() {
 	const { t } = useTranslation(["history"]);
 	const queryClient = useQueryClient();
 	const { resource } = usePostManagement();
-	const historyHref = postManagementSectionHref(resource.kind, resource.item.id, "history");
+	const historyHref = postManagementSectionHref(resource.item.id, "history");
 	const invalidateManagedPost = () =>
-		resource.kind === "post"
-			? invalidatePostQueries(
+		resource.item.postKind === "review"
+			? Promise.all([
+					queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
+					queryClient.invalidateQueries({ queryKey: getApiReviewsQueryKey() }),
+					invalidatePostQueries(queryClient, resource.item.id),
+				])
+			: invalidatePostQueries(
 					queryClient,
 					resource.item.rootPostId ?? resource.item.id,
 					resource.item.id,
-				)
-			: Promise.all([
-					queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
-					queryClient.invalidateQueries({ queryKey: getApiReviewsQueryKey() }),
-					queryClient.invalidateQueries({
-						queryKey: getApiReviewsByReviewIdQueryKey({
-							path: { reviewId: resource.item.id },
-						}),
-					}),
-				]);
+				);
 	return (
 		<section>
 			<PostManagementSectionHeader

@@ -1,28 +1,28 @@
-import type {
-	GetApiPostsByPostIdStatus200,
-	GetApiReviewsByReviewIdStatus200,
-} from "@rezics/openapi-tanstack-query";
+import type { GetApiPostsByPostIdStatus200 } from "@rezics/openapi-tanstack-query";
 
 export const PostManagementSectionIds = ["main", "attributions", "access", "history"] as const;
 
 export type PostManagementSectionId = (typeof PostManagementSectionIds)[number];
 
 type OrdinaryPostCapabilities = Pick<
-	GetApiPostsByPostIdStatus200["capabilities"],
+	Extract<GetApiPostsByPostIdStatus200, { postKind: "post" | "reply" | "wiki" }>["capabilities"],
 	"canEdit" | "canManageAccess" | "canManageAttributions"
 >;
 
 type ReviewCapabilities = Pick<
-	GetApiReviewsByReviewIdStatus200["capabilities"],
+	Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>["capabilities"],
 	"canEdit" | "canManageAccess" | "canManageAttributions" | "canManageScores"
 >;
 
 export type PostManagementCapabilitySource =
-	| Readonly<{ kind: "post"; capabilities: OrdinaryPostCapabilities }>
-	| Readonly<{ kind: "review"; capabilities: ReviewCapabilities }>;
+	| Readonly<{
+			postKind: "post" | "reply" | "wiki";
+			capabilities: OrdinaryPostCapabilities;
+	  }>
+	| Readonly<{ postKind: "review"; capabilities: ReviewCapabilities }>;
 
 export function canOpenPostManagement(source: PostManagementCapabilitySource): boolean {
-	if (source.kind === "review")
+	if (source.postKind === "review")
 		return (
 			source.capabilities.canEdit ||
 			source.capabilities.canManageAttributions ||
@@ -44,7 +44,7 @@ export function getPostManagementSectionIds(
 		if (sectionId === "main")
 			return (
 				source.capabilities.canEdit ||
-				(source.kind === "review" && source.capabilities.canManageScores)
+				(source.postKind === "review" && source.capabilities.canManageScores)
 			);
 		if (sectionId === "attributions") return source.capabilities.canManageAttributions;
 		if (sectionId === "access") return source.capabilities.canManageAccess;

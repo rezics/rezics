@@ -3,9 +3,7 @@
 import { isContentLanguage } from "@rezics/i18n";
 import {
 	type GetApiPostsByPostIdStatus200,
-	type GetApiReviewsByReviewIdStatus200,
 	useGetApiPostsByPostId,
-	useGetApiReviewsByReviewId,
 } from "@rezics/openapi-tanstack-query";
 import type { ManagementWorkspaceSection } from "@rezics/ui";
 import {
@@ -35,20 +33,17 @@ import {
 	postDetailHref,
 	postManagementHref,
 	postManagementSectionHref,
-	type PostManagementResourceKind,
 } from "../routing/post-management-routes";
 
 type OrdinaryPostManagementResource = Readonly<{
-	kind: "post";
-	item: GetApiPostsByPostIdStatus200;
+	item: Extract<GetApiPostsByPostIdStatus200, { postKind: "post" | "reply" }>;
 }>;
 
 type ReviewManagementResource = Readonly<{
-	kind: "review";
-	item: GetApiReviewsByReviewIdStatus200;
+	item: Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
 }>;
 
-type PostManagementResource = OrdinaryPostManagementResource | ReviewManagementResource;
+type PostManagementResource = Readonly<{ item: GetApiPostsByPostIdStatus200 }>;
 
 interface PostManagementContextValue {
 	resource: PostManagementResource;
@@ -64,30 +59,28 @@ export function usePostManagement(): PostManagementContextValue {
 
 export function useOrdinaryPostManagement(): OrdinaryPostManagementResource {
 	const { resource } = usePostManagement();
-	if (resource.kind !== "post")
-		throw new Error("Ordinary Post management is unavailable in a Review workspace");
-	return resource;
+	if (resource.item.postKind !== "post" && resource.item.postKind !== "reply")
+		throw new Error("Ordinary Post management is unavailable for this Post kind");
+	return { item: resource.item };
 }
 
 export function useReviewManagement(): ReviewManagementResource {
 	const { resource } = usePostManagement();
-	if (resource.kind !== "review")
+	if (resource.item.postKind !== "review")
 		throw new Error("Review management is unavailable in an ordinary Post workspace");
-	return resource;
+	return { item: resource.item };
 }
 
 export function PostManagementWorkspace({
-	kind,
 	postId,
 	children,
 }: {
-	kind: PostManagementResourceKind;
 	postId: string;
 	children: ReactNode;
 }) {
 	return (
 		<RequireSession>
-			<PostManagementWorkspaceLoader kind={kind} postId={postId}>
+			<PostManagementWorkspaceLoader postId={postId}>
 				{children}
 			</PostManagementWorkspaceLoader>
 		</RequireSession>
@@ -95,11 +88,9 @@ export function PostManagementWorkspace({
 }
 
 function PostManagementWorkspaceLoader({
-	kind,
 	postId,
 	children,
 }: {
-	kind: PostManagementResourceKind;
 	postId: string;
 	children: ReactNode;
 }) {
@@ -113,49 +104,23 @@ function PostManagementWorkspaceLoader({
 					...localizationLanguages.filter((language) => language !== requestedLanguage),
 				]
 			: localizationLanguages;
-	const postQuery = useGetApiPostsByPostId(
-		{ path: { postId }, query: { localizationLanguages: editorLocalizationLanguages } },
-		{ query: { enabled: kind === "post" } },
-	);
-	const reviewQuery = useGetApiReviewsByReviewId(
-		{
-			path: { reviewId: postId },
-			query: { localizationLanguages: editorLocalizationLanguages },
-		},
-		{ query: { enabled: kind === "review" } },
-	);
+	const postQuery = useGetApiPostsByPostId({
+		path: { postId },
+		query: { localizationLanguages: editorLocalizationLanguages },
+	});
 
-	if (kind === "post") {
-		if (postQuery.isError)
-			return <QueryFailure error={postQuery.error} retry={() => void postQuery.refetch()} />;
-		if (!postQuery.data) return <QueryPending />;
-		return (
-			<ContentLanguageEditorBoundary
-				onLanguagesChanged={async () => {
-					await postQuery.refetch();
-				}}
-				unitId={postId}
-			>
-				<LoadedPostManagementWorkspace
-					resource={{ kind, item: postQuery.data }}
-					children={children}
-				/>
-			</ContentLanguageEditorBoundary>
-		);
-	}
-
-	if (reviewQuery.isError)
-		return <QueryFailure error={reviewQuery.error} retry={() => void reviewQuery.refetch()} />;
-	if (!reviewQuery.data) return <QueryPending />;
+	if (postQuery.isError)
+		return <QueryFailure error={postQuery.error} retry={() => void postQuery.refetch()} />;
+	if (!postQuery.data) return <QueryPending />;
 	return (
 		<ContentLanguageEditorBoundary
 			onLanguagesChanged={async () => {
-				await reviewQuery.refetch();
+				await postQuery.refetch();
 			}}
 			unitId={postId}
 		>
 			<LoadedPostManagementWorkspace
-				resource={{ kind, item: reviewQuery.data }}
+				resource={{ item: postQuery.data }}
 				children={children}
 			/>
 		</ContentLanguageEditorBoundary>
@@ -171,11 +136,7 @@ function LoadedPostManagementWorkspace({
 }) {
 	const pathname = usePathname();
 	const { t } = useTranslation(["engagement", "errors", "posts", "units"]);
-	const capabilitySource =
-		resource.kind === "post"
-			? { kind: resource.kind, capabilities: resource.item.capabilities }
-			: { kind: resource.kind, capabilities: resource.item.capabilities };
-	if (!canOpenPostManagement(capabilitySource))
+	if (!canOpenPostManagement(resource.item))
 		return (
 			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
 				<p className="text-sm text-destructive">{t.errors.forbidden}</p>
@@ -184,7 +145,7 @@ function LoadedPostManagementWorkspace({
 
 	const postId = resource.item.id;
 	const mainDescription =
-		resource.kind === "review"
+		resource.item.postKind === "review"
 			? t.posts.workspace.sections.main.reviewDescription
 			: resource.item.postKind === "reply"
 				? t.posts.workspace.sections.main.replyDescription
@@ -192,42 +153,42 @@ function LoadedPostManagementWorkspace({
 	const allSections: ManagementWorkspaceSection<PostManagementSectionId>[] = [
 		{
 			id: "main",
-			href: postManagementHref(resource.kind, postId),
+			href: postManagementHref(postId),
 			label: t.posts.workspace.sections.main.label,
 			description: mainDescription,
 			icon: BookOpenText,
 		},
 		{
 			id: "attributions",
-			href: postManagementSectionHref(resource.kind, postId, "attributions"),
+			href: postManagementSectionHref(postId, "attributions"),
 			label: t.posts.workspace.sections.attributions.label,
 			description: t.posts.workspace.sections.attributions.description,
 			icon: Link2,
 		},
 		{
 			id: "access",
-			href: postManagementSectionHref(resource.kind, postId, "access"),
+			href: postManagementSectionHref(postId, "access"),
 			label: t.units.workspace.sections.access.label,
 			description: t.units.workspace.sections.access.description,
 			icon: ShieldCheck,
 		},
 		{
 			id: "history",
-			href: postManagementSectionHref(resource.kind, postId, "history"),
+			href: postManagementSectionHref(postId, "history"),
 			label: t.units.workspace.sections.history.label,
 			description: t.units.workspace.sections.history.description,
 			icon: History,
 		},
 	];
-	const visibleSectionIds = new Set(getPostManagementSectionIds(capabilitySource));
+	const visibleSectionIds = new Set(getPostManagementSectionIds(resource.item));
 	const sections = allSections.filter(({ id }) => visibleSectionIds.has(id));
-	const currentSectionId = parsePostManagementSection(pathname, resource.kind, postId);
+	const currentSectionId = parsePostManagementSection(pathname, postId);
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
 	const sectionAllowed =
 		currentSectionId !== undefined && visibleSectionIds.has(currentSectionId);
 	const title =
 		resource.item.title ??
-		(resource.kind === "review"
+		(resource.item.postKind === "review"
 			? t.engagement.editReview
 			: resource.item.postKind === "reply"
 				? t.posts.replyPost
@@ -246,7 +207,7 @@ function LoadedPostManagementWorkspace({
 			<ManagementWorkspace
 				header={
 					<ManagementWorkspaceHeader
-						backHref={postDetailHref(resource.kind, postId)}
+						backHref={postDetailHref(postId)}
 						backLabel={t.posts.workspace.backToContent}
 						description={t.posts.workspace.description}
 						link={Link}
@@ -261,7 +222,7 @@ function LoadedPostManagementWorkspace({
 				) : requestedSection ? (
 					<section>
 						<ManagementWorkspaceSectionHeader
-							backHref={postManagementHref(resource.kind, postId)}
+							backHref={postManagementHref(postId)}
 							backLabel={t.posts.workspace.sections.main.label}
 							description={requestedSection.description}
 							link={Link}

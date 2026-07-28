@@ -9,9 +9,5 @@ export default async function PostEditLayout({
 	children: ReactNode;
 	params: Promise<{ id: string }>;
 }) {
-	return (
-		<PostManagementWorkspace kind="post" postId={(await params).id}>
-			{children}
-		</PostManagementWorkspace>
-	);
+	return <PostManagementWorkspace postId={(await params).id}>{children}</PostManagementWorkspace>;
 }

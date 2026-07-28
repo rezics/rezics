@@ -38,6 +38,7 @@ export const FilterPostKindValues = [
 	"excerpt",
 	"review",
 	"chapter",
+	"page",
 	"wiki",
 	"picture",
 	"governance_note",

@@ -17,7 +17,7 @@ describe("Studio routes", () => {
 		expect(studioContentHref("book", "unit-id")).toBe("/units/book/unit-id");
 		expect(studioContentHref("realm", "unit-id")).toBe("/realm/unit-id");
 		expect(studioContentHref("zone", "unit-id")).toBe("/zone/unit-id");
-		expect(studioContentHref("review", "unit-id")).toBe("/reviews/unit-id");
+		expect(studioContentHref("review", "unit-id")).toBe("/posts/unit-id");
 		expect(studioContentHref("wiki", "unit-id")).toBe("/posts/unit-id");
 		expect(studioSectionCreateHref("book")).toBe("/units/book/new");
 		expect(studioSectionCreateHref("wiki")).toBeUndefined();

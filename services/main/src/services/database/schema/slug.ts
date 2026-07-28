@@ -15,6 +15,11 @@ import { unit } from "./core";
  * A canonical target has at most one entry, while any number of Redirect entries
  * may preserve its former addresses. A null scope is the virtual address root.
  *
+ * The target-wide canonical uniqueness intentionally cannot represent a
+ * different Post slug in each Zone. If multi-Zone Posts later need scoped
+ * slugs, extend this model and its lookup contract together; the globally
+ * unique Post ID remains the stored identity.
+ *
  * @todo
  * Automate Redirect retention and quarantine. Until that policy is finalized,
  * release remains an explicit, audited platform action.

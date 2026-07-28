@@ -1,18 +1,18 @@
 "use client";
 
 import {
-	getApiReviewsByReviewIdQueryKey,
+	type GetApiPostsByPostIdStatus200,
 	getApiReviewsQueryKey,
 	useDeleteApiReviewsByReviewId,
-	useGetApiReviewsByReviewId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
+import { PencilIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import {
 	AlertDialog,
-	AlertDialogAction,
 	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
@@ -20,84 +20,74 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-	AlertDialogTrigger,
 	Button,
-	QueryFailure,
-	QueryPending,
+	MenuItem,
 } from "@rezics/ui";
+import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-actions";
 import { PostDetailArticle } from "@/features/posts/components/post-detail-article";
-import { PostSubjectHero } from "@/features/posts/components/post-subject-hero";
-import { canOpenPostManagement } from "@/features/posts/model/post-management-section";
-import { RelatedPostRecommendations } from "@/features/posts/post-list";
+import { getPostManagementSectionIds } from "@/features/posts/model/post-management-section";
+import { invalidatePostQueries } from "@/features/posts/query";
+import { postManagementSectionHref } from "@/features/posts/routing/post-management-routes";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 
-export function ReviewDetailPage({
-	id,
-	realmId,
-}: {
-	readonly id: string;
-	readonly realmId?: string;
-}) {
-	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiReviewsByReviewId({
-		path: { reviewId: id },
-		query: {
-			localizationLanguages,
-			...(realmId ? { realmId } : {}),
-		},
-	});
-	useLocalizationFallbackToast({
-		actualLanguage: query.data?.language ?? null,
-		localizationLanguages,
-		unitId: id,
-	});
+type ReviewPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
+
+export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 	const remove = useDeleteApiReviewsByReviewId();
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const { t } = useTranslation(["engagement", "ui"]);
-	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data) return null;
-	const review = query.data;
-	const canManage = canOpenPostManagement({
-		kind: "review",
-		capabilities: review.capabilities,
-	});
+	const [deleteOpen, setDeleteOpen] = useState(false);
+	const managementSectionId = getPostManagementSectionIds(review)[0];
+	const editHref = managementSectionId
+		? postManagementSectionHref(review.id, managementSectionId)
+		: undefined;
 	const deleteReview = async () => {
 		try {
-			await remove.mutateAsync({ path: { reviewId: id } });
+			await remove.mutateAsync({ path: { reviewId: review.id } });
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: getApiReviewsQueryKey() }),
-				queryClient.invalidateQueries({
-					queryKey: getApiReviewsByReviewIdQueryKey({ path: { reviewId: id } }),
-				}),
+				invalidatePostQueries(queryClient, review.id),
 			]);
+			setDeleteOpen(false);
 			router.push("/reviews");
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	};
+
 	return (
-		<main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
-			{review.subject ? <PostSubjectHero subject={review.subject} /> : null}
+		<>
 			<PostDetailArticle
-				actions={
-					canManage ? (
+				engagementOverflow={
+					editHref || review.capabilities.canEdit ? (
 						<>
-							<Button asChild size="sm" variant="outline">
-								<Link href={`/reviews/${id}/edit`}>{t.ui.edit}</Link>
-							</Button>
+							<FeedOverflowMenu canExclude={false} itemId={review.id}>
+								{editHref ? (
+									<MenuItem asChild value="edit-review">
+										<Link href={editHref}>
+											<PencilIcon aria-hidden />
+											{t.ui.edit}
+										</Link>
+									</MenuItem>
+								) : null}
+								{review.capabilities.canEdit ? (
+									<MenuItem
+										onSelect={() => setDeleteOpen(true)}
+										value="delete-review"
+										variant="destructive"
+									>
+										<Trash2Icon aria-hidden />
+										{t.engagement.deleteReview}
+									</MenuItem>
+								) : null}
+							</FeedOverflowMenu>
 							{review.capabilities.canEdit ? (
-								<AlertDialog>
-									<AlertDialogTrigger asChild>
-										<Button size="sm" variant="destructive">
-											{t.engagement.deleteReview}
-										</Button>
-									</AlertDialogTrigger>
+								<AlertDialog
+									onOpenChange={({ open }) => setDeleteOpen(open)}
+									open={deleteOpen}
+								>
 									<AlertDialogContent>
 										<AlertDialogHeader>
 											<AlertDialogTitle>
@@ -113,13 +103,14 @@ export function ReviewDetailPage({
 											<AlertDialogCancel>
 												{t.engagement.cancel}
 											</AlertDialogCancel>
-											<AlertDialogAction
+											<Button
 												isLoading={remove.isPending}
 												onClick={() => void deleteReview()}
+												type="button"
 												variant="destructive"
 											>
 												{t.engagement.delete}
-											</AlertDialogAction>
+											</Button>
 										</AlertDialogFooter>
 									</AlertDialogContent>
 								</AlertDialog>
@@ -139,9 +130,9 @@ export function ReviewDetailPage({
 					createdAt: review.createdAt,
 					scores: review.scores,
 				}}
+				variant="thread"
 			/>
-			<RelatedPostRecommendations postId={review.id} />
 			<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
-		</main>
+		</>
 	);
 }

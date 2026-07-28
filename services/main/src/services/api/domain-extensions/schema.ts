@@ -105,6 +105,7 @@ export const ZoneRenderQuery = t.Object(
 			t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
 		pageId: t.Optional(Uuid),
+		postId: t.Optional(Uuid),
 	},
 	{ additionalProperties: false },
 );

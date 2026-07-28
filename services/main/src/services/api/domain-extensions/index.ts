@@ -40,6 +40,7 @@ import { database } from "../../database";
 import {
 	software,
 	softwareRequirement,
+	post,
 	series,
 	seriesRelease,
 	unitOwnership,
@@ -674,6 +675,20 @@ export default new Elysia()
 					const unitIds = new Set<string>();
 					const wikiPostIds = new Set<string>();
 					const assetIds = new Set<string>();
+					if (query.postId) {
+						const [zoneWikiPost] = await database
+							.select({ id: post.id })
+							.from(post)
+							.where(
+								and(
+									eq(post.id, query.postId),
+									eq(post.kind, "wiki"),
+									eq(post.subjectUnitId, params.zoneId),
+								),
+							)
+							.limit(1);
+						if (zoneWikiPost) wikiPostIds.add(zoneWikiPost.id);
+					}
 					let usesZoneSearchFeature = false;
 					const mergeBlockReferences = (document: {
 						readonly blocks: readonly Block[];

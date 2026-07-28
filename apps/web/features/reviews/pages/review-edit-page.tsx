@@ -1,7 +1,7 @@
 "use client";
 
 import {
-	type GetApiReviewsByReviewIdStatus200,
+	type GetApiPostsByPostIdStatus200,
 	usePatchApiReviewsByReviewId,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
@@ -48,7 +48,11 @@ export function ReviewEditPage() {
 	);
 }
 
-function ReviewEditForm({ review }: { review: GetApiReviewsByReviewIdStatus200 }) {
+function ReviewEditForm({
+	review,
+}: {
+	review: Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
+}) {
 	const update = usePatchApiReviewsByReviewId();
 	const queryClient = useQueryClient();
 	const router = useRouter();
@@ -91,7 +95,7 @@ function ReviewEditForm({ review }: { review: GetApiReviewsByReviewIdStatus200 }
 			);
 			setDirty(false);
 			await languagesChanged();
-			router.push(postDetailHref("review", review.id));
+			router.push(postDetailHref(review.id));
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}

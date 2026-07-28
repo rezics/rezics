@@ -137,7 +137,10 @@ export function ReplyPostThread({
 			) : (
 				<SignInButton
 					className="h-11 w-full justify-start rounded-xl text-muted-foreground"
-					destination={postHref(parentPostId ?? rootPostId, realmId)}
+					destination={postHref(
+						parentPostId ?? rootPostId,
+						realmId ? { kind: "realm", realmId } : undefined,
+					)}
 					variant="outline"
 				>
 					{t.posts.signInToReply}
@@ -440,7 +443,10 @@ function ReplyPostNode({
 										</Button>
 									) : null
 								}
-								href={postHref(reply.id, realmId)}
+								href={postHref(
+									reply.id,
+									realmId ? { kind: "realm", realmId } : undefined,
+								)}
 								itemId={reply.id}
 								overflowMenu={
 									<PostOverflowMenu
@@ -490,7 +496,10 @@ function ReplyPostNode({
 						/>
 						<Link
 							className="text-muted-foreground text-xs hover:underline"
-							href={postHref(reply.id, realmId)}
+							href={postHref(
+								reply.id,
+								realmId ? { kind: "realm", realmId } : undefined,
+							)}
 						>
 							{formatRelativeTime(reply.createdAt, locale.target)}
 						</Link>

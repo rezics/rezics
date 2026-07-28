@@ -12,5 +12,5 @@ export default async function Page({
 		params,
 		postDetailSearchParams.parse(searchParams),
 	]);
-	return <PostDetailPage id={id} realmId={realmId ?? undefined} />;
+	return <PostDetailPage context={realmId ? { kind: "realm", realmId } : undefined} id={id} />;
 }

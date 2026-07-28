@@ -890,9 +890,8 @@ export const RealmDetailResponse = t.Object({
 		canRestoreHistory: t.Boolean(),
 	}),
 });
-export const PostDetailResponse = t.Object({
+const PostThreadDetailFields = {
 	id: Uuid,
-	postKind: OrdinaryPostKindResponse,
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	realmId: t.Nullable(Uuid),
 	subjectId: t.Nullable(Uuid),
@@ -901,6 +900,7 @@ export const PostDetailResponse = t.Object({
 	replyCount: t.Integer(),
 	language: ContentLanguage,
 	title: NullableText,
+	summary: NullableText,
 	body: PortableTextDocument,
 	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
@@ -913,6 +913,18 @@ export const PostDetailResponse = t.Object({
 		canManageAccess: t.Boolean(),
 		canReply: t.Boolean(),
 	}),
+} as const;
+export const OrdinaryPostDetailResponse = t.Object({
+	...PostThreadDetailFields,
+	postKind: t.Literal("post"),
+});
+export const ReplyPostDetailResponse = t.Object({
+	...PostThreadDetailFields,
+	postKind: t.Literal("reply"),
+});
+export const WikiPostDetailResponse = t.Object({
+	...PostThreadDetailFields,
+	postKind: t.Literal("wiki"),
 });
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
@@ -935,6 +947,12 @@ export const ReviewDetailResponse = t.Object({
 		canManageScores: t.Boolean(),
 	}),
 });
+export const PostDetailResponse = t.Union([
+	OrdinaryPostDetailResponse,
+	ReplyPostDetailResponse,
+	ReviewDetailResponse,
+	WikiPostDetailResponse,
+]);
 const BookContentStructureNodeResponse = t.Object({
 	id: Uuid,
 	parentId: t.Nullable(Uuid),

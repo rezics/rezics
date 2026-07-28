@@ -65,6 +65,7 @@ import {
 } from "@/features/content-language-display/chinese-content-display-context";
 import { FeedContentSelector } from "@/features/content-feed/components/feed-content-selector";
 import { FeedList } from "@/features/content-feed/components/feed-list";
+import { postHref } from "@/features/posts/url";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
 import { zonePageHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
@@ -130,7 +131,9 @@ function useZoneBlocks() {
 	return value;
 }
 
-function unitHref(unit: RenderUnit): string | null {
+function unitHref(unit: RenderUnit, context?: ZoneBlockContextValue): string | null {
+	if (unit.kind === "post" && context)
+		return postHref(unit.id, { kind: "zone", zone: context.projection.zone });
 	return unitIdHref(unit.kind, unit.id);
 }
 
@@ -154,7 +157,7 @@ function navigationHref(target: NavigationTarget, context: ZoneBlockContextValue
 			id: targetUnit.id,
 			slug: targetUnit.zonePageSlug,
 		});
-	return targetUnit ? unitHref(targetUnit) : null;
+	return targetUnit ? unitHref(targetUnit, context) : null;
 }
 
 function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: string }) {
@@ -167,7 +170,7 @@ function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: st
 					id: unit.id,
 					slug: unit.zonePageSlug,
 				})
-			: unitHref(unit);
+			: unitHref(unit, context);
 	const avatar =
 		appearance === "cover"
 			? unit.cover
@@ -457,6 +460,16 @@ function WikiPortableText({
 	);
 }
 
+export function ZoneWikiPostContent({
+	language,
+	value,
+}: {
+	readonly language: ZoneRenderProjection["zone"]["language"];
+	readonly value: unknown;
+}) {
+	return <WikiPortableText language={language} value={value} />;
+}
+
 function ZoneBlocks({ blocks }: { blocks: readonly Block[] }) {
 	return (
 		<>
@@ -478,6 +491,7 @@ function SearchResults({
 	total: number;
 	unitListLayout?: UnitListLayout;
 }) {
+	const context = useZoneBlocks();
 	const { t } = useTranslation("zones");
 	const { t: search } = useTranslation("search");
 	if (results.length === 0)
@@ -499,7 +513,13 @@ function SearchResults({
 				)}
 			>
 				{results.map((result) => {
-					const href = unitIdHref(result.kind, result.id);
+					const href =
+						result.category === "posts" || result.category === "reviews"
+							? postHref(result.id, {
+									kind: "zone",
+									zone: context.projection.zone,
+								})
+							: unitIdHref(result.kind, result.id);
 					const title = result.titles[0] ?? result.name ?? t.untitledResult;
 					const content = (
 						<div className="rounded-lg border border-border-weak px-3 py-2 transition-colors hover:bg-accent">
@@ -741,6 +761,7 @@ function ZoneFeedBlock({
 	presentation: FeedPresentation;
 	maxResults?: number;
 }) {
+	const context = useZoneBlocks();
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const [request, setRequest] = useState<ZoneFeedRequest>();
 	const [contentKinds, setContentKinds] = useState<readonly SimpleFeedContentKind[]>([]);
@@ -821,6 +842,7 @@ function ZoneFeedBlock({
 				renderItem={(item, metadata) => (
 					<FeedItemCard
 						item={item}
+						postContext={{ kind: "zone", zone: context.projection.zone }}
 						position={metadata.position}
 						setSize={metadata.setSize}
 					/>
@@ -931,6 +953,7 @@ function CollectionUnitList({
 	layout: UnitListLayout;
 	limit: number;
 }) {
+	const context = useZoneBlocks();
 	const { t } = useTranslation("zones");
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiCollectionsByCollectionIdItems({
@@ -946,7 +969,10 @@ function CollectionUnitList({
 		<ul aria-label={t.contentList} className={unitListClasses(layout)}>
 			{items.map((item) => (
 				<li key={item.membership.targetId}>
-					<FeedItemCard item={item.content} />
+					<FeedItemCard
+						item={item.content}
+						postContext={{ kind: "zone", zone: context.projection.zone }}
+					/>
 				</li>
 			))}
 		</ul>

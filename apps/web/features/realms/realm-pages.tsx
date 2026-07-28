@@ -458,9 +458,9 @@ function realmPinnedContentHref(
 ): string | undefined {
 	if (item.itemType === "post") {
 		if (item.postKind === "post" || item.postKind === "reply") {
-			return postHref(item.id, realmId);
+			return postHref(item.id, { kind: "realm", realmId });
 		}
-		if (item.postKind === "review") return `/reviews/${item.id}`;
+		if (item.postKind === "review") return postHref(item.id, { kind: "realm", realmId });
 		return undefined;
 	}
 	if (item.unitKind === "tag") return tagDetailHref(item.id);

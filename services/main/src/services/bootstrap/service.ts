@@ -967,6 +967,18 @@ async function ensureOfficialZonePage(
 		statusActor: { kind: "system" },
 	});
 	let changed = Boolean(created);
+	const [pagePost] = await tx
+		.insert(post)
+		.values({
+			id: value.homePage.id,
+			subjectUnitId: value.id,
+			kind: "page",
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ id: post.id });
+	changed = Boolean(pagePost) || changed;
 	const [pageOwnership] = await tx
 		.insert(zonePage)
 		.values({

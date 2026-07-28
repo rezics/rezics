@@ -22,7 +22,7 @@ export function PostManagementSectionHeader({
 	return (
 		<ManagementWorkspaceSectionHeader
 			action={action}
-			backHref={postManagementHref(resource.kind, resource.item.id)}
+			backHref={postManagementHref(resource.item.id)}
 			backLabel={t.posts.workspace.sections.main.label}
 			description={description}
 			link={Link}

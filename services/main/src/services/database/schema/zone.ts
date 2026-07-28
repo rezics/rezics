@@ -36,6 +36,7 @@ export const zone = pgTable(
 /**
  * Proves that a Zone Page Unit belongs to a Zone.
  *
+ * The same Unit also has `post.kind = page` with this Zone as its subject.
  * Slug addresses are optional and page-structure is only a visual index, so
  * neither can serve as the ownership relation.
  */

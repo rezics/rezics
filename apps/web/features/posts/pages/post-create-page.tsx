@@ -78,7 +78,12 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 					},
 				});
 				await invalidatePostQueries(queryClient, post.id);
-				router.push(postHref(post.id, selectedRealm?.id));
+				router.push(
+					postHref(
+						post.id,
+						selectedRealm ? { kind: "realm", realmId: selectedRealm.id } : undefined,
+					),
+				);
 			})
 			.catch(() => undefined);
 	}

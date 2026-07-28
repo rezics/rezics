@@ -59,11 +59,10 @@ export function studioContentHref(sectionId: StudioSectionId, unitId: string): s
 			return `/zone/${unitId}`;
 		case "post":
 		case "wiki":
+		case "review":
 			return `/posts/${unitId}`;
 		case "collection":
 			return `/collections/${unitId}`;
-		case "review":
-			return `/reviews/${unitId}`;
 		case "poll":
 			return `/polls/${unitId}`;
 		default:

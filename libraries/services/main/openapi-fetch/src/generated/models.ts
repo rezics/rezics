@@ -606,6 +606,7 @@ export const PostFilterKindInEnum = {
 	excerpt: "excerpt",
 	review: "review",
 	chapter: "chapter",
+	page: "page",
 	wiki: "wiki",
 	picture: "picture",
 	governance_note: "governance_note",
@@ -2324,6 +2325,7 @@ export type UnitPredicate = {
 							| "excerpt"
 							| "review"
 							| "chapter"
+							| "page"
 							| "wiki"
 							| "picture"
 							| "governance_note"
@@ -26997,6 +26999,12 @@ export type GetZoneRenderProjectionQuery = {
 	 * @type string | undefined
 	 */
 	pageId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	postId?: string;
 };
 
 export const GetZoneRenderProjectionStatus200ZoneLanguage = {
@@ -80026,14 +80034,6 @@ export type GetApiPostsByPostIdQuery = {
 	localizationLanguages?: GetApiPostsByPostIdLocalizationLanguagesEnum[];
 };
 
-export const GetApiPostsByPostIdStatus200PostKindEnum = {
-	post: "post",
-	reply: "reply",
-} as const;
-
-export type GetApiPostsByPostIdStatus200PostKindEnum =
-	(typeof GetApiPostsByPostIdStatus200PostKindEnum)[keyof typeof GetApiPostsByPostIdStatus200PostKindEnum];
-
 export const GetApiPostsByPostIdStatus200AttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -80129,47 +80129,8 @@ export const GetApiPostsByPostIdStatus200SubjectLanguageEnum = {
 export type GetApiPostsByPostIdStatus200SubjectLanguageEnum =
 	(typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum)[keyof typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum];
 
-/**
- * @type object
- */
-export type GetApiPostsByPostIdStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @type string
-	 */
-	postKind: GetApiPostsByPostIdStatus200PostKindEnum;
-	/**
-	 * @type array
-	 */
-	attributions: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @default 'author'
-		 * @type string
-		 */
-		role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
-		/**
-		 * @description
-		 * Format: `fractional-position`
-		 * @minLength 2
-		 * @maxLength 512
-		 * @type string
-		 */
-		position: string;
-		/**
-		 * @type object
-		 */
-		creditedUnit: {
+export type GetApiPostsByPostIdStatus200 =
+	| {
 			/**
 			 * @description
 			 * Format: `uuid`
@@ -80177,258 +80138,9 @@ export type GetApiPostsByPostIdStatus200 = {
 			 */
 			id: string;
 			/**
-			 * @default 'slug_namespace'
-			 * @type string
+			 * @type array
 			 */
-			kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
-			/**
-			 * @type string
-			 */
-			language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
-			slugAddress:
-				| ({
-						/**
-						 * @minLength 1
-						 * @maxLength 63
-						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
-						 * @type string
-						 */
-						slug: string;
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						scopeUnitId: string;
-						/**
-						 * @type array
-						 */
-						canonicalPath: string[];
-				  } | null)
-				| null;
-			title: (string | null) | null;
-			summary: (string | null) | null;
-			avatar:
-				| (
-						| (
-								| {
-										/**
-										 * @type string
-										 */
-										type: "image";
-										/**
-										 * @type object
-										 */
-										image: {
-											/**
-											 * @description
-											 * Format: `uuid`
-											 * @type string
-											 */
-											id: string;
-											/**
-											 * @type string
-											 */
-											url: string;
-										};
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "emoji";
-										/**
-										 * @maxLength 64
-										 * @type string
-										 */
-										emoji: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "icon";
-										/**
-										 * @type object
-										 */
-										icon: {
-											/**
-											 * @type string
-											 */
-											provider: "font-awesome";
-											/**
-											 * @type string
-											 */
-											prefix: GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
-											/**
-											 * @maxLength 128
-											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-											 * @type string
-											 */
-											name: string;
-										};
-								  }
-						  )
-						| null
-				  )
-				| null;
-		};
-	}[];
-	realmId: (string | null) | null;
-	subjectId: (string | null) | null;
-	rootPostId: (string | null) | null;
-	parentPostId: (string | null) | null;
-	replyCount: string | number;
-	/**
-	 * @type string
-	 */
-	language: GetApiPostsByPostIdStatus200LanguageEnum;
-	title: (string | null) | null;
-	/**
-	 * @type object
-	 */
-	body: {
-		/**
-		 * @type string
-		 */
-		_type: "portable-text";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		content: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "unit-mention";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								unitId: string;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "image";
-					/**
-					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-					 * @type string
-					 */
-					assetId: string;
-					/**
-					 * @type string | undefined
-					 */
-					alt?: string;
-					/**
-					 * @type string | undefined
-					 */
-					caption?: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @pattern ^(?!(?:block|image)$).+
-					 * @type string
-					 */
-					_type: string;
-					[key: string]: unknown;
-			  }
-		)[];
-	};
-	latestRevisionId: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-	subject:
-		| ({
+			attributions: {
 				/**
 				 * @description
 				 * Format: `uuid`
@@ -80436,71 +80148,1468 @@ export type GetApiPostsByPostIdStatus200 = {
 				 */
 				id: string;
 				/**
+				 * @default 'author'
 				 * @type string
 				 */
-				type: string;
+				role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @type object
+				 */
+				creditedUnit: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'slug_namespace'
+					 * @type string
+					 */
+					kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
+					/**
+					 * @type string
+					 */
+					language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				};
+			}[];
+			realmId: (string | null) | null;
+			subjectId: (string | null) | null;
+			rootPostId: (string | null) | null;
+			parentPostId: (string | null) | null;
+			replyCount: string | number;
+			/**
+			 * @type string
+			 */
+			language: GetApiPostsByPostIdStatus200LanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			body: {
 				/**
 				 * @type string
 				 */
-				language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
-				title: (string | null) | null;
-				summary: (string | null) | null;
-				cover:
-					| ({
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
 							/**
-							 * @description
-							 * Format: `uuid`
 							 * @type string
 							 */
-							id: string;
+							_key: string;
 							/**
 							 * @type string
 							 */
-							url: string;
-					  } | null)
-					| null;
-		  } | null)
-		| null;
-	/**
-	 * @type array
-	 */
-	scores: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		scoreId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		contextUnitId: string;
-		value: string | number;
-	}[];
-	/**
-	 * @type object
-	 */
-	capabilities: {
-		/**
-		 * @type boolean
-		 */
-		canEdit: boolean;
-		/**
-		 * @type boolean
-		 */
-		canManageAttributions: boolean;
-		/**
-		 * @type boolean
-		 */
-		canManageAccess: boolean;
-		/**
-		 * @type boolean
-		 */
-		canReply: boolean;
-	};
-};
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+			latestRevisionId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						type: string;
+						/**
+						 * @type string
+						 */
+						language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			/**
+			 * @type array
+			 */
+			scores: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scoreId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contextUnitId: string;
+				value: string | number;
+			}[];
+			/**
+			 * @type object
+			 */
+			capabilities: {
+				/**
+				 * @type boolean
+				 */
+				canEdit: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAccess: boolean;
+				/**
+				 * @type boolean
+				 */
+				canReply: boolean;
+			};
+			/**
+			 * @type string
+			 */
+			postKind: "post";
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type array
+			 */
+			attributions: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'author'
+				 * @type string
+				 */
+				role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @type object
+				 */
+				creditedUnit: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'slug_namespace'
+					 * @type string
+					 */
+					kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
+					/**
+					 * @type string
+					 */
+					language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				};
+			}[];
+			realmId: (string | null) | null;
+			subjectId: (string | null) | null;
+			rootPostId: (string | null) | null;
+			parentPostId: (string | null) | null;
+			replyCount: string | number;
+			/**
+			 * @type string
+			 */
+			language: GetApiPostsByPostIdStatus200LanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			body: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+			latestRevisionId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						type: string;
+						/**
+						 * @type string
+						 */
+						language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			/**
+			 * @type array
+			 */
+			scores: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scoreId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contextUnitId: string;
+				value: string | number;
+			}[];
+			/**
+			 * @type object
+			 */
+			capabilities: {
+				/**
+				 * @type boolean
+				 */
+				canEdit: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAccess: boolean;
+				/**
+				 * @type boolean
+				 */
+				canReply: boolean;
+			};
+			/**
+			 * @type string
+			 */
+			postKind: "reply";
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			postKind: "review";
+			/**
+			 * @type array
+			 */
+			attributions: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'author'
+				 * @type string
+				 */
+				role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @type object
+				 */
+				creditedUnit: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'slug_namespace'
+					 * @type string
+					 */
+					kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
+					/**
+					 * @type string
+					 */
+					language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				};
+			}[];
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			targetId: string;
+			realmId: (string | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			/**
+			 * @type string
+			 */
+			language: GetApiPostsByPostIdStatus200LanguageEnum;
+			body:
+				| ({
+						/**
+						 * @type string
+						 */
+						_type: "portable-text";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type array
+						 */
+						content: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "block";
+									/**
+									 * @type array
+									 */
+									children: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "span";
+												/**
+												 * @type string
+												 */
+												text: string;
+												/**
+												 * @type array | undefined
+												 */
+												marks?: string[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "unit-mention";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string
+												 */
+												unitId: string;
+										  }
+									)[];
+									/**
+									 * @type array | undefined
+									 */
+									markDefs?: {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+									}[];
+									/**
+									 * @type string | undefined
+									 */
+									listItem?: string;
+									/**
+									 * @type string | undefined
+									 */
+									style?: string;
+									/**
+									 * @minLength 1
+									 * @type integer | undefined
+									 */
+									level?: number;
+									[key: string]: unknown;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "image";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									assetId: string;
+									/**
+									 * @type string | undefined
+									 */
+									alt?: string;
+									/**
+									 * @type string | undefined
+									 */
+									caption?: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!(?:block|image)$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+				  } | null)
+				| null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						type: string;
+						/**
+						 * @type string
+						 */
+						language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			/**
+			 * @type array
+			 */
+			scores: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scoreId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contextUnitId: string;
+				value: string | number;
+			}[];
+			/**
+			 * @type object
+			 */
+			capabilities: {
+				/**
+				 * @type boolean
+				 */
+				canEdit: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAccess: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageScores: boolean;
+			};
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type array
+			 */
+			attributions: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'author'
+				 * @type string
+				 */
+				role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 512
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @type object
+				 */
+				creditedUnit: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'slug_namespace'
+					 * @type string
+					 */
+					kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
+					/**
+					 * @type string
+					 */
+					language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				};
+			}[];
+			realmId: (string | null) | null;
+			subjectId: (string | null) | null;
+			rootPostId: (string | null) | null;
+			parentPostId: (string | null) | null;
+			replyCount: string | number;
+			/**
+			 * @type string
+			 */
+			language: GetApiPostsByPostIdStatus200LanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			body: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+			latestRevisionId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						type: string;
+						/**
+						 * @type string
+						 */
+						language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			/**
+			 * @type array
+			 */
+			scores: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scoreId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				contextUnitId: string;
+				value: string | number;
+			}[];
+			/**
+			 * @type object
+			 */
+			capabilities: {
+				/**
+				 * @type boolean
+				 */
+				canEdit: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAccess: boolean;
+				/**
+				 * @type boolean
+				 */
+				canReply: boolean;
+			};
+			/**
+			 * @type string
+			 */
+			postKind: "wiki";
+	  };
 
 export const GetApiPostsByPostIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",

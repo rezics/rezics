@@ -8,11 +8,13 @@ import {
 	FeedNonReviewPostItemResponse,
 	FeedReviewItemResponse,
 	LocalizedContentMetricResponse,
+	OrdinaryPostDetailResponse,
 	PostDetailResponse,
 	ReviewDetailResponse,
 	UnitDetailAttributionSummaryResponse,
 	UnitProgressStatisticsResponse,
 	UnitVariantContextResponse,
+	WikiPostDetailResponse,
 } from "./response";
 import { ReactionSummaryResponse } from "./action-response";
 
@@ -119,9 +121,10 @@ describe("API response values", () => {
 	});
 
 	it("keeps Post detail presentation and engagement context explicit", () => {
-		expect(PostDetailResponse.required).toContain("subject");
-		expect(PostDetailResponse.required).toContain("scores");
-		expect(PostDetailResponse.properties.capabilities.required).toEqual([
+		expect(PostDetailResponse.anyOf).toHaveLength(4);
+		expect(OrdinaryPostDetailResponse.required).toContain("subject");
+		expect(OrdinaryPostDetailResponse.required).toContain("scores");
+		expect(OrdinaryPostDetailResponse.properties.capabilities.required).toEqual([
 			"canEdit",
 			"canManageAttributions",
 			"canManageAccess",
@@ -136,6 +139,7 @@ describe("API response values", () => {
 			"canManageAccess",
 			"canManageScores",
 		]);
+		expect(WikiPostDetailResponse.properties.postKind.const).toBe("wiki");
 		expect(ReactionSummaryResponse.required).toContain("viewerReaction");
 	});
 

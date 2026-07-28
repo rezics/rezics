@@ -14,6 +14,7 @@ import { ZoneHomePageSlug } from "@rezics/slug";
 import { database, type DatabaseTransaction } from "../database";
 import {
 	contentStructureNode,
+	post,
 	unit,
 	unitOwnership,
 	unitLocalization,
@@ -138,8 +139,9 @@ function parseLocalization(row: StoredZonePageLocalization) {
 /**
  * Lists every Page owned by a Zone.
  *
- * Ownership comes from `zone_page`; a slug address and page-structure placement
- * are independent, optional projections.
+ * Ownership comes from `zone_page` and is mirrored by a `post(kind = page)`
+ * whose subject is the Zone. A slug address and page-structure placement are
+ * independent, optional projections.
  */
 export async function listZonePageUnits(
 	tx: DatabaseTransaction,
@@ -154,6 +156,14 @@ export async function listZonePageUnits(
 		})
 		.from(zonePage)
 		.innerJoin(unit, eq(unit.id, zonePage.id))
+		.innerJoin(
+			post,
+			and(
+				eq(post.id, zonePage.id),
+				eq(post.kind, "page"),
+				eq(post.subjectUnitId, zonePage.zoneId),
+			),
+		)
 		.where(and(eq(zonePage.zoneId, zoneId), eq(unit.kind, "zone_page"), isNull(unit.deletedAt)))
 		.orderBy(asc(unit.createdAt), asc(unit.id));
 	if (!pages.length) return [];
@@ -335,6 +345,14 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 					.select({ id: zonePage.id })
 					.from(zonePage)
 					.innerJoin(unit, eq(unit.id, zonePage.id))
+					.innerJoin(
+						post,
+						and(
+							eq(post.id, zonePage.id),
+							eq(post.kind, "page"),
+							eq(post.subjectUnitId, zonePage.zoneId),
+						),
+					)
 					.where(
 						and(
 							eq(zonePage.id, input.pageId),
@@ -358,6 +376,7 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 				statusActor: { kind: "profile", profileId: input.actorProfileId },
 			});
 			pageId = created.id;
+			await tx.insert(post).values({ id: pageId, subjectUnitId: input.zoneId, kind: "page" });
 			await tx.insert(zonePage).values({ id: pageId, zoneId: input.zoneId });
 			if (input.slug !== undefined && input.slug !== null)
 				await replaceZonePageSlugAddress(tx, {

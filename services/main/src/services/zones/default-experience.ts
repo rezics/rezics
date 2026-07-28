@@ -11,7 +11,7 @@ import { ZoneHomePageSlug } from "@rezics/slug";
 import { sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { unitLocalization, unitOwnership, zonePage } from "../database/schema";
+import { post, unitLocalization, unitOwnership, zonePage } from "../database/schema";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import { fractionalPositionAt } from "../ordering/position";
 import { getZoneSearchFeature, putZoneSearchFeatureInTransaction } from "../search/documents";
@@ -50,6 +50,7 @@ async function createDefaultFeedPage(
 		publishedAt: new Date(),
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});
+	await tx.insert(post).values({ id: page.id, subjectUnitId: input.zoneId, kind: "page" });
 	await tx.insert(zonePage).values({ id: page.id, zoneId: input.zoneId });
 	if (useHomeSlug)
 		await replaceZonePageSlugAddress(tx, {

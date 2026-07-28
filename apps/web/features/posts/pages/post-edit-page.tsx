@@ -14,16 +14,29 @@ import { useState, type FormEvent } from "react";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { ReviewEditPage } from "@/features/reviews/pages/review-edit-page";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { PostEditorFields } from "../components/post-editor-fields";
 import { PostManagementSectionHeader } from "../components/post-management-section-header";
-import { useOrdinaryPostManagement } from "../components/post-management-workspace";
+import {
+	useOrdinaryPostManagement,
+	usePostManagement,
+} from "../components/post-management-workspace";
 import { invalidatePostQueries } from "../query";
 import { postDetailHref } from "../routing/post-management-routes";
 
+type OrdinaryPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "post" }>;
+type ReplyPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "reply" }>;
+
 export function PostEditPage() {
+	const { resource } = usePostManagement();
+	if (resource.item.postKind === "review") return <ReviewEditPage />;
+	return <OrdinaryPostEditPage />;
+}
+
+function OrdinaryPostEditPage() {
 	const { t } = useTranslation(["errors", "posts"]);
 	const { item: post } = useOrdinaryPostManagement();
 	const { selectedLanguage } = useContentLanguageEditor();
@@ -51,7 +64,7 @@ export function PostEditPage() {
 	);
 }
 
-function OrdinaryPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
+function OrdinaryPostEditForm({ post }: { post: OrdinaryPost }) {
 	const { t } = useTranslation(["posts", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -84,7 +97,7 @@ function OrdinaryPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) 
 					setDirty(false);
 					await invalidatePostQueries(queryClient, post.id);
 					await languagesChanged();
-					router.push(postDetailHref("post", post.id));
+					router.push(postDetailHref(post.id));
 				},
 			},
 		);
@@ -117,7 +130,7 @@ function OrdinaryPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) 
 	);
 }
 
-function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
+function ReplyPostEditForm({ post }: { post: ReplyPost }) {
 	const { t } = useTranslation(["posts", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -149,7 +162,7 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 					setDirty(false);
 					await invalidatePostQueries(queryClient, rootPostId, post.id);
 					await languagesChanged();
-					router.push(postDetailHref("post", post.id));
+					router.push(postDetailHref(post.id));
 				},
 			},
 		);

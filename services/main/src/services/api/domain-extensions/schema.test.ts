@@ -1,7 +1,7 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { SystemRequirementResponse } from "./schema";
+import { SystemRequirementResponse, ZoneRenderQuery } from "./schema";
 
 const requirement = {
 	id: "019b76da-a800-7300-8000-000000000001",
@@ -30,5 +30,17 @@ describe("Software system requirement response", () => {
 				hardware: { memory: undefined },
 			}),
 		).toBe(false);
+	});
+});
+
+describe("Zone render query", () => {
+	it("accepts a Post ID as a render-reference context", () => {
+		expect(
+			Check(ZoneRenderQuery, {
+				postId: "019b76da-a800-7300-8000-000000000001",
+				localizationLanguages: ["zh", "en"],
+			}),
+		).toBe(true);
+		expect(Check(ZoneRenderQuery, { postId: "not-a-unit-id" })).toBe(false);
 	});
 });

@@ -77,6 +77,7 @@ import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
+const interactivePostKind = sql<"post" | "reply" | "review" | "wiki">`${post.kind}::text`;
 
 const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'post'::post_kind
 	then ${postReplyStat.undeletedDescendantCount}
@@ -386,13 +387,14 @@ export default new Elysia()
 					const [row] = await database
 						.select({
 							id: post.id,
-							postKind: ordinaryPostKind,
+							postKind: interactivePostKind,
 							subjectId: post.subjectUnitId,
 							rootPostId: postReply.rootPostId,
 							parentPostId: postReply.parentPostId,
 							replyCount,
 							language: unitLocalization.language,
 							title: unitLocalization.title,
+							summary: unitLocalization.summary,
 							body: unitLocalization.content,
 							latestRevisionId: unitRevisionHead.revisionId,
 							createdAt: unit.createdAt,
@@ -419,7 +421,7 @@ export default new Elysia()
 						.where(
 							and(
 								eq(post.id, params.postId),
-								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`,
+								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'review'::post_kind, 'wiki'::post_kind)`,
 								query.realmId
 									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
 									: undefined,
@@ -428,8 +430,10 @@ export default new Elysia()
 						.limit(1);
 					if (!row) throw new PostNotFound();
 					if (!row.language) throw new PostLocalizationNotFound();
+					if (row.postKind === "review" && !row.subjectId) throw new PostNotFound();
 					const language = row.language;
 					const subjectId = row.subjectId;
+					const threaded = row.postKind === "post" || row.postKind === "reply";
 					const subjectPromise = subjectId
 						? authorization.unit
 								.canRead(subjectId)
@@ -451,6 +455,7 @@ export default new Elysia()
 						accessDecision,
 						replyCreationDecision,
 						targetingLock,
+						canManageScores,
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
 						selectPostScores(row.id).then((items) =>
@@ -461,39 +466,78 @@ export default new Elysia()
 							})),
 						),
 						subjectPromise,
-						authorization.unit.canUpdate(row.id, ["localizations"]),
+						row.postKind === "wiki"
+							? Promise.resolve(false)
+							: authorization.unit.canUpdate(row.id, ["localizations"]),
 						authorization.unit.canUpdate(row.id, ["credit-attributions"]),
 						authorization.unit.decide(row.id, "unit.access.manage"),
-						query.realmId
+						threaded && query.realmId
 							? authorization.unit.decide(query.realmId, "realm.post.replies.create")
 							: Promise.resolve({ allowed: true } as const),
-						findPostTargetingLock(database, {
-							targets:
-								row.postKind === "reply" && row.rootPostId
-									? [
-											{ relation: "root", unitId: row.rootPostId },
-											{ relation: "parent", unitId: row.id },
-										]
-									: [{ relation: "root", unitId: row.id }],
-							...(query.realmId ? { realmId: query.realmId } : {}),
-						}),
+						threaded
+							? findPostTargetingLock(database, {
+									targets:
+										row.postKind === "reply" && row.rootPostId
+											? [
+													{ relation: "root", unitId: row.rootPostId },
+													{ relation: "parent", unitId: row.id },
+												]
+											: [{ relation: "root", unitId: row.id }],
+									...(query.realmId ? { realmId: query.realmId } : {}),
+								})
+							: Promise.resolve(null),
+						row.postKind === "review"
+							? authorization.unit.canUpdate(row.id, ["relations", "scores"])
+							: Promise.resolve(false),
 					]);
-					return {
-						...row,
+					const common = {
+						id: row.id,
 						language,
 						realmId: query.realmId ?? null,
 						attributions: attributionMap.get(row.id) ?? [],
-						replyCount: toSafeInteger(row.replyCount, "reply count"),
-						body: toPortableTextResponse(row.body),
+						title: row.title,
+						summary: row.summary,
+						createdAt: row.createdAt,
+						updatedAt: row.updatedAt,
 						subject,
 						scores,
+					};
+					if (row.postKind === "review") {
+						const targetId = row.subjectId;
+						if (!targetId) throw new PostNotFound();
+						return {
+							...common,
+							postKind: "review" as const,
+							targetId,
+							body: row.body === null ? null : toPortableTextResponse(row.body),
+							capabilities: {
+								canEdit,
+								canManageAttributions,
+								canManageAccess: accessDecision.allowed,
+								canManageScores,
+							},
+						};
+					}
+					const threadDetail = {
+						...common,
+						subjectId: row.subjectId,
+						rootPostId: row.rootPostId,
+						parentPostId: row.parentPostId,
+						replyCount: toSafeInteger(row.replyCount, "reply count"),
+						body: toPortableTextResponse(row.body),
+						latestRevisionId: row.latestRevisionId,
 						capabilities: {
 							canEdit,
 							canManageAttributions,
 							canManageAccess: accessDecision.allowed,
-							canReply: replyCreationDecision.allowed && !targetingLock,
+							canReply: threaded && replyCreationDecision.allowed && !targetingLock,
 						},
 					};
+					if (row.postKind === "reply")
+						return { ...threadDetail, postKind: "reply" as const };
+					if (row.postKind === "wiki")
+						return { ...threadDetail, postKind: "wiki" as const };
+					return { ...threadDetail, postKind: "post" as const };
 				},
 				{
 					params: PostParams,

@@ -49,6 +49,7 @@ export interface PostDetailArticleValue {
 
 export function PostDetailArticle({
 	actions,
+	bodyContent,
 	commentsHref,
 	engagementOverflow,
 	post,
@@ -56,6 +57,7 @@ export function PostDetailArticle({
 	variant = "card",
 }: {
 	readonly actions?: ReactNode;
+	readonly bodyContent?: ReactNode;
 	readonly commentsHref?: string;
 	readonly engagementOverflow?: ReactNode;
 	readonly post: PostDetailArticleValue;
@@ -84,7 +86,9 @@ export function PostDetailArticle({
 			>
 				{displayedTitle}
 			</h1>
-			{post.body ? (
+			{bodyContent !== undefined ? (
+				<div className="prose mt-5 max-w-none">{bodyContent}</div>
+			) : post.body ? (
 				<div className="prose mt-5 max-w-none">
 					<LocalizedPortableTextContent
 						language={post.language}

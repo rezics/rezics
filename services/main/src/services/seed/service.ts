@@ -1377,6 +1377,13 @@ async function seedToaruWiki(
 		}),
 	]);
 	if (!pageUnit) throw new Error("Toaru Zone Page Unit insertion failed");
+	await tx.insert(post).values({
+		id: pageUnit.id,
+		subjectUnitId: zoneUnit.id,
+		kind: "page",
+		createdAt: pageUnit.createdAt,
+		updatedAt: pageUnit.updatedAt,
+	});
 	await tx.insert(zonePage).values({
 		id: pageUnit.id,
 		zoneId: zoneUnit.id,

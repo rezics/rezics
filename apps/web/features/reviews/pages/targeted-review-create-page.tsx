@@ -5,6 +5,7 @@ import { PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useRouter } from "next/navigation";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { postHref } from "@/features/posts/url";
 import { isCatalogDetailUnitFor } from "@/features/units/model/catalog-detail-unit";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
@@ -55,7 +56,7 @@ export function TargetedReviewCreatePage({
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading description={title ?? t.ui.unnamed} title={t.engagement.newReview} />
 				<ReviewComposer
-					onCreated={(reviewId) => router.push(`/reviews/${reviewId}`)}
+					onCreated={(reviewId) => router.push(postHref(reviewId))}
 					target={{
 						id: query.data.id,
 						label: title ?? t.ui.unnamed,

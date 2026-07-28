@@ -119,14 +119,42 @@ it does not retain `home` as a redirect to the former homepage.
 
 Zone Page navigation references and mutations store Page Unit IDs. Rendering
 prefers the current slug route, but falls back to the long Page ID route when a
-slug is absent. The Zone child labels `manage`, `page`, and `search` are
+slug is absent. The Zone child labels `manage`, `page`, `posts`, and `search` are
 reserved for application routes and cannot be assigned as Page slugs.
 
+### Post interaction addresses
+
+Every interactive Post kind uses the same ID-addressed interaction family.
+Ordinary Posts, Replies, Reviews, and Wiki Posts render globally at
+`/posts/{postId}` and use `/posts/{postId}/edit` for management. Review and Wiki
+are Post kinds, not separate browser detail resources.
+
+A Zone may preserve its presentation context around the same globally unique
+Post ID:
+
+| Zone state  | Contextual Post route           |
+| ----------- | ------------------------------- |
+| addressed   | `/z/{zoneSlug}/posts/{postId}`  |
+| unaddressed | `/zone/{zoneId}/posts/{postId}` |
+
+These routes do not create a second Post identity or a Zone-owned Post route
+family. They select a Zone presentation context while all Post interaction and
+data access remains ID-addressed. Zone Pages are the explicit exception: they
+also have `post.kind = page`, but keep the Page routes documented above because
+their interaction model is Page composition, not Post detail.
+
+Scoped Post slugs are not implemented. If one Post later receives a different
+human-facing slug in each Zone, the address registry must support multiple
+canonical addresses per target in distinct scopes. That future lookup must not
+change the globally unique Post ID used by relationships, APIs, mutations, or
+cache keys.
+
 Candidates such as Collection `/collection` and `/c`, Entity `/entity` and
-`/e`, Tag `/tag` and `/t`, Post `/post` and `/p`, Poll `/poll` and `/q`, Book
-`/book` and `/b`, Software `/software` and `/s`, Media `/media` and `/m`, Review
-`/review` and `/rv`, and Series `/series` and `/sr` are not enabled or reserved.
-Adding a candidate to documentation must not install a namespace or route.
+`/e`, Tag `/tag` and `/t`, Post slug aliases `/post` and `/p`, Poll `/poll` and
+`/q`, Book `/book` and `/b`, Software `/software` and `/s`, Media `/media` and
+`/m`, Review `/review` and `/rv`, and Series `/series` and `/sr` are not enabled
+or reserved. Adding a candidate to documentation must not install a namespace
+or route.
 
 ## Collections and Favorites
 

@@ -1,4 +1,5 @@
 import {
+	getApiPostsByPostIdQueryKey,
 	getApiReviewsByReviewIdQueryKey,
 	getApiReviewsQueryKey,
 	getApiScoresByTargetIdQueryKey,
@@ -25,6 +26,9 @@ export async function invalidateReviews(
 		);
 	if (reviewId)
 		invalidations.push(
+			queryClient.invalidateQueries({
+				queryKey: getApiPostsByPostIdQueryKey({ path: { postId: reviewId } }),
+			}),
 			queryClient.invalidateQueries({
 				queryKey: getApiReviewsByReviewIdQueryKey({ path: { reviewId } }),
 			}),

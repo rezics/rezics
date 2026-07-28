@@ -11,9 +11,8 @@ import type { ReactNode } from "react";
 import { CardContent, cn, Cover, IdentityAvatar } from "@rezics/ui";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
-import { postHref } from "@/features/posts/url";
+import { postHref, type PostInteractionContext } from "@/features/posts/url";
 import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
-import { reviewHref } from "@/features/reviews/routing/review-routes";
 import { realmHref } from "@/features/slugs/unit-route";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
@@ -62,6 +61,7 @@ export function FeedItemCard({
 	displayContext = UnscopedFeedDisplayContext,
 	item,
 	onHiddenChange,
+	postContext,
 	position,
 	requestedRealmId,
 	setSize,
@@ -70,6 +70,7 @@ export function FeedItemCard({
 	displayContext?: FeedDisplayContext;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
+	postContext?: PostInteractionContext;
 	position?: number;
 	requestedRealmId?: string;
 	setSize?: number;
@@ -80,6 +81,7 @@ export function FeedItemCard({
 			displayContext={displayContext}
 			onHiddenChange={onHiddenChange}
 			post={item}
+			postContext={postContext}
 			position={position}
 			requestedRealmId={requestedRealmId}
 			setSize={setSize}
@@ -101,6 +103,7 @@ export function FeedPostCard({
 	canExclude = false,
 	displayContext = UnscopedFeedDisplayContext,
 	onHiddenChange,
+	postContext,
 	position,
 	setSize,
 }: {
@@ -109,6 +112,7 @@ export function FeedPostCard({
 	canExclude?: boolean;
 	displayContext?: FeedDisplayContext;
 	onHiddenChange?: (hidden: boolean) => void;
+	postContext?: PostInteractionContext;
 	position?: number;
 	setSize?: number;
 }) {
@@ -116,7 +120,8 @@ export function FeedPostCard({
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
-	const href = feedPostHref(post, realmId);
+	const context = postContext ?? (realmId ? { kind: "realm" as const, realmId } : undefined);
+	const href = postHref(post.id, context);
 	const subjectHref = post.subject ? unitHref(post.subject.type, post.subject.id) : undefined;
 	const subjectTitle = useChineseContentText(
 		post.subject?.title ?? t.actions.view,
@@ -182,7 +187,7 @@ export function FeedPostCard({
 				{post.replyContext ? (
 					<Link
 						className="flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
-						href={postHref(post.replyContext.rootPostId, realmId)}
+						href={postHref(post.replyContext.rootPostId, context)}
 					>
 						{t.feed.replyingIn} {post.replyContext.title ?? t.posts.untitled}
 					</Link>
@@ -538,12 +543,6 @@ function toFeedRealmContexts(realms: FeedItem["realms"], unnamedRealm: string): 
 
 function contextInitials(name: string): string {
 	return Array.from(name.trim())[0]?.toLocaleUpperCase() ?? name;
-}
-
-function feedPostHref(post: FeedPost, realmId?: string): string | undefined {
-	if (post.postKind === "post" || post.postKind === "reply") return postHref(post.id, realmId);
-	if (post.postKind === "review") return reviewHref(post.id, realmId);
-	return undefined;
 }
 
 function unitHref(kind: string, id: string): string | undefined {

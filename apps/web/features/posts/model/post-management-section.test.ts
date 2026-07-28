@@ -7,7 +7,7 @@ import {
 } from "./post-management-section";
 
 const ordinaryDenied = {
-	kind: "post",
+	postKind: "post",
 	capabilities: {
 		canEdit: false,
 		canManageAttributions: false,
@@ -16,7 +16,7 @@ const ordinaryDenied = {
 } as const satisfies PostManagementCapabilitySource;
 
 const reviewDenied = {
-	kind: "review",
+	postKind: "review",
 	capabilities: {
 		canEdit: false,
 		canManageAttributions: false,
