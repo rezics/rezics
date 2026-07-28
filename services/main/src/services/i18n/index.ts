@@ -1,9 +1,9 @@
 import Elysia from "elysia";
 import { create, parseAcceptLanguage, type NamespaceSelection } from "native-i18n";
-import { resources } from "@rezics/i18n/resources";
+import { serviceResources } from "@rezics/i18n/service-resources";
 
-const nativeI18n = create(resources);
-type Selection = NamespaceSelection<typeof resources>;
+const nativeI18n = create(serviceResources);
+type Selection = NamespaceSelection<typeof serviceResources>;
 
 export async function getTranslation<const Selected extends Selection>(
 	selection: Selected,

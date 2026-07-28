@@ -35,7 +35,6 @@ import {
 	MenuSubContent,
 	MenuSubTrigger,
 	MenuTrigger,
-	PortableTextContent,
 	Separator,
 	Tabs,
 	TabsContent,
@@ -54,9 +53,15 @@ import {
 	type CSSProperties,
 	type ReactNode,
 } from "react";
+import { normalizePortableText } from "@rezics/portable-text";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { FeedItemCard, type FeedItem } from "@/features/content-feed/components/feed-item-card";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import {
+	LocalizedText,
+	useChineseContentText,
+} from "@/features/content-language-display/chinese-content-display-context";
 import { FeedContentSelector } from "@/features/content-feed/components/feed-content-selector";
 import { FeedList } from "@/features/content-feed/components/feed-list";
 import { SearchFeature, type SearchFeatureRequest } from "@/features/search/search-feature";
@@ -153,6 +158,8 @@ function navigationHref(target: NavigationTarget, context: ZoneBlockContextValue
 
 function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: string }) {
 	const context = useZoneBlocks();
+	const title = useChineseContentText(unit.title ?? "", unit.language);
+	const summary = useChineseContentText(unit.summary ?? "", unit.language);
 	const href =
 		unit.kind === "zone_page"
 			? zonePageHref(context.projection.zone, {
@@ -177,15 +184,13 @@ function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: st
 				<IdentityAvatar
 					avatar={avatar}
 					className={appearance === "cover" ? "size-16 rounded-lg" : "size-10"}
-					fallback={unit.title?.slice(0, 1) ?? ""}
+					fallback={title.slice(0, 1)}
 				/>
 			) : null}
 			<div className="min-w-0">
-				<p className="truncate font-semibold">{unit.title}</p>
-				{appearance !== "inline" && unit.summary ? (
-					<p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
-						{unit.summary}
-					</p>
+				<p className="truncate font-semibold">{title}</p>
+				{appearance !== "inline" && summary ? (
+					<p className="mt-1 line-clamp-2 text-muted-foreground text-sm">{summary}</p>
 				) : null}
 			</div>
 		</div>
@@ -197,14 +202,18 @@ const RootMenuPositioning = { placement: "bottom-start", gutter: 4 } as const;
 const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
 const MenuHoverCloseDelay = 180;
 
-function navigationLabel(item: NavigationItem, context: ZoneBlockContextValue): string | null {
-	return context.units.get(item.labelUnitId)?.title ?? null;
+function navigationLabelUnit(
+	item: NavigationItem,
+	context: ZoneBlockContextValue,
+): RenderUnit | undefined {
+	return context.units.get(item.labelUnitId);
 }
 
 function NavigationLeaf({ item }: { item: NavigationLeafItem }) {
 	const context = useZoneBlocks();
 	const layout = useContext(ZoneNavigationLayoutContext);
-	const label = navigationLabel(item, context);
+	const labelUnit = navigationLabelUnit(item, context);
+	const label = useChineseContentText(labelUnit?.title ?? "", labelUnit?.language);
 	const href = navigationHref(item.target, context);
 	if (!label || !href) return null;
 	const external = item.target.kind === "external";
@@ -231,7 +240,8 @@ interface NavigationHoverBoundary {
 
 function NavigationMenuLeaf({ item }: { item: NavigationLeafItem }) {
 	const context = useZoneBlocks();
-	const label = navigationLabel(item, context);
+	const labelUnit = navigationLabelUnit(item, context);
+	const label = useChineseContentText(labelUnit?.title ?? "", labelUnit?.language);
 	const href = navigationHref(item.target, context);
 	if (!label || !href) return null;
 	const external = item.target.kind === "external";
@@ -257,7 +267,8 @@ function NavigationSubmenu({
 	item: NavigationGroupItem;
 }) {
 	const context = useZoneBlocks();
-	const label = navigationLabel(item, context);
+	const labelUnit = navigationLabelUnit(item, context);
+	const label = useChineseContentText(labelUnit?.title ?? "", labelUnit?.language);
 	if (!label) return null;
 	return (
 		<MenuSub positioning={NestedMenuPositioning}>
@@ -307,7 +318,8 @@ function NavigationDropdown({
 	const { t } = useTranslation("zones");
 	const context = useZoneBlocks();
 	const layout = useContext(ZoneNavigationLayoutContext);
-	const label = navigationLabel(item, context);
+	const labelUnit = navigationLabelUnit(item, context);
+	const label = useChineseContentText(labelUnit?.title ?? "", labelUnit?.language);
 	if (!label) return null;
 	return (
 		<Menu
@@ -427,8 +439,21 @@ const portableTextBlockTypes = {
 	tabs: EmbeddedPortableTextBlock,
 };
 
-function WikiPortableText({ value }: { value: unknown }) {
-	return <PortableTextContent types={portableTextBlockTypes} value={value} variant="article" />;
+function WikiPortableText({
+	language,
+	value,
+}: {
+	readonly language: ZoneRenderProjection["zone"]["language"];
+	readonly value: unknown;
+}) {
+	return (
+		<LocalizedPortableTextContent
+			language={language}
+			types={portableTextBlockTypes}
+			value={normalizePortableText(value)}
+			variant="article"
+		/>
+	);
 }
 
 function ZoneBlocks({ blocks }: { blocks: readonly Block[] }) {
@@ -1024,11 +1049,47 @@ function SearchUnitList({
 	);
 }
 
+function RenderUnitTitle({ unit }: { readonly unit: RenderUnit | undefined }) {
+	return unit?.title ? <LocalizedText language={unit.language} value={unit.title} /> : null;
+}
+
+function ZoneMediaBlock({ block }: { readonly block: Extract<Block, { _type: "media" }> }) {
+	const context = useZoneBlocks();
+	const asset = context.assets.get(block.assetId);
+	const altUnit = context.units.get(block.altUnitId);
+	const captionUnit = block.captionUnitId ? context.units.get(block.captionUnitId) : undefined;
+	const alt = useChineseContentText(altUnit?.title ?? "", altUnit?.language);
+	if (!asset) return null;
+	const image = (
+		<figure className="my-6 overflow-hidden rounded-xl border border-border-weak">
+			<img
+				alt={alt}
+				className={cn(
+					"h-auto w-full",
+					block.fit === "cover" && "max-h-[36rem] object-cover",
+				)}
+				src={asset.url}
+			/>
+			{captionUnit ? (
+				<figcaption className="px-4 py-3 text-muted-foreground text-sm">
+					<RenderUnitTitle unit={captionUnit} />
+				</figcaption>
+			) : null}
+		</figure>
+	);
+	if (!block.target) return image;
+	const href = navigationHref(block.target, context);
+	return href ? <AppLink href={href}>{image}</AppLink> : image;
+}
+
 function ZoneBlock({ block }: { block: Block }) {
-	const { t } = useTranslation("zones");
+	const { t } = useTranslation(["ui", "zones"]);
 	const context = useZoneBlocks();
 	const surface = useContext(ZoneBlockSurfaceContext);
-	if (block._type === "portable-text") return <WikiPortableText value={block.content} />;
+	if (block._type === "portable-text")
+		return (
+			<WikiPortableText language={context.projection.zone.language} value={block.content} />
+		);
 	if (block._type === "post-full-view") {
 		const wikiPost = context.projection.references.wikiPosts.find(
 			(candidate) => candidate.id === block.postId,
@@ -1038,15 +1099,18 @@ function ZoneBlock({ block }: { block: Block }) {
 			<article>
 				<header className="mb-8 border-b border-border-weak pb-6">
 					<h1 className="font-serif font-bold text-3xl tracking-tight sm:text-4xl">
-						{wikiPost.title}
+						<LocalizedText
+							language={wikiPost.language}
+							value={wikiPost.title ?? t.ui.unnamed}
+						/>
 					</h1>
 					{wikiPost.summary ? (
 						<p className="mt-3 max-w-3xl text-muted-foreground leading-7">
-							{wikiPost.summary}
+							<LocalizedText language={wikiPost.language} value={wikiPost.summary} />
 						</p>
 					) : null}
 				</header>
-				<WikiPortableText value={wikiPost.body.content} />
+				<WikiPortableText language={wikiPost.language} value={wikiPost.body.content} />
 			</article>
 		);
 	}
@@ -1099,7 +1163,7 @@ function ZoneBlock({ block }: { block: Block }) {
 			.filter((unit): unit is RenderUnit => Boolean(unit))
 			.slice(0, block.limit);
 		return (
-			<div aria-label={t.contentList} className={unitListClasses(block.layout)}>
+			<div aria-label={t.zones.contentList} className={unitListClasses(block.layout)}>
 				{units.map((unit) => (
 					<ReferencedUnit appearance="card" key={unit.id} unit={unit} />
 				))}
@@ -1124,31 +1188,7 @@ function ZoneBlock({ block }: { block: Block }) {
 		);
 	}
 	if (block._type === "menu") return <ZoneNavigationMenu navigationId={block.navigationId} />;
-	if (block._type === "media") {
-		const asset = context.assets.get(block.assetId);
-		const alt = context.units.get(block.altUnitId)?.title ?? "";
-		if (!asset) return null;
-		const image = (
-			<figure className="my-6 overflow-hidden rounded-xl border border-border-weak">
-				<img
-					alt={alt}
-					className={cn(
-						"h-auto w-full",
-						block.fit === "cover" && "max-h-[36rem] object-cover",
-					)}
-					src={asset.url}
-				/>
-				{block.captionUnitId ? (
-					<figcaption className="px-4 py-3 text-muted-foreground text-sm">
-						{context.units.get(block.captionUnitId)?.title}
-					</figcaption>
-				) : null}
-			</figure>
-		);
-		if (!block.target) return image;
-		const href = navigationHref(block.target, context);
-		return href ? <AppLink href={href}>{image}</AppLink> : image;
-	}
+	if (block._type === "media") return <ZoneMediaBlock block={block} />;
 	if (block._type === "divider")
 		return block.style === "space" ? (
 			<div aria-hidden className="h-8" />
@@ -1183,7 +1223,7 @@ function ZoneBlock({ block }: { block: Block }) {
 			>
 				{block.labelUnitId ? (
 					<h2 className="mb-3 font-semibold">
-						{context.units.get(block.labelUnitId)?.title}
+						<RenderUnitTitle unit={context.units.get(block.labelUnitId)} />
 					</h2>
 				) : null}
 				<ZoneBlocks blocks={block.blocks} />
@@ -1197,7 +1237,7 @@ function ZoneBlock({ block }: { block: Block }) {
 				<TabsList className="max-w-full overflow-x-auto" variant="underline">
 					{block.tabs.map((tab) => (
 						<TabsTrigger key={tab._key} value={tab._key}>
-							{context.units.get(tab.labelUnitId)?.title}
+							<RenderUnitTitle unit={context.units.get(tab.labelUnitId)} />
 						</TabsTrigger>
 					))}
 				</TabsList>

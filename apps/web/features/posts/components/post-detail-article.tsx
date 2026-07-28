@@ -2,9 +2,12 @@
 
 import type { PostApiFeedQueryStatus200 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextDocument } from "@rezics/block";
+import type { ContentLanguage } from "@rezics/i18n";
 import type { ReactNode } from "react";
 
-import { Card, CardContent, CardHeader, PortableTextContent } from "@rezics/ui";
+import { Card, CardContent, CardHeader } from "@rezics/ui";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
 import {
 	FeedCardRating,
@@ -36,6 +39,7 @@ export interface PostDetailArticleValue {
 	readonly postKind: PostKind;
 	readonly attributions: readonly AttributionSummary[];
 	readonly realmId: string | null;
+	readonly language: ContentLanguage;
 	readonly title: string;
 	readonly summary?: string | null;
 	readonly body: PortableTextDocument | null;
@@ -59,6 +63,8 @@ export function PostDetailArticle({
 	readonly variant?: "card" | "thread";
 }) {
 	const { locale, t } = useTranslation(["feed", "posts"]);
+	const displayedTitle = useChineseContentText(post.title, post.language);
+	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
 	const attachedScore = post.scores[0];
 	const attachedScoreValue = attachedScore ? apiValueToUnitScore(attachedScore.value) : undefined;
 	const rating: FeedTargetRating | undefined = attachedScoreValue
@@ -76,14 +82,18 @@ export function PostDetailArticle({
 				className="mt-2 font-heading font-black text-2xl leading-tight sm:text-3xl"
 				id={`post-detail-${post.id}`}
 			>
-				{post.title}
+				{displayedTitle}
 			</h1>
 			{post.body ? (
 				<div className="prose mt-5 max-w-none">
-					<PortableTextContent value={readPortableText(post.body)} variant="article" />
+					<LocalizedPortableTextContent
+						language={post.language}
+						value={readPortableText(post.body)}
+						variant="article"
+					/>
 				</div>
 			) : post.summary ? (
-				<p className="mt-4 text-muted-foreground leading-7">{post.summary}</p>
+				<p className="mt-4 text-muted-foreground leading-7">{displayedSummary}</p>
 			) : null}
 			<div className="mt-6 border-border-weak border-t pt-2">
 				<ConnectedFeedEngagementBar

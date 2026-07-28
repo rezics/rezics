@@ -5,6 +5,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { create } from "native-i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { ChineseContentDisplayProvider } from "@/features/content-language-display/chinese-content-display-context";
 import { TranslationProvider } from "@/i18n/client";
 import type { TagPresentation } from "../model/tag-presentation";
 import { TagBadgeCard } from "./tag-badge-card";
@@ -37,6 +38,7 @@ const pinnedTag = {
 	itemKey: "global:tag-1",
 	identity: {
 		tagId: "019f995d-731c-71dd-b8cd-2bc781fb07e7",
+		language: "zh",
 		title: "置頂標籤",
 		summary: null,
 	},
@@ -64,9 +66,9 @@ describe("TagBadgeCard", () => {
 		render(
 			<TranslationProvider initial={translation.snapshot}>
 				<TagBadgeCard
+					fallbackLabel="未命名標籤"
 					isPending={false}
 					item={pinnedTag}
-					label={pinnedTag.identity.title}
 					onClearVote={vi.fn()}
 					onToggleSelected={vi.fn()}
 					onVote={vi.fn()}
@@ -81,5 +83,27 @@ describe("TagBadgeCard", () => {
 		expect(trigger.closest('[data-slot="badge"]')?.getAttribute("data-variant")).toBe(
 			"outline",
 		);
+	});
+
+	it("projects Chinese Tag content into the selected display script", async () => {
+		render(
+			<ChineseContentDisplayProvider value="hans">
+				<TranslationProvider initial={translation.snapshot}>
+					<TagBadgeCard
+						fallbackLabel="未命名標籤"
+						isPending={false}
+						item={pinnedTag}
+						onClearVote={vi.fn()}
+						onToggleSelected={vi.fn()}
+						onVote={vi.fn()}
+						selected={false}
+						selectionMode={false}
+						type="book"
+					/>
+				</TranslationProvider>
+			</ChineseContentDisplayProvider>,
+		);
+
+		expect(await screen.findByRole("link", { name: /置顶标签/ })).toBeTruthy();
 	});
 });

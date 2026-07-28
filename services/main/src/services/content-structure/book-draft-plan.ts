@@ -1,3 +1,5 @@
+import type { ContentLanguage } from "@rezics/i18n";
+
 import { compareBytewisePositions, fractionalPositionAt } from "../ordering/position";
 import { ContentStructureInvalid } from "./errors";
 
@@ -15,7 +17,7 @@ type NewBookDraftNodeBase = {
 	readonly parentId: string | null;
 	readonly order: number;
 	readonly title: string;
-	readonly language: "zh" | "en";
+	readonly language: ContentLanguage;
 };
 
 export type NewBookDraftNode =

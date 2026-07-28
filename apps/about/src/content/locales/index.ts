@@ -1,6 +1,8 @@
 import type { AboutLocale } from "../../i18n/locales";
 import de from "./de";
 import en from "./en";
+import es from "./es";
+import fr from "./fr";
 import ja from "./ja";
 import ko from "./ko";
 import zhHans from "./zh-hans";
@@ -11,6 +13,8 @@ export type LocaleContent = typeof en;
 const contentByLocale = {
 	de,
 	en,
+	es,
+	fr,
 	ja,
 	ko,
 	"zh-hans": zhHans,

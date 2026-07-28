@@ -1,0 +1,129 @@
+import { insert } from "native-i18n";
+
+import { deTerminology } from "@rezics/i18n/terminology/de";
+
+const { forms: realmTerms } = deTerminology.realm;
+const { forms: followTerms } = deTerminology.follow;
+const { forms: tagStructureTerms } = deTerminology.tagStructure;
+
+export default {
+	page: {
+		title: "Tags",
+		description:
+			"Prüfe globale Tags und die kontextbezogenen Bewertungen der von dir ausgewählten Tag-Quellen.",
+		viewAll: "Vollständige Tag-Seite anzeigen",
+		manageOnTagPage: `Füge Tags und ${tagStructureTerms.pluralLabel} auf der eigenen Tag-Seite hinzu, damit der Abstimmungskontext sichtbar bleibt.`,
+	},
+	card: {
+		open: insert("Tag-Karte für {{tag}} öffnen ({{context}})", {
+			tag: String,
+			context: String,
+		}),
+		close: "Tag-Karte schließen",
+		globalContext: "Globale Tags",
+		structureContext: tagStructureTerms.label,
+		policy: `Vom ${realmTerms.inline} festgelegt`,
+		search: "Diesen Tag durchsuchen",
+		details: "Tag-Details anzeigen",
+	},
+	selection: {
+		start: "Mehrere auswählen",
+		finish: "Auswahl abschließen",
+		add: "Zur Auswahl hinzufügen",
+		remove: "Aus Auswahl entfernen",
+		addNamed: insert("{{tag}} auswählen", { tag: String }),
+		removeNamed: insert("Auswahl von {{tag}} aufheben", { tag: String }),
+		selectedCount: insert("{{count}} Tags ausgewählt", { count: Number }),
+		search: "Ausgewählte Tags durchsuchen",
+		clear: "Auswahl aufheben",
+	},
+	basic: {
+		title: "Einfache Tags",
+		description: `Globale Tags und ${tagStructureTerms.pluralLabel} ohne kontextbezogene Bewertungen eines ${realmTerms.inline}s.`,
+	},
+	structures: {
+		title: tagStructureTerms.pluralLabel,
+		description: `${tagStructureTerms.pluralLabel} bewahren sinnvolle Hierarchien und werden vor ungeordneten Tags angezeigt.`,
+		addTitle: `${tagStructureTerms.label} hinzufügen`,
+		addDescription: `Suche zuerst nach angenommenen ${tagStructureTerms.plural}. Das Hinzufügen unterstützt den Pfad und jeden enthaltenen Tag.`,
+		add: `${tagStructureTerms.label} hinzufügen`,
+		create: `${tagStructureTerms.label} erstellen`,
+		details: `${tagStructureTerms.label} anzeigen`,
+		empty: `Für dieses Werk gibt es noch keine angenommenen ${tagStructureTerms.plural}.`,
+		memberFallback: "Tag ohne Namen",
+		pathLabel: `Geordneter ${tagStructureTerms.label}`,
+	},
+	detail: {
+		childrenTitle: "Direkt untergeordnete Tags",
+		childrenDescription: `Diese Beziehungen stammen aus angenommenen und von der Community gesperrten ${tagStructureTerms.pluralLabel}. Für jedes untergeordnete Element werden seine direkten Unterelemente angezeigt.`,
+		noChildren: "Dieser Tag hat noch keine angenommenen direkten Unterelemente.",
+		grandchildrenTitle: "Direkte Unterelemente",
+	},
+	createStructure: {
+		title: `${tagStructureTerms.label} erstellen`,
+		description:
+			"Erstelle einen geordneten Pfad von allgemeineren zu spezifischeren Tags. Community-Mitglieder können ihn nach dem Erstellen nicht ändern; Plattformadministratoren dürfen protokollierte Korrekturen vornehmen.",
+		pick: "Nächsten Tag auswählen",
+		addMember: "Zum Pfad hinzufügen",
+		removeMember: "Aus dem Pfad entfernen",
+		moveEarlier: "Nach vorne verschieben",
+		moveLater: "Nach hinten verschieben",
+		preview: "Vorschau des von der Community gesperrten Pfads",
+		minimum: "Füge mindestens zwei verschiedene Tags hinzu.",
+		submit: `${tagStructureTerms.label} erstellen und abstimmen`,
+	},
+	adminEditStructure: {
+		title: `${tagStructureTerms.label} korrigieren`,
+		description:
+			"Plattformadministratoren können Elemente oder Reihenfolge korrigieren. Unit-Identität, Stimmen und Verwendungen bleiben erhalten, und die Korrektur wird im Verlauf protokolliert.",
+		reasonLabel: "Grund der Korrektur",
+		reasonPlaceholder: "Erkläre, warum diese administrative Korrektur erforderlich ist.",
+		submit: "Protokollierte Korrektur speichern",
+	},
+	global: {
+		title: "Globale Tags",
+		description:
+			"Globale Tags werden von allen Personen mit Interaktionszugriff vorgeschlagen und bewertet.",
+		addTitle: "Globalen Tag hinzufügen",
+		addDescription:
+			"Suche zuerst nach vorhandenen Tags. Beim Hinzufügen wird zugleich mit „Passt“ abgestimmt.",
+		add: "Tag hinzufügen",
+		pinned: "Fixiert",
+		empty: "Dieses Werk hat noch keine globalen Tags.",
+	},
+	realms: {
+		title: `${realmTerms.label}-Tag-Kontexte`,
+		description: `Jeder ${realmTerms.inline} ist ein unabhängiger Kontext. Seine Bewertungen werden nie mit globalen Tags oder einem anderen ${realmTerms.inline} zusammengeführt.`,
+		policy: `Vom ${realmTerms.inline} festgelegte Tags`,
+		votes: `Stimmen der Mitglieder des ${realmTerms.inline}s`,
+		context: "Abstimmungskontext anzeigen",
+		empty: "Die ausgewählten Tag-Quellen haben dieses Werk noch nicht bewertet.",
+		cannotVote: `Tritt diesem ${realmTerms.inline} bei, um an seiner kontextbezogenen Abstimmung teilzunehmen.`,
+	},
+	vote: {
+		fits: "Passt",
+		doesNotFit: "Passt nicht",
+		clear: "Meine Bewertung entfernen",
+		signIn: "Zum Abstimmen anmelden",
+		signInDescription: "Melde dich an, um im globalen Tag-Kontext abzustimmen.",
+		summary: insert("Saldo {{score}} · {{count}} Stimmen", {
+			score: String,
+			count: String,
+		}),
+	},
+	sources: {
+		title: "Tag-Quellen",
+		description: `Wähle und ordne die ${realmTerms.plural}, die in den Tag-Bereichen von Werken angezeigt werden. Dadurch wird für kein Werk „${followTerms.actionLabel}“ aktiviert und die Mitgliedschaft in einem ${realmTerms.inline} nicht geändert.`,
+		addTitle: "Tag-Quelle hinzufügen",
+		addDescription: `Suche lesbare ${realmTerms.plural} und füge einen zu deiner persönlichen Liste der Tag-Quellen hinzu.`,
+		add: "Quelle hinzufügen",
+		remove: "Quelle entfernen",
+		moveEarlier: "Nach vorne verschieben",
+		moveLater: "Nach hinten verschieben",
+		empty: "Keine Tag-Quellen ausgewählt.",
+		manage: "Tag-Quellen verwalten",
+	},
+	unnamedTag: "Tag ohne Namen",
+	unnamedRealm: `${realmTerms.label} ohne Namen`,
+	unnamedStructure: `${tagStructureTerms.label} ohne Namen`,
+} satisfies typeof import("../zh-Hant/tags").default;

@@ -11,7 +11,7 @@ import {
 	readSimpleFeedFilter,
 	type UnitPredicate,
 } from "@rezics/filter";
-import type { ContentLanguage } from "@rezics/i18n";
+import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { resolveIdentity } from "../../auth/session";
@@ -102,6 +102,7 @@ const feedContextRealm = alias(unit, "feed_context_realm");
 
 interface FeedRealmContextSummary {
 	readonly id: string;
+	readonly language: ContentLanguage;
 	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
 	readonly title: string | null;
 	readonly summary: string | null;
@@ -119,6 +120,7 @@ async function getFeedRealmContextsByUnitIds(
 		.select({
 			unitId: realmUnit.unitId,
 			id: realmUnit.realmId,
+			language: resolvedUnitLocalizationLanguage(feedContextRealm.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(feedContextRealm.id, localizationLanguages),
 			summary: resolvedUnitLocalizationSummary(feedContextRealm.id, localizationLanguages),
 			avatar: resolvedUnitLocalizationAvatar(feedContextRealm.id, localizationLanguages),
@@ -136,14 +138,17 @@ async function getFeedRealmContextsByUnitIds(
 		)
 		.orderBy(asc(realmUnit.createdAt), asc(realmUnit.realmId));
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(rows.map((row) => row.id));
-	for (const row of rows)
+	for (const row of rows) {
+		if (!row.language) continue;
 		result.get(row.unitId)?.push({
 			id: row.id,
+			language: row.language,
 			slugAddress: slugAddresses.get(row.id) ?? null,
 			title: row.title,
 			summary: row.summary,
 			avatar: presentAvatar(row.avatar),
 		});
+	}
 	return result;
 }
 
@@ -282,8 +287,8 @@ const FeedCursor = t.Object(
 		v: t.Literal(7),
 		sort: FeedSortSchema,
 		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
-		filterLanguages: t.Array(t.UnionEnum(["zh", "en"]), { uniqueItems: true }),
-		localizationLanguages: t.Array(t.UnionEnum(["zh", "en"]), {
+		filterLanguages: t.Array(t.UnionEnum(ContentLanguageValues), { uniqueItems: true }),
+		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues), {
 			uniqueItems: true,
 		}),
 		personalized: t.Boolean(),
@@ -936,6 +941,7 @@ export async function hydrateFeedItems(
 					.select({
 						id: unit.id,
 						type: unit.kind,
+						language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
 						title: unitLocalization.title,
 						summary: unitLocalization.summary,
 						coverAssetId: resolvedUnitLocalizationImageAssetId(
@@ -1055,23 +1061,28 @@ export async function hydrateFeedItems(
 			: [],
 	]);
 	const [attributions, rootAttributions, realmContexts] = await Promise.all([
-		getAttributionSummariesByUnitIds(validIds),
-		getAttributionSummariesByUnitIds(rootIds),
+		getAttributionSummariesByUnitIds(validIds, displayLanguages),
+		getAttributionSummariesByUnitIds(rootIds, displayLanguages),
 		getFeedRealmContextsByUnitIds(validIds, displayLanguages),
 	]);
 	const subjects = new Map(
-		await Promise.all(
-			subjectRows.map(
-				async ({ coverAssetId, ...subject }) =>
-					[
-						subject.id,
-						{
-							...subject,
-							cover: presentImageAsset(coverAssetId, "cover"),
-						},
-					] as const,
-			),
-		),
+		subjectRows.flatMap((subject) => {
+			const language = subject.language;
+			if (!language) return [];
+			return [
+				[
+					subject.id,
+					{
+						id: subject.id,
+						type: subject.type,
+						language,
+						title: subject.title,
+						summary: subject.summary,
+						cover: presentImageAsset(subject.coverAssetId, "cover"),
+					},
+				] as const,
+			];
+		}),
 	);
 	const rowMap = new Map(rows.map((row) => [row.id, row]));
 	const pageMap = new Map(page.map((item) => [item.id, item]));

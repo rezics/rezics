@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { UnitTagExplorer } from "@/features/tags/components/unit-tag-explorer";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { isCatalogDetailUnitFor } from "@/features/units/model/catalog-detail-unit";
 import { catalogDetailHref } from "@/features/units/routing/catalog-detail-routes";
@@ -32,6 +33,14 @@ export function UnitTagsPage({
 		localizationLanguages,
 		unitId,
 	});
+	const localization =
+		query.data && isCatalogDetailUnitFor(query.data, type)
+			? selectLocalization(query.data.localizations, query.data.language, query.data.language)
+			: null;
+	const displayedTitle = useChineseContentText(
+		localization?.title ?? t.ui.unnamed,
+		localization?.language,
+	);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -43,11 +52,6 @@ export function UnitTagsPage({
 			/>
 		);
 
-	const localization = selectLocalization(
-		query.data.localizations,
-		query.data.language,
-		query.data.language,
-	);
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
 			<Button asChild className="w-fit" variant="outline">
@@ -56,10 +60,7 @@ export function UnitTagsPage({
 					{t.units.detail.backToOverview}
 				</Link>
 			</Button>
-			<PageHeading
-				description={localization?.title ?? t.ui.unnamed}
-				title={t.tags.page.title}
-			/>
+			<PageHeading description={displayedTitle} title={t.tags.page.title} />
 			<p className="-mt-5 max-w-3xl text-sm leading-6 text-muted-foreground">
 				{t.tags.page.description}
 			</p>

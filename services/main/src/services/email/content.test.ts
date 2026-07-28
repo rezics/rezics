@@ -14,7 +14,7 @@ const claimedAuthenticationEmail = {
 	kind: "verify_email",
 	lastError: null,
 	leaseExpiresAt: new Date("2026-07-24T00:01:00.000Z"),
-	locale: "zh-hant",
+	locale: "zh",
 	notificationId: null,
 	providerMessageId: null,
 	providerStatus: null,

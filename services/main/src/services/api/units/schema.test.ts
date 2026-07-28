@@ -65,6 +65,7 @@ describe("Unit content language order inputs", () => {
 				languages: ["zh", "zh"],
 			}),
 		).toBe(false);
-		expect(Check(UnitLocalizationDeleteBody, { expectedLanguages: ["ja"] })).toBe(false);
+		expect(Check(UnitLocalizationDeleteBody, { expectedLanguages: ["ja"] })).toBe(true);
+		expect(Check(UnitLocalizationDeleteBody, { expectedLanguages: ["zh-Hans"] })).toBe(false);
 	});
 });

@@ -1,5 +1,5 @@
 import { PlatformCapabilityValues } from "@rezics/access";
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
@@ -16,6 +16,7 @@ import {
 import { pgTable } from "./base";
 import {
 	type ContentLanguage,
+	ContentLanguageValues,
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
@@ -131,7 +132,7 @@ export const realmRuleAcceptance = pgTable(
 		index("realm_rule_acceptance_profile_idx").on(table.profileId, table.acceptedAt.desc()),
 		check(
 			"realm_rule_acceptance_language_check",
-			sql`${table.language} is null or ${table.language} in ('zh', 'en')`,
+			sql`${table.language} is null or ${inArray(table.language, ContentLanguageValues)}`,
 		),
 	],
 );

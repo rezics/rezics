@@ -25,7 +25,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { PortableTextContent } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -55,6 +54,8 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { hasErrorCode } from "@/i18n/errors";
 import { readPortableText, writePortableText } from "@/lib/block";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { buildContentStructureTree, type ContentStructureTreeNode } from "./content-structure-tree";
 import {
 	collectBookStructureLabelIds,
@@ -203,7 +204,12 @@ function ContentReadTree({
 											expanded && "rotate-90",
 										)}
 									/>
-									<span className="truncate">{node.title}</span>
+									<span className="truncate">
+										<LocalizedText
+											language={node.language}
+											value={node.title}
+										/>
+									</span>
 								</button>
 							) : (
 								<Link
@@ -212,7 +218,12 @@ function ContentReadTree({
 									href={`/units/book/${bookId}/read/${node.contentUnitId}`}
 									style={rowStyle}
 								>
-									<span className="truncate">{node.title}</span>
+									<span className="truncate">
+										<LocalizedText
+											language={node.language}
+											value={node.title}
+										/>
+									</span>
 								</Link>
 							)}
 						</div>
@@ -323,11 +334,9 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const selectedLanguageLabel =
-		selectedLanguage === "zh"
-			? t.locale.zh
-			: selectedLanguage === "en"
-				? t.locale.en
-				: t.units.reader.automaticLanguage;
+		selectedLanguage === undefined
+			? t.units.reader.automaticLanguage
+			: t.locale.contentLanguages[selectedLanguage];
 	return (
 		<main
 			className="fixed inset-0 z-50 grid grid-rows-[3.75rem_minmax(0,1fr)] overflow-hidden bg-background"
@@ -346,7 +355,9 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 					{t.brand.name}
 				</span>
 				<span aria-hidden className="hidden h-5 w-px bg-border sm:block" />
-				<p className="min-w-0 flex-1 truncate font-medium text-sm">{query.data.title}</p>
+				<p className="min-w-0 flex-1 truncate font-medium text-sm">
+					<LocalizedText language={query.data.language} value={query.data.title} />
+				</p>
 
 				<Sheet>
 					<SheetTrigger asChild>
@@ -435,7 +446,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 											key={language}
 											value={language}
 										>
-											{language === "zh" ? t.locale.zh : t.locale.en}
+											{t.locale.contentLanguages[language]}
 										</MenuRadioItem>
 									))}
 								</MenuRadioGroup>
@@ -466,16 +477,20 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								{t.units.content.chapter}
 							</p>
 							<h1 className="mt-3 font-serif font-semibold text-3xl tracking-tight sm:text-4xl">
-								{query.data.title}
+								<LocalizedText
+									language={query.data.language}
+									value={query.data.title}
+								/>
 							</h1>
 						</header>
 						<article className="flex-1 py-8">
 							{query.data.content ? (
-								<PortableTextContent
+								<LocalizedPortableTextContent
 									className={cn(
 										fontSize.className,
 										"prose-p:leading-[1.8]! prose-li:leading-[1.8]!",
 									)}
+									language={query.data.language}
 									value={readPortableText(query.data.content)}
 									variant="article"
 								/>
@@ -729,7 +744,7 @@ function ChapterLocalizationForm({
 					variant="document"
 				/>
 				<p aria-live="polite" className="text-muted-foreground text-sm">
-					{language === "zh"
+					{language === "zh" || language === "ja"
 						? t.units.chapter.characterCount({ count: contentMetrics.characterCount })
 						: t.units.chapter.wordCount({ count: contentMetrics.wordCount })}
 				</p>

@@ -2,6 +2,7 @@ import type {
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
 	PutApiUnitsBookByUnitIdContentStructureBody,
 } from "@rezics/openapi-tanstack-query";
+import type { ContentLanguage } from "@rezics/i18n";
 
 type RemoteBookNode = GetApiUnitsBookByUnitIdContentStructureNodesStatus200["items"][number];
 export type BookContentStructureSaveNode =
@@ -19,7 +20,7 @@ export type ExistingBookDraftNode = BookDraftNodeBase & {
 	readonly state: "existing";
 	readonly contentUnitId: string;
 	readonly contentKind: "chapter" | "label";
-	readonly language: "zh" | "en";
+	readonly language: ContentLanguage;
 };
 
 export type NewBookDraftNode = BookDraftNodeBase &

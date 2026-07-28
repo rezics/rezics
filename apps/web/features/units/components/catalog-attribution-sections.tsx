@@ -13,6 +13,7 @@ import Link from "next/link";
 import { Fragment } from "react";
 
 import { FollowButton } from "@/features/following/components/follow-button";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
@@ -34,7 +35,11 @@ function AttributionName({
 }) {
 	const { t } = useTranslation(["ui"]);
 	const href = attributionHref(attribution);
-	const name = attribution.creditedUnit.title ?? t.ui.unnamed;
+	const sourceName = attribution.creditedUnit.title ?? t.ui.unnamed;
+	const name = useChineseContentText(
+		sourceName,
+		attribution.creditedUnit.title ? attribution.creditedUnit.language : undefined,
+	);
 	const nameContent = href ? (
 		<Link
 			className="font-medium text-foreground underline-offset-4 hover:underline focus-visible:underline"
@@ -53,8 +58,11 @@ function AttributionName({
 				<ProfileInfoCard
 					profile={{
 						id: attribution.creditedUnit.id,
-						name,
-						initials: name.slice(0, 1).toUpperCase(),
+						name: sourceName,
+						initials: sourceName.slice(0, 1).toUpperCase(),
+						language: attribution.creditedUnit.title
+							? attribution.creditedUnit.language
+							: undefined,
 						avatar: attribution.creditedUnit.avatar,
 						slug: attribution.creditedUnit.slugAddress?.slug,
 						summary: attribution.creditedUnit.summary ?? undefined,

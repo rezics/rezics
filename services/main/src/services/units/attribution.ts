@@ -1,13 +1,17 @@
 import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { database, type DatabaseExecutor } from "../database";
 import { creditAttribution, unit, unitFollowStat } from "../database/schema";
 import { toSafeInteger } from "../database/integer";
 import type { CreditAttributionRole, UnitKind } from "../database/schema/contract-values";
 import {
-	firstUnitLocalizationSummary,
 	firstUnitLocalizationTitle,
 	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationSummary,
+	resolvedUnitLocalizationTitle,
+	type LocalizationLanguageQuery,
 } from "./localization";
 import {
 	getPublicCanonicalUnitSlugAddresses,
@@ -26,6 +30,7 @@ export type UnitAttributionSummary = {
 	readonly creditedUnit: {
 		readonly id: string;
 		readonly kind: UnitKind;
+		readonly language: ContentLanguage;
 		readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
 		readonly title: string | null;
 		readonly summary: string | null;
@@ -46,15 +51,17 @@ export type UnitAttributionSummaryWithStatistics = Omit<UnitAttributionSummary, 
 
 export async function getPublicUnitSummariesByIds(
 	unitIds: readonly string[],
+	localizationLanguages: LocalizationLanguageQuery = [],
 ): Promise<Map<string, UnitSummary>> {
 	if (!unitIds.length) return new Map();
 	const rows = await database
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			title: firstUnitLocalizationTitle(unit.id),
-			summary: firstUnitLocalizationSummary(unit.id),
-			avatar: resolvedUnitLocalizationAvatar(unit.id),
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(unit.id, localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
 		})
 		.from(unit)
 		.where(
@@ -68,14 +75,21 @@ export async function getPublicUnitSummariesByIds(
 		);
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(rows.map(({ id }) => id));
 	return new Map(
-		rows.map(({ avatar, ...row }) => [
-			row.id,
-			{
-				...row,
-				slugAddress: slugAddresses.get(row.id) ?? null,
-				avatar: presentAvatar(avatar),
-			},
-		]),
+		rows.flatMap(({ avatar, ...row }) =>
+			row.language
+				? [
+						[
+							row.id,
+							{
+								...row,
+								language: row.language,
+								slugAddress: slugAddresses.get(row.id) ?? null,
+								avatar: presentAvatar(avatar),
+							},
+						] as const,
+					]
+				: [],
+		),
 	);
 }
 
@@ -180,6 +194,7 @@ export async function createProfilePublisherAttribution(
 
 export async function getAttributionSummariesByUnitIds(
 	sourceUnitIds: readonly string[],
+	localizationLanguages: LocalizationLanguageQuery = [],
 ): Promise<Map<string, UnitAttributionSummary[]>> {
 	const result = new Map<string, UnitAttributionSummary[]>();
 	for (const sourceUnitId of sourceUnitIds) result.set(sourceUnitId, []);
@@ -202,6 +217,7 @@ export async function getAttributionSummariesByUnitIds(
 		);
 	const creditedUnits = await getPublicUnitSummariesByIds(
 		rows.map(({ creditedUnitId }) => creditedUnitId),
+		localizationLanguages,
 	);
 	for (const row of rows) {
 		const creditedUnit = creditedUnits.get(row.creditedUnitId);
@@ -218,8 +234,9 @@ export async function getAttributionSummariesByUnitIds(
 
 export async function getAttributionSummariesWithStatisticsByUnitIds(
 	sourceUnitIds: readonly string[],
+	localizationLanguages: LocalizationLanguageQuery = [],
 ): Promise<Map<string, UnitAttributionSummaryWithStatistics[]>> {
-	const summaries = await getAttributionSummariesByUnitIds(sourceUnitIds);
+	const summaries = await getAttributionSummariesByUnitIds(sourceUnitIds, localizationLanguages);
 	const statistics = await getAttributionStatisticsByUnitIds(
 		[...summaries.values()].flatMap((items) =>
 			items.map(({ creditedUnit }) => creditedUnit.id),

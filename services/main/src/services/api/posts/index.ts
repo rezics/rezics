@@ -263,6 +263,7 @@ export default new Elysia()
 						.limit(query.limit ?? 20);
 					const attributions = await getAttributionSummariesByUnitIds(
 						rows.map(({ id }) => id),
+						localizationLanguages,
 					);
 					return {
 						items: rows.map((item) => ({
@@ -451,7 +452,7 @@ export default new Elysia()
 						replyCreationDecision,
 						targetingLock,
 					] = await Promise.all([
-						getAttributionSummariesByUnitIds([row.id]),
+						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
 						selectPostScores(row.id).then((items) =>
 							items.map(({ scoreId, contextUnitId, value }) => ({
 								scoreId,
@@ -665,6 +666,7 @@ export default new Elysia()
 						);
 					const attributions = await getAttributionSummariesByUnitIds(
 						rows.map(({ id }) => id),
+						localizationLanguages,
 					);
 					const lockedTargetIds = await getPostTargetingLockedUnitIds(database, {
 						targetUnitIds: [params.postId, ...rows.map(({ id }) => id)],

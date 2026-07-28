@@ -27,7 +27,7 @@ describe("avatar emoji data", () => {
 		expect(
 			createAvatarEmojiDataResponse({
 				version: AvatarEmojiDataVersion,
-				locale: "fr",
+				locale: "pt",
 				file: "messages.json",
 			}).status,
 		).toBe(404);

@@ -1,11 +1,15 @@
 "use client";
 
+import type { ContentLanguage } from "@rezics/i18n";
+
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import type { TagPresentation } from "../model/tag-presentation";
 import { TagBadgeCard } from "./tag-badge-card";
 
 export function TagContextSection({
 	description,
+	descriptionLanguage,
 	empty,
 	fallbackLabel,
 	headingLevel = "h3",
@@ -14,12 +18,14 @@ export function TagContextSection({
 	selectedTagIds,
 	selectionMode,
 	title,
+	titleLanguage,
 	type,
 	onClearVote,
 	onToggleSelected,
 	onVote,
 }: {
 	readonly description?: string | null;
+	readonly descriptionLanguage?: ContentLanguage | null;
 	readonly empty: string;
 	readonly fallbackLabel: string;
 	readonly headingLevel?: "h2" | "h3" | "h4";
@@ -28,28 +34,33 @@ export function TagContextSection({
 	readonly selectedTagIds: ReadonlySet<string>;
 	readonly selectionMode: boolean;
 	readonly title: string;
+	readonly titleLanguage?: ContentLanguage | null;
 	readonly type: CatalogDetailUnitType;
 	readonly onClearVote: (item: TagPresentation) => void;
-	readonly onToggleSelected: (tagId: string) => void;
+	readonly onToggleSelected: (tagId: string, label: string) => void;
 	readonly onVote: (item: TagPresentation, value: -1 | 1) => void;
 }) {
 	const Heading = headingLevel;
+	const displayedTitle = useChineseContentText(title, titleLanguage);
+	const displayedDescription = useChineseContentText(description ?? "", descriptionLanguage);
 	return (
 		<section className="grid gap-3">
 			<div className="grid gap-1">
-				<Heading className="font-semibold">{title}</Heading>
-				{description ? (
-					<p className="text-sm leading-6 text-muted-foreground">{description}</p>
+				<Heading className="font-semibold">{displayedTitle}</Heading>
+				{displayedDescription ? (
+					<p className="text-sm leading-6 text-muted-foreground">
+						{displayedDescription}
+					</p>
 				) : null}
 			</div>
 			{items.length ? (
 				<div className="flex flex-wrap gap-2">
 					{items.map((item) => (
 						<TagBadgeCard
+							fallbackLabel={fallbackLabel}
 							isPending={pendingItemKey === item.itemKey}
 							item={item}
 							key={item.itemKey}
-							label={item.identity.title ?? fallbackLabel}
 							onClearVote={onClearVote}
 							onToggleSelected={onToggleSelected}
 							onVote={onVote}

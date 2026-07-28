@@ -2569,7 +2569,7 @@ export function getApiUsersMePreferences<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Update current user interface locale
+ * @summary Update current user display preferences
  * {@link /api/users/me/preferences}
  */
 export function patchApiUsersMePreferences<ThrowOnError extends boolean = true>(

@@ -16,7 +16,7 @@ import {
 import { Button, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useReducer } from "react";
+import { useReducer, useRef } from "react";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useDevelopmentPreviewAccess } from "@/features/preview-access/components/development-preview-boundary";
@@ -65,6 +65,7 @@ export function UnitTagExplorer({
 		tagSelectionReducer,
 		InitialTagSelectionState,
 	);
+	const selectionLabels = useRef(new Map<string, string>());
 	const queryInput = {
 		path: { type, unitId },
 		query: {
@@ -131,8 +132,10 @@ export function UnitTagExplorer({
 		realmVote,
 		clearRealmVote,
 	});
-	const toggleSelected = (tagId: string) =>
+	const toggleSelected = (tagId: string, label: string) => {
+		selectionLabels.current.set(tagId, label);
 		dispatchSelection(selectionMode ? { type: "toggle", tagId } : { type: "enter", tagId });
+	};
 	const vote = (item: TagPresentation, value: -1 | 1) => {
 		if (item.vote.kind !== "available" || !item.vote.canVote) return;
 		voteOnTarget(item.vote.target, value, { globalVote, realmVote });
@@ -286,6 +289,7 @@ export function UnitTagExplorer({
 							{realmGroups.map((group) => (
 								<TagContextSection
 									description={group.summary}
+									descriptionLanguage={group.summary ? group.language : null}
 									empty={t.tags.realms.empty}
 									fallbackLabel={t.tags.unnamedTag}
 									headingLevel={groupHeadingLevel}
@@ -298,6 +302,7 @@ export function UnitTagExplorer({
 									selectedTagIds={selectedTagIds}
 									selectionMode={selectionMode}
 									title={group.title ?? t.tags.unnamedRealm}
+									titleLanguage={group.title ? group.language : null}
 									type={type}
 								/>
 							))}
@@ -329,6 +334,7 @@ export function UnitTagExplorer({
 			{selectionMode ? (
 				<TagSelectionToolbar
 					identities={identities}
+					labels={selectionLabels.current}
 					onClear={() => dispatchSelection({ type: "clear" })}
 					onFinish={() => dispatchSelection({ type: "exit" })}
 					selectedTagIds={selection.selectedTagIds}

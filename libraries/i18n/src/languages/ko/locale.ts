@@ -1,0 +1,35 @@
+export default {
+	label: "언어",
+	uiLocales: {
+		en: "English",
+		"zh-Hant": "繁體中文",
+		"zh-Hans": "简体中文",
+		ja: "日本語",
+		ko: "한국어",
+		de: "Deutsch",
+		fr: "Français",
+		es: "Español",
+	},
+	contentLanguages: {
+		zh: "중국어",
+		en: "영어",
+		ja: "일본어",
+		ko: "한국어",
+		de: "독일어",
+		fr: "프랑스어",
+		es: "스페인어",
+	},
+	chineseContentDisplay: {
+		label: "중국어 콘텐츠 표시",
+		hint: "저자의 텍스트를 수정하지 않고 중국어 콘텐츠 표시 방식을 변경합니다.",
+		original: "작성자의 원문 유지",
+		hant: "번체 중국어로 표시",
+		hans: "간체 중국어로 표시",
+	},
+	displayMode: "표시 모드",
+	displayModes: {
+		system: "자동 (기기 설정)",
+		light: "밝게",
+		dark: "어둡게",
+	},
+} satisfies typeof import("../zh-Hant/locale").default;

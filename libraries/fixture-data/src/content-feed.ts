@@ -1,6 +1,11 @@
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 
+import german from "./languages/de/content-feed";
 import english from "./languages/en/content-feed";
+import spanish from "./languages/es/content-feed";
+import french from "./languages/fr/content-feed";
+import japanese from "./languages/ja/content-feed";
+import korean from "./languages/ko/content-feed";
 import traditionalChinese from "./languages/zh-Hant/content-feed";
 import type { FeedFixtureLocalizedContent } from "./content-feed/localized-content";
 
@@ -145,6 +150,11 @@ function createAttributionContext(
 const FeedFixtureDataByContentLanguage = {
 	zh: createFeedFixtureData(traditionalChinese),
 	en: createFeedFixtureData(english),
+	ja: createFeedFixtureData(japanese),
+	ko: createFeedFixtureData(korean),
+	de: createFeedFixtureData(german),
+	fr: createFeedFixtureData(french),
+	es: createFeedFixtureData(spanish),
 } satisfies Readonly<Record<FixtureContentLanguage, FeedFixtureData>>;
 
 export function getFeedFixtureData(language: FixtureContentLanguage): FeedFixtureData {

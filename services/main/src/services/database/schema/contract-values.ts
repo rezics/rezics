@@ -1,11 +1,19 @@
 export {
+	ChineseContentDisplayValues,
 	ContentLanguageValues,
+	DefaultChineseContentDisplay,
 	DefaultContentLanguage,
 	DefaultPreferredLanguage,
 	DefaultStoredUiLocale,
+	DeliveryLocaleValues,
 	StoredUiLocaleValues,
 } from "@rezics/i18n";
-export type { ContentLanguage, StoredUiLocale } from "@rezics/i18n";
+export type {
+	ChineseContentDisplay,
+	ContentLanguage,
+	DeliveryLocale,
+	StoredUiLocale,
+} from "@rezics/i18n";
 
 export const UnitKindValues = [
 	"slug_namespace",

@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { boolean, check, index, text, uuid } from "drizzle-orm/pg-core";
 import type { PublicationLicenseId } from "@rezics/license";
 
@@ -10,11 +10,16 @@ import {
 	createUpdatedAtColumn,
 } from "./columns";
 import {
+	type ChineseContentDisplay,
+	ChineseContentDisplayValues,
 	type ContentLanguage,
+	ContentLanguageValues,
+	DefaultChineseContentDisplay,
 	DefaultContentRatingValues,
 	DefaultPreferredLanguage,
 	DefaultStoredUiLocale,
 	type StoredUiLocale,
+	StoredUiLocaleValues,
 } from "./contract-values";
 import { contentRating, profile, unit } from "./core";
 
@@ -31,6 +36,10 @@ export const profilePreference = pgTable(
 		filterFeedByPreferredLanguages: boolean().default(false).notNull(),
 		collectionConfig: createJsonObjectColumn(),
 		interfaceLocale: text().$type<StoredUiLocale>().default(DefaultStoredUiLocale).notNull(),
+		chineseContentDisplay: text()
+			.$type<ChineseContentDisplay>()
+			.default(DefaultChineseContentDisplay)
+			.notNull(),
 		contentRatings: contentRating()
 			.array()
 			.default(
@@ -58,9 +67,17 @@ export const profilePreference = pgTable(
 		check(
 			"profile_preference_languages_check",
 			sql`cardinality(${table.preferredLanguages}) > 0
-				and ${table.preferredLanguages} <@ array['zh', 'en']::text[]
-				and cardinality(array_positions(${table.preferredLanguages}, 'zh')) <= 1
-				and cardinality(array_positions(${table.preferredLanguages}, 'en')) <= 1`,
+				and ${table.preferredLanguages} <@ array[${sql.join(
+					ContentLanguageValues.map((language) => sql`${language}`),
+					sql`, `,
+				)}]::text[]
+				and ${sql.join(
+					ContentLanguageValues.map(
+						(language) =>
+							sql`cardinality(array_positions(${table.preferredLanguages}, ${language})) <= 1`,
+					),
+					sql` and `,
+				)}`,
 		),
 		check(
 			"profile_preference_content_ratings_check",
@@ -68,7 +85,11 @@ export const profilePreference = pgTable(
 		),
 		check(
 			"profile_preference_interface_locale_check",
-			sql`${table.interfaceLocale} in ('en', 'zh-hant')`,
+			inArray(table.interfaceLocale, StoredUiLocaleValues),
+		),
+		check(
+			"profile_preference_chinese_content_display_check",
+			inArray(table.chineseContentDisplay, ChineseContentDisplayValues),
 		),
 		createJsonObjectConstraint(
 			"profile_preference_collection_config_json_object_check",

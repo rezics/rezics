@@ -1,7 +1,9 @@
+import type { ContentLanguage } from "@rezics/i18n";
+
 export type BookStructureViewNode = {
 	readonly id: string;
 	readonly title: string;
-	readonly language: "zh" | "en";
+	readonly language: ContentLanguage;
 	readonly contentKind: "chapter" | "label";
 };
 

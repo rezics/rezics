@@ -33,7 +33,7 @@ export function ReviewFiltersDialog({
 	readonly onApply: (filters: ReviewFilterModel) => void;
 	readonly onClose: () => void;
 }) {
-	const { t } = useTranslation(["engagement", "search"]);
+	const { t } = useTranslation(["engagement", "locale", "search"]);
 	const [draft, setDraft] = useState(initialFilters);
 
 	return (
@@ -69,7 +69,7 @@ export function ReviewFiltersDialog({
 								setDraft((current) => ({ ...current, languages }))
 							}
 							options={ContentLanguageValues.map((value) => ({
-								label: t.search.languageOptions[value],
+								label: t.locale.contentLanguages[value],
 								value,
 							}))}
 							placeholder={t.engagement.allReviewLanguages}

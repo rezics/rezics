@@ -13,6 +13,7 @@ const attribution = {
 	creditedUnit: {
 		id: "019f9d16-1000-7000-8000-000000000002",
 		kind: "profile",
+		language: "zh",
 		slugAddress: null,
 		title: "海豚號編輯部",
 		summary: "策劃作品、評論與知識脈絡。",
@@ -22,6 +23,7 @@ const attribution = {
 
 const realmContext = {
 	id: "019f9d16-1000-7000-8000-000000000003",
+	language: "zh",
 	slugAddress: null,
 	title: "科幻研究",
 	summary: "細讀不同媒介與傳統中的科幻作品。",
@@ -166,6 +168,7 @@ const contextualReview = {
 	subject: {
 		id: book.id,
 		type: book.unitKind,
+		language: book.language,
 		title: book.title,
 		summary: book.summary,
 		cover: book.cover,

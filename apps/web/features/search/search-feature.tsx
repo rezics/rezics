@@ -285,6 +285,7 @@ export function SearchFeature({
 	readonly toolbarFilters?: ReactNode;
 }) {
 	const { t } = useTranslation("search");
+	const { t: localeCopy } = useTranslation("locale");
 	const { data: session } = useHydratedSession();
 	const preferences = useGetApiUsersMePreferences({
 		query: { enabled: Boolean(session) },
@@ -723,7 +724,7 @@ export function SearchFeature({
 							onValueChange={(values) => setLanguage([...values])}
 							options={ContentLanguageValues.map((value) => ({
 								value,
-								label: t.languageOptions[value],
+								label: localeCopy.contentLanguages[value],
 							}))}
 							placeholder={t.allLanguages}
 							value={language}

@@ -10,6 +10,7 @@ import {
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import {
 	AvatarInput,
+	ChineseContentDisplay,
 	ContentLanguage,
 	ContentRating,
 	DateTime,
@@ -149,15 +150,19 @@ export const UpdateProfileBody = t.Object(
 );
 export type UpdateProfileBody = Static<typeof UpdateProfileBody>;
 
-export const UpdateInterfaceLocaleBody = t.Object(
-	{ interfaceLocale: StoredUiLocale },
-	{ additionalProperties: false },
+export const UpdateDisplayPreferencesBody = t.Object(
+	{
+		interfaceLocale: t.Optional(StoredUiLocale),
+		chineseContentDisplay: t.Optional(ChineseContentDisplay),
+	},
+	{ additionalProperties: false, minProperties: 1 },
 );
-export type UpdateInterfaceLocaleBody = Static<typeof UpdateInterfaceLocaleBody>;
+export type UpdateDisplayPreferencesBody = Static<typeof UpdateDisplayPreferencesBody>;
 
 export const ReplacePreferencesBody = t.Object(
 	{
 		interfaceLocale: StoredUiLocale,
+		chineseContentDisplay: ChineseContentDisplay,
 		defaultLicense: t.Nullable(PublicationLicense),
 		defaultRealmManageMode: t.Boolean({ default: false }),
 		defaultScoreContextUnitId: Uuid,

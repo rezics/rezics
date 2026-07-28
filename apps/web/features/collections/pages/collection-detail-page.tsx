@@ -4,6 +4,7 @@ import { useGetApiCollectionsByCollectionId } from "@rezics/openapi-tanstack-que
 import { Badge, Button, Cover, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import Link from "next/link";
 
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -22,16 +23,21 @@ export function CollectionDetailPage({ collectionId }: { readonly collectionId: 
 		localizationLanguages,
 		unitId: collectionId,
 	});
+	const localization = query.data
+		? selectLocalization(query.data.localizations, query.data.language)
+		: null;
+	const title = useChineseContentText(
+		query.data?.systemKey === "favorites"
+			? t.collections.favorites
+			: (localization?.title ?? t.ui.unnamed),
+		query.data?.systemKey !== "favorites" && localization?.title ? localization.language : null,
+	);
+	const summary = useChineseContentText(localization?.summary ?? "", localization?.language);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const collection = query.data;
-	const localization = selectLocalization(collection.localizations, collection.language);
 	const canManage = Object.values(collection.capabilities).some(Boolean);
-	const title =
-		collection.systemKey === "favorites"
-			? t.collections.favorites
-			: (localization?.title ?? t.ui.unnamed);
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-0 py-8 sm:px-6 sm:py-10">
 			<div className="grid gap-5 px-4 sm:px-0">
@@ -45,7 +51,7 @@ export function CollectionDetailPage({ collectionId }: { readonly collectionId: 
 							</Button>
 						) : undefined
 					}
-					description={localization?.summary ?? undefined}
+					description={summary || undefined}
 					title={title}
 				/>
 				<div className="flex flex-wrap items-center gap-3">

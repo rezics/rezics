@@ -16,6 +16,7 @@ export function presentGlobalTags(input: {
 		itemKey: `global:${tag.tagId}`,
 		identity: {
 			tagId: tag.tagId,
+			language: tag.language,
 			title: tag.title,
 			summary: tag.summary,
 		},
@@ -48,12 +49,14 @@ export function presentRealmTagGroups(input: {
 				itemKey: `realm:${realm.realmId}:${tag.tagId}`,
 				identity: {
 					tagId: tag.tagId,
+					language: tag.language,
 					title: tag.title,
 					summary: tag.summary,
 				},
 				context: {
 					kind: "realm",
 					realmId: realm.realmId,
+					realmLanguage: realm.language,
 					realmTitle: realm.title,
 					policy: true,
 				},
@@ -66,12 +69,14 @@ export function presentRealmTagGroups(input: {
 				itemKey: `realm:${realm.realmId}:${tag.tagId}`,
 				identity: {
 					tagId: tag.tagId,
+					language: tag.language,
 					title: tag.title,
 					summary: tag.summary,
 				},
 				context: {
 					kind: "realm",
 					realmId: realm.realmId,
+					realmLanguage: realm.language,
 					realmTitle: realm.title,
 					policy,
 					contextPostId: tag.contextPostId,
@@ -97,6 +102,7 @@ export function presentRealmTagGroups(input: {
 			? [
 					{
 						realmId: realm.realmId,
+						language: realm.language,
 						title: realm.title,
 						summary: realm.summary,
 						tags,

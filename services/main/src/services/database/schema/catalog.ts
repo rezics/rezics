@@ -16,6 +16,7 @@ import { pgTable } from "./base";
 import {
 	AliasKindValues,
 	type ContentLanguage,
+	ContentLanguageValues,
 	toEnumValues,
 	type VariantCapableUnitKind,
 	VariantCapableUnitKindValues,
@@ -91,7 +92,7 @@ export const unitAlias = pgTable(
 		),
 		check(
 			"unit_alias_language_check",
-			sql`${table.language} is null or ${table.language} in ('zh', 'en')`,
+			sql`${table.language} is null or ${inArray(table.language, ContentLanguageValues)}`,
 		),
 		check(
 			"unit_alias_deleted_at_check",

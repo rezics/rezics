@@ -1,9 +1,9 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { check, foreignKey, integer, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import type { ContentLanguage } from "./contract-values";
+import { type ContentLanguage, ContentLanguageValues } from "./contract-values";
 import { unitLocalization } from "./core";
 
 /**
@@ -34,7 +34,7 @@ export const unitLocalizationContentMetric = pgTable(
 		}).onDelete("cascade"),
 		check(
 			"unit_localization_content_metric_language_check",
-			sql`${table.language} in ('zh', 'en')`,
+			inArray(table.language, ContentLanguageValues),
 		),
 		check("unit_localization_content_metric_word_count_check", sql`${table.wordCount} >= 0`),
 		check(

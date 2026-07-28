@@ -59,7 +59,7 @@ export function ApiFeedList({
 	sort = "best",
 	tagIds = [],
 }: ApiFeedListProps) {
-	const { t } = useTranslation(["actions", "feed", "state"]);
+	const { t } = useTranslation(["actions", "feed", "locale", "state"]);
 	const session = useHydratedSession();
 	const preferences = useGetApiUsersMePreferences({
 		query: { enabled: Boolean(session.data) },
@@ -289,7 +289,7 @@ export function FeedListControls({
 	| "sort"
 	| "tagIds"
 >) {
-	const { t } = useTranslation(["feed"]);
+	const { t } = useTranslation(["feed", "locale"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const [filtersOpen, setFiltersOpen] = useState(false);
 	const realms = useGetApiRealms(
@@ -306,7 +306,7 @@ export function FeedListControls({
 	})) satisfies readonly ChoiceOption<FeedSort>[];
 	const languageOptions = ContentLanguageValues.map((value) => ({
 		value,
-		label: t.feed.filters.languages.options[value],
+		label: t.locale.contentLanguages[value],
 	})) satisfies readonly ChoiceOption<ContentLanguage>[];
 	const realmOptions =
 		realms.data?.items.map((realm) => ({

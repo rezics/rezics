@@ -1,6 +1,6 @@
 import { isSingleEmojiGrapheme } from "@rezics/avatar";
 
-export type AvatarEmojiLocale = "en" | "zh-hant";
+export type AvatarEmojiLocale = "de" | "en" | "es" | "fr" | "ja" | "ko" | "zh" | "zh-hant";
 
 const RecentEmojiStorageKeyPrefix = "rezics-avatar-recent-emojis-v1";
 const RecentChoiceLimit = 18;

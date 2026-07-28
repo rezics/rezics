@@ -5,6 +5,8 @@ import { parse } from "@babel/parser";
 const aboutLocaleByDirectory = {
 	de: "de",
 	en: "en",
+	es: "es",
+	fr: "fr",
 	ja: "ja",
 	ko: "ko",
 	"zh-hans": "zh-Hans",
@@ -107,12 +109,52 @@ function isPropertyName(node, parent) {
 	);
 }
 
+const approvedUiLocaleAutonyms = {
+	en: "English",
+	"zh-Hant": "繁體中文",
+	"zh-Hans": "简体中文",
+	ja: "日本語",
+	ko: "한국어",
+	de: "Deutsch",
+	fr: "Français",
+	es: "Español",
+};
+
+function propertyName(node) {
+	if (node?.type === "Identifier") return node.name;
+	if (node?.type === "StringLiteral") return node.value;
+	return undefined;
+}
+
+function isApprovedUiLocaleAutonym(path, node, parent, ancestors) {
+	if (
+		!path
+			.replaceAll("\\", "/")
+			.match(/(?:^|\/)libraries\/i18n\/src\/languages\/[^/]+\/locale\.ts$/)
+	)
+		return false;
+	if (node.type !== "StringLiteral" || parent?.type !== "ObjectProperty") return false;
+	if (parent.value !== node) return false;
+	const locale = propertyName(parent.key);
+	if (!locale || approvedUiLocaleAutonyms[locale] !== node.value) return false;
+	const containingObject = ancestors.at(-2);
+	const uiLocalesProperty = ancestors.at(-3);
+	return (
+		containingObject?.type === "ObjectExpression" &&
+		uiLocalesProperty?.type === "ObjectProperty" &&
+		uiLocalesProperty.value === containingObject &&
+		propertyName(uiLocalesProperty.key) === "uiLocales"
+	);
+}
+
 export function localeForLocalizationPath(path) {
 	const normalizedPath = path.replaceAll("\\", "/");
-	const coreMatch = normalizedPath.match(/\/libraries\/i18n\/src\/languages\/(en|zh-Hant)\//);
+	const coreMatch = normalizedPath.match(
+		/\/libraries\/i18n\/src\/languages\/(de|en|es|fr|ja|ko|zh-Hans|zh-Hant)\//,
+	);
 	if (coreMatch) return coreMatch[1];
 	const fixtureMatch = normalizedPath.match(
-		/\/libraries\/fixture-data\/src\/languages\/(en|zh-Hant)\//,
+		/\/libraries\/fixture-data\/src\/languages\/(de|en|es|fr|ja|ko|zh-Hant)\//,
 	);
 	if (fixtureMatch) return fixtureMatch[1];
 	const aboutMatch = normalizedPath.match(/\/apps\/about\/src\/content\/locales\/([^/]+)\//);
@@ -211,7 +253,7 @@ export function checkTypeScriptSource({
 		return [`${path}: unable to parse localization source: ${error.message}`];
 	}
 
-	function visit(node, parent) {
+	function visit(node, parent, ancestors = []) {
 		if (!node || typeof node !== "object") return;
 		const value =
 			node.type === "StringLiteral"
@@ -235,7 +277,7 @@ export function checkTypeScriptSource({
 			errors.push(
 				...checkTerminologyValue(path, source, value, valueOffset, terminologyDefinitions),
 			);
-			if (rejectUnapprovedTokens)
+			if (rejectUnapprovedTokens && !isApprovedUiLocaleAutonym(path, node, parent, ancestors))
 				errors.push(
 					...checkUnapprovedTokens(path, source, value, valueOffset, verbatimDefinitions),
 				);
@@ -243,9 +285,9 @@ export function checkTypeScriptSource({
 
 		for (const child of Object.values(node)) {
 			if (Array.isArray(child)) {
-				for (const item of child) visit(item, node);
+				for (const item of child) visit(item, node, [...ancestors, node]);
 			} else {
-				visit(child, node);
+				visit(child, node, [...ancestors, node]);
 			}
 		}
 	}

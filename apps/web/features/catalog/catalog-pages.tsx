@@ -1,5 +1,5 @@
 "use client";
-import { toContentLanguage } from "@rezics/i18n";
+import { toContentLanguage, type ContentLanguage } from "@rezics/i18n";
 
 import {
 	getApiEntitiesQueryKey,
@@ -17,18 +17,22 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { BookOpenIcon } from "lucide-react";
 
-import { Banner, PageHeading } from "@rezics/ui";
+import { Banner, Cover, PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { UnitList } from "@rezics/ui";
+import { UnitList, type UnitListItem } from "@rezics/ui";
 import { IdentityAvatar } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@rezics/ui";
+import { LinkBox, LinkOverlay } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
@@ -77,6 +81,77 @@ function CatalogFrame({
 	);
 }
 
+interface CatalogListItem extends UnitListItem {
+	readonly language: ContentLanguage;
+}
+
+function CatalogUnitList<Item extends CatalogListItem>({
+	error,
+	href,
+	items,
+	pending,
+}: {
+	readonly error: boolean;
+	readonly href: (item: Item) => string;
+	readonly items: readonly Item[] | undefined;
+	readonly pending: boolean;
+}) {
+	if (pending || error || !items?.length) {
+		return <UnitList error={error} items={items} pending={pending} />;
+	}
+	return (
+		<ItemGroup className="gap-0 overflow-hidden rounded-2xl bg-background">
+			{items.map((item) => (
+				<CatalogUnitListItem href={href(item)} item={item} key={item.id} />
+			))}
+		</ItemGroup>
+	);
+}
+
+function CatalogUnitListItem({
+	href,
+	item,
+}: {
+	readonly href: string;
+	readonly item: CatalogListItem;
+}) {
+	const { t } = useTranslation("ui");
+	const title = useChineseContentText(item.title ?? t.unnamed, item.title ? item.language : null);
+	const summary = useChineseContentText(item.summary ?? "", item.language);
+	const usesAvatar = Boolean(item.avatar);
+	return (
+		<LinkBox>
+			<Item
+				className="rounded-none border-0 border-b border-border-weak shadow-none last:border-b-0 hover:bg-surface-hover focus-within:bg-surface-hover"
+				role="listitem"
+			>
+				{usesAvatar ? (
+					<ItemMedia variant="icon">
+						<IdentityAvatar
+							avatar={item.avatar}
+							className="size-14 text-lg font-black"
+							fallback={title.slice(0, 1)}
+						/>
+					</ItemMedia>
+				) : (
+					<Cover
+						alt={title}
+						className="w-14 shrink-0 self-stretch rounded-md"
+						fallback={<BookOpenIcon aria-hidden className="size-5" />}
+						src={item.cover?.url}
+					/>
+				)}
+				<ItemContent className="min-w-0 justify-center">
+					<ItemTitle>
+						<LinkOverlay href={href}>{title}</LinkOverlay>
+					</ItemTitle>
+					{summary ? <ItemDescription>{summary}</ItemDescription> : null}
+				</ItemContent>
+			</Item>
+		</LinkBox>
+	);
+}
+
 export function EntitiesPage() {
 	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
@@ -85,7 +160,7 @@ export function EntitiesPage() {
 	});
 	return (
 		<CatalogFrame title={t.catalog.entities} createHref="/entities/new">
-			<UnitList
+			<CatalogUnitList
 				items={query.data?.items}
 				pending={query.isPending}
 				error={query.isError}
@@ -101,7 +176,7 @@ export function TagsPage() {
 	const query = useGetApiTags({ query: { localizationLanguages, limit: 50 } });
 	return (
 		<CatalogFrame title={t.catalog.tags} createHref="/tags/new">
-			<UnitList
+			<CatalogUnitList
 				items={query.data?.items}
 				pending={query.isPending}
 				error={query.isError}
@@ -123,14 +198,28 @@ export function EntityDetailPage({ id }: { id: string }) {
 		localizationLanguages,
 		unitId: id,
 	});
+	const localization = query.data
+		? selectLocalization(query.data.localizations, query.data.language ?? "")
+		: null;
+	const displayedTitle = useChineseContentText(
+		localization?.title ?? t.ui.unnamed,
+		localization?.title ? localization.language : null,
+	);
+	const displayedSummary = useChineseContentText(
+		localization?.summary ?? "",
+		localization?.language,
+	);
+	const displayedOwnerTitle = useChineseContentText(
+		query.data?.owner?.title ?? t.ui.unnamed,
+		query.data?.owner?.title ? query.data.owner.language : undefined,
+	);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	const localization = selectLocalization(query.data.localizations, query.data.language ?? "");
 	const avatar = localization?.avatar ?? query.data.avatar;
 	const banner = localization?.banner ?? query.data.banner;
 	return (
-		<CatalogFrame title={localization?.title ?? t.ui.unnamed}>
+		<CatalogFrame title={displayedTitle}>
 			{banner ? (
 				<Banner alt="" className="rounded-2xl bg-muted" priority src={banner.url} />
 			) : null}
@@ -139,7 +228,7 @@ export function EntityDetailPage({ id }: { id: string }) {
 					<IdentityAvatar
 						avatar={avatar}
 						className="size-20"
-						fallback={(localization?.title ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
+						fallback={displayedTitle.slice(0, 1).toUpperCase()}
 					/>
 					<p>
 						<span className="text-muted-foreground">{t.catalog.kind}</span>{" "}
@@ -159,11 +248,11 @@ export function EntityDetailPage({ id }: { id: string }) {
 									slugAddress: query.data.owner.slugAddress,
 								})}
 							>
-								{query.data.owner.title ?? t.ui.unnamed}
+								{displayedOwnerTitle}
 							</Link>
 						</p>
 					) : null}
-					{localization?.summary && <p>{localization.summary}</p>}
+					{displayedSummary ? <p>{displayedSummary}</p> : null}
 					{query.data.capabilities.canEdit ? (
 						<Button variant="solid" asChild className="w-fit">
 							<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
@@ -248,12 +337,12 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 	const localization = entity.localizations.find((entry) => entry.language === selectedLanguage);
 	const avatarOptions: AvatarFieldOption[] = entity.localizations.flatMap((entry) =>
 		entry.language !== selectedLanguage && entry.avatar
-			? [{ ...entry.avatar, label: t.locale[entry.language] }]
+			? [{ ...entry.avatar, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
 	const bannerOptions: LocalizationImageAssetOption[] = entity.localizations.flatMap((entry) =>
 		entry.language !== selectedLanguage && entry.banner
-			? [{ ...entry.banner, label: t.locale[entry.language] }]
+			? [{ ...entry.banner, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);

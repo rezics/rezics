@@ -28,6 +28,42 @@ A person's ongoing interest relationship with a Unit; this is not a content subs
 | zh-Hant | approved | undoAction | 取消追蹤 | 訂閱, 關注, 跟隨, Subscribe, Subscription |
 | zh-Hant | approved | follower | 追蹤者 | 訂閱, 關注, 跟隨, Subscribe, Subscription |
 | zh-Hant | approved | collectionLabel | 追蹤項目 | 訂閱, 關注, 跟隨, Subscribe, Subscription |
+| zh-Hans | approved | actionLabel | 关注 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | action | 关注 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | stateLabel | 已关注 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | gerund | 关注 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | followed | 已关注 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | undoActionLabel | 取消关注 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | undoAction | 取消关注 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | follower | 关注者 | 订阅, 跟随, Subscribe, Subscription |
+| zh-Hans | approved | collectionLabel | 关注项目 | 订阅, 跟随, Subscribe, Subscription |
+| de | approved | actionLabel | Folgen | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | action | folgen | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | stateLabel | Gefolgt | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | gerund | Folgen | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | followed | gefolgt | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | undoActionLabel | Nicht mehr folgen | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | undoAction | nicht mehr folgen | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | follower | Follower | Abonnieren, Abonnement, Subscribe, Subscription |
+| de | approved | collectionLabel | Gefolgt | Abonnieren, Abonnement, Subscribe, Subscription |
+| ja | approved | actionLabel | フォロー | 購読, Subscribe, Subscription |
+| ja | approved | action | フォロー | 購読, Subscribe, Subscription |
+| ja | approved | stateLabel | フォロー中 | 購読, Subscribe, Subscription |
+| ja | approved | gerund | フォロー | 購読, Subscribe, Subscription |
+| ja | approved | followed | フォロー済み | 購読, Subscribe, Subscription |
+| ja | approved | undoActionLabel | フォロー解除 | 購読, Subscribe, Subscription |
+| ja | approved | undoAction | フォロー解除 | 購読, Subscribe, Subscription |
+| ja | approved | follower | フォロワー | 購読, Subscribe, Subscription |
+| ja | approved | collectionLabel | フォロー中 | 購読, Subscribe, Subscription |
+| ko | approved | actionLabel | 팔로우 | 구독, Subscribe, Subscription |
+| ko | approved | action | 팔로우 | 구독, Subscribe, Subscription |
+| ko | approved | stateLabel | 팔로우 중 | 구독, Subscribe, Subscription |
+| ko | approved | gerund | 팔로우 | 구독, Subscribe, Subscription |
+| ko | approved | followed | 팔로우함 | 구독, Subscribe, Subscription |
+| ko | approved | undoActionLabel | 팔로우 취소 | 구독, Subscribe, Subscription |
+| ko | approved | undoAction | 팔로우 취소 | 구독, Subscribe, Subscription |
+| ko | approved | follower | 팔로워 | 구독, Subscribe, Subscription |
+| ko | approved | collectionLabel | 팔로우 중 | 구독, Subscribe, Subscription |
 
 ## zone
 
@@ -105,6 +141,22 @@ The REZICS Dock content-placement concept.
 | zh-Hant | approved | pluralLabel | 停靠區 | Dock, Docks, 碼頭 |
 | zh-Hant | approved | inline | 停靠區 | Dock, Docks, 碼頭 |
 | zh-Hant | approved | plural | 停靠區 | Dock, Docks, 碼頭 |
+| zh-Hans | approved | label | 停靠区 | Dock, Docks, 码头 |
+| zh-Hans | approved | pluralLabel | 停靠区 | Dock, Docks, 码头 |
+| zh-Hans | approved | inline | 停靠区 | Dock, Docks, 码头 |
+| zh-Hans | approved | plural | 停靠区 | Dock, Docks, 码头 |
+| de | approved | label | Ablagebereich | Dock, Docks |
+| de | approved | pluralLabel | Ablagebereiche | Dock, Docks |
+| de | approved | inline | Ablagebereich | Dock, Docks |
+| de | approved | plural | Ablagebereiche | Dock, Docks |
+| ja | approved | label | 配置枠 | Dock, Docks |
+| ja | approved | pluralLabel | 配置枠 | Dock, Docks |
+| ja | approved | inline | 配置枠 | Dock, Docks |
+| ja | approved | plural | 配置枠 | Dock, Docks |
+| ko | approved | label | 배치 영역 | Dock, Docks |
+| ko | approved | pluralLabel | 배치 영역 | Dock, Docks |
+| ko | approved | inline | 배치 영역 | Dock, Docks |
+| ko | approved | plural | 배치 영역 | Dock, Docks |
 
 ## unitSlug
 
@@ -120,6 +172,22 @@ The optional human-facing path identifier of a Unit; slug remains the internal c
 | zh-Hant | approved | pluralLabel | 路徑標識 | Slug, slug, 公開網址標識, 網址標識, 路徑識別碼 |
 | zh-Hant | approved | inline | 路徑標識 | Slug, slug, 公開網址標識, 網址標識, 路徑識別碼 |
 | zh-Hant | approved | plural | 路徑標識 | Slug, slug, 公開網址標識, 網址標識, 路徑識別碼 |
+| zh-Hans | approved | label | 路径标识 | Slug, slug, 路径识别码 |
+| zh-Hans | approved | pluralLabel | 路径标识 | Slug, slug, 路径识别码 |
+| zh-Hans | approved | inline | 路径标识 | Slug, slug, 路径识别码 |
+| zh-Hans | approved | plural | 路径标识 | Slug, slug, 路径识别码 |
+| de | approved | label | Pfadkennung | Slug, slug |
+| de | approved | pluralLabel | Pfadkennungen | Slug, slug |
+| de | approved | inline | Pfadkennung | Slug, slug |
+| de | approved | plural | Pfadkennungen | Slug, slug |
+| ja | approved | label | パス識別子 | Slug, slug |
+| ja | approved | pluralLabel | パス識別子 | Slug, slug |
+| ja | approved | inline | パス識別子 | Slug, slug |
+| ja | approved | plural | パス識別子 | Slug, slug |
+| ko | approved | label | 경로 식별자 | Slug, slug |
+| ko | approved | pluralLabel | 경로 식별자 | Slug, slug |
+| ko | approved | inline | 경로 식별자 | Slug, slug |
+| ko | approved | plural | 경로 식별자 | Slug, slug |
 
 ## post
 
@@ -166,6 +234,22 @@ A lightweight localized-title Unit used as a structural heading or taxonomy entr
 | zh-Hant | approved | pluralLabel | 分類標目 |  |
 | zh-Hant | approved | inline | 分類標目 |  |
 | zh-Hant | approved | plural | 分類標目 |  |
+| zh-Hans | approved | label | 分类标目 |  |
+| zh-Hans | approved | pluralLabel | 分类标目 |  |
+| zh-Hans | approved | inline | 分类标目 |  |
+| zh-Hans | approved | plural | 分类标目 |  |
+| de | approved | label | Taxonomiebezeichnung |  |
+| de | approved | pluralLabel | Taxonomiebezeichnungen |  |
+| de | approved | inline | Taxonomiebezeichnung |  |
+| de | approved | plural | Taxonomiebezeichnungen |  |
+| ja | approved | label | 分類ラベル |  |
+| ja | approved | pluralLabel | 分類ラベル |  |
+| ja | approved | inline | 分類ラベル |  |
+| ja | approved | plural | 分類ラベル |  |
+| ko | approved | label | 분류 항목 |  |
+| ko | approved | pluralLabel | 분류 항목 |  |
+| ko | approved | inline | 분류 항목 |  |
+| ko | approved | plural | 분류 항목 |  |
 
 ## tagStructure
 
@@ -181,6 +265,22 @@ A community-immutable, community-voted ordered path of Tags; platform administra
 | zh-Hant | approved | pluralLabel | 標籤路徑 | Tag structure, Structure tag, 結構標籤 |
 | zh-Hant | approved | inline | 標籤路徑 | Tag structure, Structure tag, 結構標籤 |
 | zh-Hant | approved | plural | 標籤路徑 | Tag structure, Structure tag, 結構標籤 |
+| zh-Hans | approved | label | 标签路径 | Tag structure, Structure tag, 结构标签 |
+| zh-Hans | approved | pluralLabel | 标签路径 | Tag structure, Structure tag, 结构标签 |
+| zh-Hans | approved | inline | 标签路径 | Tag structure, Structure tag, 结构标签 |
+| zh-Hans | approved | plural | 标签路径 | Tag structure, Structure tag, 结构标签 |
+| de | approved | label | Tag-Pfad | Tag structure, Structure tag |
+| de | approved | pluralLabel | Tag-Pfade | Tag structure, Structure tag |
+| de | approved | inline | Tag-Pfad | Tag structure, Structure tag |
+| de | approved | plural | Tag-Pfade | Tag structure, Structure tag |
+| ja | approved | label | タグパス | Tag structure, Structure tag |
+| ja | approved | pluralLabel | タグパス | Tag structure, Structure tag |
+| ja | approved | inline | タグパス | Tag structure, Structure tag |
+| ja | approved | plural | タグパス | Tag structure, Structure tag |
+| ko | approved | label | 태그 경로 | Tag structure, Structure tag |
+| ko | approved | pluralLabel | 태그 경로 | Tag structure, Structure tag |
+| ko | approved | inline | 태그 경로 | Tag structure, Structure tag |
+| ko | approved | plural | 태그 경로 | Tag structure, Structure tag |
 
 ## publicationLicense
 
@@ -192,6 +292,14 @@ The terms under which a Unit's work is made available to the public; this is not
 | en | approved | inline | publication license |  |
 | zh-Hant | approved | label | 作品授權條款 | License, 作品 License, 授權 REZICS |
 | zh-Hant | approved | inline | 授權條款 | License, 作品 License, 授權 REZICS |
+| zh-Hans | approved | label | 作品许可条款 | License, 作品 License, 授权 REZICS |
+| zh-Hans | approved | inline | 许可条款 | License, 作品 License, 授权 REZICS |
+| de | approved | label | Veröffentlichungslizenz |  |
+| de | approved | inline | Veröffentlichungslizenz |  |
+| ja | approved | label | 公開ライセンス | Publication license |
+| ja | approved | inline | 公開ライセンス | Publication license |
+| ko | approved | label | 게시 라이선스 | Publication license |
+| ko | approved | inline | 게시 라이선스 | Publication license |
 
 ## metadata
 
@@ -203,3 +311,11 @@ Structured administrative and type-specific information about a Unit, distinct f
 | en | approved | inline | metadata | Basic information |
 | zh-Hant | approved | label | 中繼資料 | Metadata, 基本資訊 |
 | zh-Hant | approved | inline | 中繼資料 | Metadata, 基本資訊 |
+| zh-Hans | approved | label | 元数据 | Metadata, 基本信息 |
+| zh-Hans | approved | inline | 元数据 | Metadata, 基本信息 |
+| de | approved | label | Metadaten | Grundinformationen |
+| de | approved | inline | Metadaten | Grundinformationen |
+| ja | approved | label | メタデータ | Basic information |
+| ja | approved | inline | メタデータ | Basic information |
+| ko | approved | label | 메타데이터 | Basic information |
+| ko | approved | inline | 메타데이터 | Basic information |

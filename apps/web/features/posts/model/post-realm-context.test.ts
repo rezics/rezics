@@ -6,6 +6,7 @@ import { selectPostRealmContext } from "./post-realm-context";
 function realm(id: string): PostRealmContext {
 	return {
 		id,
+		language: "en",
 		slugAddress: null,
 		title: id,
 		summary: null,

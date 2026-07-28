@@ -12,6 +12,7 @@ import {
 	usePutApiRealmsByRealmIdMembership,
 	type GetApiRealmsByRealmIdPinsStatus200,
 	type GetApiRealmsByRealmIdStatus200,
+	type GetApiRealmsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -55,6 +56,7 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { RequestFailure } from "@/i18n/request-failure";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 import { RealmFeed } from "./components/realm-feed";
@@ -95,41 +97,46 @@ export function RealmsPage() {
 			) : query.data?.items.length ? (
 				<div className="grid gap-3">
 					{query.data.items.map((realm) => (
-						<Link key={realm.id} href={realmHref(realm)}>
-							<Card className="transition-colors hover:bg-surface-hover">
-								<CardContent className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 p-5">
-									<IdentityAvatar
-										avatar={realm.avatar}
-										className="size-12"
-										fallback={(realm.title ?? t.realms.untitled)
-											.slice(0, 1)
-											.toUpperCase()}
-									/>
-									<div className="grid min-w-0 gap-2">
-										<h2 className="font-semibold">
-											{realm.title ?? t.realms.untitled}
-										</h2>
-										{realm.summary && (
-											<p className="text-muted-foreground line-clamp-2 text-sm">
-												{realm.summary}
-											</p>
-										)}
-										<p className="text-muted-foreground text-sm">
-											{t.realms.joinPolicy}:{" "}
-											{realm.joinPolicy === "approval"
-												? t.realms.approval
-												: t.realms.open}
-										</p>
-									</div>
-								</CardContent>
-							</Card>
-						</Link>
+						<RealmListCard key={realm.id} realm={realm} />
 					))}
 				</div>
 			) : (
 				<p className="text-muted-foreground text-sm">{t.state.empty}</p>
 			)}
 		</main>
+	);
+}
+
+function RealmListCard({ realm }: { readonly realm: GetApiRealmsStatus200["items"][number] }) {
+	const { t } = useTranslation(["realms"]);
+	const title = useChineseContentText(
+		realm.title ?? t.realms.untitled,
+		realm.title ? realm.language : null,
+	);
+	const summary = useChineseContentText(realm.summary ?? "", realm.language);
+
+	return (
+		<Link href={realmHref(realm)}>
+			<Card className="transition-colors hover:bg-surface-hover">
+				<CardContent className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 p-5">
+					<IdentityAvatar
+						avatar={realm.avatar}
+						className="size-12"
+						fallback={title.slice(0, 1).toUpperCase()}
+					/>
+					<div className="grid min-w-0 gap-2">
+						<h2 className="font-semibold">{title}</h2>
+						{summary ? (
+							<p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>
+						) : null}
+						<p className="text-muted-foreground text-sm">
+							{t.realms.joinPolicy}:{" "}
+							{realm.joinPolicy === "approval" ? t.realms.approval : t.realms.open}
+						</p>
+					</div>
+				</CardContent>
+			</Card>
+		</Link>
 	);
 }
 
@@ -249,21 +256,27 @@ export function RealmDetailPage({ id }: { id: string }) {
 		localizationLanguages,
 		unitId: id,
 	});
+	const localization = query.data
+		? selectLocalization(query.data.localizations, query.data.language ?? "")
+		: null;
+	const displayedTitle = useChineseContentText(
+		localization?.title ?? t.realms.untitled,
+		localization?.title ? localization.language : null,
+	);
+	const displayedSummary = useChineseContentText(
+		localization?.summary ?? "",
+		localization?.language,
+	);
 	const headerSearch = useMemo(() => {
 		if (!query.data) return undefined;
-		const localization = selectLocalization(
-			query.data.localizations,
-			query.data.language ?? "",
-		);
-		const title = localization?.title ?? t.realms.untitled;
 		return {
 			href: `${realmHref(query.data)}/search`,
-			label: t.search.withinLabel({ name: title }),
-			placeholder: t.search.withinPlaceholder({ name: title }),
+			label: t.search.withinLabel({ name: displayedTitle }),
+			placeholder: t.search.withinPlaceholder({ name: displayedTitle }),
 			avatar: query.data.avatar,
-			avatarFallback: title.slice(0, 1).toUpperCase(),
+			avatarFallback: displayedTitle.slice(0, 1).toUpperCase(),
 		};
-	}, [locale.target, query.data, t.realms.untitled, t.search]);
+	}, [displayedTitle, locale.target, query.data, t.search]);
 	useHeaderSearchOverride(headerSearch);
 	const rules = useGetApiRealmsByRealmIdRules(
 		{ path: { realmId: id }, query: { localizationLanguages } },
@@ -281,7 +294,6 @@ export function RealmDetailPage({ id }: { id: string }) {
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const realm = query.data;
-	const localization = selectLocalization(realm.localizations, realm.language);
 	const canManage = canOpenRealmSettings(realm.capabilities, dockAccess.allowedKinds.length > 0);
 	const canPost = realm.capabilities.canCreateUnits;
 	return (
@@ -300,9 +312,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 						<IdentityAvatar
 							avatar={realm.avatar}
 							className="size-16 ring-4 ring-background sm:size-20"
-							fallback={(localization?.title ?? t.realms.untitled)
-								.slice(0, 1)
-								.toUpperCase()}
+							fallback={displayedTitle.slice(0, 1).toUpperCase()}
 						/>
 						<div className="flex flex-wrap items-center gap-2">
 							<Badge variant="secondary">{t.ui.realm}</Badge>
@@ -317,7 +327,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 						</div>
 					</div>
 					<h1 className="break-words font-serif font-semibold text-3xl tracking-tight sm:text-5xl">
-						{localization?.title ?? t.realms.untitled}
+						{displayedTitle}
 					</h1>
 					{realm.slugAddress ? (
 						<p className="mt-1 font-mono text-muted-foreground text-sm">
@@ -326,7 +336,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 					) : null}
 					{localization?.summary ? (
 						<p className="mt-3 max-w-3xl text-base text-muted-foreground leading-7 sm:text-lg">
-							{localization.summary}
+							{displayedSummary}
 						</p>
 					) : null}
 				</div>
@@ -356,6 +366,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 														: undefined,
 												href: realmPinnedContentHref(item, realm.id),
 												imageUrl: item.cover?.url,
+												language: item.language,
 												summary: item.summary,
 												title: item.title,
 											})),

@@ -8,6 +8,8 @@ export type {
 } from "./concepts";
 export { deTerminology } from "./locales/de";
 export { enTerminology } from "./locales/en";
+export { esTerminology } from "./locales/es";
+export { frTerminology } from "./locales/fr";
 export { jaTerminology } from "./locales/ja";
 export { koTerminology } from "./locales/ko";
 export { zhHansTerminology } from "./locales/zh-Hans";

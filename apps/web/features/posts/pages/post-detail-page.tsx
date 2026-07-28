@@ -83,6 +83,7 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 							postKind: post.postKind,
 							attributions: post.attributions,
 							realmId: realmId ?? post.realmId,
+							language: post.language,
 							title,
 							body: post.body,
 							createdAt: post.createdAt,

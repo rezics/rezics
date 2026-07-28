@@ -8,7 +8,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { CardContent, cn, Cover, IdentityAvatar, PortableTextContent } from "@rezics/ui";
+import { CardContent, cn, Cover, IdentityAvatar } from "@rezics/ui";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { postHref } from "@/features/posts/url";
 import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
 import { reviewHref } from "@/features/reviews/routing/review-routes";
@@ -116,14 +118,24 @@ export function FeedPostCard({
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
 	const href = feedPostHref(post, realmId);
 	const subjectHref = post.subject ? unitHref(post.subject.type, post.subject.id) : undefined;
+	const subjectTitle = useChineseContentText(
+		post.subject?.title ?? t.actions.view,
+		post.subject?.language,
+	);
+	const subjectSummary = useChineseContentText(
+		post.subject?.summary ?? "",
+		post.subject?.language,
+	);
 	const excerptSource =
 		post.postKind === "excerpt" && post.subject && subjectHref
 			? {
 					href: subjectHref,
-					title: post.subject.title ?? t.actions.view,
+					title: subjectTitle,
 				}
 			: undefined;
 	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
+	const displayedTitle = useChineseContentText(title, post.language);
+	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
 	const attributions = toFeedAttributionContexts(post.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
 	const attachedScore = post.postKind === "review" ? post.scores[0] : undefined;
@@ -180,18 +192,19 @@ export function FeedPostCard({
 						className="font-heading font-black text-[1.05rem] leading-snug"
 						id={`feed-item-${post.id}`}
 					>
-						{title}
+						{displayedTitle}
 					</h2>
 					{post.body ? (
 						<div className="prose prose-sm mt-2 max-w-none text-muted-foreground leading-6">
-							<PortableTextContent
+							<LocalizedPortableTextContent
+								language={post.language}
 								value={readPortableText(post.body)}
 								variant="preview"
 							/>
 						</div>
 					) : post.summary ? (
 						<p className="mt-2 text-muted-foreground text-sm leading-6">
-							{post.summary}
+							{displayedSummary}
 						</p>
 					) : null}
 				</FeedItemMain>
@@ -214,14 +227,14 @@ export function FeedPostCard({
 			</FeedCardContent>
 			{post.postKind !== "excerpt" && post.subject && subjectHref && !subjectIsCurrentUnit ? (
 				<FeedCardTarget
-					{...(post.subject.summary ? { description: post.subject.summary } : {})}
+					{...(post.subject.summary ? { description: subjectSummary } : {})}
 					{...(post.subject.cover ? { imageUrl: post.subject.cover.url } : {})}
 					href={subjectHref}
-					imageAlt={post.subject.title ?? t.actions.view}
+					imageAlt={subjectTitle}
 					imageFallback={<UnitCoverFallback kind={post.subject.type} />}
 					label={t.feed.relatedWork}
 					rating={subjectRating}
-					title={post.subject.title ?? t.actions.view}
+					title={subjectTitle}
 				/>
 			) : null}
 			<CardContent className="px-4 pb-4 sm:px-5">
@@ -496,6 +509,7 @@ function toFeedAttributionContexts(
 			id: attribution.id,
 			kind: creditedUnit.kind,
 			role: attribution.role,
+			...(creditedUnit.title ? { language: creditedUnit.language } : {}),
 			...(href ? { href } : {}),
 			initials: contextInitials(name),
 			name,
@@ -514,6 +528,7 @@ function toFeedRealmContexts(realms: FeedItem["realms"], unnamedRealm: string): 
 			href: realmHref({ id: realm.id, slugAddress: realm.slugAddress }),
 			initials: contextInitials(name),
 			name,
+			...(realm.title ? { language: realm.language } : {}),
 			...(realm.avatar ? { avatar: realm.avatar } : {}),
 			...(realm.slugAddress ? { slug: realm.slugAddress.slug } : {}),
 			...(realm.summary ? { summary: realm.summary } : {}),

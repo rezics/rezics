@@ -1,0 +1,41 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+
+const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: zoneTerms } = zhHansTerminology.zone;
+
+export default {
+	loading: "正在加载编辑器…",
+	loadFailed: "无法加载编辑器。",
+	paragraph: "正文",
+	heading2: "二级标题",
+	heading3: "三级标题",
+	quote: "引用",
+	bold: "粗体",
+	italic: "斜体",
+	bulletList: "项目符号列表",
+	numberedList: "编号列表",
+	link: "链接",
+	linkPrompt: `支持 ${verbatimTerms.http.value}、${verbatimTerms.https.value}、${verbatimTerms.mailto.value} 或站内相对网址。`,
+	linkUrl: "链接网址",
+	openInNewTab: "在新分页打开",
+	addLink: "添加链接",
+	removeLink: "移除链接",
+	invalidLink: "请输入支持的链接网址。",
+	undo: "撤销",
+	redo: "重做",
+	style: "文本样式",
+	preview: "预览",
+	placeholder: "开始撰写，或输入 / 插入内容区块。",
+	slashMenu: "插入",
+	slashHint: `输入 / 插入区块；输入 ${verbatimTerms.profileSlugPrefix.value}、t/、e/、r/、z/ 插入项目提及。`,
+	mentionSearchPrompt: "请输入文本以搜索。",
+	mentionUsers: "用户",
+	mentionTags: "标签",
+	mentionEntities: "实体",
+	mentionRealms: realmTerms.label,
+	mentionZones: zoneTerms.label,
+	unavailableMention: "无法显示的项目",
+	richText: "多格式文本",
+	toolbar: "文本格式工具栏",
+} satisfies typeof import("../zh-Hant/editor").default;

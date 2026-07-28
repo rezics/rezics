@@ -2,6 +2,7 @@
 
 import { EmojiPicker, type Emoji } from "frimousse";
 import { Button } from "@rezics/ui";
+import type { UiLocale } from "@rezics/i18n";
 import { useEffect, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
@@ -10,13 +11,25 @@ import {
 	readRecentEmojiChoices,
 	rememberRecentEmojiChoice,
 	type RecentEmojiChoice,
+	type AvatarEmojiLocale,
 } from "../model/avatar-emoji-recents";
+
+const EmojiLocaleByUiLocale = {
+	de: "de",
+	en: "en",
+	es: "es",
+	fr: "fr",
+	ja: "ja",
+	ko: "ko",
+	"zh-Hans": "zh",
+	"zh-Hant": "zh-hant",
+} as const satisfies Record<UiLocale, AvatarEmojiLocale>;
 
 export function AvatarEmojiPicker({ onSelect }: { readonly onSelect: (emoji: string) => void }) {
 	const { t, locale } = useTranslation(["media"]);
 	const [query, setQuery] = useState("");
 	const [recent, setRecent] = useState<readonly RecentEmojiChoice[]>([]);
-	const emojiLocale = locale.target === "zh-Hant" ? "zh-hant" : "en";
+	const emojiLocale = EmojiLocaleByUiLocale[locale.target];
 
 	useEffect(() => {
 		setRecent(readRecentEmojiChoices(window.localStorage, emojiLocale));

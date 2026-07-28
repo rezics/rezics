@@ -3,7 +3,6 @@
 import {
 	Button,
 	Cover,
-	PortableTextContent,
 	ShowMoreContent,
 	Tooltip,
 	TooltipContent,
@@ -21,6 +20,8 @@ import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import type { CatalogDetailUnitType } from "../model/catalog-detail-section";
 import type { CatalogDetailUnitFor } from "../model/catalog-detail-unit";
 import { CatalogShareAction } from "./catalog-share-action";
@@ -64,7 +65,10 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 			<div className="grid min-w-0 content-start gap-4">
 				<div className="flex flex-wrap items-start justify-between gap-4">
 					<h1 className="min-w-0 flex-1 font-heading text-3xl font-black leading-tight tracking-tight sm:text-4xl">
-						{localization?.title ?? t.ui.unnamed}
+						<LocalizedText
+							language={localization?.language}
+							value={localization?.title ?? t.ui.unnamed}
+						/>
 					</h1>
 					<div className="flex shrink-0 items-center justify-end gap-1">
 						<FollowButton size="sm" unitId={unit.id} variant="quiet" />
@@ -91,14 +95,18 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 
 				{localization?.summary ? (
 					<p className="max-w-3xl text-base font-medium leading-7 text-foreground/88">
-						{localization.summary}
+						<LocalizedText
+							language={localization.language}
+							value={localization.summary}
+						/>
 					</p>
 				) : null}
 
 				{localization?.description ? (
 					<ShowMoreContent showLessLabel={t.ui.showLess} showMoreLabel={t.ui.showMore}>
-						<PortableTextContent
+						<LocalizedPortableTextContent
 							className="text-base prose-p:my-4 prose-p:leading-7 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0"
+							language={localization.language}
 							value={readPortableText(localization.description)}
 							variant="article"
 						/>

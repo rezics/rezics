@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { create } from "native-i18n";
+import { ContentLanguageValues, UiLocaleValues } from "@rezics/i18n";
 import { resources } from "@rezics/i18n/resources";
 
 function isTranslationGroup(value: unknown): value is Readonly<Record<string, unknown>> {
@@ -35,15 +36,33 @@ describe("language dictionaries", () => {
 			"locale",
 			"settings",
 		] as const;
-		const english = await i18n.getTranslation(namespaces, ["en"]);
 		const traditionalChinese = await i18n.getTranslation(namespaces, ["zh-Hant"]);
+		const translations = await Promise.all(
+			UiLocaleValues.map((locale) => i18n.getTranslation(namespaces, [locale])),
+		);
 
-		assertSameTranslationShape(traditionalChinese.t, english.t);
+		for (const [index, translation] of translations.entries()) {
+			const locale = UiLocaleValues[index];
+			expect(translation.locale.current).toBe(locale);
+			assertSameTranslationShape(
+				traditionalChinese.t,
+				translation.t,
+				`translation.${locale}`,
+			);
+			for (const key of UiLocaleValues)
+				expect(translation.t.locale.uiLocales[key]).not.toBe(key);
+			for (const key of ContentLanguageValues)
+				expect(translation.t.locale.contentLanguages[key]).not.toBe(key);
+		}
+
+		const english = translations[UiLocaleValues.indexOf("en")];
+		expect(english).toBeDefined();
+		if (!english) return;
 		expect(
 			Object.keys(english.t.errorCodes).every((code) => /^[A-Z][A-Za-z0-9]*$/.test(code)),
 		).toBe(true);
 		expect(traditionalChinese.locale.current).toBe("zh-Hant");
-		expect(traditionalChinese.t.locale.zh).toBe("繁體中文");
+		expect(traditionalChinese.t.locale.uiLocales["zh-Hant"]).toBe("繁體中文");
 		expect(traditionalChinese.t.settings.tokens.standardLimitsDescription).toContain(
 			"一律使用標準策略",
 		);

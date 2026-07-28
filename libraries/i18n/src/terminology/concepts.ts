@@ -1,4 +1,13 @@
-export const TerminologyLocaleValues = ["en", "zh-Hant", "zh-Hans", "de", "ja", "ko"] as const;
+export const TerminologyLocaleValues = [
+	"en",
+	"zh-Hant",
+	"zh-Hans",
+	"de",
+	"fr",
+	"es",
+	"ja",
+	"ko",
+] as const;
 
 export type TerminologyLocale = (typeof TerminologyLocaleValues)[number];
 
@@ -21,7 +30,7 @@ function defineTerminologyConcepts<
 }
 
 const AllTerminologyLocales = TerminologyLocaleValues;
-const WebTerminologyLocales = ["en", "zh-Hant"] as const satisfies readonly TerminologyLocale[];
+const WebTerminologyLocales = AllTerminologyLocales;
 
 /**
  * Stable REZICS product concepts whose user-visible names must remain

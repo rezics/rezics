@@ -8,6 +8,7 @@ import { RealmRulesCard, type RealmRulePresentation } from "./realm-rules-card";
 const rules = [
 	{
 		id: "rule-1",
+		language: "en",
 		title: "Be civil",
 		content: {
 			_type: "portable-text",
@@ -32,6 +33,7 @@ const rules = [
 	},
 	{
 		id: "rule-2",
+		language: "en",
 		title: "Stay on topic",
 		content: {
 			_type: "portable-text",
@@ -56,6 +58,7 @@ const rules = [
 	},
 	{
 		id: "rule-3",
+		language: "en",
 		title: "AnUninterruptedRuleTitleThatMustRemainInsideTheSidebarEvenWithoutNaturalBreakPoints",
 		content: {
 			_type: "portable-text",

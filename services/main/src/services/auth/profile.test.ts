@@ -39,7 +39,13 @@ vi.mock("../units/create", () => ({ insertUnit }));
 vi.mock("../units/history", () => ({ recordUnitRevision }));
 
 import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
-import { profilePreference, realmMember, unitFollow, unitOwnership } from "../database/schema";
+import {
+	profilePreference,
+	realmMember,
+	unitFollow,
+	unitLocalization,
+	unitOwnership,
+} from "../database/schema";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 import { fractionalPositionBetween } from "../ordering/position";
 import { ensureProfile } from "./profile";
@@ -134,7 +140,7 @@ describe("Profile registration defaults", () => {
 	});
 
 	it("uses the registration language when the frontend supplies one", async () => {
-		registrationLanguageLimit.mockResolvedValue([{ contentLanguage: "zh" }]);
+		registrationLanguageLimit.mockResolvedValue([{ contentLanguage: "ja" }]);
 
 		await ensureProfile({
 			id: "019f82aa-db8f-7962-9924-7369b17f5501",
@@ -144,7 +150,12 @@ describe("Profile registration defaults", () => {
 		});
 
 		expect(valuesByTable.get(profilePreference)).toEqual(
-			expect.objectContaining({ preferredLanguages: ["zh"] }),
+			expect.objectContaining({ preferredLanguages: ["ja"] }),
 		);
+		expect(valuesByTable.get(unitLocalization)).toEqual({
+			unitId: ProfileId,
+			language: "ja",
+			title: "Reader",
+		});
 	});
 });

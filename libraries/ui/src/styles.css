@@ -147,13 +147,41 @@
 
 :root {
 	--radius: 0.625rem;
+	--rezics-font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+	--rezics-font-heading: "Iowan Old Style", Georgia, ui-serif, serif;
+	--rezics-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+}
+
+:root:lang(zh-Hans) {
 	--rezics-font-sans:
 		Inter, "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", ui-sans-serif,
 		system-ui, sans-serif;
 	--rezics-font-heading:
-		"Iowan Old Style", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", Georgia,
-		ui-serif, serif;
-	--rezics-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+		"Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", Georgia, ui-serif, serif;
+}
+
+:root:lang(zh-Hant) {
+	--rezics-font-sans:
+		Inter, "Noto Sans CJK TC", "Source Han Sans TC", "Microsoft JhengHei", ui-sans-serif,
+		system-ui, sans-serif;
+	--rezics-font-heading:
+		"Noto Serif CJK TC", "Source Han Serif TC", "Songti TC", Georgia, ui-serif, serif;
+}
+
+:root:lang(ja) {
+	--rezics-font-sans:
+		Inter, "Noto Sans CJK JP", "Source Han Sans JP", "Yu Gothic", ui-sans-serif, system-ui,
+		sans-serif;
+	--rezics-font-heading:
+		"Noto Serif CJK JP", "Source Han Serif JP", "Yu Mincho", Georgia, ui-serif, serif;
+}
+
+:root:lang(ko) {
+	--rezics-font-sans:
+		Inter, "Noto Sans CJK KR", "Source Han Sans KR", "Malgun Gothic", ui-sans-serif, system-ui,
+		sans-serif;
+	--rezics-font-heading:
+		"Noto Serif CJK KR", "Source Han Serif KR", "Batang", Georgia, ui-serif, serif;
 }
 
 @layer base {

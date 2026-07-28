@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
@@ -13,7 +13,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { type StoredUiLocale, NotificationKindValues, toEnumValues } from "./contract-values";
+import {
+	type DeliveryLocale,
+	DeliveryLocaleValues,
+	NotificationKindValues,
+	toEnumValues,
+} from "./contract-values";
 import {
 	createCreatedAtColumn,
 	createJsonObjectColumn,
@@ -109,7 +114,7 @@ export const emailOutbox = pgTable(
 		kind: emailOutboxKind().notNull(),
 		notificationId: uuid().references(() => notification.id, { onDelete: "cascade" }),
 		recipientEmail: text(),
-		locale: text().$type<StoredUiLocale>(),
+		locale: text().$type<DeliveryLocale>(),
 		actionUrl: text(),
 		status: emailOutboxStatus().default("pending").notNull(),
 		attemptCount: integer().default(0).notNull(),
@@ -160,7 +165,7 @@ export const emailOutbox = pgTable(
 						)
 						and nullif(btrim(${table.recipientEmail}), '') is not null
 						and nullif(btrim(${table.actionUrl}), '') is not null
-						and ${table.locale} in ('en', 'zh-hant')
+						and ${inArray(table.locale, DeliveryLocaleValues)}
 					) or (
 						${table.status} in (
 							'accepted'::email_outbox_status,

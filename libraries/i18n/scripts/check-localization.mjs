@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 
 import { deTerminology } from "@rezics/i18n/terminology/de";
 import { enTerminology } from "@rezics/i18n/terminology/en";
+import { esTerminology } from "@rezics/i18n/terminology/es";
+import { frTerminology } from "@rezics/i18n/terminology/fr";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
@@ -20,11 +22,13 @@ import {
 const packageRoot = fileURLToPath(new URL("..", import.meta.url));
 const repositoryRoot = resolve(packageRoot, "../..");
 const sourceRoots = [
-	resolve(packageRoot, "src/languages/en"),
-	resolve(packageRoot, "src/languages/zh-Hant"),
-	resolve(repositoryRoot, "libraries/fixture-data/src/languages/en"),
-	resolve(repositoryRoot, "libraries/fixture-data/src/languages/zh-Hant"),
-	...["de", "en", "ja", "ko", "zh-hans", "zh-hant"].map((locale) =>
+	...["de", "en", "es", "fr", "ja", "ko", "zh-Hans", "zh-Hant"].map((locale) =>
+		resolve(packageRoot, `src/languages/${locale}`),
+	),
+	...["de", "en", "es", "fr", "ja", "ko", "zh-Hant"].map((locale) =>
+		resolve(repositoryRoot, `libraries/fixture-data/src/languages/${locale}`),
+	),
+	...["de", "en", "es", "fr", "ja", "ko", "zh-hans", "zh-hant"].map((locale) =>
 		resolve(repositoryRoot, `apps/about/src/content/locales/${locale}`),
 	),
 ];
@@ -32,6 +36,8 @@ const sourceExtensions = new Set([".ts", ".tsx", ".md", ".mdx"]);
 const terminologyByLocale = {
 	de: deTerminology,
 	en: enTerminology,
+	es: esTerminology,
+	fr: frTerminology,
 	ja: jaTerminology,
 	ko: koTerminology,
 	"zh-Hans": zhHansTerminology,
@@ -66,12 +72,14 @@ for (const path of (await Promise.all(sourceRoots.map(collectFiles))).flat().toS
 		continue;
 	}
 	const source = await readFile(path, "utf8");
+	const isAboutContent = path.includes("/apps/about/");
 	const common = {
 		path: relative(repositoryRoot, path),
 		source,
 		verbatimDefinitions: definitionsForPath(path),
 		terminologyDefinitions: flattenTerminology(terminologyByLocale[locale]),
-		rejectUnapprovedTokens: locale === "zh-Hant",
+		rejectUnapprovedTokens:
+			locale === "zh-Hant" || (!isAboutContent && ["ja", "ko", "zh-Hans"].includes(locale)),
 	};
 	if (path.endsWith(".ts") || path.endsWith(".tsx"))
 		errors.push(...checkTypeScriptSource(common));

@@ -26,6 +26,7 @@ import { pgTable } from "./base";
 import {
 	AiDisclosureValues,
 	type ContentLanguage,
+	ContentLanguageValues,
 	ContentRatingValues,
 	ContentStatusValues,
 	ImageAssetAccessValues,
@@ -155,7 +156,7 @@ export const unitLocalization = pgTable(
 		),
 		index("unit_localization_language_unit_idx").on(table.language, table.unitId),
 		index("unit_localization_content_status_idx").on(table.contentStatus, table.updatedAt),
-		check("unit_localization_language_check", sql`${table.language} in ('zh', 'en')`),
+		check("unit_localization_language_check", inArray(table.language, ContentLanguageValues)),
 		check("unit_localization_avatar_type_check", inArray(table.avatarType, AvatarTypeValues)),
 		check(
 			"unit_localization_avatar_value_check",

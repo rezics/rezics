@@ -1,6 +1,21 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const deTerminology = defineTerminology("de", {
+	follow: {
+		status: "approved",
+		forms: {
+			actionLabel: "Folgen",
+			action: "folgen",
+			stateLabel: "Gefolgt",
+			gerund: "Folgen",
+			followed: "gefolgt",
+			undoActionLabel: "Nicht mehr folgen",
+			undoAction: "nicht mehr folgen",
+			follower: "Follower",
+			collectionLabel: "Gefolgt",
+		},
+		forbidden: ["Abonnieren", "Abonnement", "Subscribe", "Subscription"],
+	},
 	zone: {
 		status: "approved",
 		forms: {
@@ -21,9 +36,62 @@ export const deTerminology = defineTerminology("de", {
 		},
 		forbidden: ["Realm", "Realms"],
 	},
+	dock: {
+		status: "approved",
+		forms: {
+			label: "Ablagebereich",
+			pluralLabel: "Ablagebereiche",
+			inline: "Ablagebereich",
+			plural: "Ablagebereiche",
+		},
+		forbidden: ["Dock", "Docks"],
+	},
+	unitSlug: {
+		status: "approved",
+		forms: {
+			label: "Pfadkennung",
+			pluralLabel: "Pfadkennungen",
+			inline: "Pfadkennung",
+			plural: "Pfadkennungen",
+		},
+		forbidden: ["Slug", "slug"],
+	},
 	post: {
 		status: "approved",
 		forms: { label: "Beitrag", pluralLabel: "Beiträge", inline: "Beitrag", plural: "Beiträge" },
 		forbidden: ["Post", "Posts"],
+	},
+	label: {
+		status: "approved",
+		forms: {
+			label: "Taxonomiebezeichnung",
+			pluralLabel: "Taxonomiebezeichnungen",
+			inline: "Taxonomiebezeichnung",
+			plural: "Taxonomiebezeichnungen",
+		},
+		forbidden: [],
+	},
+	tagStructure: {
+		status: "approved",
+		forms: {
+			label: "Tag-Pfad",
+			pluralLabel: "Tag-Pfade",
+			inline: "Tag-Pfad",
+			plural: "Tag-Pfade",
+		},
+		forbidden: ["Tag structure", "Structure tag"],
+	},
+	publicationLicense: {
+		status: "approved",
+		forms: {
+			label: "Veröffentlichungslizenz",
+			inline: "Veröffentlichungslizenz",
+		},
+		forbidden: [],
+	},
+	metadata: {
+		status: "approved",
+		forms: { label: "Metadaten", inline: "Metadaten" },
+		forbidden: ["Grundinformationen"],
 	},
 });

@@ -31,6 +31,11 @@ describe("ContentLanguage", () => {
 
 		expect(check.Check("en")).toBe(true);
 		expect(check.Check("zh")).toBe(true);
+		expect(check.Check("ja")).toBe(true);
+		expect(check.Check("ko")).toBe(true);
+		expect(check.Check("de")).toBe(true);
+		expect(check.Check("fr")).toBe(true);
+		expect(check.Check("es")).toBe(true);
 	});
 
 	it("rejects UI locales and unsupported content languages", () => {
@@ -39,7 +44,6 @@ describe("ContentLanguage", () => {
 		expect(check.Check("zh-Hant")).toBe(false);
 		expect(check.Check("zh-hant")).toBe(false);
 		expect(check.Check("en-US")).toBe(false);
-		expect(check.Check("ja")).toBe(false);
 		expect(check.Check("invalid")).toBe(false);
 	});
 
@@ -76,6 +80,7 @@ describe("LocalizationLanguagePriority", () => {
 		expect(check.Check(["en"])).toBe(true);
 		expect(check.Check([])).toBe(false);
 		expect(check.Check(["en", "en"])).toBe(false);
-		expect(check.Check(["ja"])).toBe(false);
+		expect(check.Check(["ja"])).toBe(true);
+		expect(check.Check(["zh-Hans"])).toBe(false);
 	});
 });

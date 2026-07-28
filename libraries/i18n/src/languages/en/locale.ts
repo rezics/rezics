@@ -1,7 +1,31 @@
 export default {
 	label: "Language",
-	zh: "Traditional Chinese",
-	en: "English",
+	uiLocales: {
+		en: "English",
+		"zh-Hant": "繁體中文",
+		"zh-Hans": "简体中文",
+		ja: "日本語",
+		ko: "한국어",
+		de: "Deutsch",
+		fr: "Français",
+		es: "Español",
+	},
+	contentLanguages: {
+		zh: "Chinese",
+		en: "English",
+		ja: "Japanese",
+		ko: "Korean",
+		de: "German",
+		fr: "French",
+		es: "Spanish",
+	},
+	chineseContentDisplay: {
+		label: "Chinese content display",
+		hint: "Changes how Chinese content is displayed without modifying the author's text.",
+		original: "Keep the original text",
+		hant: "Display in Traditional Chinese",
+		hans: "Display in Simplified Chinese",
+	},
 	displayMode: "Display mode",
 	displayModes: {
 		system: "Automatic (device setting)",

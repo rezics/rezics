@@ -40,8 +40,12 @@ describe("seed data", () => {
 		const plans = Array.from({ length: 20 }, (_, index) => data.languages(index));
 		const primary = plans.map(([language]) => language);
 
-		expect(primary.filter((language) => language === "zh")).toHaveLength(9);
-		expect(primary.filter((language) => language === "en")).toHaveLength(11);
+		expect(new Set(primary)).toEqual(new Set(SeedLanguages));
+		for (const language of SeedLanguages) {
+			expect(
+				primary.filter((primaryLanguage) => primaryLanguage === language).length,
+			).toBeGreaterThan(1);
+		}
 		expect(plans.filter((languages) => languages.length === 1)).toHaveLength(11);
 		expect(plans.filter((languages) => languages.length === 2)).toHaveLength(9);
 		for (const languages of plans) {

@@ -1,4 +1,4 @@
-export const ABOUT_LOCALES = ["zh-hant", "zh-hans", "en", "ja", "de", "ko"] as const;
+export const ABOUT_LOCALES = ["zh-hant", "zh-hans", "en", "ja", "de", "ko", "fr", "es"] as const;
 
 export type AboutLocale = (typeof ABOUT_LOCALES)[number];
 
@@ -38,6 +38,8 @@ export const ABOUT_LOCALE_META: Record<
 	ja: { name: "Japanese", nativeName: "日本語", htmlLang: "ja" },
 	de: { name: "German", nativeName: "Deutsch", htmlLang: "de" },
 	ko: { name: "Korean", nativeName: "한국어", htmlLang: "ko" },
+	fr: { name: "French", nativeName: "Français", htmlLang: "fr" },
+	es: { name: "Spanish", nativeName: "Español", htmlLang: "es" },
 };
 
 const ABOUT_LOCALE_SET = new Set<string>(ABOUT_LOCALES);

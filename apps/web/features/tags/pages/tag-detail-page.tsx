@@ -4,6 +4,10 @@ import { useGetApiTagsByTagId } from "@rezics/openapi-tanstack-query";
 import { Badge, Card, CardContent, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import Link from "next/link";
 
+import {
+	LocalizedText,
+	useChineseContentText,
+} from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -26,15 +30,21 @@ export function TagDetailPage({ tagId }: { readonly tagId: string }) {
 		localizationLanguages,
 		unitId: tagId,
 	});
+	const displayedTitle = useChineseContentText(
+		query.data?.title ?? t.tags.unnamedTag,
+		query.data?.title ? query.data.language : null,
+	);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading title={query.data.title ?? t.tags.unnamedTag} />
+			<PageHeading title={displayedTitle} />
 			{query.data.summary ? (
-				<p className="max-w-3xl text-muted-foreground">{query.data.summary}</p>
+				<p className="max-w-3xl text-muted-foreground">
+					<LocalizedText language={query.data.language} value={query.data.summary} />
+				</p>
 			) : null}
 			<section className="grid gap-4">
 				<div className="grid gap-1">
@@ -55,11 +65,21 @@ export function TagDetailPage({ tagId }: { readonly tagId: string }) {
 											className="font-semibold text-link hover:text-link-hover hover:underline"
 											href={tagDetailHref(child.tagId)}
 										>
-											{child.title ?? t.tags.unnamedTag}
+											{child.title ? (
+												<LocalizedText
+													language={child.language}
+													value={child.title}
+												/>
+											) : (
+												t.tags.unnamedTag
+											)}
 										</Link>
 										{child.summary ? (
 											<p className="text-sm text-muted-foreground">
-												{child.summary}
+												<LocalizedText
+													language={child.language}
+													value={child.summary}
+												/>
 											</p>
 										) : null}
 										<p className="text-xs text-muted-foreground">
@@ -83,7 +103,14 @@ export function TagDetailPage({ tagId }: { readonly tagId: string }) {
 														key={grandchild.tagId}
 													>
 														<Badge variant="outline">
-															{grandchild.title ?? t.tags.unnamedTag}
+															{grandchild.title ? (
+																<LocalizedText
+																	language={grandchild.language}
+																	value={grandchild.title}
+																/>
+															) : (
+																t.tags.unnamedTag
+															)}
 														</Badge>
 													</Link>
 												))}

@@ -160,14 +160,14 @@ export function ContentLanguageSettingsDialog({
 										aria-label={t.units.contentLanguages.controlLabel}
 										onChange={(event) => {
 											const language = event.currentTarget.value;
-											if (language === "zh" || language === "en")
+											if (isContentLanguage(language))
 												setLanguageToAdd(language);
 										}}
 										value={languageToAdd}
 									>
 										{missingLanguages.map((language) => (
 											<NativeSelectOption key={language} value={language}>
-												{t.locale[language]}
+												{t.locale.contentLanguages[language]}
 											</NativeSelectOption>
 										))}
 									</NativeSelect>
@@ -198,12 +198,16 @@ export function ContentLanguageSettingsDialog({
 							announcements: {
 								onDragStart({ active }) {
 									const language = contentLanguageFromDragId(active.id);
-									return language ? t.locale[language] : undefined;
+									return language
+										? t.locale.contentLanguages[language]
+										: undefined;
 								},
 								onDragOver({ over }) {
 									if (!over) return;
 									const language = contentLanguageFromDragId(over.id);
-									return language ? t.locale[language] : undefined;
+									return language
+										? t.locale.contentLanguages[language]
+										: undefined;
 								},
 								onDragEnd({ active, over }) {
 									if (!over) return;
@@ -212,7 +216,7 @@ export function ContentLanguageSettingsDialog({
 									if (!language || !target) return;
 									const position = draft.indexOf(target) + 1;
 									return t.units.contentLanguages.moved({
-										language: t.locale[language],
+										language: t.locale.contentLanguages[language],
 										position,
 										count: draft.length,
 									});
@@ -307,7 +311,7 @@ function SortableLanguage({
 		>
 			<div className="flex items-center gap-2">
 				<Button
-					aria-label={`${t.units.contentLanguages.drag}: ${t.locale[language]}`}
+					aria-label={`${t.units.contentLanguages.drag}: ${t.locale.contentLanguages[language]}`}
 					ref={sortable.setActivatorNodeRef}
 					size="icon-sm"
 					type="button"
@@ -317,7 +321,9 @@ function SortableLanguage({
 				>
 					<GripVertical aria-hidden />
 				</Button>
-				<span className="min-w-0 flex-1 font-medium">{t.locale[language]}</span>
+				<span className="min-w-0 flex-1 font-medium">
+					{t.locale.contentLanguages[language]}
+				</span>
 				<div className="flex items-center gap-1">
 					<Button
 						aria-label={t.units.contentLanguages.moveFirst}
@@ -375,7 +381,7 @@ function SortableLanguage({
 				<div className="mt-3 grid gap-3 border-t pt-3">
 					<p className="text-sm text-destructive">
 						{t.units.contentLanguages.removeConfirm({
-							language: t.locale[language],
+							language: t.locale.contentLanguages[language],
 						})}
 					</p>
 					<div className="flex justify-end gap-2">

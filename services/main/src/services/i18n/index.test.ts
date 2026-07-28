@@ -29,7 +29,7 @@ describe("backend internationalization", () => {
 			new Request("http://localhost/", { headers: { "Accept-Language": "en-US" } }),
 		);
 
-		expect(response.headers.get("Content-Language")).toBe("zh-Hant");
+		expect(response.headers.get("Content-Language")).toBe("zh");
 		expect(await response.json()).toEqual({
 			title: "REZICS 有新的追蹤者",
 			body: "有人開始追蹤你。",
@@ -58,13 +58,11 @@ describe("backend internationalization", () => {
 		});
 	});
 
-	it("uses the shared fallback for unsupported stored preferences", async () => {
+	it("matches Japanese delivery copy from a regional language preference", async () => {
 		const { t, locale } = await getTranslation("notifications", ["ja-JP"]);
 
-		expect(locale).toBe("zh-Hant");
-		expect(t.new_follower).toEqual({
-			title: "REZICS 有新的追蹤者",
-			body: "有人開始追蹤你。",
-		});
+		expect(locale).toBe("ja");
+		expect(t.new_follower.title).toContain("REZICS");
+		expect(t.new_follower.body.length).toBeGreaterThan(0);
 	});
 });

@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, PortableTextContent } from "@rezics/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rezics/ui";
 
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useProfileContext } from "./profile-layout";
 
 export function ProfilePage() {
@@ -21,7 +22,8 @@ export function ProfilePage() {
 				</CardHeader>
 				<CardContent>
 					{hasDescription ? (
-						<PortableTextContent
+						<LocalizedPortableTextContent
+							language={profile.language}
 							value={readPortableText(profile.description)}
 							variant="article"
 						/>

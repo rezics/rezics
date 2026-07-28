@@ -1,0 +1,26 @@
+export default {
+	title: "Historial de revisiones",
+	description:
+		"Consulta los cambios, compara revisiones o restaura contenido cuando tengas permiso.",
+	noRevisions: "Todavía no hay revisiones.",
+	currentRevision: "Revisión actual",
+	minorEdit: "Edición menor",
+	hiddenRevision: "Oculta",
+	undoRevision: "Deshacer esta edición",
+	restoreRevision: "Restaurar esta revisión",
+	compareWithParent: "Comparar con la anterior",
+	revisionBy: "Editor",
+	noEditSummary: "Sin resumen de la edición",
+	compareTitle: "Diferencia entre revisiones",
+	before: "Antes",
+	after: "Después",
+	backToHistory: "Volver al historial de revisiones",
+	backToEditor: "Volver al editor",
+	bytes: "bytes",
+	structureKinds: {
+		create: "Estructura creada",
+		update: "Estructura actualizada",
+		delete: "Estructura eliminada",
+		restore: "Estructura restaurada",
+	},
+} satisfies typeof import("../zh-Hant/history").default;

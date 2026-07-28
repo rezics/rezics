@@ -1,0 +1,5 @@
+- L’authentification, les contrôles d’autorisation, les limites de sécurité et les limites d’utilisation relèvent de couches intermédiaires distinctes.
+- Les limites effectives sont déterminées à partir d’un profil de politique, puis d’une dérogation propre au jeton, puis d’une dérogation propre à l’opération, tandis que les plafonds immuables du serveur restent applicables.
+- Les configurations Standard et Privileged utilisent des schémas validés différents. Leur configuration JSON est stockée dans la base de données et validée de nouveau à chaque lecture.
+- Une politique Privileged augmente uniquement le débit. Elle n’ajoute aucune autorisation, exige une date d’expiration et un motif d’audit, puis revient à un comportement sûr lorsqu’elle expire ou devient invalide.
+- Les secrets des jetons ne sont affichés qu’une fois et ne sont conservés que sous forme d’empreintes. L’auto-inspection ne renvoie jamais d’empreinte, de référence de secret ni de donnée d’identification.

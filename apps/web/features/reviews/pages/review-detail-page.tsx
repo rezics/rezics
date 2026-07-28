@@ -132,6 +132,7 @@ export function ReviewDetailPage({
 					postKind: review.postKind,
 					attributions: review.attributions,
 					realmId: review.realmId,
+					language: review.language,
 					title: review.title ?? t.ui.unnamed,
 					summary: review.summary,
 					body: review.body,

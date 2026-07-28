@@ -89,12 +89,12 @@ export function RealmProfileSettings({
 	const localization = realm.localizations.find((entry) => entry.language === selectedLanguage);
 	const avatarOptions: AvatarFieldOption[] = realm.localizations.flatMap((entry) =>
 		entry.language !== selectedLanguage && entry.avatar
-			? [{ ...entry.avatar, label: t.locale[entry.language] }]
+			? [{ ...entry.avatar, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
 	const bannerOptions: LocalizationImageAssetOption[] = realm.localizations.flatMap((entry) =>
 		entry.language !== selectedLanguage && entry.banner
-			? [{ ...entry.banner, label: t.locale[entry.language] }]
+			? [{ ...entry.banner, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);
@@ -287,7 +287,7 @@ export function RealmRules({
 	error: Parameters<typeof RequestFailure>[0]["error"];
 	embedded?: boolean;
 }) {
-	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
+	const { t, locale } = useTranslation(["errors", "locale", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const save = usePutApiRealmsByRealmIdRules();
 	const [drafts, setDrafts] = useState<RuleDraft[]>();
@@ -424,7 +424,7 @@ export function RealmRules({
 										>
 											{ContentLanguageValues.map((value) => (
 												<NativeSelectOption key={value} value={value}>
-													{value}
+													{t.locale.contentLanguages[value]}
 												</NativeSelectOption>
 											))}
 										</NativeSelect>

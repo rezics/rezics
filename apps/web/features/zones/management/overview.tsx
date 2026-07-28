@@ -61,7 +61,7 @@ function ZoneManagementOverviewForLanguage() {
 	const selected = zone.localizations.find((item) => item.language === selectedLanguage);
 	const avatarOptions: AvatarFieldOption[] = zone.localizations.flatMap((item) =>
 		item.language !== selectedLanguage && item.avatar
-			? [{ ...item.avatar, label: t.locale[item.language] }]
+			? [{ ...item.avatar, label: t.locale.contentLanguages[item.language] }]
 			: [],
 	);
 	const [title, setTitle] = useState(selectedLanguageIsPending ? "" : (selected?.title ?? ""));

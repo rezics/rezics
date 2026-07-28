@@ -1,0 +1,126 @@
+import { insert } from "native-i18n";
+
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+
+const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: followTerms } = zhHansTerminology.follow;
+const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
+
+export default {
+	page: {
+		title: "标签",
+		description: `查看一般标签，以及你所选标签来源对这个作品的${realmTerms.label}上下文判断。`,
+		viewAll: "查看完整标签页",
+		manageOnTagPage: `请在专用标签页加入标签或${tagStructureTerms.label}，以保留清楚的投票上下文。`,
+	},
+	card: {
+		open: insert("打开「{{tag}}」标签卡片（{{context}}）", {
+			tag: String,
+			context: String,
+		}),
+		close: "关闭标签卡片",
+		globalContext: "一般标签",
+		structureContext: tagStructureTerms.label,
+		policy: `${realmTerms.label}设置`,
+		search: "搜索此标签",
+		details: "查看标签详情",
+	},
+	selection: {
+		start: "多选",
+		finish: "结束多选",
+		add: "加入选取",
+		remove: "移出选取",
+		addNamed: insert("选取「{{tag}}」", { tag: String }),
+		removeNamed: insert("取消选取「{{tag}}」", { tag: String }),
+		selectedCount: insert("已选 {{count}} 个标签", { count: Number }),
+		search: "搜索所选标签",
+		clear: "清除选取",
+	},
+	basic: {
+		title: "基本标签",
+		description: `由一般标签与${tagStructureTerms.pluralLabel}组成，不带入任何${realmTerms.label}的上下文判断。`,
+	},
+	structures: {
+		title: tagStructureTerms.pluralLabel,
+		description: `${tagStructureTerms.pluralLabel}会保留有意义的阶层，并优先于扁平标签显示。`,
+		addTitle: `加入${tagStructureTerms.inline}`,
+		addDescription: `请先搜索已通过的${tagStructureTerms.plural}；加入时会支持整条路径及路径上的每个标签。`,
+		add: `加入${tagStructureTerms.label}`,
+		create: `创建${tagStructureTerms.label}`,
+		details: `查看${tagStructureTerms.label}`,
+		empty: `这个作品还没有通过的${tagStructureTerms.plural}。`,
+		memberFallback: "未命名标签",
+		pathLabel: `依序排列的${tagStructureTerms.label}`,
+	},
+	detail: {
+		childrenTitle: "直接子标签",
+		childrenDescription: `这些关系来自通过投票且由社区锁定的${tagStructureTerms.label}；每个子标签下方会显示其直接子标签。`,
+		noChildren: "这个标签当前没有通过的直接子标签。",
+		grandchildrenTitle: "直接子标签",
+	},
+	createStructure: {
+		title: `创建${tagStructureTerms.label}`,
+		description:
+			"请依「较广泛」到「较具体」的顺序创建路径。创建后社区成员不能编辑；平台管理员可进行留有审计记录的修正。",
+		pick: "选择下一个标签",
+		addMember: "加入路径",
+		removeMember: "从路径移除",
+		moveEarlier: "向前移",
+		moveLater: "向后移",
+		preview: "社区锁定路径预览",
+		minimum: "请加入至少两个不同的标签。",
+		submit: `创建${tagStructureTerms.label}并投票`,
+	},
+	adminEditStructure: {
+		title: `修正${tagStructureTerms.label}`,
+		description:
+			"平台管理员可以修正成员或顺序；条目身份、既有投票与所有应用关系都会保留，修正内容也会写入历史记录。",
+		reasonLabel: "修正理由",
+		reasonPlaceholder: "说明为何需要进行这项管理修正。",
+		submit: "保存并记录修正",
+	},
+	global: {
+		title: "一般标签",
+		description: "一般标签由所有具备交互权限的用户共同提出及判断。",
+		addTitle: "加入一般标签",
+		addDescription: "先搜索既有标签；加入时会同时投下一票「符合」。",
+		add: "加入标签",
+		pinned: "精选",
+		empty: "这个作品还没有一般标签。",
+	},
+	realms: {
+		title: `${realmTerms.label}标签上下文`,
+		description: `各${realmTerms.inline}的判断彼此独立，不会与一般标签或其他${realmTerms.inline}合并计分。`,
+		policy: `${realmTerms.label}设置的标签`,
+		votes: `${realmTerms.label}成员投票`,
+		context: "查看投票上下文",
+		empty: "你选择的标签来源当前没有对这个作品提出判断。",
+		cannotVote: `加入这个${realmTerms.inline}后才能参与该上下文的投票。`,
+	},
+	vote: {
+		fits: "符合",
+		doesNotFit: "不符合",
+		clear: "移除我的判断",
+		signIn: "登录后投票",
+		signInDescription: "登录后即可在一般标签上下文中投票。",
+		summary: insert("净票数 {{score}} · {{count}} 票", {
+			score: String,
+			count: String,
+		}),
+	},
+	sources: {
+		title: "标签来源",
+		description: `选择并排序要在作品标签区域显示的${realmTerms.label}来源；这项设置不会${followTerms.action}作品，也不会改变${realmTerms.inline}成员身份。`,
+		addTitle: "加入标签来源",
+		addDescription: `搜索可阅读的${realmTerms.label}，并加入个人标签来源列表。`,
+		add: "加入来源",
+		remove: "移除来源",
+		moveEarlier: "向前移",
+		moveLater: "向后移",
+		empty: "尚未选择任何标签来源。",
+		manage: "管理标签来源",
+	},
+	unnamedTag: "未命名标签",
+	unnamedRealm: `未命名${realmTerms.label}`,
+	unnamedStructure: `未命名${tagStructureTerms.label}`,
+} satisfies typeof import("../zh-Hant/tags").default;

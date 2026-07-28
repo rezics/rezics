@@ -503,8 +503,9 @@ async function seedProfiles(
 	);
 	await writeBatches(
 		profiles.map((value, index) => {
+			const contentLanguage = itemAt(data.languages(index), 0);
 			const interfaceLocale =
-				itemAt(data.languages(index), 0) === "zh" ? ("zh-hant" as const) : ("en" as const);
+				contentLanguage === "zh" ? ("zh-Hant" as const) : contentLanguage;
 			return {
 				profileId: value.id,
 				interfaceLocale,

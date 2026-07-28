@@ -1,0 +1,78 @@
+import { deTerminology } from "@rezics/i18n/terminology/de";
+
+const { forms: postTerms } = deTerminology.post;
+const { forms: realmTerms } = deTerminology.realm;
+
+export default {
+	title: postTerms.pluralLabel,
+	create: `Neuer ${postTerms.inline}`,
+	createTitle: `${postTerms.label} veröffentlichen`,
+	editTitle: `${postTerms.label} bearbeiten`,
+	publish: "Veröffentlichen",
+	untitled: `${postTerms.label} ohne Titel`,
+	unknownAttribution: "Keine Zuordnung",
+	publisher: "Herausgeber",
+	replies: `Antwort-${postTerms.pluralLabel}`,
+	replyPost: `Antwort-${postTerms.inline}`,
+	signInToReply: "Zum Antworten anmelden",
+	openReplyComposer: "An der Diskussion teilnehmen",
+	hideChildReplies: "Nachfolgende Antworten ausblenden",
+	showChildReplies: "Nachfolgende Antworten anzeigen",
+	replyingLocked: `Neue Antwort-${postTerms.pluralLabel} sind für dieses Ziel deaktiviert.`,
+	noReplies: `Noch keine Antwort-${postTerms.pluralLabel}.`,
+	replyBody: "Antworttext",
+	reply: "Antworten",
+	cancel: "Abbrechen",
+	delete: "Löschen",
+	deleteTitle: `${postTerms.label} löschen?`,
+	deleteDescription: "Diese Aktion kann nicht rückgängig gemacht werden.",
+	deleteReplyTitle: `Antwort-${postTerms.inline} löschen?`,
+	deleteReplyDescription: "Der Inhalt der Antwort wird anschließend nicht mehr angezeigt.",
+	deletedReply: `Dieser Antwort-${postTerms.inline} wurde gelöscht.`,
+	editReplyTitle: `Antwort-${postTerms.inline} bearbeiten`,
+	viewThread: "Vollständigen Diskussionsverlauf anzeigen",
+	history: "Verlauf",
+	historyTitle: "Versionsverlauf",
+	noRevisions: "Noch keine Versionen.",
+	currentRevision: "Aktuelle Version",
+	minorEdit: "Kleine Änderung",
+	hiddenRevision: "Ausgeblendet",
+	undoRevision: "Diese Änderung rückgängig machen",
+	restoreRevision: "Diese Version wiederherstellen",
+	compareWithParent: "Mit vorheriger Version vergleichen",
+	revisionBy: "Bearbeitet von",
+	noEditSummary: "Keine Änderungszusammenfassung",
+	compareTitle: "Versionsunterschiede",
+	before: "Vorher",
+	after: "Nachher",
+	realm: realmTerms.label,
+	selectRealmContext: `${realmTerms.label} als Kontext auswählen`,
+	realmContextCard: `${realmTerms.label}-Informationen`,
+	subject: "Gegenstand",
+	clearRealm: `${realmTerms.label} entfernen`,
+	clearSubject: "Gegenstand entfernen",
+	attributions: "Zuordnungen",
+	viewRealm: `${realmTerms.label} anzeigen`,
+	workspace: {
+		description: "Bearbeite Hauptinhalt, Zuordnungen, Zugriff und Versionsverlauf.",
+		backToContent: "Zurück zum Inhalt",
+		navigation: "Navigation der Inhaltsverwaltung",
+		sections: {
+			main: {
+				label: "Hauptinhalt",
+				postDescription: `Titel und Text des ${postTerms.inline}s bearbeiten.`,
+				replyDescription: `Text des Antwort-${postTerms.inline}s bearbeiten.`,
+				reviewDescription:
+					"Titel, Zusammenfassung, Text und Bewertungszuordnung der Rezension bearbeiten.",
+			},
+			attributions: {
+				label: "Zuordnungsbeziehungen",
+				description:
+					"Aktuelle Zuordnungen prüfen und Vorschläge verwalten, die von der anderen Partei angenommen werden müssen.",
+			},
+		},
+		currentAttributions: "Aktuelle Zuordnungen",
+		currentAttributionsDescription:
+			"Bestehende Zuordnungsbeziehungen, die für diesen Inhalt angezeigt werden.",
+	},
+} satisfies typeof import("../zh-Hant/posts").default;

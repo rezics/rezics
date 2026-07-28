@@ -16,6 +16,11 @@ export type JsonValue =
 export const LocalizationFilterLanguageInEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type LocalizationFilterLanguageInEnum =
@@ -1208,7 +1213,7 @@ export type UnitPredicate = {
 						/**
 						 * @type array
 						 */
-						in: ("zh" | "en")[];
+						in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
 					};
 				};
 		  }
@@ -1236,7 +1241,7 @@ export type UnitPredicate = {
 						/**
 						 * @type array
 						 */
-						in: ("zh" | "en")[];
+						in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
 					};
 				};
 		  };
@@ -8828,6 +8833,19 @@ export type GetApiRecommendationsPostsByPostIdQuery = {
 	limit?: string | number;
 };
 
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsLanguage =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsLanguage)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsLanguage];
+
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -8876,6 +8894,20 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCredite
 export type GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitKindEnum];
 
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -8884,6 +8916,19 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCredite
 
 export type GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsLanguageEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsLanguageEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsLanguageEnum];
 
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -8966,6 +9011,20 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttribu
 export type GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -8974,6 +9033,19 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttribu
 
 export type GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSubjectLanguageEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSubjectLanguageEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSubjectLanguageEnum];
 
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum = {
 	post: "post",
@@ -9002,7 +9074,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (("zh" | "en") | null) | null;
+				language: (GetApiRecommendationsPostsByPostIdStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
@@ -9041,6 +9113,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 						 * @type string
 						 */
 						kind: GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitKindEnum;
+						/**
+						 * @type string
+						 */
+						language: GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -9141,6 +9217,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 * @type string
 					 */
 					id: string;
+					/**
+					 * @type string
+					 */
+					language: GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -9487,6 +9567,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 									 * @type string
 									 */
 									kind: GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+									/**
+									 * @type string
+									 */
+									language: GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 									slugAddress:
 										| ({
 												/**
@@ -9591,6 +9675,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							 * @type string
 							 */
 							type: string;
+							/**
+							 * @type string
+							 */
+							language: GetApiRecommendationsPostsByPostIdStatus200ItemsSubjectLanguageEnum;
 							title: (string | null) | null;
 							summary: (string | null) | null;
 							cover:
@@ -9653,7 +9741,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (("zh" | "en") | null) | null;
+				language: (GetApiRecommendationsPostsByPostIdStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
@@ -9692,6 +9780,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 						 * @type string
 						 */
 						kind: GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitKindEnum;
+						/**
+						 * @type string
+						 */
+						language: GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -9792,6 +9884,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 * @type string
 					 */
 					id: string;
+					/**
+					 * @type string
+					 */
+					language: GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -10138,6 +10234,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 									 * @type string
 									 */
 									kind: GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+									/**
+									 * @type string
+									 */
+									language: GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 									slugAddress:
 										| ({
 												/**
@@ -10242,6 +10342,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							 * @type string
 							 */
 							type: string;
+							/**
+							 * @type string
+							 */
+							language: GetApiRecommendationsPostsByPostIdStatus200ItemsSubjectLanguageEnum;
 							title: (string | null) | null;
 							summary: (string | null) | null;
 							cover:
@@ -14423,6 +14527,19 @@ export type PutApiApiTokenPoliciesBindingsByTokenIdResponse =
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
 	| PutApiApiTokenPoliciesBindingsByTokenIdStatus500;
 
+export const PostApiFeedQueryStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsLanguage =
+	(typeof PostApiFeedQueryStatus200ItemsLanguage)[keyof typeof PostApiFeedQueryStatus200ItemsLanguage];
+
 export const PostApiFeedQueryStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -14471,6 +14588,19 @@ export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum = {
 export type PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum];
 
+export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -14478,6 +14608,19 @@ export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPre
 
 export type PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiFeedQueryStatus200ItemsRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsRealmsLanguageEnum =
+	(typeof PostApiFeedQueryStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiFeedQueryStatus200ItemsRealmsLanguageEnum];
 
 export const PostApiFeedQueryStatus200ItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -14586,6 +14729,19 @@ export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitK
 export type PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
+export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -14594,6 +14750,19 @@ export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitA
 
 export type PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiFeedQueryStatus200ItemsSubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSubjectLanguageEnum =
+	(typeof PostApiFeedQueryStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiFeedQueryStatus200ItemsSubjectLanguageEnum];
 
 export const PostApiFeedQueryStatus200ItemsPostKindEnum = {
 	post: "post",
@@ -14622,7 +14791,7 @@ export type PostApiFeedQueryStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (("zh" | "en") | null) | null;
+				language: (PostApiFeedQueryStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
@@ -14661,6 +14830,10 @@ export type PostApiFeedQueryStatus200 = {
 						 * @type string
 						 */
 						kind: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum;
+						/**
+						 * @type string
+						 */
+						language: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -14761,6 +14934,10 @@ export type PostApiFeedQueryStatus200 = {
 					 * @type string
 					 */
 					id: string;
+					/**
+					 * @type string
+					 */
+					language: PostApiFeedQueryStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -15073,7 +15250,7 @@ export type PostApiFeedQueryStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language: (PostApiFeedQueryStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -15112,6 +15289,10 @@ export type PostApiFeedQueryStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -15212,6 +15393,10 @@ export type PostApiFeedQueryStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiFeedQueryStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -15557,6 +15742,10 @@ export type PostApiFeedQueryStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -15661,6 +15850,10 @@ export type PostApiFeedQueryStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiFeedQueryStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -15723,7 +15916,7 @@ export type PostApiFeedQueryStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language: (PostApiFeedQueryStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -15762,6 +15955,10 @@ export type PostApiFeedQueryStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -15862,6 +16059,10 @@ export type PostApiFeedQueryStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiFeedQueryStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -16207,6 +16408,10 @@ export type PostApiFeedQueryStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -16311,6 +16516,10 @@ export type PostApiFeedQueryStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiFeedQueryStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -16447,6 +16656,11 @@ export type PostApiFeedQueryRequestSortEnum =
 export const PostApiFeedQueryRequestLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiFeedQueryRequestLocalizationLanguagesEnum =
@@ -16522,6 +16736,11 @@ export type GetApiFeedbackMeQuery = {
 export const GetApiFeedbackMeStatus200ItemsEvidenceLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiFeedbackMeStatus200ItemsEvidenceLanguageEnum =
@@ -16544,6 +16763,19 @@ export const GetApiFeedbackMeStatus200ItemsResolutionCode = {
 
 export type GetApiFeedbackMeStatus200ItemsResolutionCode =
 	(typeof GetApiFeedbackMeStatus200ItemsResolutionCode)[keyof typeof GetApiFeedbackMeStatus200ItemsResolutionCode];
+
+export const GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum =
+	(typeof GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum)[keyof typeof GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum];
 
 /**
  * @type object
@@ -16723,7 +16955,10 @@ export type GetApiFeedbackMeStatus200 = {
 					 * @type string
 					 */
 					postId: string;
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: GetApiFeedbackMeStatus200ItemsPublicNoticeLanguageEnum;
 					/**
 					 * @type object
 					 */
@@ -16937,6 +17172,11 @@ export type GetApiFeedbackMeResponse =
 export const PostApiFeedbackStatus200EvidenceLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiFeedbackStatus200EvidenceLanguageEnum =
@@ -16959,6 +17199,19 @@ export const PostApiFeedbackStatus200ResolutionCode = {
 
 export type PostApiFeedbackStatus200ResolutionCode =
 	(typeof PostApiFeedbackStatus200ResolutionCode)[keyof typeof PostApiFeedbackStatus200ResolutionCode];
+
+export const PostApiFeedbackStatus200PublicNoticeLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedbackStatus200PublicNoticeLanguageEnum =
+	(typeof PostApiFeedbackStatus200PublicNoticeLanguageEnum)[keyof typeof PostApiFeedbackStatus200PublicNoticeLanguageEnum];
 
 /**
  * @type object
@@ -17134,7 +17387,10 @@ export type PostApiFeedbackStatus200 = {
 				 * @type string
 				 */
 				postId: string;
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PostApiFeedbackStatus200PublicNoticeLanguageEnum;
 				/**
 				 * @type object
 				 */
@@ -17383,6 +17639,11 @@ export type PostApiFeedbackRequestTypeEnum =
 export const PostApiFeedbackRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiFeedbackRequestLanguageEnum =
@@ -20452,6 +20713,11 @@ export type GetApiGovernanceNotesByPostIdStatus200RoleEnum =
 export const GetApiGovernanceNotesByPostIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiGovernanceNotesByPostIdStatus200LanguageEnum =
@@ -20711,6 +20977,11 @@ export type PatchApiGovernanceNotesByPostIdStatus200RoleEnum =
 export const PatchApiGovernanceNotesByPostIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiGovernanceNotesByPostIdStatus200LanguageEnum =
@@ -21013,6 +21284,11 @@ export type PatchApiGovernanceNotesByPostIdStatus500 = InternalError;
 export const PatchApiGovernanceNotesByPostIdRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiGovernanceNotesByPostIdRequestLanguageEnum =
@@ -21257,6 +21533,11 @@ export type GetApiGovernanceModerationCasesStatus200ItemsNotesRoleEnum =
 export const GetApiGovernanceModerationCasesStatus200ItemsNotesLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiGovernanceModerationCasesStatus200ItemsNotesLanguageEnum =
@@ -21575,6 +21856,11 @@ export type GetApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum =
 export const GetApiGovernanceModerationCasesByCaseIdStatus200NotesLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiGovernanceModerationCasesByCaseIdStatus200NotesLanguageEnum =
@@ -21918,6 +22204,11 @@ export type PatchApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum =
 export const PatchApiGovernanceModerationCasesByCaseIdStatus200NotesLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiGovernanceModerationCasesByCaseIdStatus200NotesLanguageEnum =
@@ -22229,6 +22520,11 @@ export type PatchApiGovernanceModerationCasesByCaseIdRequestStateEnum =
 export const PatchApiGovernanceModerationCasesByCaseIdRequestInternalNoteLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiGovernanceModerationCasesByCaseIdRequestInternalNoteLanguageEnum =
@@ -22662,6 +22958,19 @@ export const PostApiGovernanceModerationActionsRequestReasonCodeEnum = {
 export type PostApiGovernanceModerationActionsRequestReasonCodeEnum =
 	(typeof PostApiGovernanceModerationActionsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceModerationActionsRequestReasonCodeEnum];
 
+export const PostApiGovernanceModerationActionsRequestNotesLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiGovernanceModerationActionsRequestNotesLanguageEnum =
+	(typeof PostApiGovernanceModerationActionsRequestNotesLanguageEnum)[keyof typeof PostApiGovernanceModerationActionsRequestNotesLanguageEnum];
+
 export type PostApiGovernanceModerationActionsBody =
 	| {
 			/**
@@ -22679,7 +22988,10 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			notes?: {
 				role: "internal_note" | "public_notice";
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PostApiGovernanceModerationActionsRequestNotesLanguageEnum;
 				/**
 				 * @type object
 				 */
@@ -22846,7 +23158,10 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			notes?: {
 				role: "internal_note" | "public_notice";
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PostApiGovernanceModerationActionsRequestNotesLanguageEnum;
 				/**
 				 * @type object
 				 */
@@ -23011,7 +23326,10 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			notes: {
 				role: "internal_note" | "public_notice";
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PostApiGovernanceModerationActionsRequestNotesLanguageEnum;
 				/**
 				 * @type object
 				 */
@@ -23335,6 +23653,11 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEn
 export const PatchApiGovernanceFeedbackByFeedbackIdResolveRequestPublicNoticeLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiGovernanceFeedbackByFeedbackIdResolveRequestPublicNoticeLanguageEnum =
@@ -23726,6 +24049,11 @@ export type PostApiGovernanceModerationEnforcementsRequestNotesRoleEnum =
 export const PostApiGovernanceModerationEnforcementsRequestNotesLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiGovernanceModerationEnforcementsRequestNotesLanguageEnum =
@@ -24164,6 +24492,11 @@ export const PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequest
 	{
 		zh: "zh",
 		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
 	} as const;
 
 export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestNotesLanguageEnum =
@@ -24744,6 +25077,11 @@ export type PostApiSeriesStatus500 = InternalError;
 export const PostApiSeriesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiSeriesRequestLocalizationLanguageEnum =
@@ -25031,6 +25369,11 @@ export type GetApiSeriesBySeriesIdReleasesPath = {
 export const GetApiSeriesBySeriesIdReleasesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiSeriesBySeriesIdReleasesLocalizationLanguagesEnum =
@@ -25045,6 +25388,19 @@ export type GetApiSeriesBySeriesIdReleasesQuery = {
 	 */
 	localizationLanguages?: GetApiSeriesBySeriesIdReleasesLocalizationLanguagesEnum[];
 };
+
+export const GetApiSeriesBySeriesIdReleasesStatus200ItemsReleaseLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiSeriesBySeriesIdReleasesStatus200ItemsReleaseLanguageEnum =
+	(typeof GetApiSeriesBySeriesIdReleasesStatus200ItemsReleaseLanguageEnum)[keyof typeof GetApiSeriesBySeriesIdReleasesStatus200ItemsReleaseLanguageEnum];
 
 /**
  * @type object
@@ -25099,7 +25455,10 @@ export type GetApiSeriesBySeriesIdReleasesStatus200 = {
 			 */
 			id: string;
 			type: "book" | "software" | "media";
-			language: "zh" | "en";
+			/**
+			 * @type string
+			 */
+			language: GetApiSeriesBySeriesIdReleasesStatus200ItemsReleaseLanguageEnum;
 			title: (string | null) | null;
 			cover:
 				| ({
@@ -25470,6 +25829,11 @@ export type GetApiZonesByZoneIdPath = {
 export const GetApiZonesByZoneIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiZonesByZoneIdLocalizationLanguagesEnum =
@@ -25485,6 +25849,19 @@ export type GetApiZonesByZoneIdQuery = {
 	localizationLanguages?: GetApiZonesByZoneIdLocalizationLanguagesEnum[];
 };
 
+export const GetApiZonesByZoneIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiZonesByZoneIdStatus200Language =
+	(typeof GetApiZonesByZoneIdStatus200Language)[keyof typeof GetApiZonesByZoneIdStatus200Language];
+
 export const GetApiZonesByZoneIdStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -25496,6 +25873,11 @@ export type GetApiZonesByZoneIdStatus200AvatarIconPrefixEnum =
 export const GetApiZonesByZoneIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiZonesByZoneIdStatus200LocalizationsLanguageEnum =
@@ -25540,7 +25922,7 @@ export type GetApiZonesByZoneIdStatus200 = {
 				canonicalPath: string[];
 		  } | null)
 		| null;
-	language: (("zh" | "en") | null) | null;
+	language: (GetApiZonesByZoneIdStatus200Language | null) | null;
 	avatar:
 		| (
 				| (
@@ -25848,6 +26230,19 @@ export type PatchApiZonesByZoneIdPath = {
 	zoneId: string;
 };
 
+export const PatchApiZonesByZoneIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus200Language =
+	(typeof PatchApiZonesByZoneIdStatus200Language)[keyof typeof PatchApiZonesByZoneIdStatus200Language];
+
 export const PatchApiZonesByZoneIdStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -25859,6 +26254,11 @@ export type PatchApiZonesByZoneIdStatus200AvatarIconPrefixEnum =
 export const PatchApiZonesByZoneIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiZonesByZoneIdStatus200LocalizationsLanguageEnum =
@@ -25903,7 +26303,7 @@ export type PatchApiZonesByZoneIdStatus200 = {
 				canonicalPath: string[];
 		  } | null)
 		| null;
-	language: (("zh" | "en") | null) | null;
+	language: (PatchApiZonesByZoneIdStatus200Language | null) | null;
 	avatar:
 		| (
 				| (
@@ -26268,6 +26668,11 @@ export type PatchApiZonesByZoneIdStatus500 = InternalError;
 export const PatchApiZonesByZoneIdRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiZonesByZoneIdRequestLocalizationLanguageEnum =
@@ -26561,6 +26966,11 @@ export type GetZoneRenderProjectionPath = {
 export const GetZoneRenderProjectionLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetZoneRenderProjectionLocalizationLanguagesEnum =
@@ -26589,6 +26999,19 @@ export type GetZoneRenderProjectionQuery = {
 	pageId?: string;
 };
 
+export const GetZoneRenderProjectionStatus200ZoneLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetZoneRenderProjectionStatus200ZoneLanguage =
+	(typeof GetZoneRenderProjectionStatus200ZoneLanguage)[keyof typeof GetZoneRenderProjectionStatus200ZoneLanguage];
+
 export const GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -26600,6 +27023,11 @@ export type GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum =
 export const GetZoneRenderProjectionStatus200ZoneLocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetZoneRenderProjectionStatus200ZoneLocalizationsLanguageEnum =
@@ -26613,6 +27041,32 @@ export const GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEn
 export type GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum =
 	(typeof GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum)[keyof typeof GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum];
 
+export const GetZoneRenderProjectionStatus200PageLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetZoneRenderProjectionStatus200PageLanguageEnum =
+	(typeof GetZoneRenderProjectionStatus200PageLanguageEnum)[keyof typeof GetZoneRenderProjectionStatus200PageLanguageEnum];
+
+export const GetZoneRenderProjectionStatus200PageLocalizationsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetZoneRenderProjectionStatus200PageLocalizationsLanguageEnum =
+	(typeof GetZoneRenderProjectionStatus200PageLocalizationsLanguageEnum)[keyof typeof GetZoneRenderProjectionStatus200PageLocalizationsLanguageEnum];
+
 export const GetZoneRenderProjectionStatus200PageLocalizationsContentStatusEnum = {
 	draft: "draft",
 	published: "published",
@@ -26622,6 +27076,19 @@ export const GetZoneRenderProjectionStatus200PageLocalizationsContentStatusEnum 
 export type GetZoneRenderProjectionStatus200PageLocalizationsContentStatusEnum =
 	(typeof GetZoneRenderProjectionStatus200PageLocalizationsContentStatusEnum)[keyof typeof GetZoneRenderProjectionStatus200PageLocalizationsContentStatusEnum];
 
+export const GetZoneRenderProjectionStatus200ReferencesUnitsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetZoneRenderProjectionStatus200ReferencesUnitsLanguage =
+	(typeof GetZoneRenderProjectionStatus200ReferencesUnitsLanguage)[keyof typeof GetZoneRenderProjectionStatus200ReferencesUnitsLanguage];
+
 export const GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -26629,6 +27096,19 @@ export const GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum
 
 export type GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum =
 	(typeof GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum)[keyof typeof GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum];
+
+export const GetZoneRenderProjectionStatus200ReferencesWikiPostsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetZoneRenderProjectionStatus200ReferencesWikiPostsLanguage =
+	(typeof GetZoneRenderProjectionStatus200ReferencesWikiPostsLanguage)[keyof typeof GetZoneRenderProjectionStatus200ReferencesWikiPostsLanguage];
 
 export const GetZoneRenderProjectionStatus200ReferencesWikiPostsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -26673,7 +27153,7 @@ export type GetZoneRenderProjectionStatus200 = {
 					canonicalPath: string[];
 			  } | null)
 			| null;
-		language: (("zh" | "en") | null) | null;
+		language: (GetZoneRenderProjectionStatus200ZoneLanguage | null) | null;
 		avatar:
 			| (
 					| (
@@ -26955,7 +27435,10 @@ export type GetZoneRenderProjectionStatus200 = {
 							latestStructureRevisionId: string;
 					  } | null)
 					| null;
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: GetZoneRenderProjectionStatus200PageLanguageEnum;
 				/**
 				 * @type string
 				 */
@@ -26964,7 +27447,10 @@ export type GetZoneRenderProjectionStatus200 = {
 				 * @type array
 				 */
 				localizations: {
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: GetZoneRenderProjectionStatus200PageLocalizationsLanguageEnum;
 					/**
 					 * @type string
 					 */
@@ -27075,7 +27561,7 @@ export type GetZoneRenderProjectionStatus200 = {
 			 */
 			kind: string;
 			zonePageSlug: (string | null) | null;
-			language: (("zh" | "en") | null) | null;
+			language: (GetZoneRenderProjectionStatus200ReferencesUnitsLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
@@ -27186,7 +27672,7 @@ export type GetZoneRenderProjectionStatus200 = {
 			 */
 			kind: string;
 			zonePageSlug: (string | null) | null;
-			language: (("zh" | "en") | null) | null;
+			language: (GetZoneRenderProjectionStatus200ReferencesWikiPostsLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
@@ -27394,6 +27880,11 @@ export type GetApiZonesByZoneIdPagesPath = {
 export const GetApiZonesByZoneIdPagesStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiZonesByZoneIdPagesStatus200ItemsLanguageEnum =
@@ -27402,6 +27893,11 @@ export type GetApiZonesByZoneIdPagesStatus200ItemsLanguageEnum =
 export const GetApiZonesByZoneIdPagesStatus200ItemsLocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiZonesByZoneIdPagesStatus200ItemsLocalizationsLanguageEnum =
@@ -27625,6 +28121,11 @@ export type PostApiZonesByZoneIdPagesPath = {
 export const PostApiZonesByZoneIdPagesStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiZonesByZoneIdPagesStatus200LanguageEnum =
@@ -27633,6 +28134,11 @@ export type PostApiZonesByZoneIdPagesStatus200LanguageEnum =
 export const PostApiZonesByZoneIdPagesStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiZonesByZoneIdPagesStatus200LocalizationsLanguageEnum =
@@ -27925,6 +28431,11 @@ export type PostApiZonesByZoneIdPagesStatus500 = InternalError;
 export const PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum =
@@ -28020,6 +28531,11 @@ export type GetApiZonesByZoneIdPagesByPageIdPath = {
 export const GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum =
@@ -28028,6 +28544,11 @@ export type GetApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum =
 export const GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum =
@@ -28244,6 +28765,11 @@ export type PutApiZonesByZoneIdPagesByPageIdPath = {
 export const PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum =
@@ -28252,6 +28778,11 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus200LanguageEnum =
 export const PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiZonesByZoneIdPagesByPageIdStatus200LocalizationsLanguageEnum =
@@ -28544,6 +29075,11 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus500 = InternalError;
 export const PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum =
@@ -28823,6 +29359,11 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementPath = {
 export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum =
@@ -28831,6 +29372,11 @@ export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LanguageEnum =
 export const PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiZonesByZoneIdPagesByPageIdPlacementStatus200LocalizationsLanguageEnum =
@@ -30815,6 +31361,11 @@ export type PostApiZonesStatus500 = InternalError;
 export const PostApiZonesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiZonesRequestLocalizationLanguageEnum =
@@ -33193,6 +33744,11 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreRespo
 export const GetApiUsersMeLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUsersMeLocalizationLanguagesEnum =
@@ -33207,6 +33763,19 @@ export type GetApiUsersMeQuery = {
 	 */
 	localizationLanguages?: GetApiUsersMeLocalizationLanguagesEnum[];
 };
+
+export const GetApiUsersMeStatus200LanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUsersMeStatus200LanguageEnum =
+	(typeof GetApiUsersMeStatus200LanguageEnum)[keyof typeof GetApiUsersMeStatus200LanguageEnum];
 
 export const GetApiUsersMeStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
@@ -33280,7 +33849,10 @@ export type GetApiUsersMeStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: "zh" | "en";
+	/**
+	 * @type string
+	 */
+	language: GetApiUsersMeStatus200LanguageEnum;
 	name: (string | null) | null;
 	avatar:
 		| (
@@ -33621,6 +34193,11 @@ export type GetApiUsersMeResponse =
 export const PatchApiUsersMeStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiUsersMeStatus200LanguageEnum =
@@ -34038,6 +34615,11 @@ export type PatchApiUsersMeStatus500 = InternalError;
 export const PatchApiUsersMeRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiUsersMeRequestLanguageEnum =
@@ -34385,6 +34967,11 @@ export type ListCurrentUserStudioContentSort =
 export const ListCurrentUserStudioContentLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type ListCurrentUserStudioContentLocalizationLanguagesEnum =
@@ -34460,6 +35047,11 @@ export type ListCurrentUserStudioContentStatus200ItemsSectionEnum =
 export const ListCurrentUserStudioContentStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type ListCurrentUserStudioContentStatus200ItemsLanguageEnum =
@@ -34865,11 +35457,26 @@ export type RecordCurrentUserStudioVisitResponse =
 
 export const GetApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 	en: "en",
-	"zh-hant": "zh-hant",
+	"zh-Hant": "zh-Hant",
+	"zh-Hans": "zh-Hans",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUsersMePreferencesStatus200InterfaceLocaleEnum =
 	(typeof GetApiUsersMePreferencesStatus200InterfaceLocaleEnum)[keyof typeof GetApiUsersMePreferencesStatus200InterfaceLocaleEnum];
+
+export const GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum = {
+	original: "original",
+	hant: "hant",
+	hans: "hans",
+} as const;
+
+export type GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
+	(typeof GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum)[keyof typeof GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum];
 
 export const GetApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -34904,6 +35511,11 @@ export type GetApiUsersMePreferencesStatus200ContentRatingsEnum =
 export const GetApiUsersMePreferencesStatus200PreferredLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUsersMePreferencesStatus200PreferredLanguagesEnum =
@@ -34923,6 +35535,10 @@ export type GetApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	interfaceLocale: GetApiUsersMePreferencesStatus200InterfaceLocaleEnum;
+	/**
+	 * @type string
+	 */
+	chineseContentDisplay: GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum;
 	defaultLicense: (GetApiUsersMePreferencesStatus200DefaultLicense | null) | null;
 	/**
 	 * @type boolean
@@ -35057,11 +35673,26 @@ export type GetApiUsersMePreferencesResponse =
 
 export const PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 	en: "en",
-	"zh-hant": "zh-hant",
+	"zh-Hant": "zh-Hant",
+	"zh-Hans": "zh-Hans",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum =
 	(typeof PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum)[keyof typeof PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum];
+
+export const PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum = {
+	original: "original",
+	hant: "hant",
+	hans: "hans",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
+	(typeof PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum)[keyof typeof PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum];
 
 export const PatchApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -35096,6 +35727,11 @@ export type PatchApiUsersMePreferencesStatus200ContentRatingsEnum =
 export const PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum =
@@ -35115,6 +35751,10 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	interfaceLocale: PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum;
+	/**
+	 * @type string
+	 */
+	chineseContentDisplay: PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum;
 	defaultLicense: (PatchApiUsersMePreferencesStatus200DefaultLicense | null) | null;
 	/**
 	 * @type boolean
@@ -35230,20 +35870,39 @@ export type PatchApiUsersMePreferencesStatus500 = InternalError;
 
 export const PatchApiUsersMePreferencesRequestInterfaceLocaleEnum = {
 	en: "en",
-	"zh-hant": "zh-hant",
+	"zh-Hant": "zh-Hant",
+	"zh-Hans": "zh-Hans",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiUsersMePreferencesRequestInterfaceLocaleEnum =
 	(typeof PatchApiUsersMePreferencesRequestInterfaceLocaleEnum)[keyof typeof PatchApiUsersMePreferencesRequestInterfaceLocaleEnum];
+
+export const PatchApiUsersMePreferencesRequestChineseContentDisplayEnum = {
+	original: "original",
+	hant: "hant",
+	hans: "hans",
+} as const;
+
+export type PatchApiUsersMePreferencesRequestChineseContentDisplayEnum =
+	(typeof PatchApiUsersMePreferencesRequestChineseContentDisplayEnum)[keyof typeof PatchApiUsersMePreferencesRequestChineseContentDisplayEnum];
 
 /**
  * @type object
  */
 export type PatchApiUsersMePreferencesBody = {
 	/**
-	 * @type string
+	 * @type string | undefined
 	 */
-	interfaceLocale: PatchApiUsersMePreferencesRequestInterfaceLocaleEnum;
+	interfaceLocale?: PatchApiUsersMePreferencesRequestInterfaceLocaleEnum;
+	/**
+	 * @type string | undefined
+	 */
+	chineseContentDisplay?: PatchApiUsersMePreferencesRequestChineseContentDisplayEnum;
 };
 
 /**
@@ -35281,11 +35940,26 @@ export type PatchApiUsersMePreferencesResponse =
 
 export const PutApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 	en: "en",
-	"zh-hant": "zh-hant",
+	"zh-Hant": "zh-Hant",
+	"zh-Hans": "zh-Hans",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUsersMePreferencesStatus200InterfaceLocaleEnum =
 	(typeof PutApiUsersMePreferencesStatus200InterfaceLocaleEnum)[keyof typeof PutApiUsersMePreferencesStatus200InterfaceLocaleEnum];
+
+export const PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum = {
+	original: "original",
+	hant: "hant",
+	hans: "hans",
+} as const;
+
+export type PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
+	(typeof PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum)[keyof typeof PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum];
 
 export const PutApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -35320,6 +35994,11 @@ export type PutApiUsersMePreferencesStatus200ContentRatingsEnum =
 export const PutApiUsersMePreferencesStatus200PreferredLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUsersMePreferencesStatus200PreferredLanguagesEnum =
@@ -35339,6 +36018,10 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	interfaceLocale: PutApiUsersMePreferencesStatus200InterfaceLocaleEnum;
+	/**
+	 * @type string
+	 */
+	chineseContentDisplay: PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum;
 	defaultLicense: (PutApiUsersMePreferencesStatus200DefaultLicense | null) | null;
 	/**
 	 * @type boolean
@@ -35512,11 +36195,26 @@ export type PutApiUsersMePreferencesStatus500 = InternalError;
 
 export const PutApiUsersMePreferencesRequestInterfaceLocaleEnum = {
 	en: "en",
-	"zh-hant": "zh-hant",
+	"zh-Hant": "zh-Hant",
+	"zh-Hans": "zh-Hans",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUsersMePreferencesRequestInterfaceLocaleEnum =
 	(typeof PutApiUsersMePreferencesRequestInterfaceLocaleEnum)[keyof typeof PutApiUsersMePreferencesRequestInterfaceLocaleEnum];
+
+export const PutApiUsersMePreferencesRequestChineseContentDisplayEnum = {
+	original: "original",
+	hant: "hant",
+	hans: "hans",
+} as const;
+
+export type PutApiUsersMePreferencesRequestChineseContentDisplayEnum =
+	(typeof PutApiUsersMePreferencesRequestChineseContentDisplayEnum)[keyof typeof PutApiUsersMePreferencesRequestChineseContentDisplayEnum];
 
 export const PutApiUsersMePreferencesRequestDefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -35551,6 +36249,11 @@ export type PutApiUsersMePreferencesRequestContentRatingsEnum =
 export const PutApiUsersMePreferencesRequestPreferredLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUsersMePreferencesRequestPreferredLanguagesEnum =
@@ -35564,6 +36267,10 @@ export type PutApiUsersMePreferencesBody = {
 	 * @type string
 	 */
 	interfaceLocale: PutApiUsersMePreferencesRequestInterfaceLocaleEnum;
+	/**
+	 * @type string
+	 */
+	chineseContentDisplay: PutApiUsersMePreferencesRequestChineseContentDisplayEnum;
 	defaultLicense: (PutApiUsersMePreferencesRequestDefaultLicense | null) | null;
 	/**
 	 * @default false
@@ -35675,6 +36382,11 @@ export type GetApiUsersMeFollowingKind =
 export const GetApiUsersMeFollowingLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUsersMeFollowingLocalizationLanguagesEnum =
@@ -35727,6 +36439,19 @@ export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
 export type GetApiUsersMeFollowingStatus200ItemsKindEnum =
 	(typeof GetApiUsersMeFollowingStatus200ItemsKindEnum)[keyof typeof GetApiUsersMeFollowingStatus200ItemsKindEnum];
 
+export const GetApiUsersMeFollowingStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUsersMeFollowingStatus200ItemsLanguage =
+	(typeof GetApiUsersMeFollowingStatus200ItemsLanguage)[keyof typeof GetApiUsersMeFollowingStatus200ItemsLanguage];
+
 export const GetApiUsersMeFollowingStatus200ItemsAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -35774,7 +36499,7 @@ export type GetApiUsersMeFollowingStatus200 = {
 		 * @type string
 		 */
 		kind: GetApiUsersMeFollowingStatus200ItemsKindEnum;
-		language: (("zh" | "en") | null) | null;
+		language: (GetApiUsersMeFollowingStatus200ItemsLanguage | null) | null;
 		title: (string | null) | null;
 		avatar:
 			| (
@@ -36527,6 +37252,11 @@ export type GetApiUsersByIdPath = {
 export const GetApiUsersByIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUsersByIdLocalizationLanguagesEnum =
@@ -36545,6 +37275,11 @@ export type GetApiUsersByIdQuery = {
 export const GetApiUsersByIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUsersByIdStatus200LanguageEnum =
@@ -38016,6 +38751,11 @@ export type GetApiTagsByTagIdPath = {
 export const GetApiTagsByTagIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiTagsByTagIdLocalizationLanguagesEnum =
@@ -38039,6 +38779,45 @@ export type GetApiTagsByTagIdQuery = {
 	grandchildLimit?: string | number;
 };
 
+export const GetApiTagsByTagIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdStatus200Language =
+	(typeof GetApiTagsByTagIdStatus200Language)[keyof typeof GetApiTagsByTagIdStatus200Language];
+
+export const GetApiTagsByTagIdStatus200ChildrenLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdStatus200ChildrenLanguage =
+	(typeof GetApiTagsByTagIdStatus200ChildrenLanguage)[keyof typeof GetApiTagsByTagIdStatus200ChildrenLanguage];
+
+export const GetApiTagsByTagIdStatus200ChildrenChildrenLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdStatus200ChildrenChildrenLanguage =
+	(typeof GetApiTagsByTagIdStatus200ChildrenChildrenLanguage)[keyof typeof GetApiTagsByTagIdStatus200ChildrenChildrenLanguage];
+
 /**
  * @type object
  */
@@ -38049,7 +38828,7 @@ export type GetApiTagsByTagIdStatus200 = {
 	 * @type string
 	 */
 	tagId: string;
-	language: (("zh" | "en") | null) | null;
+	language: (GetApiTagsByTagIdStatus200Language | null) | null;
 	title: (string | null) | null;
 	summary: (string | null) | null;
 	/**
@@ -38062,7 +38841,7 @@ export type GetApiTagsByTagIdStatus200 = {
 		 * @type string
 		 */
 		tagId: string;
-		language: (("zh" | "en") | null) | null;
+		language: (GetApiTagsByTagIdStatus200ChildrenLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		score: string | number;
@@ -38077,7 +38856,7 @@ export type GetApiTagsByTagIdStatus200 = {
 			 * @type string
 			 */
 			tagId: string;
-			language: (("zh" | "en") | null) | null;
+			language: (GetApiTagsByTagIdStatus200ChildrenChildrenLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			score: string | number;
@@ -38432,6 +39211,11 @@ export type GetApiTagStructuresByStructureIdPath = {
 export const GetApiTagStructuresByStructureIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiTagStructuresByStructureIdLocalizationLanguagesEnum =
@@ -38446,6 +39230,19 @@ export type GetApiTagStructuresByStructureIdQuery = {
 	 */
 	localizationLanguages?: GetApiTagStructuresByStructureIdLocalizationLanguagesEnum[];
 };
+
+export const GetApiTagStructuresByStructureIdStatus200MembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagStructuresByStructureIdStatus200MembersLanguage =
+	(typeof GetApiTagStructuresByStructureIdStatus200MembersLanguage)[keyof typeof GetApiTagStructuresByStructureIdStatus200MembersLanguage];
 
 /**
  * @type object
@@ -38485,7 +39282,7 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 		 * @type string
 		 */
 		tagId: string;
-		language: (("zh" | "en") | null) | null;
+		language: (GetApiTagStructuresByStructureIdStatus200MembersLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 	}[];
@@ -38671,6 +39468,11 @@ export type PutApiTagStructuresByStructureIdPath = {
 export const PutApiTagStructuresByStructureIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiTagStructuresByStructureIdLocalizationLanguagesEnum =
@@ -38685,6 +39487,19 @@ export type PutApiTagStructuresByStructureIdQuery = {
 	 */
 	localizationLanguages?: PutApiTagStructuresByStructureIdLocalizationLanguagesEnum[];
 };
+
+export const PutApiTagStructuresByStructureIdStatus200MembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiTagStructuresByStructureIdStatus200MembersLanguage =
+	(typeof PutApiTagStructuresByStructureIdStatus200MembersLanguage)[keyof typeof PutApiTagStructuresByStructureIdStatus200MembersLanguage];
 
 /**
  * @type object
@@ -38724,7 +39539,7 @@ export type PutApiTagStructuresByStructureIdStatus200 = {
 		 * @type string
 		 */
 		tagId: string;
-		language: (("zh" | "en") | null) | null;
+		language: (PutApiTagStructuresByStructureIdStatus200MembersLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 	}[];
@@ -39291,6 +40106,11 @@ export type GetApiUnitsByTypeByUnitIdTagsPath = {
 export const GetApiUnitsByTypeByUnitIdTagsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsByTypeByUnitIdTagsLocalizationLanguagesEnum =
@@ -39321,6 +40141,71 @@ export type GetApiUnitsByTypeByUnitIdTagsQuery = {
 	 */
 	perRealmLimit?: string | number;
 };
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsLanguage];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage];
 
 /**
  * @type object
@@ -39357,7 +40242,8 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			 * @type string
 			 */
 			tagId: string;
-			language: (("zh" | "en") | null) | null;
+			language:
+				(GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 		}[];
@@ -39384,7 +40270,7 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		 * @type string
 		 */
 		tagId: string;
-		language: (("zh" | "en") | null) | null;
+		language: (GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		/**
@@ -39418,7 +40304,7 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		 * @type string
 		 */
 		realmId: string;
-		language: (("zh" | "en") | null) | null;
+		language: (GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		/**
@@ -39455,7 +40341,7 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			 * @type string
 			 */
 			tagId: string;
-			language: (("zh" | "en") | null) | null;
+			language: (GetApiUnitsByTypeByUnitIdTagsStatus200RealmsVotedTagsLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			/**
@@ -39496,7 +40382,8 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			 * @type string
 			 */
 			tagId: string;
-			language: (("zh" | "en") | null) | null;
+			language:
+				(GetApiUnitsByTypeByUnitIdTagsStatus200RealmsPolicyTagsLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			/**
@@ -40336,6 +41223,11 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
 export const GetApiUsersMeTagRealmSubscriptionsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUsersMeTagRealmSubscriptionsLocalizationLanguagesEnum =
@@ -40351,6 +41243,19 @@ export type GetApiUsersMeTagRealmSubscriptionsQuery = {
 	localizationLanguages?: GetApiUsersMeTagRealmSubscriptionsLocalizationLanguagesEnum[];
 };
 
+export const GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage =
+	(typeof GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage)[keyof typeof GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage];
+
 /**
  * @type object
  */
@@ -40365,7 +41270,7 @@ export type GetApiUsersMeTagRealmSubscriptionsStatus200 = {
 		 * @type string
 		 */
 		realmId: string;
-		language: (("zh" | "en") | null) | null;
+		language: (GetApiUsersMeTagRealmSubscriptionsStatus200ItemsLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		/**
@@ -40473,6 +41378,11 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdPath = {
 export const PutApiUsersMeTagRealmSubscriptionsByRealmIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUsersMeTagRealmSubscriptionsByRealmIdLocalizationLanguagesEnum =
@@ -40488,6 +41398,19 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdQuery = {
 	localizationLanguages?: PutApiUsersMeTagRealmSubscriptionsByRealmIdLocalizationLanguagesEnum[];
 };
 
+export const PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language =
+	(typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language)[keyof typeof PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language];
+
 /**
  * @type object
  */
@@ -40498,7 +41421,7 @@ export type PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200 = {
 	 * @type string
 	 */
 	realmId: string;
-	language: (("zh" | "en") | null) | null;
+	language: (PutApiUsersMeTagRealmSubscriptionsByRealmIdStatus200Language | null) | null;
 	title: (string | null) | null;
 	summary: (string | null) | null;
 	/**
@@ -43057,6 +43980,11 @@ export type GetApiUnitsByIdByUnitIdLocalizationOrderPath = {
 export const GetApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum =
@@ -43154,6 +44082,11 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderPath = {
 export const PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum =
@@ -43335,6 +44268,11 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus500 = InternalError;
 export const PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum =
@@ -43343,6 +44281,11 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum
 export const PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum =
@@ -43402,6 +44345,11 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderResponse =
 export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageLanguage = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageLanguage =
@@ -43426,6 +44374,11 @@ export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguagePath = {
 export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum =
@@ -43621,6 +44574,11 @@ export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500 = Interna
 export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum =
@@ -43685,6 +44643,11 @@ export type GetApiUnitsByTypePath = {
 export const GetApiUnitsByTypeLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsByTypeLocalizationLanguagesEnum =
@@ -43711,6 +44674,11 @@ export type GetApiUnitsByTypeQuery = {
 export const GetApiUnitsByTypeStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsByTypeStatus200ItemsLanguageEnum =
@@ -43763,6 +44731,19 @@ export const GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum = {
 
 export type GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum];
+
+export const GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitLanguageEnum];
 
 export const GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -43855,6 +44836,10 @@ export type GetApiUnitsByTypeStatus200 = {
 				 * @type string
 				 */
 				kind: GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum;
+				/**
+				 * @type string
+				 */
+				language: GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 				slugAddress:
 					| ({
 							/**
@@ -44136,6 +45121,19 @@ export const PostApiUnitsByTypeStatus200TypeEnum = {
 export type PostApiUnitsByTypeStatus200TypeEnum =
 	(typeof PostApiUnitsByTypeStatus200TypeEnum)[keyof typeof PostApiUnitsByTypeStatus200TypeEnum];
 
+export const PostApiUnitsByTypeStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeStatus200Language =
+	(typeof PostApiUnitsByTypeStatus200Language)[keyof typeof PostApiUnitsByTypeStatus200Language];
+
 export const PostApiUnitsByTypeStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -44196,6 +45194,19 @@ export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum = {
 export type PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum =
 	(typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum)[keyof typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum];
 
+export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -44203,6 +45214,19 @@ export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefix
 
 export type PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiUnitsByTypeStatus200DetailsPublishedContentMetricsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeStatus200DetailsPublishedContentMetricsLanguageEnum =
+	(typeof PostApiUnitsByTypeStatus200DetailsPublishedContentMetricsLanguageEnum)[keyof typeof PostApiUnitsByTypeStatus200DetailsPublishedContentMetricsLanguageEnum];
 
 export const PostApiUnitsByTypeStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
@@ -44215,6 +45239,11 @@ export type PostApiUnitsByTypeStatus200AvatarIconPrefixEnum =
 export const PostApiUnitsByTypeStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiUnitsByTypeStatus200LocalizationsLanguageEnum =
@@ -44282,7 +45311,7 @@ export type PostApiUnitsByTypeStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: (("zh" | "en") | null) | null;
+	language: (PostApiUnitsByTypeStatus200Language | null) | null;
 	/**
 	 * @type string
 	 */
@@ -44335,6 +45364,10 @@ export type PostApiUnitsByTypeStatus200 = {
 			 * @type string
 			 */
 			kind: PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PostApiUnitsByTypeStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -44453,7 +45486,10 @@ export type PostApiUnitsByTypeStatus200 = {
 				 * @type array
 				 */
 				publishedContentMetrics: {
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: PostApiUnitsByTypeStatus200DetailsPublishedContentMetricsLanguageEnum;
 					chapterCount: string | number;
 					wordCount: string | number;
 					characterCount: string | number;
@@ -45278,6 +46314,11 @@ export type PostApiUnitsByTypeStatus500 = InternalError;
 export const PostApiUnitsByTypeRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiUnitsByTypeRequestLocalizationLanguageEnum =
@@ -45619,6 +46660,11 @@ export type GetApiUnitsByTypeByUnitIdPath = {
 export const GetApiUnitsByTypeByUnitIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsByTypeByUnitIdLocalizationLanguagesEnum =
@@ -45643,6 +46689,19 @@ export const GetApiUnitsByTypeByUnitIdStatus200TypeEnum = {
 
 export type GetApiUnitsByTypeByUnitIdStatus200TypeEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200TypeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200TypeEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200Language =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200Language)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200Language];
 
 export const GetApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -45704,6 +46763,19 @@ export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum 
 export type GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum];
 
+export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -45711,6 +46783,19 @@ export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIco
 
 export type GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum];
 
 export const GetApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
@@ -45723,6 +46808,11 @@ export type GetApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum =
 export const GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum =
@@ -45790,7 +46880,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: (("zh" | "en") | null) | null;
+	language: (GetApiUnitsByTypeByUnitIdStatus200Language | null) | null;
 	/**
 	 * @type string
 	 */
@@ -45843,6 +46933,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 			 * @type string
 			 */
 			kind: GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -45961,7 +47055,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type array
 				 */
 				publishedContentMetrics: {
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: GetApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum;
 					chapterCount: string | number;
 					wordCount: string | number;
 					characterCount: string | number;
@@ -46733,6 +47830,19 @@ export const PatchApiUnitsByTypeByUnitIdStatus200TypeEnum = {
 export type PatchApiUnitsByTypeByUnitIdStatus200TypeEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200TypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200TypeEnum];
 
+export const PatchApiUnitsByTypeByUnitIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200Language =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200Language)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200Language];
+
 export const PatchApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -46793,6 +47903,19 @@ export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnu
 export type PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum];
 
+export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -46800,6 +47923,19 @@ export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarI
 
 export type PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum];
 
 export const PatchApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
@@ -46812,6 +47948,11 @@ export type PatchApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum =
 export const PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum =
@@ -46879,7 +48020,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: (("zh" | "en") | null) | null;
+	language: (PatchApiUnitsByTypeByUnitIdStatus200Language | null) | null;
 	/**
 	 * @type string
 	 */
@@ -46932,6 +48073,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 			 * @type string
 			 */
 			kind: PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -47050,7 +48195,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type array
 				 */
 				publishedContentMetrics: {
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: PatchApiUnitsByTypeByUnitIdStatus200DetailsPublishedContentMetricsLanguageEnum;
 					chapterCount: string | number;
 					wordCount: string | number;
 					characterCount: string | number;
@@ -48265,6 +49413,19 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum = {
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum];
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -48325,6 +49486,20 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCredi
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitKindEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitKindEnum];
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -48333,6 +49508,20 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCredi
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsPublishedContentMetricsLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsPublishedContentMetricsLanguageEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsPublishedContentMetricsLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsPublishedContentMetricsLanguageEnum];
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
@@ -48345,6 +49534,11 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200AvatarIconPrefixEn
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLanguageEnum =
@@ -48412,7 +49606,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: (("zh" | "en") | null) | null;
+	language: (PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language | null) | null;
 	/**
 	 * @type string
 	 */
@@ -48465,6 +49659,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 			 * @type string
 			 */
 			kind: PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -48583,7 +49781,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				 * @type array
 				 */
 				publishedContentMetrics: {
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsPublishedContentMetricsLanguageEnum;
 					chapterCount: string | number;
 					wordCount: string | number;
 					characterCount: string | number;
@@ -49519,6 +50720,19 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum = 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum];
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -49580,6 +50794,20 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Attribution
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitKindEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitKindEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitKindEnum];
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -49588,6 +50816,20 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Attribution
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsPublishedContentMetricsLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsPublishedContentMetricsLanguageEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsPublishedContentMetricsLanguageEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsPublishedContentMetricsLanguageEnum];
 
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
@@ -49600,6 +50842,11 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AvatarIconPr
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsLanguageEnum =
@@ -49670,7 +50917,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: (("zh" | "en") | null) | null;
+	language: (PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language | null) | null;
 	/**
 	 * @type string
 	 */
@@ -49723,6 +50970,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 			 * @type string
 			 */
 			kind: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -49841,7 +51092,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				 * @type array
 				 */
 				publishedContentMetrics: {
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsPublishedContentMetricsLanguageEnum;
 					chapterCount: string | number;
 					wordCount: string | number;
 					characterCount: string | number;
@@ -50749,6 +52003,11 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponse =
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage =
@@ -50780,6 +52039,19 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum =
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language];
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -50842,6 +52114,20 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Attributio
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitKindEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitKindEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitKindEnum];
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -50850,6 +52136,20 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Attributio
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsPublishedContentMetricsLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsPublishedContentMetricsLanguageEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsPublishedContentMetricsLanguageEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsPublishedContentMetricsLanguageEnum];
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
@@ -50862,6 +52162,11 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AvatarIconP
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsLanguageEnum =
@@ -50933,7 +52238,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: (("zh" | "en") | null) | null;
+	language: (PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language | null) | null;
 	/**
 	 * @type string
 	 */
@@ -50986,6 +52291,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 			 * @type string
 			 */
 			kind: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -51104,7 +52413,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				 * @type array
 				 */
 				publishedContentMetrics: {
-					language: "zh" | "en";
+					/**
+					 * @type string
+					 */
+					language: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsPublishedContentMetricsLanguageEnum;
 					chapterCount: string | number;
 					wordCount: string | number;
 					characterCount: string | number;
@@ -52395,6 +53707,19 @@ export type GetApiHistoryUnitRevisionsByRevisionIdPath = {
 	revisionId: string;
 };
 
+export const GetApiHistoryUnitRevisionsByRevisionIdStatus200SlotsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiHistoryUnitRevisionsByRevisionIdStatus200SlotsLanguageEnum =
+	(typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200SlotsLanguageEnum)[keyof typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200SlotsLanguageEnum];
+
 export type GetApiHistoryUnitRevisionsByRevisionIdStatus200 = {
 	/**
 	 * @description
@@ -52477,7 +53802,10 @@ export type GetApiHistoryUnitRevisionsByRevisionIdStatus200 = {
 				 * @type string
 				 */
 				role: "localization";
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: GetApiHistoryUnitRevisionsByRevisionIdStatus200SlotsLanguageEnum;
 				/**
 				 * @type string
 				 */
@@ -53840,6 +55168,11 @@ export type GetApiHistoryChangeTagsResponse =
 export const GetApiEntitiesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiEntitiesLocalizationLanguagesEnum =
@@ -53867,6 +55200,11 @@ export type GetApiEntitiesQuery = {
 export const GetApiEntitiesStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiEntitiesStatus200ItemsLanguageEnum =
@@ -54120,6 +55458,11 @@ export type PostApiEntitiesStatus500 = InternalError;
 export const PostApiEntitiesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiEntitiesRequestLocalizationLanguageEnum =
@@ -54407,6 +55750,11 @@ export type GetApiEntitiesByUnitIdPath = {
 export const GetApiEntitiesByUnitIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiEntitiesByUnitIdLocalizationLanguagesEnum =
@@ -54422,6 +55770,19 @@ export type GetApiEntitiesByUnitIdQuery = {
 	localizationLanguages?: GetApiEntitiesByUnitIdLocalizationLanguagesEnum[];
 };
 
+export const GetApiEntitiesByUnitIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200Language =
+	(typeof GetApiEntitiesByUnitIdStatus200Language)[keyof typeof GetApiEntitiesByUnitIdStatus200Language];
+
 export const GetApiEntitiesByUnitIdStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -54433,6 +55794,11 @@ export type GetApiEntitiesByUnitIdStatus200AvatarIconPrefixEnum =
 export const GetApiEntitiesByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiEntitiesByUnitIdStatus200LocalizationsLanguageEnum =
@@ -54469,6 +55835,19 @@ export const GetApiEntitiesByUnitIdStatus200OwnerKindEnum = {
 
 export type GetApiEntitiesByUnitIdStatus200OwnerKindEnum =
 	(typeof GetApiEntitiesByUnitIdStatus200OwnerKindEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200OwnerKindEnum];
+
+export const GetApiEntitiesByUnitIdStatus200OwnerLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200OwnerLanguageEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200OwnerLanguageEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200OwnerLanguageEnum];
 
 export const GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -54534,7 +55913,7 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 	 * @type boolean
 	 */
 	verified: boolean;
-	language: (("zh" | "en") | null) | null;
+	language: (GetApiEntitiesByUnitIdStatus200Language | null) | null;
 	avatar:
 		| (
 				| (
@@ -54910,6 +56289,10 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 				 * @type string
 				 */
 				kind: GetApiEntitiesByUnitIdStatus200OwnerKindEnum;
+				/**
+				 * @type string
+				 */
+				language: GetApiEntitiesByUnitIdStatus200OwnerLanguageEnum;
 				slugAddress:
 					| ({
 							/**
@@ -55166,6 +56549,11 @@ export type GetApiEntitiesByUnitIdResponse =
 export const PutApiEntitiesByUnitIdLocalizationsByLanguageLanguage = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageLanguage =
@@ -55559,6 +56947,11 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponse =
 export const GetApiTagsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiTagsLocalizationLanguagesEnum =
@@ -55581,6 +56974,11 @@ export type GetApiTagsQuery = {
 export const GetApiTagsStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiTagsStatus200ItemsLanguageEnum =
@@ -55697,6 +57095,11 @@ export type PostApiTagsStatus500 = InternalError;
 export const PostApiTagsRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiTagsRequestLocalizationLanguageEnum =
@@ -56313,6 +57716,11 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus500 = InternalError;
 export const PostApiUnitsByTypeByUnitIdAliasesRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdAliasesRequestLanguageEnum =
@@ -56966,6 +58374,19 @@ export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKi
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKindEnum =
 	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKindEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKindEnum];
 
+export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitLanguageEnum =
+	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitLanguageEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitLanguageEnum];
+
 export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -57013,6 +58434,10 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200 = {
 		 * @type string
 		 */
 		kind: PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKindEnum;
+		/**
+		 * @type string
+		 */
+		language: PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitLanguageEnum;
 		slugAddress:
 			| ({
 					/**
@@ -60827,6 +62252,20 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
  */
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500 = InternalError;
 
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestContentLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestContentLanguageEnum =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestContentLanguageEnum)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestContentLanguageEnum];
+
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestContentRatingEnum = {
 	general: "general",
 	r15: "r15",
@@ -60871,7 +62310,10 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBody = {
 				 * @type string
 				 */
 				kind: "label";
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestContentLanguageEnum;
 				/**
 				 * @minLength 1
 				 * @maxLength 500
@@ -61648,6 +63090,11 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesPath = {
 export const GetApiUnitsBookByUnitIdContentStructureNodesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsBookByUnitIdContentStructureNodesLocalizationLanguagesEnum =
@@ -61674,6 +63121,11 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKin
 export const GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsLanguageEnum =
@@ -61822,6 +63274,11 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum
 export const PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiUnitsBookByUnitIdContentStructureStatus200ItemsLanguageEnum =
@@ -62048,6 +63505,19 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus429 = {
  */
 export type PutApiUnitsBookByUnitIdContentStructureStatus500 = InternalError;
 
+export const PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum];
+
 /**
  * @type object
  */
@@ -62101,7 +63571,10 @@ export type PutApiUnitsBookByUnitIdContentStructureBody = {
 				 * @type string
 				 */
 				title: string;
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum;
 				/**
 				 * @type string
 				 */
@@ -62126,7 +63599,10 @@ export type PutApiUnitsBookByUnitIdContentStructureBody = {
 				 * @type string
 				 */
 				title: string;
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum;
 				/**
 				 * @type string
 				 */
@@ -62318,6 +63794,11 @@ export type GetApiChaptersByChapterIdPath = {
 export const GetApiChaptersByChapterIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiChaptersByChapterIdLocalizationLanguagesEnum =
@@ -62326,6 +63807,11 @@ export type GetApiChaptersByChapterIdLocalizationLanguagesEnum =
 export const GetApiChaptersByChapterIdLanguage = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiChaptersByChapterIdLanguage =
@@ -62348,6 +63834,11 @@ export type GetApiChaptersByChapterIdQuery = {
 export const GetApiChaptersByChapterIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiChaptersByChapterIdStatus200LanguageEnum =
@@ -62356,6 +63847,11 @@ export type GetApiChaptersByChapterIdStatus200LanguageEnum =
 export const GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum =
@@ -62627,6 +64123,11 @@ export type GetApiChaptersByChapterIdResponse =
 export const PutApiChaptersByChapterIdLocalizationsByLanguageContentLanguage = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentLanguage =
@@ -62986,6 +64487,11 @@ export type GetApiProgressStatus = (typeof GetApiProgressStatus)[keyof typeof Ge
 export const GetApiProgressLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiProgressLocalizationLanguagesEnum =
@@ -63023,6 +64529,11 @@ export type GetApiProgressStatus200ItemsStatusEnum =
 export const GetApiProgressStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiProgressStatus200ItemsLanguageEnum =
@@ -64169,6 +65680,11 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdResponse =
 export const GetApiCollectionsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsLocalizationLanguagesEnum =
@@ -64212,6 +65728,11 @@ export type GetApiCollectionsStatus200ItemsSourceEnum =
 export const GetApiCollectionsStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsStatus200ItemsLanguageEnum =
@@ -64325,6 +65846,11 @@ export type GetApiCollectionsResponse =
 export const PostApiCollectionsStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiCollectionsStatus200LanguageEnum =
@@ -64360,6 +65886,11 @@ export type PostApiCollectionsStatus200PresentationDocumentOrderEnum =
 export const PostApiCollectionsStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiCollectionsStatus200LocalizationsLanguageEnum =
@@ -65092,6 +66623,11 @@ export type PostApiCollectionsStatus500 = InternalError;
 export const PostApiCollectionsRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiCollectionsRequestLocalizationLanguageEnum =
@@ -65839,6 +67375,11 @@ export type PostApiCollectionsResponse =
 export const GetApiCollectionsFavoritesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsFavoritesLocalizationLanguagesEnum =
@@ -65857,6 +67398,11 @@ export type GetApiCollectionsFavoritesQuery = {
 export const GetApiCollectionsFavoritesStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsFavoritesStatus200LanguageEnum =
@@ -65892,6 +67438,11 @@ export type GetApiCollectionsFavoritesStatus200PresentationDocumentOrderEnum =
 export const GetApiCollectionsFavoritesStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsFavoritesStatus200LocalizationsLanguageEnum =
@@ -66654,6 +68205,11 @@ export type GetApiCollectionsByCollectionIdItemsPath = {
 export const GetApiCollectionsByCollectionIdItemsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsByCollectionIdItemsLocalizationLanguagesEnum =
@@ -66686,6 +68242,19 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnu
 
 export type GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum =
 	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsMembershipRoleEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentLanguage =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentLanguage)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentLanguage];
 
 export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsRoleEnum = {
 	author: "author",
@@ -66736,6 +68305,20 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributio
 export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum =
 	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum];
 
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -66744,6 +68327,19 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributio
 
 export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsLanguageEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsLanguageEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsLanguageEnum];
 
 export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -66855,6 +68451,20 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyConte
 export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum];
 
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -66863,6 +68473,19 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyConte
 
 export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSubjectLanguageEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSubjectLanguageEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSubjectLanguageEnum];
 
 export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentPostKindEnum = {
 	post: "post",
@@ -66923,7 +68546,9 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 					 * @type string
 					 */
 					id: string;
-					language: (("zh" | "en") | null) | null;
+					language:
+						| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentLanguage | null)
+						| null;
 					/**
 					 * @type array
 					 */
@@ -66962,6 +68587,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 							 * @type string
 							 */
 							kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum;
+							/**
+							 * @type string
+							 */
+							language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -67062,6 +68691,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 						 * @type string
 						 */
 						id: string;
+						/**
+						 * @type string
+						 */
+						language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -67375,7 +69008,9 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 							 * @type string
 							 */
 							id: string;
-							language: (("zh" | "en") | null) | null;
+							language:
+								| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentLanguage | null)
+								| null;
 							/**
 							 * @type array
 							 */
@@ -67414,6 +69049,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 									 * @type string
 									 */
 									kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum;
+									/**
+									 * @type string
+									 */
+									language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitLanguageEnum;
 									slugAddress:
 										| ({
 												/**
@@ -67514,6 +69153,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								 * @type string
 								 */
 								id: string;
+								/**
+								 * @type string
+								 */
+								language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -67860,6 +69503,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 												 * @type string
 												 */
 												kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum;
+												/**
+												 * @type string
+												 */
+												language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitLanguageEnum;
 												slugAddress:
 													| ({
 															/**
@@ -67964,6 +69611,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										 * @type string
 										 */
 										type: string;
+										/**
+										 * @type string
+										 */
+										language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSubjectLanguageEnum;
 										title: (string | null) | null;
 										summary: (string | null) | null;
 										cover:
@@ -68026,7 +69677,9 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 							 * @type string
 							 */
 							id: string;
-							language: (("zh" | "en") | null) | null;
+							language:
+								| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentLanguage | null)
+								| null;
 							/**
 							 * @type array
 							 */
@@ -68065,6 +69718,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 									 * @type string
 									 */
 									kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitKindEnum;
+									/**
+									 * @type string
+									 */
+									language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributionsCreditedUnitLanguageEnum;
 									slugAddress:
 										| ({
 												/**
@@ -68165,6 +69822,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								 * @type string
 								 */
 								id: string;
+								/**
+								 * @type string
+								 */
+								language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentRealmsLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -68511,6 +70172,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 												 * @type string
 												 */
 												kind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitKindEnum;
+												/**
+												 * @type string
+												 */
+												language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyContextAttributionsCreditedUnitLanguageEnum;
 												slugAddress:
 													| ({
 															/**
@@ -68615,6 +70280,10 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										 * @type string
 										 */
 										type: string;
+										/**
+										 * @type string
+										 */
+										language: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSubjectLanguageEnum;
 										title: (string | null) | null;
 										summary: (string | null) | null;
 										cover:
@@ -68804,6 +70473,11 @@ export type GetApiCollectionsByCollectionIdPath = {
 export const GetApiCollectionsByCollectionIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsByCollectionIdLocalizationLanguagesEnum =
@@ -68822,6 +70496,11 @@ export type GetApiCollectionsByCollectionIdQuery = {
 export const GetApiCollectionsByCollectionIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsByCollectionIdStatus200LanguageEnum =
@@ -68857,6 +70536,11 @@ export type GetApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnu
 export const GetApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum =
@@ -69593,6 +71277,11 @@ export type PatchApiCollectionsByCollectionIdPath = {
 export const PatchApiCollectionsByCollectionIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiCollectionsByCollectionIdStatus200LanguageEnum =
@@ -69628,6 +71317,11 @@ export type PatchApiCollectionsByCollectionIdStatus200PresentationDocumentOrderE
 export const PatchApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum =
@@ -70464,6 +72158,11 @@ export type PatchApiCollectionsByCollectionIdRequestVisibilityEnum =
 export const PatchApiCollectionsByCollectionIdRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiCollectionsByCollectionIdRequestLocalizationLanguageEnum =
@@ -72494,6 +74193,11 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdResponse =
 export const GetApiReviewsLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiReviewsLanguagesEnum =
@@ -72502,6 +74206,11 @@ export type GetApiReviewsLanguagesEnum =
 export const GetApiReviewsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiReviewsLocalizationLanguagesEnum =
@@ -72562,6 +74271,19 @@ export type GetApiReviewsQuery = {
 	scores?: (string | number)[];
 };
 
+export const GetApiReviewsStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsStatus200ItemsLanguage =
+	(typeof GetApiReviewsStatus200ItemsLanguage)[keyof typeof GetApiReviewsStatus200ItemsLanguage];
+
 export const GetApiReviewsStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -72610,6 +74332,19 @@ export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 export type GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum];
 
+export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -72617,6 +74352,19 @@ export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefix
 
 export type GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiReviewsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiReviewsStatus200ItemsRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsStatus200ItemsRealmsLanguageEnum =
+	(typeof GetApiReviewsStatus200ItemsRealmsLanguageEnum)[keyof typeof GetApiReviewsStatus200ItemsRealmsLanguageEnum];
 
 export const GetApiReviewsStatus200ItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -72698,6 +74446,19 @@ export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKind
 export type GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
+export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -72705,6 +74466,19 @@ export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvat
 
 export type GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiReviewsStatus200ItemsSubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSubjectLanguageEnum =
+	(typeof GetApiReviewsStatus200ItemsSubjectLanguageEnum)[keyof typeof GetApiReviewsStatus200ItemsSubjectLanguageEnum];
 
 /**
  * @type object
@@ -72722,7 +74496,7 @@ export type GetApiReviewsStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		language: (("zh" | "en") | null) | null;
+		language: (GetApiReviewsStatus200ItemsLanguage | null) | null;
 		/**
 		 * @type array
 		 */
@@ -72761,6 +74535,10 @@ export type GetApiReviewsStatus200 = {
 				 * @type string
 				 */
 				kind: GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum;
+				/**
+				 * @type string
+				 */
+				language: GetApiReviewsStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 				slugAddress:
 					| ({
 							/**
@@ -72861,6 +74639,10 @@ export type GetApiReviewsStatus200 = {
 			 * @type string
 			 */
 			id: string;
+			/**
+			 * @type string
+			 */
+			language: GetApiReviewsStatus200ItemsRealmsLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -73205,6 +74987,10 @@ export type GetApiReviewsStatus200 = {
 							 * @type string
 							 */
 							kind: GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+							/**
+							 * @type string
+							 */
+							language: GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -73309,6 +75095,10 @@ export type GetApiReviewsStatus200 = {
 					 * @type string
 					 */
 					type: string;
+					/**
+					 * @type string
+					 */
+					language: GetApiReviewsStatus200ItemsSubjectLanguageEnum;
 					title: (string | null) | null;
 					summary: (string | null) | null;
 					cover:
@@ -73662,6 +75452,11 @@ export type PostApiReviewsStatus500 = InternalError;
 export const PostApiReviewsRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiReviewsRequestLanguageEnum =
@@ -73894,6 +75689,11 @@ export type GetApiReviewsByReviewIdPath = {
 export const GetApiReviewsByReviewIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiReviewsByReviewIdLocalizationLanguagesEnum =
@@ -73963,6 +75763,19 @@ export const GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum = 
 export type GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum =
 	(typeof GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum)[keyof typeof GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum];
 
+export const GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -73974,10 +75787,28 @@ export type GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitAvatarIconPr
 export const GetApiReviewsByReviewIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiReviewsByReviewIdStatus200LanguageEnum =
 	(typeof GetApiReviewsByReviewIdStatus200LanguageEnum)[keyof typeof GetApiReviewsByReviewIdStatus200LanguageEnum];
+
+export const GetApiReviewsByReviewIdStatus200SubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200SubjectLanguageEnum =
+	(typeof GetApiReviewsByReviewIdStatus200SubjectLanguageEnum)[keyof typeof GetApiReviewsByReviewIdStatus200SubjectLanguageEnum];
 
 /**
  * @type object
@@ -74031,6 +75862,10 @@ export type GetApiReviewsByReviewIdStatus200 = {
 			 * @type string
 			 */
 			kind: GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -74286,6 +76121,10 @@ export type GetApiReviewsByReviewIdStatus200 = {
 				 * @type string
 				 */
 				type: string;
+				/**
+				 * @type string
+				 */
+				language: GetApiReviewsByReviewIdStatus200SubjectLanguageEnum;
 				title: (string | null) | null;
 				summary: (string | null) | null;
 				cover:
@@ -74570,6 +76409,11 @@ export type PatchApiReviewsByReviewIdStatus500 = InternalError;
 export const PatchApiReviewsByReviewIdRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiReviewsByReviewIdRequestLanguageEnum =
@@ -75235,6 +77079,11 @@ export type GetApiScoresByTargetIdViewerPath = {
 export const GetApiScoresByTargetIdViewerLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiScoresByTargetIdViewerLocalizationLanguagesEnum =
@@ -76042,6 +77891,11 @@ export type PostApiPollsStatus500 = InternalError;
 export const PostApiPollsRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiPollsRequestLanguageEnum =
@@ -76181,6 +78035,11 @@ export type GetApiPollsByPollIdPath = {
 export const GetApiPollsByPollIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPollsByPollIdLocalizationLanguagesEnum =
@@ -76199,6 +78058,11 @@ export type GetApiPollsByPollIdQuery = {
 export const GetApiPollsByPollIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPollsByPollIdStatus200LanguageEnum =
@@ -77288,6 +79152,11 @@ export type PutApiPostsByPostIdScoresResponse =
 export const GetApiPostsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPostsLocalizationLanguagesEnum =
@@ -77330,6 +79199,11 @@ export type GetApiPostsStatus200ItemsPostKindEnum =
 export const GetApiPostsStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPostsStatus200ItemsLanguageEnum =
@@ -77382,6 +79256,19 @@ export const GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 
 export type GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum];
+
+export const GetApiPostsStatus200ItemsAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiPostsStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiPostsStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiPostsStatus200ItemsAttributionsCreditedUnitLanguageEnum];
 
 export const GetApiPostsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -77451,6 +79338,10 @@ export type GetApiPostsStatus200 = {
 				 * @type string
 				 */
 				kind: GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum;
+				/**
+				 * @type string
+				 */
+				language: GetApiPostsStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 				slugAddress:
 					| ({
 							/**
@@ -77889,6 +79780,11 @@ export type PostApiPostsStatus500 = InternalError;
 export const PostApiPostsRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiPostsRequestLanguageEnum =
@@ -78104,6 +80000,11 @@ export type GetApiPostsByPostIdPath = {
 export const GetApiPostsByPostIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPostsByPostIdLocalizationLanguagesEnum =
@@ -78181,6 +80082,19 @@ export const GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum = {
 export type GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum =
 	(typeof GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum)[keyof typeof GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum];
 
+export const GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum];
+
 export const GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -78192,10 +80106,28 @@ export type GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefix
 export const GetApiPostsByPostIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPostsByPostIdStatus200LanguageEnum =
 	(typeof GetApiPostsByPostIdStatus200LanguageEnum)[keyof typeof GetApiPostsByPostIdStatus200LanguageEnum];
+
+export const GetApiPostsByPostIdStatus200SubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiPostsByPostIdStatus200SubjectLanguageEnum =
+	(typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum)[keyof typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum];
 
 /**
  * @type object
@@ -78249,6 +80181,10 @@ export type GetApiPostsByPostIdStatus200 = {
 			 * @type string
 			 */
 			kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -78503,6 +80439,10 @@ export type GetApiPostsByPostIdStatus200 = {
 				 * @type string
 				 */
 				type: string;
+				/**
+				 * @type string
+				 */
+				language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
 				title: (string | null) | null;
 				summary: (string | null) | null;
 				cover:
@@ -78805,6 +80745,11 @@ export type PatchApiPostsByPostIdStatus500 = InternalError;
 export const PatchApiPostsByPostIdRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiPostsByPostIdRequestLanguageEnum =
@@ -79171,6 +81116,11 @@ export type GetApiPostsByPostIdRepliesPath = {
 export const GetApiPostsByPostIdRepliesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPostsByPostIdRepliesLocalizationLanguagesEnum =
@@ -79210,6 +81160,11 @@ export type GetApiPostsByPostIdRepliesQuery = {
 export const GetApiPostsByPostIdRepliesStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiPostsByPostIdRepliesStatus200ItemsLanguageEnum =
@@ -79262,6 +81217,19 @@ export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKin
 
 export type GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKindEnum];
+
+export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitLanguageEnum];
 
 export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
@@ -79332,6 +81300,10 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 				 * @type string
 				 */
 				kind: GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKindEnum;
+				/**
+				 * @type string
+				 */
+				language: GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 				slugAddress:
 					| ({
 							/**
@@ -79718,6 +81690,11 @@ export type PostApiPostsByPostIdRepliesPath = {
 export const PostApiPostsByPostIdRepliesStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiPostsByPostIdRepliesStatus200LanguageEnum =
@@ -79770,6 +81747,19 @@ export const PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnu
 
 export type PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum =
 	(typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum];
+
+export const PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitLanguageEnum];
 
 export const PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -79835,6 +81825,10 @@ export type PostApiPostsByPostIdRepliesStatus200 = {
 			 * @type string
 			 */
 			kind: PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitLanguageEnum;
 			slugAddress:
 				| ({
 						/**
@@ -80250,6 +82244,11 @@ export type PostApiPostsByPostIdRepliesStatus500 = InternalError;
 export const PostApiPostsByPostIdRepliesRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiPostsByPostIdRepliesRequestLanguageEnum =
@@ -80616,6 +82615,11 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus500 = InternalError;
 export const PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum =
@@ -80970,6 +82974,11 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdResponse =
 export const GetApiRealmsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsLocalizationLanguagesEnum =
@@ -80992,6 +83001,11 @@ export type GetApiRealmsQuery = {
 export const GetApiRealmsStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsStatus200ItemsLanguageEnum =
@@ -81275,6 +83289,11 @@ export type PostApiRealmsStatus500 = InternalError;
 export const PostApiRealmsRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiRealmsRequestLocalizationLanguageEnum =
@@ -81858,6 +83877,11 @@ export type GetApiRealmsByRealmIdPath = {
 export const GetApiRealmsByRealmIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdLocalizationLanguagesEnum =
@@ -81873,6 +83897,19 @@ export type GetApiRealmsByRealmIdQuery = {
 	localizationLanguages?: GetApiRealmsByRealmIdLocalizationLanguagesEnum[];
 };
 
+export const GetApiRealmsByRealmIdStatus200Language = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdStatus200Language =
+	(typeof GetApiRealmsByRealmIdStatus200Language)[keyof typeof GetApiRealmsByRealmIdStatus200Language];
+
 export const GetApiRealmsByRealmIdStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -81884,6 +83921,11 @@ export type GetApiRealmsByRealmIdStatus200AvatarIconPrefixEnum =
 export const GetApiRealmsByRealmIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdStatus200LocalizationsLanguageEnum =
@@ -81936,7 +83978,7 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 * @type string
 	 */
 	visibility: string;
-	language: (("zh" | "en") | null) | null;
+	language: (GetApiRealmsByRealmIdStatus200Language | null) | null;
 	/**
 	 * @type string
 	 */
@@ -82436,6 +84478,11 @@ export type PatchApiRealmsByRealmIdRequestStatusEnum =
 export const PatchApiRealmsByRealmIdRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PatchApiRealmsByRealmIdRequestLocalizationLanguageEnum =
@@ -83362,6 +85409,11 @@ export type GetApiRealmsByRealmIdMembersState =
 export const GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum =
@@ -83394,6 +85446,11 @@ export type GetApiRealmsByRealmIdMembersQuery = {
 export const GetApiRealmsByRealmIdMembersStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdMembersStatus200ItemsLanguageEnum =
@@ -83985,6 +86042,11 @@ export type PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum =
 export const PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum =
@@ -84202,6 +86264,11 @@ export type GetApiRealmsByRealmIdRulesPath = {
 export const GetApiRealmsByRealmIdRulesLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdRulesLocalizationLanguagesEnum =
@@ -84228,6 +86295,11 @@ export type GetApiRealmsByRealmIdRulesStatus200AcknowledgementModeEnum =
 export const GetApiRealmsByRealmIdRulesStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdRulesStatus200ItemsLanguageEnum =
@@ -84592,6 +86664,11 @@ export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus500 = Int
 export const PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementRequestLanguageEnum =
@@ -84654,6 +86731,19 @@ export type GetApiRealmsByRealmIdPinsPath = {
 	realmId: string;
 };
 
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage];
+
 export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -84702,6 +86792,19 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedU
 export type GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum =
 	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum];
 
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -84710,6 +86813,19 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedU
 
 export type GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsLanguageEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsLanguageEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsLanguageEnum];
 
 export const GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -84819,6 +86935,20 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributi
 export type GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum];
 
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -84827,6 +86957,19 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributi
 
 export type GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSubjectLanguageEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSubjectLanguageEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSubjectLanguageEnum];
 
 export const GetApiRealmsByRealmIdPinsStatus200ContentItemsPostKindEnum = {
 	post: "post",
@@ -84896,7 +87039,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (("zh" | "en") | null) | null;
+				language: (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
@@ -84935,6 +87078,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 * @type string
 						 */
 						kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum;
+						/**
+						 * @type string
+						 */
+						language: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -85035,6 +87182,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 					 * @type string
 					 */
 					id: string;
+					/**
+					 * @type string
+					 */
+					language: GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -85348,7 +87499,8 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							(GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -85387,6 +87539,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 								 * @type string
 								 */
 								kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -85487,6 +87643,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -85833,6 +87993,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 											 * @type string
 											 */
 											kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -85937,6 +88101,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: GetApiRealmsByRealmIdPinsStatus200ContentItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -85999,7 +88167,8 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							(GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -86038,6 +88207,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 								 * @type string
 								 */
 								kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -86138,6 +88311,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: GetApiRealmsByRealmIdPinsStatus200ContentItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -86484,6 +88661,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 											 * @type string
 											 */
 											kind: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -86588,6 +88769,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: GetApiRealmsByRealmIdPinsStatus200ContentItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -87949,6 +90134,11 @@ export type GetApiRealmsByRealmIdUnitsStatus =
 export const GetApiRealmsByRealmIdUnitsLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdUnitsLocalizationLanguagesEnum =
@@ -87981,6 +90171,11 @@ export type GetApiRealmsByRealmIdUnitsQuery = {
 export const GetApiRealmsByRealmIdUnitsStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdUnitsStatus200ItemsLanguageEnum =
@@ -88270,6 +90465,11 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesRoleEnum
 export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesLanguageEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesLanguageEnum =
@@ -88904,6 +91104,19 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum = {
 export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum =
 	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum];
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum];
+
 export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 	| {
 			/**
@@ -88927,7 +91140,10 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 			 */
 			annotation?: {
 				role: "internal_note" | "public_notice";
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum;
 				/**
 				 * @type object
 				 */
@@ -89081,7 +91297,10 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 			 */
 			annotation: {
 				role: "internal_note" | "public_notice";
-				language: "zh" | "en";
+				/**
+				 * @type string
+				 */
+				language: PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum;
 				/**
 				 * @type object
 				 */
@@ -91556,6 +93775,19 @@ export type PostApiSearchFeaturesByTemplateFeedPath = {
 	template: PostApiSearchFeaturesByTemplateFeedTemplate;
 };
 
+export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage];
+
 export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -91604,6 +93836,20 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCredit
 export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
 
+export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -91612,6 +93858,19 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCredit
 
 export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum];
 
 export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -91721,6 +93980,20 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttrib
 export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
+export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -91729,6 +94002,19 @@ export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttrib
 
 export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum =
+	(typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum];
 
 export const PostApiSearchFeaturesByTemplateFeedStatus200ItemsPostKindEnum = {
 	post: "post",
@@ -91765,7 +94051,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (("zh" | "en") | null) | null;
+				language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
@@ -91804,6 +94090,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+						/**
+						 * @type string
+						 */
+						language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -91904,6 +94194,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 					 * @type string
 					 */
 					id: string;
+					/**
+					 * @type string
+					 */
+					language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -92217,7 +94511,9 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -92256,6 +94552,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -92356,6 +94656,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -92702,6 +95006,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -92806,6 +95114,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -92868,7 +95180,9 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -92907,6 +95221,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -93007,6 +95325,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -93353,6 +95675,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -93457,6 +95783,10 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiSearchFeaturesByTemplateFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -96196,6 +98526,19 @@ export type PostApiSearchZonesByZoneIdFeatureFeedPath = {
 	zoneId: string;
 };
 
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage];
+
 export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -96244,6 +98587,20 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCred
 export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum];
 
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -96252,6 +98609,19 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCred
 
 export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum];
 
 export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -96361,6 +98731,20 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttr
 export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -96369,6 +98753,19 @@ export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttr
 
 export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum];
 
 export const PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsPostKindEnum = {
 	post: "post",
@@ -96405,7 +98802,8 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (("zh" | "en") | null) | null;
+				language:
+					(PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
@@ -96444,6 +98842,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+						/**
+						 * @type string
+						 */
+						language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -96544,6 +98946,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 					 * @type string
 					 */
 					id: string;
+					/**
+					 * @type string
+					 */
+					language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -96857,7 +99263,9 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -96896,6 +99304,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -96996,6 +99408,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -97342,6 +99758,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -97446,6 +99866,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -97508,7 +99932,9 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -97547,6 +99973,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -97647,6 +100077,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -97993,6 +100427,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -98097,6 +100535,10 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -102110,6 +104552,19 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecutePath = {
 	blockKey: string;
 };
 
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsLanguage =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsLanguage)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsLanguage];
+
 export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsRoleEnum =
 	{
 		author: "author",
@@ -102160,6 +104615,20 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum];
 
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -102168,6 +104637,20 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsLanguageEnum];
 
 export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsAvatarIconPrefixEnum =
 	{
@@ -102282,6 +104765,20 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum];
 
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum];
+
 export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	{
 		fas: "fas",
@@ -102290,6 +104787,20 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 
 export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsSubjectLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsSubjectLanguageEnum =
+	(typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsSubjectLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsSubjectLanguageEnum];
 
 export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsPostKindEnum = {
 	post: "post",
@@ -102327,7 +104838,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language: (("zh" | "en") | null) | null;
+				language:
+					| (PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsLanguage | null)
+					| null;
 				/**
 				 * @type array
 				 */
@@ -102366,6 +104879,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 						 * @type string
 						 */
 						kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum;
+						/**
+						 * @type string
+						 */
+						language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 						slugAddress:
 							| ({
 									/**
@@ -102466,6 +104983,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 					 * @type string
 					 */
 					id: string;
+					/**
+					 * @type string
+					 */
+					language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsLanguageEnum;
 					slugAddress:
 						| ({
 								/**
@@ -102779,7 +105300,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							| (PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -102818,6 +105341,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -102918,6 +105445,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -103264,6 +105795,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -103368,6 +105903,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -103430,7 +105969,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language: (("zh" | "en") | null) | null;
+						language:
+							| (PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsLanguage | null)
+							| null;
 						/**
 						 * @type array
 						 */
@@ -103469,6 +106010,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 								 * @type string
 								 */
 								kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitKindEnum;
+								/**
+								 * @type string
+								 */
+								language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsAttributionsCreditedUnitLanguageEnum;
 								slugAddress:
 									| ({
 											/**
@@ -103569,6 +106114,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 							 * @type string
 							 */
 							id: string;
+							/**
+							 * @type string
+							 */
+							language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsRealmsLanguageEnum;
 							slugAddress:
 								| ({
 										/**
@@ -103915,6 +106464,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 											 * @type string
 											 */
 											kind: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum;
+											/**
+											 * @type string
+											 */
+											language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsReplyContextAttributionsCreditedUnitLanguageEnum;
 											slugAddress:
 												| ({
 														/**
@@ -104019,6 +106572,10 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 									 * @type string
 									 */
 									type: string;
+									/**
+									 * @type string
+									 */
+									language: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200ItemsSubjectLanguageEnum;
 									title: (string | null) | null;
 									summary: (string | null) | null;
 									cover:
@@ -105474,6 +108031,11 @@ export type PostApiSearchRequestIndexesEnum =
 export const PostApiSearchRequestLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiSearchRequestLanguagesEnum =
@@ -107744,6 +110306,11 @@ export type PostApiSearchByIndexStatus503 = {
 export const PostApiSearchByIndexRequestLanguagesEnum = {
 	zh: "zh",
 	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
 export type PostApiSearchByIndexRequestLanguagesEnum =

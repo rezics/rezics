@@ -1,5 +1,5 @@
 import { and, asc, eq, inArray, lte, or, sql } from "drizzle-orm";
-import { toStoredUiLocale, type UiLocale } from "@rezics/i18n";
+import type { DeliveryLocale } from "@rezics/i18n";
 
 import { database, type DatabaseTransaction } from "../database";
 import { emailOutbox, notification } from "../database/schema";
@@ -10,7 +10,7 @@ export type AuthenticationEmailKind = "reset_password" | "verify_email";
 export async function enqueueAuthenticationEmail(input: {
 	readonly actionUrl: string;
 	readonly kind: AuthenticationEmailKind;
-	readonly locale: UiLocale;
+	readonly locale: DeliveryLocale;
 	readonly recipientEmail: string;
 }): Promise<string> {
 	const [created] = await database
@@ -18,7 +18,7 @@ export async function enqueueAuthenticationEmail(input: {
 		.values({
 			actionUrl: input.actionUrl,
 			kind: input.kind,
-			locale: toStoredUiLocale(input.locale),
+			locale: input.locale,
 			recipientEmail: input.recipientEmail,
 		})
 		.returning({ id: emailOutbox.id });

@@ -6,6 +6,7 @@ import {
 	useDeleteApiUsersMeFollowingByUnitId,
 	usePatchApiUsersMeFollowingByUnitId,
 	type GetApiUsersMeFollowingQuery,
+	type GetApiUsersMeFollowingStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
@@ -20,8 +21,10 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Star, UserMinus } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
+import type { ComponentProps } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -110,25 +113,6 @@ function FollowingContent() {
 							item.avatar ??
 							(item.cover ? { type: "image" as const, image: item.cover } : null);
 						const destination = followingHref(item.kind, item);
-						const identity = (
-							<>
-								<IdentityAvatar
-									avatar={avatar}
-									className="size-11"
-									fallback={(item.title ?? t.ui.unnamed)
-										.slice(0, 1)
-										.toUpperCase()}
-								/>
-								<span className="min-w-0">
-									<strong className="block truncate text-sm">
-										{item.title ?? t.ui.unnamed}
-									</strong>
-									<span className="text-muted-foreground text-xs">
-										{t.nav.following.types[item.kind]}
-									</span>
-								</span>
-							</>
-						);
 						return (
 							<article className="flex min-w-0 items-center gap-2 py-3" key={item.id}>
 								{destination ? (
@@ -136,11 +120,11 @@ function FollowingContent() {
 										className="flex min-w-0 flex-1 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 										href={destination}
 									>
-										{identity}
+										<FollowingIdentity avatar={avatar} item={item} />
 									</Link>
 								) : (
 									<div className="flex min-w-0 flex-1 items-center gap-3">
-										{identity}
+										<FollowingIdentity avatar={avatar} item={item} />
 									</div>
 								)}
 								<Button
@@ -203,5 +187,34 @@ function FollowingContent() {
 			) : null}
 			<RequestFailure error={update.error ?? unfollow.error} />
 		</main>
+	);
+}
+
+function FollowingIdentity({
+	avatar,
+	item,
+}: {
+	readonly avatar: ComponentProps<typeof IdentityAvatar>["avatar"];
+	readonly item: GetApiUsersMeFollowingStatus200["items"][number];
+}) {
+	const { t } = useTranslation(["nav", "ui"]);
+	const title = useChineseContentText(
+		item.title ?? t.ui.unnamed,
+		item.title ? item.language : null,
+	);
+	return (
+		<>
+			<IdentityAvatar
+				avatar={avatar}
+				className="size-11"
+				fallback={title.slice(0, 1).toUpperCase()}
+			/>
+			<span className="min-w-0">
+				<strong className="block truncate text-sm">{title}</strong>
+				<span className="text-muted-foreground text-xs">
+					{t.nav.following.types[item.kind]}
+				</span>
+			</span>
+		</>
 	);
 }

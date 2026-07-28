@@ -1,0 +1,35 @@
+export default {
+	label: "Langue",
+	uiLocales: {
+		en: "English",
+		"zh-Hant": "繁體中文",
+		"zh-Hans": "简体中文",
+		ja: "日本語",
+		ko: "한국어",
+		de: "Deutsch",
+		fr: "Français",
+		es: "Español",
+	},
+	contentLanguages: {
+		zh: "Chinois",
+		en: "Anglais",
+		ja: "Japonais",
+		ko: "Coréen",
+		de: "Allemand",
+		fr: "Français",
+		es: "Espagnol",
+	},
+	chineseContentDisplay: {
+		label: "Affichage des contenus en chinois",
+		hint: "Modifie l’affichage des contenus en chinois sans altérer le texte de l’auteur.",
+		original: "Conserver le texte d’origine",
+		hant: "Afficher en chinois traditionnel",
+		hans: "Afficher en chinois simplifié",
+	},
+	displayMode: "Mode d’affichage",
+	displayModes: {
+		system: "Automatique (réglage de l’appareil)",
+		light: "Clair",
+		dark: "Sombre",
+	},
+} satisfies typeof import("../zh-Hant/locale").default;

@@ -1,0 +1,3 @@
+- N’accorder à un agent que les autorisations nécessaires pour compléter les métadonnées manquantes d’un livre ou une traduction.
+- Exécuter un importateur ou un outil local avec un identifiant propre à son usage, qui peut être désactivé ou révoqué indépendamment.
+- Accorder temporairement une politique Privileged lorsqu’une charge de travail auditée exige un débit supérieur, sans octroyer d’autorisations supplémentaires sur les données.

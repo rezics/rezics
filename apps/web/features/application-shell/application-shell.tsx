@@ -12,9 +12,10 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell as SharedAppShell, Button } from "@rezics/ui";
-import { toStoredUiLocale, toUiLocale } from "@rezics/i18n";
+import { toStoredUiLocale, toUiLocale, UiLocaleValues } from "@rezics/i18n";
 
 import { followingManagementHref } from "@/features/following/routing/following-route";
+import { ChineseContentDisplayProvider } from "@/features/content-language-display/chinese-content-display-context";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -85,10 +86,10 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const localeSelection = {
 		label: t.locale.label,
 		value: locale.target,
-		options: [
-			{ value: "zh-Hant", label: t.locale.zh },
-			{ value: "en", label: t.locale.en },
-		],
+		options: UiLocaleValues.map((value) => ({
+			value,
+			label: t.locale.uiLocales[value],
+		})),
 		onChange: (nextLocale: typeof locale.target) => {
 			localeChangedByUser.current = true;
 			updateInterfaceLocale.reset();
@@ -150,10 +151,17 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 		setLocale,
 	]);
 
-	if (/^\/units\/book\/[^/]+\/read\/[^/]+$/.test(pathname)) return children;
+	const chineseContentDisplay = preferences.data?.chineseContentDisplay ?? "original";
+
+	if (/^\/units\/book\/[^/]+\/read\/[^/]+$/.test(pathname))
+		return (
+			<ChineseContentDisplayProvider value={chineseContentDisplay}>
+				{children}
+			</ChineseContentDisplayProvider>
+		);
 
 	return (
-		<>
+		<ChineseContentDisplayProvider value={chineseContentDisplay}>
 			<SharedAppShell
 				brandName={t.brand.name}
 				currentPath={pathname}
@@ -272,6 +280,6 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 					) : null}
 				</div>
 			) : null}
-		</>
+		</ChineseContentDisplayProvider>
 	);
 }

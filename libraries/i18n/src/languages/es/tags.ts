@@ -1,0 +1,129 @@
+import { insert } from "native-i18n";
+
+import { esTerminology } from "@rezics/i18n/terminology/es";
+
+const { forms: realmTerms } = esTerminology.realm;
+const { forms: followTerms } = esTerminology.follow;
+const { forms: tagStructureTerms } = esTerminology.tagStructure;
+
+export default {
+	page: {
+		title: "Etiquetas",
+		description:
+			"Revisa las etiquetas globales y las valoraciones contextuales de las fuentes de etiquetas que hayas seleccionado.",
+		viewAll: "Ver la página completa de la etiqueta",
+		manageOnTagPage: `Añade etiquetas y ${tagStructureTerms.plural} en la página específica de etiquetas para que su contexto de votación siga visible.`,
+	},
+	card: {
+		open: insert("Abrir la tarjeta de la etiqueta {{tag}} ({{context}})", {
+			tag: String,
+			context: String,
+		}),
+		close: "Cerrar la tarjeta de la etiqueta",
+		globalContext: "Etiquetas globales",
+		structureContext: tagStructureTerms.label,
+		policy: `Definida por el ${realmTerms.inline}`,
+		search: "Buscar esta etiqueta",
+		details: "Ver detalles de la etiqueta",
+	},
+	selection: {
+		start: "Seleccionar varias",
+		finish: "Terminar la selección",
+		add: "Añadir a la selección",
+		remove: "Quitar de la selección",
+		addNamed: insert("Seleccionar {{tag}}", { tag: String }),
+		removeNamed: insert("Anular la selección de {{tag}}", { tag: String }),
+		selectedCount: insert("{{count}} etiquetas seleccionadas", { count: Number }),
+		search: "Buscar entre las etiquetas seleccionadas",
+		clear: "Borrar selección",
+	},
+	basic: {
+		title: "Etiquetas básicas",
+		description: `Etiquetas globales y ${tagStructureTerms.plural}, sin valoraciones contextuales de ningún ${realmTerms.inline}.`,
+	},
+	structures: {
+		title: tagStructureTerms.pluralLabel,
+		description: `Las ${tagStructureTerms.plural} conservan una jerarquía con significado y se muestran antes que las etiquetas sin jerarquía.`,
+		addTitle: `Añadir una ${tagStructureTerms.inline}`,
+		addDescription: `Busca primero ${tagStructureTerms.plural} aceptadas. Añadir una respalda la ruta y todas sus etiquetas.`,
+		add: `Añadir ${tagStructureTerms.inline}`,
+		create: `Crear ${tagStructureTerms.inline}`,
+		details: `Ver ${tagStructureTerms.inline}`,
+		empty: `Esta obra todavía no tiene ninguna ${tagStructureTerms.inline} aceptada.`,
+		memberFallback: "Etiqueta sin nombre",
+		pathLabel: `${tagStructureTerms.label} ordenada`,
+	},
+	detail: {
+		childrenTitle: "Etiquetas subordinadas directas",
+		childrenDescription: `Estas relaciones proceden de ${tagStructureTerms.plural} aceptadas y bloqueadas por la comunidad. Cada elemento subordinado muestra sus propios elementos subordinados directos.`,
+		noChildren: "Esta etiqueta todavía no tiene elementos subordinados directos aceptados.",
+		grandchildrenTitle: "Elementos subordinados directos",
+	},
+	createStructure: {
+		title: `Crear ${tagStructureTerms.inline}`,
+		description:
+			"Crea una ruta ordenada desde las etiquetas más generales hasta las más específicas. Los miembros de la comunidad no podrán editarla después de crearla; los administradores de la plataforma podrán realizar correcciones auditadas.",
+		pick: "Elegir la siguiente etiqueta",
+		addMember: "Añadir a la ruta",
+		removeMember: "Quitar de la ruta",
+		moveEarlier: "Mover hacia el principio",
+		moveLater: "Mover hacia el final",
+		preview: "Vista previa de la ruta bloqueada por la comunidad",
+		minimum: "Añade al menos dos etiquetas distintas.",
+		submit: `Crear ${tagStructureTerms.inline} y votar`,
+	},
+	adminEditStructure: {
+		title: `Corregir ${tagStructureTerms.inline}`,
+		description:
+			"Los administradores de la plataforma pueden corregir los elementos o su orden. Se conservan la identidad de la Unit, los votos y los usos, y la corrección queda registrada en el historial.",
+		reasonLabel: "Motivo de la corrección",
+		reasonPlaceholder: "Explica por qué es necesaria esta corrección administrativa.",
+		submit: "Guardar la corrección auditada",
+	},
+	global: {
+		title: "Etiquetas globales",
+		description:
+			"Todas las personas con acceso de interacción pueden proponer y valorar etiquetas globales.",
+		addTitle: "Añadir una etiqueta global",
+		addDescription:
+			"Busca primero entre las etiquetas existentes. Añadir una también cuenta como un voto «Encaja».",
+		add: "Añadir etiqueta",
+		pinned: "Fijada",
+		empty: "Esta obra todavía no tiene etiquetas globales.",
+	},
+	realms: {
+		title: `Contextos de etiquetas de los ${realmTerms.plural}`,
+		description: `Cada ${realmTerms.inline} es un contexto independiente. Sus valoraciones nunca se combinan con las etiquetas globales ni con otro ${realmTerms.inline}.`,
+		policy: `Etiquetas definidas por el ${realmTerms.inline}`,
+		votes: `Votos de los miembros del ${realmTerms.inline}`,
+		context: "Ver contexto de votación",
+		empty: "Las fuentes de etiquetas seleccionadas todavía no han valorado esta obra.",
+		cannotVote: `Únete a este ${realmTerms.inline} para participar en su votación contextual.`,
+	},
+	vote: {
+		fits: "Encaja",
+		doesNotFit: "No encaja",
+		clear: "Quitar mi valoración",
+		signIn: "Iniciar sesión para votar",
+		signInDescription: "Inicia sesión para votar en el contexto global de etiquetas.",
+		summary: insert("Saldo {{score}} · {{count}} votos", {
+			score: String,
+			count: String,
+		}),
+	},
+	sources: {
+		title: "Fuentes de etiquetas",
+		description: `Elige y ordena los ${realmTerms.plural} que se muestran en las áreas de etiquetas de las obras. Esto no implica ${followTerms.action} una obra ni cambia tu pertenencia a un ${realmTerms.inline}.`,
+		addTitle: "Añadir una fuente de etiquetas",
+		addDescription: `Busca ${realmTerms.plural} que puedas consultar y añade uno a tu lista personal de fuentes de etiquetas.`,
+		add: "Añadir fuente",
+		remove: "Quitar fuente",
+		moveEarlier: "Mover hacia el principio",
+		moveLater: "Mover hacia el final",
+		empty: "No hay fuentes de etiquetas seleccionadas.",
+		manage: "Gestionar fuentes de etiquetas",
+	},
+	unnamedTag: "Etiqueta sin nombre",
+	unnamedRealm: `${realmTerms.label} sin nombre`,
+	unnamedStructure: `${tagStructureTerms.label} sin nombre`,
+} satisfies typeof import("../zh-Hant/tags").default;

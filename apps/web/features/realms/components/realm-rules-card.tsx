@@ -2,12 +2,16 @@
 
 import { ChevronDownIcon, ShieldCheckIcon } from "lucide-react";
 import { useId, useState } from "react";
+import type { ContentLanguage } from "@rezics/i18n";
 
-import { Button, Card, CardContent, PortableTextContent } from "@rezics/ui";
+import { Button, Card, CardContent } from "@rezics/ui";
 import { readPortableText } from "@/lib/block";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 
 export interface RealmRulePresentation {
 	readonly id: string;
+	readonly language: ContentLanguage;
 	readonly title: string;
 	readonly content: Parameters<typeof readPortableText>[0];
 }
@@ -62,7 +66,7 @@ function RealmRuleDisclosure({
 							{index}
 						</span>
 						<span className="min-w-0 flex-1 break-words text-left [overflow-wrap:anywhere]">
-							{rule.title}
+							<LocalizedText language={rule.language} value={rule.title} />
 						</span>
 					</span>
 					<ChevronDownIcon
@@ -75,8 +79,9 @@ function RealmRuleDisclosure({
 			</h3>
 			{open ? (
 				<div className="min-w-0 overflow-hidden ps-8 pb-4" id={contentId}>
-					<PortableTextContent
+					<LocalizedPortableTextContent
 						className="min-w-0 break-words [overflow-wrap:anywhere]"
+						language={rule.language}
 						value={readPortableText(rule.content)}
 						variant="compact"
 					/>

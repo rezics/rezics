@@ -1,14 +1,15 @@
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
+import { ContentLanguageValues, DefaultPreferredLanguage } from "@rezics/i18n";
 
 export const authClient = createAuthClient({
 	plugins: [
 		inferAdditionalFields({
 			user: {
 				registrationContentLanguage: {
-					type: ["zh", "en"],
+					type: [...ContentLanguageValues],
 					required: false,
-					defaultValue: "en",
+					defaultValue: DefaultPreferredLanguage,
 					input: true,
 					returned: false,
 				},

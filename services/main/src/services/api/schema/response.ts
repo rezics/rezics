@@ -13,6 +13,7 @@ import {
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
 import {
+	ChineseContentDisplay,
 	ContentLanguage,
 	ContentRating,
 	DateTime,
@@ -131,6 +132,7 @@ export const LocalizedContentMetricResponse = t.Object(
 const UnitSummaryFields = {
 	id: Uuid,
 	kind: t.UnionEnum(UnitKindValues),
+	language: ContentLanguage,
 	slugAddress: NullablePublicSlugAddressResponse,
 	title: NullableText,
 	summary: NullableText,
@@ -508,6 +510,7 @@ const FeedItemBaseResponse = {
 	realms: t.Array(
 		t.Object({
 			id: Uuid,
+			language: ContentLanguage,
 			slugAddress: NullablePublicSlugAddressResponse,
 			title: NullableText,
 			summary: NullableText,
@@ -552,6 +555,7 @@ const FeedScoreCandidatesResponse = t.Object({
 const PostSubjectPresentationFields = {
 	id: Uuid,
 	type: t.String(),
+	language: ContentLanguage,
 	title: NullableText,
 	summary: NullableText,
 	cover: ImageAssetResponse,
@@ -689,6 +693,7 @@ export const CurrentProfileResponse = t.Intersect([
 export const PreferencesResponse = t.Object({
 	profileId: Uuid,
 	interfaceLocale: StoredUiLocale,
+	chineseContentDisplay: ChineseContentDisplay,
 	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean(),
 	defaultScoreContextUnitId: Uuid,

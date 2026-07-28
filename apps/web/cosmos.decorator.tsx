@@ -1,4 +1,5 @@
 import { resources } from "@rezics/i18n/resources";
+import { UiLocaleValues, type UiLocale } from "@rezics/i18n";
 import { FixtureProvider } from "@rezics/fixture-client";
 import { FixtureContentLanguages, type FixtureContentLanguage } from "@rezics/fixture-data";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,18 +21,25 @@ const CosmosTranslationNamespaces = [
 ] as const;
 
 const i18n = create(resources, { timeZone: "Asia/Taipei" });
-const [zhHantTranslation, englishTranslation] = await Promise.all([
-	i18n.getTranslation(CosmosTranslationNamespaces, ["zh-Hant"]),
-	i18n.getTranslation(CosmosTranslationNamespaces, ["en"]),
-]);
+const translations = new Map(
+	await Promise.all(
+		UiLocaleValues.map(
+			async (locale) =>
+				[
+					locale,
+					(await i18n.getTranslation(CosmosTranslationNamespaces, [locale])).snapshot,
+				] as const,
+		),
+	),
+);
 
 export default function CosmosDecorator({ children }: { children: ReactNode }) {
 	const [theme] = useFixtureSelect("Theme", {
 		options: ["light", "dark"],
 		defaultValue: "light",
 	});
-	const [locale] = useFixtureSelect("Locale", {
-		options: ["zh-Hant", "en"],
+	const [locale] = useFixtureSelect<UiLocale>("Locale", {
+		options: [...UiLocaleValues],
 		defaultValue: "zh-Hant",
 	});
 	const [contentLanguage] = useFixtureSelect<FixtureContentLanguage>("Content language", {
@@ -51,8 +59,8 @@ export default function CosmosDecorator({ children }: { children: ReactNode }) {
 		};
 	}, [theme]);
 
-	const initialTranslation =
-		locale === "zh-Hant" ? zhHantTranslation.snapshot : englishTranslation.snapshot;
+	const initialTranslation = translations.get(locale);
+	if (!initialTranslation) throw new Error(`Missing Cosmos translation for ${locale}`);
 
 	return (
 		<>

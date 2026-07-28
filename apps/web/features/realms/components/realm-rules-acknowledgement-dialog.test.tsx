@@ -52,6 +52,7 @@ describe("RealmRulesAcknowledgementDialog", () => {
 					rules={[
 						{
 							id: "019fa2b0-1000-7000-8000-000000000001",
+							language: "zh",
 							title: "尊重其他成員",
 							content: {
 								_type: "portable-text",

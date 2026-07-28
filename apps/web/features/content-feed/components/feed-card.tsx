@@ -2,6 +2,7 @@
 
 import { type ComponentProps, type ReactNode, useState } from "react";
 import type { PresentedAvatar } from "@rezics/avatar";
+import type { ContentLanguage } from "@rezics/i18n";
 import { BookOpenIcon, ChevronRightIcon, StarIcon } from "lucide-react";
 
 import {
@@ -26,6 +27,10 @@ import {
 	type RealmInfoCardData,
 } from "@/features/realms/components/realm-info-card";
 import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
+import {
+	LocalizedText,
+	useChineseContentText,
+} from "@/features/content-language-display/chinese-content-display-context";
 import type { UnitScore } from "@/features/reviews/model/score-value";
 import { isKnownAttributionRole } from "@/features/units/attribution-role";
 import { useTranslation } from "@/i18n/client";
@@ -34,6 +39,7 @@ import { useFineHover } from "../hooks/use-fine-hover";
 interface FeedContextItem {
 	readonly id: string;
 	readonly name: string;
+	readonly language?: ContentLanguage;
 	readonly href?: string;
 	readonly avatar?: PresentedAvatar | null;
 	readonly initials: string;
@@ -346,6 +352,7 @@ function FeedContextGroup<T extends FeedContextItem>({
 	const supportsFineHover = useFineHover();
 	const [listOpen, setListOpen] = useState(false);
 	const primary = items[0];
+	const primaryName = useChineseContentText(primary?.name ?? "", primary?.language);
 	if (!primary) return emptyLabel ? <span className="text-xs">{emptyLabel}</span> : null;
 	if (items.length === 1)
 		return (
@@ -362,12 +369,12 @@ function FeedContextGroup<T extends FeedContextItem>({
 							href={primary.href}
 						>
 							<FeedAvatar item={primary} />
-							<span className="max-w-40 truncate sm:max-w-56">{primary.name}</span>
+							<span className="max-w-40 truncate sm:max-w-56">{primaryName}</span>
 						</a>
 					) : (
 						<span className="inline-flex min-w-0 items-center gap-2 font-semibold text-xs">
 							<FeedAvatar item={primary} />
-							<span className="max-w-40 truncate sm:max-w-56">{primary.name}</span>
+							<span className="max-w-40 truncate sm:max-w-56">{primaryName}</span>
 						</span>
 					)}
 				</HoverCardTrigger>
@@ -387,14 +394,14 @@ function FeedContextGroup<T extends FeedContextItem>({
 				<Button
 					aria-expanded={listOpen}
 					aria-haspopup="dialog"
-					aria-label={showListLabel(primary, additionalCount)}
+					aria-label={showListLabel({ ...primary, name: primaryName }, additionalCount)}
 					className="h-auto max-w-full gap-2 px-0 py-0 font-semibold hover:bg-transparent hover:underline"
 					onClick={() => setListOpen(true)}
 					size="xs"
 					variant="quiet"
 				>
 					<FeedAvatar item={primary} />
-					<span className="max-w-36 truncate sm:max-w-52">{primary.name}</span>
+					<span className="max-w-36 truncate sm:max-w-52">{primaryName}</span>
 					<span className="shrink-0 text-muted-foreground">+{additionalCount}</span>
 				</Button>
 			</HoverCardTrigger>
@@ -416,14 +423,20 @@ function FeedContextGroup<T extends FeedContextItem>({
 										>
 											<FeedAvatar item={item} />
 											<span className="min-w-0 flex-1 truncate">
-												{item.name}
+												<LocalizedText
+													language={item.language}
+													value={item.name}
+												/>
 											</span>
 										</a>
 									) : (
 										<span className="flex min-h-11 min-w-0 items-center gap-2 px-2 py-1.5 text-sm">
 											<FeedAvatar item={item} />
 											<span className="min-w-0 flex-1 truncate">
-												{item.name}
+												<LocalizedText
+													language={item.language}
+													value={item.name}
+												/>
 											</span>
 										</span>
 									)}
@@ -441,7 +454,8 @@ function FeedContextGroup<T extends FeedContextItem>({
 }
 
 function FeedAvatar({ item }: { item: FeedContextItem }) {
-	return <IdentityAvatar avatar={item.avatar} fallback={item.initials} size="sm" />;
+	const fallback = useChineseContentText(item.initials, item.language);
+	return <IdentityAvatar avatar={item.avatar} fallback={fallback} size="sm" />;
 }
 
 function FeedAttributionInfoCard({
@@ -451,6 +465,9 @@ function FeedAttributionInfoCard({
 	attribution: FeedAttributionContext;
 	roleLabel: string;
 }) {
+	const name = useChineseContentText(attribution.name, attribution.language);
+	const initials = useChineseContentText(attribution.initials, attribution.language);
+	const summary = useChineseContentText(attribution.summary ?? "", attribution.language);
 	if (attribution.kind === "profile")
 		return (
 			<ProfileInfoCard
@@ -458,6 +475,7 @@ function FeedAttributionInfoCard({
 					id: attribution.id,
 					name: attribution.name,
 					initials: attribution.initials,
+					language: attribution.language,
 					avatar: attribution.avatar,
 					slug: attribution.slug,
 					summary: attribution.summary,
@@ -470,18 +488,16 @@ function FeedAttributionInfoCard({
 				<IdentityAvatar
 					avatar={attribution.avatar}
 					className="size-12 text-base"
-					fallback={attribution.initials}
+					fallback={initials}
 					size="lg"
 				/>
 				<div className="min-w-0">
-					<p className="truncate font-heading font-bold text-base">{attribution.name}</p>
+					<p className="truncate font-heading font-bold text-base">{name}</p>
 					<p className="truncate text-muted-foreground text-xs">{roleLabel}</p>
 				</div>
 			</div>
-			{attribution.summary ? (
-				<p className="line-clamp-3 text-muted-foreground text-sm leading-5">
-					{attribution.summary}
-				</p>
+			{summary ? (
+				<p className="line-clamp-3 text-muted-foreground text-sm leading-5">{summary}</p>
 			) : null}
 		</div>
 	);

@@ -21,6 +21,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { SettingsOverviewHref } from "@/features/settings/routing/settings-routes";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -142,11 +143,21 @@ export function TagSourcesSettingsPage() {
 												className="font-semibold text-link hover:text-link-hover hover:underline"
 												href={`/realms/${item.realmId}`}
 											>
-												{item.title ?? t.tags.unnamedRealm}
+												{item.title ? (
+													<LocalizedText
+														language={item.language}
+														value={item.title}
+													/>
+												) : (
+													t.tags.unnamedRealm
+												)}
 											</Link>
 											{item.summary ? (
 												<p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-													{item.summary}
+													<LocalizedText
+														language={item.language}
+														value={item.summary}
+													/>
 												</p>
 											) : null}
 										</div>

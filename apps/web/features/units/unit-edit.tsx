@@ -409,7 +409,7 @@ function UnitLocalizationForm({
 	);
 	const coverOptions: LocalizationImageAssetOption[] = unit.localizations.flatMap((entry) =>
 		entry.language !== language && entry.cover
-			? [{ ...entry.cover, label: t.locale[entry.language] }]
+			? [{ ...entry.cover, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
 	const fallbackCover = coverOptions[0] ?? null;

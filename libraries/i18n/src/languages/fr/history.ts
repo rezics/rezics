@@ -1,0 +1,26 @@
+export default {
+	title: "Historique des révisions",
+	description:
+		"Consultez les modifications, comparez les révisions ou restaurez le contenu lorsque vous y êtes autorisé.",
+	noRevisions: "Aucune révision pour le moment.",
+	currentRevision: "Révision actuelle",
+	minorEdit: "Modification mineure",
+	hiddenRevision: "Masquée",
+	undoRevision: "Annuler cette modification",
+	restoreRevision: "Restaurer cette révision",
+	compareWithParent: "Comparer à la précédente",
+	revisionBy: "Éditeur",
+	noEditSummary: "Aucun résumé de modification",
+	compareTitle: "Différence entre les révisions",
+	before: "Avant",
+	after: "Après",
+	backToHistory: "Retour à l’historique des révisions",
+	backToEditor: "Retour à l’éditeur",
+	bytes: "octets",
+	structureKinds: {
+		create: "Structure créée",
+		update: "Structure mise à jour",
+		delete: "Structure supprimée",
+		restore: "Structure restaurée",
+	},
+} satisfies typeof import("../zh-Hant/history").default;

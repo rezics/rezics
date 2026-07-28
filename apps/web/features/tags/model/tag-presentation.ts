@@ -1,3 +1,5 @@
+import type { ContentLanguage } from "@rezics/i18n";
+
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 
 export type TagItemKey =
@@ -5,6 +7,7 @@ export type TagItemKey =
 
 export interface TagIdentity {
 	readonly tagId: string;
+	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
 }
@@ -43,6 +46,7 @@ export type TagContextPresentation =
 	| {
 			readonly kind: "realm";
 			readonly realmId: string;
+			readonly realmLanguage: ContentLanguage | null;
 			readonly realmTitle: string | null;
 			readonly policy: boolean;
 			readonly contextPostId?: string;
@@ -61,6 +65,7 @@ export interface TagPresentation {
 
 export interface RealmTagGroupPresentation {
 	readonly realmId: string;
+	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
 	readonly tags: readonly TagPresentation[];

@@ -1,0 +1,41 @@
+import { frTerminology } from "@rezics/i18n/terminology/fr";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
+const content = {
+	implemented: "Implémenté",
+	modes: "Modes d’attribution",
+	credit: String(verbatimTerms.creditAttribution.value),
+	subject: String(verbatimTerms.subjectAssociation.value),
+	bookCredits: "Crédits du livre",
+	relationship: "Type de relation",
+	entity: "Entité",
+	unit: "Unit",
+	author: "Auteur",
+	translator: "Traducteur",
+	publisher: "Éditeur",
+	personEntity: "Entité / personne",
+	organizationEntity: "Entité / organisation",
+	book: "Livre",
+	bookVariant: "Variante du livre",
+	release: "Version",
+	entityDetail: "Détail de l’entité",
+	entityType: "Type d’entité",
+	realOrFictional: "réelle / fictive",
+	record: "Fiche",
+	stableIdentity: "identité stable",
+	attributions: "Attributions",
+	managedList: "liste gérée",
+	bookSubjects: "Sujets du livre",
+	protagonist: "Protagoniste",
+	character: "Personnage",
+	derivativeOf: "Dérivé de",
+	characterEntity: "Entité personnage",
+	fictionalEntity: "Entité fictive",
+	entityUnitRelation: "Relation Entité / Unit",
+	post: frTerminology.post.forms.label,
+	relationshipEditor: "Éditeur de relations",
+	type: "Type",
+	targetUnit: "Unit cible",
+} satisfies typeof import("../../en/components/attribution").default;
+
+export default content;

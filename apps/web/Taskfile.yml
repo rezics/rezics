@@ -9,6 +9,7 @@ tasks:
     build:
         desc: Create the frontend production build.
         cmds:
+            - yarn run generate:offline
             - yarn exec vinext build
 
     typecheck:

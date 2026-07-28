@@ -48,7 +48,7 @@ import {
 	StudioContentListResponse,
 	StudioResourceParams,
 	StudioVisitResponse,
-	UpdateInterfaceLocaleBody,
+	UpdateDisplayPreferencesBody,
 	UpdateProfileBody,
 	UpdateFollowingBody,
 	UserIdParams,
@@ -83,6 +83,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 	return {
 		profileId: preference.profileId,
 		interfaceLocale: preference.interfaceLocale,
+		chineseContentDisplay: preference.chineseContentDisplay,
 		defaultLicense: parseNullablePublicationLicenseId(preference.defaultLicense),
 		defaultRealmManageMode: preference.defaultRealmManageMode,
 		defaultScoreContextUnitId:
@@ -278,7 +279,14 @@ export default new Elysia({ prefix: "/users" })
 		async ({ profile, body }) => {
 			const [preference] = await database
 				.update(profilePreference)
-				.set({ interfaceLocale: body.interfaceLocale })
+				.set({
+					...(body.interfaceLocale === undefined
+						? {}
+						: { interfaceLocale: body.interfaceLocale }),
+					...(body.chineseContentDisplay === undefined
+						? {}
+						: { chineseContentDisplay: body.chineseContentDisplay }),
+				})
 				.where(eq(profilePreference.profileId, profile.unitId))
 				.returning();
 			if (!preference) throw new PreferencesNotFound();
@@ -286,12 +294,12 @@ export default new Elysia({ prefix: "/users" })
 		},
 		{
 			access: "profile:update",
-			body: UpdateInterfaceLocaleBody,
+			body: UpdateDisplayPreferencesBody,
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
-			detail: { summary: "Update current user interface locale", tags: ["Users"] },
+			detail: { summary: "Update current user display preferences", tags: ["Users"] },
 		},
 	)
 	.put(
@@ -307,6 +315,7 @@ export default new Elysia({ prefix: "/users" })
 					.update(profilePreference)
 					.set({
 						interfaceLocale: body.interfaceLocale,
+						chineseContentDisplay: body.chineseContentDisplay,
 						defaultLicense: body.defaultLicense,
 						defaultRealmManageMode: body.defaultRealmManageMode,
 						defaultScoreContextUnitId: defaultScoreContext.contextUnitId,

@@ -2,8 +2,10 @@
 
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 import { Button, Card, CardContent, ChoiceSelect, IdentityAvatar, cn } from "@rezics/ui";
+import { useChineseContentTexts } from "@/features/content-language-display/chinese-content-display-context";
 import { RealmInfoCard } from "@/features/realms/components/realm-info-card";
 import { realmHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
@@ -37,12 +39,28 @@ export function PostRealmContextSelector({
 	readonly value?: string;
 }) {
 	const { t } = useTranslation(["posts", "ui"]);
-	const options = realms.map((realm) => {
-		const name = realmName(realm, t.ui.unnamed);
+	const sourceTexts = useMemo(
+		() =>
+			realms.flatMap((realm) => [
+				{
+					value: realmName(realm, t.ui.unnamed),
+					language: realm.title ? realm.language : undefined,
+				},
+				{
+					value: realm.summary ?? "",
+					language: realm.summary ? realm.language : undefined,
+				},
+			]),
+		[realms, t.ui.unnamed],
+	);
+	const displayedTexts = useChineseContentTexts(sourceTexts);
+	const options = realms.map((realm, index) => {
+		const name = displayedTexts[index * 2] ?? realmName(realm, t.ui.unnamed);
+		const summary = displayedTexts[index * 2 + 1];
 		return {
 			value: realm.id,
 			label: name,
-			...(realm.summary ? { description: realm.summary } : {}),
+			...(summary ? { description: summary } : {}),
 			icon: (
 				<IdentityAvatar
 					avatar={realm.avatar}
@@ -117,6 +135,7 @@ export function PostRealmContextCard({ realm }: { readonly realm: PostRealmConte
 							id: realm.id,
 							name,
 							initials: realmInitials(name),
+							...(realm.title ? { language: realm.language } : {}),
 							avatar: realm.avatar,
 							...(realm.slugAddress ? { slug: realm.slugAddress.slug } : {}),
 							...(realm.summary ? { summary: realm.summary } : {}),

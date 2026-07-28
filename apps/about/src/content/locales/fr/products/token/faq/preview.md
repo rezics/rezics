@@ -1,0 +1,1 @@
+L’agent ne doit pas recevoir le jeton dans la conversation. Il peut préparer un espace de travail dédié et un fichier `.env` vide ; l’utilisateur saisit ensuite la valeur localement. L’agent doit l’utiliser par l’intermédiaire de l’environnement du processus, sans le lire, l’afficher, le journaliser ni le valider dans le dépôt.

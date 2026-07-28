@@ -1,0 +1,112 @@
+import { insert } from "native-i18n";
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+
+const { forms: metadataTerms } = zhHansTerminology.metadata;
+
+export default {
+	title: "收藏集",
+	favorites: "我的收藏",
+	newCollection: "创建收藏集",
+	createDescription: "创建一个可整理、呈现与分享内容的收藏集。",
+	editCollection: "管理收藏集",
+	deleteCollection: "删除收藏集",
+	deleteCollectionPrompt: "删除后将无法恢复这个收藏集及其编排。",
+	emptyCollections: "还没有收藏集。",
+	emptyCollectionTitle: "这个收藏集当前是空的",
+	emptyCollectionBody: "加入内容后，这里会使用与动态消息相同的内容卡片呈现。",
+	contentLabel: "收藏集内容",
+	itemCount: insert("{{count}} 个项目", { count: Number }),
+	directCollectionHint: "收藏集只会加入为一个项目，不会递归导入其中的内容。",
+	save: {
+		action: "收藏",
+		title: "收藏到收藏集",
+		directDescription: "选择「我的收藏」或任一自定义收藏集。",
+		reviewDescription: "加入自定义收藏集时，评论会放在被评论对象之下。",
+		favoritesDescription: "快速保存，不创建父子编排。",
+		searchLabel: "查找收藏集",
+		searchPlaceholder: "输入收藏集名称",
+		noMatches: "找不到符合的收藏集。",
+		noCollections: "尚未创建可加入内容的收藏集。",
+		createLabel: "添加收藏集",
+		createPlaceholder: "收藏集名称",
+		createAndSave: "创建并收藏",
+		manage: "管理收藏集",
+		saved: "已收藏",
+		notSaved: "尚未收藏",
+	},
+	workspace: {
+		title: "收藏集管理",
+		description: `管理内容、${metadataTerms.label}、内容结构、呈现方式、访问权与版本记录。`,
+		navigation: "收藏集管理导航",
+		overview: "收藏集管理项目",
+		backToCollection: "返回收藏集",
+		backToContent: "返回内容",
+		sections: {
+			content: {
+				label: "内容",
+				description: "编辑各内容语言的标题、摘要与封面。",
+			},
+			metadata: {
+				label: metadataTerms.label,
+				description: `设置状态与可见性${metadataTerms.inline}，或删除收藏集。`,
+			},
+			items: {
+				label: "内容与结构",
+				description: "添加、移除、排序内容，并设置父子关系与精选状态。",
+			},
+			presentation: {
+				label: "呈现方式",
+				description: "选择内容布局与排序规则。",
+			},
+			access: {
+				label: "访问权",
+				description: "管理授权对象、权限与限制。",
+			},
+			history: {
+				label: "版本记录",
+				description: "查看、比较与还原收藏集版本。",
+			},
+		},
+	},
+	items: {
+		add: "添加内容",
+		target: "内容",
+		role: "角色",
+		parent: "父项目",
+		topLevel: "最上层",
+		item: "一般项目",
+		featured: "精选项目",
+		remove: "移除",
+		moveEarlier: "往前移",
+		moveLater: "往后移",
+		saveStructure: "更新结构",
+		empty: "这个收藏集还没有可管理的内容。",
+	},
+	presentation: {
+		layout: "布局",
+		order: "排序",
+		save: "保存呈现方式",
+		layouts: {
+			flat: "单栏动态",
+			nested: "父子分组",
+			shelf: "卡片书架",
+		},
+		orders: {
+			manual: "手动排序",
+			name: "依名称",
+			"added-at": "依加入时间",
+		},
+	},
+	form: {
+		language: "内容语言",
+		title: "标题",
+		summary: "摘要",
+		cover: "封面",
+		status: "状态",
+		visibility: "可见性",
+		save: "保存变更",
+	},
+	cancel: "取消",
+	delete: "删除",
+	close: "关闭",
+} satisfies typeof import("../zh-Hant/collections").default;

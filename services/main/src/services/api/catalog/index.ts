@@ -348,9 +348,12 @@ export default new Elysia()
 						.limit(1);
 					const entityEntry = entry;
 					const ownerSummary = owner?.profileId
-						? ((await getPublicUnitSummariesByIds([owner.profileId])).get(
-								owner.profileId,
-							) ?? null)
+						? ((
+								await getPublicUnitSummariesByIds(
+									[owner.profileId],
+									localizationLanguages,
+								)
+							).get(owner.profileId) ?? null)
 						: null;
 					const [canEdit, accessDecision, creditDecision, subjectDecision] =
 						await Promise.all([

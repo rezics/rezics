@@ -11,6 +11,7 @@ import { PublicationLicenseIds } from "@rezics/license";
 
 import {
 	AiDisclosureValues,
+	ChineseContentDisplayValues,
 	ContentLanguageValues,
 	ContentRatingValues,
 	StoredUiLocaleValues,
@@ -24,11 +25,14 @@ FormatRegistry.Set("fractional-position", isFractionalPosition);
 FormatRegistry.Set("single-emoji-grapheme", isSingleEmojiGrapheme);
 
 /** A content-language group accepted by authoring, discovery, and storage. */
-export const ContentLanguage = t.Union([
-	t.Literal(ContentLanguageValues[0]),
-	t.Literal(ContentLanguageValues[1]),
-]);
+export const ContentLanguage = t.UnionEnum(ContentLanguageValues, { default: undefined });
 export type ContentLanguage = Static<typeof ContentLanguage>;
+
+/** A persisted preference controlling presentation-only Chinese script conversion. */
+export const ChineseContentDisplay = t.UnionEnum(ChineseContentDisplayValues, {
+	default: undefined,
+});
+export type ChineseContentDisplay = Static<typeof ChineseContentDisplay>;
 
 /** A persisted content-visibility rating accepted and returned by the public API. */
 export const ContentRating = t.UnionEnum(ContentRatingValues, { default: undefined });
@@ -51,11 +55,8 @@ export const LocalizationLanguageQuery = {
 	localizationLanguages: t.Optional(LocalizationLanguagePriority),
 };
 
-/** A lowercase UI locale value persisted in profile preferences. */
-export const StoredUiLocale = t.Union([
-	t.Literal(StoredUiLocaleValues[0]),
-	t.Literal(StoredUiLocaleValues[1]),
-]);
+/** A canonical BCP 47 UI locale value persisted in profile preferences. */
+export const StoredUiLocale = t.UnionEnum(StoredUiLocaleValues, { default: undefined });
 export type StoredUiLocale = Static<typeof StoredUiLocale>;
 
 /** A persisted Unit discriminator accepted and returned by the public API. */

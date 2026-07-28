@@ -1,0 +1,1 @@
+Privileged selecciona un perfil de límites independiente, validado y configurable en la base de datos, con topes máximos más altos. No omite las comprobaciones de permisos. Cada asignación es específica de un token, está limitada en el tiempo y versionada, y se registra junto con el actor y el motivo.

@@ -15,18 +15,21 @@ import {
 	CarouselContent,
 	CarouselItem,
 	cn,
-	PortableTextContent,
 	Skeleton,
 	useCarousel,
 	useIsMobile,
 } from "@rezics/ui";
 import { readPortableText } from "@/lib/block";
+import type { ContentLanguage } from "@rezics/i18n";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 
 export interface RealmPinnedContentItem {
 	readonly id: string;
 	readonly body?: Parameters<typeof readPortableText>[0];
 	readonly href?: string;
 	readonly imageUrl?: string | null;
+	readonly language?: ContentLanguage | null;
 	readonly summary?: string | null;
 	readonly title?: string | null;
 }
@@ -241,19 +244,24 @@ function RealmPinnedItemCard({
 						<img alt="" loading="lazy" src={item.imageUrl} />
 					</CardMedia>
 					<CardContent className="min-h-0 px-4 py-3">
-						<h3 className="line-clamp-2 font-semibold text-sm leading-5">{title}</h3>
+						<h3 className="line-clamp-2 font-semibold text-sm leading-5">
+							<LocalizedText language={item.language} value={title} />
+						</h3>
 					</CardContent>
 				</>
 			) : (
 				<CardContent className="min-h-0 p-4">
-					<h3 className="line-clamp-2 font-semibold leading-5">{title}</h3>
+					<h3 className="line-clamp-2 font-semibold leading-5">
+						<LocalizedText language={item.language} value={title} />
+					</h3>
 					{item.summary ? (
 						<p className="mt-2 line-clamp-4 text-muted-foreground text-sm leading-5">
-							{item.summary}
+							<LocalizedText language={item.language} value={item.summary} />
 						</p>
 					) : item.body ? (
-						<PortableTextContent
+						<LocalizedPortableTextContent
 							className="mt-2 line-clamp-4 text-muted-foreground leading-5"
+							language={item.language}
 							value={readPortableText(item.body)}
 							variant="preview"
 						/>

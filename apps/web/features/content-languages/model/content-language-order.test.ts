@@ -11,7 +11,7 @@ describe("content language order", () => {
 		expect(parseContentLanguageOrder(["zh", "en"])).toEqual(["zh", "en"]);
 		expect(parseContentLanguageOrder([])).toBeUndefined();
 		expect(parseContentLanguageOrder(["zh", "zh"])).toBeUndefined();
-		expect(parseContentLanguageOrder(["ja"])).toBeUndefined();
+		expect(parseContentLanguageOrder(["pt"])).toBeUndefined();
 	});
 
 	it("moves a language without losing the order invariant", () => {

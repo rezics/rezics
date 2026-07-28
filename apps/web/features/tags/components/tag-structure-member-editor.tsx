@@ -64,6 +64,7 @@ export function TagStructureMemberEditor({
 							fallback={t.tags.structures.memberFallback}
 							members={members.map((member) => ({
 								tagId: member.id,
+								language: null,
 								title: member.label,
 							}))}
 						/>

@@ -1,6 +1,6 @@
 "use client";
 
-import { isUiLocale, type UiLocale } from "@rezics/i18n";
+import { isUiLocale, UiLocaleValues, type UiLocale } from "@rezics/i18n";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
 import {
@@ -126,7 +126,7 @@ function useUserMenuModel({
 
 	return {
 		canAccessConsole,
-		currentLocaleLabel: locale === "zh-Hant" ? t.locale.zh : t.locale.en,
+		currentLocaleLabel: t.locale.uiLocales[locale],
 		currentThemeLabel: t.locale.displayModes[themePreference],
 		initial,
 		locale,
@@ -234,20 +234,16 @@ function DesktopUserMenu({
 							}}
 							value={locale}
 						>
-							<MenuRadioItem
-								closeOnSelect={false}
-								disabled={localeChangePending}
-								value="zh-Hant"
-							>
-								{t.locale.zh}
-							</MenuRadioItem>
-							<MenuRadioItem
-								closeOnSelect={false}
-								disabled={localeChangePending}
-								value="en"
-							>
-								{t.locale.en}
-							</MenuRadioItem>
+							{UiLocaleValues.map((value) => (
+								<MenuRadioItem
+									closeOnSelect={false}
+									disabled={localeChangePending}
+									key={value}
+									value={value}
+								>
+									{t.locale.uiLocales[value]}
+								</MenuRadioItem>
+							))}
 						</MenuRadioGroup>
 					</MenuSubContent>
 				</MenuSub>
@@ -494,20 +490,16 @@ function MobileUserMenu(model: UserMenuModel) {
 							value={locale}
 						>
 							<RadioGroupLabel className="sr-only">{t.locale.label}</RadioGroupLabel>
-							<RadioGroupItem
-								className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
-								disabled={localeChangePending}
-								value="zh-Hant"
-							>
-								{t.locale.zh}
-							</RadioGroupItem>
-							<RadioGroupItem
-								className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
-								disabled={localeChangePending}
-								value="en"
-							>
-								{t.locale.en}
-							</RadioGroupItem>
+							{UiLocaleValues.map((value) => (
+								<RadioGroupItem
+									className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+									disabled={localeChangePending}
+									key={value}
+									value={value}
+								>
+									{t.locale.uiLocales[value]}
+								</RadioGroupItem>
+							))}
 						</RadioGroup>
 					) : null}
 				</SheetBody>

@@ -11,12 +11,14 @@ import { tagSearchHref } from "../routing/tag-links";
 
 export function TagSelectionToolbar({
 	identities,
+	labels,
 	selectedTagIds,
 	type,
 	onClear,
 	onFinish,
 }: {
 	readonly identities: ReadonlyMap<string, TagIdentity>;
+	readonly labels: ReadonlyMap<string, string>;
 	readonly selectedTagIds: readonly string[];
 	readonly type: CatalogDetailUnitType;
 	readonly onClear: () => void;
@@ -43,7 +45,7 @@ export function TagSelectionToolbar({
 								type,
 								selected.map((identity) => ({
 									tagId: identity.tagId,
-									label: identity.title ?? t.tags.unnamedTag,
+									label: labels.get(identity.tagId) ?? t.tags.unnamedTag,
 								})),
 							)}
 						>

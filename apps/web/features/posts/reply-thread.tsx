@@ -26,7 +26,6 @@ import {
 	cn,
 	FieldGroup,
 	IdentityAvatar,
-	PortableTextContent,
 	Skeleton,
 	Spinner,
 	ThreadBranch,
@@ -45,6 +44,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
 import {
 	buildReplyPostTree,
@@ -410,7 +410,8 @@ function ReplyPostNode({
 							</form>
 						) : (
 							<div className="prose prose-sm mt-2 max-w-none">
-								<PortableTextContent
+								<LocalizedPortableTextContent
+									language={reply.language}
 									value={readPortableText(reply.body)}
 									variant="compact"
 								/>

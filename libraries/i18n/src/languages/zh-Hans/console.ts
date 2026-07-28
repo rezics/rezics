@@ -1,0 +1,101 @@
+import { insert } from "native-i18n";
+
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
+const { forms: realmTerms } = zhHansTerminology.realm;
+
+export default {
+	title: "管理主控台",
+	description: "依平台权限开放管理功能；这里不代表任何用户身份或工作关系。",
+	backToApplication: "返回应用程序",
+	navigation: "管理主控台导航",
+	overview: "所有管理功能",
+	cancel: "取消",
+	sections: {
+		access: {
+			label: "平台访问权",
+			description: "查看或管理用户获得的平台级权限，以及每笔授权的期限与来源。",
+		},
+		audit: {
+			label: "安全审计",
+			description: `查看平台、${realmTerms.label}与条目的高影响管理事件及安全决策。`,
+		},
+	},
+	access: {
+		searchTitle: "查找用户",
+		searchLabel: "名称或登录电子邮件",
+		searchPlaceholder: "输入名称或电子邮件",
+		search: "搜索",
+		searchResults: "搜索结果",
+		activeProfiles: "当前拥有平台权限的用户",
+		noProfiles: "当前没有有效的平台权限授权。",
+		noSearchResults: "找不到符合条件的用户。",
+		selectProfile: "请选择一位用户，以查看其平台权限。",
+		capabilityCount: insert("{{count}} 项权限", { count: Number }),
+		capability: "权限",
+		expiry: "有效期限",
+		expiryFor: insert("「{{capability}}」的有效期限", { capability: String }),
+		noExpiry: "无期限",
+		provenance: "授权来源",
+		grantProvenance: insert("由 {{profileId}} 于 {{date}} 授予", {
+			profileId: String,
+			date: String,
+		}),
+		notGranted: "未直接授予",
+		readOnly: "你可以查看平台权限，但没有变更权限。",
+		grantAll: "授予全部权限",
+		clearAll: "清除全部权限",
+		save: "保存平台权限",
+		revokeAllTitle: "撤销这位用户的全部平台权限？",
+		revokeAllDescription:
+			"这项变更会撤销每一笔有效授权。若因此移除最后一位无期限的平台访问权管理者，服务器会拒绝变更。",
+		confirmRevokeAll: "确认全部撤销",
+	},
+	audit: {
+		category: "事件类别",
+		allCategories: "所有类别",
+		categories: {
+			admin_activity: "管理活动",
+			policy_denied: "政策拒绝",
+			system_event: "系统事件",
+		},
+		outcome: "结果",
+		allOutcomes: "所有结果",
+		outcomes: {
+			succeeded: "成功",
+			denied: "已拒绝",
+			failed: "失败",
+		},
+		time: "时间",
+		action: "动作",
+		actor: "运行者",
+		authority: "权限范围",
+		authorities: {
+			platform: "平台",
+			realm: realmTerms.label,
+			unit: "条目",
+		},
+		empty: "没有符合当前筛选条件的审计事件。",
+		previousPage: "上一页",
+		nextPage: "下一页",
+		selectEvent: "请选择一笔事件，以查看完整审计内容。",
+		detailsTitle: "事件内容",
+		systemActor: "系统",
+		credential: "凭证类型",
+		credentialId: `凭证 ${verbatimTerms.id.value}`,
+		credentials: {
+			session: "交互式会话",
+			api_token: `${verbatimTerms.api.value} 令牌`,
+			bootstrap: "系统初始化",
+			system: "系统进程",
+		},
+		scopedAuthority: insert("{{kind}}（{{id}}）", { kind: String, id: String }),
+		target: "目标",
+		noTarget: "没有特定目标",
+		reasonCode: "原因代码",
+		requestId: `请求 ${verbatimTerms.id.value}`,
+		traceId: `分布式追查 ${verbatimTerms.id.value}`,
+		rawDetails: "结构化内容",
+	},
+} satisfies typeof import("../zh-Hant/console").default;

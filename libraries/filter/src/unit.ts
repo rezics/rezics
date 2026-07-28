@@ -115,7 +115,7 @@ export const FilterRealmUnitStatusValues = ["pending", "visible", "hidden", "rem
 export type FilterRealmUnitStatus = (typeof FilterRealmUnitStatusValues)[number];
 export const FilterRealmUnitStatus = stringEnum(FilterRealmUnitStatusValues);
 
-export const FilterContentLanguageValues = ["zh", "en"] as const;
+export const FilterContentLanguageValues = ["zh", "en", "ja", "ko", "de", "fr", "es"] as const;
 export type FilterContentLanguage = (typeof FilterContentLanguageValues)[number];
 export const FilterContentLanguage = stringEnum(FilterContentLanguageValues);
 

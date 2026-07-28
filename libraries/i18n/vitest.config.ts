@@ -8,7 +8,7 @@ export default defineProject({
 	test: {
 		name: "i18n",
 		environment: "node",
-		include: ["scripts/**/*.test.mjs"],
+		include: ["scripts/**/*.test.mjs", "src/**/*.test.ts"],
 		globals: false,
 		restoreMocks: true,
 		expect: { requireAssertions: true },

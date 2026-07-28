@@ -45,10 +45,13 @@
 						"properties": {
 							"in": {
 								"minItems": 1,
-								"maxItems": 2,
+								"maxItems": 7,
 								"uniqueItems": true,
 								"type": "array",
-								"items": { "type": "string", "enum": ["zh", "en"] }
+								"items": {
+									"type": "string",
+									"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+								}
 							}
 						}
 					}
@@ -2237,13 +2240,18 @@
 												"properties": {
 													"in": {
 														"minItems": 1,
-														"maxItems": 2,
+														"maxItems": 7,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
 															"anyOf": [
 																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+																{ "const": "en", "type": "string" },
+																{ "const": "ja", "type": "string" },
+																{ "const": "ko", "type": "string" },
+																{ "const": "de", "type": "string" },
+																{ "const": "fr", "type": "string" },
+																{ "const": "es", "type": "string" }
 															]
 														}
 													}
@@ -2290,13 +2298,18 @@
 												"properties": {
 													"in": {
 														"minItems": 1,
-														"maxItems": 2,
+														"maxItems": 7,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
 															"anyOf": [
 																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+																{ "const": "en", "type": "string" },
+																{ "const": "ja", "type": "string" },
+																{ "const": "ko", "type": "string" },
+																{ "const": "de", "type": "string" },
+																{ "const": "fr", "type": "string" },
+																{ "const": "es", "type": "string" }
 															]
 														}
 													}
@@ -13262,15 +13275,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -13326,6 +13339,7 @@
 																			"required": [
 																				"id",
 																				"kind",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -13358,6 +13372,18 @@
 																						"poll",
 																						"realm",
 																						"realm_rule"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"slugAddress": {
@@ -13544,6 +13570,7 @@
 																	"type": "object",
 																	"required": [
 																		"id",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -13553,6 +13580,18 @@
 																		"id": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
 																		},
 																		"slugAddress": {
 																			"nullable": true,
@@ -14282,6 +14321,7 @@
 																							"required": [
 																								"id",
 																								"kind",
+																								"language",
 																								"slugAddress",
 																								"title",
 																								"summary",
@@ -14314,6 +14354,18 @@
 																										"poll",
 																										"realm",
 																										"realm_rule"
+																									]
+																								},
+																								"language": {
+																									"type": "string",
+																									"enum": [
+																										"zh",
+																										"en",
+																										"ja",
+																										"ko",
+																										"de",
+																										"fr",
+																										"es"
 																									]
 																								},
 																								"slugAddress": {
@@ -14509,6 +14561,7 @@
 																		"required": [
 																			"id",
 																			"type",
+																			"language",
 																			"title",
 																			"summary",
 																			"cover",
@@ -14521,6 +14574,18 @@
 																			},
 																			"type": {
 																				"type": "string"
+																			},
+																			"language": {
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
+																				]
 																			},
 																			"title": {
 																				"nullable": true,
@@ -14759,15 +14824,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -14823,6 +14888,7 @@
 																			"required": [
 																				"id",
 																				"kind",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -14855,6 +14921,18 @@
 																						"poll",
 																						"realm",
 																						"realm_rule"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"slugAddress": {
@@ -15041,6 +15119,7 @@
 																	"type": "object",
 																	"required": [
 																		"id",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -15050,6 +15129,18 @@
 																		"id": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
 																		},
 																		"slugAddress": {
 																			"nullable": true,
@@ -15779,6 +15870,7 @@
 																							"required": [
 																								"id",
 																								"kind",
+																								"language",
 																								"slugAddress",
 																								"title",
 																								"summary",
@@ -15811,6 +15903,18 @@
 																										"poll",
 																										"realm",
 																										"realm_rule"
+																									]
+																								},
+																								"language": {
+																									"type": "string",
+																									"enum": [
+																										"zh",
+																										"en",
+																										"ja",
+																										"ko",
+																										"de",
+																										"fr",
+																										"es"
 																									]
 																								},
 																								"slugAddress": {
@@ -16006,6 +16110,7 @@
 																		"required": [
 																			"id",
 																			"type",
+																			"language",
 																			"title",
 																			"summary",
 																			"cover",
@@ -16018,6 +16123,18 @@
 																			},
 																			"type": {
 																				"type": "string"
+																			},
+																			"language": {
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
+																				]
 																			},
 																			"title": {
 																				"nullable": true,
@@ -21743,10 +21860,13 @@
 									},
 									"localizationLanguages": {
 										"minItems": 1,
-										"maxItems": 2,
+										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
-										"items": { "type": "string", "enum": ["zh", "en"] }
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -21799,15 +21919,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -21863,6 +21983,7 @@
 																			"required": [
 																				"id",
 																				"kind",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -21895,6 +22016,18 @@
 																						"poll",
 																						"realm",
 																						"realm_rule"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"slugAddress": {
@@ -22081,6 +22214,7 @@
 																	"type": "object",
 																	"required": [
 																		"id",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -22090,6 +22224,18 @@
 																		"id": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
 																		},
 																		"slugAddress": {
 																			"nullable": true,
@@ -22820,15 +22966,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -22884,6 +23030,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -22916,6 +23063,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -23102,6 +23261,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -23111,6 +23271,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -23858,6 +24030,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -23890,6 +24063,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -24085,6 +24270,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -24097,6 +24283,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -24335,15 +24533,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -24399,6 +24597,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -24431,6 +24630,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -24617,6 +24828,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -24626,6 +24838,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -25373,6 +25597,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -25405,6 +25630,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -25600,6 +25837,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -25612,6 +25850,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -25973,7 +26223,15 @@
 															},
 															"language": {
 																"type": "string",
-																"enum": ["zh", "en"]
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
 															},
 															"content": {
 																"additionalProperties": false,
@@ -26305,15 +26563,15 @@
 																		"type": "string"
 																	},
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"content": {
@@ -26683,7 +26941,10 @@
 										"type": "string",
 										"enum": ["report", "bug", "feature", "other"]
 									},
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"content": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",
@@ -26954,7 +27215,15 @@
 												"postId": { "format": "uuid", "type": "string" },
 												"language": {
 													"type": "string",
-													"enum": ["zh", "en"]
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
+													]
 												},
 												"content": {
 													"additionalProperties": false,
@@ -27271,9 +27540,15 @@
 															"type": "string"
 														},
 														"language": {
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"content": {
@@ -30675,7 +30950,10 @@
 											"type": "string",
 											"enum": ["evidence", "internal_note", "public_notice"]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"content": {
 											"additionalProperties": false,
 											"$id": "PortableTextDocument",
@@ -30989,7 +31267,10 @@
 								"type": "object",
 								"required": ["language", "content", "baseRevisionId"],
 								"properties": {
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"content": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",
@@ -31260,7 +31541,10 @@
 											"type": "string",
 											"enum": ["evidence", "internal_note", "public_notice"]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"content": {
 											"additionalProperties": false,
 											"$id": "PortableTextDocument",
@@ -31810,7 +32094,15 @@
 																},
 																"language": {
 																	"type": "string",
-																	"enum": ["zh", "en"]
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
 																},
 																"content": {
 																	"additionalProperties": false,
@@ -32272,7 +32564,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"content": {
 														"additionalProperties": false,
@@ -32692,7 +32992,10 @@
 										"type": "object",
 										"required": ["language", "content"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"content": {
 												"additionalProperties": false,
 												"$id": "PortableTextDocument",
@@ -33045,7 +33348,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"content": {
 														"additionalProperties": false,
@@ -33475,9 +33786,15 @@
 															]
 														},
 														"language": {
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"content": {
@@ -33834,9 +34151,15 @@
 															]
 														},
 														"language": {
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"content": {
@@ -34173,9 +34496,15 @@
 															]
 														},
 														"language": {
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"content": {
@@ -34859,7 +35188,10 @@
 										"type": "object",
 										"required": ["language", "content"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"content": {
 												"additionalProperties": false,
 												"$id": "PortableTextDocument",
@@ -35177,7 +35509,15 @@
 												},
 												"language": {
 													"type": "string",
-													"enum": ["zh", "en"]
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
+													]
 												},
 												"content": {
 													"additionalProperties": false,
@@ -35667,7 +36007,15 @@
 												},
 												"language": {
 													"type": "string",
-													"enum": ["zh", "en"]
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
+													]
 												},
 												"content": {
 													"additionalProperties": false,
@@ -36522,7 +36870,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -37005,10 +37356,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -37103,15 +37457,15 @@
 																		]
 																	},
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": {
@@ -37504,10 +37858,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -37578,9 +37935,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -37717,7 +38080,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -37973,7 +38344,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -38423,9 +38797,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -38562,7 +38942,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -38908,10 +39296,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -39009,9 +39400,15 @@
 													"nullable": true,
 													"anyOf": [
 														{
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														{ "type": "null" }
@@ -39156,7 +39553,15 @@
 														"properties": {
 															"language": {
 																"type": "string",
-																"enum": ["zh", "en"]
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
 															},
 															"title": {
 																"nullable": true,
@@ -39435,9 +39840,15 @@
 															]
 														},
 														"language": {
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"title": { "type": "string" },
@@ -39453,15 +39864,15 @@
 																],
 																"properties": {
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"title": { "type": "string" },
@@ -39592,15 +40003,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -39793,15 +40204,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -40136,7 +40547,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"localizations": {
@@ -40152,7 +40571,15 @@
 															"properties": {
 																"language": {
 																	"type": "string",
-																	"enum": ["zh", "en"]
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
 																},
 																"title": { "type": "string" },
 																"document": {
@@ -40294,7 +40721,10 @@
 										"type": "object",
 										"required": ["language", "title", "document"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -40390,7 +40820,10 @@
 												{ "type": "null" }
 											]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"title": { "type": "string" },
 										"localizations": {
 											"type": "array",
@@ -40405,7 +40838,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"document": {
@@ -40697,7 +41138,10 @@
 												{ "type": "null" }
 											]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"title": { "type": "string" },
 										"localizations": {
 											"type": "array",
@@ -40712,7 +41156,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"document": {
@@ -40827,7 +41279,10 @@
 										"type": "object",
 										"required": ["language", "title", "document"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -40923,7 +41378,10 @@
 												{ "type": "null" }
 											]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"title": { "type": "string" },
 										"localizations": {
 											"type": "array",
@@ -40938,7 +41396,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"document": {
@@ -41419,7 +41885,10 @@
 												{ "type": "null" }
 											]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"title": { "type": "string" },
 										"localizations": {
 											"type": "array",
@@ -41434,7 +41903,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"document": {
@@ -42992,7 +43469,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -45509,10 +45989,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -45583,9 +46066,15 @@
 												"status": { "type": "string" },
 												"visibility": { "type": "string" },
 												"language": {
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												"name": {
@@ -46145,7 +46634,10 @@
 								"required": ["updatedAt", "language"],
 								"properties": {
 									"updatedAt": { "format": "date-time", "type": "string" },
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
 									"avatar": {
 										"nullable": true,
@@ -46538,7 +47030,10 @@
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"name": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -47155,10 +47650,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -47275,7 +47773,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -47646,6 +48152,7 @@
 									"required": [
 										"profileId",
 										"interfaceLocale",
+										"chineseContentDisplay",
 										"defaultLicense",
 										"defaultRealmManageMode",
 										"defaultScoreContextUnitId",
@@ -47659,7 +48166,20 @@
 										"profileId": { "format": "uuid", "type": "string" },
 										"interfaceLocale": {
 											"type": "string",
-											"enum": ["en", "zh-hant"]
+											"enum": [
+												"en",
+												"zh-Hant",
+												"zh-Hans",
+												"ja",
+												"ko",
+												"de",
+												"fr",
+												"es"
+											]
+										},
+										"chineseContentDisplay": {
+											"type": "string",
+											"enum": ["original", "hant", "hans"]
 										},
 										"defaultLicense": {
 											"nullable": true,
@@ -47719,7 +48239,10 @@
 										},
 										"preferredLanguages": {
 											"type": "array",
-											"items": { "type": "string", "enum": ["zh", "en"] }
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										}
 									}
 								}
@@ -47800,7 +48323,7 @@
 				"x-rezics-policy-operation-id": "getApiUsersMePreferences"
 			},
 			"patch": {
-				"summary": "Update current user interface locale",
+				"summary": "Update current user display preferences",
 				"tags": ["Users"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"requestBody": {
@@ -47808,12 +48331,25 @@
 						"application/json": {
 							"schema": {
 								"additionalProperties": false,
+								"minProperties": 1,
 								"type": "object",
-								"required": ["interfaceLocale"],
 								"properties": {
 									"interfaceLocale": {
 										"type": "string",
-										"enum": ["en", "zh-hant"]
+										"enum": [
+											"en",
+											"zh-Hant",
+											"zh-Hans",
+											"ja",
+											"ko",
+											"de",
+											"fr",
+											"es"
+										]
+									},
+									"chineseContentDisplay": {
+										"type": "string",
+										"enum": ["original", "hant", "hans"]
 									}
 								}
 							}
@@ -47831,6 +48367,7 @@
 									"required": [
 										"profileId",
 										"interfaceLocale",
+										"chineseContentDisplay",
 										"defaultLicense",
 										"defaultRealmManageMode",
 										"defaultScoreContextUnitId",
@@ -47844,7 +48381,20 @@
 										"profileId": { "format": "uuid", "type": "string" },
 										"interfaceLocale": {
 											"type": "string",
-											"enum": ["en", "zh-hant"]
+											"enum": [
+												"en",
+												"zh-Hant",
+												"zh-Hans",
+												"ja",
+												"ko",
+												"de",
+												"fr",
+												"es"
+											]
+										},
+										"chineseContentDisplay": {
+											"type": "string",
+											"enum": ["original", "hant", "hans"]
 										},
 										"defaultLicense": {
 											"nullable": true,
@@ -47904,7 +48454,10 @@
 										},
 										"preferredLanguages": {
 											"type": "array",
-											"items": { "type": "string", "enum": ["zh", "en"] }
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										}
 									}
 								}
@@ -48012,6 +48565,7 @@
 								"type": "object",
 								"required": [
 									"interfaceLocale",
+									"chineseContentDisplay",
 									"defaultLicense",
 									"defaultRealmManageMode",
 									"defaultScoreContextUnitId",
@@ -48024,7 +48578,20 @@
 								"properties": {
 									"interfaceLocale": {
 										"type": "string",
-										"enum": ["en", "zh-hant"]
+										"enum": [
+											"en",
+											"zh-Hant",
+											"zh-Hans",
+											"ja",
+											"ko",
+											"de",
+											"fr",
+											"es"
+										]
+									},
+									"chineseContentDisplay": {
+										"type": "string",
+										"enum": ["original", "hant", "hans"]
 									},
 									"defaultLicense": {
 										"nullable": true,
@@ -48090,10 +48657,13 @@
 									},
 									"preferredLanguages": {
 										"minItems": 1,
-										"maxItems": 2,
+										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
-										"items": { "type": "string", "enum": ["zh", "en"] }
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -48111,6 +48681,7 @@
 									"required": [
 										"profileId",
 										"interfaceLocale",
+										"chineseContentDisplay",
 										"defaultLicense",
 										"defaultRealmManageMode",
 										"defaultScoreContextUnitId",
@@ -48124,7 +48695,20 @@
 										"profileId": { "format": "uuid", "type": "string" },
 										"interfaceLocale": {
 											"type": "string",
-											"enum": ["en", "zh-hant"]
+											"enum": [
+												"en",
+												"zh-Hant",
+												"zh-Hans",
+												"ja",
+												"ko",
+												"de",
+												"fr",
+												"es"
+											]
+										},
+										"chineseContentDisplay": {
+											"type": "string",
+											"enum": ["original", "hant", "hans"]
 										},
 										"defaultLicense": {
 											"nullable": true,
@@ -48184,7 +48768,10 @@
 										},
 										"preferredLanguages": {
 											"type": "array",
-											"items": { "type": "string", "enum": ["zh", "en"] }
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										}
 									}
 								}
@@ -48375,10 +48962,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -48495,15 +49085,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -49247,10 +49837,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -49317,7 +49910,10 @@
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"name": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -50847,10 +51443,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -50902,9 +51501,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -50937,15 +51542,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -51007,15 +51612,15 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{
-																			"anyOf": [
-																				{
-																					"const": "zh",
-																					"type": "string"
-																				},
-																				{
-																					"const": "en",
-																					"type": "string"
-																				}
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		{ "type": "null" }
@@ -51407,10 +52012,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -51503,15 +52111,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -51694,10 +52302,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -51813,15 +52424,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -52413,10 +53024,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -52612,15 +53226,15 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{
-																			"anyOf": [
-																				{
-																					"const": "zh",
-																					"type": "string"
-																				},
-																				{
-																					"const": "en",
-																					"type": "string"
-																				}
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		{ "type": "null" }
@@ -52677,15 +53291,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -52790,15 +53404,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -52859,15 +53473,15 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{
-																			"anyOf": [
-																				{
-																					"const": "zh",
-																					"type": "string"
-																				},
-																				{
-																					"const": "en",
-																					"type": "string"
-																				}
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		{ "type": "null" }
@@ -52971,15 +53585,15 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{
-																			"anyOf": [
-																				{
-																					"const": "zh",
-																					"type": "string"
-																				},
-																				{
-																					"const": "en",
-																					"type": "string"
-																				}
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		{ "type": "null" }
@@ -53912,10 +54526,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -53951,15 +54568,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -54075,10 +54692,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -54124,9 +54744,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -56674,10 +57300,13 @@
 									"properties": {
 										"languages": {
 											"minItems": 1,
-											"maxItems": 2,
+											"maxItems": 7,
 											"uniqueItems": true,
 											"type": "array",
-											"items": { "type": "string", "enum": ["zh", "en"] }
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										}
 									}
 								}
@@ -56753,17 +57382,23 @@
 								"properties": {
 									"expectedLanguages": {
 										"minItems": 1,
-										"maxItems": 2,
+										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
-										"items": { "type": "string", "enum": ["zh", "en"] }
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									},
 									"languages": {
 										"minItems": 1,
-										"maxItems": 2,
+										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
-										"items": { "type": "string", "enum": ["zh", "en"] }
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -56782,10 +57417,13 @@
 									"properties": {
 										"languages": {
 											"minItems": 1,
-											"maxItems": 2,
+											"maxItems": 7,
 											"uniqueItems": true,
 											"type": "array",
-											"items": { "type": "string", "enum": ["zh", "en"] }
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										}
 									}
 								}
@@ -56984,7 +57622,10 @@
 						"name": "language",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"type": "string",
+							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+						}
 					}
 				],
 				"requestBody": {
@@ -56997,10 +57638,13 @@
 								"properties": {
 									"expectedLanguages": {
 										"minItems": 1,
-										"maxItems": 2,
+										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
-										"items": { "type": "string", "enum": ["zh", "en"] }
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									}
 								}
 							}
@@ -57019,10 +57663,13 @@
 									"properties": {
 										"languages": {
 											"minItems": 1,
-											"maxItems": 2,
+											"maxItems": 7,
 											"uniqueItems": true,
 											"type": "array",
-											"items": { "type": "string", "enum": ["zh", "en"] }
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										}
 									}
 								}
@@ -57239,10 +57886,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -57297,7 +57947,15 @@
 													"id": { "format": "uuid", "type": "string" },
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"contentRating": { "type": "string" },
 													"publishedAt": {
@@ -57382,6 +58040,7 @@
 																	"required": [
 																		"id",
 																		"kind",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -57414,6 +58073,18 @@
 																				"poll",
 																				"realm",
 																				"realm_rule"
+																			]
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		"slugAddress": {
@@ -57793,7 +58464,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -58238,9 +58912,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -58320,6 +59000,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -58354,6 +59035,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -58636,15 +59329,15 @@
 																],
 																"properties": {
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"chapterCount": {
@@ -58981,7 +59674,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"position": {
 														"format": "fractional-position",
@@ -60137,10 +60838,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -60191,9 +60895,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -60273,6 +60983,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -60307,6 +61018,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -60589,15 +61312,15 @@
 																],
 																"properties": {
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"chapterCount": {
@@ -60934,7 +61657,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"position": {
 														"format": "fractional-position",
@@ -62213,9 +62944,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -62295,6 +63032,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -62329,6 +63067,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -62611,15 +63361,15 @@
 																],
 																"properties": {
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"chapterCount": {
@@ -62956,7 +63706,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"position": {
 														"format": "fractional-position",
@@ -64374,9 +65132,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -64456,6 +65220,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -64490,6 +65255,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -64772,15 +65549,15 @@
 																],
 																"properties": {
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"chapterCount": {
@@ -65117,7 +65894,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"position": {
 														"format": "fractional-position",
@@ -66354,9 +67139,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -66436,6 +67227,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -66470,6 +67262,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -66752,15 +67556,15 @@
 																],
 																"properties": {
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"chapterCount": {
@@ -67097,7 +67901,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"position": {
 														"format": "fractional-position",
@@ -68286,7 +69098,10 @@
 						"name": "language",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"type": "string",
+							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+						}
 					}
 				],
 				"requestBody": {
@@ -68680,9 +69495,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -68762,6 +69583,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -68796,6 +69618,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -69078,15 +69912,15 @@
 																],
 																"properties": {
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"chapterCount": {
@@ -69423,7 +70257,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"position": {
 														"format": "fractional-position",
@@ -70991,15 +71833,15 @@
 																		"type": "string"
 																	},
 																	"language": {
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	"model": { "type": "string" },
@@ -72319,10 +73161,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -72370,7 +73215,15 @@
 													"verified": { "type": "boolean" },
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"avatar": {
 														"nullable": true,
@@ -72565,7 +73418,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -73048,10 +73904,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -73086,9 +73945,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -73236,7 +74101,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"position": {
 														"format": "fractional-position",
@@ -73690,6 +74563,7 @@
 													"required": [
 														"id",
 														"kind",
+														"language",
 														"slugAddress",
 														"title",
 														"summary",
@@ -73722,6 +74596,18 @@
 																"poll",
 																"realm",
 																"realm_rule"
+															]
+														},
+														"language": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"slugAddress": {
@@ -74131,7 +75017,10 @@
 						"name": "language",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"type": "string",
+							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+						}
 					}
 				],
 				"requestBody": {
@@ -74619,10 +75508,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -74658,7 +75550,15 @@
 													"id": { "format": "uuid", "type": "string" },
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -74720,7 +75620,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -75390,7 +76293,10 @@
 								"required": ["term"],
 								"properties": {
 									"term": { "minLength": 1, "maxLength": 500, "type": "string" },
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"kind": {
 										"type": "string",
 										"enum": [
@@ -76249,6 +77155,7 @@
 											"required": [
 												"id",
 												"kind",
+												"language",
 												"slugAddress",
 												"title",
 												"summary",
@@ -76278,6 +77185,18 @@
 														"poll",
 														"realm",
 														"realm_rule"
+													]
+												},
+												"language": {
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												"slugAddress": {
@@ -79788,9 +80707,15 @@
 												"properties": {
 													"kind": { "const": "label", "type": "string" },
 													"language": {
-														"anyOf": [
-															{ "const": "zh", "type": "string" },
-															{ "const": "en", "type": "string" }
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
 														]
 													},
 													"title": {
@@ -80846,10 +81771,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -80909,7 +81837,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"position": {
@@ -81131,9 +82067,15 @@
 															"type": "string"
 														},
 														"language": {
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"contentKind": {
@@ -81192,9 +82134,15 @@
 															"type": "string"
 														},
 														"language": {
-															"anyOf": [
-																{ "const": "zh", "type": "string" },
-																{ "const": "en", "type": "string" }
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
 															]
 														},
 														"contentKind": {
@@ -81548,7 +82496,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"position": {
@@ -81789,17 +82745,23 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
 						"name": "language",
 						"in": "query",
 						"required": false,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"type": "string",
+							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+						}
 					}
 				],
 				"responses": {
@@ -81835,10 +82797,16 @@
 											"maxLength": 512,
 											"type": "string"
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"availableLanguages": {
 											"type": "array",
-											"items": { "type": "string", "enum": ["zh", "en"] }
+											"items": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											}
 										},
 										"content": {
 											"nullable": true,
@@ -82238,7 +83206,10 @@
 						"name": "language",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["zh", "en"] }
+						"schema": {
+							"type": "string",
+							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+						}
 					}
 				],
 				"requestBody": {
@@ -82669,10 +83640,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -82776,7 +83750,15 @@
 													"type": { "type": "string" },
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -83903,10 +84885,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -83975,7 +84960,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"itemCount": {
 														"anyOf": [
@@ -84072,7 +85065,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -85910,7 +86906,10 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -87394,7 +88393,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -87679,10 +88686,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -87714,7 +88724,10 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -89198,7 +90211,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -89477,10 +90498,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -89598,15 +90622,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -89662,6 +90686,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -89694,6 +90719,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -89880,6 +90917,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -89889,6 +90927,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -90639,15 +91689,15 @@
 																				"nullable": true,
 																				"anyOf": [
 																					{
-																						"anyOf": [
-																							{
-																								"const": "zh",
-																								"type": "string"
-																							},
-																							{
-																								"const": "en",
-																								"type": "string"
-																							}
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
 																						]
 																					},
 																					{
@@ -90705,6 +91755,7 @@
 																							"required": [
 																								"id",
 																								"kind",
+																								"language",
 																								"slugAddress",
 																								"title",
 																								"summary",
@@ -90737,6 +91788,18 @@
 																										"poll",
 																										"realm",
 																										"realm_rule"
+																									]
+																								},
+																								"language": {
+																									"type": "string",
+																									"enum": [
+																										"zh",
+																										"en",
+																										"ja",
+																										"ko",
+																										"de",
+																										"fr",
+																										"es"
 																									]
 																								},
 																								"slugAddress": {
@@ -90925,6 +91988,7 @@
 																					"type": "object",
 																					"required": [
 																						"id",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -90934,6 +91998,18 @@
 																						"id": {
 																							"format": "uuid",
 																							"type": "string"
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
+																							]
 																						},
 																						"slugAddress": {
 																							"nullable": true,
@@ -91711,6 +92787,7 @@
 																											"required": [
 																												"id",
 																												"kind",
+																												"language",
 																												"slugAddress",
 																												"title",
 																												"summary",
@@ -91743,6 +92820,18 @@
 																														"poll",
 																														"realm",
 																														"realm_rule"
+																													]
+																												},
+																												"language": {
+																													"type": "string",
+																													"enum": [
+																														"zh",
+																														"en",
+																														"ja",
+																														"ko",
+																														"de",
+																														"fr",
+																														"es"
 																													]
 																												},
 																												"slugAddress": {
@@ -91940,6 +93029,7 @@
 																						"required": [
 																							"id",
 																							"type",
+																							"language",
 																							"title",
 																							"summary",
 																							"cover",
@@ -91952,6 +93042,18 @@
 																							},
 																							"type": {
 																								"type": "string"
+																							},
+																							"language": {
+																								"type": "string",
+																								"enum": [
+																									"zh",
+																									"en",
+																									"ja",
+																									"ko",
+																									"de",
+																									"fr",
+																									"es"
+																								]
 																							},
 																							"title": {
 																								"nullable": true,
@@ -92192,15 +93294,15 @@
 																				"nullable": true,
 																				"anyOf": [
 																					{
-																						"anyOf": [
-																							{
-																								"const": "zh",
-																								"type": "string"
-																							},
-																							{
-																								"const": "en",
-																								"type": "string"
-																							}
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
 																						]
 																					},
 																					{
@@ -92258,6 +93360,7 @@
 																							"required": [
 																								"id",
 																								"kind",
+																								"language",
 																								"slugAddress",
 																								"title",
 																								"summary",
@@ -92290,6 +93393,18 @@
 																										"poll",
 																										"realm",
 																										"realm_rule"
+																									]
+																								},
+																								"language": {
+																									"type": "string",
+																									"enum": [
+																										"zh",
+																										"en",
+																										"ja",
+																										"ko",
+																										"de",
+																										"fr",
+																										"es"
 																									]
 																								},
 																								"slugAddress": {
@@ -92478,6 +93593,7 @@
 																					"type": "object",
 																					"required": [
 																						"id",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -92487,6 +93603,18 @@
 																						"id": {
 																							"format": "uuid",
 																							"type": "string"
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
+																							]
 																						},
 																						"slugAddress": {
 																							"nullable": true,
@@ -93264,6 +94392,7 @@
 																											"required": [
 																												"id",
 																												"kind",
+																												"language",
 																												"slugAddress",
 																												"title",
 																												"summary",
@@ -93296,6 +94425,18 @@
 																														"poll",
 																														"realm",
 																														"realm_rule"
+																													]
+																												},
+																												"language": {
+																													"type": "string",
+																													"enum": [
+																														"zh",
+																														"en",
+																														"ja",
+																														"ko",
+																														"de",
+																														"fr",
+																														"es"
 																													]
 																												},
 																												"slugAddress": {
@@ -93493,6 +94634,7 @@
 																						"required": [
 																							"id",
 																							"type",
+																							"language",
 																							"title",
 																							"summary",
 																							"cover",
@@ -93505,6 +94647,18 @@
 																							},
 																							"type": {
 																								"type": "string"
+																							},
+																							"language": {
+																								"type": "string",
+																								"enum": [
+																									"zh",
+																									"en",
+																									"ja",
+																									"ko",
+																									"de",
+																									"fr",
+																									"es"
+																								]
 																							},
 																							"title": {
 																								"nullable": true,
@@ -93843,10 +94997,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -93878,7 +95035,10 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -95362,7 +96522,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -95623,7 +96791,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -97457,7 +98628,10 @@
 										"id": { "format": "uuid", "type": "string" },
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"source": {
 											"type": "string",
 											"enum": ["manual", "search", "system"]
@@ -98941,7 +100115,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -100523,7 +101705,10 @@
 							"maxItems": 50,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -100532,10 +101717,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -100653,15 +101841,15 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"anyOf": [
-																	{
-																		"const": "zh",
-																		"type": "string"
-																	},
-																	{
-																		"const": "en",
-																		"type": "string"
-																	}
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															{ "type": "null" }
@@ -100717,6 +101905,7 @@
 																	"required": [
 																		"id",
 																		"kind",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -100749,6 +101938,18 @@
 																				"poll",
 																				"realm",
 																				"realm_rule"
+																			]
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		"slugAddress": {
@@ -100924,6 +102125,7 @@
 															"type": "object",
 															"required": [
 																"id",
+																"language",
 																"slugAddress",
 																"title",
 																"summary",
@@ -100933,6 +102135,18 @@
 																"id": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"language": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
 																},
 																"slugAddress": {
 																	"nullable": true,
@@ -101640,6 +102854,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -101672,6 +102887,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -101865,6 +103092,7 @@
 																"required": [
 																	"id",
 																	"type",
+																	"language",
 																	"title",
 																	"summary",
 																	"cover",
@@ -101876,6 +103104,18 @@
 																		"type": "string"
 																	},
 																	"type": { "type": "string" },
+																	"language": {
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
+																		]
+																	},
 																	"title": {
 																		"nullable": true,
 																		"anyOf": [
@@ -102211,7 +103451,10 @@
 											}
 										}
 									},
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"summary": { "maxLength": 2000, "type": "string" },
 									"body": {
@@ -102662,10 +103905,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -102742,6 +103988,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -102774,6 +104021,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -102948,7 +104207,10 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"body": {
 											"nullable": true,
 											"anyOf": [
@@ -103231,6 +104493,7 @@
 													"required": [
 														"id",
 														"type",
+														"language",
 														"title",
 														"summary",
 														"cover"
@@ -103241,6 +104504,18 @@
 															"type": "string"
 														},
 														"type": { "type": "string" },
+														"language": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														},
 														"title": {
 															"nullable": true,
 															"anyOf": [
@@ -103396,7 +104671,10 @@
 								"type": "object",
 								"required": ["language", "title", "body"],
 								"properties": {
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"summary": { "maxLength": 2000, "type": "string" },
 									"body": {
@@ -104275,10 +105553,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -104989,7 +106270,10 @@
 										"maxLength": 500,
 										"type": "string"
 									},
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"options": {
 										"minItems": 2,
 										"maxItems": 50,
@@ -105199,10 +106483,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -105228,7 +106515,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"question": { "type": "string" },
 										"voteMode": { "type": "string" },
 										"anonymous": { "type": "boolean" },
@@ -106317,10 +107607,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -106375,7 +107668,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"attributions": {
 														"type": "array",
@@ -106427,6 +107728,7 @@
 																	"required": [
 																		"id",
 																		"kind",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -106459,6 +107761,18 @@
 																				"poll",
 																				"realm",
 																				"realm_rule"
+																			]
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		"slugAddress": {
@@ -107223,7 +108537,10 @@
 											}
 										}
 									},
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"realmId": { "format": "uuid", "type": "string" },
 									"subjectId": { "format": "uuid", "type": "string" }
 								}
@@ -107418,10 +108735,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -107501,6 +108821,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -107533,6 +108854,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -107729,7 +109062,10 @@
 												{ "type": "integer" }
 											]
 										},
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"title": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -107990,6 +109326,7 @@
 													"required": [
 														"id",
 														"type",
+														"language",
 														"title",
 														"summary",
 														"cover"
@@ -108000,6 +109337,18 @@
 															"type": "string"
 														},
 														"type": { "type": "string" },
+														"language": {
+															"type": "string",
+															"enum": [
+																"zh",
+																"en",
+																"ja",
+																"ko",
+																"de",
+																"fr",
+																"es"
+															]
+														},
 														"title": {
 															"nullable": true,
 															"anyOf": [
@@ -108159,7 +109508,10 @@
 								"type": "object",
 								"required": ["language", "title", "body", "baseRevisionId"],
 								"properties": {
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"body": {
 										"additionalProperties": false,
@@ -108720,10 +110072,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -108785,7 +110140,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"attributions": {
 														"type": "array",
@@ -108837,6 +110200,7 @@
 																	"required": [
 																		"id",
 																		"kind",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -108869,6 +110233,18 @@
 																				"poll",
 																				"realm",
 																				"realm_rule"
+																			]
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
 																			]
 																		},
 																		"slugAddress": {
@@ -109461,7 +110837,10 @@
 								"properties": {
 									"parentPostId": { "format": "uuid", "type": "string" },
 									"realmId": { "format": "uuid", "type": "string" },
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"body": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",
@@ -109727,7 +111106,10 @@
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"postKind": { "const": "reply", "type": "string" },
-										"language": { "type": "string", "enum": ["zh", "en"] },
+										"language": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										},
 										"attributions": {
 											"type": "array",
 											"items": {
@@ -109775,6 +111157,7 @@
 														"required": [
 															"id",
 															"kind",
+															"language",
 															"slugAddress",
 															"title",
 															"summary",
@@ -109807,6 +111190,18 @@
 																	"poll",
 																	"realm",
 																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
 																]
 															},
 															"slugAddress": {
@@ -110430,7 +111825,10 @@
 								"type": "object",
 								"required": ["language", "body", "baseRevisionId"],
 								"properties": {
-									"language": { "type": "string", "enum": ["zh", "en"] },
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
 									"body": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",
@@ -110974,10 +112372,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -111076,7 +112477,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -111277,7 +112686,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -112049,10 +113461,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -112126,9 +113541,15 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "zh", "type": "string" },
-														{ "const": "en", "type": "string" }
+													"type": "string",
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
 													]
 												},
 												{ "type": "null" }
@@ -112279,7 +113700,15 @@
 												"properties": {
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -112554,7 +113983,10 @@
 										"type": "object",
 										"required": ["language", "title"],
 										"properties": {
-											"language": { "type": "string", "enum": ["zh", "en"] },
+											"language": {
+												"type": "string",
+												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+											},
 											"title": {
 												"minLength": 1,
 												"maxLength": 500,
@@ -113641,10 +115073,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -113692,7 +115127,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -114205,7 +115648,15 @@
 											"properties": {
 												"language": {
 													"type": "string",
-													"enum": ["zh", "en"]
+													"enum": [
+														"zh",
+														"en",
+														"ja",
+														"ko",
+														"de",
+														"fr",
+														"es"
+													]
 												},
 												"title": {
 													"minLength": 1,
@@ -114617,10 +116068,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					}
 				],
@@ -114696,7 +116150,15 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": { "type": "string" },
 													"content": {
@@ -115170,7 +116632,10 @@
 								"type": "object",
 								"required": ["language"],
 								"properties": {
-									"language": { "type": "string", "enum": ["zh", "en"] }
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									}
 								}
 							}
 						}
@@ -115277,15 +116742,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -115341,6 +116806,7 @@
 																			"required": [
 																				"id",
 																				"kind",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -115373,6 +116839,18 @@
 																						"poll",
 																						"realm",
 																						"realm_rule"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"slugAddress": {
@@ -115559,6 +117037,7 @@
 																	"type": "object",
 																	"required": [
 																		"id",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -115568,6 +117047,18 @@
 																		"id": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
 																		},
 																		"slugAddress": {
 																			"nullable": true,
@@ -116298,15 +117789,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -116362,6 +117853,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -116394,6 +117886,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -116580,6 +118084,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -116589,6 +118094,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -117336,6 +118853,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -117368,6 +118886,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -117563,6 +119093,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -117575,6 +119106,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -117813,15 +119356,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -117877,6 +119420,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -117909,6 +119453,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -118095,6 +119651,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -118104,6 +119661,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -118851,6 +120420,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -118883,6 +120453,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -119078,6 +120660,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -119090,6 +120673,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -120543,10 +122138,13 @@
 						"required": false,
 						"schema": {
 							"minItems": 1,
-							"maxItems": 2,
+							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
-							"items": { "type": "string", "enum": ["zh", "en"] }
+							"items": {
+								"type": "string",
+								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+							}
 						}
 					},
 					{
@@ -120608,7 +122206,15 @@
 													"unitKind": { "type": "string" },
 													"language": {
 														"type": "string",
-														"enum": ["zh", "en"]
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
 													},
 													"title": {
 														"nullable": true,
@@ -120950,7 +122556,15 @@
 																},
 																"language": {
 																	"type": "string",
-																	"enum": ["zh", "en"]
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
 																},
 																"content": {
 																	"additionalProperties": false,
@@ -121406,9 +123020,15 @@
 														]
 													},
 													"language": {
-														"anyOf": [
-															{ "const": "zh", "type": "string" },
-															{ "const": "en", "type": "string" }
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
 														]
 													},
 													"content": {
@@ -121732,9 +123352,15 @@
 														]
 													},
 													"language": {
-														"anyOf": [
-															{ "const": "zh", "type": "string" },
-															{ "const": "en", "type": "string" }
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
 														]
 													},
 													"content": {
@@ -129328,15 +130954,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -129392,6 +131018,7 @@
 																			"required": [
 																				"id",
 																				"kind",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -129424,6 +131051,18 @@
 																						"poll",
 																						"realm",
 																						"realm_rule"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"slugAddress": {
@@ -129610,6 +131249,7 @@
 																	"type": "object",
 																	"required": [
 																		"id",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -129619,6 +131259,18 @@
 																		"id": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
 																		},
 																		"slugAddress": {
 																			"nullable": true,
@@ -130349,15 +132001,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -130413,6 +132065,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -130445,6 +132098,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -130631,6 +132296,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -130640,6 +132306,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -131387,6 +133065,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -131419,6 +133098,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -131614,6 +133305,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -131626,6 +133318,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -131864,15 +133568,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -131928,6 +133632,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -131960,6 +133665,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -132146,6 +133863,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -132155,6 +133873,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -132902,6 +134632,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -132934,6 +134665,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -133129,6 +134872,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -133141,6 +134885,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -139844,15 +141600,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -139908,6 +141664,7 @@
 																			"required": [
 																				"id",
 																				"kind",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -139940,6 +141697,18 @@
 																						"poll",
 																						"realm",
 																						"realm_rule"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"slugAddress": {
@@ -140126,6 +141895,7 @@
 																	"type": "object",
 																	"required": [
 																		"id",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -140135,6 +141905,18 @@
 																		"id": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
 																		},
 																		"slugAddress": {
 																			"nullable": true,
@@ -140865,15 +142647,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -140929,6 +142711,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -140961,6 +142744,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -141147,6 +142942,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -141156,6 +142952,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -141903,6 +143711,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -141935,6 +143744,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -142130,6 +143951,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -142142,6 +143964,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -142380,15 +144214,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -142444,6 +144278,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -142476,6 +144311,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -142662,6 +144509,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -142671,6 +144519,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -143418,6 +145278,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -143450,6 +145311,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -143645,6 +145518,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -143657,6 +145531,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -153732,15 +155618,15 @@
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"anyOf": [
-																			{
-																				"const": "zh",
-																				"type": "string"
-																			},
-																			{
-																				"const": "en",
-																				"type": "string"
-																			}
+																		"type": "string",
+																		"enum": [
+																			"zh",
+																			"en",
+																			"ja",
+																			"ko",
+																			"de",
+																			"fr",
+																			"es"
 																		]
 																	},
 																	{ "type": "null" }
@@ -153796,6 +155682,7 @@
 																			"required": [
 																				"id",
 																				"kind",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -153828,6 +155715,18 @@
 																						"poll",
 																						"realm",
 																						"realm_rule"
+																					]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
 																					]
 																				},
 																				"slugAddress": {
@@ -154014,6 +155913,7 @@
 																	"type": "object",
 																	"required": [
 																		"id",
+																		"language",
 																		"slugAddress",
 																		"title",
 																		"summary",
@@ -154023,6 +155923,18 @@
 																		"id": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"language": {
+																			"type": "string",
+																			"enum": [
+																				"zh",
+																				"en",
+																				"ja",
+																				"ko",
+																				"de",
+																				"fr",
+																				"es"
+																			]
 																		},
 																		"slugAddress": {
 																			"nullable": true,
@@ -154753,15 +156665,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -154817,6 +156729,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -154849,6 +156762,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -155035,6 +156960,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -155044,6 +156970,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -155791,6 +157729,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -155823,6 +157762,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -156018,6 +157969,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -156030,6 +157982,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -156268,15 +158232,15 @@
 																		"nullable": true,
 																		"anyOf": [
 																			{
-																				"anyOf": [
-																					{
-																						"const": "zh",
-																						"type": "string"
-																					},
-																					{
-																						"const": "en",
-																						"type": "string"
-																					}
+																				"type": "string",
+																				"enum": [
+																					"zh",
+																					"en",
+																					"ja",
+																					"ko",
+																					"de",
+																					"fr",
+																					"es"
 																				]
 																			},
 																			{ "type": "null" }
@@ -156332,6 +158296,7 @@
 																					"required": [
 																						"id",
 																						"kind",
+																						"language",
 																						"slugAddress",
 																						"title",
 																						"summary",
@@ -156364,6 +158329,18 @@
 																								"poll",
 																								"realm",
 																								"realm_rule"
+																							]
+																						},
+																						"language": {
+																							"type": "string",
+																							"enum": [
+																								"zh",
+																								"en",
+																								"ja",
+																								"ko",
+																								"de",
+																								"fr",
+																								"es"
 																							]
 																						},
 																						"slugAddress": {
@@ -156550,6 +158527,7 @@
 																			"type": "object",
 																			"required": [
 																				"id",
+																				"language",
 																				"slugAddress",
 																				"title",
 																				"summary",
@@ -156559,6 +158537,18 @@
 																				"id": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": [
+																						"zh",
+																						"en",
+																						"ja",
+																						"ko",
+																						"de",
+																						"fr",
+																						"es"
+																					]
 																				},
 																				"slugAddress": {
 																					"nullable": true,
@@ -157306,6 +159296,7 @@
 																									"required": [
 																										"id",
 																										"kind",
+																										"language",
 																										"slugAddress",
 																										"title",
 																										"summary",
@@ -157338,6 +159329,18 @@
 																												"poll",
 																												"realm",
 																												"realm_rule"
+																											]
+																										},
+																										"language": {
+																											"type": "string",
+																											"enum": [
+																												"zh",
+																												"en",
+																												"ja",
+																												"ko",
+																												"de",
+																												"fr",
+																												"es"
 																											]
 																										},
 																										"slugAddress": {
@@ -157533,6 +159536,7 @@
 																				"required": [
 																					"id",
 																					"type",
+																					"language",
 																					"title",
 																					"summary",
 																					"cover",
@@ -157545,6 +159549,18 @@
 																					},
 																					"type": {
 																						"type": "string"
+																					},
+																					"language": {
+																						"type": "string",
+																						"enum": [
+																							"zh",
+																							"en",
+																							"ja",
+																							"ko",
+																							"de",
+																							"fr",
+																							"es"
+																						]
 																					},
 																					"title": {
 																						"nullable": true,
@@ -157998,7 +160014,10 @@
 									"Languages": {
 										"maxItems": 50,
 										"type": "array",
-										"items": { "type": "string", "enum": ["zh", "en"] }
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									},
 									"limitPerIndex": {
 										"minimum": 1,
@@ -163248,7 +165267,10 @@
 									"Languages": {
 										"maxItems": 50,
 										"type": "array",
-										"items": { "type": "string", "enum": ["zh", "en"] }
+										"items": {
+											"type": "string",
+											"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+										}
 									},
 									"kinds": {
 										"maxItems": 50,

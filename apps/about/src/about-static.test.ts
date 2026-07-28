@@ -70,14 +70,16 @@ async function listRelativeFiles(root: string, current = root): Promise<string[]
 
 describe("locale handling", () => {
 	test("keeps the six public locales stable", () => {
-		expect(ABOUT_LOCALES).toEqual(["zh-hant", "zh-hans", "en", "ja", "de", "ko"]);
+		expect(ABOUT_LOCALES).toEqual(["zh-hant", "zh-hans", "en", "ja", "de", "ko", "fr", "es"]);
 	});
 
 	test("matches regional language tags and weighted preferences", () => {
 		expect(matchAboutLocale("zh-TW")).toBe("zh-hant");
 		expect(matchAboutLocale("zh-CN")).toBe("zh-hans");
 		expect(matchAboutLocale("de-DE")).toBe("de");
-		expect(matchAboutLocale("fr-FR")).toBeUndefined();
+		expect(matchAboutLocale("fr-FR")).toBe("fr");
+		expect(matchAboutLocale("es-MX")).toBe("es");
+		expect(matchAboutLocale("pt-BR")).toBeUndefined();
 		expect(negotiateAboutLocale("en;q=0.7, ja-JP;q=0.9")).toBe("ja");
 		expect(negotiateAboutLocale(null)).toBe("zh-hant");
 	});

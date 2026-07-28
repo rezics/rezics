@@ -126,6 +126,7 @@ const excerpt = {
 	subject: {
 		id: "019f9872-bd49-7bb4-a6b7-ec621fca2034",
 		type: "book",
+		language: "en",
 		title: "Glorious Exploits",
 		summary: "A novel.",
 		cover: null,

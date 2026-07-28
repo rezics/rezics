@@ -20,6 +20,7 @@ export function presentStructureMembers(structure: TagStructure): readonly TagPr
 		itemKey: `structure:${structure.structureId}:${member.tagId}`,
 		identity: {
 			tagId: member.tagId,
+			language: member.language,
 			title: member.title,
 			summary: member.summary,
 		},
@@ -48,7 +49,7 @@ export function TagStructureList({
 	readonly onClearTagVote: (item: TagPresentation) => void;
 	readonly onStructureVote: (structureId: string, value: -1 | 1) => void;
 	readonly onTagVote: (item: TagPresentation, value: -1 | 1) => void;
-	readonly onToggleSelected: (tagId: string) => void;
+	readonly onToggleSelected: (tagId: string, label: string) => void;
 	readonly selectedTagIds: ReadonlySet<string>;
 	readonly selectionMode: boolean;
 	readonly structures: readonly TagStructure[];
@@ -78,9 +79,9 @@ export function TagStructureList({
 										/>
 									) : null}
 									<TagBadgeCard
+										fallbackLabel={t.tags.unnamedTag}
 										isPending={false}
 										item={item}
-										label={item.identity.title ?? t.tags.unnamedTag}
 										onClearVote={onClearTagVote}
 										onToggleSelected={onToggleSelected}
 										onVote={onTagVote}

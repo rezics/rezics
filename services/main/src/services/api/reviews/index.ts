@@ -505,7 +505,7 @@ export default new Elysia()
 						accessDecision,
 						canManageScores,
 					] = await Promise.all([
-						getAttributionSummariesByUnitIds([review.id]),
+						getAttributionSummariesByUnitIds([review.id], localizationLanguages),
 						selectPostScores(review.id).then((items) =>
 							items.map(({ scoreId, contextUnitId, value }) => ({
 								scoreId,

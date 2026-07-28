@@ -12517,7 +12517,7 @@ export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Update current user interface locale
+ * @summary Update current user display preferences
  * {@link /api/users/me/preferences}
  */
 export function usePatchApiUsersMePreferences<TContext>(

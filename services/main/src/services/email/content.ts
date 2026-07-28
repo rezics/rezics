@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { renderActionEmail, renderNotificationEmail, type RenderedEmail } from "@rezics/email";
-import { toUiLocale, type UiLocale } from "@rezics/i18n";
+import { toDeliveryLocale, toUiLocale, type DeliveryLocale } from "@rezics/i18n";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import { database } from "../database";
@@ -40,7 +40,7 @@ function createFrame(
 
 async function renderAuthenticationIntent(
 	item: ClaimedEmail,
-	locale: UiLocale,
+	locale: DeliveryLocale,
 	actionUrl: string,
 	recipientEmail: string,
 ): Promise<RenderedMailMessage> {
@@ -73,7 +73,7 @@ async function renderNotificationIntent(item: ClaimedEmail): Promise<RenderedMai
 		.limit(1);
 	if (!row)
 		throw new InvalidEmailIntent("Notification email intent has no deliverable recipient");
-	const locale = toUiLocale(row.interfaceLocale ?? DefaultStoredUiLocale);
+	const locale = toDeliveryLocale(toUiLocale(row.interfaceLocale ?? DefaultStoredUiLocale));
 	const { t } = await getTranslation(["emails", "notifications"], [locale]);
 	const copy = t.notifications[notificationTranslationKey(row.kind, row.payload)];
 	const rendered = await renderNotificationEmail({
@@ -97,7 +97,7 @@ export function renderClaimedEmail(item: ClaimedEmail): Promise<RenderedMailMess
 				);
 			return renderAuthenticationIntent(
 				item,
-				toUiLocale(item.locale),
+				item.locale,
 				item.actionUrl,
 				item.recipientEmail,
 			);

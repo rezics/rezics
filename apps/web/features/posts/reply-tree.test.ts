@@ -20,6 +20,7 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 					avatar: null,
 					id: "019b1234-1234-7000-8000-000000000001",
 					kind: "profile",
+					language: "en",
 					slugAddress: null,
 					title: "Publisher",
 					summary: null,

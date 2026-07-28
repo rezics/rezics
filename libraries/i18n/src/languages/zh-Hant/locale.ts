@@ -1,7 +1,31 @@
 export default {
 	label: "語言",
-	zh: "繁體中文",
-	en: "英文",
+	uiLocales: {
+		en: "English",
+		"zh-Hant": "繁體中文",
+		"zh-Hans": "简体中文",
+		ja: "日本語",
+		ko: "한국어",
+		de: "Deutsch",
+		fr: "Français",
+		es: "Español",
+	},
+	contentLanguages: {
+		zh: "中文",
+		en: "英文",
+		ja: "日文",
+		ko: "韓文",
+		de: "德文",
+		fr: "法文",
+		es: "西班牙文",
+	},
+	chineseContentDisplay: {
+		label: "中文內容顯示",
+		hint: "只改變中文內容的顯示方式，不會修改作者原文。",
+		original: "保留作者原文",
+		hant: "顯示為繁體中文",
+		hans: "顯示為簡體中文",
+	},
 	displayMode: "顯示模式",
 	displayModes: {
 		system: "自動（依裝置設定）",

@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 
 import { Button } from "@rezics/ui";
+import { isContentLanguage } from "@rezics/i18n";
 import { useTranslation } from "@/i18n/client";
 import { useContentLanguageEditor } from "../hooks/use-content-language-editor";
 
@@ -32,13 +33,13 @@ export function ContentLanguageControl() {
 				aria-label={t.units.contentLanguages.controlLabel}
 				onChange={(event) => {
 					const language = event.currentTarget.value;
-					if (language === "zh" || language === "en") requestLanguage(language);
+					if (isContentLanguage(language)) requestLanguage(language);
 				}}
 				value={selectedLanguage}
 			>
 				{selectorLanguages.map((language) => (
 					<NativeSelectOption key={language} value={language}>
-						{t.locale[language]}
+						{t.locale.contentLanguages[language]}
 						{language === selectedLanguage && selectedLanguageIsPending
 							? ` · ${t.units.contentLanguages.pending}`
 							: ""}

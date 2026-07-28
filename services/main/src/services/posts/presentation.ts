@@ -5,6 +5,7 @@ import { database } from "../database";
 import { unit } from "../database/schema";
 import {
 	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
@@ -18,6 +19,7 @@ export async function getPostSubjectPresentation(
 		.select({
 			id: unit.id,
 			type: unit.kind,
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
 			summary: resolvedUnitLocalizationSummary(unit.id, localizationLanguages),
 			coverAssetId: resolvedUnitLocalizationImageAssetId(
@@ -29,10 +31,11 @@ export async function getPostSubjectPresentation(
 		.from(unit)
 		.where(eq(unit.id, subjectId))
 		.limit(1);
-	if (!subject) return null;
-	const { coverAssetId, ...presentation } = subject;
+	if (!subject?.language) return null;
+	const { coverAssetId, language, ...presentation } = subject;
 	return {
 		...presentation,
+		language,
 		cover: presentImageAsset(coverAssetId, "cover"),
 	};
 }

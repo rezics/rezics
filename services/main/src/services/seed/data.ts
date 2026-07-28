@@ -1,4 +1,14 @@
-import { fakerEN, fakerZH_TW, type Faker } from "@faker-js/faker";
+import {
+	fakerDE,
+	fakerEN,
+	fakerES,
+	fakerFR,
+	fakerJA,
+	fakerKO,
+	fakerZH_TW,
+	type Faker,
+} from "@faker-js/faker";
+import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import type { PortableText } from "@rezics/portable-text";
 
 import type { EnforcementKindValues } from "../database/schema/contract-values";
@@ -95,24 +105,24 @@ export const SeedPlan = {
 	historyRestores: 10,
 } as const;
 
-export const SeedLanguages = ["zh", "en"] as const;
-export type SeedLanguage = (typeof SeedLanguages)[number];
+export const SeedLanguages = ContentLanguageValues;
+export type SeedLanguage = ContentLanguage;
 
 const InitialLanguageCycle: readonly SeedLanguage[] = [
 	"zh",
 	"en",
-	"zh",
-	"en",
-	"en",
-	"zh",
-	"en",
-	"zh",
-	"en",
+	"ja",
+	"ko",
+	"de",
+	"fr",
+	"es",
 	"en",
 	"zh",
-	"en",
-	"zh",
-	"en",
+	"ja",
+	"ko",
+	"de",
+	"fr",
+	"es",
 ];
 
 const LocalizationCountCycle = [
@@ -150,6 +160,11 @@ export function createSeedData(referenceTime: Date): SeedData {
 	const fakerByLanguage = {
 		zh: fakerZH_TW,
 		en: fakerEN,
+		ja: fakerJA,
+		ko: fakerKO,
+		de: fakerDE,
+		fr: fakerFR,
+		es: fakerES,
 	} satisfies Record<SeedLanguage, Faker>;
 	for (const [index, language] of SeedLanguages.entries()) {
 		const languageFaker = fakerByLanguage[language];

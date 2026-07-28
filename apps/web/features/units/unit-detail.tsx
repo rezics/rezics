@@ -10,7 +10,6 @@ import { Card, CardContent } from "@rezics/ui";
 import { Badge } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Cover } from "@rezics/ui";
-import { PortableTextContent } from "@rezics/ui";
 import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
@@ -28,6 +27,8 @@ import { BookContents } from "./components/book-contents";
 import type { UnitType } from "./unit-types";
 import { CatalogSubjectGroups } from "./components/catalog-subject-groups";
 import { canOpenUnitManagement } from "./model/unit-management-section";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 
 const Icons = { book: BookOpen, software: Gamepad2, media: PlaySquare, series: LibraryBig };
 
@@ -61,6 +62,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		"feed",
 		"governance",
 		"licenses",
+		"locale",
 		"posts",
 		"state",
 		"ui",
@@ -162,11 +164,17 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						<Badge variant="outline">{rating}</Badge>
 					</div>
 					<h1 className="font-heading text-2xl font-black tracking-tight sm:text-4xl">
-						{localization?.title ?? t.ui.unnamed}
+						<LocalizedText
+							language={localization?.language}
+							value={localization?.title ?? t.ui.unnamed}
+						/>
 					</h1>
 					{localization?.summary && (
 						<p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-							{localization.summary}
+							<LocalizedText
+								language={localization.language}
+								value={localization.summary}
+							/>
 						</p>
 					)}
 					<div className="flex flex-wrap gap-2">
@@ -237,13 +245,17 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 							<CardContent className="p-6 leading-7 text-muted-foreground">
 								{localization?.description ? (
 									<div className="prose max-w-none">
-										<PortableTextContent
+										<LocalizedPortableTextContent
+											language={localization.language}
 											value={readPortableText(localization.description)}
 											variant="article"
 										/>
 									</div>
 								) : (
-									(localization?.summary ?? t.state.empty)
+									<LocalizedText
+										language={localization?.language}
+										value={localization?.summary ?? t.state.empty}
+									/>
 								)}
 							</CardContent>
 						</Card>
@@ -285,14 +297,20 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 									{item.localizations.map((entry) => (
 										<div key={entry.language} className="grid gap-1">
 											<Badge className="w-fit" variant="outline">
-												{entry.language}
+												{t.locale.contentLanguages[entry.language]}
 											</Badge>
 											<p className="break-words font-medium">
-												{entry.title ?? t.ui.unnamed}
+												<LocalizedText
+													language={entry.language}
+													value={entry.title ?? t.ui.unnamed}
+												/>
 											</p>
 											{entry.summary && (
 												<p className="break-words text-muted-foreground">
-													{entry.summary}
+													<LocalizedText
+														language={entry.language}
+														value={entry.summary}
+													/>
 												</p>
 											)}
 										</div>

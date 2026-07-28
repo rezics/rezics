@@ -16,6 +16,7 @@ import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { FollowButton } from "@/features/following/components/follow-button";
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -129,7 +130,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 
 						<div className="mt-4 min-w-0">
 							<h1 className="font-heading font-black text-2xl tracking-tight text-balance sm:text-4xl">
-								{name}
+								<LocalizedText language={user.language} value={name} />
 							</h1>
 							{user.slugAddress ? (
 								<p className="mt-1 font-mono text-muted-foreground text-sm">
@@ -139,7 +140,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 							) : null}
 							{user.summary ? (
 								<p className="mt-2 max-w-2xl text-muted-foreground text-sm leading-6 sm:text-base">
-									{user.summary}
+									<LocalizedText language={user.language} value={user.summary} />
 								</p>
 							) : null}
 							{joinedDate ? (

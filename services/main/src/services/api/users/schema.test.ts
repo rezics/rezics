@@ -8,7 +8,7 @@ import {
 	PublicProfileQuery,
 	ReplacePreferencesBody,
 	StudioContentListQuery,
-	UpdateInterfaceLocaleBody,
+	UpdateDisplayPreferencesBody,
 	UpdateProfileBody,
 } from "./schema";
 
@@ -85,7 +85,8 @@ describe("profile content language contract", () => {
 			name: "名稱",
 		};
 		expect(Check(UpdateProfileBody, input)).toBe(true);
-		expect(Check(UpdateProfileBody, { ...input, language: "ja" })).toBe(false);
+		expect(Check(UpdateProfileBody, { ...input, language: "ja" })).toBe(true);
+		expect(Check(UpdateProfileBody, { ...input, language: "zh-Hans" })).toBe(false);
 		expect(
 			Check(UpdateProfileBody, {
 				updatedAt: input.updatedAt,
@@ -132,12 +133,16 @@ describe("Studio content list contract", () => {
 });
 
 describe("user preference inputs", () => {
-	it("accepts only a supported interface locale in the partial update", () => {
-		expect(Check(UpdateInterfaceLocaleBody, { interfaceLocale: "en" })).toBe(true);
-		expect(Check(UpdateInterfaceLocaleBody, { interfaceLocale: "zh-hant" })).toBe(true);
-		expect(Check(UpdateInterfaceLocaleBody, { interfaceLocale: "fr" })).toBe(false);
+	it("accepts supported display preferences in partial updates", () => {
+		expect(Check(UpdateDisplayPreferencesBody, { interfaceLocale: "en" })).toBe(true);
+		expect(Check(UpdateDisplayPreferencesBody, { interfaceLocale: "zh-Hant" })).toBe(true);
+		expect(Check(UpdateDisplayPreferencesBody, { interfaceLocale: "zh-Hans" })).toBe(true);
+		expect(Check(UpdateDisplayPreferencesBody, { interfaceLocale: "fr" })).toBe(true);
+		expect(Check(UpdateDisplayPreferencesBody, { chineseContentDisplay: "hans" })).toBe(true);
+		expect(Check(UpdateDisplayPreferencesBody, {})).toBe(false);
+		expect(Check(UpdateDisplayPreferencesBody, { interfaceLocale: "zh-hant" })).toBe(false);
 		expect(
-			Check(UpdateInterfaceLocaleBody, {
+			Check(UpdateDisplayPreferencesBody, {
 				interfaceLocale: "en",
 				preferredLanguages: ["en"],
 			}),
@@ -147,6 +152,7 @@ describe("user preference inputs", () => {
 	it("accepts only registered default publication License IDs", () => {
 		const preferences = {
 			interfaceLocale: "en",
+			chineseContentDisplay: "original",
 			defaultLicense: "cc-by-nc-sa-4.0",
 			defaultRealmManageMode: false,
 			defaultScoreContextUnitId: "019b76da-a800-7300-8000-000000000002",

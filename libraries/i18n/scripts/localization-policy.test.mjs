@@ -18,9 +18,9 @@ const terminology = {
 const terminologyDefinitions = flattenTerminology(terminology);
 const verbatimDefinitions = [{ key: "rezics", value: "REZICS" }];
 
-function checkTypeScript(source) {
+function checkTypeScript(source, path = "libraries/i18n/src/languages/zh-Hant/example.ts") {
 	return checkTypeScriptSource({
-		path: "libraries/i18n/src/languages/zh-Hant/example.ts",
+		path,
 		source,
 		verbatimDefinitions,
 		terminologyDefinitions,
@@ -56,6 +56,32 @@ describe("localization terminology policy", () => {
 		);
 
 		expect(errors).toEqual([]);
+	});
+
+	it("allows only approved autonyms in the uiLocales map", () => {
+		const approved = checkTypeScript(
+			'export default { uiLocales: { en: "English", de: "Deutsch", fr: "Français", es: "Español" } };',
+			"libraries/i18n/src/languages/ja/locale.ts",
+		);
+		const wrongProperty = checkTypeScript(
+			'export default { contentLanguages: { en: "English" } };',
+			"libraries/i18n/src/languages/ja/locale.ts",
+		);
+		const unapprovedValue = checkTypeScript(
+			'export default { uiLocales: { en: "English language" } };',
+			"libraries/i18n/src/languages/ja/locale.ts",
+		);
+
+		expect(approved).toEqual([]);
+		expect(wrongProperty).toEqual([
+			expect.stringContaining('unapproved untranslated token "English"'),
+		]);
+		expect(unapprovedValue).toEqual(
+			expect.arrayContaining([
+				expect.stringContaining('unapproved untranslated token "English"'),
+				expect.stringContaining('unapproved untranslated token "language"'),
+			]),
+		);
 	});
 
 	it("rejects forbidden alternatives", () => {

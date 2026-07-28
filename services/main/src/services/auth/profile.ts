@@ -15,7 +15,6 @@ import {
 	users,
 } from "../database/schema";
 import {
-	DefaultContentLanguage,
 	DefaultContentRatingValues,
 	DefaultPreferredLanguage,
 } from "../database/schema/contract-values";
@@ -75,7 +74,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			});
 			await tx.insert(unitLocalization).values({
 				unitId: profileUnit.id,
-				language: DefaultContentLanguage,
+				language: preferredLanguage,
 				title: authUser.name,
 			});
 			await tx.insert(profilePreference).values({

@@ -1,10 +1,13 @@
+import type { ContentLanguage } from "@rezics/i18n";
 import { Badge } from "@rezics/ui";
 import Link from "next/link";
 
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { tagDetailHref } from "../routing/tag-links";
 
 export interface TagStructurePathMember {
 	readonly tagId: string;
+	readonly language?: ContentLanguage | null;
 	readonly title: string | null;
 }
 
@@ -27,7 +30,13 @@ export function TagStructurePath({
 						</span>
 					) : null}
 					<Link href={tagDetailHref(member.tagId)}>
-						<Badge variant="secondary">{member.title ?? fallback}</Badge>
+						<Badge variant="secondary">
+							{member.title ? (
+								<LocalizedText language={member.language} value={member.title} />
+							) : (
+								fallback
+							)}
+						</Badge>
 					</Link>
 				</li>
 			))}

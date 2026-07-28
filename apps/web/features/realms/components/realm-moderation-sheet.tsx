@@ -29,7 +29,6 @@ import {
 	FieldLabel,
 	NativeSelect,
 	NativeSelectOption,
-	PortableTextContent,
 	Sheet,
 	SheetBody,
 	SheetContent,
@@ -45,6 +44,7 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import {
 	RealmModerationHistoryQuery,
 	refreshRealmModerationData,
@@ -77,7 +77,7 @@ export function RealmModerationSheet({
 	readonly filter: RealmModerationFilter;
 	readonly onOpenChange: (open: boolean) => void;
 }) {
-	const { t, locale } = useTranslation(["posts", "realms"]);
+	const { t, locale } = useTranslation(["locale", "posts", "realms"]);
 	const queryClient = useQueryClient();
 	const mutation = usePatchApiRealmsByRealmIdUnitsByUnitId();
 	const history = useGetApiRealmsByRealmIdUnitsByUnitIdHistory({
@@ -279,7 +279,7 @@ export function RealmModerationSheet({
 											>
 												{ContentLanguageValues.map((value) => (
 													<NativeSelectOption key={value} value={value}>
-														{value}
+														{t.locale.contentLanguages[value]}
 													</NativeSelectOption>
 												))}
 											</NativeSelect>
@@ -375,7 +375,7 @@ export function RealmModerationSheet({
 }
 
 function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryAction }) {
-	const { t, locale } = useTranslation(["realms"]);
+	const { t, locale } = useTranslation(["locale", "realms"]);
 	return (
 		<article className="grid gap-3 rounded-lg border p-4 text-sm">
 			<div className="flex flex-wrap items-start justify-between gap-2">
@@ -424,7 +424,7 @@ function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryActi
 						<span>
 							{t.realms.annotationRoleLanguage({
 								role: t.realms.annotationRoles[note.role],
-								language: note.language,
+								language: t.locale.contentLanguages[note.language],
 							})}
 						</span>
 						<span>
@@ -436,7 +436,11 @@ function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryActi
 							</span>
 						) : null}
 					</div>
-					<PortableTextContent value={readPortableText(note.content)} variant="compact" />
+					<LocalizedPortableTextContent
+						language={note.language}
+						value={readPortableText(note.content)}
+						variant="compact"
+					/>
 				</div>
 			))}
 		</article>

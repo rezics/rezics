@@ -1,4 +1,5 @@
 import { RealmUnitCreatePermissionValues } from "@rezics/access";
+import type { ContentLanguage } from "@rezics/i18n";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, gt, inArray, isNull, lt, max, notInArray, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -1749,7 +1750,7 @@ export default new Elysia({ prefix: "/realms" })
 					postId: string;
 					latestRevisionId: string | null;
 					role: "internal_note" | "public_notice";
-					language: "en" | "zh";
+					language: ContentLanguage;
 					content: ReturnType<typeof toPortableTextResponse>;
 					createdAt: Date;
 					updatedAt: Date;

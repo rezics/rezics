@@ -21,6 +21,7 @@ import Link from "next/link";
 import { useRef, useState, type MouseEvent } from "react";
 
 import { SignInButton } from "@/features/auth/auth-portal";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 import type { TagPresentation } from "../model/tag-presentation";
 import { isModifiedLinkActivation } from "../model/tag-selection";
@@ -29,7 +30,7 @@ import { TagVoteControls } from "./tag-vote-controls";
 
 export function TagBadgeCard({
 	item,
-	label,
+	fallbackLabel,
 	isPending,
 	selected,
 	selectionMode,
@@ -39,12 +40,12 @@ export function TagBadgeCard({
 	type,
 }: {
 	readonly item: TagPresentation;
-	readonly label: string;
+	readonly fallbackLabel: string;
 	readonly isPending: boolean;
 	readonly selected: boolean;
 	readonly selectionMode: boolean;
 	readonly onClearVote: (item: TagPresentation) => void;
-	readonly onToggleSelected: (tagId: string) => void;
+	readonly onToggleSelected: (tagId: string, label: string) => void;
 	readonly onVote: (item: TagPresentation, value: -1 | 1) => void;
 	readonly type: "book" | "media" | "software";
 }) {
@@ -53,6 +54,17 @@ export function TagBadgeCard({
 	const nativeNavigation = useRef(false);
 	const detailHref = tagDetailHref(item.identity.tagId);
 	const score = item.vote.kind === "available" ? item.vote.score : undefined;
+	const label = useChineseContentText(
+		item.identity.title ?? fallbackLabel,
+		item.identity.title ? item.identity.language : null,
+	);
+	const summary = useChineseContentText(item.identity.summary ?? "", item.identity.language);
+	const realmTitle = useChineseContentText(
+		item.context.kind === "realm" ? (item.context.realmTitle ?? t.tags.unnamedRealm) : "",
+		item.context.kind === "realm" && item.context.realmTitle
+			? item.context.realmLanguage
+			: null,
+	);
 
 	const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
 		if (isModifiedLinkActivation(event)) {
@@ -69,7 +81,7 @@ export function TagBadgeCard({
 		item.context.kind === "global"
 			? t.tags.card.globalContext
 			: item.context.kind === "realm"
-				? (item.context.realmTitle ?? t.tags.unnamedRealm)
+				? realmTitle
 				: t.tags.card.structureContext;
 
 	return (
@@ -160,9 +172,9 @@ export function TagBadgeCard({
 						</PopoverClose>
 					</PopoverHeader>
 					<PopoverBody className="grid gap-4">
-						{item.identity.summary ? (
+						{summary ? (
 							<p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-								{item.identity.summary}
+								{summary}
 							</p>
 						) : null}
 						{item.vote.kind === "available" ? (
@@ -250,7 +262,7 @@ export function TagBadgeCard({
 					}
 					aria-pressed={selected}
 					className="me-1 inline-grid size-6 shrink-0 place-items-center rounded-full border border-current/20 bg-background/60 outline-none hover:bg-background focus-visible:ring-2 focus-visible:ring-ring/40"
-					onClick={() => onToggleSelected(item.identity.tagId)}
+					onClick={() => onToggleSelected(item.identity.tagId, label)}
 					type="button"
 				>
 					{selected ? <Check aria-hidden className="size-3.5" /> : null}

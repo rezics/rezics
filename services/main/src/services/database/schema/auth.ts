@@ -1,4 +1,4 @@
-import { defineRelationsPart, sql } from "drizzle-orm";
+import { defineRelationsPart, inArray, sql } from "drizzle-orm";
 import {
 	text,
 	timestamp,
@@ -9,7 +9,7 @@ import {
 	index,
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
-import type { ContentLanguage } from "@rezics/i18n";
+import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { pgTable } from "./base";
 
 export const users = pgTable(
@@ -38,7 +38,7 @@ export const users = pgTable(
 	(table) => [
 		check(
 			"users_registration_content_language_check",
-			sql`${table.registrationContentLanguage} in ('zh', 'en')`,
+			inArray(table.registrationContentLanguage, ContentLanguageValues),
 		),
 	],
 );

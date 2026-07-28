@@ -1,0 +1,35 @@
+export default {
+	label: "语言",
+	uiLocales: {
+		en: "English",
+		"zh-Hant": "繁體中文",
+		"zh-Hans": "简体中文",
+		ja: "日本語",
+		ko: "한국어",
+		de: "Deutsch",
+		fr: "Français",
+		es: "Español",
+	},
+	contentLanguages: {
+		zh: "中文",
+		en: "英文",
+		ja: "日文",
+		ko: "韩文",
+		de: "德文",
+		fr: "法文",
+		es: "西班牙文",
+	},
+	chineseContentDisplay: {
+		label: "中文内容显示",
+		hint: "只改变中文内容的显示方式，不会修改作者原文。",
+		original: "保留作者原文",
+		hant: "显示为繁体中文",
+		hans: "显示为简体中文",
+	},
+	displayMode: "显示模式",
+	displayModes: {
+		system: "自动（依设备设置）",
+		light: "浅色",
+		dark: "深色",
+	},
+} satisfies typeof import("../zh-Hant/locale").default;

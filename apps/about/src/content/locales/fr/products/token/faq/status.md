@@ -1,0 +1,1 @@
+Privileged sélectionne un profil de limites distinct, validé séparément, configurable dans la base de données et doté de plafonds stricts plus élevés. Il ne contourne pas les contrôles d’autorisation. Chaque attribution est propre à un jeton, limitée dans le temps, versionnée et enregistrée avec l’auteur et le motif.

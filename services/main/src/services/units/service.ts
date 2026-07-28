@@ -295,7 +295,9 @@ export async function getUnit(
 	if (!resolvedLocalization) throw new UnitNotFound();
 	const selectedLocalization = resolvedLocalization;
 	const attributions =
-		(await getAttributionSummariesWithStatisticsByUnitIds([base.id])).get(base.id) ?? [];
+		(
+			await getAttributionSummariesWithStatisticsByUnitIds([base.id], localizationLanguages)
+		).get(base.id) ?? [];
 	const subjectAssociationRows = await database
 		.select({
 			id: subjectAssociation.id,
@@ -506,7 +508,10 @@ export async function listUnits(
 		)
 		.orderBy(desc(unit.createdAt), desc(unit.id))
 		.limit(limit + 1);
-	const attributions = await getAttributionSummariesByUnitIds(rows.map(({ id }) => id));
+	const attributions = await getAttributionSummariesByUnitIds(
+		rows.map(({ id }) => id),
+		localizationLanguages,
+	);
 	return Promise.all(
 		rows.map(
 			async ({

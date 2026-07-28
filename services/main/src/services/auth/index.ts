@@ -2,6 +2,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { apiKey } from "@better-auth/api-key";
 import { betterAuth } from "better-auth/minimal";
 import { getActiveObservability } from "@rezics/observability";
+import { ContentLanguageValues } from "@rezics/i18n";
 
 import { env } from "../config";
 import { database } from "../database";
@@ -56,7 +57,7 @@ export const auth = betterAuth({
 	user: {
 		additionalFields: {
 			registrationContentLanguage: {
-				type: ["zh", "en"],
+				type: [...ContentLanguageValues],
 				required: false,
 				defaultValue: "en",
 				input: true,

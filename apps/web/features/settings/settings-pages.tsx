@@ -30,9 +30,12 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import {
+	ChineseContentDisplayValues,
 	ContentLanguageValues,
+	isChineseContentDisplay,
 	isContentLanguage,
 	isStoredUiLocale,
+	StoredUiLocaleValues,
 	toContentLanguage,
 	toUiLocale,
 	type ContentLanguage,
@@ -324,8 +327,7 @@ export function PreferenceSettings() {
 		pendingLanguage && availableLanguages.includes(pendingLanguage)
 			? pendingLanguage
 			: availableLanguages[0];
-	const languageLabel = (language: ContentLanguage) =>
-		language === "zh" ? t.locale.zh : t.locale.en;
+	const languageLabel = (language: ContentLanguage) => t.locale.contentLanguages[language];
 	const moveLanguage = (language: ContentLanguage, offset: -1 | 1) => {
 		setEditedPreferredLanguages((edited) => {
 			const current = edited ?? preferences.data.preferredLanguages;
@@ -363,9 +365,11 @@ export function PreferenceSettings() {
 		if (!current) return;
 		const data = new FormData(event.currentTarget);
 		const interfaceLocale = String(data.get("interfaceLocale"));
+		const chineseContentDisplay = String(data.get("chineseContentDisplay"));
 		const submittedDefaultLicense = data.get("defaultLicense");
 		if (
 			!contentRatings.length ||
+			!isChineseContentDisplay(chineseContentDisplay) ||
 			!isStoredUiLocale(interfaceLocale) ||
 			!preferredLanguages.length ||
 			(submittedDefaultLicense !== null &&
@@ -379,6 +383,7 @@ export function PreferenceSettings() {
 			await update.mutateAsync({
 				body: {
 					interfaceLocale,
+					chineseContentDisplay,
 					defaultLicense: isPublicationLicenseId(submittedDefaultLicense)
 						? submittedDefaultLicense
 						: null,
@@ -408,8 +413,27 @@ export function PreferenceSettings() {
 							name="interfaceLocale"
 							defaultValue={preferences.data.interfaceLocale}
 						>
-							<NativeSelectOption value="zh-hant">{t.locale.zh}</NativeSelectOption>
-							<NativeSelectOption value="en">{t.locale.en}</NativeSelectOption>
+							{StoredUiLocaleValues.map((value) => (
+								<NativeSelectOption key={value} value={value}>
+									{t.locale.uiLocales[value]}
+								</NativeSelectOption>
+							))}
+						</NativeSelect>
+					</Field>
+					<Field>
+						<FieldLabel>{t.locale.chineseContentDisplay.label}</FieldLabel>
+						<p className="text-sm text-muted-foreground">
+							{t.locale.chineseContentDisplay.hint}
+						</p>
+						<NativeSelect
+							name="chineseContentDisplay"
+							defaultValue={preferences.data.chineseContentDisplay}
+						>
+							{ChineseContentDisplayValues.map((value) => (
+								<NativeSelectOption key={value} value={value}>
+									{t.locale.chineseContentDisplay[value]}
+								</NativeSelectOption>
+							))}
 						</NativeSelect>
 					</Field>
 					<Field>
