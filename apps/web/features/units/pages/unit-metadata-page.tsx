@@ -3,9 +3,9 @@
 import { useTranslation } from "@/i18n/client";
 import { useUnitManagement } from "../components/unit-management-workspace";
 import { UnitSectionHeader } from "../components/unit-section-header";
-import { UnitLocalizationEditor } from "../unit-edit";
+import { UnitMetadataEditor } from "../unit-edit";
 
-export function UnitLocalizationsPage() {
+export function UnitMetadataPage() {
 	const { t } = useTranslation(["errors", "units"]);
 	const { type, unit } = useUnitManagement();
 	if (!unit.capabilities.canEdit)
@@ -13,10 +13,10 @@ export function UnitLocalizationsPage() {
 	return (
 		<section>
 			<UnitSectionHeader
-				description={t.units.workspace.sections.localizations.description}
-				title={t.units.workspace.sections.localizations.label}
+				description={t.units.workspace.sections.metadata.description}
+				title={t.units.workspace.sections.metadata.label}
 			/>
-			<UnitLocalizationEditor type={type} unit={unit} />
+			<UnitMetadataEditor type={type} unit={unit} />
 		</section>
 	);
 }

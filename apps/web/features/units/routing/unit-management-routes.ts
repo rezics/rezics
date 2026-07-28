@@ -14,6 +14,7 @@ export function unitManagementSectionHref(
 	unitId: string,
 	sectionId: UnitManagementSectionId,
 ): string {
+	if (sectionId === "content") return unitManagementHref(type, unitId);
 	return `${unitManagementHref(type, unitId)}/${sectionId}`;
 }
 
@@ -23,9 +24,8 @@ export function parseUnitManagementSection(
 	unitId: string,
 ): UnitManagementSectionId | undefined {
 	const base = unitManagementHref(type, unitId);
-	if (pathname === base || pathname === `${base}/`) return undefined;
-	if (pathname === `${base}/basic`) return "basic";
-	if (pathname === `${base}/localizations`) return "localizations";
+	if (pathname === base || pathname === `${base}/`) return "content";
+	if (pathname === `${base}/metadata`) return "metadata";
 	if (pathname === `${base}/relationships`) return "relationships";
 	if (
 		pathname === `${base}/content-structure` ||

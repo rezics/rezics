@@ -21,7 +21,7 @@ export type DevelopmentPreviewAccess =
 
 export function useDevelopmentPreviewAccess(): DevelopmentPreviewAccess {
 	const session = useHydratedSession();
-	const profile = useGetApiUsersMe({ query: { enabled: Boolean(session.data) } });
+	const profile = useGetApiUsersMe({}, { query: { enabled: Boolean(session.data) } });
 
 	if (session.isPending || (session.data && profile.isPending)) return { state: "pending" };
 	if (!session.data) return { state: "denied" };

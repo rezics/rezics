@@ -20,7 +20,7 @@ import { PublicationLicenseIds } from "@rezics/license";
 import { recordAuditEvent } from "../audit";
 import type { DatabaseTransaction } from "../database";
 import type { Authorization } from "../authorization";
-import { isPrimaryUnitLocalization } from "./localization";
+import { isFirstUnitLocalization } from "./localization";
 import {
 	book,
 	collection,
@@ -392,7 +392,7 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, realmRule.id),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
+				isFirstUnitLocalization(unitLocalization.unitId),
 			),
 		)
 		.where(eq(realmRule.revisionId, revision.id))

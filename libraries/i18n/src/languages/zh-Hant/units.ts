@@ -6,6 +6,7 @@ const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: followTerms } = zhHantTerminology.follow;
+const { forms: metadataTerms } = zhHantTerminology.metadata;
 
 export default {
 	types: { book: "書籍", software: "軟體", media: "媒體", series: "系列" },
@@ -41,19 +42,19 @@ export default {
 	},
 	workspace: {
 		title: "管理作品",
-		description: "編輯基本資訊、在地化內容、目錄關係、存取權限與修訂記錄。",
+		description: `編輯內容、${metadataTerms.label}、目錄關係、存取權限與修訂記錄。`,
 		backToUnit: "返回作品",
-		backToOverview: "返回管理總覽",
+		backToContent: "返回內容",
 		navigation: "作品管理導覽",
 		overview: "所有管理功能",
 		sections: {
-			basic: {
-				label: "基本資訊",
-				description: "管理生命週期、可見性、分級、授權與類型欄位。",
+			content: {
+				label: "內容",
+				description: "編輯各內容語言的標題、摘要、說明與封面。",
 			},
-			localizations: {
-				label: "在地化內容",
-				description: "編輯各語言的標題、摘要、說明與封面。",
+			metadata: {
+				label: metadataTerms.label,
+				description: `管理生命週期、可見性、分級、授權與類型專屬${metadataTerms.inline}。`,
 			},
 			relationships: {
 				label: "目錄關係",
@@ -148,7 +149,7 @@ export default {
 			},
 		},
 		information: "條目資訊",
-		localizations: "在地化內容",
+		contentLanguages: "內容語言",
 		credits: "署名",
 		aboutAuthor: "關於作者",
 		authorStatistics: {
@@ -167,7 +168,6 @@ export default {
 		variantsDescription: "同一作品中彼此直接連結的主作品與變體。",
 		viewAssociations: "查看所有關聯",
 		aliases: "別名",
-		primaryLanguage: "主要語言",
 		releasedOn: "發布日期",
 		license: publicationLicenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} 使用揭露`,
@@ -200,9 +200,7 @@ export default {
 	editor: {
 		title: "編輯作品",
 		settings: "基本設定",
-		localization: "在地化內容",
-		selectLocalization: "選擇現有語言",
-		useLanguage: "編輯此語言",
+		content: "內容",
 		languageCode: "語言代碼",
 		relationships: "目錄關係",
 		creditRole: "署名角色",
@@ -218,6 +216,34 @@ export default {
 		version: "關聯版本",
 		canonicalUnit: "主版本",
 		saveSettings: "儲存設定",
+	},
+	contentLanguages: {
+		controlLabel: "內容語言",
+		settings: "語言設定",
+		dialogTitle: "內容語言設定",
+		dialogDescription: "設定讀者偏好語言皆無法使用時採用的後備顯示順序。",
+		add: "新增語言",
+		addDescription: "選擇語言後，儲存其必要內容即可將它加入這個作品。",
+		pending: "尚未新增",
+		drag: "拖曳排序",
+		moveFirst: "移到最前",
+		moveUp: "向前移",
+		moveDown: "向後移",
+		moveLast: "移到最後",
+		remove: "移除語言",
+		removeConfirm: insert("要從這個作品移除{{language}}及其所有內容嗎？", {
+			language: String,
+		}),
+		saveOrder: "儲存順序",
+		cancel: "取消",
+		noMoreLanguages: "所有支援的語言都已加入。",
+		unsavedConfirm: "要捨棄這個語言尚未儲存的變更嗎？",
+		instructions: "按空白鍵拿起語言，使用方向鍵移動，再按一次空白鍵放下。",
+		moved: insert("已將{{language}}移到第 {{position}} 位，共 {{count}} 位。", {
+			language: String,
+			position: Number,
+			count: Number,
+		}),
 	},
 	content: {
 		title: "目錄",

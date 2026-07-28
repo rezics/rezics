@@ -5,7 +5,7 @@ import Elysia, { t } from "elysia";
 import session from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { primaryUnitTitle } from "../../units/localization";
+import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	conversation,
 	conversationParticipantStat,
@@ -244,7 +244,7 @@ export default new Elysia({ prefix: "/messages" })
 				.select({
 					id: conversation.id,
 					otherProfileId: sql<string>`${otherProfileId}`,
-					otherUserName: primaryUnitTitle(profileTable.id),
+					otherUserName: firstUnitLocalizationTitle(profileTable.id),
 					lastMessageAt: conversationParticipantStat.lastMessageAt,
 					lastMessage: sql<string | null>`(
 						select m.content from message m

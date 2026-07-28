@@ -29,6 +29,9 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
@@ -190,14 +193,7 @@ export function EntityEditPage({ id }: { id: string }) {
 }
 
 function EntityEditContent({ id }: { id: string }) {
-	const { t, locale } = useTranslation([
-		"actions",
-		"catalog",
-		"errors",
-		"governance",
-		"media",
-		"ui",
-	]);
+	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
@@ -213,41 +209,51 @@ function EntityEditContent({ id }: { id: string }) {
 			</main>
 		);
 	return (
+		<ContentLanguageEditorProvider
+			localizations={query.data.localizations}
+			onLanguagesChanged={async () => {
+				await query.refetch();
+			}}
+			unitId={query.data.id}
+		>
+			<EntityLocalizationEditor entity={query.data} />
+		</ContentLanguageEditorProvider>
+	);
+}
+
+function EntityLocalizationEditor({ entity }: { entity: GetApiEntitiesByUnitIdStatus200 }) {
+	const { selectedLanguage } = useContentLanguageEditor();
+	return (
 		<EntityLocalizationForm
-			key={`${query.data.id}:${toContentLanguage(locale.target)}:${query.data.updatedAt}`}
-			entity={query.data}
+			entity={entity}
+			key={`${entity.id}:${selectedLanguage}:${entity.updatedAt}`}
 		/>
 	);
 }
 
 function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStatus200 }) {
-	const { t, locale } = useTranslation([
+	const { t } = useTranslation([
 		"actions",
 		"catalog",
 		"errors",
 		"governance",
+		"locale",
 		"media",
 		"ui",
 	]);
+	const { selectedLanguage, setDirty, languagesChanged } = useContentLanguageEditor();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
-	const localization = entity.localizations.find(
-		(entry) => entry.language === toContentLanguage(locale.target),
-	);
-	const fallbackLocalization = selectLocalization(
-		entity.localizations,
-		toContentLanguage(locale.target),
-		entity.localizations[0]?.language,
-	);
+	const localization = entity.localizations.find((entry) => entry.language === selectedLanguage);
 	const avatarOptions: AvatarFieldOption[] = entity.localizations.flatMap((entry) =>
-		entry.language !== toContentLanguage(locale.target) && entry.avatar
-			? [{ ...entry.avatar, label: entry.language }]
+		entry.language !== selectedLanguage && entry.avatar
+			? [{ ...entry.avatar, label: t.locale[entry.language] }]
 			: [],
 	);
 	const bannerOptions: LocalizationImageAssetOption[] = entity.localizations.flatMap((entry) =>
-		entry.language !== toContentLanguage(locale.target) && entry.banner
-			? [{ ...entry.banner, label: entry.language }]
+		entry.language !== selectedLanguage && entry.banner
+			? [{ ...entry.banner, label: t.locale[entry.language] }]
 			: [],
 	);
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);
@@ -261,7 +267,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 		const form = new FormData(event.currentTarget);
 		try {
 			await update.mutateAsync({
-				path: { unitId: entity.id, language: toContentLanguage(locale.target) },
+				path: { unitId: entity.id, language: selectedLanguage },
 				body: {
 					title: String(form.get("title") ?? "").trim(),
 					summary: String(form.get("summary") ?? "").trim(),
@@ -269,6 +275,8 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 					bannerAssetId: banner?.id ?? null,
 				},
 			});
+			setDirty(false);
+			await languagesChanged();
 			await queryClient.invalidateQueries({
 				queryKey: getApiEntitiesByUnitIdQueryKey({
 					path: { unitId: entity.id },
@@ -282,13 +290,13 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 	}
 
 	return (
-		<CreateFrame title={t.catalog.entities}>
-			<form onSubmit={submit}>
+		<CreateFrame action={<ContentLanguageControl />} title={t.catalog.entities}>
+			<form onChange={() => setDirty(true)} onSubmit={submit}>
 				<FieldGroup>
 					<Field required>
 						<FieldLabel>{t.ui.title}</FieldLabel>
 						<Input
-							defaultValue={localization?.title ?? fallbackLocalization?.title ?? ""}
+							defaultValue={localization?.title ?? ""}
 							maxLength={500}
 							name="title"
 							required
@@ -297,9 +305,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 					<Field>
 						<FieldLabel>{t.ui.summary}</FieldLabel>
 						<Textarea
-							defaultValue={
-								localization?.summary ?? fallbackLocalization?.summary ?? ""
-							}
+							defaultValue={localization?.summary ?? ""}
 							maxLength={2000}
 							name="summary"
 						/>
@@ -308,7 +314,10 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 						<AvatarField
 							fallback={avatarOptions[0] ?? null}
-							onChange={setAvatar}
+							onChange={(value) => {
+								setAvatar(value);
+								setDirty(true);
+							}}
 							options={avatarOptions}
 							value={avatar}
 						/>
@@ -317,7 +326,10 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
 						<LocalizationImageUploadField
 							fallback={bannerOptions[0] ?? null}
-							onChange={setBanner}
+							onChange={(value) => {
+								setBanner(value);
+								setDirty(true);
+							}}
 							options={bannerOptions}
 							role="banner"
 							value={banner}
@@ -338,11 +350,19 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 	);
 }
 
-function CreateFrame({ title, children }: { title: string; children: React.ReactNode }) {
+function CreateFrame({
+	title,
+	action,
+	children,
+}: {
+	title: string;
+	action?: React.ReactNode;
+	children: React.ReactNode;
+}) {
 	return (
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
-				<PageHeading title={title} />
+				<PageHeading action={action} title={title} />
 				{children}
 			</main>
 		</RequireSession>

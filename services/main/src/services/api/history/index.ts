@@ -6,7 +6,7 @@ import Elysia, { t, type Static } from "elysia";
 import { recordAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { primaryUnitTitle } from "../../units/localization";
+import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	revisionContent,
 	profile as profileTable,
@@ -90,7 +90,7 @@ const summarySelection = {
 	unitId: unitRevision.unitId,
 	parentRevisionId: unitRevision.parentRevisionId,
 	actorProfileId: unitRevision.actorProfileId,
-	actorName: primaryUnitTitle(profileTable.id),
+	actorName: firstUnitLocalizationTitle(profileTable.id),
 	editSummary: unitRevision.editSummary,
 	minor: unitRevision.minor,
 	byteSize: unitRevision.byteSize,

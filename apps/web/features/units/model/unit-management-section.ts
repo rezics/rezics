@@ -1,6 +1,6 @@
 export const UnitManagementSectionIds = [
-	"basic",
-	"localizations",
+	"content",
+	"metadata",
 	"relationships",
 	"content-structure",
 	"releases",
@@ -35,7 +35,7 @@ export function getUnitManagementSectionIds(
 	const hasUnitCapability =
 		capabilities.canEdit || capabilities.canManageAccess || capabilities.canManageAssociations;
 	return UnitManagementSectionIds.filter((sectionId) => {
-		if (sectionId === "basic" || sectionId === "localizations") return capabilities.canEdit;
+		if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
 		if (sectionId === "relationships")
 			return capabilities.canEdit || capabilities.canManageAssociations;
 		if (sectionId === "content-structure")

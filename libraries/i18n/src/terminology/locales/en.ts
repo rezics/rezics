@@ -71,4 +71,9 @@ export const enTerminology = defineTerminology("en", {
 		forms: { label: "Publication license", inline: "publication license" },
 		forbidden: [],
 	},
+	metadata: {
+		status: "approved",
+		forms: { label: "Metadata", inline: "metadata" },
+		forbidden: ["Basic information"],
+	},
 });

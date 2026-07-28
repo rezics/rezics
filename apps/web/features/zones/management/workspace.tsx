@@ -18,6 +18,8 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
@@ -117,29 +119,44 @@ function ZoneManagementWorkspaceContent({
 		query.data.language,
 		query.data.language,
 	);
+	const currentSectionId = parseZoneManagementSection(pathname, zoneId);
 	return (
 		<ZoneManagementContext.Provider value={{ zoneId, zone: query.data, sections }}>
-			<ManagementWorkspace
-				header={
-					<ManagementWorkspaceHeader
-						backHref={`/zone/${zoneId}`}
-						backLabel={t.zones.management.backToZone}
-						description={t.zones.management.description}
-						link={Link}
-						title={localization?.title ?? t.zones.management.title}
-					/>
-				}
-				navigation={
-					<ManagementWorkspaceNavigation
-						ariaLabel={t.zones.management.navigation}
-						currentSectionId={parseZoneManagementSection(pathname, zoneId)}
-						link={Link}
-						sections={sections}
-					/>
-				}
+			<ContentLanguageEditorProvider
+				localizations={query.data.localizations}
+				onLanguagesChanged={async () => {
+					await query.refetch();
+				}}
+				unitId={zoneId}
 			>
-				{children}
-			</ManagementWorkspace>
+				<ManagementWorkspace
+					header={
+						<ManagementWorkspaceHeader
+							action={
+								query.data.capabilities.canManage &&
+								currentSectionId === "overview" ? (
+									<ContentLanguageControl />
+								) : undefined
+							}
+							backHref={`/zone/${zoneId}`}
+							backLabel={t.zones.management.backToZone}
+							description={t.zones.management.description}
+							link={Link}
+							title={localization?.title ?? t.zones.management.title}
+						/>
+					}
+					navigation={
+						<ManagementWorkspaceNavigation
+							ariaLabel={t.zones.management.navigation}
+							currentSectionId={currentSectionId}
+							link={Link}
+							sections={sections}
+						/>
+					}
+				>
+					{children}
+				</ManagementWorkspace>
+			</ContentLanguageEditorProvider>
 		</ZoneManagementContext.Provider>
 	);
 }

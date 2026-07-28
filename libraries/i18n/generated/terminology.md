@@ -192,3 +192,14 @@ The terms under which a Unit's work is made available to the public; this is not
 | en | approved | inline | publication license |  |
 | zh-Hant | approved | label | 作品授權條款 | License, 作品 License, 授權 REZICS |
 | zh-Hant | approved | inline | 授權條款 | License, 作品 License, 授權 REZICS |
+
+## metadata
+
+Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Metadata | Basic information |
+| en | approved | inline | metadata | Basic information |
+| zh-Hant | approved | label | 中繼資料 | Metadata, 基本資訊 |
+| zh-Hant | approved | inline | 中繼資料 | Metadata, 基本資訊 |

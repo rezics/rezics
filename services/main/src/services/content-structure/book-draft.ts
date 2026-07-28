@@ -10,7 +10,7 @@ import {
 	unitOwnership,
 	unitLocalization,
 } from "../database/schema";
-import { isPrimaryUnitLocalization } from "../units/localization";
+import { isFirstUnitLocalization } from "../units/localization";
 import { insertUnit } from "../units/create";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 import { applyNewPostTagMentionVotes } from "../posts/tag-mentions";
@@ -153,7 +153,7 @@ export async function saveBookContentStructureDraft(
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						isFirstUnitLocalization(unitLocalization.unitId),
 					),
 				)
 				.where(
@@ -246,7 +246,7 @@ export async function saveBookContentStructureDraft(
 					.where(
 						and(
 							eq(unitLocalization.unitId, contentUnitId),
-							isPrimaryUnitLocalization(unitLocalization.unitId),
+							isFirstUnitLocalization(unitLocalization.unitId),
 						),
 					)
 					.returning({ unitId: unitLocalization.unitId });

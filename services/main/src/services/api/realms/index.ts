@@ -19,8 +19,7 @@ import { createContentStructureHistory } from "../../content-structure/history";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	avatarReferenceFromColumns,
-	makePrimaryUnitLocalization,
-	primaryUnitTitle,
+	firstUnitLocalizationTitle,
 	resolveUnitLocalizationFromOrdered,
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationLanguage,
@@ -761,11 +760,6 @@ export default new Elysia({ prefix: "/realms" })
 							target: [unitLocalization.unitId, unitLocalization.language],
 							set: storedLocalization,
 						});
-					await makePrimaryUnitLocalization(
-						tx,
-						params.realmId,
-						body.localization.language,
-					);
 				}
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
@@ -1717,7 +1711,7 @@ export default new Elysia({ prefix: "/realms" })
 					caseId: moderationAction.caseId,
 					kind: moderationAction.kind,
 					actorProfileId: moderationAction.actorProfileId,
-					actorName: primaryUnitTitle(profileTable.id),
+					actorName: firstUnitLocalizationTitle(profileTable.id),
 					previousState: moderationAction.previousState,
 					resultingState: moderationAction.resultingState,
 					previousPostTargetingLocked: moderationAction.previousPostTargetingLocked,

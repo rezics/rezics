@@ -7,7 +7,7 @@ import { toUiLocale } from "@rezics/i18n";
 
 import session from "../../auth/session";
 import { database } from "../../database";
-import { primaryUnitTitle } from "../../units/localization";
+import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	notification,
 	profile as profileTable,
@@ -149,7 +149,7 @@ export default new Elysia({ prefix: "/notifications" })
 					id: notification.id,
 					kind: notification.kind,
 					actorProfileId: notification.actorProfileId,
-					actorName: primaryUnitTitle(actor.id),
+					actorName: firstUnitLocalizationTitle(actor.id),
 					subjectUnitId: notification.subjectUnitId,
 					payload: notification.payload,
 					readAt: notification.readAt,

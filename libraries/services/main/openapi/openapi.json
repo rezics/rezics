@@ -9119,7 +9119,10 @@
 					"UnitAccessRestricted",
 					"UnitChanged",
 					"UnitRevisionConflict",
-					"UnitPrimaryLanguageMissing",
+					"UnitLocalizationOrderChanged",
+					"UnitLocalizationOrderInvalid",
+					"UnitLocalizationNotFound",
+					"UnitLastLocalizationRemovalForbidden",
 					"UnitVariantKindMismatch",
 					"UnitVariantTargetIsVariant",
 					"UnitVariantSourceHasVariants",
@@ -45499,6 +45502,20 @@
 				"summary": "Current user profile",
 				"tags": ["Users"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minItems": 1,
+							"maxItems": 2,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en"] }
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -46061,6 +46078,14 @@
 							}
 						}
 					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
 					"429": {
 						"description": "API token resource limit exceeded",
 						"headers": {
@@ -46117,9 +46142,10 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["updatedAt"],
+								"required": ["updatedAt", "language"],
 								"properties": {
 									"updatedAt": { "format": "date-time", "type": "string" },
+									"language": { "type": "string", "enum": ["zh", "en"] },
 									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
 									"avatar": {
 										"nullable": true,
@@ -56625,6 +56651,566 @@
 				"x-rezics-policy-operation-id": "getApiUnitsBy-idByUnitIdStatus-events"
 			}
 		},
+		"/api/units/by-id/{unitId}/localization-order": {
+			"get": {
+				"summary": "Get Unit content language order",
+				"tags": ["Units"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["languages"],
+									"properties": {
+										"languages": {
+											"minItems": 1,
+											"maxItems": 2,
+											"uniqueItems": true,
+											"type": "array",
+											"items": { "type": "string", "enum": ["zh", "en"] }
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUnitsBy-idByUnitIdLocalization-order",
+				"x-rezics-policy-operation-id": "getApiUnitsBy-idByUnitIdLocalization-order"
+			},
+			"put": {
+				"summary": "Reorder Unit content languages",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["expectedLanguages", "languages"],
+								"properties": {
+									"expectedLanguages": {
+										"minItems": 1,
+										"maxItems": 2,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "type": "string", "enum": ["zh", "en"] }
+									},
+									"languages": {
+										"minItems": 1,
+										"maxItems": 2,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "type": "string", "enum": ["zh", "en"] }
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["languages"],
+									"properties": {
+										"languages": {
+											"minItems": 1,
+											"maxItems": 2,
+											"uniqueItems": true,
+											"type": "array",
+											"items": { "type": "string", "enum": ["zh", "en"] }
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitLocalizationOrderInvalid",
+															"type": "string",
+															"enum": ["UnitLocalizationOrderInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitLocalizationOrderChanged",
+													"type": "string",
+													"enum": [
+														"UnitLocalizationOrderChanged",
+														"UnitLastLocalizationRemovalForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUnitsBy-idByUnitIdLocalization-order",
+				"x-rezics-policy-operation-id": "putApiUnitsBy-idByUnitIdLocalization-order"
+			}
+		},
+		"/api/units/by-id/{unitId}/localizations/{language}": {
+			"delete": {
+				"summary": "Remove a Unit content language",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["expectedLanguages"],
+								"properties": {
+									"expectedLanguages": {
+										"minItems": 1,
+										"maxItems": 2,
+										"uniqueItems": true,
+										"type": "array",
+										"items": { "type": "string", "enum": ["zh", "en"] }
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["languages"],
+									"properties": {
+										"languages": {
+											"minItems": 1,
+											"maxItems": 2,
+											"uniqueItems": true,
+											"type": "array",
+											"items": { "type": "string", "enum": ["zh", "en"] }
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitLocalizationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitLocalizationOrderChanged",
+													"type": "string",
+													"enum": [
+														"UnitLocalizationOrderChanged",
+														"UnitLastLocalizationRemovalForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiUnitsBy-idByUnitIdLocalizationsByLanguage",
+				"x-rezics-policy-operation-id": "deleteApiUnitsBy-idByUnitIdLocalizationsByLanguage"
+			}
+		},
 		"/api/units/{type}": {
 			"get": {
 				"summary": "List published units",
@@ -57626,7 +58212,6 @@
 										"attributions",
 										"createdAt",
 										"updatedAt",
-										"primaryLanguage",
 										"releasedOn",
 										"details",
 										"avatar",
@@ -57957,10 +58542,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"primaryLanguage": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -59584,7 +60165,6 @@
 										"attributions",
 										"createdAt",
 										"updatedAt",
-										"primaryLanguage",
 										"releasedOn",
 										"details",
 										"avatar",
@@ -59915,10 +60495,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"primaryLanguage": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -61460,10 +62036,6 @@
 										"additionalProperties": false,
 										"type": "object",
 										"properties": {
-											"primaryLanguage": {
-												"type": "string",
-												"enum": ["zh", "en"]
-											},
 											"releasedOn": {
 												"nullable": true,
 												"anyOf": [
@@ -61615,7 +62187,6 @@
 										"attributions",
 										"createdAt",
 										"updatedAt",
-										"primaryLanguage",
 										"releasedOn",
 										"details",
 										"avatar",
@@ -61946,10 +62517,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"primaryLanguage": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -63364,34 +63931,10 @@
 						}
 					},
 					"400": {
-						"description": "Response for status 400",
+						"description": "Request body could not be parsed",
 						"content": {
 							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "UnitPrimaryLanguageMissing",
-															"type": "string",
-															"enum": ["UnitPrimaryLanguageMissing"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/MalformedRequestBody" }
-									]
-								}
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
 							}
 						}
 					},
@@ -63805,7 +64348,6 @@
 										"attributions",
 										"createdAt",
 										"updatedAt",
-										"primaryLanguage",
 										"releasedOn",
 										"details",
 										"avatar",
@@ -64136,10 +64678,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"primaryLanguage": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -65790,7 +66328,6 @@
 										"attributions",
 										"createdAt",
 										"updatedAt",
-										"primaryLanguage",
 										"releasedOn",
 										"details",
 										"avatar",
@@ -66121,10 +66658,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"primaryLanguage": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -68121,7 +68654,6 @@
 										"attributions",
 										"createdAt",
 										"updatedAt",
-										"primaryLanguage",
 										"releasedOn",
 										"details",
 										"avatar",
@@ -68452,10 +68984,6 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"primaryLanguage": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -107629,8 +108157,9 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["title", "body", "baseRevisionId"],
+								"required": ["language", "title", "body", "baseRevisionId"],
 								"properties": {
+									"language": { "type": "string", "enum": ["zh", "en"] },
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"body": {
 										"additionalProperties": false,
@@ -109899,8 +110428,9 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["body", "baseRevisionId"],
+								"required": ["language", "body", "baseRevisionId"],
 								"properties": {
+									"language": { "type": "string", "enum": ["zh", "en"] },
 									"body": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",

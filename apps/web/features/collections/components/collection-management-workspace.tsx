@@ -15,8 +15,8 @@ import {
 } from "@rezics/ui";
 import {
 	BookOpenText,
+	Database,
 	History,
-	Languages,
 	LayoutTemplate,
 	ListTree,
 	ShieldCheck,
@@ -26,6 +26,8 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
@@ -100,18 +102,18 @@ function CollectionManagementWorkspaceContent({
 	const labels = t.collections.workspace.sections;
 	const allSections: ManagementWorkspaceSection<CollectionManagementSectionId>[] = [
 		{
-			id: "basic",
-			href: collectionManagementSectionHref(collectionId, "basic"),
-			label: labels.basic.label,
-			description: labels.basic.description,
+			id: "content",
+			href: collectionManagementSectionHref(collectionId, "content"),
+			label: labels.content.label,
+			description: labels.content.description,
 			icon: BookOpenText,
 		},
 		{
-			id: "localizations",
-			href: collectionManagementSectionHref(collectionId, "localizations"),
-			label: labels.localizations.label,
-			description: labels.localizations.description,
-			icon: Languages,
+			id: "metadata",
+			href: collectionManagementSectionHref(collectionId, "metadata"),
+			label: labels.metadata.label,
+			description: labels.metadata.description,
+			icon: Database,
 		},
 		{
 			id: "items",
@@ -146,8 +148,7 @@ function CollectionManagementWorkspaceContent({
 	const sections = allSections.filter(({ id }) => visibleSectionIds.has(id));
 	const currentSectionId = parseCollectionManagementSection(pathname, collectionId);
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
-	const sectionAllowed =
-		currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
+	const sectionAllowed = Boolean(currentSectionId && visibleSectionIds.has(currentSectionId));
 	const localization = selectLocalization(collection.localizations, collection.language);
 	const title =
 		collection.systemKey === "favorites"
@@ -162,36 +163,49 @@ function CollectionManagementWorkspaceContent({
 		/>
 	);
 	return (
-		<CollectionManagementContext.Provider value={{ collection, sections }}>
-			<ManagementWorkspace
-				header={
-					<ManagementWorkspaceHeader
-						backHref={collectionHref(collectionId)}
-						backLabel={t.collections.workspace.backToCollection}
-						description={t.collections.workspace.description}
-						link={Link}
-						title={title}
-					/>
-				}
-				mobileNavigation={navigation}
-				navigation={navigation}
-			>
-				{sectionAllowed ? (
-					children
-				) : requestedSection ? (
-					<section>
-						<ManagementWorkspaceSectionHeader
-							backHref={collectionManagementHref(collectionId)}
-							backLabel={t.collections.workspace.backToOverview}
-							description={requestedSection.description}
+		<ContentLanguageEditorProvider
+			localizations={collection.localizations}
+			onLanguagesChanged={async () => {
+				await query.refetch();
+			}}
+			unitId={collection.id}
+		>
+			<CollectionManagementContext.Provider value={{ collection, sections }}>
+				<ManagementWorkspace
+					header={
+						<ManagementWorkspaceHeader
+							action={
+								collection.capabilities.canManageLocalizations ? (
+									<ContentLanguageControl />
+								) : undefined
+							}
+							backHref={collectionHref(collectionId)}
+							backLabel={t.collections.workspace.backToCollection}
+							description={t.collections.workspace.description}
 							link={Link}
-							showBackOnMobile={false}
-							title={requestedSection.label}
+							title={title}
 						/>
-						<p className="text-sm text-destructive">{t.errors.forbidden}</p>
-					</section>
-				) : null}
-			</ManagementWorkspace>
-		</CollectionManagementContext.Provider>
+					}
+					mobileNavigation={navigation}
+					navigation={navigation}
+				>
+					{sectionAllowed ? (
+						children
+					) : requestedSection ? (
+						<section>
+							<ManagementWorkspaceSectionHeader
+								backHref={collectionManagementHref(collectionId)}
+								backLabel={t.collections.workspace.backToContent}
+								description={requestedSection.description}
+								link={Link}
+								showBackOnMobile={false}
+								title={requestedSection.label}
+							/>
+							<p className="text-sm text-destructive">{t.errors.forbidden}</p>
+						</section>
+					) : null}
+				</ManagementWorkspace>
+			</CollectionManagementContext.Provider>
+		</ContentLanguageEditorProvider>
 	);
 }

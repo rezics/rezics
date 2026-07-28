@@ -4821,7 +4821,10 @@ export const ApiErrorCode = {
 	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitChanged: "UnitChanged",
 	UnitRevisionConflict: "UnitRevisionConflict",
-	UnitPrimaryLanguageMissing: "UnitPrimaryLanguageMissing",
+	UnitLocalizationOrderChanged: "UnitLocalizationOrderChanged",
+	UnitLocalizationOrderInvalid: "UnitLocalizationOrderInvalid",
+	UnitLocalizationNotFound: "UnitLocalizationNotFound",
+	UnitLastLocalizationRemovalForbidden: "UnitLastLocalizationRemovalForbidden",
 	UnitVariantKindMismatch: "UnitVariantKindMismatch",
 	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
 	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
@@ -33187,6 +33190,24 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreRespo
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500;
 
+export const GetApiUsersMeLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiUsersMeLocalizationLanguagesEnum =
+	(typeof GetApiUsersMeLocalizationLanguagesEnum)[keyof typeof GetApiUsersMeLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiUsersMeLocalizationLanguagesEnum[];
+};
+
 export const GetApiUsersMeStatus200AvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -33535,6 +33556,11 @@ export type GetApiUsersMeStatus404 = {
 /**
  * @type object
  */
+export type GetApiUsersMeStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
 export type GetApiUsersMeStatus429 = {
 	/**
 	 * @type object
@@ -33567,7 +33593,7 @@ export type GetApiUsersMeStatus500 = InternalError;
 export type GetApiUsersMeOptions = {
 	body?: never;
 	path?: never;
-	query?: never;
+	query?: GetApiUsersMeQuery;
 	headers?: never;
 };
 
@@ -33577,6 +33603,7 @@ export type GetApiUsersMeOptions = {
 export type GetApiUsersMeResponses = {
 	"200": GetApiUsersMeStatus200;
 	"404": GetApiUsersMeStatus404;
+	"422": GetApiUsersMeStatus422;
 	"429": GetApiUsersMeStatus429;
 	"500": GetApiUsersMeStatus500;
 };
@@ -33587,6 +33614,7 @@ export type GetApiUsersMeResponses = {
 export type GetApiUsersMeResponse =
 	| GetApiUsersMeStatus200
 	| GetApiUsersMeStatus404
+	| GetApiUsersMeStatus422
 	| GetApiUsersMeStatus429
 	| GetApiUsersMeStatus500;
 
@@ -34007,6 +34035,14 @@ export type PatchApiUsersMeStatus429 = {
  */
 export type PatchApiUsersMeStatus500 = InternalError;
 
+export const PatchApiUsersMeRequestLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PatchApiUsersMeRequestLanguageEnum =
+	(typeof PatchApiUsersMeRequestLanguageEnum)[keyof typeof PatchApiUsersMeRequestLanguageEnum];
+
 export const PatchApiUsersMeRequestAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
@@ -34025,6 +34061,10 @@ export type PatchApiUsersMeBody = {
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @type string
+	 */
+	language: PatchApiUsersMeRequestLanguageEnum;
 	/**
 	 * @minLength 1
 	 * @maxLength 120
@@ -43005,6 +43045,639 @@ export type GetApiUnitsByIdByUnitIdStatusEventsResponse =
 /**
  * @type object
  */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum =
+	(typeof GetApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum)[keyof typeof GetApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderStatus200 = {
+	/**
+	 * @type array
+	 */
+	languages: GetApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderOptions = {
+	body?: never;
+	path: GetApiUnitsByIdByUnitIdLocalizationOrderPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderResponses = {
+	"200": GetApiUnitsByIdByUnitIdLocalizationOrderStatus200;
+	"404": GetApiUnitsByIdByUnitIdLocalizationOrderStatus404;
+	"422": GetApiUnitsByIdByUnitIdLocalizationOrderStatus422;
+	"500": GetApiUnitsByIdByUnitIdLocalizationOrderStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByIdByUnitIdLocalizationOrderResponse =
+	| GetApiUnitsByIdByUnitIdLocalizationOrderStatus200
+	| GetApiUnitsByIdByUnitIdLocalizationOrderStatus404
+	| GetApiUnitsByIdByUnitIdLocalizationOrderStatus422
+	| GetApiUnitsByIdByUnitIdLocalizationOrderStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus200 = {
+	/**
+	 * @type array
+	 */
+	languages: PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum[];
+};
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitLocalizationOrderInvalid'
+				 * @type string
+				 */
+				code: "UnitLocalizationOrderInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiUnitsByIdByUnitIdLocalizationOrderStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PutApiUnitsByIdByUnitIdLocalizationOrderStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiUnitsByIdByUnitIdLocalizationOrderStatus409ErrorCodeEnum = {
+	UnitLocalizationOrderChanged: "UnitLocalizationOrderChanged",
+	UnitLastLocalizationRemovalForbidden: "UnitLastLocalizationRemovalForbidden",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus409ErrorCodeEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus409ErrorCodeEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitLocalizationOrderChanged'
+		 * @type string
+		 */
+		code: PutApiUnitsByIdByUnitIdLocalizationOrderStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus500 = InternalError;
+
+export const PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum];
+
+export const PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderBody = {
+	/**
+	 * @type array
+	 */
+	expectedLanguages: PutApiUnitsByIdByUnitIdLocalizationOrderRequestExpectedLanguagesEnum[];
+	/**
+	 * @type array
+	 */
+	languages: PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum[];
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderOptions = {
+	body: PutApiUnitsByIdByUnitIdLocalizationOrderBody;
+	path: PutApiUnitsByIdByUnitIdLocalizationOrderPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderResponses = {
+	"200": PutApiUnitsByIdByUnitIdLocalizationOrderStatus200;
+	"400": PutApiUnitsByIdByUnitIdLocalizationOrderStatus400;
+	"401": PutApiUnitsByIdByUnitIdLocalizationOrderStatus401;
+	"403": PutApiUnitsByIdByUnitIdLocalizationOrderStatus403;
+	"409": PutApiUnitsByIdByUnitIdLocalizationOrderStatus409;
+	"422": PutApiUnitsByIdByUnitIdLocalizationOrderStatus422;
+	"429": PutApiUnitsByIdByUnitIdLocalizationOrderStatus429;
+	"500": PutApiUnitsByIdByUnitIdLocalizationOrderStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUnitsByIdByUnitIdLocalizationOrderResponse =
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus200
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus400
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus401
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus403
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus409
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus422
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus429
+	| PutApiUnitsByIdByUnitIdLocalizationOrderStatus500;
+
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageLanguage =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageLanguage)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageLanguage];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguagePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @type string
+	 */
+	language: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageLanguage;
+};
+
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200 = {
+	/**
+	 * @type array
+	 */
+	languages: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum[];
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitLocalizationNotFound: "UnitLocalizationNotFound",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409ErrorCodeEnum = {
+	UnitLocalizationOrderChanged: "UnitLocalizationOrderChanged",
+	UnitLastLocalizationRemovalForbidden: "UnitLastLocalizationRemovalForbidden",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409ErrorCodeEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409ErrorCodeEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitLocalizationOrderChanged'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500 = InternalError;
+
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageBody = {
+	/**
+	 * @type array
+	 */
+	expectedLanguages: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum[];
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions = {
+	body: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageBody;
+	path: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguagePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponses = {
+	"200": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200;
+	"400": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400;
+	"401": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401;
+	"403": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403;
+	"404": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404;
+	"409": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409;
+	"422": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422;
+	"429": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429;
+	"500": DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponse =
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429
+	| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiUnitsByTypePath = {
 	type: ("book" | "software" | "media") | "series";
 };
@@ -43765,7 +44438,6 @@ export type PostApiUnitsByTypeStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
-	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
 	details:
 		| {
@@ -45274,7 +45946,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
-	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
 	details:
 		| {
@@ -46364,7 +47035,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
-	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
 	details:
 		| {
@@ -47062,32 +47732,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	};
 };
 
-export type PatchApiUnitsByTypeByUnitIdStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'UnitPrimaryLanguageMissing'
-				 * @type string
-				 */
-				code: "UnitPrimaryLanguageMissing";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -47304,14 +47952,6 @@ export const PatchApiUnitsByTypeByUnitIdRequestLicense = {
 export type PatchApiUnitsByTypeByUnitIdRequestLicense =
 	(typeof PatchApiUnitsByTypeByUnitIdRequestLicense)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestLicense];
 
-export const PatchApiUnitsByTypeByUnitIdRequestUnitPrimaryLanguageEnum = {
-	zh: "zh",
-	en: "en",
-} as const;
-
-export type PatchApiUnitsByTypeByUnitIdRequestUnitPrimaryLanguageEnum =
-	(typeof PatchApiUnitsByTypeByUnitIdRequestUnitPrimaryLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestUnitPrimaryLanguageEnum];
-
 /**
  * @type object
  */
@@ -47343,10 +47983,6 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 	 * @type object | undefined
 	 */
 	unit?: {
-		/**
-		 * @type string | undefined
-		 */
-		primaryLanguage?: PatchApiUnitsByTypeByUnitIdRequestUnitPrimaryLanguageEnum;
 		releasedOn?: (string | null) | null;
 	};
 	/**
@@ -47932,7 +48568,6 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
-	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
 	details:
 		| {
@@ -49191,7 +49826,6 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
-	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
 	details:
 		| {
@@ -50455,7 +51089,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
-	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
 	details:
 		| {
@@ -78169,10 +78802,22 @@ export type PatchApiPostsByPostIdStatus429 = {
  */
 export type PatchApiPostsByPostIdStatus500 = InternalError;
 
+export const PatchApiPostsByPostIdRequestLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PatchApiPostsByPostIdRequestLanguageEnum =
+	(typeof PatchApiPostsByPostIdRequestLanguageEnum)[keyof typeof PatchApiPostsByPostIdRequestLanguageEnum];
+
 /**
  * @type object
  */
 export type PatchApiPostsByPostIdBody = {
+	/**
+	 * @type string
+	 */
+	language: PatchApiPostsByPostIdRequestLanguageEnum;
 	/**
 	 * @minLength 1
 	 * @maxLength 500
@@ -79968,10 +80613,22 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus429 = {
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus500 = InternalError;
 
+export const PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum =
+	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum];
+
 /**
  * @type object
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdBody = {
+	/**
+	 * @type string
+	 */
+	language: PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum;
 	/**
 	 * @type object
 	 */

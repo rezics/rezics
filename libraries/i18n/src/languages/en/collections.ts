@@ -1,4 +1,7 @@
 import { insert } from "native-i18n";
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: metadataTerms } = enTerminology.metadata;
 
 export default {
 	title: "Collections",
@@ -35,19 +38,19 @@ export default {
 	},
 	workspace: {
 		title: "Collection management",
-		description: "Manage details, content structure, presentation, access, and history.",
+		description: `Manage content, ${metadataTerms.inline}, structure, presentation, access, and history.`,
 		navigation: "Collection management navigation",
 		overview: "Collection management areas",
 		backToCollection: "Back to collection",
-		backToOverview: "Back to management",
+		backToContent: "Back to content",
 		sections: {
-			basic: {
-				label: "Basics",
-				description: "Set status and visibility, or delete the collection.",
+			content: {
+				label: "Content",
+				description: "Edit the title, summary, and cover in each content language.",
 			},
-			localizations: {
-				label: "Languages & appearance",
-				description: "Edit the title, summary, and cover for the current language.",
+			metadata: {
+				label: metadataTerms.label,
+				description: `Set status and visibility ${metadataTerms.inline}, or delete the collection.`,
 			},
 			items: {
 				label: "Content & structure",

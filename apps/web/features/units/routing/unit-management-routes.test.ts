@@ -13,6 +13,24 @@ describe("unit management routes", () => {
 		);
 	});
 
+	it("uses the management root for content and metadata for structured fields", () => {
+		expect(unitManagementSectionHref("book", "unit-1", "content")).toBe(
+			"/units/book/unit-1/edit",
+		);
+		expect(unitManagementSectionHref("book", "unit-1", "metadata")).toBe(
+			"/units/book/unit-1/edit/metadata",
+		);
+		expect(parseUnitManagementSection("/units/book/unit-1/edit", "book", "unit-1")).toBe(
+			"content",
+		);
+		expect(
+			parseUnitManagementSection("/units/book/unit-1/edit/basic", "book", "unit-1"),
+		).toBeUndefined();
+		expect(
+			parseUnitManagementSection("/units/book/unit-1/edit/localizations", "book", "unit-1"),
+		).toBeUndefined();
+	});
+
 	it("keeps the focused chapter editor outside the management shell", () => {
 		expect(chapterEditorHref("book-1", "chapter-1")).toBe(
 			"/units/book/book-1/chapters/chapter-1/edit",

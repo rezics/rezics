@@ -60,6 +60,7 @@ export const PostScoreResponse = t.Object({
 export const PostScoreListResponse = t.Object({ items: t.Array(PostScoreResponse) });
 
 export const UpdatePostBody = t.Object({
+	language: ContentLanguage,
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	body: PortableTextDocument,
 	baseRevisionId: Uuid,
@@ -95,6 +96,7 @@ export const RootPostParams = t.Object({ postId: Uuid });
 export type RootPostParams = Static<typeof RootPostParams>;
 
 export const UpdateReplyBody = t.Object({
+	language: ContentLanguage,
 	body: PortableTextDocument,
 	baseRevisionId: Uuid,
 	editSummary: t.Optional(t.String({ maxLength: 500 })),

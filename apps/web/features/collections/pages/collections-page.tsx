@@ -11,7 +11,7 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 export function CollectionsPage() {
 	const localizationLanguages = useLocalizationLanguages();
 	const session = useHydratedSession();
-	const me = useGetApiUsersMe({ query: { enabled: Boolean(session.data) } });
+	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session.data) } });
 	const query = useGetApiCollections(
 		{
 			query: {

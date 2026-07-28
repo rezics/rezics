@@ -22,7 +22,6 @@ import {
 import { createNotification } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
-import { makePrimaryUnitLocalization } from "../../units/localization";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import { FeedbackAlreadyResolved, FeedbackNotFound } from "../feedback/errors";
@@ -220,7 +219,6 @@ export default new Elysia({ prefix: "/governance" })
 							updatedAt: new Date(),
 						},
 					});
-				await makePrimaryUnitLocalization(tx, params.postId, body.language);
 				await recordUnitRevision(tx, {
 					unitId: params.postId,
 					actorProfileId: profile.unitId,

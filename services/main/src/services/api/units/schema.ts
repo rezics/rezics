@@ -1,4 +1,5 @@
 import { type Static, t } from "elysia";
+import { ContentLanguageValues } from "@rezics/i18n";
 
 import {
 	DateTime,
@@ -107,7 +108,6 @@ export const UpdateUnitBody = t.Object(
 		unit: t.Optional(
 			t.Object(
 				{
-					primaryLanguage: t.Optional(ContentLanguage),
 					releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
 				},
 				{ additionalProperties: false },
@@ -167,3 +167,31 @@ export type UnitLocalizationParams = Static<typeof UnitLocalizationParams>;
 
 export const UnitLocalizationBody = t.Omit(UnitLocalizationInput, ["language"]);
 export type UnitLocalizationBody = Static<typeof UnitLocalizationBody>;
+
+const ContentLanguageOrder = t.Array(ContentLanguage, {
+	minItems: 1,
+	maxItems: ContentLanguageValues.length,
+	uniqueItems: true,
+});
+
+export const UnitLocalizationOrderParams = t.Object({ unitId: Uuid });
+export const UnitLocalizationDeleteParams = t.Object({
+	unitId: Uuid,
+	language: ContentLanguage,
+});
+export const UnitLocalizationOrderBody = t.Object(
+	{
+		expectedLanguages: ContentLanguageOrder,
+		languages: ContentLanguageOrder,
+	},
+	{ additionalProperties: false },
+);
+export type UnitLocalizationOrderBody = Static<typeof UnitLocalizationOrderBody>;
+export const UnitLocalizationDeleteBody = t.Object(
+	{ expectedLanguages: ContentLanguageOrder },
+	{ additionalProperties: false },
+);
+export type UnitLocalizationDeleteBody = Static<typeof UnitLocalizationDeleteBody>;
+export const UnitLocalizationOrderResponse = t.Object({
+	languages: ContentLanguageOrder,
+});

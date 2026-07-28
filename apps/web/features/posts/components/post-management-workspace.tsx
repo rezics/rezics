@@ -1,5 +1,6 @@
 "use client";
 
+import { isContentLanguage } from "@rezics/i18n";
 import {
 	type GetApiPostsByPostIdStatus200,
 	type GetApiReviewsByReviewIdStatus200,
@@ -17,10 +18,12 @@ import {
 } from "@rezics/ui";
 import { BookOpenText, History, Link2, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import {
@@ -102,12 +105,24 @@ function PostManagementWorkspaceLoader({
 	children: ReactNode;
 }) {
 	const localizationLanguages = useLocalizationLanguages();
+	const searchParams = useSearchParams();
+	const requestedLanguage = searchParams.get("language");
+	const editorLocalizationLanguages =
+		requestedLanguage && isContentLanguage(requestedLanguage)
+			? [
+					requestedLanguage,
+					...localizationLanguages.filter((language) => language !== requestedLanguage),
+				]
+			: localizationLanguages;
 	const postQuery = useGetApiPostsByPostId(
-		{ path: { postId }, query: { localizationLanguages } },
+		{ path: { postId }, query: { localizationLanguages: editorLocalizationLanguages } },
 		{ query: { enabled: kind === "post" } },
 	);
 	const reviewQuery = useGetApiReviewsByReviewId(
-		{ path: { reviewId: postId }, query: { localizationLanguages } },
+		{
+			path: { reviewId: postId },
+			query: { localizationLanguages: editorLocalizationLanguages },
+		},
 		{ query: { enabled: kind === "review" } },
 	);
 
@@ -116,10 +131,17 @@ function PostManagementWorkspaceLoader({
 			return <QueryFailure error={postQuery.error} retry={() => void postQuery.refetch()} />;
 		if (!postQuery.data) return <QueryPending />;
 		return (
-			<LoadedPostManagementWorkspace
-				resource={{ kind, item: postQuery.data }}
-				children={children}
-			/>
+			<ContentLanguageEditorBoundary
+				onLanguagesChanged={async () => {
+					await postQuery.refetch();
+				}}
+				unitId={postId}
+			>
+				<LoadedPostManagementWorkspace
+					resource={{ kind, item: postQuery.data }}
+					children={children}
+				/>
+			</ContentLanguageEditorBoundary>
 		);
 	}
 
@@ -127,10 +149,17 @@ function PostManagementWorkspaceLoader({
 		return <QueryFailure error={reviewQuery.error} retry={() => void reviewQuery.refetch()} />;
 	if (!reviewQuery.data) return <QueryPending />;
 	return (
-		<LoadedPostManagementWorkspace
-			resource={{ kind, item: reviewQuery.data }}
-			children={children}
-		/>
+		<ContentLanguageEditorBoundary
+			onLanguagesChanged={async () => {
+				await reviewQuery.refetch();
+			}}
+			unitId={postId}
+		>
+			<LoadedPostManagementWorkspace
+				resource={{ kind, item: reviewQuery.data }}
+				children={children}
+			/>
+		</ContentLanguageEditorBoundary>
 	);
 }
 
@@ -218,6 +247,11 @@ function LoadedPostManagementWorkspace({
 			<ManagementWorkspace
 				header={
 					<ManagementWorkspaceHeader
+						action={
+							resource.item.capabilities.canEdit ? (
+								<ContentLanguageControl />
+							) : undefined
+						}
 						backHref={postDetailHref(resource.kind, postId)}
 						backLabel={t.posts.workspace.backToContent}
 						description={t.posts.workspace.description}

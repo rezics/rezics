@@ -1,11 +1,11 @@
 "use client";
 
-import { UnitBasicEditor } from "../unit-edit";
+import { useTranslation } from "@/i18n/client";
 import { useUnitManagement } from "../components/unit-management-workspace";
 import { UnitSectionHeader } from "../components/unit-section-header";
-import { useTranslation } from "@/i18n/client";
+import { UnitContentEditor } from "../unit-edit";
 
-export function UnitBasicPage() {
+export function UnitContentPage() {
 	const { t } = useTranslation(["errors", "units"]);
 	const { type, unit } = useUnitManagement();
 	if (!unit.capabilities.canEdit)
@@ -13,10 +13,10 @@ export function UnitBasicPage() {
 	return (
 		<section>
 			<UnitSectionHeader
-				description={t.units.workspace.sections.basic.description}
-				title={t.units.workspace.sections.basic.label}
+				description={t.units.workspace.sections.content.description}
+				title={t.units.workspace.sections.content.label}
 			/>
-			<UnitBasicEditor type={type} unit={unit} />
+			<UnitContentEditor type={type} unit={unit} />
 		</section>
 	);
 }

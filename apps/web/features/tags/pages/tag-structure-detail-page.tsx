@@ -117,7 +117,7 @@ export function TagStructureDetailPage({ structureId }: { readonly structureId: 
 		query: { localizationLanguages },
 	} as const;
 	const query = useGetApiTagStructuresByStructureId(queryInput);
-	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
+	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session) } });
 	const invalidate = () =>
 		queryClient.invalidateQueries({
 			queryKey: getApiTagStructuresByStructureIdQueryKey(queryInput),

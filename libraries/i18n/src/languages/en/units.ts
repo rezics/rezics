@@ -5,6 +5,7 @@ import { insert } from "native-i18n";
 const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 const { forms: postTerms } = enTerminology.post;
 const { forms: followTerms } = enTerminology.follow;
+const { forms: metadataTerms } = enTerminology.metadata;
 
 export default {
 	types: { book: "Book", software: "Software", media: "Media", series: "Series" },
@@ -40,21 +41,20 @@ export default {
 	},
 	workspace: {
 		title: "Manage unit",
-		description:
-			"Edit basic information, localizations, catalog relationships, access, and revision history.",
+		description: `Edit content, ${metadataTerms.inline}, catalog relationships, access, and revision history.`,
 		backToUnit: "Back to unit",
-		backToOverview: "Back to management overview",
+		backToContent: "Back to content",
 		navigation: "Unit management navigation",
 		overview: "All management tools",
 		sections: {
-			basic: {
-				label: "Basic information",
+			content: {
+				label: "Content",
 				description:
-					"Manage lifecycle, visibility, rating, license, and type-specific fields.",
+					"Edit titles, summaries, descriptions, and covers in each content language.",
 			},
-			localizations: {
-				label: "Localizations",
-				description: "Edit titles, summaries, descriptions, and covers for each language.",
+			metadata: {
+				label: metadataTerms.label,
+				description: `Manage lifecycle, visibility, rating, license, and type-specific ${metadataTerms.inline}.`,
 			},
 			relationships: {
 				label: "Catalog relationships",
@@ -159,7 +159,7 @@ export default {
 			},
 		},
 		information: "Unit information",
-		localizations: "Localizations",
+		contentLanguages: "Content languages",
 		credits: "Credits",
 		aboutAuthor: "About the author",
 		authorStatistics: {
@@ -178,7 +178,6 @@ export default {
 		variantsDescription: "Direct Main and Variant relationships within the same work.",
 		viewAssociations: "View all associations",
 		aliases: "Aliases",
-		primaryLanguage: "Primary language",
 		releasedOn: "Release date",
 		license: publicationLicenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} disclosure`,
@@ -211,9 +210,7 @@ export default {
 	editor: {
 		title: "Edit unit",
 		settings: "Settings",
-		localization: "Localization",
-		selectLocalization: "Choose an existing language",
-		useLanguage: "Edit this language",
+		content: "Content",
 		languageCode: "Language code",
 		relationships: "Catalog relationships",
 		creditRole: "Credit role",
@@ -229,6 +226,36 @@ export default {
 		version: "Attach version",
 		canonicalUnit: "Primary unit",
 		saveSettings: "Save settings",
+	},
+	contentLanguages: {
+		controlLabel: "Content language",
+		settings: "Language settings",
+		dialogTitle: "Content language settings",
+		dialogDescription:
+			"Set the fallback display order used when a reader's preferred languages are unavailable.",
+		add: "Add language",
+		addDescription: "Choose a language, then save its required content to add it to this Unit.",
+		pending: "Not added yet",
+		drag: "Drag to reorder",
+		moveFirst: "Move to first",
+		moveUp: "Move up",
+		moveDown: "Move down",
+		moveLast: "Move to last",
+		remove: "Remove language",
+		removeConfirm: insert("Remove {{language}} and all of its content from this Unit?", {
+			language: String,
+		}),
+		saveOrder: "Save order",
+		cancel: "Cancel",
+		noMoreLanguages: "All supported languages have already been added.",
+		unsavedConfirm: "Discard the unsaved changes for this language?",
+		instructions:
+			"Press Space to pick up a language. Use the arrow keys to move it, then press Space again to drop it.",
+		moved: insert("Moved {{language}} to position {{position}} of {{count}}.", {
+			language: String,
+			position: Number,
+			count: Number,
+		}),
 	},
 	content: {
 		title: "Contents",

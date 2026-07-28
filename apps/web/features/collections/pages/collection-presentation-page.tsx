@@ -56,7 +56,7 @@ export function CollectionPresentationPage() {
 		<section className="grid gap-6">
 			<ManagementWorkspaceSectionHeader
 				backHref={collectionManagementHref(collection.id)}
-				backLabel={t.collections.workspace.backToOverview}
+				backLabel={t.collections.workspace.backToContent}
 				description={t.collections.workspace.sections.presentation.description}
 				link={Link}
 				title={t.collections.workspace.sections.presentation.label}

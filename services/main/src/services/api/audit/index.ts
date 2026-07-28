@@ -6,7 +6,7 @@ import session from "../../auth/session";
 import { database } from "../../database";
 import { auditEvent } from "../../database/schema";
 import { InvalidPaginationCursor } from "../../pagination/errors";
-import { primaryUnitTitle } from "../../units/localization";
+import { firstUnitLocalizationTitle } from "../../units/localization";
 import { toApiErrorResponse } from "../schema/response";
 import { decodeAuditCursor, encodeAuditCursor } from "./cursor";
 import { AuditEventListResponse, AuditEventsQuery } from "./schema";
@@ -43,7 +43,7 @@ export default new Elysia({ prefix: "/audit" }).use(session).get(
 				outcome: auditEvent.outcome,
 				actorKind: auditEvent.actorKind,
 				actorProfileId: auditEvent.actorProfileId,
-				actorName: primaryUnitTitle(auditEvent.actorProfileId),
+				actorName: firstUnitLocalizationTitle(auditEvent.actorProfileId),
 				actorCredentialKind: auditEvent.actorCredentialKind,
 				actorCredentialId: auditEvent.actorCredentialId,
 				authorityKind: auditEvent.authorityKind,
@@ -55,7 +55,7 @@ export default new Elysia({ prefix: "/audit" }).use(session).get(
 				targetKind: auditEvent.targetKind,
 				targetId: auditEvent.targetId,
 				targetPath: auditEvent.targetPath,
-				targetName: primaryUnitTitle(auditEvent.targetId),
+				targetName: firstUnitLocalizationTitle(auditEvent.targetId),
 				details: auditEvent.details,
 				createdAt: auditEvent.createdAt,
 			})

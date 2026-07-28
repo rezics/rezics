@@ -285,6 +285,12 @@ import type {
 	GetApiUnitsByIdByUnitIdSeriesMembershipsResponses,
 	GetApiUnitsByIdByUnitIdStatusEventsOptions,
 	GetApiUnitsByIdByUnitIdStatusEventsResponses,
+	GetApiUnitsByIdByUnitIdLocalizationOrderOptions,
+	GetApiUnitsByIdByUnitIdLocalizationOrderResponses,
+	PutApiUnitsByIdByUnitIdLocalizationOrderOptions,
+	PutApiUnitsByIdByUnitIdLocalizationOrderResponses,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponses,
 	GetApiUnitsByTypeOptions,
 	GetApiUnitsByTypeResponses,
 	PostApiUnitsByTypeOptions,
@@ -3341,6 +3347,68 @@ export function getApiUnitsByIdByUnitIdStatusEvents<ThrowOnError extends boolean
 		url: "/api/units/by-id/{unitId}/status-events",
 		...config,
 	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Unit content language order
+ * {@link /api/units/by-id/:unitId/localization-order}
+ */
+export function getApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdLocalizationOrderOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/localization-order",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Reorder Unit content languages
+ * {@link /api/units/by-id/:unitId/localization-order}
+ */
+export function putApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsByIdByUnitIdLocalizationOrderOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/units/by-id/{unitId}/localization-order",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove a Unit content language
+ * {@link /api/units/by-id/:unitId/localizations/:language}
+ */
+export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguage<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/by-id/{unitId}/localizations/{language}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+	>;
 }
 
 /**

@@ -23,7 +23,7 @@ export function UnitSectionHeader({
 		<ManagementWorkspaceSectionHeader
 			action={action}
 			backHref={unitManagementHref(type, unit.id)}
-			backLabel={t.units.workspace.backToOverview}
+			backLabel={t.units.workspace.backToContent}
 			description={description}
 			link={Link}
 			title={title}

@@ -19,7 +19,8 @@ import { createContentStructureHistory } from "../content-structure/history";
 import {
 	avatarReferenceFromColumns,
 	avatarReferenceToColumns,
-	makePrimaryUnitLocalization,
+	removeUnitLocalization,
+	reorderUnitLocalizations,
 	resolveUnitLocalizationFromOrdered,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
@@ -46,7 +47,7 @@ import {
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
-import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors";
+import { UnitChanged, UnitNotFound } from "./errors";
 import { recordUnitRevision } from "./history";
 import { insertUnit } from "./create";
 import { transitionUnitStatus } from "./status";
@@ -89,7 +90,6 @@ export interface UpdateUnitInput {
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: PublicationLicenseId | null;
 	unit?: {
-		primaryLanguage?: ContentLanguage;
 		releasedOn?: string | null;
 	};
 	details?: {
@@ -294,7 +294,6 @@ export async function getUnit(
 	);
 	if (!resolvedLocalization) throw new UnitNotFound();
 	const selectedLocalization = resolvedLocalization;
-	const primaryLanguage = localizations[0]?.language ?? null;
 	const attributions =
 		(await getAttributionSummariesWithStatisticsByUnitIds([base.id])).get(base.id) ?? [];
 	const subjectAssociationRows = await database
@@ -378,7 +377,6 @@ export async function getUnit(
 		attributions,
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
-		primaryLanguage,
 		releasedOn:
 			details.type === "book"
 				? details.publicationDate
@@ -583,21 +581,6 @@ export async function updateUnit(
 				: common.releasedOn === null
 					? null
 					: common.releasedOn;
-		if (common.primaryLanguage) {
-			const language = common.primaryLanguage;
-			const [localization] = await tx
-				.select({ language: unitLocalization.language })
-				.from(unitLocalization)
-				.where(
-					and(
-						eq(unitLocalization.unitId, unitId),
-						eq(unitLocalization.language, language),
-					),
-				)
-				.limit(1);
-			if (!localization) throw new UnitPrimaryLanguageMissing();
-			await makePrimaryUnitLocalization(tx, unitId, language);
-		}
 		if (kind === "book")
 			await tx
 				.update(book)
@@ -736,5 +719,63 @@ export async function upsertLocalization(
 			actorProfileId: authorization.profileId,
 			event: "update",
 		});
+	});
+}
+
+export async function updateUnitLocalizationOrder(
+	unitId: string,
+	authorization: Authorization<string>,
+	input: {
+		expectedLanguages: readonly ContentLanguage[];
+		languages: readonly ContentLanguage[];
+	},
+): Promise<ContentLanguage[]> {
+	await authorization.unit.ensureCanUpdate(unitId, [["localizations"]]);
+	await database.transaction(async (tx) => {
+		const changed = await reorderUnitLocalizations(
+			tx,
+			unitId,
+			input.expectedLanguages,
+			input.languages,
+		);
+		if (changed)
+			await recordUnitRevision(tx, {
+				unitId,
+				actorProfileId: authorization.profileId,
+				event: "update",
+			});
+	});
+	return [...input.languages];
+}
+
+export async function getUnitLocalizationOrder(
+	unitId: string,
+	authorization: Authorization,
+): Promise<ContentLanguage[]> {
+	await authorization.unit.ensureCanRead(unitId);
+	const localizations = await database
+		.select({ language: unitLocalization.language })
+		.from(unitLocalization)
+		.where(eq(unitLocalization.unitId, unitId))
+		.orderBy(unitLocalization.position, unitLocalization.language);
+	if (!localizations.length) throw new UnitNotFound();
+	return localizations.map(({ language }) => language);
+}
+
+export async function deleteUnitContentLanguage(
+	unitId: string,
+	language: ContentLanguage,
+	authorization: Authorization<string>,
+	expectedLanguages: readonly ContentLanguage[],
+): Promise<ContentLanguage[]> {
+	await authorization.unit.ensureCanUpdate(unitId, [["localizations"]]);
+	return database.transaction(async (tx) => {
+		const languages = await removeUnitLocalization(tx, unitId, language, expectedLanguages);
+		await recordUnitRevision(tx, {
+			unitId,
+			actorProfileId: authorization.profileId,
+			event: "update",
+		});
+		return languages;
 	});
 }

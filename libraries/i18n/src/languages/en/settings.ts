@@ -6,6 +6,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
+const { forms: metadataTerms } = enTerminology.metadata;
 
 export default {
 	workspace: {
@@ -86,7 +87,7 @@ export default {
 		createDescription:
 			"The secret is shown once. Choose the least access needed and conservative limits first.",
 		name: "Name",
-		namePlaceholder: "For example: Book metadata completion agent",
+		namePlaceholder: `For example: Book ${metadataTerms.inline} completion agent`,
 		expiresIn: "Lifetime",
 		expiryDays: {
 			thirty: "30 days",

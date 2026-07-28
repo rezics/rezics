@@ -114,8 +114,9 @@ export const unitLocalization = pgTable(
 			.references(() => unit.id, { onDelete: "cascade" }),
 		language: text().$type<ContentLanguage>().notNull(),
 		/**
-		 * Fractional index in the Unit's localization sequence. The first item is
-		 * primary; fallback selection is one consumer of this general ordering.
+		 * Fractional index in the Unit's content-language fallback sequence.
+		 * Reader preferences are resolved first; this order is used only when no
+		 * requested language is available.
 		 */
 		position: fractionalIndexPosition()
 			.default(sql`('a0' || replace(uuidv7()::text, '-', '') || 'V')`)

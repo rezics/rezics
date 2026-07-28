@@ -10,8 +10,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { toContentLanguage } from "@rezics/i18n";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { PostManagementSectionHeader } from "@/features/posts/components/post-management-section-header";
 import { useReviewManagement } from "@/features/posts/components/post-management-workspace";
 import { postDetailHref } from "@/features/posts/routing/post-management-routes";
@@ -24,6 +24,7 @@ import { invalidateReviews } from "../data/review-cache";
 export function ReviewEditPage() {
 	const { t } = useTranslation(["engagement", "errors", "posts"]);
 	const { item: review } = useReviewManagement();
+	const { selectedLanguage } = useContentLanguageEditor();
 	const { capabilities } = review;
 	if (!capabilities.canEdit && !capabilities.canManageScores)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
@@ -34,7 +35,9 @@ export function ReviewEditPage() {
 				title={t.engagement.editReview}
 			/>
 			<div className="grid gap-8">
-				{capabilities.canEdit ? <ReviewEditForm key={review.id} review={review} /> : null}
+				{capabilities.canEdit ? (
+					<ReviewEditForm key={`${review.id}:${selectedLanguage}`} review={review} />
+				) : null}
 				{capabilities.canManageScores ? <ReviewScoreAssociationManager /> : null}
 			</div>
 		</section>
@@ -45,8 +48,12 @@ function ReviewEditForm({ review }: { review: GetApiReviewsByReviewIdStatus200 }
 	const update = usePatchApiReviewsByReviewId();
 	const queryClient = useQueryClient();
 	const router = useRouter();
-	const { locale, t } = useTranslation(["errors", "ui"]);
-	const [body, setBody] = useState<PortableTextValue>(() => readPortableText(review.body));
+	const { t } = useTranslation(["errors", "ui"]);
+	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+		useContentLanguageEditor();
+	const [body, setBody] = useState<PortableTextValue>(() =>
+		readPortableText(selectedLanguageIsPending ? null : review.body),
+	);
 	const [invalid, setInvalid] = useState(false);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -61,12 +68,15 @@ function ReviewEditForm({ review }: { review: GetApiReviewsByReviewIdStatus200 }
 			await update.mutateAsync({
 				path: { reviewId: review.id },
 				body: {
-					language: toContentLanguage(locale.target),
+					language: selectedLanguage,
 					title: String(form.get("title") ?? "").trim(),
 					...(String(form.get("summary") ?? "").trim()
 						? { summary: String(form.get("summary") ?? "").trim() }
 						: {}),
-					body: writePortableText(body, review.body),
+					body: writePortableText(
+						body,
+						selectedLanguageIsPending ? undefined : review.body,
+					),
 				},
 			});
 			await invalidateReviews(
@@ -75,6 +85,8 @@ function ReviewEditForm({ review }: { review: GetApiReviewsByReviewIdStatus200 }
 				review.targetId,
 				review.scores[0]?.contextUnitId,
 			);
+			setDirty(false);
+			await languagesChanged();
 			router.push(postDetailHref("review", review.id));
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -82,12 +94,16 @@ function ReviewEditForm({ review }: { review: GetApiReviewsByReviewIdStatus200 }
 	}
 
 	return (
-		<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
+		<form
+			className="flex flex-col gap-6"
+			onChange={() => setDirty(true)}
+			onSubmit={(event) => void submit(event)}
+		>
 			<FieldGroup>
 				<Field required>
 					<FieldLabel>{t.ui.title}</FieldLabel>
 					<Input
-						defaultValue={review.title ?? ""}
+						defaultValue={selectedLanguageIsPending ? "" : (review.title ?? "")}
 						maxLength={500}
 						name="title"
 						required
@@ -95,9 +111,21 @@ function ReviewEditForm({ review }: { review: GetApiReviewsByReviewIdStatus200 }
 				</Field>
 				<Field>
 					<FieldLabel>{t.ui.summary}</FieldLabel>
-					<Input defaultValue={review.summary ?? ""} maxLength={2000} name="summary" />
+					<Input
+						defaultValue={selectedLanguageIsPending ? "" : (review.summary ?? "")}
+						maxLength={2000}
+						name="summary"
+					/>
 				</Field>
-				<PortableTextEditor label={t.ui.body} onChange={setBody} required value={body} />
+				<PortableTextEditor
+					label={t.ui.body}
+					onChange={(value) => {
+						setBody(value);
+						setDirty(true);
+					}}
+					required
+					value={body}
+				/>
 			</FieldGroup>
 			{invalid ? (
 				<p className="text-sm text-destructive" role="alert">

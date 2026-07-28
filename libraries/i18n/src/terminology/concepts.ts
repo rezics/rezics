@@ -89,6 +89,12 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "inline"] as const,
 		locales: WebTerminologyLocales,
 	},
+	metadata: {
+		definition:
+			"Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.",
+		slots: ["label", "inline"] as const,
+		locales: WebTerminologyLocales,
+	},
 });
 
 export type TerminologyConceptKey = keyof typeof terminologyConcepts;

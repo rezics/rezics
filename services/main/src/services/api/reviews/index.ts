@@ -6,8 +6,7 @@ import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
-	isPrimaryUnitLocalization,
-	makePrimaryUnitLocalization,
+	isFirstUnitLocalization,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
@@ -561,7 +560,7 @@ export default new Elysia()
 							.where(
 								and(
 									eq(unitLocalization.unitId, params.reviewId),
-									isPrimaryUnitLocalization(unitLocalization.unitId),
+									isFirstUnitLocalization(unitLocalization.unitId),
 								),
 							)
 							.for("update")
@@ -591,7 +590,6 @@ export default new Elysia()
 							previousBody: current?.content,
 							nextBody: body.body,
 						});
-						await makePrimaryUnitLocalization(tx, params.reviewId, body.language);
 						await recordUnitRevision(tx, {
 							unitId: params.reviewId,
 							actorProfileId: profile.unitId,

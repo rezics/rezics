@@ -100,7 +100,6 @@ export function CatalogOverviewPage() {
 					? t.ui.unlisted
 					: t.ui.public,
 		],
-		[t.units.detail.primaryLanguage, unit.primaryLanguage],
 		[t.units.detail.releasedOn, formatDate(unit.releasedOn, locale.current)],
 		[t.units.detail.license, licenseValue],
 		[t.units.detail.updatedAt, formatDate(unit.updatedAt, locale.current)],

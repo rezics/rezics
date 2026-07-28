@@ -138,7 +138,7 @@ describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
 		).toBe("banner-default");
 	});
 
-	it("falls forward when the primary localization has no asset", () => {
+	it("falls forward when the first fallback localization has no asset", () => {
 		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "cover")).toBe(
 			"cover-zh",
 		);

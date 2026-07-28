@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	ContentLanguageValues,
-	isContentLanguage,
-	toContentLanguage,
-	type ContentLanguage,
-} from "@rezics/i18n";
+import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 
 import {
 	type GetApiChaptersByChapterIdStatus200,
@@ -50,6 +45,9 @@ import { Skeleton } from "@rezics/ui";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTrigger } from "@rezics/ui";
 import { cn } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
@@ -587,12 +585,16 @@ function ChapterLocalizationEditorContent({
 				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
 			</main>
 		);
-	return <ChapterLocalizationEditor bookId={bookId} chapterId={chapterId} />;
+	return (
+		<ContentLanguageEditorBoundary unitId={chapterId}>
+			<ChapterLocalizationEditor bookId={bookId} chapterId={chapterId} />
+		</ContentLanguageEditorBoundary>
+	);
 }
 
 function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t, locale } = useTranslation(["actions", "errors", "history", "state", "ui", "units"]);
-	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
+	const { t } = useTranslation(["actions", "errors", "history", "state", "ui", "units"]);
+	const { selectedLanguage: language } = useContentLanguageEditor();
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
 		query: { localizationLanguages: [language], language },
@@ -607,7 +609,8 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 		<main className="mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
 			<PageHeading
 				action={
-					<div className="flex gap-2">
+					<div className="flex flex-wrap justify-end gap-2">
+						<ContentLanguageControl />
 						<Button asChild variant="outline">
 							<Link
 								href={unitManagementSectionHref(
@@ -633,24 +636,6 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 			/>
 			<Card>
 				<CardContent className="grid gap-6 p-6">
-					<div className="grid gap-2">
-						<Field>
-							<FieldLabel>{t.units.chapter.language}</FieldLabel>
-							<NativeSelect
-								value={language}
-								onChange={(event) => {
-									const value = event.currentTarget.value;
-									if (isContentLanguage(value)) setLanguage(value);
-								}}
-							>
-								{ContentLanguageValues.map((value) => (
-									<NativeSelectOption key={value} value={value}>
-										{value}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
-					</div>
 					<ChapterLocalizationForm
 						key={`${chapterId}:${language}:${query.data?.updatedAt ?? "new"}`}
 						bookId={bookId}
@@ -677,6 +662,7 @@ function ChapterLocalizationForm({
 }) {
 	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
 	const queryClient = useQueryClient();
+	const { setDirty, languagesChanged } = useContentLanguageEditor();
 	const [content, setContent] = useState<PortableTextValue>(() =>
 		readPortableText(chapter?.content),
 	);
@@ -706,12 +692,14 @@ function ChapterLocalizationForm({
 								: "draft",
 				},
 			});
+			setDirty(false);
+			await languagesChanged();
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
 	return (
-		<form onSubmit={submit}>
+		<form onChange={() => setDirty(true)} onSubmit={submit}>
 			<FieldGroup>
 				<Field required>
 					<FieldLabel>{t.ui.title}</FieldLabel>
@@ -732,7 +720,10 @@ function ChapterLocalizationForm({
 				</Field>
 				<PortableTextEditor
 					label={t.ui.body}
-					onChange={setContent}
+					onChange={(value) => {
+						setContent(value);
+						setDirty(true);
+					}}
 					required
 					value={content}
 					variant="document"

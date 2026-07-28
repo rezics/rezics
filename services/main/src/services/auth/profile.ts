@@ -4,7 +4,7 @@ import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 import { database } from "../database";
-import { isPrimaryUnitLocalization } from "../units/localization";
+import { isFirstUnitLocalization } from "../units/localization";
 import {
 	profile,
 	profilePreference,
@@ -42,7 +42,7 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, profile.id),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
+				isFirstUnitLocalization(unitLocalization.unitId),
 			),
 		)
 		.where(eq(profile.authUserId, authUserId))

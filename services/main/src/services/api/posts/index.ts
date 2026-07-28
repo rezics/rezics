@@ -6,10 +6,7 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import {
-	isPrimaryUnitLocalization,
-	resolvedUnitLocalizationLanguage,
-} from "../../units/localization";
+import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	creditAttribution,
 	post,
@@ -515,36 +512,40 @@ export default new Elysia()
 				"/:postId",
 				async ({ params, profile, authorization, body }) => {
 					await ensureOrdinaryPost(params.postId);
-					await authorization.unit.ensureCanUpdate(params.postId, [["localizations"]]);
+					await authorization.unit.ensureCanUpdate(params.postId, [
+						["localizations", body.language],
+					]);
 					await database.transaction(async (tx) => {
 						const [current] = await tx
 							.select({
-								language: unitLocalization.language,
 								content: unitLocalization.content,
 							})
 							.from(unitLocalization)
 							.where(
 								and(
 									eq(unitLocalization.unitId, params.postId),
-									isPrimaryUnitLocalization(unitLocalization.unitId),
+									eq(unitLocalization.language, body.language),
 								),
 							)
 							.for("update")
 							.limit(1);
-						if (!current) throw new PostLocalizationNotFound();
 						await tx
-							.update(unitLocalization)
-							.set({ title: body.title, content: body.body })
-							.where(
-								and(
-									eq(unitLocalization.unitId, params.postId),
-									eq(unitLocalization.language, current.language),
-								),
-							);
+							.insert(unitLocalization)
+							.values({
+								unitId: params.postId,
+								language: body.language,
+								title: body.title,
+								content: body.body,
+								contentStatus: "published",
+							})
+							.onConflictDoUpdate({
+								target: [unitLocalization.unitId, unitLocalization.language],
+								set: { title: body.title, content: body.body },
+							});
 						await applyNewPostTagMentionVotes(tx, {
 							postId: params.postId,
 							profileId: profile.unitId,
-							previousBody: current.content,
+							previousBody: current?.content,
 							nextBody: body.body,
 						});
 						await recordUnitRevision(tx, {
@@ -901,7 +902,7 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					await getReplyPost(params.postId, params.replyPostId);
 					await authorization.unit.ensureCanUpdate(params.replyPostId, [
-						["localizations"],
+						["localizations", body.language],
 					]);
 					await database.transaction(async (tx) => {
 						const [current] = await tx
@@ -910,25 +911,27 @@ export default new Elysia()
 							.where(
 								and(
 									eq(unitLocalization.unitId, params.replyPostId),
-									isPrimaryUnitLocalization(unitLocalization.unitId),
+									eq(unitLocalization.language, body.language),
 								),
 							)
 							.for("update")
 							.limit(1);
-						if (!current) throw new PostLocalizationNotFound();
 						await tx
-							.update(unitLocalization)
-							.set({ content: body.body })
-							.where(
-								and(
-									eq(unitLocalization.unitId, params.replyPostId),
-									isPrimaryUnitLocalization(unitLocalization.unitId),
-								),
-							);
+							.insert(unitLocalization)
+							.values({
+								unitId: params.replyPostId,
+								language: body.language,
+								content: body.body,
+								contentStatus: "published",
+							})
+							.onConflictDoUpdate({
+								target: [unitLocalization.unitId, unitLocalization.language],
+								set: { content: body.body },
+							});
 						await applyNewPostTagMentionVotes(tx, {
 							postId: params.replyPostId,
 							profileId: profile.unitId,
-							previousBody: current.content,
+							previousBody: current?.content,
 							nextBody: body.body,
 						});
 						await recordUnitRevision(tx, {

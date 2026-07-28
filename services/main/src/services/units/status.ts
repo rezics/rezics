@@ -11,7 +11,7 @@ import {
 	UnitStatusValues,
 } from "../database/schema";
 import { recordStudioWorkRelation } from "../studio/projection";
-import { primaryUnitTitle } from "./localization";
+import { firstUnitLocalizationTitle } from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 
@@ -242,7 +242,7 @@ export async function listUnitStatusEvents(input: {
 			actorKind: unitStatusEvent.actorKind,
 			actorHidden: unitStatusEvent.actorHidden,
 			profileId: unitStatusEvent.changedByProfileId,
-			profileName: primaryUnitTitle(profile.id),
+			profileName: firstUnitLocalizationTitle(profile.id),
 			revisionId: unitStatusEvent.revisionId,
 			createdAt: unitStatusEvent.createdAt,
 		})

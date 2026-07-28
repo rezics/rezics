@@ -46,11 +46,11 @@ import {
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
-import { selectLocalization } from "@/lib/localization";
 import { invalidateRealmDetails } from "./query";
 
 type PickedEntity = { id: string; label: string };
@@ -69,7 +69,9 @@ export function RealmProfileSettings({
 	realm: GetApiRealmsByRealmIdStatus200;
 	embedded?: boolean;
 }) {
-	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
+	const { t } = useTranslation(["errors", "locale", "media", "realms", "state", "ui"]);
+	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+		useContentLanguageEditor();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiRealmsByRealmId();
@@ -84,22 +86,15 @@ export function RealmProfileSettings({
 			},
 		},
 	});
-	const localization = realm.localizations.find(
-		(entry) => entry.language === toContentLanguage(locale.target),
-	);
-	const fallbackLocalization = selectLocalization(
-		realm.localizations,
-		toContentLanguage(locale.target),
-		realm.language,
-	);
+	const localization = realm.localizations.find((entry) => entry.language === selectedLanguage);
 	const avatarOptions: AvatarFieldOption[] = realm.localizations.flatMap((entry) =>
-		entry.language !== toContentLanguage(locale.target) && entry.avatar
-			? [{ ...entry.avatar, label: entry.language }]
+		entry.language !== selectedLanguage && entry.avatar
+			? [{ ...entry.avatar, label: t.locale[entry.language] }]
 			: [],
 	);
 	const bannerOptions: LocalizationImageAssetOption[] = realm.localizations.flatMap((entry) =>
-		entry.language !== toContentLanguage(locale.target) && entry.banner
-			? [{ ...entry.banner, label: entry.language }]
+		entry.language !== selectedLanguage && entry.banner
+			? [{ ...entry.banner, label: t.locale[entry.language] }]
 			: [],
 	);
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);
@@ -131,7 +126,7 @@ export function RealmProfileSettings({
 					visibility,
 					joinPolicy: data.get("joinPolicy") === "approval" ? "approval" : "open",
 					localization: {
-						language: toContentLanguage(locale.target),
+						language: selectedLanguage,
 						title,
 						...(summary ? { summary } : {}),
 						avatar: avatarPresentationToInput(avatar),
@@ -140,7 +135,11 @@ export function RealmProfileSettings({
 				},
 			},
 			{
-				onSuccess: () => invalidateRealmDetails(queryClient, realm.id),
+				onSuccess: async () => {
+					setDirty(false);
+					await invalidateRealmDetails(queryClient, realm.id);
+					await languagesChanged();
+				},
 			},
 		);
 	}
@@ -152,7 +151,7 @@ export function RealmProfileSettings({
 			)}
 			<Card>
 				<CardContent className="p-5">
-					<form onSubmit={submit}>
+					<form onChange={() => setDirty(true)} onSubmit={submit}>
 						<FieldGroup>
 							<Field required>
 								<FieldLabel>{t.ui.title}</FieldLabel>
@@ -161,7 +160,7 @@ export function RealmProfileSettings({
 									required
 									maxLength={500}
 									defaultValue={
-										localization?.title ?? fallbackLocalization?.title ?? ""
+										selectedLanguageIsPending ? "" : (localization?.title ?? "")
 									}
 								/>
 							</Field>
@@ -171,7 +170,9 @@ export function RealmProfileSettings({
 									name="summary"
 									maxLength={2000}
 									defaultValue={
-										localization?.summary ?? fallbackLocalization?.summary ?? ""
+										selectedLanguageIsPending
+											? ""
+											: (localization?.summary ?? "")
 									}
 								/>
 							</Field>
@@ -179,7 +180,10 @@ export function RealmProfileSettings({
 								<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 								<AvatarField
 									fallback={avatarOptions[0] ?? null}
-									onChange={setAvatar}
+									onChange={(value) => {
+										setAvatar(value);
+										setDirty(true);
+									}}
 									options={avatarOptions}
 									value={avatar}
 								/>
@@ -188,7 +192,10 @@ export function RealmProfileSettings({
 								<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
 								<LocalizationImageUploadField
 									fallback={bannerOptions[0] ?? null}
-									onChange={setBanner}
+									onChange={(value) => {
+										setBanner(value);
+										setDirty(true);
+									}}
 									options={bannerOptions}
 									role="banner"
 									value={banner}

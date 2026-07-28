@@ -9,6 +9,7 @@ import {
 	ReplacePreferencesBody,
 	StudioContentListQuery,
 	UpdateInterfaceLocaleBody,
+	UpdateProfileBody,
 } from "./schema";
 
 describe("Collection preference contract", () => {
@@ -73,6 +74,24 @@ describe("public profile localization query", () => {
 		expect(Check(PublicProfileQuery, { localizationLanguages: [] })).toBe(false);
 		expect(Check(PublicProfileQuery, { localizationLanguages: ["en", "en"] })).toBe(false);
 		expect(Check(PublicProfileQuery, { language: "en" })).toBe(false);
+	});
+});
+
+describe("profile content language contract", () => {
+	it("requires one supported language for every localized profile update", () => {
+		const input = {
+			updatedAt: "2026-07-28T00:00:00.000Z",
+			language: "zh",
+			name: "名稱",
+		};
+		expect(Check(UpdateProfileBody, input)).toBe(true);
+		expect(Check(UpdateProfileBody, { ...input, language: "ja" })).toBe(false);
+		expect(
+			Check(UpdateProfileBody, {
+				updatedAt: input.updatedAt,
+				name: input.name,
+			}),
+		).toBe(false);
 	});
 });
 

@@ -48,6 +48,9 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 
 import { BlockDocumentEditor } from "@/features/blocks/block-document-editor";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { zoneManagementHref } from "./model";
@@ -227,15 +230,29 @@ export function ZonePagesManagement() {
 						<RequestFailure error={move.error} fallback={t.ui.retryLater} />
 					</CardContent>
 				</Card>
-				<PageEditor
-					key={selected?.id ?? "new"}
-					onSaved={setSelectedId}
-					page={selected}
-					pageStructureRevisionId={query.data.pageStructure?.latestRevisionId}
-					pages={pages}
-					placedPages={placedPages}
-					zoneId={zoneId}
-				/>
+				{selected ? (
+					<ContentLanguageEditorBoundary
+						onLanguagesChanged={invalidate}
+						unitId={selected.id}
+					>
+						<PageEditorForLanguage
+							onSaved={setSelectedId}
+							page={selected}
+							pageStructureRevisionId={query.data.pageStructure?.latestRevisionId}
+							pages={pages}
+							placedPages={placedPages}
+							zoneId={zoneId}
+						/>
+					</ContentLanguageEditorBoundary>
+				) : (
+					<PageEditorForLanguage
+						onSaved={setSelectedId}
+						pageStructureRevisionId={query.data.pageStructure?.latestRevisionId}
+						pages={pages}
+						placedPages={placedPages}
+						zoneId={zoneId}
+					/>
+				)}
 			</div>
 		</section>
 	);
@@ -381,6 +398,11 @@ function PageTreeRow({
 	);
 }
 
+function PageEditorForLanguage(props: Parameters<typeof PageEditor>[0]) {
+	const { selectedLanguage } = useContentLanguageEditor();
+	return <PageEditor key={`${props.page?.id ?? "new"}:${selectedLanguage}`} {...props} />;
+}
+
 function PageEditor({
 	page,
 	pageStructureRevisionId,
@@ -396,7 +418,9 @@ function PageEditor({
 	readonly zoneId: string;
 	readonly onSaved: (pageId: string) => void;
 }) {
-	const { t, locale } = useTranslation(["errors", "locale", "ui", "zones"]);
+	const { t } = useTranslation(["errors", "locale", "ui", "zones"]);
+	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+		useContentLanguageEditor();
 	const queryClient = useQueryClient();
 	const invalidate = () =>
 		queryClient.invalidateQueries({
@@ -415,13 +439,15 @@ function PageEditor({
 	const removePlacement = useDeleteApiZonesByZoneIdPagesByPageIdPlacement({
 		mutation: { onSuccess: invalidate },
 	});
-	const defaultLanguage = locale.target.startsWith("zh") ? "zh" : "en";
 	const [slug, setSlug] = useState(page?.home ? "" : (page?.slug ?? ""));
-	const [language, setLanguage] = useState<"zh" | "en">(page?.language ?? defaultLanguage);
-	const initialLocalization = page?.localizations.find((entry) => entry.language === language);
-	const [title, setTitle] = useState(initialLocalization?.title ?? page?.title ?? "");
+	const initialLocalization = page?.localizations.find(
+		(entry) => entry.language === selectedLanguage,
+	);
+	const [title, setTitle] = useState(
+		selectedLanguageIsPending ? "" : (initialLocalization?.title ?? ""),
+	);
 	const [document, setDocument] = useState<UnitReferencedBlockDocumentValue>(() =>
-		initialLocalization
+		initialLocalization && !selectedLanguageIsPending
 			? parseDocument(UnitReferencedBlockDocument, initialLocalization.document)
 			: createUnitReferencedBlockDocument(),
 	);
@@ -430,17 +456,6 @@ function PageEditor({
 	const [indexed, setIndexed] = useState(Boolean(page?.placement));
 	const [confirmingRemove, setConfirmingRemove] = useState(false);
 	const excludedParents = page ? descendantPageIds(placedPages, page.id) : new Set<string>();
-
-	function chooseLanguage(nextLanguage: "zh" | "en") {
-		setLanguage(nextLanguage);
-		const localization = page?.localizations.find((entry) => entry.language === nextLanguage);
-		setTitle(localization?.title ?? "");
-		setDocument(
-			localization
-				? parseDocument(UnitReferencedBlockDocument, localization.document)
-				: createUnitReferencedBlockDocument(),
-		);
-	}
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -451,7 +466,7 @@ function PageEditor({
 						path: { zoneId, pageId: page.id },
 						body: {
 							slug: normalizedSlug,
-							localization: { language, title, document },
+							localization: { language: selectedLanguage, title, document },
 							baseUnitRevisionId: page.latestUnitRevisionId,
 						},
 					})
@@ -459,7 +474,7 @@ function PageEditor({
 						path: { zoneId },
 						body: {
 							slug: normalizedSlug,
-							localization: { language, title, document },
+							localization: { language: selectedLanguage, title, document },
 						},
 					});
 
@@ -491,6 +506,8 @@ function PageEditor({
 					},
 				});
 			}
+			setDirty(false);
+			if (page) await languagesChanged();
 			onSaved(saved.id);
 		} catch {
 			// Typed mutation states supply the visible request failure.
@@ -513,12 +530,15 @@ function PageEditor({
 	return (
 		<Card appearance="outlined">
 			<CardContent className="p-6">
-				<form className="grid gap-6" onSubmit={submit}>
-					<h2 className="font-semibold text-xl">
-						{page
-							? t.zones.management.pages.editPage
-							: t.zones.management.pages.newPage}
-					</h2>
+				<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
+					<div className="flex flex-wrap items-center justify-between gap-3">
+						<h2 className="font-semibold text-xl">
+							{page
+								? t.zones.management.pages.editPage
+								: t.zones.management.pages.newPage}
+						</h2>
+						{page ? <ContentLanguageControl /> : null}
+					</div>
 					<FieldGroup className="grid gap-4 sm:grid-cols-2">
 						<Field>
 							<FieldLabel>{t.zones.management.pages.slugOptional}</FieldLabel>
@@ -529,18 +549,6 @@ function PageEditor({
 								pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
 								value={home ? ZoneHomePageSlug : slug}
 							/>
-						</Field>
-						<Field>
-							<FieldLabel>{t.zones.management.pages.language}</FieldLabel>
-							<NativeSelect
-								onChange={(event) =>
-									chooseLanguage(event.currentTarget.value === "zh" ? "zh" : "en")
-								}
-								value={language}
-							>
-								<NativeSelectOption value="zh">{t.locale.zh}</NativeSelectOption>
-								<NativeSelectOption value="en">{t.locale.en}</NativeSelectOption>
-							</NativeSelect>
 						</Field>
 						<Field required>
 							<FieldLabel>{t.zones.management.pages.title}</FieldLabel>
@@ -592,9 +600,10 @@ function PageEditor({
 					<BlockDocumentEditor
 						document={document}
 						labels={t.zones.management.blocks}
-						onChange={(next) =>
-							setDocument(parseDocument(UnitReferencedBlockDocument, next))
-						}
+						onChange={(next) => {
+							setDocument(parseDocument(UnitReferencedBlockDocument, next));
+							setDirty(true);
+						}}
 					/>
 					<div className="flex flex-wrap gap-3">
 						<Button isLoading={pending} type="submit">

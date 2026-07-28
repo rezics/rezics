@@ -15,6 +15,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, type DragEvent, type FormEvent } from "react";
 import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
@@ -56,12 +57,25 @@ import { SettingsOverviewHref } from "./routing/settings-routes";
 import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
 import { FeedQueryKey } from "@/features/content-feed/query";
 import { ContentRatingPreferenceField } from "./components/content-rating-preference-field";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 
-function SettingsFrame({ title, children }: { title: string; children: React.ReactNode }) {
+function SettingsFrame({
+	title,
+	action,
+	children,
+}: {
+	readonly title: string;
+	readonly action?: React.ReactNode;
+	readonly children: React.ReactNode;
+}) {
 	const { t } = useTranslation(["settings"]);
 	return (
 		<section className="max-w-2xl">
 			<ManagementWorkspaceSectionHeader
+				action={action}
 				backHref={SettingsOverviewHref}
 				backLabel={t.settings.workspace.backToOverview}
 				link={Link}
@@ -78,11 +92,34 @@ interface PickedRealm {
 }
 
 export function ProfileSettings() {
-	const profile = useGetApiUsersMe();
+	const searchParams = useSearchParams();
+	const requestedLanguage = searchParams.get("language");
+	const fallbackLanguages = useLocalizationLanguages();
+	const localizationLanguages =
+		requestedLanguage && isContentLanguage(requestedLanguage)
+			? [requestedLanguage]
+			: fallbackLanguages;
+	const profile = useGetApiUsersMe({ query: { localizationLanguages } });
 	if (profile.isPending) return <QueryPending />;
 	if (profile.isError || !profile.data)
 		return <QueryFailure error={profile.error} retry={() => void profile.refetch()} />;
-	return <ProfileSettingsForm key={profile.data.updatedAt} current={profile.data} />;
+	return (
+		<ContentLanguageEditorBoundary
+			onLanguagesChanged={async () => {
+				await profile.refetch();
+			}}
+			unitId={profile.data.id}
+		>
+			<ProfileSettingsForLanguage current={profile.data} />
+		</ContentLanguageEditorBoundary>
+	);
+}
+
+function ProfileSettingsForLanguage({ current }: { readonly current: GetApiUsersMeStatus200 }) {
+	const { selectedLanguage } = useContentLanguageEditor();
+	return (
+		<ProfileSettingsForm current={current} key={`${current.updatedAt}:${selectedLanguage}`} />
+	);
 }
 
 function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
@@ -96,6 +133,8 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 		"ui",
 	]);
 	const queryClient = useQueryClient();
+	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+		useContentLanguageEditor();
 	const update = usePatchApiUsersMe({
 		mutation: {
 			onSuccess: (profile) =>
@@ -119,51 +158,76 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 		},
 	});
 	const [saved, setSaved] = useState(false);
-	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(current.avatar);
-	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(current.banner);
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(
+		selectedLanguageIsPending ? null : current.avatar,
+	);
+	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
+		selectedLanguageIsPending ? null : current.banner,
+	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setSaved(false);
 		const data = new FormData(event.currentTarget);
 		const name = String(data.get("name") ?? "").trim();
+		if (!name) return;
 		try {
 			await update.mutateAsync({
 				body: {
 					updatedAt: current.updatedAt,
-					...(name ? { name } : {}),
+					language: selectedLanguage,
+					name,
 					summary: String(data.get("summary") ?? "").trim(),
 					avatar: avatarPresentationToInput(avatar),
 					bannerAssetId: banner?.id ?? null,
 				},
 			});
+			setDirty(false);
+			await languagesChanged();
 			setSaved(true);
 		} catch {
 			setSaved(false);
 		}
 	}
 	return (
-		<SettingsFrame title={t.settings.profile}>
-			<form onSubmit={submit}>
+		<SettingsFrame action={<ContentLanguageControl />} title={t.settings.profile}>
+			<form onChange={() => setDirty(true)} onSubmit={submit}>
 				<FieldGroup>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<AvatarField onChange={setAvatar} value={avatar} />
+						<AvatarField
+							onChange={(value) => {
+								setAvatar(value);
+								setDirty(true);
+							}}
+							value={avatar}
+						/>
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
 						<LocalizationImageUploadField
-							onChange={setBanner}
+							onChange={(value) => {
+								setBanner(value);
+								setDirty(true);
+							}}
 							role="banner"
 							value={banner}
 						/>
 					</Field>
-					<Field>
+					<Field required>
 						<FieldLabel>{t.ui.displayName}</FieldLabel>
-						<Input name="name" defaultValue={current.name ?? ""} />
+						<Input
+							defaultValue={selectedLanguageIsPending ? "" : (current.name ?? "")}
+							maxLength={120}
+							name="name"
+							required
+						/>
 					</Field>
 					<Field>
 						<FieldLabel>{t.ui.introduction}</FieldLabel>
-						<Textarea name="summary" defaultValue={current.summary ?? ""} />
+						<Textarea
+							name="summary"
+							defaultValue={selectedLanguageIsPending ? "" : (current.summary ?? "")}
+						/>
 					</Field>
 					{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}
 					<Button variant="solid" type="submit" isLoading={update.isPending}>

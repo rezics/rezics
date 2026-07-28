@@ -20,7 +20,7 @@ import {
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
 import { createProfilePublisherAttribution } from "../units/attribution";
-import { isPrimaryUnitLocalization } from "../units/localization";
+import { isFirstUnitLocalization } from "../units/localization";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 
 export type GovernanceNoteRole = (typeof GovernanceNoteRoleValues)[number];
@@ -149,7 +149,7 @@ export async function listGovernanceNotes(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, governancePostBinding.postId),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
+				isFirstUnitLocalization(unitLocalization.unitId),
 			),
 		)
 		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, governancePostBinding.postId))

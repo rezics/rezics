@@ -21,7 +21,7 @@ describe("seed data", () => {
 			const data = createSeedData(referenceTime);
 			return Array.from({ length: 20 }, (_, index) => {
 				const language = data.languages(index)[0];
-				if (!language) throw new Error("A seed localization must have a primary language");
+				if (!language) throw new Error("A seed localization must have an initial language");
 				return {
 					languages: data.languages(index),
 					name: data.name(language),

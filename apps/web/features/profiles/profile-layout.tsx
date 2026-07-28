@@ -45,7 +45,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 		path: { id: profileId },
 		query: { localizationLanguages },
 	});
-	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
+	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session) } });
 	useLocalizationFallbackToast({
 		actualLanguage: profile.data?.language ?? null,
 		localizationLanguages,

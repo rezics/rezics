@@ -32,9 +32,9 @@ describe("Collection management section manifest", () => {
 		).toEqual(["items", "presentation"]);
 	});
 
-	it("shows Basics when delete is the only allowed operation", () => {
+	it("shows metadata when delete is the only allowed operation", () => {
 		expect(getCollectionManagementSectionIds({ ...denied, canDelete: true })).toEqual([
-			"basic",
+			"metadata",
 		]);
 	});
 });

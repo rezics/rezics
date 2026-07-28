@@ -36,7 +36,7 @@ import {
 import { invalidateCollections } from "../data/collection-cache";
 import { collectionManagementHref } from "../routing/collection-management-routes";
 
-export function CollectionBasicPage() {
+export function CollectionMetadataPage() {
 	const { collection } = useCollectionManagement();
 	const { t } = useTranslation(["collections", "errors", "ui"]);
 	const queryClient = useQueryClient();
@@ -84,10 +84,10 @@ export function CollectionBasicPage() {
 		<section className="grid gap-6">
 			<ManagementWorkspaceSectionHeader
 				backHref={collectionManagementHref(collection.id)}
-				backLabel={t.collections.workspace.backToOverview}
-				description={t.collections.workspace.sections.basic.description}
+				backLabel={t.collections.workspace.backToContent}
+				description={t.collections.workspace.sections.metadata.description}
 				link={Link}
-				title={t.collections.workspace.sections.basic.label}
+				title={t.collections.workspace.sections.metadata.label}
 			/>
 			{collection.capabilities.canEditDetails ? (
 				<form className="grid max-w-xl gap-6" onSubmit={(event) => void submit(event)}>

@@ -16,8 +16,8 @@ import {
 } from "@rezics/ui";
 import {
 	BookOpenText,
+	Database,
 	History,
-	Languages,
 	LibraryBig,
 	Link2,
 	ListTree,
@@ -29,6 +29,8 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useDockManagementAccess, type DockKind } from "@/features/docks";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -113,18 +115,18 @@ function UnitManagementWorkspaceContent({
 	const labels = t.units.workspace.sections;
 	const allSections: ManagementWorkspaceSection<UnitManagementSectionId>[] = [
 		{
-			id: "basic",
-			href: unitManagementSectionHref(type, unitId, "basic"),
-			label: labels.basic.label,
-			description: labels.basic.description,
+			id: "content",
+			href: unitManagementSectionHref(type, unitId, "content"),
+			label: labels.content.label,
+			description: labels.content.description,
 			icon: BookOpenText,
 		},
 		{
-			id: "localizations",
-			href: unitManagementSectionHref(type, unitId, "localizations"),
-			label: labels.localizations.label,
-			description: labels.localizations.description,
-			icon: Languages,
+			id: "metadata",
+			href: unitManagementSectionHref(type, unitId, "metadata"),
+			label: labels.metadata.label,
+			description: labels.metadata.description,
+			icon: Database,
 		},
 		{
 			id: "relationships",
@@ -186,50 +188,59 @@ function UnitManagementWorkspaceContent({
 	);
 	const currentSectionId = parseUnitManagementSection(pathname, type, unitId);
 	const requestedSection = allSections.find((section) => section.id === currentSectionId);
-	const sectionAllowed = !currentSectionId || visibleSectionIds.has(currentSectionId);
+	const sectionAllowed = Boolean(currentSectionId && visibleSectionIds.has(currentSectionId));
 	return (
-		<UnitManagementContext.Provider
-			value={{
-				type,
-				unit: query.data,
-				sections: candidates,
-				dockKinds: dockAccess.allowedKinds,
+		<ContentLanguageEditorProvider
+			localizations={query.data.localizations}
+			onLanguagesChanged={async () => {
+				await query.refetch();
 			}}
+			unitId={unitId}
 		>
-			<ManagementWorkspace
-				header={
-					<ManagementWorkspaceHeader
-						backHref={unitHref(type, unitId)}
-						backLabel={t.units.workspace.backToUnit}
-						description={t.units.workspace.description}
-						link={Link}
-						title={localization?.title ?? t.units.workspace.title}
-					/>
-				}
-				navigation={
-					<ManagementWorkspaceNavigation
-						ariaLabel={t.units.workspace.navigation}
-						currentSectionId={sectionAllowed ? currentSectionId : undefined}
-						link={Link}
-						sections={candidates}
-					/>
-				}
+			<UnitManagementContext.Provider
+				value={{
+					type,
+					unit: query.data,
+					sections: candidates,
+					dockKinds: dockAccess.allowedKinds,
+				}}
 			>
-				{sectionAllowed ? (
-					children
-				) : requestedSection ? (
-					<section>
-						<ManagementWorkspaceSectionHeader
-							backHref={unitManagementHref(type, unitId)}
-							backLabel={t.units.workspace.backToOverview}
-							description={requestedSection.description}
+				<ManagementWorkspace
+					header={
+						<ManagementWorkspaceHeader
+							action={capabilities.canEdit ? <ContentLanguageControl /> : undefined}
+							backHref={unitHref(type, unitId)}
+							backLabel={t.units.workspace.backToUnit}
+							description={t.units.workspace.description}
 							link={Link}
-							title={requestedSection.label}
+							title={localization?.title ?? t.units.workspace.title}
 						/>
-						<p className="text-sm text-destructive">{t.errors.forbidden}</p>
-					</section>
-				) : null}
-			</ManagementWorkspace>
-		</UnitManagementContext.Provider>
+					}
+					navigation={
+						<ManagementWorkspaceNavigation
+							ariaLabel={t.units.workspace.navigation}
+							currentSectionId={sectionAllowed ? currentSectionId : undefined}
+							link={Link}
+							sections={candidates}
+						/>
+					}
+				>
+					{sectionAllowed ? (
+						children
+					) : requestedSection ? (
+						<section>
+							<ManagementWorkspaceSectionHeader
+								backHref={unitManagementHref(type, unitId)}
+								backLabel={t.units.workspace.backToContent}
+								description={requestedSection.description}
+								link={Link}
+								title={requestedSection.label}
+							/>
+							<p className="text-sm text-destructive">{t.errors.forbidden}</p>
+						</section>
+					) : null}
+				</ManagementWorkspace>
+			</UnitManagementContext.Provider>
+		</ContentLanguageEditorProvider>
 	);
 }

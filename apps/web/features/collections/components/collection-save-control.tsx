@@ -60,7 +60,7 @@ export function CollectionSaveControl({
 	const [newCollectionTitle, setNewCollectionTitle] = useState("");
 	const open = controlledOpen ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
-	const me = useGetApiUsersMe({ query: { enabled: open && Boolean(session) } });
+	const me = useGetApiUsersMe({}, { query: { enabled: open && Boolean(session) } });
 	const collections = useGetApiCollections(
 		{
 			query: {

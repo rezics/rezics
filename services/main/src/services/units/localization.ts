@@ -10,7 +10,13 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import type { DatabaseTransaction } from "../database";
 import { unitLocalization } from "../database/schema";
-import { fractionalPositionBetween } from "../ordering/position";
+import { fractionalPositionAt, fractionalPositionBetween } from "../ordering/position";
+import {
+	UnitLastLocalizationRemovalForbidden,
+	UnitLocalizationNotFound,
+	UnitLocalizationOrderChanged,
+	UnitLocalizationOrderInvalid,
+} from "./errors";
 
 export const UnitLocalizationImageRoles = ["banner", "cover"] as const;
 export type UnitLocalizationImageRole = (typeof UnitLocalizationImageRoles)[number];
@@ -200,19 +206,19 @@ export function resolveUnitLocalizationAvatarFromOrdered(
 	return resolved ? avatarReferenceFromColumns(resolved) : null;
 }
 
-/** Return the first position in the Unit's ordered localization sequence. */
-function primaryUnitLocalizationPosition(unitId: SQLWrapper): SQL<string | null> {
+/** Return the first position in the Unit's ordered content-language fallback sequence. */
+function firstUnitLocalizationPosition(unitId: SQLWrapper): SQL<string | null> {
 	return sql<string | null>`(
-		select "primary_localization"."position"
-		from "unit_localization" as "primary_localization"
-		where "primary_localization"."unit_id" = ${unitId}
-		order by "primary_localization"."position", "primary_localization"."language"
+		select "first_localization"."position"
+		from "unit_localization" as "first_localization"
+		where "first_localization"."unit_id" = ${unitId}
+		order by "first_localization"."position", "first_localization"."language"
 		limit 1
 	)`;
 }
 
-export function isPrimaryUnitLocalization(unitId: SQLWrapper): SQL {
-	return eq(unitLocalization.position, primaryUnitLocalizationPosition(unitId));
+export function isFirstUnitLocalization(unitId: SQLWrapper): SQL {
+	return eq(unitLocalization.position, firstUnitLocalizationPosition(unitId));
 }
 
 /** Resolve a locale override, then the first available image in localization order. */
@@ -274,40 +280,102 @@ export function firstUnitLocalizationCoverAssetId(unitId: SQLWrapper): SQL<strin
 	return resolvedUnitLocalizationImageAssetId(unitId, "cover");
 }
 
+function contentLanguageOrdersEqual(
+	left: readonly ContentLanguage[],
+	right: readonly ContentLanguage[],
+): boolean {
+	return (
+		left.length === right.length && left.every((language, index) => language === right[index])
+	);
+}
+
+function contentLanguageSetsEqual(
+	left: readonly ContentLanguage[],
+	right: readonly ContentLanguage[],
+): boolean {
+	if (left.length !== right.length) return false;
+	const rightSet = new Set(right);
+	return left.every((language) => rightSet.has(language));
+}
+
 /**
- * Move an existing localization to the first position without changing the
- * relative order of the remaining localizations.
+ * Atomically replace a Unit's complete content-language fallback order.
+ *
+ * @remarks
+ * The expected order is an optimistic concurrency proof. The candidate order
+ * must contain the same non-empty language set, so this operation cannot add or
+ * remove content.
  */
-export async function makePrimaryUnitLocalization(
+export async function reorderUnitLocalizations(
 	tx: DatabaseTransaction,
 	unitId: string,
-	language: string,
-): Promise<void> {
+	expectedLanguages: readonly ContentLanguage[],
+	languages: readonly ContentLanguage[],
+): Promise<boolean> {
 	const localizations = await tx
 		.select({ language: unitLocalization.language, position: unitLocalization.position })
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, unitId))
-		.orderBy(unitLocalization.position, unitLocalization.language);
-	const primary = localizations[0];
-	const selected = localizations.find((localization) => localization.language === language);
-	if (!primary || !selected)
-		throw new Error(`Cannot make missing localization ${language} primary for Unit ${unitId}`);
-	if (primary.language === selected.language) return;
+		.orderBy(unitLocalization.position, unitLocalization.language)
+		.for("update");
+	const currentLanguages = localizations.map(({ language }) => language);
+	if (!contentLanguageOrdersEqual(currentLanguages, expectedLanguages))
+		throw new UnitLocalizationOrderChanged(currentLanguages);
+	if (!currentLanguages.length || !contentLanguageSetsEqual(currentLanguages, languages))
+		throw new UnitLocalizationOrderInvalid();
+	if (contentLanguageOrdersEqual(currentLanguages, languages)) return false;
 
-	const firstPosition = fractionalPositionBetween(null, primary.position);
-	await tx
-		.update(unitLocalization)
-		.set({ position: firstPosition })
-		.where(
-			and(
-				eq(unitLocalization.unitId, unitId),
-				eq(unitLocalization.language, selected.language),
-			),
-		);
+	let temporaryPosition = localizations.at(-1)?.position;
+	for (const localization of localizations) {
+		temporaryPosition = fractionalPositionBetween(temporaryPosition, null);
+		await tx
+			.update(unitLocalization)
+			.set({ position: temporaryPosition })
+			.where(
+				and(
+					eq(unitLocalization.unitId, unitId),
+					eq(unitLocalization.language, localization.language),
+				),
+			);
+	}
+	for (const [index, language] of languages.entries())
+		await tx
+			.update(unitLocalization)
+			.set({ position: fractionalPositionAt(index) })
+			.where(
+				and(eq(unitLocalization.unitId, unitId), eq(unitLocalization.language, language)),
+			);
+	return true;
 }
 
-/** Select the primary display title without joining a second localization role. */
-export function primaryUnitTitle(unitId: SQLWrapper): SQL<string | null> {
+/**
+ * Remove one Unit content language while preserving the non-empty invariant.
+ */
+export async function removeUnitLocalization(
+	tx: DatabaseTransaction,
+	unitId: string,
+	language: ContentLanguage,
+	expectedLanguages: readonly ContentLanguage[],
+): Promise<ContentLanguage[]> {
+	const localizations = await tx
+		.select({ language: unitLocalization.language })
+		.from(unitLocalization)
+		.where(eq(unitLocalization.unitId, unitId))
+		.orderBy(unitLocalization.position, unitLocalization.language)
+		.for("update");
+	const currentLanguages = localizations.map((localization) => localization.language);
+	if (!contentLanguageOrdersEqual(currentLanguages, expectedLanguages))
+		throw new UnitLocalizationOrderChanged(currentLanguages);
+	if (!currentLanguages.includes(language)) throw new UnitLocalizationNotFound();
+	if (currentLanguages.length === 1) throw new UnitLastLocalizationRemovalForbidden();
+	await tx
+		.delete(unitLocalization)
+		.where(and(eq(unitLocalization.unitId, unitId), eq(unitLocalization.language, language)));
+	return currentLanguages.filter((currentLanguage) => currentLanguage !== language);
+}
+
+/** Select the first fallback display title without joining a second localization role. */
+export function firstUnitLocalizationTitle(unitId: SQLWrapper): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.title}
 		from ${unitLocalization}
@@ -317,8 +385,8 @@ export function primaryUnitTitle(unitId: SQLWrapper): SQL<string | null> {
 	)`;
 }
 
-/** Select the primary display summary without joining a second localization role. */
-export function primaryUnitSummary(unitId: SQLWrapper): SQL<string | null> {
+/** Select the first fallback display summary without joining a second localization role. */
+export function firstUnitLocalizationSummary(unitId: SQLWrapper): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.summary}
 		from ${unitLocalization}
@@ -328,7 +396,7 @@ export function primaryUnitSummary(unitId: SQLWrapper): SQL<string | null> {
 	)`;
 }
 
-/** Resolve the requested localization, then fall back to the primary localization. */
+/** Resolve the requested localization, then use the Unit's fallback language order. */
 export function resolvedUnitLocalizationLanguage(
 	unitId: SQLWrapper,
 	languages: LocalizationLanguageQuery = [],
@@ -345,7 +413,7 @@ export function resolvedUnitLocalizationLanguage(
 	)`;
 }
 
-/** Resolve the requested localization's title, then fall back to the primary localization. */
+/** Resolve the requested localization's title, then use the Unit's fallback language order. */
 export function resolvedUnitLocalizationTitle(
 	unitId: SQLWrapper,
 	languages: LocalizationLanguageQuery = [],
@@ -362,7 +430,7 @@ export function resolvedUnitLocalizationTitle(
 	)`;
 }
 
-/** Resolve the requested localization's summary, then fall back to the primary localization. */
+/** Resolve the requested localization's summary, then use the Unit's fallback language order. */
 export function resolvedUnitLocalizationSummary(
 	unitId: SQLWrapper,
 	languages: LocalizationLanguageQuery = [],

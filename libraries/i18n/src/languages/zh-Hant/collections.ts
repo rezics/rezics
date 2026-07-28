@@ -1,4 +1,7 @@
 import { insert } from "native-i18n";
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: metadataTerms } = zhHantTerminology.metadata;
 
 export default {
 	title: "收藏集",
@@ -33,19 +36,19 @@ export default {
 	},
 	workspace: {
 		title: "收藏集管理",
-		description: "管理基本資料、內容結構、呈現方式、存取權與版本紀錄。",
+		description: `管理內容、${metadataTerms.label}、內容結構、呈現方式、存取權與版本紀錄。`,
 		navigation: "收藏集管理導覽",
 		overview: "收藏集管理項目",
 		backToCollection: "返回收藏集",
-		backToOverview: "返回管理首頁",
+		backToContent: "返回內容",
 		sections: {
-			basic: {
-				label: "基本設定",
-				description: "設定狀態、可見性與刪除收藏集。",
+			content: {
+				label: "內容",
+				description: "編輯各內容語言的標題、摘要與封面。",
 			},
-			localizations: {
-				label: "語言與外觀",
-				description: "編輯目前語言的標題、摘要與封面。",
+			metadata: {
+				label: metadataTerms.label,
+				description: `設定狀態與可見性${metadataTerms.inline}，或刪除收藏集。`,
 			},
 			items: {
 				label: "內容與結構",

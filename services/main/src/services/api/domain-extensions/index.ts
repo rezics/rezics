@@ -64,7 +64,6 @@ import { getContentStructureRevision } from "../../content-structure/service";
 import { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
 import { insertUnit } from "../../units/create";
 import {
-	makePrimaryUnitLocalization,
 	avatarReferenceFromColumns,
 	resolveUnitLocalizationFromOrdered,
 	resolvedUnitLocalizationImageAssetId,
@@ -855,11 +854,6 @@ export default new Elysia()
 									target: [unitLocalization.unitId, unitLocalization.language],
 									set: storedLocalization,
 								});
-							await makePrimaryUnitLocalization(
-								tx,
-								params.zoneId,
-								body.localization.language,
-							);
 						}
 						if (
 							body.boundaryDocument ||

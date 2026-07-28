@@ -639,8 +639,10 @@ import type {
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500,
+	GetApiUsersMeOptions,
 	GetApiUsersMeStatus200,
 	GetApiUsersMeStatus404,
+	GetApiUsersMeStatus422,
 	GetApiUsersMeStatus429,
 	GetApiUsersMeStatus500,
 	PatchApiUsersMeOptions,
@@ -924,6 +926,30 @@ import type {
 	GetApiUnitsByIdByUnitIdStatusEventsStatus404,
 	GetApiUnitsByIdByUnitIdStatusEventsStatus422,
 	GetApiUnitsByIdByUnitIdStatusEventsStatus500,
+	GetApiUnitsByIdByUnitIdLocalizationOrderOptions,
+	GetApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+	GetApiUnitsByIdByUnitIdLocalizationOrderStatus404,
+	GetApiUnitsByIdByUnitIdLocalizationOrderStatus422,
+	GetApiUnitsByIdByUnitIdLocalizationOrderStatus500,
+	PutApiUnitsByIdByUnitIdLocalizationOrderOptions,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus400,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus401,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus403,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus409,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus422,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus429,
+	PutApiUnitsByIdByUnitIdLocalizationOrderStatus500,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429,
+	DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500,
 	GetApiUnitsByTypeOptions,
 	GetApiUnitsByTypeStatus200,
 	GetApiUnitsByTypeStatus400,
@@ -2116,6 +2142,9 @@ import {
 	postApiUnitsPresentations,
 	getApiUnitsByIdByUnitIdSeriesMemberships,
 	getApiUnitsByIdByUnitIdStatusEvents,
+	getApiUnitsByIdByUnitIdLocalizationOrder,
+	putApiUnitsByIdByUnitIdLocalizationOrder,
+	deleteApiUnitsByIdByUnitIdLocalizationsByLanguage,
 	getApiUnitsByType,
 	postApiUnitsByType,
 	getApiUnitsByTypeByUnitId,
@@ -11980,18 +12009,23 @@ export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdResto
 	>;
 }
 
-export const getApiUsersMeQueryKey = () => [{ url: "/api/users/me" }] as const;
+export const getApiUsersMeQueryKey = ({ query }: Omit<GetApiUsersMeOptions, "headers"> = {}) =>
+	[{ url: "/api/users/me" }, ...(query ? [query] : [])] as const;
 
 type GetApiUsersMeQueryKey = ReturnType<typeof getApiUsersMeQueryKey>;
 
 export function getApiUsersMeQueryOptions(
+	{ query }: GetApiUsersMeOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersMeQueryKey();
+	const queryKey = getApiUsersMeQueryKey({ query });
 	return queryOptions<
 		GetApiUsersMeStatus200,
 		ResponseErrorConfig<
-			GetApiUsersMeStatus404 | GetApiUsersMeStatus429 | GetApiUsersMeStatus500
+			| GetApiUsersMeStatus404
+			| GetApiUsersMeStatus422
+			| GetApiUsersMeStatus429
+			| GetApiUsersMeStatus500
 		>,
 		GetApiUsersMeStatus200,
 		typeof queryKey
@@ -12000,6 +12034,7 @@ export function getApiUsersMeQueryOptions(
 		queryFn: async ({ signal }) => {
 			const { data } = await getApiUsersMe({
 				...config,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -12017,12 +12052,18 @@ export function useGetApiUsersMe<
 	TQueryData = GetApiUsersMeStatus200,
 	TQueryKey extends QueryKey = GetApiUsersMeQueryKey,
 >(
+	{
+		query,
+	}: { query?: GetApiUsersMeOptions["query"] | (() => GetApiUsersMeOptions["query"]) } = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiUsersMeStatus200,
 				ResponseErrorConfig<
-					GetApiUsersMeStatus404 | GetApiUsersMeStatus429 | GetApiUsersMeStatus500
+					| GetApiUsersMeStatus404
+					| GetApiUsersMeStatus422
+					| GetApiUsersMeStatus429
+					| GetApiUsersMeStatus500
 				>,
 				TData,
 				TQueryData,
@@ -12034,11 +12075,12 @@ export function useGetApiUsersMe<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeQueryKey();
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersMeQueryOptions(config),
+			...getApiUsersMeQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -12046,7 +12088,10 @@ export function useGetApiUsersMe<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiUsersMeStatus404 | GetApiUsersMeStatus429 | GetApiUsersMeStatus500
+			| GetApiUsersMeStatus404
+			| GetApiUsersMeStatus422
+			| GetApiUsersMeStatus429
+			| GetApiUsersMeStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -16515,6 +16560,340 @@ export function useGetApiUnitsByIdByUnitIdStatusEvents<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const getApiUnitsByIdByUnitIdLocalizationOrderQueryKey = ({
+	path,
+}: Omit<GetApiUnitsByIdByUnitIdLocalizationOrderOptions, "headers">) =>
+	[{ url: "/api/units/by-id/:unitId/localization-order", params: path }] as const;
+
+type GetApiUnitsByIdByUnitIdLocalizationOrderQueryKey = ReturnType<
+	typeof getApiUnitsByIdByUnitIdLocalizationOrderQueryKey
+>;
+
+export function getApiUnitsByIdByUnitIdLocalizationOrderQueryOptions(
+	{ path }: GetApiUnitsByIdByUnitIdLocalizationOrderOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByIdByUnitIdLocalizationOrderQueryKey({ path });
+	return queryOptions<
+		GetApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdLocalizationOrderStatus404
+			| GetApiUnitsByIdByUnitIdLocalizationOrderStatus422
+			| GetApiUnitsByIdByUnitIdLocalizationOrderStatus500
+		>,
+		GetApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByIdByUnitIdLocalizationOrder({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Unit content language order
+ * {@link /api/units/by-id/:unitId/localization-order}
+ */
+export function useGetApiUnitsByIdByUnitIdLocalizationOrder<
+	TData = GetApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+	TQueryData = GetApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByIdByUnitIdLocalizationOrderQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiUnitsByIdByUnitIdLocalizationOrderOptions["path"]
+			| (() => GetApiUnitsByIdByUnitIdLocalizationOrderOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdLocalizationOrderStatus404
+					| GetApiUnitsByIdByUnitIdLocalizationOrderStatus422
+					| GetApiUnitsByIdByUnitIdLocalizationOrderStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiUnitsByIdByUnitIdLocalizationOrderQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByIdByUnitIdLocalizationOrderQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdLocalizationOrderStatus404
+			| GetApiUnitsByIdByUnitIdLocalizationOrderStatus422
+			| GetApiUnitsByIdByUnitIdLocalizationOrderStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiUnitsByIdByUnitIdLocalizationOrderMutationKey = () =>
+	[{ url: "/api/units/by-id/:unitId/localization-order" }] as const;
+
+export function putApiUnitsByIdByUnitIdLocalizationOrderMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUnitsByIdByUnitIdLocalizationOrderMutationKey();
+	return mutationOptions<
+		PutApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus400
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus401
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus403
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus409
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus422
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus429
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus500
+		>,
+		PutApiUnitsByIdByUnitIdLocalizationOrderOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByIdByUnitIdLocalizationOrder({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Reorder Unit content languages
+ * {@link /api/units/by-id/:unitId/localization-order}
+ */
+export function usePutApiUnitsByIdByUnitIdLocalizationOrder<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByIdByUnitIdLocalizationOrderStatus400
+				| PutApiUnitsByIdByUnitIdLocalizationOrderStatus401
+				| PutApiUnitsByIdByUnitIdLocalizationOrderStatus403
+				| PutApiUnitsByIdByUnitIdLocalizationOrderStatus409
+				| PutApiUnitsByIdByUnitIdLocalizationOrderStatus422
+				| PutApiUnitsByIdByUnitIdLocalizationOrderStatus429
+				| PutApiUnitsByIdByUnitIdLocalizationOrderStatus500
+			>,
+			PutApiUnitsByIdByUnitIdLocalizationOrderOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUnitsByIdByUnitIdLocalizationOrderMutationKey();
+
+	const baseOptions = putApiUnitsByIdByUnitIdLocalizationOrderMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus400
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus401
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus403
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus409
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus422
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus429
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus500
+		>,
+		PutApiUnitsByIdByUnitIdLocalizationOrderOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus400
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus401
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus403
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus409
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus422
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus429
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus500
+		>,
+		PutApiUnitsByIdByUnitIdLocalizationOrderOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByIdByUnitIdLocalizationOrderStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus400
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus401
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus403
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus409
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus422
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus429
+			| PutApiUnitsByIdByUnitIdLocalizationOrderStatus500
+		>,
+		PutApiUnitsByIdByUnitIdLocalizationOrderOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationKey = () =>
+	[{ url: "/api/units/by-id/:unitId/localizations/:language" }] as const;
+
+export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await deleteApiUnitsByIdByUnitIdLocalizationsByLanguage({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove a Unit content language
+ * {@link /api/units/by-id/:unitId/localizations/:language}
+ */
+export function useDeleteApiUnitsByIdByUnitIdLocalizationsByLanguage<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429
+				| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500
+			>,
+			DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationKey();
+
+	const baseOptions = deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus401
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus403
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus404
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus409
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus422
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus429
+			| DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>;
 }
 
 export const getApiUnitsByTypeQueryKey = ({

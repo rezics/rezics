@@ -35,13 +35,21 @@ import {
 	type AvatarFieldOption,
 	type AvatarFieldValue,
 } from "@/features/media/components/avatar-field";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toApiDateTime, toLocalDateTime } from "../model/zone-form";
 import { useZoneManagement } from "./workspace";
 
 export function ZoneManagementOverview() {
-	const { t, locale } = useTranslation(["errors", "locale", "media", "ui", "zones"]);
+	const { selectedLanguage } = useContentLanguageEditor();
+	return <ZoneManagementOverviewForLanguage key={selectedLanguage} />;
+}
+
+function ZoneManagementOverviewForLanguage() {
+	const { t } = useTranslation(["errors", "locale", "media", "ui", "zones"]);
+	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+		useContentLanguageEditor();
 	const { sections, zone, zoneId } = useZoneManagement();
 	const queryClient = useQueryClient();
 	const invalidate = () =>
@@ -50,32 +58,24 @@ export function ZoneManagementOverview() {
 		});
 	const update = usePatchApiZonesByZoneId({ mutation: { onSuccess: invalidate } });
 	const replaceSlug = useReplaceZoneSlugAddress({ mutation: { onSuccess: invalidate } });
-	const defaultLanguage = locale.target.startsWith("zh") ? "zh" : "en";
-	const [language, setLanguage] = useState<"zh" | "en">(
-		zone.localizations.some((item) => item.language === defaultLanguage)
-			? defaultLanguage
-			: (zone.language ?? defaultLanguage),
-	);
-	const selected = zone.localizations.find((item) => item.language === language);
+	const selected = zone.localizations.find((item) => item.language === selectedLanguage);
 	const avatarOptions: AvatarFieldOption[] = zone.localizations.flatMap((item) =>
-		item.language !== language && item.avatar ? [{ ...item.avatar, label: item.language }] : [],
+		item.language !== selectedLanguage && item.avatar
+			? [{ ...item.avatar, label: t.locale[item.language] }]
+			: [],
 	);
-	const [title, setTitle] = useState(selected?.title ?? "");
-	const [summary, setSummary] = useState(selected?.summary ?? "");
-	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(selected?.avatar ?? null);
+	const [title, setTitle] = useState(selectedLanguageIsPending ? "" : (selected?.title ?? ""));
+	const [summary, setSummary] = useState(
+		selectedLanguageIsPending ? "" : (selected?.summary ?? ""),
+	);
+	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(
+		selectedLanguageIsPending ? null : (selected?.avatar ?? null),
+	);
 	const [slug, setSlug] = useState(zone.slugAddress?.slug ?? "");
 	const [startsAt, setStartsAt] = useState(toLocalDateTime(zone.startsAt));
 	const [endsAt, setEndsAt] = useState(toLocalDateTime(zone.endsAt));
 	const initialTheme = parseDocument(ZoneThemeDocument, zone.themeDocument);
 	const [theme, setTheme] = useState<ZoneTheme>(initialTheme);
-
-	function chooseLanguage(next: "zh" | "en") {
-		setLanguage(next);
-		const localization = zone.localizations.find((item) => item.language === next);
-		setTitle(localization?.title ?? "");
-		setSummary(localization?.summary ?? "");
-		setAvatar(localization?.avatar ?? null);
-	}
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -84,7 +84,7 @@ export function ZoneManagementOverview() {
 				path: { zoneId },
 				body: {
 					localization: {
-						language,
+						language: selectedLanguage,
 						title: title.trim(),
 						summary: summary.trim(),
 						avatar: avatarPresentationToInput(avatar),
@@ -96,6 +96,8 @@ export function ZoneManagementOverview() {
 			});
 			if (slug && slug !== zone.slugAddress?.slug)
 				await replaceSlug.mutateAsync({ path: { zoneId }, body: { slug } });
+			setDirty(false);
+			await languagesChanged();
 		} catch {
 			// Typed mutation state supplies the visible request failure.
 		}
@@ -109,29 +111,11 @@ export function ZoneManagementOverview() {
 			</p>
 			<Card appearance="outlined" className="mt-6">
 				<CardContent className="p-6">
-					<form className="grid gap-6" onSubmit={submit}>
+					<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
 						<h2 className="font-semibold text-lg">
 							{t.zones.management.profile.title}
 						</h2>
 						<FieldGroup className="grid gap-4 sm:grid-cols-2">
-							<Field>
-								<FieldLabel>{t.zones.management.profile.language}</FieldLabel>
-								<NativeSelect
-									onChange={(event) =>
-										chooseLanguage(
-											event.currentTarget.value === "zh" ? "zh" : "en",
-										)
-									}
-									value={language}
-								>
-									<NativeSelectOption value="zh">
-										{t.locale.zh}
-									</NativeSelectOption>
-									<NativeSelectOption value="en">
-										{t.locale.en}
-									</NativeSelectOption>
-								</NativeSelect>
-							</Field>
 							<Field required>
 								<FieldLabel>{t.zones.management.profile.name}</FieldLabel>
 								<Input
@@ -153,7 +137,10 @@ export function ZoneManagementOverview() {
 								<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 								<AvatarField
 									fallback={avatarOptions[0] ?? null}
-									onChange={setAvatar}
+									onChange={(value) => {
+										setAvatar(value);
+										setDirty(true);
+									}}
 									options={avatarOptions}
 									value={avatar}
 								/>

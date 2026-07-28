@@ -290,6 +290,7 @@ function ReplyPostNode({
 			{
 				path: { postId: rootPostId, replyPostId: reply.id },
 				body: {
+					language: reply.language,
 					body: writePortableText(body, reply.body),
 					baseRevisionId: reply.latestRevisionId,
 				},

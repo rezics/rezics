@@ -167,7 +167,12 @@ export default {
 	ImageAssetInvalidState: "The image asset state does not allow this operation.",
 	ImageAssetInvalidPresentation: "The displayed area is invalid for this image and role.",
 	ImageAssetInUse: "An image asset in use cannot be deleted.",
-	UnitPrimaryLanguageMissing: "The primary language must have an existing localization.",
+	UnitLocalizationOrderChanged:
+		"The content language order changed elsewhere. Reload it and try again.",
+	UnitLocalizationOrderInvalid:
+		"The language order must include every existing content language exactly once.",
+	UnitLocalizationNotFound: "That content language no longer exists.",
+	UnitLastLocalizationRemovalForbidden: "A Unit must keep at least one content language.",
 	InvalidSlug: `${unitSlugTerms.label} must be a 1-63 character lowercase ${verbatimTerms.ascii.value} hyphenated label.`,
 	SlugTaken: `That ${unitSlugTerms.inline} is already used in this Unit namespace.`,
 	SlugScopeNotFound: `The Unit namespace for this ${unitSlugTerms.inline} could not be found.`,

@@ -21,7 +21,7 @@ import {
 	unitAccessRestriction,
 	unitOwnership,
 } from "../../database/schema";
-import { primaryUnitTitle } from "../../units/localization";
+import { firstUnitLocalizationTitle } from "../../units/localization";
 import { UnitNotFound } from "../../units/errors";
 import { toApiErrorResponse } from "../schema/response";
 import { RealmNotFound } from "../realms/errors";
@@ -176,7 +176,7 @@ async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
 		database
 			.select({
 				profileId: unitOwnership.profileId,
-				label: primaryUnitTitle(unitOwnership.profileId),
+				label: firstUnitLocalizationTitle(unitOwnership.profileId),
 			})
 			.from(unitOwnership)
 			.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
@@ -255,7 +255,7 @@ async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
 	);
 	const labels = ids.length
 		? await database
-				.select({ id: unit.id, label: primaryUnitTitle(unit.id) })
+				.select({ id: unit.id, label: firstUnitLocalizationTitle(unit.id) })
 				.from(unit)
 				.where(inArray(unit.id, ids))
 		: [];
@@ -503,18 +503,18 @@ export default new Elysia({ prefix: "/unit" })
 			await authorization.unit.ensure(params.unitId, "unit.access.manage");
 			const search = query.query?.trim();
 			const rows = await database
-				.select({ id: unit.id, label: primaryUnitTitle(unit.id) })
+				.select({ id: unit.id, label: firstUnitLocalizationTitle(unit.id) })
 				.from(unit)
 				.where(
 					and(
 						eq(unit.kind, query.kind),
 						isNull(unit.deletedAt),
 						search
-							? sql`coalesce(${primaryUnitTitle(unit.id)}, '') ilike ${`%${search}%`}`
+							? sql`coalesce(${firstUnitLocalizationTitle(unit.id)}, '') ilike ${`%${search}%`}`
 							: undefined,
 					),
 				)
-				.orderBy(primaryUnitTitle(unit.id), unit.id)
+				.orderBy(firstUnitLocalizationTitle(unit.id), unit.id)
 				.limit(query.limit ?? 20);
 			return {
 				items: rows.map(({ id, label }) => ({

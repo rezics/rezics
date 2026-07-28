@@ -15,7 +15,7 @@ import {
 	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
-import { isPrimaryUnitLocalization, firstUnitLocalizationCoverAssetId } from "./localization";
+import { isFirstUnitLocalization, firstUnitLocalizationCoverAssetId } from "./localization";
 import {
 	UnitNotFound,
 	UnitVariantChanged,
@@ -196,7 +196,7 @@ async function readableSummaries(
 		.from(unit)
 		.leftJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), isPrimaryUnitLocalization(unit.id)),
+			and(eq(unitLocalization.unitId, unit.id), isFirstUnitLocalization(unit.id)),
 		)
 		.where(and(inArray(unit.id, ids), getUnitReadCondition(profileId)));
 	const summaries = new Map<string, UnitVariantSummary>();
@@ -278,7 +278,7 @@ export async function getUnitSeriesMemberships(
 		.innerJoin(seriesRelease, eq(seriesRelease.seriesId, series.id))
 		.leftJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), isPrimaryUnitLocalization(unit.id)),
+			and(eq(unitLocalization.unitId, unit.id), isFirstUnitLocalization(unit.id)),
 		)
 		.where(
 			and(

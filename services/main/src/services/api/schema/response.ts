@@ -304,7 +304,6 @@ export const UnitDetailResponse = t.Object({
 	attributions: t.Array(UnitDetailAttributionSummaryResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
-	primaryLanguage: NullableText,
 	releasedOn: t.Nullable(t.String()),
 	details: UnitDetailsResponse,
 	avatar: AvatarResponse,

@@ -5,6 +5,8 @@ import {
 	CatalogUnitTypeParams,
 	CreateUnitBody,
 	UpdateUnitBody,
+	UnitLocalizationDeleteBody,
+	UnitLocalizationOrderBody,
 	VariantUnitTypeParams,
 } from "./schema";
 
@@ -36,5 +38,33 @@ describe("Catalog Unit route types", () => {
 	it("keeps Series out of variant-only creation routes", () => {
 		expect(Check(VariantUnitTypeParams, { type: "series" })).toBe(false);
 		expect(Check(VariantUnitTypeParams, { type: "book" })).toBe(true);
+	});
+});
+
+describe("Unit content language order inputs", () => {
+	it("accepts a complete non-empty unique language sequence", () => {
+		expect(
+			Check(UnitLocalizationOrderBody, {
+				expectedLanguages: ["zh", "en"],
+				languages: ["en", "zh"],
+			}),
+		).toBe(true);
+		expect(Check(UnitLocalizationDeleteBody, { expectedLanguages: ["zh"] })).toBe(true);
+	});
+
+	it("rejects empty, duplicate, and unsupported language sequences", () => {
+		expect(
+			Check(UnitLocalizationOrderBody, {
+				expectedLanguages: [],
+				languages: ["en"],
+			}),
+		).toBe(false);
+		expect(
+			Check(UnitLocalizationOrderBody, {
+				expectedLanguages: ["zh", "en"],
+				languages: ["zh", "zh"],
+			}),
+		).toBe(false);
+		expect(Check(UnitLocalizationDeleteBody, { expectedLanguages: ["ja"] })).toBe(false);
 	});
 });

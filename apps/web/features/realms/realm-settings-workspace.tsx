@@ -31,6 +31,11 @@ import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
+import {
+	ContentLanguageEditorProvider,
+	useContentLanguageEditor,
+} from "@/features/content-languages/hooks/use-content-language-editor";
 import { UnitDockSettings, useDockManagementAccess } from "@/features/docks";
 import { UnitAccessManager } from "@/features/governance/components/unit-access-manager";
 import { UnitRevisionCompare } from "@/features/history/components/unit-revision-compare";
@@ -170,78 +175,100 @@ function RealmSettingsWorkspaceContent({
 		realm.data.localizations.find((item) => item.language === realm.data.language) ??
 		realm.data.localizations[0];
 	return (
-		<ManagementWorkspace
-			header={
-				<ManagementWorkspaceHeader
-					backHref={realmHref(realm.data)}
-					backLabel={t.realms.backToRealm}
-					description={t.realms.settingsWorkspace.description}
-					link={Link}
-					title={localization?.title ?? t.realms.settings}
-				/>
-			}
-			navigation={
-				<ManagementWorkspaceNavigation
-					ariaLabel={t.realms.settingsWorkspace.navigation}
-					currentSectionId={sectionAllowed ? section : undefined}
-					link={Link}
-					sections={sections}
-				/>
-			}
+		<ContentLanguageEditorProvider
+			localizations={realm.data.localizations}
+			onLanguagesChanged={async () => {
+				await realm.refetch();
+			}}
+			unitId={realmId}
 		>
-			{section && !sectionAllowed ? (
-				<RealmSettingsSection baseHref={baseHref} section={section}>
-					<p className="text-sm text-destructive">{t.errors.forbidden}</p>
-				</RealmSettingsSection>
-			) : !section ? (
-				<ManagementWorkspaceOverview
-					ariaLabel={t.realms.settingsWorkspace.overview}
-					link={Link}
-					sections={sections}
-				/>
-			) : section === "profile" ? (
-				<RealmSettingsSection baseHref={baseHref} section="profile">
-					<RealmProfileSettings embedded realm={realm.data} />
-				</RealmSettingsSection>
-			) : section === "members" ? (
-				<RealmMembersSection
-					baseHref={baseHref}
-					canManage={capabilities.canManageMembers}
-					realmId={realmId}
-				/>
-			) : section === "rules" ? (
-				<RealmRulesSection baseHref={baseHref} realmId={realmId} />
-			) : section === "pins" ? (
-				<RealmPinsSection baseHref={baseHref} realmId={realmId} />
-			) : section === "docks" ? (
-				<RealmSettingsSection baseHref={baseHref} section="docks">
-					<UnitDockSettings
-						allowedKinds={dockAccess.allowedKinds}
-						ownerKind="realm"
-						ownerUnitId={realmId}
+			<ManagementWorkspace
+				header={
+					<ManagementWorkspaceHeader
+						action={
+							capabilities.canUpdateSettings && section === "profile" ? (
+								<ContentLanguageControl />
+							) : undefined
+						}
+						backHref={realmHref(realm.data)}
+						backLabel={t.realms.backToRealm}
+						description={t.realms.settingsWorkspace.description}
+						link={Link}
+						title={localization?.title ?? t.realms.settings}
 					/>
-				</RealmSettingsSection>
-			) : section === "access" ? (
-				<RealmSettingsSection baseHref={baseHref} section="access">
-					{capabilities.canManageAccess ? (
-						<UnitAccessManager unitId={realmId} />
-					) : (
+				}
+				navigation={
+					<ManagementWorkspaceNavigation
+						ariaLabel={t.realms.settingsWorkspace.navigation}
+						currentSectionId={sectionAllowed ? section : undefined}
+						link={Link}
+						sections={sections}
+					/>
+				}
+			>
+				{section && !sectionAllowed ? (
+					<RealmSettingsSection baseHref={baseHref} section={section}>
 						<p className="text-sm text-destructive">{t.errors.forbidden}</p>
-					)}
-				</RealmSettingsSection>
-			) : section === "moderation" ? (
-				<RealmSettingsSection baseHref={baseHref} section="moderation">
-					<RealmModeration embedded realmId={realmId} />
-				</RealmSettingsSection>
-			) : (
-				<RealmHistorySection
-					baseHref={baseHref}
-					comparison={comparison}
-					realmId={realmId}
-				/>
-			)}
-		</ManagementWorkspace>
+					</RealmSettingsSection>
+				) : !section ? (
+					<ManagementWorkspaceOverview
+						ariaLabel={t.realms.settingsWorkspace.overview}
+						link={Link}
+						sections={sections}
+					/>
+				) : section === "profile" ? (
+					<RealmSettingsSection baseHref={baseHref} section="profile">
+						<RealmProfileSettingsForLanguage realm={realm.data} />
+					</RealmSettingsSection>
+				) : section === "members" ? (
+					<RealmMembersSection
+						baseHref={baseHref}
+						canManage={capabilities.canManageMembers}
+						realmId={realmId}
+					/>
+				) : section === "rules" ? (
+					<RealmRulesSection baseHref={baseHref} realmId={realmId} />
+				) : section === "pins" ? (
+					<RealmPinsSection baseHref={baseHref} realmId={realmId} />
+				) : section === "docks" ? (
+					<RealmSettingsSection baseHref={baseHref} section="docks">
+						<UnitDockSettings
+							allowedKinds={dockAccess.allowedKinds}
+							ownerKind="realm"
+							ownerUnitId={realmId}
+						/>
+					</RealmSettingsSection>
+				) : section === "access" ? (
+					<RealmSettingsSection baseHref={baseHref} section="access">
+						{capabilities.canManageAccess ? (
+							<UnitAccessManager unitId={realmId} />
+						) : (
+							<p className="text-sm text-destructive">{t.errors.forbidden}</p>
+						)}
+					</RealmSettingsSection>
+				) : section === "moderation" ? (
+					<RealmSettingsSection baseHref={baseHref} section="moderation">
+						<RealmModeration embedded realmId={realmId} />
+					</RealmSettingsSection>
+				) : (
+					<RealmHistorySection
+						baseHref={baseHref}
+						comparison={comparison}
+						realmId={realmId}
+					/>
+				)}
+			</ManagementWorkspace>
+		</ContentLanguageEditorProvider>
 	);
+}
+
+function RealmProfileSettingsForLanguage({
+	realm,
+}: {
+	readonly realm: Parameters<typeof RealmProfileSettings>[0]["realm"];
+}) {
+	const { selectedLanguage } = useContentLanguageEditor();
+	return <RealmProfileSettings embedded key={`${realm.id}:${selectedLanguage}`} realm={realm} />;
 }
 
 function RealmSettingsSection({

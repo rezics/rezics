@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
@@ -24,6 +25,7 @@ import { postDetailHref } from "../routing/post-management-routes";
 export function PostEditPage() {
 	const { t } = useTranslation(["errors", "posts"]);
 	const { item: post } = useOrdinaryPostManagement();
+	const { selectedLanguage } = useContentLanguageEditor();
 	if (!post.capabilities.canEdit)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
 	const description =
@@ -37,9 +39,9 @@ export function PostEditPage() {
 				title={post.postKind === "reply" ? t.posts.editReplyTitle : t.posts.editTitle}
 			/>
 			{post.postKind === "reply" ? (
-				<ReplyPostEditForm key={post.id} post={post} />
+				<ReplyPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
 			) : (
-				<OrdinaryPostEditForm key={post.id} post={post} />
+				<OrdinaryPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
 			)}
 		</section>
 	);
@@ -50,7 +52,11 @@ function OrdinaryPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) 
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostId();
-	const [body, setBody] = useState<PortableTextValue>(() => readPortableText(post.body));
+	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+		useContentLanguageEditor();
+	const [body, setBody] = useState<PortableTextValue>(() =>
+		readPortableText(selectedLanguageIsPending ? null : post.body),
+	);
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -60,14 +66,20 @@ function OrdinaryPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) 
 			{
 				path: { postId: post.id },
 				body: {
+					language: selectedLanguage,
 					title,
-					body: writePortableText(body, post.body),
+					body: writePortableText(
+						body,
+						selectedLanguageIsPending ? undefined : post.body,
+					),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},
 			{
 				onSuccess: async () => {
+					setDirty(false);
 					await invalidatePostQueries(queryClient, post.id);
+					await languagesChanged();
 					router.push(postDetailHref("post", post.id));
 				},
 			},
@@ -75,16 +87,24 @@ function OrdinaryPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) 
 	}
 
 	return (
-		<form onSubmit={submit}>
+		<form onChange={() => setDirty(true)} onSubmit={submit}>
 			<FieldGroup>
 				<Field required>
 					<FieldLabel>{t.ui.title}</FieldLabel>
-					<Input defaultValue={post.title ?? ""} maxLength={500} name="title" required />
+					<Input
+						defaultValue={selectedLanguageIsPending ? "" : (post.title ?? "")}
+						maxLength={500}
+						name="title"
+						required
+					/>
 				</Field>
 				<PostEditorFields
 					body={body}
 					error={update.error}
-					onBodyChange={setBody}
+					onBodyChange={(value) => {
+						setBody(value);
+						setDirty(true);
+					}}
 					pending={update.isPending}
 					submitLabel={t.ui.save}
 				/>
@@ -98,7 +118,11 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
-	const [body, setBody] = useState<PortableTextValue>(() => readPortableText(post.body));
+	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+		useContentLanguageEditor();
+	const [body, setBody] = useState<PortableTextValue>(() =>
+		readPortableText(selectedLanguageIsPending ? null : post.body),
+	);
 	const rootPostId = post.rootPostId;
 
 	function submit(event: FormEvent<HTMLFormElement>) {
@@ -108,13 +132,19 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 			{
 				path: { postId: rootPostId, replyPostId: post.id },
 				body: {
-					body: writePortableText(body, post.body),
+					language: selectedLanguage,
+					body: writePortableText(
+						body,
+						selectedLanguageIsPending ? undefined : post.body,
+					),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},
 			{
 				onSuccess: async () => {
+					setDirty(false);
 					await invalidatePostQueries(queryClient, rootPostId, post.id);
+					await languagesChanged();
 					router.push(postDetailHref("post", post.id));
 				},
 			},
@@ -122,11 +152,14 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 	}
 
 	return (
-		<form onSubmit={submit}>
+		<form onChange={() => setDirty(true)} onSubmit={submit}>
 			<FieldGroup>
 				<PortableTextEditor
 					label={t.posts.replyBody}
-					onChange={setBody}
+					onChange={(value) => {
+						setBody(value);
+						setDirty(true);
+					}}
 					required
 					value={body}
 				/>

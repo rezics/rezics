@@ -98,7 +98,7 @@ export const SeedPlan = {
 export const SeedLanguages = ["zh", "en"] as const;
 export type SeedLanguage = (typeof SeedLanguages)[number];
 
-const PrimaryLanguageCycle: readonly SeedLanguage[] = [
+const InitialLanguageCycle: readonly SeedLanguage[] = [
 	"zh",
 	"en",
 	"zh",
@@ -162,11 +162,11 @@ export function createSeedData(referenceTime: Date): SeedData {
 		referenceTime,
 		fakerByLanguage,
 		languages(index) {
-			const primary = cycleValue(PrimaryLanguageCycle, index);
+			const initialLanguage = cycleValue(InitialLanguageCycle, index);
 			const count = cycleValue(LocalizationCountCycle, index);
-			const remaining = SeedLanguages.filter((language) => language !== primary);
+			const remaining = SeedLanguages.filter((language) => language !== initialLanguage);
 			if (index % 2 === 1) remaining.reverse();
-			return [primary, ...remaining.slice(0, count - 1)];
+			return [initialLanguage, ...remaining.slice(0, count - 1)];
 		},
 		name(language) {
 			return fakerByLanguage[language].person.fullName();

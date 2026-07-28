@@ -142,7 +142,6 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		],
 		[t.ui.contentRating, rating],
 		[t.units.detail.aiDisclosure, aiDisclosure],
-		[t.units.detail.primaryLanguage, item.primaryLanguage],
 		[t.units.detail.releasedOn, formatDate(item.releasedOn, locale.current)],
 		[t.units.detail.license, licenseValue],
 		[t.units.detail.updatedAt, formatDate(item.updatedAt, locale.current)],
@@ -280,7 +279,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					</DetailSection>
 
 					{item.localizations.length > 0 && (
-						<DetailSection title={t.units.detail.localizations}>
+						<DetailSection title={t.units.detail.contentLanguages}>
 							<Card>
 								<CardContent className="grid gap-3 p-5 text-sm">
 									{item.localizations.map((entry) => (

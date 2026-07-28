@@ -46,7 +46,10 @@ import {
 	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { env } from "../config";
-import { firstUnitLocalizationCoverAssetId, primaryUnitTitle } from "../units/localization";
+import {
+	firstUnitLocalizationCoverAssetId,
+	firstUnitLocalizationTitle,
+} from "../units/localization";
 import { InvalidSearch } from "./errors";
 import { getActiveSearchGeneration } from "./generation";
 import { searchCandidates } from "./meilisearch";
@@ -889,7 +892,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				'kind', ${hitType},
 				'titles', case when ${category}::text = 'tag-structures' then coalesce((
 					select jsonb_build_array(string_agg(
-						coalesce(${primaryUnitTitle(unitStructureMember.memberUnitId)},
+						coalesce(${firstUnitLocalizationTitle(unitStructureMember.memberUnitId)},
 							${unitStructureMember.memberUnitId}::text),
 						' › ' order by ${unitStructureMember.ordinal}
 					))
@@ -958,7 +961,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 						'unit', jsonb_build_object(
 							'id', ${searchMainUnit.id},
 							'type', ${searchMainUnit.kind},
-							'title', ${primaryUnitTitle(searchMainUnit.id)},
+							'title', ${firstUnitLocalizationTitle(searchMainUnit.id)},
 							'cover', case when ${searchMainCoverAssetId} is null then null
 								else jsonb_build_object(
 									'id', ${searchMainCoverAssetId},

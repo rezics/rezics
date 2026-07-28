@@ -32,7 +32,7 @@ import { databaseBootstrapService } from "../bootstrap/service";
 import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
 import { database, type DatabaseTransaction } from "../database";
 import { createGovernanceNotePost } from "../governance/note-service";
-import { isPrimaryUnitLocalization } from "../units/localization";
+import { isFirstUnitLocalization } from "../units/localization";
 import {
 	accountEnforcement,
 	accounts,
@@ -2997,7 +2997,7 @@ async function seedHistory(
 			.where(
 				and(
 					eq(unitLocalization.unitId, value.id),
-					isPrimaryUnitLocalization(unitLocalization.unitId),
+					isFirstUnitLocalization(unitLocalization.unitId),
 				),
 			);
 		const baseRevisionId = initialRevisionByUnit.get(value.id);

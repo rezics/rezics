@@ -138,6 +138,7 @@ export function parseCollectionConfig(value: unknown): CollectionConfigV1 | null
 export const UpdateProfileBody = t.Object(
 	{
 		updatedAt: t.String({ format: "date-time" }),
+		language: ContentLanguage,
 		name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
 		avatar: t.Optional(t.Nullable(AvatarInput)),
 		bannerAssetId: t.Optional(t.Nullable(Uuid)),

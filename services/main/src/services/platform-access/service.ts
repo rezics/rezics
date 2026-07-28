@@ -12,7 +12,7 @@ import { CapabilityGrantExpiryInvalid } from "../api/governance/errors";
 import { ProfileNotFound } from "../api/users/errors";
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
 import { platformCapabilityGrant, profile, users } from "../database/schema";
-import { primaryUnitTitle } from "../units/localization";
+import { firstUnitLocalizationTitle } from "../units/localization";
 
 const PlatformAccessLockName = "platform-access-grants";
 
@@ -118,7 +118,7 @@ export async function listPlatformAccessProfiles(
 	const rows = await executor
 		.select({
 			profileId: profile.id,
-			name: primaryUnitTitle(profile.id),
+			name: firstUnitLocalizationTitle(profile.id),
 			email: users.email,
 		})
 		.from(platformCapabilityGrant)
@@ -146,13 +146,16 @@ export async function searchPlatformAccessProfiles(
 	const rows = await executor
 		.select({
 			profileId: profile.id,
-			name: primaryUnitTitle(profile.id),
+			name: firstUnitLocalizationTitle(profile.id),
 			email: users.email,
 		})
 		.from(profile)
 		.innerJoin(users, eq(users.id, profile.authUserId))
 		.where(
-			or(ilike(users.email, pattern), sql`${primaryUnitTitle(profile.id)} ilike ${pattern}`),
+			or(
+				ilike(users.email, pattern),
+				sql`${firstUnitLocalizationTitle(profile.id)} ilike ${pattern}`,
+			),
 		)
 		.orderBy(users.email)
 		.limit(limit);
@@ -170,7 +173,7 @@ export async function getPlatformAccessProfile(
 	const [row] = await executor
 		.select({
 			profileId: profile.id,
-			name: primaryUnitTitle(profile.id),
+			name: firstUnitLocalizationTitle(profile.id),
 			email: users.email,
 		})
 		.from(profile)

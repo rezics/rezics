@@ -65,7 +65,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const theme = useThemePreference();
 	const localeChangedByUser = useRef(false);
 	const queryClient = useQueryClient();
-	const currentProfile = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
+	const currentProfile = useGetApiUsersMe({}, { query: { enabled: Boolean(session) } });
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
 	const localizationLanguages = useLocalizationLanguages();
 	const followedZones = useGetApiUsersMeFollowing(

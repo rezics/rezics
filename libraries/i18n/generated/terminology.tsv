@@ -125,3 +125,7 @@ publicationLicense	The terms under which a Unit's work is made available to the 
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	en	approved	inline	publication license	-
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	label	作品授權條款	License | 作品 License | 授權 REZICS
 publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	inline	授權條款	License | 作品 License | 授權 REZICS
+metadata	Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.	en	approved	label	Metadata	Basic information
+metadata	Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.	en	approved	inline	metadata	Basic information
+metadata	Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.	zh-Hant	approved	label	中繼資料	Metadata | 基本資訊
+metadata	Structured administrative and type-specific information about a Unit, distinct from its localized editorial content.	zh-Hant	approved	inline	中繼資料	Metadata | 基本資訊

@@ -5,8 +5,8 @@ import { creditAttribution, unit, unitFollowStat } from "../database/schema";
 import { toSafeInteger } from "../database/integer";
 import type { CreditAttributionRole, UnitKind } from "../database/schema/contract-values";
 import {
-	primaryUnitSummary,
-	primaryUnitTitle,
+	firstUnitLocalizationSummary,
+	firstUnitLocalizationTitle,
 	resolvedUnitLocalizationAvatar,
 } from "./localization";
 import {
@@ -52,8 +52,8 @@ export async function getPublicUnitSummariesByIds(
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			title: primaryUnitTitle(unit.id),
-			summary: primaryUnitSummary(unit.id),
+			title: firstUnitLocalizationTitle(unit.id),
+			summary: firstUnitLocalizationSummary(unit.id),
 			avatar: resolvedUnitLocalizationAvatar(unit.id),
 		})
 		.from(unit)
@@ -89,7 +89,7 @@ export async function getReadableUnitPresentationsByIds(
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			title: primaryUnitTitle(unit.id),
+			title: firstUnitLocalizationTitle(unit.id),
 			avatar: resolvedUnitLocalizationAvatar(unit.id),
 		})
 		.from(unit)

@@ -9,7 +9,7 @@ import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import {
 	avatarReferenceToColumns,
-	isPrimaryUnitLocalization,
+	isFirstUnitLocalization,
 	resolvedUnitLocalizationLanguage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
@@ -99,11 +99,11 @@ export default new Elysia({ prefix: "/users" })
 	.use(session)
 	.get(
 		"/me",
-		async ({ authorization, profile, user }) => {
+		async ({ authorization, profile, query, user }) => {
 			const platformCapabilities =
 				await authorization.platform.decideCapabilities(PlatformCapabilityValues);
 			return {
-				...(await getProfile(profile.unitId)),
+				...(await getProfile(profile.unitId, query.localizationLanguages)),
 				email: user.email,
 				emailVerified: user.emailVerified,
 				onboarding: user.emailVerified ? "complete" : "verify_email",
@@ -114,6 +114,7 @@ export default new Elysia({ prefix: "/users" })
 		},
 		{
 			access: "profile:read",
+			query: PublicProfileQuery,
 			response: {
 				[StatusCodes.OK]: CurrentProfileResponse,
 				[StatusCodes.NOT_FOUND]: ProfileNotFoundResponse,
@@ -172,7 +173,9 @@ export default new Elysia({ prefix: "/users" })
 	.patch(
 		"/me",
 		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(profile.unitId, [["profile"]]);
+			await authorization.unit.ensureCanUpdate(profile.unitId, [
+				["localizations", body.language],
+			]);
 			await database.transaction(async (tx) => {
 				await ensureImageAssetsAttachable(
 					tx,
@@ -206,31 +209,37 @@ export default new Elysia({ prefix: "/users" })
 					throw new ProfileChanged(latest.updatedAt);
 				}
 				await tx
-					.update(unitLocalization)
-					.set({
+					.insert(unitLocalization)
+					.values({
+						unitId: profile.unitId,
+						language: body.language,
 						title: body.name,
 						summary: body.summary,
 						description: body.description,
-						...(Object.hasOwn(body, "avatar")
-							? avatarReferenceToColumns(body.avatar ?? null)
-							: {}),
-						...(Object.hasOwn(body, "bannerAssetId")
-							? { bannerAssetId: body.bannerAssetId }
-							: {}),
+						...avatarReferenceToColumns(body.avatar ?? null),
+						bannerAssetId: body.bannerAssetId ?? null,
 					})
-					.where(
-						and(
-							eq(unitLocalization.unitId, profile.unitId),
-							isPrimaryUnitLocalization(unitLocalization.unitId),
-						),
-					);
+					.onConflictDoUpdate({
+						target: [unitLocalization.unitId, unitLocalization.language],
+						set: {
+							title: body.name,
+							summary: body.summary,
+							description: body.description,
+							...(Object.hasOwn(body, "avatar")
+								? avatarReferenceToColumns(body.avatar ?? null)
+								: {}),
+							...(Object.hasOwn(body, "bannerAssetId")
+								? { bannerAssetId: body.bannerAssetId }
+								: {}),
+						},
+					});
 				await recordUnitRevision(tx, {
 					unitId: profile.unitId,
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
 			});
-			return getProfile(profile.unitId);
+			return getProfile(profile.unitId, [body.language]);
 		},
 		{
 			access: "write:unit:update",
@@ -490,7 +499,7 @@ export default new Elysia({ prefix: "/users" })
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, profileTable.id),
-						isPrimaryUnitLocalization(unitLocalization.unitId),
+						isFirstUnitLocalization(unitLocalization.unitId),
 					),
 				)
 				.where(eq(profileBlock.blockerProfileId, profile.unitId))

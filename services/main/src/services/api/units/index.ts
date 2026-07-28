@@ -6,9 +6,12 @@ import { decodeCursor, encodeCursor } from "../../pagination";
 import { listUnitStatusEvents } from "../../units/status";
 import {
 	createUnit,
+	deleteUnitContentLanguage,
 	deleteUnit,
+	getUnitLocalizationOrder,
 	getUnit,
 	listUnits,
+	updateUnitLocalizationOrder,
 	updateUnit,
 	upsertLocalization,
 } from "../../units/service";
@@ -17,6 +20,11 @@ import {
 	ListUnitsQuery,
 	UpdateUnitBody,
 	UnitLocalizationBody,
+	UnitLocalizationDeleteBody,
+	UnitLocalizationDeleteParams,
+	UnitLocalizationOrderBody,
+	UnitLocalizationOrderParams,
+	UnitLocalizationOrderResponse,
 	UnitLocalizationParams,
 	UnitDetailQuery,
 	UnitLookupParams,
@@ -54,7 +62,17 @@ const UnitCreateForbiddenResponse = toApiErrorResponse([
 	"EmailVerificationRequired",
 	"AccountRestricted",
 ]);
-const UnitUpdateBadRequestResponse = toApiErrorResponse(["UnitPrimaryLanguageMissing"]);
+const UnitLocalizationOrderBadRequestResponse = toApiErrorResponse([
+	"UnitLocalizationOrderInvalid",
+]);
+const UnitLocalizationOrderConflictResponse = toApiErrorResponse([
+	"UnitLocalizationOrderChanged",
+	"UnitLastLocalizationRemovalForbidden",
+]);
+const UnitLocalizationMutationNotFoundResponse = toApiErrorResponse([
+	"UnitNotFound",
+	"UnitLocalizationNotFound",
+]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
@@ -149,6 +167,66 @@ export default new Elysia({ prefix: "/units" })
 		},
 	)
 	.get(
+		"/by-id/:unitId/localization-order",
+		async ({ params, request }) => ({
+			languages: await getUnitLocalizationOrder(
+				params.unitId,
+				(await resolveIdentity(request.headers, "unit:read")).authorization,
+			),
+		}),
+		{
+			params: UnitLocalizationOrderParams,
+			response: {
+				[StatusCodes.OK]: UnitLocalizationOrderResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: { summary: "Get Unit content language order", tags: ["Units"] },
+		},
+	)
+	.put(
+		"/by-id/:unitId/localization-order",
+		async ({ params, authorization, body }) => ({
+			languages: await updateUnitLocalizationOrder(params.unitId, authorization, body),
+		}),
+		{
+			access: "contribute:unit:update",
+			params: UnitLocalizationOrderParams,
+			body: UnitLocalizationOrderBody,
+			response: {
+				[StatusCodes.OK]: UnitLocalizationOrderResponse,
+				[StatusCodes.BAD_REQUEST]: UnitLocalizationOrderBadRequestResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.CONFLICT]: UnitLocalizationOrderConflictResponse,
+			},
+			detail: { summary: "Reorder Unit content languages", tags: ["Units"] },
+		},
+	)
+	.delete(
+		"/by-id/:unitId/localizations/:language",
+		async ({ params, authorization, body }) => ({
+			languages: await deleteUnitContentLanguage(
+				params.unitId,
+				params.language,
+				authorization,
+				body.expectedLanguages,
+			),
+		}),
+		{
+			access: "contribute:unit:update",
+			params: UnitLocalizationDeleteParams,
+			body: UnitLocalizationDeleteBody,
+			response: {
+				[StatusCodes.OK]: UnitLocalizationOrderResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitLocalizationMutationNotFoundResponse,
+				[StatusCodes.CONFLICT]: UnitLocalizationOrderConflictResponse,
+			},
+			detail: { summary: "Remove a Unit content language", tags: ["Units"] },
+		},
+	)
+	.get(
 		"/:type",
 		async ({ params, query }) => {
 			const limit = query.limit ?? 20;
@@ -221,7 +299,6 @@ export default new Elysia({ prefix: "/units" })
 			body: UpdateUnitBody,
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
-				[StatusCodes.BAD_REQUEST]: UnitUpdateBadRequestResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,

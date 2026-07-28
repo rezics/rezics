@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	ContentLanguageValues,
-	isContentLanguage,
-	toContentLanguage,
-	type ContentLanguage,
-} from "@rezics/i18n";
+import type { ContentLanguage } from "@rezics/i18n";
 import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 
 import {
@@ -30,6 +25,7 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
@@ -58,7 +54,7 @@ function readPositiveInteger(form: FormData, name: string): number | null | unde
 	return Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
 
-export function UnitBasicEditor({ type, unit }: { type: UnitType; unit: Unit }) {
+export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit }) {
 	const { t } = useTranslation(["cover", "errors", "licenses", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiUnitsByTypeByUnitId({
@@ -70,10 +66,6 @@ export function UnitBasicEditor({ type, unit }: { type: UnitType; unit: Unit }) 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const form = new FormData(event.currentTarget);
-		const submittedPrimaryLanguage = String(form.get("primaryLanguage") ?? "");
-		const primaryLanguage = isContentLanguage(submittedPrimaryLanguage)
-			? submittedPrimaryLanguage
-			: undefined;
 		const releasedOn = String(form.get("releasedOn") ?? "").trim();
 		const submittedStatus = form.get("status");
 		const submittedVisibility = form.get("visibility");
@@ -154,7 +146,6 @@ export function UnitBasicEditor({ type, unit }: { type: UnitType; unit: Unit }) 
 					aiDisclosure,
 					license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
 					unit: {
-						...(primaryLanguage ? { primaryLanguage } : {}),
 						...(unit.details.type === "series"
 							? {}
 							: { releasedOn: releasedOn || null }),
@@ -237,14 +228,6 @@ export function UnitBasicEditor({ type, unit }: { type: UnitType; unit: Unit }) 
 									{t.units.aiDisclosure.machine_generated}
 								</NativeSelectOption>
 							</NativeSelect>
-						</Field>
-						<Field>
-							<FieldLabel>{t.units.detail.primaryLanguage}</FieldLabel>
-							<Input
-								defaultValue={unit.primaryLanguage ?? ""}
-								maxLength={35}
-								name="primaryLanguage"
-							/>
 						</Field>
 						{unit.details.type !== "series" && (
 							<Field>
@@ -379,32 +362,19 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 	);
 }
 
-export function UnitLocalizationEditor({ type, unit }: { type: UnitType; unit: Unit }) {
-	const { t, locale } = useTranslation(["cover", "errors", "ui", "units"]);
-	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
+export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }) {
+	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
+	const { selectedLanguage: language, selectedLanguageIsPending } = useContentLanguageEditor();
 	const selected = unit.localizations.find((entry) => entry.language === language);
 	return (
 		<Card>
 			<CardContent className="grid gap-6 p-6">
-				<h2 className="font-heading text-xl font-bold">{t.units.editor.localization}</h2>
-				<div className="grid gap-4 sm:grid-cols-2">
-					<Field>
-						<FieldLabel>{t.units.editor.selectLocalization}</FieldLabel>
-						<NativeSelect
-							value={language}
-							onChange={(event) => {
-								const value = event.currentTarget.value;
-								if (isContentLanguage(value)) setLanguage(value);
-							}}
-						>
-							{ContentLanguageValues.map((value) => (
-								<NativeSelectOption key={value} value={value}>
-									{value}
-								</NativeSelectOption>
-							))}
-						</NativeSelect>
-					</Field>
-				</div>
+				<h2 className="font-heading text-xl font-bold">{t.units.editor.content}</h2>
+				{selectedLanguageIsPending ? (
+					<p className="text-sm text-muted-foreground">
+						{t.units.contentLanguages.addDescription}
+					</p>
+				) : null}
 				<UnitLocalizationForm
 					key={`${unit.id}:${language}:${selected?.updatedAt ?? "new"}`}
 					language={language}
@@ -428,8 +398,9 @@ function UnitLocalizationForm({
 	language: ContentLanguage;
 	localization: Unit["localizations"][number] | undefined;
 }) {
-	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
+	const { t } = useTranslation(["cover", "errors", "locale", "ui", "units"]);
 	const queryClient = useQueryClient();
+	const { setDirty, languagesChanged } = useContentLanguageEditor();
 	const [description, setDescription] = useState<PortableTextValue>(() =>
 		readPortableText(localization?.description),
 	);
@@ -438,7 +409,7 @@ function UnitLocalizationForm({
 	);
 	const coverOptions: LocalizationImageAssetOption[] = unit.localizations.flatMap((entry) =>
 		entry.language !== language && entry.cover
-			? [{ ...entry.cover, label: entry.language }]
+			? [{ ...entry.cover, label: t.locale[entry.language] }]
 			: [],
 	);
 	const fallbackCover = coverOptions[0] ?? null;
@@ -460,12 +431,14 @@ function UnitLocalizationForm({
 					coverAssetId: cover?.id ?? null,
 				},
 			});
+			setDirty(false);
+			await languagesChanged();
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
 	return (
-		<form onSubmit={submit}>
+		<form onChange={() => setDirty(true)} onSubmit={submit}>
 			<FieldGroup>
 				<Field required>
 					<FieldLabel>{t.ui.title}</FieldLabel>
@@ -486,14 +459,20 @@ function UnitLocalizationForm({
 				</Field>
 				<PortableTextEditor
 					label={t.ui.description}
-					onChange={setDescription}
+					onChange={(value) => {
+						setDescription(value);
+						setDirty(true);
+					}}
 					value={description}
 				/>
 				<Field>
 					<FieldLabel>{t.cover.title}</FieldLabel>
 					<LocalizationImageUploadField
 						fallback={fallbackCover}
-						onChange={setCover}
+						onChange={(value) => {
+							setCover(value);
+							setDirty(true);
+						}}
 						options={coverOptions}
 						role="cover"
 						value={cover}

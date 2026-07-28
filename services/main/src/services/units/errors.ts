@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import * as Data from "effect/Data";
+import type { ContentLanguage } from "@rezics/i18n";
 
 export class UnitNotFound extends Data.TaggedError("UnitNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
@@ -58,10 +59,37 @@ export class UnitRevisionConflict extends Data.TaggedError("UnitRevisionConflict
 	}
 }
 
-export class UnitPrimaryLanguageMissing extends Data.TaggedError("UnitPrimaryLanguageMissing") {
+export class UnitLocalizationOrderChanged extends Data.TaggedError("UnitLocalizationOrderChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitLocalizationOrderChanged.status;
+	readonly message = "Unit content language order has changed";
+	readonly details: { readonly currentLanguages: ContentLanguage[] };
+
+	constructor(currentLanguages: readonly ContentLanguage[]) {
+		super();
+		this.details = { currentLanguages: [...currentLanguages] };
+	}
+}
+
+export class UnitLocalizationOrderInvalid extends Data.TaggedError("UnitLocalizationOrderInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitPrimaryLanguageMissing.status;
-	readonly message = "Primary language must have an existing Unit localization";
+	readonly status = UnitLocalizationOrderInvalid.status;
+	readonly message =
+		"Content language order must contain every existing Unit language exactly once";
+}
+
+export class UnitLocalizationNotFound extends Data.TaggedError("UnitLocalizationNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = UnitLocalizationNotFound.status;
+	readonly message = "Unit content language was not found";
+}
+
+export class UnitLastLocalizationRemovalForbidden extends Data.TaggedError(
+	"UnitLastLocalizationRemovalForbidden",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitLastLocalizationRemovalForbidden.status;
+	readonly message = "A Unit must keep at least one content language";
 }
 
 export class UnitVariantKindMismatch extends Data.TaggedError("UnitVariantKindMismatch") {
@@ -208,7 +236,10 @@ export const UnitErrors = [
 	UnitAccessRestricted,
 	UnitChanged,
 	UnitRevisionConflict,
-	UnitPrimaryLanguageMissing,
+	UnitLocalizationOrderChanged,
+	UnitLocalizationOrderInvalid,
+	UnitLocalizationNotFound,
+	UnitLastLocalizationRemovalForbidden,
 	UnitVariantKindMismatch,
 	UnitVariantTargetIsVariant,
 	UnitVariantSourceHasVariants,
