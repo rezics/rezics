@@ -140,6 +140,8 @@ export default {
 	SubjectAssociationNotFound: "This subject association could not be found.",
 	AliasNotFound: "This alias could not be found.",
 	TagApplicationNotFound: "This tag application could not be found.",
+	UnitTagCurationChanged:
+		"This Tag curation changed elsewhere. The latest order has been loaded; try again.",
 	TagNotFound: "This Tag could not be found.",
 	UnitVersionNotFound: "This Unit version could not be found.",
 	UnitVariantKindMismatch: "A Variant and its Main must use the same supported Unit type.",

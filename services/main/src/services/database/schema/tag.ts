@@ -7,6 +7,7 @@ import {
 	integer,
 	primaryKey,
 	text,
+	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 
@@ -62,6 +63,14 @@ export const unitTag = pgTable(
 			table.pinned,
 			table.position,
 			table.tagId,
+		),
+		uniqueIndex("unit_tag_unit_pinned_position_unique")
+			.on(table.unitId, table.position)
+			.where(sql`${table.pinned}`),
+		check(
+			"unit_tag_pinned_position_check",
+			sql`(${table.pinned} and ${table.position} is not null)
+				or (not ${table.pinned} and ${table.position} is null)`,
 		),
 		check("unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 	],

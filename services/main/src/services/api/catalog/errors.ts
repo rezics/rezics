@@ -20,10 +20,27 @@ export class TagApplicationNotFound extends Data.TaggedError("TagApplicationNotF
 	}
 }
 
+export class UnitTagCurationChanged extends Data.TaggedError("UnitTagCurationChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitTagCurationChanged.status;
+	readonly message = "Unit Tag curation has changed";
+	readonly details: { readonly currentFeaturedTagIds: string[] };
+
+	constructor(currentFeaturedTagIds: readonly string[]) {
+		super();
+		this.details = { currentFeaturedTagIds: [...currentFeaturedTagIds] };
+	}
+}
+
 export class UnitVersionNotFound extends Data.TaggedError("UnitVersionNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = UnitVersionNotFound.status;
 	readonly message = "Unit version not found";
 }
 
-export const CatalogErrors = [AliasNotFound, TagApplicationNotFound, UnitVersionNotFound] as const;
+export const CatalogErrors = [
+	AliasNotFound,
+	TagApplicationNotFound,
+	UnitTagCurationChanged,
+	UnitVersionNotFound,
+] as const;

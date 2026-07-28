@@ -141,6 +141,8 @@ export default {
 	SubjectAssociationNotFound: "この主題の関連付けは見つかりませんでした。",
 	AliasNotFound: "この別名は見つかりませんでした。",
 	TagApplicationNotFound: "このタグの適用は見つかりませんでした。",
+	UnitTagCurationChanged:
+		"このタグ選定は他の場所で変更されました。最新の順序を読み込みました。もう一度お試しください。",
 	TagNotFound: "このタグは見つかりませんでした。",
 	UnitVersionNotFound: "このユニットバージョンは見つかりませんでした。",
 	UnitVariantKindMismatch:

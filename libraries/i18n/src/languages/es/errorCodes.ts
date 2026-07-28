@@ -152,6 +152,8 @@ export default {
 	SubjectAssociationNotFound: "No se ha encontrado esta asociación de tema.",
 	AliasNotFound: "No se ha encontrado este alias.",
 	TagApplicationNotFound: "No se ha encontrado esta aplicación de etiqueta.",
+	UnitTagCurationChanged:
+		"Esta selección de etiquetas se ha modificado en otro lugar. Se ha cargado el orden más reciente; inténtalo de nuevo.",
 	TagNotFound: "No se ha encontrado esta etiqueta.",
 	UnitVersionNotFound: "No se ha encontrado esta versión de la Unit.",
 	UnitVariantKindMismatch:

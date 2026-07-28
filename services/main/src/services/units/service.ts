@@ -72,6 +72,7 @@ import { listPublishedBookContentMetrics } from "../content-metrics/service";
 import { getAssociationContextPostsByAssociationIds } from "./association-context";
 import { createAssociationRequestInTransaction } from "./association-proposals";
 import { resolvePublisherAttributionCreationMode } from "./attribution-authorization";
+import { wilsonLowerBoundSql } from "../tags/ranking";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
@@ -411,6 +412,8 @@ export async function getUnit(
 			pinned: unitTag.pinned,
 			position: unitTag.position,
 			title: resolvedUnitLocalizationTitle(unitTag.tagId, localizationLanguages),
+			createdAt: unitTag.createdAt,
+			updatedAt: unitTag.updatedAt,
 		})
 		.from(unitTag)
 		.leftJoin(
@@ -421,7 +424,14 @@ export async function getUnit(
 			),
 		)
 		.where(eq(unitTag.unitId, base.id))
-		.orderBy(desc(unitTag.pinned), unitTag.position, unitTag.tagId);
+		.orderBy(
+			desc(unitTag.pinned),
+			sql`case when ${unitTag.pinned} then ${unitTag.position} end asc nulls last`,
+			desc(wilsonLowerBoundSql(unitTagVoteStat.score, unitTagVoteStat.voteCount)),
+			desc(unitTagVoteStat.score),
+			desc(unitTagVoteStat.voteCount),
+			unitTag.tagId,
+		);
 	const [progressCounts] = await database
 		.select({
 			active: sql<unknown>`count(*) filter (where ${unitProgress.status} = 'active')`,
@@ -433,13 +443,19 @@ export async function getUnit(
 		kind === "series"
 			? { role: "standalone" }
 			: await getUnitVariantContext(base.id, authorization.profileId);
-	const [canEdit, accessDecision, associationDecision, hasDevelopmentPreviewAccess] =
-		await Promise.all([
-			authorization.unit.canUpdate(base.id),
-			authorization.unit.decide(base.id, "unit.access.manage"),
-			authorization.unit.decide(base.id, "unit.association.manage"),
-			authorization.platform.hasCapability(DevelopmentPreviewCapability),
-		]);
+	const [
+		canEdit,
+		canManageTags,
+		accessDecision,
+		associationDecision,
+		hasDevelopmentPreviewAccess,
+	] = await Promise.all([
+		authorization.unit.canUpdate(base.id),
+		authorization.unit.canUpdate(base.id, ["tags"]),
+		authorization.unit.decide(base.id, "unit.access.manage"),
+		authorization.unit.decide(base.id, "unit.association.manage"),
+		authorization.platform.hasCapability(DevelopmentPreviewCapability),
+	]);
 	const details = await getUnitDetails(kind, base.id);
 	return {
 		id: base.id,
@@ -519,6 +535,7 @@ export async function getUnit(
 			canEdit,
 			canManageAccess: accessDecision.allowed,
 			canManageAssociations: associationDecision.allowed,
+			canManageTags,
 			hasDevelopmentPreviewAccess,
 		},
 	};

@@ -155,6 +155,8 @@ export default {
 	SubjectAssociationNotFound: "Cette association de sujet est introuvable.",
 	AliasNotFound: "Cet alias est introuvable.",
 	TagApplicationNotFound: "Cette utilisation d’étiquette est introuvable.",
+	UnitTagCurationChanged:
+		"Cette sélection d’étiquettes a été modifiée ailleurs. Le dernier ordre a été chargé ; réessayez.",
 	TagNotFound: "Cette étiquette est introuvable.",
 	UnitVersionNotFound: "Cette version de la Unit est introuvable.",
 	UnitVariantKindMismatch:

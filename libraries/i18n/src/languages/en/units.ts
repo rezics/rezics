@@ -75,8 +75,12 @@ export default {
 			},
 			relationships: {
 				label: "Catalog relationships",
+				description: "Manage credits, subjects, source links, and variant relationships.",
+			},
+			tags: {
+				label: "Tags",
 				description:
-					"Manage credits, subjects, source links, tags, and variant relationships.",
+					"Feature global Tags and arrange the order in which they appear first.",
 			},
 			contentStructure: {
 				label: "Content structure",

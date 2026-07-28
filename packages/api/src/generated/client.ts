@@ -373,6 +373,8 @@ import type {
 	PostApiUnitsByTypeByUnitIdLinksResponses,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdResponses,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdResponses,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -4252,6 +4254,26 @@ export function putApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolea
 		],
 		...config,
 	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Update Unit tag curation
+ * {@link /api/units/:type/:unitId/tags/:tagId}
+ */
+export function patchApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/units/{type}/{unitId}/tags/{tagId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>>;
 }
 
 /**

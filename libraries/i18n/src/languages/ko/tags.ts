@@ -88,6 +88,43 @@ export default {
 		pinned: "고정됨",
 		empty: "이 작품에는 아직 글로벌 태그가 없습니다.",
 	},
+	management: {
+		title: "태그 선별",
+		description:
+			"먼저 표시할 글로벌 태그를 선택합니다. 나머지 태그는 커뮤니티 순위를 유지합니다.",
+		featuredTitle: "추천 태그",
+		featuredDescription:
+			"추천 태그는 설정한 순서대로 먼저 표시됩니다. 드래그하거나 이동 버튼을 사용하세요.",
+		rankedTitle: "커뮤니티 순위 태그",
+		rankedDescription: "나머지 글로벌 태그는 커뮤니티 투표에 따라 자동으로 정렬됩니다.",
+		feature: "추천으로 설정",
+		unfeature: "추천 해제",
+		moveEarlier: "앞으로 이동",
+		moveLater: "뒤로 이동",
+		drag: insert("{{tag}} 태그를 드래그하여 순서 변경", { tag: String }),
+		instructions:
+			"스페이스바를 눌러 추천 태그를 집고, 방향키로 이동한 다음 스페이스바를 다시 눌러 놓으세요.",
+		pickedUp: insert("{{tag}} 태그를 집었습니다.", { tag: String }),
+		over: insert("{{tag}} 태그가 전체 {{count}}개 중 {{position}}번째 위치에 있습니다.", {
+			tag: String,
+			position: Number,
+			count: Number,
+		}),
+		cancelled: insert("{{tag}} 태그 이동을 취소했습니다.", { tag: String }),
+		featuredAnnouncement: insert("{{tag}} 태그를 {{position}}번째 추천 태그로 설정했습니다.", {
+			tag: String,
+			position: Number,
+		}),
+		unfeaturedAnnouncement: insert("{{tag}} 태그의 추천을 해제했습니다.", {
+			tag: String,
+		}),
+		movedAnnouncement: insert("{{tag}} 태그를 {{position}}번째로 이동했습니다.", {
+			tag: String,
+			position: Number,
+		}),
+		noFeatured: "아직 추천 태그가 없습니다.",
+		noRanked: "추천으로 설정할 다른 글로벌 태그가 없습니다.",
+	},
 	realms: {
 		title: `${realmTerms.label} 태그 문맥`,
 		description: `각 ${realmTerms.inline}는 독립적인 문맥입니다. 그 판단은 글로벌 태그나 다른 ${realmTerms.inline}과 결합되지 않습니다.`,

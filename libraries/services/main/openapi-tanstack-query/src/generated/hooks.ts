@@ -1236,6 +1236,15 @@ import type {
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429,
+	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403,
@@ -2282,6 +2291,7 @@ import {
 	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId,
 	postApiUnitsByTypeByUnitIdLinks,
 	putApiUnitsByTypeByUnitIdTagsByTagId,
+	patchApiUnitsByTypeByUnitIdTagsByTagId,
 	deleteApiUnitsByTypeByUnitIdTagsByTagId,
 	putApiUnitsByTypeByUnitIdTagsByTagIdVote,
 	deleteApiUnitsByTypeByUnitIdTagsByTagIdVote,
@@ -21370,6 +21380,121 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
+		TContext
+	>;
+}
+
+export const patchApiUnitsByTypeByUnitIdTagsByTagIdMutationKey = () =>
+	[{ url: "/api/units/:type/:unitId/tags/:tagId" }] as const;
+
+export function patchApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = patchApiUnitsByTypeByUnitIdTagsByTagIdMutationKey();
+	return mutationOptions<
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500
+		>,
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await patchApiUnitsByTypeByUnitIdTagsByTagId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update Unit tag curation
+ * {@link /api/units/:type/:unitId/tags/:tagId}
+ */
+export function usePatchApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
+			ResponseErrorConfig<
+				| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400
+				| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403
+				| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+				| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409
+				| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+				| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429
+				| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500
+			>,
+			PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? patchApiUnitsByTypeByUnitIdTagsByTagIdMutationKey();
+
+	const baseOptions = patchApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500
+		>,
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500
+		>,
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429
+			| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500
+		>,
+		PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 		TContext
 	>;
 }

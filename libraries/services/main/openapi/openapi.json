@@ -9305,6 +9305,7 @@
 					"NotificationNotFound",
 					"AliasNotFound",
 					"TagApplicationNotFound",
+					"UnitTagCurationChanged",
 					"UnitVersionNotFound",
 					"InvalidMessageCursor",
 					"ConversationNotFound",
@@ -61763,7 +61764,9 @@
 													"voteCount",
 													"pinned",
 													"position",
-													"title"
+													"title",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -61814,6 +61817,14 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
 													}
 												}
 											}
@@ -62058,12 +62069,14 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
+												"canManageTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
+												"canManageTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -63784,7 +63797,9 @@
 													"voteCount",
 													"pinned",
 													"position",
-													"title"
+													"title",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -63835,6 +63850,14 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
 													}
 												}
 											}
@@ -64079,12 +64102,14 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
+												"canManageTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
+												"canManageTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -65833,7 +65858,9 @@
 													"voteCount",
 													"pinned",
 													"position",
-													"title"
+													"title",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -65884,6 +65911,14 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
 													}
 												}
 											}
@@ -66128,12 +66163,14 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
+												"canManageTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
+												"canManageTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -68025,7 +68062,9 @@
 													"voteCount",
 													"pinned",
 													"position",
-													"title"
+													"title",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -68076,6 +68115,14 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
 													}
 												}
 											}
@@ -68320,12 +68367,14 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
+												"canManageTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
+												"canManageTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -70032,7 +70081,9 @@
 													"voteCount",
 													"pinned",
 													"position",
-													"title"
+													"title",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -70083,6 +70134,14 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
 													}
 												}
 											}
@@ -70327,12 +70386,14 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
+												"canManageTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
+												"canManageTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -72388,7 +72449,9 @@
 													"voteCount",
 													"pinned",
 													"position",
-													"title"
+													"title",
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -72439,6 +72502,14 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
 													}
 												}
 											}
@@ -72683,12 +72754,14 @@
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
+												"canManageTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
+												"canManageTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -80247,6 +80320,315 @@
 				},
 				"operationId": "putApiUnitsByTypeByUnitIdTagsByTagId",
 				"x-rezics-policy-operation-id": "putApiUnitsByTypeByUnitIdTagsByTagId"
+			},
+			"patch": {
+				"summary": "Update Unit tag curation",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "tagId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": [
+											"pinned",
+											"position",
+											"updatedAt",
+											"expectedFeaturedTagIds"
+										],
+										"properties": {
+											"pinned": { "const": true, "type": "boolean" },
+											"position": {
+												"format": "fractional-position",
+												"minLength": 2,
+												"maxLength": 512,
+												"type": "string"
+											},
+											"updatedAt": {
+												"format": "date-time",
+												"type": "string"
+											},
+											"expectedFeaturedTagIds": {
+												"type": "array",
+												"items": { "format": "uuid", "type": "string" }
+											}
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": [
+											"pinned",
+											"position",
+											"updatedAt",
+											"expectedFeaturedTagIds"
+										],
+										"properties": {
+											"pinned": { "const": false, "type": "boolean" },
+											"position": { "type": "null" },
+											"updatedAt": {
+												"format": "date-time",
+												"type": "string"
+											},
+											"expectedFeaturedTagIds": {
+												"type": "array",
+												"items": { "format": "uuid", "type": "string" }
+											}
+										}
+									}
+								]
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"unitId",
+										"tagId",
+										"createdByProfileId",
+										"score",
+										"voteCount",
+										"pinned",
+										"position",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"unitId": { "format": "uuid", "type": "string" },
+										"tagId": { "format": "uuid", "type": "string" },
+										"createdByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"pinned": { "type": "boolean" },
+										"position": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												},
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": ["UnitPermissionForbidden"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"TagApplicationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitTagCurationChanged",
+													"type": "string",
+													"enum": ["UnitTagCurationChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiUnitsByTypeByUnitIdTagsByTagId",
+				"x-rezics-policy-operation-id": "patchApiUnitsByTypeByUnitIdTagsByTagId"
 			},
 			"delete": {
 				"summary": "Remove Unit tag",

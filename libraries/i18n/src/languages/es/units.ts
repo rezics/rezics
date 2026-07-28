@@ -76,7 +76,12 @@ export default {
 			relationships: {
 				label: "Relaciones de catálogo",
 				description:
-					"Gestiona los créditos, temas, enlaces de origen, etiquetas y relaciones de variantes.",
+					"Gestiona los créditos, temas, enlaces de origen y relaciones de variantes.",
+			},
+			tags: {
+				label: "Etiquetas",
+				description:
+					"Destaca etiquetas globales y organiza el orden en el que aparecen primero.",
 			},
 			contentStructure: {
 				label: "Estructura de contenido",

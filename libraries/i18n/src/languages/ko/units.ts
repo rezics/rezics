@@ -74,7 +74,11 @@ export default {
 			},
 			relationships: {
 				label: "카탈로그 관계",
-				description: "저작권, 주제, 출처 링크, 태그 및 변형 관계 관리.",
+				description: "저작권, 주제, 출처 링크 및 변형 관계 관리.",
+			},
+			tags: {
+				label: "태그",
+				description: "글로벌 태그를 추천으로 설정하고 우선 표시 순서를 관리합니다.",
 			},
 			contentStructure: {
 				label: "콘텐츠 구조",

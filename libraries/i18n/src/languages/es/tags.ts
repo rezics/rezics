@@ -91,6 +91,44 @@ export default {
 		pinned: "Fijada",
 		empty: "Esta obra todavía no tiene etiquetas globales.",
 	},
+	management: {
+		title: "Selección de etiquetas",
+		description:
+			"Elige qué etiquetas globales aparecen primero. Las demás conservan el orden de la comunidad.",
+		featuredTitle: "Etiquetas destacadas",
+		featuredDescription:
+			"Las etiquetas destacadas aparecen primero en el orden que definas. Arrástralas o usa los botones.",
+		rankedTitle: "Etiquetas ordenadas por la comunidad",
+		rankedDescription:
+			"Las demás etiquetas globales se ordenan automáticamente según los votos de la comunidad.",
+		feature: "Destacar",
+		unfeature: "Quitar de destacadas",
+		moveEarlier: "Mover antes",
+		moveLater: "Mover después",
+		drag: insert("Arrastrar {{tag}} para reordenar", { tag: String }),
+		instructions:
+			"Pulsa Espacio para recoger una etiqueta destacada. Muévela con las flechas y pulsa Espacio de nuevo para soltarla.",
+		pickedUp: insert("Se ha recogido {{tag}}.", { tag: String }),
+		over: insert("{{tag}} está sobre la posición {{position}} de {{count}}.", {
+			tag: String,
+			position: Number,
+			count: Number,
+		}),
+		cancelled: insert("Se ha cancelado el movimiento de {{tag}}.", { tag: String }),
+		featuredAnnouncement: insert("Se ha destacado {{tag}} en la posición {{position}}.", {
+			tag: String,
+			position: Number,
+		}),
+		unfeaturedAnnouncement: insert("Se ha quitado {{tag}} de las destacadas.", {
+			tag: String,
+		}),
+		movedAnnouncement: insert("Se ha movido {{tag}} a la posición {{position}}.", {
+			tag: String,
+			position: Number,
+		}),
+		noFeatured: "Aún no hay etiquetas destacadas.",
+		noRanked: "No hay más etiquetas globales que destacar.",
+	},
 	realms: {
 		title: `Contextos de etiquetas de los ${realmTerms.plural}`,
 		description: `Cada ${realmTerms.inline} es un contexto independiente. Sus valoraciones nunca se combinan con las etiquetas globales ni con otro ${realmTerms.inline}.`,

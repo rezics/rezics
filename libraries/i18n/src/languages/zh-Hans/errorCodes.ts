@@ -133,6 +133,7 @@ export default {
 	SubjectAssociationNotFound: "找不到这项主题关联。",
 	AliasNotFound: "找不到这个别名。",
 	TagApplicationNotFound: "找不到这笔标签应用记录。",
+	UnitTagCurationChanged: "这笔标签精选已在其他地方变更；已加载最新顺序，请再试一次。",
 	TagNotFound: "找不到这个标签。",
 	UnitVersionNotFound: "找不到这个条目版本。",
 	UnitVariantKindMismatch: "变体与主版本必须使用相同且受支持的条目类型。",

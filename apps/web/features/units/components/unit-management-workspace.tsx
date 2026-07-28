@@ -23,6 +23,7 @@ import {
 	ListTree,
 	PanelRight,
 	ShieldCheck,
+	Tags,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -133,6 +134,13 @@ function UnitManagementWorkspaceContent({
 			label: labels.relationships.label,
 			description: labels.relationships.description,
 			icon: Link2,
+		},
+		{
+			id: "tags",
+			href: unitManagementSectionHref(type, unitId, "tags"),
+			label: labels.tags.label,
+			description: labels.tags.description,
+			icon: Tags,
 		},
 		{
 			id: "content-structure",

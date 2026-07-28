@@ -47,6 +47,7 @@ import {
 	ListEntityEntriesQuery,
 	ListTagsQuery,
 	TagUnitBody,
+	UpdateUnitTagCurationBody,
 	UnitAssociationParams,
 	UnitAliasParams,
 	UnitAliasUnitParams,
@@ -97,6 +98,7 @@ import {
 	SubjectAssociationNotFound,
 } from "../../entities/errors";
 import { AssociationContextPostInvalid } from "../../units/errors";
+import { updateDirectUnitTagCuration } from "../../tags/curation";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -1088,6 +1090,41 @@ export default new Elysia()
 						]),
 					},
 					detail: { summary: "Tag unit", tags: ["Units"] },
+				},
+			)
+			.patch(
+				"/tags/:tagId",
+				async ({ params, profile, authorization, body }) => {
+					await checkUnitType(params.unitId, params.type);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, ["tags"]);
+					return updateDirectUnitTagCuration({
+						unitId: params.unitId,
+						tagId: params.tagId,
+						actorProfileId: profile.unitId,
+						expectedUpdatedAt: body.updatedAt,
+						expectedFeaturedTagIds: body.expectedFeaturedTagIds,
+						state: body.pinned
+							? { pinned: true, position: body.position }
+							: { pinned: false, position: null },
+					});
+				},
+				{
+					access: "write:unit:update",
+					params: UnitTagParams,
+					body: UpdateUnitTagCurationBody,
+					response: {
+						[StatusCodes.OK]: TagApplicationResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"TagApplicationNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitTagCurationChanged"]),
+					},
+					detail: {
+						summary: "Update Unit tag curation",
+						tags: ["Units"],
+					},
 				},
 			)
 			.delete(

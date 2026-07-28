@@ -91,6 +91,44 @@ export default {
 		pinned: "Fixiert",
 		empty: "Dieses Werk hat noch keine globalen Tags.",
 	},
+	management: {
+		title: "Tag-Kuratierung",
+		description:
+			"Wähle aus, welche globalen Tags zuerst erscheinen. Alle anderen bleiben nach der Community-Wertung sortiert.",
+		featuredTitle: "Hervorgehobene Tags",
+		featuredDescription:
+			"Hervorgehobene Tags erscheinen in der festgelegten Reihenfolge zuerst. Ziehe sie oder nutze die Schaltflächen.",
+		rankedTitle: "Nach Community sortierte Tags",
+		rankedDescription:
+			"Alle anderen globalen Tags werden weiterhin automatisch nach den Community-Stimmen sortiert.",
+		feature: "Hervorheben",
+		unfeature: "Hervorhebung aufheben",
+		moveEarlier: "Nach vorne",
+		moveLater: "Nach hinten",
+		drag: insert("{{tag}} zum Sortieren ziehen", { tag: String }),
+		instructions:
+			"Drücke die Leertaste, um ein hervorgehobenes Tag aufzunehmen. Verschiebe es mit den Pfeiltasten und lege es mit der Leertaste ab.",
+		pickedUp: insert("{{tag}} aufgenommen.", { tag: String }),
+		over: insert("{{tag}} befindet sich über Position {{position}} von {{count}}.", {
+			tag: String,
+			position: Number,
+			count: Number,
+		}),
+		cancelled: insert("Verschieben von {{tag}} abgebrochen.", { tag: String }),
+		featuredAnnouncement: insert("{{tag}} wurde an Position {{position}} hervorgehoben.", {
+			tag: String,
+			position: Number,
+		}),
+		unfeaturedAnnouncement: insert("Hervorhebung von {{tag}} aufgehoben.", {
+			tag: String,
+		}),
+		movedAnnouncement: insert("{{tag}} wurde an Position {{position}} verschoben.", {
+			tag: String,
+			position: Number,
+		}),
+		noFeatured: "Noch keine hervorgehobenen Tags.",
+		noRanked: "Es gibt keine weiteren globalen Tags zum Hervorheben.",
+	},
 	realms: {
 		title: `${realmTerms.label}-Tag-Kontexte`,
 		description: `Jeder ${realmTerms.inline} ist ein unabhängiger Kontext. Seine Bewertungen werden nie mit globalen Tags oder einem anderen ${realmTerms.inline} zusammengeführt.`,

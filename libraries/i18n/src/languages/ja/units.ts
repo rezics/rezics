@@ -74,7 +74,11 @@ export default {
 			},
 			relationships: {
 				label: "カタログの関係",
-				description: "クレジット、主題、ソースリンク、タグ、およびバリアント関係を管理。",
+				description: "クレジット、主題、ソースリンク、およびバリアント関係を管理。",
+			},
+			tags: {
+				label: "タグ",
+				description: "グローバルタグを注目タグに設定し、優先表示の順序を管理。",
 			},
 			contentStructure: {
 				label: "コンテンツ構造",

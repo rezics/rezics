@@ -76,7 +76,12 @@ export default {
 			relationships: {
 				label: "Relations de catalogue",
 				description:
-					"Gérez les crédits, les sujets, les liens sources, les étiquettes et les relations de variantes.",
+					"Gérez les crédits, les sujets, les liens sources et les relations de variantes.",
+			},
+			tags: {
+				label: "Étiquettes",
+				description:
+					"Mettez en avant des étiquettes globales et organisez leur ordre d’affichage prioritaire.",
 			},
 			contentStructure: {
 				label: "Structure du contenu",

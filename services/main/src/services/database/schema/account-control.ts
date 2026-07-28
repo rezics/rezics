@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, pgEnum, text, uuid } from "drizzle-orm/pg-core";
+import { check, foreignKey, index, integer, pgEnum, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { users } from "./auth";
@@ -30,21 +30,27 @@ export const userAccountStateReason = pgEnum(
 export const userAccountState = pgTable(
 	"user_account_state",
 	{
-		userId: uuid()
-			.primaryKey()
-			.references(() => users.id, { onDelete: "cascade" }),
+		userId: uuid().primaryKey(),
 		state: userAccountStateValue().default("active").notNull(),
 		reason: userAccountStateReason(),
 		note: text(),
 		expiresAt: createTimestampMsColumn(),
-		updatedByProfileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+		updatedByProfileId: uuid().notNull(),
 		revision: integer().default(1).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		foreignKey({
+			name: "user_account_state_user_id_fkey",
+			columns: [table.userId],
+			foreignColumns: [users.id],
+		}).onDelete("cascade"),
+		foreignKey({
+			name: "user_account_state_updated_by_profile_id_fkey",
+			columns: [table.updatedByProfileId],
+			foreignColumns: [profile.id],
+		}).onDelete("restrict"),
 		index("user_account_state_state_expiry_idx").on(table.state, table.expiresAt),
 		index("user_account_state_updated_by_idx").on(table.updatedByProfileId),
 		check("user_account_state_revision_check", sql`${table.revision} > 0`),

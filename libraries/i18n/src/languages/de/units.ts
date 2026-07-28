@@ -75,8 +75,12 @@ export default {
 			},
 			relationships: {
 				label: "Katalogbeziehungen",
+				description: "Verwalte Mitwirkende, Themen, Quelllinks und Variantenbeziehungen.",
+			},
+			tags: {
+				label: "Tags",
 				description:
-					"Verwalte Mitwirkende, Themen, Quelllinks, Tags und Variantenbeziehungen.",
+					"Hebe globale Tags hervor und lege fest, in welcher Reihenfolge sie zuerst erscheinen.",
 			},
 			contentStructure: {
 				label: "Inhaltsstruktur",

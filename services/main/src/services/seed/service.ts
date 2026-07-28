@@ -979,7 +979,7 @@ async function seedCatalog(
 		unitId: itemAt(works, Math.floor(index / 5)).id,
 		tagId: itemAt(tags, index * 7).id,
 		pinned: index % 11 === 0,
-		position: fractionalPositionAt(index),
+		position: index % 11 === 0 ? fractionalPositionAt(index) : null,
 	}));
 	await writeBatches(tagRows, (batch) => tx.insert(unitTag).values(batch));
 	await writeBatches(

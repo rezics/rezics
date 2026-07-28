@@ -7,6 +7,7 @@ import {
 	UnitKindValues,
 } from "../../database/schema/contract-values";
 import {
+	DateTime,
 	FractionalPosition,
 	ContentLanguage,
 	LocalizationLanguageQuery,
@@ -119,6 +120,28 @@ export type UnitTagParams = Static<typeof UnitTagParams>;
 
 export const TagUnitBody = t.Object({}, { additionalProperties: false });
 export type TagUnitBody = Static<typeof TagUnitBody>;
+
+export const UpdateUnitTagCurationBody = t.Union([
+	t.Object(
+		{
+			pinned: t.Literal(true),
+			position: FractionalPosition,
+			updatedAt: DateTime,
+			expectedFeaturedTagIds: t.Array(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			pinned: t.Literal(false),
+			position: t.Null(),
+			updatedAt: DateTime,
+			expectedFeaturedTagIds: t.Array(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type UpdateUnitTagCurationBody = Static<typeof UpdateUnitTagCurationBody>;
 
 export const AddUnitAliasBody = t.Object(
 	{

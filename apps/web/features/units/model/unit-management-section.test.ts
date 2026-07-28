@@ -6,6 +6,7 @@ const denied = {
 	canEdit: false,
 	canManageAccess: false,
 	canManageAssociations: false,
+	canManageTags: false,
 	hasDevelopmentPreviewAccess: false,
 };
 
@@ -17,8 +18,19 @@ describe("unit management section manifest", () => {
 		]);
 	});
 
+	it("keeps Tag curation and history available to a Tag-only manager", () => {
+		expect(getUnitManagementSectionIds("book", { ...denied, canManageTags: true })).toEqual([
+			"tags",
+			"history",
+		]);
+	});
+
 	it("adds type-owned editors only to their matching catalog unit", () => {
 		const editable = { ...denied, canEdit: true };
+		expect(getUnitManagementSectionIds("book", editable)).not.toContain("tags");
+		expect(getUnitManagementSectionIds("book", { ...editable, canManageTags: true })).toContain(
+			"tags",
+		);
 		expect(getUnitManagementSectionIds("book", editable)).toContain("content-structure");
 		expect(getUnitManagementSectionIds("series", editable)).toContain("releases");
 		expect(getUnitManagementSectionIds("software", editable)).not.toContain(

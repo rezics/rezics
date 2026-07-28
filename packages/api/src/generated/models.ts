@@ -4978,6 +4978,7 @@ export const ApiErrorCode = {
 	NotificationNotFound: "NotificationNotFound",
 	AliasNotFound: "AliasNotFound",
 	TagApplicationNotFound: "TagApplicationNotFound",
+	UnitTagCurationChanged: "UnitTagCurationChanged",
 	UnitVersionNotFound: "UnitVersionNotFound",
 	InvalidMessageCursor: "InvalidMessageCursor",
 	ConversationNotFound: "ConversationNotFound",
@@ -47206,6 +47207,18 @@ export type PostApiUnitsByTypeStatus200 = {
 		pinned: boolean;
 		position: (string | null) | null;
 		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @type object
@@ -47346,6 +47359,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -49083,6 +49100,18 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		pinned: boolean;
 		position: (string | null) | null;
 		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @type object
@@ -49223,6 +49252,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -50223,6 +50256,18 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		pinned: boolean;
 		position: (string | null) | null;
 		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @type object
@@ -50363,6 +50408,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -51810,6 +51859,18 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		pinned: boolean;
 		position: (string | null) | null;
 		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @type object
@@ -51950,6 +52011,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -53121,6 +53186,18 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		pinned: boolean;
 		position: (string | null) | null;
 		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @type object
@@ -53261,6 +53338,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -54442,6 +54523,18 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		pinned: boolean;
 		position: (string | null) | null;
 		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @type object
@@ -54582,6 +54675,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type boolean
 		 */
 		canManageAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -61505,6 +61602,277 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+	createdByProfileId: (string | null) | null;
+	score: string | number;
+	voteCount: string | number;
+	/**
+	 * @type boolean
+	 */
+	pinned: boolean;
+	position: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: "UnitPermissionForbidden";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	TagApplicationNotFound: "TagApplicationNotFound",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitTagCurationChanged'
+		 * @type string
+		 */
+		code: "UnitTagCurationChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500 = InternalError;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdBody =
+	| {
+			/**
+			 * @type boolean
+			 */
+			pinned: true;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type array
+			 */
+			expectedFeaturedTagIds: string[];
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			pinned: false;
+			/**
+			 * @type null
+			 */
+			position: null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type array
+			 */
+			expectedFeaturedTagIds: string[];
+	  };
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions = {
+	body: PatchApiUnitsByTypeByUnitIdTagsByTagIdBody;
+	path: PatchApiUnitsByTypeByUnitIdTagsByTagIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
+	"200": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200;
+	"400": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400;
+	"403": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403;
+	"404": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404;
+	"409": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409;
+	"422": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422;
+	"429": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429;
+	"500": PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdResponse =
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429
+	| PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
 
 /**
  * @type object

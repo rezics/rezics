@@ -17,8 +17,10 @@ export default {
 		publicEntry: "公共条目",
 		publicEntryDescription: "由社区拥有，所有已登录用户都能编辑；创建者不会获得特殊权限。",
 		publisherEntity: "出版者条目",
-		publisherOwnedDescription: "我的作品必须选择出版者；若对方限制直接关联，系统会发送同意请求。",
-		publisherPublicDescription: "公共条目可选填出版者；若需要同意，系统会发送请求，而不是邀请。",
+		publisherOwnedDescription:
+			"我的作品必须选择出版者；若对方限制直接关联，系统会发送同意请求。",
+		publisherPublicDescription:
+			"公共条目可选填出版者；若需要同意，系统会发送请求，而不是邀请。",
 		versionRole: "版本类型",
 		mainVersion: "主要版本",
 		variantVersion: "变体版本",
@@ -72,7 +74,11 @@ export default {
 			},
 			relationships: {
 				label: "目录关系",
-				description: "管理署名、内容主体、来源链接、标签与版本关系。",
+				description: "管理署名、内容主体、来源链接与版本关系。",
+			},
+			tags: {
+				label: "标签",
+				description: "精选一般标签，并调整其优先显示顺序。",
 			},
 			contentStructure: {
 				label: "内容结构",

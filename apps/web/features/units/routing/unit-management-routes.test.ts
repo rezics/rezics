@@ -13,6 +13,15 @@ describe("unit management routes", () => {
 		);
 	});
 
+	it("maps Tag curation to its own management section", () => {
+		expect(unitManagementSectionHref("book", "unit-1", "tags")).toBe(
+			"/units/book/unit-1/edit/tags",
+		);
+		expect(parseUnitManagementSection("/units/book/unit-1/edit/tags", "book", "unit-1")).toBe(
+			"tags",
+		);
+	});
+
 	it("uses the management root for content and metadata for structured fields", () => {
 		expect(unitManagementSectionHref("book", "unit-1", "content")).toBe(
 			"/units/book/unit-1/edit",

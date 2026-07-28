@@ -349,6 +349,8 @@ export const UnitDetailResponse = t.Object({
 			pinned: t.Boolean(),
 			position: t.Nullable(FractionalPosition),
 			title: NullableText,
+			createdAt: DateTime,
+			updatedAt: DateTime,
 		}),
 	),
 	progressStatistics: UnitProgressStatisticsResponse,
@@ -364,6 +366,7 @@ export const UnitDetailResponse = t.Object({
 		canEdit: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageAssociations: t.Boolean(),
+		canManageTags: t.Boolean(),
 		hasDevelopmentPreviewAccess: t.Boolean(),
 	}),
 });

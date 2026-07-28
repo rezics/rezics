@@ -90,6 +90,41 @@ export default {
 		pinned: "固定済み",
 		empty: "この作品にはまだグローバルタグがありません。",
 	},
+	management: {
+		title: "タグの選定",
+		description:
+			"最初に表示するグローバルタグを選びます。その他のタグはコミュニティ順位を維持します。",
+		featuredTitle: "注目タグ",
+		featuredDescription:
+			"注目タグは設定した順序で最初に表示されます。ドラッグするか移動ボタンを使用してください。",
+		rankedTitle: "コミュニティ順のタグ",
+		rankedDescription: "その他のグローバルタグは、コミュニティ投票に基づいて自動的に並びます。",
+		feature: "注目タグにする",
+		unfeature: "注目を解除",
+		moveEarlier: "前へ移動",
+		moveLater: "後ろへ移動",
+		drag: insert("{{tag}} をドラッグして並べ替え", { tag: String }),
+		instructions:
+			"スペースキーで注目タグを持ち上げ、矢印キーで移動し、もう一度スペースキーを押して置きます。",
+		pickedUp: insert("{{tag}} を持ち上げました。", { tag: String }),
+		over: insert("{{tag}} は全 {{count}} 件中 {{position}} 番目の位置にあります。", {
+			tag: String,
+			position: Number,
+			count: Number,
+		}),
+		cancelled: insert("{{tag}} の移動をキャンセルしました。", { tag: String }),
+		featuredAnnouncement: insert("{{tag}} を {{position}} 番目の注目タグにしました。", {
+			tag: String,
+			position: Number,
+		}),
+		unfeaturedAnnouncement: insert("{{tag}} の注目を解除しました。", { tag: String }),
+		movedAnnouncement: insert("{{tag}} を {{position}} 番目に移動しました。", {
+			tag: String,
+			position: Number,
+		}),
+		noFeatured: "注目タグはまだありません。",
+		noRanked: "注目タグにできる他のグローバルタグはありません。",
+	},
 	realms: {
 		title: `${realmTerms.label} タグの文脈`,
 		description: `各${realmTerms.inline}は独立した文脈です。その判断はグローバルタグや他の${realmTerms.inline}と統合されることはありません。`,

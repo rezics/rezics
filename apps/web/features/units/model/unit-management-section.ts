@@ -2,6 +2,7 @@ export const UnitManagementSectionIds = [
 	"content",
 	"metadata",
 	"relationships",
+	"tags",
 	"content-structure",
 	"releases",
 	"docks",
@@ -22,7 +23,8 @@ export function canOpenUnitManagement(capabilities: UnitCapabilities, canManageD
 		canManageDocks ||
 		capabilities.canEdit ||
 		capabilities.canManageAccess ||
-		capabilities.canManageAssociations
+		capabilities.canManageAssociations ||
+		capabilities.canManageTags
 	);
 }
 
@@ -33,11 +35,15 @@ export function getUnitManagementSectionIds(
 ): readonly UnitManagementSectionId[] {
 	if (!canOpenUnitManagement(capabilities, canManageDocks)) return [];
 	const hasUnitCapability =
-		capabilities.canEdit || capabilities.canManageAccess || capabilities.canManageAssociations;
+		capabilities.canEdit ||
+		capabilities.canManageAccess ||
+		capabilities.canManageAssociations ||
+		capabilities.canManageTags;
 	return UnitManagementSectionIds.filter((sectionId) => {
 		if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
 		if (sectionId === "relationships")
 			return capabilities.canEdit || capabilities.canManageAssociations;
+		if (sectionId === "tags") return capabilities.canManageTags;
 		if (sectionId === "content-structure")
 			return (
 				type !== "series" &&

@@ -89,6 +89,43 @@ export default {
 		pinned: "Pinned",
 		empty: "This work has no global Tags yet.",
 	},
+	management: {
+		title: "Tag curation",
+		description:
+			"Choose which global Tags appear first. All other Tags keep their community-ranked order.",
+		featuredTitle: "Featured Tags",
+		featuredDescription:
+			"Featured Tags appear first in the order you set. Drag them or use the move buttons.",
+		rankedTitle: "Community-ranked Tags",
+		rankedDescription: "Other global Tags remain ordered automatically by community voting.",
+		feature: "Feature",
+		unfeature: "Remove from featured",
+		moveEarlier: "Move earlier",
+		moveLater: "Move later",
+		drag: insert("Drag {{tag}} to reorder", { tag: String }),
+		instructions:
+			"Press Space to pick up a featured Tag. Use the arrow keys to move it, then press Space again to drop it.",
+		pickedUp: insert("Picked up {{tag}}.", { tag: String }),
+		over: insert("{{tag}} is over position {{position}} of {{count}}.", {
+			tag: String,
+			position: Number,
+			count: Number,
+		}),
+		cancelled: insert("Cancelled moving {{tag}}.", { tag: String }),
+		featuredAnnouncement: insert("Featured {{tag}} at position {{position}}.", {
+			tag: String,
+			position: Number,
+		}),
+		unfeaturedAnnouncement: insert("Removed {{tag}} from featured Tags.", {
+			tag: String,
+		}),
+		movedAnnouncement: insert("Moved {{tag}} to position {{position}}.", {
+			tag: String,
+			position: Number,
+		}),
+		noFeatured: "No featured Tags yet.",
+		noRanked: "There are no other global Tags to feature.",
+	},
 	realms: {
 		title: `${realmTerms.label} Tag contexts`,
 		description: `Each ${realmTerms.inline} is an independent context. Its judgments are never merged with global Tags or another ${realmTerms.inline}.`,

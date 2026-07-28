@@ -91,6 +91,44 @@ export default {
 		pinned: "Épinglée",
 		empty: "Cette œuvre ne possède encore aucune étiquette globale.",
 	},
+	management: {
+		title: "Sélection des étiquettes",
+		description:
+			"Choisissez les étiquettes globales affichées en premier. Les autres conservent le classement de la communauté.",
+		featuredTitle: "Étiquettes mises en avant",
+		featuredDescription:
+			"Les étiquettes mises en avant apparaissent d’abord dans l’ordre défini. Faites-les glisser ou utilisez les boutons.",
+		rankedTitle: "Étiquettes classées par la communauté",
+		rankedDescription:
+			"Les autres étiquettes globales restent automatiquement classées selon les votes de la communauté.",
+		feature: "Mettre en avant",
+		unfeature: "Retirer de la sélection",
+		moveEarlier: "Déplacer vers le haut",
+		moveLater: "Déplacer vers le bas",
+		drag: insert("Faire glisser {{tag}} pour réorganiser", { tag: String }),
+		instructions:
+			"Appuyez sur la barre d’espacement pour saisir une étiquette mise en avant. Déplacez-la avec les flèches, puis appuyez de nouveau sur la barre d’espacement pour la déposer.",
+		pickedUp: insert("{{tag}} a été saisie.", { tag: String }),
+		over: insert("{{tag}} se trouve au-dessus de la position {{position}} sur {{count}}.", {
+			tag: String,
+			position: Number,
+			count: Number,
+		}),
+		cancelled: insert("Le déplacement de {{tag}} a été annulé.", { tag: String }),
+		featuredAnnouncement: insert("{{tag}} a été mise en avant à la position {{position}}.", {
+			tag: String,
+			position: Number,
+		}),
+		unfeaturedAnnouncement: insert("{{tag}} a été retirée de la sélection.", {
+			tag: String,
+		}),
+		movedAnnouncement: insert("{{tag}} a été déplacée à la position {{position}}.", {
+			tag: String,
+			position: Number,
+		}),
+		noFeatured: "Aucune étiquette mise en avant.",
+		noRanked: "Aucune autre étiquette globale ne peut être mise en avant.",
+	},
 	realms: {
 		title: `Contextes d’étiquettes des ${realmTerms.plural}`,
 		description: `Chaque ${realmTerms.inline} constitue un contexte indépendant. Ses appréciations ne sont jamais fusionnées avec les étiquettes globales ni avec un autre ${realmTerms.inline}.`,

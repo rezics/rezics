@@ -138,6 +138,8 @@ export default {
 	SubjectAssociationNotFound: "이 주제 연계를 찾을 수 없습니다.",
 	AliasNotFound: "이 별칭을 찾을 수 없습니다.",
 	TagApplicationNotFound: "이 태그 적용을 찾을 수 없습니다.",
+	UnitTagCurationChanged:
+		"이 태그 선별이 다른 곳에서 변경되었습니다. 최신 순서를 불러왔으니 다시 시도하세요.",
 	TagNotFound: "이 태그를 찾을 수 없습니다.",
 	UnitVersionNotFound: "이 유닛 버전을 찾을 수 없습니다.",
 	UnitVariantKindMismatch: "변형과 주 버전은 동일한 지원 유닛 유형을 사용해야 합니다.",
