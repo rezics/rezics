@@ -1,4 +1,5 @@
 import {
+	getApiProgressByUnitIdEntriesQueryKey,
 	getApiProgressByUnitIdQueryKey,
 	getApiProgressByUnitIdNodesQueryKey,
 	getApiProgressQueryKey,
@@ -19,6 +20,9 @@ export async function invalidateProgressQueries(
 			}),
 			queryClient.invalidateQueries({
 				queryKey: getApiProgressByUnitIdNodesQueryKey({ path: { unitId } }),
+			}),
+			queryClient.invalidateQueries({
+				queryKey: getApiProgressByUnitIdEntriesQueryKey({ path: { unitId } }),
 			}),
 		);
 	await Promise.all(invalidations);

@@ -211,5 +211,6 @@ export default {
 	TagStructureChanged: `この ${tagStructureTerms.inline} は他の場所で変更されました。更新して再試行してください。`,
 	TagStructureDefinitionConflict: `同一の ${tagStructureTerms.inline} が既に存在します。`,
 	AssociationContextPostInvalid: `関係コンテキストはウィキの ${postTerms.label} である必要があります。`,
+	ProgressEntryNotFound: "この進捗イベントが見つかりませんでした。",
 	PostTagMentionVoteConflict: `このタグメンションは既存の ${postTerms.label} へのダウンボートと競合しています。`,
 } satisfies typeof import("../zh-Hant/errorCodes").default;

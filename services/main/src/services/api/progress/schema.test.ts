@@ -1,7 +1,14 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CompleteProgressBody, ProgressLookupResponse, UpsertProgressBody } from "./schema";
+import {
+	CompleteProgressBody,
+	CreateProgressEntryBody,
+	ImportProgressBody,
+	ProgressLookupResponse,
+	ReplaceProgressEntryBody,
+	UpsertProgressBody,
+} from "./schema";
 
 describe("progress API contract", () => {
 	it("represents untracked and tracked progress as distinct successful states", () => {
@@ -16,6 +23,7 @@ describe("progress API contract", () => {
 			firstSeenAt: "2026-07-26T00:00:00.000Z",
 			lastSeenAt: "2026-07-26T01:00:00.000Z",
 			lastContentStructureNodeId: null,
+			currentEntryId: null,
 			lastReadAnchor: null,
 			createdAt: "2026-07-26T00:00:00.000Z",
 			updatedAt: "2026-07-26T01:00:00.000Z",
@@ -48,5 +56,44 @@ describe("progress API contract", () => {
 		expect(Check(CompleteProgressBody, {})).toBe(true);
 		expect(Check(CompleteProgressBody, { totalTimeMs: 3_600_000 })).toBe(true);
 		expect(Check(CompleteProgressBody, { totalTimeMs: -1 })).toBe(false);
+		expect(Check(CompleteProgressBody, { totalTimeMs: Number.MAX_SAFE_INTEGER + 1 })).toBe(
+			false,
+		);
+	});
+
+	it("keeps native provenance when an existing journal event is edited", () => {
+		const event = {
+			entryKind: "update",
+			status: "active",
+			progress: 0.4,
+			occurredAt: "2026-07-26T00:00:00.000Z",
+			datePrecision: "instant",
+			sourceKind: "rezics",
+			affectsCurrent: true,
+		};
+		expect(Check(CreateProgressEntryBody, event)).toBe(false);
+		expect(Check(ReplaceProgressEntryBody, event)).toBe(true);
+	});
+
+	it("accepts a bounded batch of externally sourced journal events", () => {
+		expect(
+			Check(ImportProgressBody, {
+				sourceProvider: "Previous platform",
+				items: [
+					{
+						unitId: "00000000-0000-7000-8000-000000000002",
+						entryKind: "completion",
+						status: "completed",
+						progress: 1,
+						occurredAt: "2020-01-01T00:00:00.000Z",
+						datePrecision: "year",
+						affectsCurrent: false,
+					},
+				],
+			}),
+		).toBe(true);
+		expect(Check(ImportProgressBody, { sourceProvider: "Previous platform", items: [] })).toBe(
+			false,
+		);
 	});
 });

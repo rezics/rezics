@@ -4926,6 +4926,7 @@ export const ApiErrorCode = {
 	PollSingleChoiceInvalid: "PollSingleChoiceInvalid",
 	PollOptionInvalid: "PollOptionInvalid",
 	PollAlreadyClosed: "PollAlreadyClosed",
+	ProgressEntryNotFound: "ProgressEntryNotFound",
 	ContentStructureInvalid: "ContentStructureInvalid",
 	ContentStructureNotFound: "ContentStructureNotFound",
 	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
@@ -66378,6 +66379,230 @@ export type GetApiProgressResponse =
 /**
  * @type object
  */
+export type PostApiProgressImportStatus200 = {
+	createdCount: string | number;
+	/**
+	 * @type array
+	 */
+	entryIds: string[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressImportStatus400 = MalformedRequestBody;
+
+export const PostApiProgressImportStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
+} as const;
+
+export type PostApiProgressImportStatus404ErrorCodeEnum =
+	(typeof PostApiProgressImportStatus404ErrorCodeEnum)[keyof typeof PostApiProgressImportStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressImportStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiProgressImportStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiProgressImportStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiProgressImportStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressImportStatus500 = InternalError;
+
+export const PostApiProgressImportRequestItemsEntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type PostApiProgressImportRequestItemsEntryKindEnum =
+	(typeof PostApiProgressImportRequestItemsEntryKindEnum)[keyof typeof PostApiProgressImportRequestItemsEntryKindEnum];
+
+export const PostApiProgressImportRequestItemsStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PostApiProgressImportRequestItemsStatusEnum =
+	(typeof PostApiProgressImportRequestItemsStatusEnum)[keyof typeof PostApiProgressImportRequestItemsStatusEnum];
+
+export const PostApiProgressImportRequestItemsDatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type PostApiProgressImportRequestItemsDatePrecisionEnum =
+	(typeof PostApiProgressImportRequestItemsDatePrecisionEnum)[keyof typeof PostApiProgressImportRequestItemsDatePrecisionEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressImportBody = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @default 'update'
+		 * @type string
+		 */
+		entryKind: PostApiProgressImportRequestItemsEntryKindEnum;
+		/**
+		 * @type string
+		 */
+		status: PostApiProgressImportRequestItemsStatusEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 1
+		 * @type number | undefined
+		 */
+		progress?: number;
+		totalTimeMs?: string | number;
+		lastContentStructureNodeId?: (string | null) | null;
+		occurredAt: (string | null) | null;
+		/**
+		 * @default 'instant'
+		 * @type string
+		 */
+		datePrecision: PostApiProgressImportRequestItemsDatePrecisionEnum;
+		sourceProvider?: (string | null) | null;
+		sourceExternalId?: (string | null) | null;
+		/**
+		 * @default false
+		 * @type boolean | undefined
+		 */
+		affectsCurrent?: boolean;
+	}[];
+	/**
+	 * @minLength 1
+	 * @maxLength 100
+	 * @type string
+	 */
+	sourceProvider: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressImportOptions = {
+	body: PostApiProgressImportBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressImportResponses = {
+	"200": PostApiProgressImportStatus200;
+	"400": PostApiProgressImportStatus400;
+	"404": PostApiProgressImportStatus404;
+	"422": PostApiProgressImportStatus422;
+	"429": PostApiProgressImportStatus429;
+	"500": PostApiProgressImportStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiProgressImportResponse =
+	| PostApiProgressImportStatus200
+	| PostApiProgressImportStatus400
+	| PostApiProgressImportStatus404
+	| PostApiProgressImportStatus422
+	| PostApiProgressImportStatus429
+	| PostApiProgressImportStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiProgressByUnitIdPath = {
 	/**
 	 * @description
@@ -66454,6 +66679,7 @@ export type GetApiProgressByUnitIdStatus200 =
 				 */
 				lastSeenAt: string;
 				lastContentStructureNodeId: (string | null) | null;
+				currentEntryId: (string | null) | null;
 				lastReadAnchor: (void | null) | null;
 				/**
 				 * @description
@@ -66630,6 +66856,7 @@ export type PutApiProgressByUnitIdStatus200 = {
 	 */
 	lastSeenAt: string;
 	lastContentStructureNodeId: (string | null) | null;
+	currentEntryId: (string | null) | null;
 	lastReadAnchor: (void | null) | null;
 	/**
 	 * @description
@@ -66865,6 +67092,1067 @@ export type DeleteApiProgressByUnitIdResponse =
 /**
  * @type object
  */
+export type GetApiProgressByUnitIdEntriesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesQuery = {
+	/**
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 30
+	 */
+	limit?: string | number;
+};
+
+export const GetApiProgressByUnitIdEntriesStatus200ItemsEntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type GetApiProgressByUnitIdEntriesStatus200ItemsEntryKindEnum =
+	(typeof GetApiProgressByUnitIdEntriesStatus200ItemsEntryKindEnum)[keyof typeof GetApiProgressByUnitIdEntriesStatus200ItemsEntryKindEnum];
+
+export const GetApiProgressByUnitIdEntriesStatus200ItemsStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type GetApiProgressByUnitIdEntriesStatus200ItemsStatusEnum =
+	(typeof GetApiProgressByUnitIdEntriesStatus200ItemsStatusEnum)[keyof typeof GetApiProgressByUnitIdEntriesStatus200ItemsStatusEnum];
+
+export const GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum =
+	(typeof GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum)[keyof typeof GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum];
+
+export const GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum = {
+	rezics: "rezics",
+	manual: "manual",
+	import: "import",
+} as const;
+
+export type GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum =
+	(typeof GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum)[keyof typeof GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @default 'update'
+		 * @type string
+		 */
+		entryKind: GetApiProgressByUnitIdEntriesStatus200ItemsEntryKindEnum;
+		/**
+		 * @default 'backlog'
+		 * @type string
+		 */
+		status: GetApiProgressByUnitIdEntriesStatus200ItemsStatusEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 1
+		 * @type number
+		 */
+		progress: number;
+		completionDelta: string | number;
+		totalTimeMs: string | number;
+		lastContentStructureNodeId: (string | null) | null;
+		contentStructureRevisionId: (string | null) | null;
+		occurredAt: (string | null) | null;
+		/**
+		 * @default 'instant'
+		 * @type string
+		 */
+		datePrecision: GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum;
+		/**
+		 * @default 'rezics'
+		 * @type string
+		 */
+		sourceKind: GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum;
+		sourceProvider: (string | null) | null;
+		sourceExternalId: (string | null) | null;
+		/**
+		 * @type boolean
+		 */
+		affectsCurrent: boolean;
+		reviewId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesOptions = {
+	body?: never;
+	path: GetApiProgressByUnitIdEntriesPath;
+	query?: GetApiProgressByUnitIdEntriesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdEntriesResponses = {
+	"200": GetApiProgressByUnitIdEntriesStatus200;
+	"400": GetApiProgressByUnitIdEntriesStatus400;
+	"404": GetApiProgressByUnitIdEntriesStatus404;
+	"422": GetApiProgressByUnitIdEntriesStatus422;
+	"429": GetApiProgressByUnitIdEntriesStatus429;
+	"500": GetApiProgressByUnitIdEntriesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiProgressByUnitIdEntriesResponse =
+	| GetApiProgressByUnitIdEntriesStatus200
+	| GetApiProgressByUnitIdEntriesStatus400
+	| GetApiProgressByUnitIdEntriesStatus404
+	| GetApiProgressByUnitIdEntriesStatus422
+	| GetApiProgressByUnitIdEntriesStatus429
+	| GetApiProgressByUnitIdEntriesStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiProgressByUnitIdEntriesStatus200EntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesStatus200EntryKindEnum =
+	(typeof PostApiProgressByUnitIdEntriesStatus200EntryKindEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus200EntryKindEnum];
+
+export const PostApiProgressByUnitIdEntriesStatus200StatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesStatus200StatusEnum =
+	(typeof PostApiProgressByUnitIdEntriesStatus200StatusEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus200StatusEnum];
+
+export const PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum =
+	(typeof PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum];
+
+export const PostApiProgressByUnitIdEntriesStatus200SourceKindEnum = {
+	rezics: "rezics",
+	manual: "manual",
+	import: "import",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesStatus200SourceKindEnum =
+	(typeof PostApiProgressByUnitIdEntriesStatus200SourceKindEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus200SourceKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @default 'update'
+	 * @type string
+	 */
+	entryKind: PostApiProgressByUnitIdEntriesStatus200EntryKindEnum;
+	/**
+	 * @default 'backlog'
+	 * @type string
+	 */
+	status: PostApiProgressByUnitIdEntriesStatus200StatusEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 1
+	 * @type number
+	 */
+	progress: number;
+	completionDelta: string | number;
+	totalTimeMs: string | number;
+	lastContentStructureNodeId: (string | null) | null;
+	contentStructureRevisionId: (string | null) | null;
+	occurredAt: (string | null) | null;
+	/**
+	 * @default 'instant'
+	 * @type string
+	 */
+	datePrecision: PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum;
+	/**
+	 * @default 'rezics'
+	 * @type string
+	 */
+	sourceKind: PostApiProgressByUnitIdEntriesStatus200SourceKindEnum;
+	sourceProvider: (string | null) | null;
+	sourceExternalId: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	affectsCurrent: boolean;
+	reviewId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesStatus400 = MalformedRequestBody;
+
+export const PostApiProgressByUnitIdEntriesStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesStatus404ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdEntriesStatus404ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiProgressByUnitIdEntriesStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiProgressByUnitIdEntriesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesStatus500 = InternalError;
+
+export const PostApiProgressByUnitIdEntriesRequestEntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesRequestEntryKindEnum =
+	(typeof PostApiProgressByUnitIdEntriesRequestEntryKindEnum)[keyof typeof PostApiProgressByUnitIdEntriesRequestEntryKindEnum];
+
+export const PostApiProgressByUnitIdEntriesRequestStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesRequestStatusEnum =
+	(typeof PostApiProgressByUnitIdEntriesRequestStatusEnum)[keyof typeof PostApiProgressByUnitIdEntriesRequestStatusEnum];
+
+export const PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum =
+	(typeof PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum)[keyof typeof PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum];
+
+export const PostApiProgressByUnitIdEntriesRequestSourceKindEnum = {
+	manual: "manual",
+	import: "import",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesRequestSourceKindEnum =
+	(typeof PostApiProgressByUnitIdEntriesRequestSourceKindEnum)[keyof typeof PostApiProgressByUnitIdEntriesRequestSourceKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesBody = {
+	/**
+	 * @default 'update'
+	 * @type string
+	 */
+	entryKind: PostApiProgressByUnitIdEntriesRequestEntryKindEnum;
+	/**
+	 * @type string
+	 */
+	status: PostApiProgressByUnitIdEntriesRequestStatusEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 1
+	 * @type number | undefined
+	 */
+	progress?: number;
+	totalTimeMs?: string | number;
+	lastContentStructureNodeId?: (string | null) | null;
+	occurredAt: (string | null) | null;
+	/**
+	 * @default 'instant'
+	 * @type string
+	 */
+	datePrecision: PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum;
+	sourceProvider?: (string | null) | null;
+	sourceExternalId?: (string | null) | null;
+	/**
+	 * @default false
+	 * @type boolean | undefined
+	 */
+	affectsCurrent?: boolean;
+	/**
+	 * @type string | undefined
+	 */
+	sourceKind?: PostApiProgressByUnitIdEntriesRequestSourceKindEnum;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesOptions = {
+	body: PostApiProgressByUnitIdEntriesBody;
+	path: PostApiProgressByUnitIdEntriesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdEntriesResponses = {
+	"200": PostApiProgressByUnitIdEntriesStatus200;
+	"400": PostApiProgressByUnitIdEntriesStatus400;
+	"404": PostApiProgressByUnitIdEntriesStatus404;
+	"422": PostApiProgressByUnitIdEntriesStatus422;
+	"429": PostApiProgressByUnitIdEntriesStatus429;
+	"500": PostApiProgressByUnitIdEntriesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiProgressByUnitIdEntriesResponse =
+	| PostApiProgressByUnitIdEntriesStatus200
+	| PostApiProgressByUnitIdEntriesStatus400
+	| PostApiProgressByUnitIdEntriesStatus404
+	| PostApiProgressByUnitIdEntriesStatus422
+	| PostApiProgressByUnitIdEntriesStatus429
+	| PostApiProgressByUnitIdEntriesStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entryId: string;
+};
+
+export const PutApiProgressByUnitIdEntriesByEntryIdStatus200EntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus200EntryKindEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200EntryKindEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200EntryKindEnum];
+
+export const PutApiProgressByUnitIdEntriesByEntryIdStatus200StatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus200StatusEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200StatusEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200StatusEnum];
+
+export const PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum];
+
+export const PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum = {
+	rezics: "rezics",
+	manual: "manual",
+	import: "import",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum];
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @default 'update'
+	 * @type string
+	 */
+	entryKind: PutApiProgressByUnitIdEntriesByEntryIdStatus200EntryKindEnum;
+	/**
+	 * @default 'backlog'
+	 * @type string
+	 */
+	status: PutApiProgressByUnitIdEntriesByEntryIdStatus200StatusEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 1
+	 * @type number
+	 */
+	progress: number;
+	completionDelta: string | number;
+	totalTimeMs: string | number;
+	lastContentStructureNodeId: (string | null) | null;
+	contentStructureRevisionId: (string | null) | null;
+	occurredAt: (string | null) | null;
+	/**
+	 * @default 'instant'
+	 * @type string
+	 */
+	datePrecision: PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum;
+	/**
+	 * @default 'rezics'
+	 * @type string
+	 */
+	sourceKind: PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum;
+	sourceProvider: (string | null) | null;
+	sourceExternalId: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	affectsCurrent: boolean;
+	reviewId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus400 = MalformedRequestBody;
+
+export const PutApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ProgressEntryNotFound: "ProgressEntryNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus500 = InternalError;
+
+export const PutApiProgressByUnitIdEntriesByEntryIdRequestEntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdRequestEntryKindEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdRequestEntryKindEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdRequestEntryKindEnum];
+
+export const PutApiProgressByUnitIdEntriesByEntryIdRequestStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdRequestStatusEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdRequestStatusEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdRequestStatusEnum];
+
+export const PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum];
+
+export const PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum = {
+	rezics: "rezics",
+	manual: "manual",
+	import: "import",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum];
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdBody = {
+	/**
+	 * @default 'update'
+	 * @type string
+	 */
+	entryKind: PutApiProgressByUnitIdEntriesByEntryIdRequestEntryKindEnum;
+	/**
+	 * @type string
+	 */
+	status: PutApiProgressByUnitIdEntriesByEntryIdRequestStatusEnum;
+	/**
+	 * @minLength 0
+	 * @maxLength 1
+	 * @type number | undefined
+	 */
+	progress?: number;
+	totalTimeMs?: string | number;
+	lastContentStructureNodeId?: (string | null) | null;
+	occurredAt: (string | null) | null;
+	/**
+	 * @default 'instant'
+	 * @type string
+	 */
+	datePrecision: PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum;
+	sourceProvider?: (string | null) | null;
+	sourceExternalId?: (string | null) | null;
+	/**
+	 * @default false
+	 * @type boolean | undefined
+	 */
+	affectsCurrent?: boolean;
+	/**
+	 * @default 'rezics'
+	 * @type string
+	 */
+	sourceKind: PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdOptions = {
+	body: PutApiProgressByUnitIdEntriesByEntryIdBody;
+	path: PutApiProgressByUnitIdEntriesByEntryIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdResponses = {
+	"200": PutApiProgressByUnitIdEntriesByEntryIdStatus200;
+	"400": PutApiProgressByUnitIdEntriesByEntryIdStatus400;
+	"404": PutApiProgressByUnitIdEntriesByEntryIdStatus404;
+	"422": PutApiProgressByUnitIdEntriesByEntryIdStatus422;
+	"429": PutApiProgressByUnitIdEntriesByEntryIdStatus429;
+	"500": PutApiProgressByUnitIdEntriesByEntryIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiProgressByUnitIdEntriesByEntryIdResponse =
+	| PutApiProgressByUnitIdEntriesByEntryIdStatus200
+	| PutApiProgressByUnitIdEntriesByEntryIdStatus400
+	| PutApiProgressByUnitIdEntriesByEntryIdStatus404
+	| PutApiProgressByUnitIdEntriesByEntryIdStatus422
+	| PutApiProgressByUnitIdEntriesByEntryIdStatus429
+	| PutApiProgressByUnitIdEntriesByEntryIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entryId: string;
+};
+
+export const DeleteApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ProgressEntryNotFound: "ProgressEntryNotFound",
+} as const;
+
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdOptions = {
+	body?: never;
+	path: DeleteApiProgressByUnitIdEntriesByEntryIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdResponses = {
+	"404": DeleteApiProgressByUnitIdEntriesByEntryIdStatus404;
+	"422": DeleteApiProgressByUnitIdEntriesByEntryIdStatus422;
+	"429": DeleteApiProgressByUnitIdEntriesByEntryIdStatus429;
+	"500": DeleteApiProgressByUnitIdEntriesByEntryIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiProgressByUnitIdEntriesByEntryIdResponse =
+	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus404
+	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
+	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
+	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiProgressByUnitIdNodesPath = {
 	/**
 	 * @description
@@ -67057,6 +68345,7 @@ export type PostApiProgressByUnitIdCompleteStatus200 = {
 	 */
 	lastSeenAt: string;
 	lastContentStructureNodeId: (string | null) | null;
+	currentEntryId: (string | null) | null;
 	lastReadAnchor: (void | null) | null;
 	/**
 	 * @description
@@ -77151,6 +78440,14 @@ export type PostApiReviewsStatus409 = {
 	requestId: string;
 };
 
+export const PostApiReviewsStatus422ErrorCodeEnum = {
+	ScoreContextUnitUnsupported: "ScoreContextUnitUnsupported",
+	ValidationError: "ValidationError",
+} as const;
+
+export type PostApiReviewsStatus422ErrorCodeEnum =
+	(typeof PostApiReviewsStatus422ErrorCodeEnum)[keyof typeof PostApiReviewsStatus422ErrorCodeEnum];
+
 export type PostApiReviewsStatus422 =
 	| {
 			/**
@@ -77161,7 +78458,7 @@ export type PostApiReviewsStatus422 =
 				 * @default 'ScoreContextUnitUnsupported'
 				 * @type string
 				 */
-				code: "ScoreContextUnitUnsupported";
+				code: PostApiReviewsStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -77230,6 +78527,12 @@ export type PostApiReviewsBody = {
 	 * @type string
 	 */
 	targetId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	progressEntryId?: string;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -77567,6 +78870,45 @@ export const GetApiReviewsByReviewIdStatus200SubjectLanguageEnum = {
 
 export type GetApiReviewsByReviewIdStatus200SubjectLanguageEnum =
 	(typeof GetApiReviewsByReviewIdStatus200SubjectLanguageEnum)[keyof typeof GetApiReviewsByReviewIdStatus200SubjectLanguageEnum];
+
+export const GetApiReviewsByReviewIdStatus200ProgressEntryEntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200ProgressEntryEntryKindEnum =
+	(typeof GetApiReviewsByReviewIdStatus200ProgressEntryEntryKindEnum)[keyof typeof GetApiReviewsByReviewIdStatus200ProgressEntryEntryKindEnum];
+
+export const GetApiReviewsByReviewIdStatus200ProgressEntryStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200ProgressEntryStatusEnum =
+	(typeof GetApiReviewsByReviewIdStatus200ProgressEntryStatusEnum)[keyof typeof GetApiReviewsByReviewIdStatus200ProgressEntryStatusEnum];
+
+export const GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum =
+	(typeof GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum)[keyof typeof GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum];
+
+export const GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum = {
+	rezics: "rezics",
+	manual: "manual",
+	import: "import",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum =
+	(typeof GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum)[keyof typeof GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum];
 
 /**
  * @type object
@@ -77920,6 +79262,53 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		contextUnitId: string;
 		value: string | number;
 	}[];
+	progressEntry:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				unitId: string;
+				/**
+				 * @default 'update'
+				 * @type string
+				 */
+				entryKind: GetApiReviewsByReviewIdStatus200ProgressEntryEntryKindEnum;
+				/**
+				 * @default 'backlog'
+				 * @type string
+				 */
+				status: GetApiReviewsByReviewIdStatus200ProgressEntryStatusEnum;
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number
+				 */
+				progress: number;
+				completionDelta: string | number;
+				totalTimeMs: string | number;
+				lastContentStructureNodeId: (string | null) | null;
+				occurredAt: (string | null) | null;
+				/**
+				 * @default 'instant'
+				 * @type string
+				 */
+				datePrecision: GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum;
+				/**
+				 * @default 'rezics'
+				 * @type string
+				 */
+				sourceKind: GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum;
+				sourceProvider: (string | null) | null;
+		  } | null)
+		| null;
 	/**
 	 * @type object
 	 */
@@ -82263,6 +83652,45 @@ export const GetApiPostsByPostIdStatus200SubjectLanguageEnum = {
 export type GetApiPostsByPostIdStatus200SubjectLanguageEnum =
 	(typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum)[keyof typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum];
 
+export const GetApiPostsByPostIdStatus200ProgressEntryEntryKindEnum = {
+	update: "update",
+	completion: "completion",
+} as const;
+
+export type GetApiPostsByPostIdStatus200ProgressEntryEntryKindEnum =
+	(typeof GetApiPostsByPostIdStatus200ProgressEntryEntryKindEnum)[keyof typeof GetApiPostsByPostIdStatus200ProgressEntryEntryKindEnum];
+
+export const GetApiPostsByPostIdStatus200ProgressEntryStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type GetApiPostsByPostIdStatus200ProgressEntryStatusEnum =
+	(typeof GetApiPostsByPostIdStatus200ProgressEntryStatusEnum)[keyof typeof GetApiPostsByPostIdStatus200ProgressEntryStatusEnum];
+
+export const GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum = {
+	instant: "instant",
+	day: "day",
+	month: "month",
+	year: "year",
+	unknown: "unknown",
+} as const;
+
+export type GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum =
+	(typeof GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum)[keyof typeof GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum];
+
+export const GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum = {
+	rezics: "rezics",
+	manual: "manual",
+	import: "import",
+} as const;
+
+export type GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum =
+	(typeof GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum)[keyof typeof GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum];
+
 export type GetApiPostsByPostIdStatus200 =
 	| {
 			/**
@@ -83353,6 +84781,53 @@ export type GetApiPostsByPostIdStatus200 =
 				contextUnitId: string;
 				value: string | number;
 			}[];
+			progressEntry:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						unitId: string;
+						/**
+						 * @default 'update'
+						 * @type string
+						 */
+						entryKind: GetApiPostsByPostIdStatus200ProgressEntryEntryKindEnum;
+						/**
+						 * @default 'backlog'
+						 * @type string
+						 */
+						status: GetApiPostsByPostIdStatus200ProgressEntryStatusEnum;
+						/**
+						 * @minLength 0
+						 * @maxLength 1
+						 * @type number
+						 */
+						progress: number;
+						completionDelta: string | number;
+						totalTimeMs: string | number;
+						lastContentStructureNodeId: (string | null) | null;
+						occurredAt: (string | null) | null;
+						/**
+						 * @default 'instant'
+						 * @type string
+						 */
+						datePrecision: GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum;
+						/**
+						 * @default 'rezics'
+						 * @type string
+						 */
+						sourceKind: GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum;
+						sourceProvider: (string | null) | null;
+				  } | null)
+				| null;
 			/**
 			 * @type object
 			 */

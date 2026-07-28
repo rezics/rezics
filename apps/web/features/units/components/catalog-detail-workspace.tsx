@@ -9,6 +9,7 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import { UnitProgressDialog } from "@/features/progress/components/unit-progress-dialog";
 import { UnitProgressProvider } from "@/features/progress/components/unit-progress-provider";
+import { UnitProgressSummaryCard } from "@/features/progress/components/unit-progress-summary-card";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -113,6 +114,8 @@ function CatalogDetailShell<Type extends CatalogDetailUnitType>({
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
 			<CatalogDetailHero type={type} unit={unit} />
+
+			<UnitProgressSummaryCard className="lg:hidden" />
 
 			<nav
 				aria-label={t.units.detail.sections}

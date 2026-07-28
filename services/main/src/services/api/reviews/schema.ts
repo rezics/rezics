@@ -59,6 +59,7 @@ export function resolveReviewScoreFilter(
 
 export const CreateReviewBody = t.Object({
 	targetId: Uuid,
+	progressEntryId: t.Optional(Uuid),
 	realmId: t.Optional(Uuid),
 	score: t.Optional(
 		t.Object(

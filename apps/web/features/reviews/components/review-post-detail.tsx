@@ -21,13 +21,19 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	Button,
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
 	MenuItem,
 } from "@rezics/ui";
 import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-actions";
 import { PostDetailArticle } from "@/features/posts/components/post-detail-article";
+import { ProgressEventDescription } from "@/features/progress/components/progress-event-description";
 import { getPostManagementSectionIds } from "@/features/posts/model/post-management-section";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { postManagementSectionHref } from "@/features/posts/routing/post-management-routes";
+import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 
@@ -59,6 +65,23 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 
 	return (
 		<>
+			{review.progressEntry &&
+			review.subject &&
+			isCatalogDetailUnitType(review.subject.type) ? (
+				<Card appearance="outlined" className="mb-5">
+					<CardHeader>
+						<CardTitle>{t.engagement.progressJournal.linkedReview}</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p className="text-sm">
+							<ProgressEventDescription
+								entry={review.progressEntry}
+								type={review.subject.type}
+							/>
+						</p>
+					</CardContent>
+				</Card>
+			) : null}
 			<PostDetailArticle
 				commentsHref="#replies"
 				engagementOverflow={

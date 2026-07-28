@@ -108,6 +108,7 @@ export default {
 		book: {
 			title: "読書進捗",
 			summaryTitle: "マイ読書",
+			progressLabel: "読書の進捗率",
 			dialogDescription:
 				"読書状況と現在の位置を記録します。この読了を完了すると、完了読書数に1が加算されます。",
 			listSummary: insert("{{percent}}% 読了 · 完了読書 {{count}} 件", {
@@ -119,6 +120,15 @@ export default {
 			completedCount: "完了した読書",
 			lastChapter: "現在の章",
 			noChapter: "章が選択されていません",
+			estimatedFromContents:
+				"選択した章と目次の内容量から推定しました。必要に応じて調整できます。",
+			history: {
+				completion: insert("{{date}} にこの本を読み終えました。", { date: String }),
+				update: insert("{{date}} に {{percent}}% まで読みました。", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "この本を評価",
 			recordAction: "読書を記録",
 			startAction: "読書を開始",
@@ -145,6 +155,7 @@ export default {
 		media: {
 			title: "視聴進行状況",
 			summaryTitle: "マイビュー",
+			progressLabel: "視聴の進捗率",
 			dialogDescription:
 				"視聴状況と再生位置を記録します。この視聴を完了すると、完了視聴に 1 が加算されます。",
 			listSummary: insert("{{percent}}% 視聴済み · 完了視聴 {{count}}", {
@@ -155,6 +166,13 @@ export default {
 			progress: "再生進行",
 			completedCount: "完了視聴",
 			totalMinutes: "総視聴分数",
+			history: {
+				completion: insert("{{date}} にこの作品を見終えました。", { date: String }),
+				update: insert("{{date}} に {{percent}}% まで視聴しました。", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "この作品を評価",
 			recordAction: "視聴を記録",
 			startAction: "視聴を開始",
@@ -181,6 +199,7 @@ export default {
 		software: {
 			title: "利用記録",
 			summaryTitle: "私の使用状況",
+			progressLabel: "利用進捗",
 			dialogDescription:
 				"使用状況と合計時間を記録します。この使用を完了すると、完了回数が1増えます。",
 			listSummary: insert("{{count}} 完了 · {{minutes}} 分", {
@@ -190,6 +209,13 @@ export default {
 			status: "使用状況",
 			completedCount: "完了回数",
 			totalMinutes: "総使用時間（分）",
+			history: {
+				completion: insert("{{date}} に1回の利用を完了しました。", { date: String }),
+				update: insert("{{date}} に利用進捗を {{percent}}% と記録しました。", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "このソフトウェアを評価する",
 			recordAction: "使用状況を記録",
 			startAction: "使用開始",
@@ -213,6 +239,78 @@ export default {
 				dropped: "使用を中止",
 			},
 		},
+	},
+	retryProgress: "進捗を再読み込み",
+	progressPercent: insert("{{percent}}%", { percent: Number }),
+	viewProgressHistory: "足跡を見る",
+	progressJournal: {
+		title: "私の足跡",
+		description: "状態の変更を編集可能なイベントとして残し、他のサービスの履歴も保存できます。",
+		backToUnit: "作品に戻る",
+		backToProgress: "進捗一覧に戻る",
+		historyTitle: "進捗履歴",
+		updateNow: "現在の進捗を更新",
+		addHistory: "過去の記録を追加",
+		addHistoryDescription: "過去の進捗変更を追加します。初期設定では現在の進捗は変わりません。",
+		importHistory: "履歴をインポート",
+		noEntries: "進捗の足跡はまだありません。",
+		loadMore: "さらに読み込む",
+		unknownDate: "日付不明",
+		affectsCurrentShort: "現在の進捗",
+		entryDetails: "イベントの詳細",
+		entryKind: "イベントの種類",
+		kinds: { update: "進捗の更新", completion: "1回完了" },
+		status: "状態",
+		percentage: "完了率",
+		totalMinutes: "累計時間（分）",
+		occurredAt: "記録日時",
+		datePrecision: "日付の精度",
+		precision: {
+			instant: "正確な日時",
+			day: "日",
+			month: "月",
+			year: "年",
+			unknown: "日付不明",
+		},
+		source: "出典",
+		sourceKinds: { rezics: "このサイトで記録", manual: "手動で追加", import: "インポート" },
+		sourceProvider: "移行元サービス",
+		sourceProviderPlaceholder: "例：以前使っていたサービス",
+		sourceProviderDescription: "任意。この記録が元々どのサービスにあったかを示します。",
+		sourceExternalId: "外部記録の識別子",
+		affectsCurrent: "このイベントを現在の進捗にする",
+		affectsCurrentDescription:
+			"有効にすると、この作品に表示される現在の状態と進捗が更新されます。",
+		saveEntry: "イベントを保存",
+		editEntry: "イベントを編集",
+		editDescription: "この状態変更の日付、進捗、出典を修正します。",
+		deleteEntry: "イベントを削除",
+		deletePrompt: "この進捗イベントを削除し、進捗の集計と完了回数を再計算します。",
+		completionIncrement: "完了回数の増加",
+		writeReview: "この足跡をレビュー",
+		viewReview: "紐づいたレビューを見る",
+		linkedReview: "このレビューに紐づく足跡",
+		reviewBindingNotice: "このレビューは進捗ページで選択した足跡に紐づきます。",
+		importDescription:
+			"他のサービスから過去の足跡を取り込みます。初期設定では現在の進捗は変わりません。",
+		importFormat: "ファイル形式",
+		importFormatDescription:
+			"1行目は次の列順と完全に一致させ、以降は1行につき1イベントを記述します。",
+		importFormatRules: insert(
+			"{{format}} の進捗欄は 0〜1 の値です。日付は指定した精度に合わせて日時、日、月、年で入力します。",
+			{ format: String },
+		),
+		importProviderDescription:
+			"今回取り込むすべてのイベントに、この移行元サービスが記録されます。",
+		importFile: "インポートファイル",
+		importInvalidLine: insert(
+			"{{line}} 行目の形式が正しくありません。修正して再試行してください。",
+			{
+				line: Number,
+			},
+		),
+		importReady: insert("{{count}} 件のイベントを読み込みました。", { count: Number }),
+		importComplete: insert("{{count}} 件のイベントをインポートしました。", { count: Number }),
 	},
 	progressNotRecorded: "記録されていません",
 	completionCountChange: insert("完了回数は {{current}} から {{next}} に増加します。", {

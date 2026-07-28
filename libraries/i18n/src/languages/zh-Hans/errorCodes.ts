@@ -198,5 +198,6 @@ export default {
 	TagStructureChanged: `这个${tagStructureTerms.inline}已在其他地方变更，请刷新后再试一次。`,
 	TagStructureDefinitionConflict: `已有内容完全相同的${tagStructureTerms.inline}。`,
 	AssociationContextPostInvalid: `关联脉络必须是知识型${postTerms.inline}。`,
+	ProgressEntryNotFound: "找不到这条进度事件。",
 	PostTagMentionVoteConflict: `这个标签提及与你对该${postTerms.inline}的既有负票冲突。`,
 } satisfies typeof import("../zh-Hant/errorCodes").default;

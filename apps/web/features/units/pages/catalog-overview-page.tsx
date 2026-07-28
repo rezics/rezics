@@ -15,6 +15,7 @@ import type { ReactNode } from "react";
 
 import { UnitShelf } from "@/features/explore/unit-shelf";
 import { UnitRatingsReviewsSection } from "@/features/reviews/components/unit-ratings-reviews-section";
+import { UnitProgressSummaryCard } from "@/features/progress/components/unit-progress-summary-card";
 import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
 import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
@@ -146,6 +147,8 @@ export function CatalogOverviewPage() {
 			</div>
 
 			<aside className="grid min-w-0 content-start gap-5">
+				<UnitProgressSummaryCard className="hidden lg:flex" />
+
 				<DetailSection title={t.units.detail.information}>
 					<DataList>
 						{[...domainFacts, ...commonFacts].map(([label, value]) =>

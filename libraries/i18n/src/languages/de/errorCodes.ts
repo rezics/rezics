@@ -224,5 +224,6 @@ export default {
 	TagStructureChanged: `Dieser ${tagStructureTerms.inline} wurde an anderer Stelle geändert. Aktualisiere die Seite und versuche es erneut.`,
 	TagStructureDefinitionConflict: `Ein identischer ${tagStructureTerms.inline} ist bereits vorhanden.`,
 	AssociationContextPostInvalid: `Der Beziehungskontext muss ein Wiki-${postTerms.inline} sein.`,
+	ProgressEntryNotFound: "Dieses Fortschrittsereignis wurde nicht gefunden.",
 	PostTagMentionVoteConflict: `Diese Tag-Erwähnung steht im Konflikt mit deiner vorhandenen Gegenstimme für den ${postTerms.inline}.`,
 } satisfies typeof import("../zh-Hant/errorCodes").default;

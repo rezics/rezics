@@ -6,6 +6,7 @@ import {
 	type GetApiProgressStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
+import { Import } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -37,6 +38,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { invalidateProgressQueries } from "../data/progress-cache";
 import { toProgressStatus } from "../model/progress-record";
+import { unitProgressHref } from "../routing/progress-routes";
 
 export function ProgressPage() {
 	return (
@@ -69,7 +71,17 @@ function ProgressList() {
 
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading title={t.engagement.progress} />
+			<PageHeading
+				action={
+					<Button asChild variant="outline">
+						<Link href="/me/progress/import">
+							<Import aria-hidden />
+							{t.engagement.progressJournal.importHistory}
+						</Link>
+					</Button>
+				}
+				title={t.engagement.progress}
+			/>
 			{query.data?.items.length ? (
 				<div className="grid gap-3">
 					{query.data.items.map((item) => (
@@ -137,8 +149,8 @@ function ProgressListItem({
 					<div className="flex gap-2">
 						{type ? (
 							<Button asChild size="sm" variant="outline">
-								<Link href={`/units/${type}/${item.unitId}`}>
-									{t.engagement.select}
+								<Link href={unitProgressHref(type, item.unitId)}>
+									{t.engagement.viewProgressHistory}
 								</Link>
 							</Button>
 						) : null}

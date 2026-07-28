@@ -35,6 +35,7 @@ import {
 } from "../../posts/targeting";
 import { getPostSubjectPresentation } from "../../posts/presentation";
 import { selectPostScores } from "../../posts/scores";
+import { selectPostProgressEntry } from "../../posts/progress";
 import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
@@ -546,6 +547,7 @@ export default new Elysia()
 					const [
 						attributionMap,
 						scores,
+						progressEntries,
 						subject,
 						canEdit,
 						canManageAttributions,
@@ -562,6 +564,9 @@ export default new Elysia()
 								value,
 							})),
 						),
+						row.postKind === "review"
+							? selectPostProgressEntry(row.id)
+							: Promise.resolve([]),
 						subjectPromise,
 						row.postKind === "wiki"
 							? Promise.resolve(false)
@@ -606,6 +611,23 @@ export default new Elysia()
 							postKind: "review" as const,
 							targetId,
 							body: row.body === null ? null : toPortableTextResponse(row.body),
+							progressEntry: progressEntries[0]
+								? {
+										id: progressEntries[0].id,
+										unitId: progressEntries[0].unitId,
+										entryKind: progressEntries[0].entryKind,
+										status: progressEntries[0].status,
+										progress: progressEntries[0].progress,
+										completionDelta: progressEntries[0].completionDelta,
+										totalTimeMs: Number(progressEntries[0].totalTimeMs),
+										lastContentStructureNodeId:
+											progressEntries[0].lastContentStructureNodeId,
+										occurredAt: progressEntries[0].occurredAt,
+										datePrecision: progressEntries[0].datePrecision,
+										sourceKind: progressEntries[0].sourceKind,
+										sourceProvider: progressEntries[0].sourceProvider,
+									}
+								: null,
 							capabilities: {
 								canEdit,
 								canManageAttributions,

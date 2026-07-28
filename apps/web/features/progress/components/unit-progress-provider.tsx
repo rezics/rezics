@@ -26,6 +26,7 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { invalidateProgressQueries } from "../data/progress-cache";
+import { estimateBookChapterProgresses } from "../model/book-progress-estimate";
 import {
 	clampProgress,
 	completeProgressOptimistically,
@@ -40,6 +41,7 @@ import {
 import { deriveUnitProgressState, type UnitProgressState } from "../model/progress-state";
 
 interface ProgressChapter {
+	readonly estimatedPercentage: number;
 	readonly id: string;
 	readonly title: string;
 }
@@ -55,6 +57,7 @@ interface UnitProgressContextValue {
 	) => Promise<boolean>;
 	readonly completionError: unknown;
 	readonly completionFeedbackCount: number | undefined;
+	readonly currentEntryId: string | null;
 	readonly domain: UnitProgressDomain;
 	readonly editorOpen: boolean;
 	readonly isCompleting: boolean;
@@ -117,6 +120,24 @@ export function UnitProgressProvider({
 				: null,
 		[recordQuery.data],
 	);
+	const currentEntryId =
+		recordQuery.data?.state === "tracked" ? recordQuery.data.record.currentEntryId : null;
+	const chapters = useMemo(() => {
+		const nodes = chaptersQuery.data?.items ?? [];
+		const titleById = new Map(nodes.map((node) => [node.id, node.title]));
+		return estimateBookChapterProgresses(nodes).flatMap((estimate) => {
+			const title = titleById.get(estimate.id);
+			return title !== undefined
+				? [
+						{
+							id: estimate.id,
+							title,
+							estimatedPercentage: estimate.percentage,
+						},
+					]
+				: [];
+		});
+	}, [chaptersQuery.data?.items]);
 	const displayedRecord = completionPreview ?? confirmedRecord;
 	const state = useMemo(
 		() =>
@@ -258,13 +279,14 @@ export function UnitProgressProvider({
 	const value = useMemo<UnitProgressContextValue>(
 		() => ({
 			addToBacklog,
-			chapters: chaptersQuery.data?.items ?? [],
+			chapters,
 			chaptersError: chaptersQuery.error,
 			chaptersPending: chaptersQuery.isPending,
 			closeEditor,
 			completeCurrentProgress,
 			completionError: completionMutation.error,
 			completionFeedbackCount,
+			currentEntryId,
 			domain,
 			editorOpen,
 			isCompleting: completionPreview !== undefined,
@@ -282,7 +304,7 @@ export function UnitProgressProvider({
 		}),
 		[
 			addToBacklog,
-			chaptersQuery.data?.items,
+			chapters,
 			chaptersQuery.error,
 			chaptersQuery.isPending,
 			closeEditor,
@@ -290,6 +312,7 @@ export function UnitProgressProvider({
 			completionFeedbackCount,
 			completionMutation.error,
 			completionPreview,
+			currentEntryId,
 			domain,
 			editorOpen,
 			openEditor,

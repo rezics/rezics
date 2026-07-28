@@ -15,9 +15,11 @@ import { selectLocalization } from "@/lib/localization";
 import { ReviewComposer } from "../components/review-composer";
 
 export function TargetedReviewCreatePage({
+	progressEntryId,
 	targetId,
 	type,
 }: {
+	readonly progressEntryId?: string;
 	readonly targetId: string;
 	readonly type: CatalogDetailUnitType;
 }) {
@@ -57,6 +59,7 @@ export function TargetedReviewCreatePage({
 				<PageHeading description={title ?? t.ui.unnamed} title={t.engagement.newReview} />
 				<ReviewComposer
 					onCreated={(reviewId) => router.push(postHref(reviewId))}
+					progressEntryId={progressEntryId}
 					target={{
 						id: query.data.id,
 						label: title ?? t.ui.unnamed,

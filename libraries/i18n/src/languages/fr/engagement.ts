@@ -108,6 +108,7 @@ export default {
 		book: {
 			title: "Progression de lecture",
 			summaryTitle: "Ma lecture",
+			progressLabel: "Progression de lecture",
 			dialogDescription:
 				"Enregistrez votre état de lecture et votre position actuelle. Terminer cette lecture ajoute une unité à votre nombre de lectures achevées.",
 			listSummary: insert("{{percent}} % lu · {{count}} lectures achevées", {
@@ -119,6 +120,15 @@ export default {
 			completedCount: "Lectures achevées",
 			lastChapter: "Chapitre actuel",
 			noChapter: "Aucun chapitre sélectionné",
+			estimatedFromContents:
+				"Estimation fondée sur le chapitre choisi et le volume du sommaire ; vous pouvez l’ajuster.",
+			history: {
+				completion: insert("Livre terminé le {{date}}.", { date: String }),
+				update: insert("Progression portée à {{percent}} % le {{date}}.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Noter ce livre",
 			recordAction: "Enregistrer la lecture",
 			startAction: "Commencer la lecture",
@@ -145,6 +155,7 @@ export default {
 		media: {
 			title: "Progression de visionnage",
 			summaryTitle: "Mon visionnage",
+			progressLabel: "Progression de visionnage",
 			dialogDescription:
 				"Enregistrez votre état de visionnage et votre position de lecture. Terminer ce visionnage ajoute une unité à votre nombre de visionnages achevés.",
 			listSummary: insert("{{percent}} % visionné · {{count}} visionnages achevés", {
@@ -155,6 +166,13 @@ export default {
 			progress: "Progression de lecture",
 			completedCount: "Visionnages achevés",
 			totalMinutes: "Minutes de visionnage totales",
+			history: {
+				completion: insert("Œuvre visionnée en entier le {{date}}.", { date: String }),
+				update: insert("Visionnage porté à {{percent}} % le {{date}}.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Noter cette œuvre",
 			recordAction: "Enregistrer le visionnage",
 			startAction: "Commencer à regarder",
@@ -181,6 +199,7 @@ export default {
 		software: {
 			title: "Journal d’utilisation",
 			summaryTitle: "Mon utilisation",
+			progressLabel: "Progression d’utilisation",
 			dialogDescription:
 				"Enregistrez votre état d’utilisation et le temps total. Terminer cette utilisation ajoute une unité à votre nombre d’utilisations achevées.",
 			listSummary: insert("{{count}} utilisations achevées · {{minutes}} minutes", {
@@ -190,6 +209,13 @@ export default {
 			status: "État d’utilisation",
 			completedCount: "Utilisations achevées",
 			totalMinutes: "Minutes d’utilisation totales",
+			history: {
+				completion: insert("Utilisation terminée le {{date}}.", { date: String }),
+				update: insert("Progression d’utilisation portée à {{percent}} % le {{date}}.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Noter ce logiciel",
 			recordAction: "Enregistrer l’utilisation",
 			startAction: "Commencer à utiliser",
@@ -219,6 +245,82 @@ export default {
 				dropped: "Utilisation abandonnée",
 			},
 		},
+	},
+	retryProgress: "Recharger la progression",
+	progressPercent: insert("{{percent}} %", { percent: Number }),
+	viewProgressHistory: "Voir le journal de progression",
+	progressJournal: {
+		title: "Mon journal de progression",
+		description:
+			"Chaque changement d’état devient un événement modifiable, y compris l’historique d’autres plateformes.",
+		backToUnit: "Retour à l’œuvre",
+		backToProgress: "Retour aux progressions",
+		historyTitle: "Historique de progression",
+		updateNow: "Mettre à jour la progression actuelle",
+		addHistory: "Ajouter une entrée passée",
+		addHistoryDescription:
+			"Ajoutez un ancien changement sans modifier la progression actuelle par défaut.",
+		importHistory: "Importer l’historique",
+		noEntries: "Aucun événement de progression.",
+		loadMore: "Charger la suite",
+		unknownDate: "Date inconnue",
+		affectsCurrentShort: "Progression actuelle",
+		entryDetails: "Détails de l’événement",
+		entryKind: "Type d’événement",
+		kinds: { update: "Mise à jour", completion: "Achèvement" },
+		status: "État",
+		percentage: "Pourcentage achevé",
+		totalMinutes: "Minutes totales",
+		occurredAt: "Date de l’événement",
+		datePrecision: "Précision de la date",
+		precision: {
+			instant: "Date et heure précises",
+			day: "Jour",
+			month: "Mois",
+			year: "Année",
+			unknown: "Date inconnue",
+		},
+		source: "Source",
+		sourceKinds: { rezics: "Enregistré ici", manual: "Ajout manuel", import: "Importé" },
+		sourceProvider: "Plateforme source",
+		sourceProviderPlaceholder: "Par exemple, votre ancienne plateforme",
+		sourceProviderDescription:
+			"Facultatif ; indique la plateforme où cet événement a été enregistré à l’origine.",
+		sourceExternalId: "Identifiant de l’enregistrement externe",
+		affectsCurrent: "Utiliser cet événement comme progression actuelle",
+		affectsCurrentDescription:
+			"Cette option met à jour l’état et la progression actuellement affichés pour cette œuvre.",
+		saveEntry: "Enregistrer l’événement",
+		editEntry: "Modifier l’événement",
+		editDescription: "Corrigez la date, la progression ou la source de ce changement d’état.",
+		deleteEntry: "Supprimer l’événement",
+		deletePrompt:
+			"Cet événement sera supprimé, puis la progression et les achèvements seront recalculés.",
+		completionIncrement: "Achèvements ajoutés",
+		writeReview: "Critiquer cet événement",
+		viewReview: "Voir la critique liée",
+		linkedReview: "Progression liée à cette critique",
+		reviewBindingNotice:
+			"Cette critique sera liée à l’événement choisi depuis la page de progression.",
+		importDescription:
+			"Importez un historique provenant d’une autre plateforme. Il ne modifie pas la progression actuelle par défaut.",
+		importFormat: "Format du fichier",
+		importFormatDescription:
+			"La première ligne doit respecter exactement cet ordre de colonnes. Chaque ligne suivante représente un événement.",
+		importFormatRules: insert(
+			"Dans le fichier {{format}}, la progression est comprise entre 0 et 1. La date est indiquée selon sa précision : date et heure, jour, mois ou année.",
+			{ format: String },
+		),
+		importProviderDescription:
+			"Tous les événements importés seront associés à cette plateforme source.",
+		importFile: "Fichier à importer",
+		importInvalidLine: insert("La ligne {{line}} est incorrecte. Corrigez-la puis réessayez.", {
+			line: Number,
+		}),
+		importReady: insert("{{count}} événements lus et prêts à être importés.", {
+			count: Number,
+		}),
+		importComplete: insert("{{count}} événements importés avec succès.", { count: Number }),
 	},
 	progressNotRecorded: "Non enregistré",
 	completionCountChange: insert("Le nombre d’achèvements passera de {{current}} à {{next}}.", {

@@ -1,6 +1,7 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	bigint,
+	boolean,
 	check,
 	doublePrecision,
 	foreignKey,
@@ -8,14 +9,33 @@ import {
 	integer,
 	pgEnum,
 	primaryKey,
+	text,
+	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { ProgressStatusValues, toEnumValues } from "./contract-values";
-import { createCreatedAtColumn, createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
+import {
+	type ProgressDatePrecision,
+	ProgressDatePrecisionValues,
+	type ProgressEntryKind,
+	ProgressEntryKindValues,
+	type ProgressSourceKind,
+	ProgressSourceKindValues,
+	ProgressStatusValues,
+	toEnumValues,
+} from "./contract-values";
+import {
+	createCreatedAtColumn,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
+} from "./columns";
 import { contentStructureNode } from "./content-structure";
+import { contentStructureRevision } from "./content-structure-history";
 import { profile, unit } from "./core";
+import { post } from "./post";
 
 export const progressStatus = pgEnum("progress_status", toEnumValues(ProgressStatusValues));
 
@@ -39,6 +59,105 @@ export const contentStructureNodeProgress = pgTable(
 	],
 );
 
+/**
+ * One user-editable checkpoint in a Profile's Unit progress journal.
+ *
+ * Entries are historical product records rather than an audit log. A checkpoint
+ * may be edited or removed, and only entries with `affectsCurrent` participate
+ * in selecting the current status snapshot.
+ */
+export const unitProgressEntry = pgTable(
+	"unit_progress_entry",
+	{
+		id: createUuidv7PrimaryKey(),
+		profileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "cascade" }),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		entryKind: text().$type<ProgressEntryKind>().notNull(),
+		status: progressStatus().notNull(),
+		progress: doublePrecision().notNull(),
+		completionDelta: integer().default(0).notNull(),
+		totalTimeMs: bigint({ mode: "bigint" }).default(0n).notNull(),
+		contentStructureNodeId: uuid(),
+		contentStructureRevisionId: uuid(),
+		occurredAt: createTimestampMsColumn(),
+		datePrecision: text().$type<ProgressDatePrecision>().notNull(),
+		sourceKind: text().$type<ProgressSourceKind>().notNull(),
+		sourceProvider: text(),
+		sourceExternalId: text(),
+		affectsCurrent: boolean().default(true).notNull(),
+		deletedAt: createTimestampMsColumn(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		unique("unit_progress_entry_id_profile_unit_key").on(
+			table.id,
+			table.profileId,
+			table.unitId,
+		),
+		foreignKey({
+			columns: [table.contentStructureNodeId, table.unitId],
+			foreignColumns: [contentStructureNode.id, contentStructureNode.ownerUnitId],
+			name: "unit_progress_entry_content_structure_node_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.contentStructureRevisionId],
+			foreignColumns: [contentStructureRevision.id],
+			name: "unit_progress_entry_content_structure_revision_fkey",
+		}).onDelete("restrict"),
+		index("unit_progress_entry_profile_unit_occurred_idx")
+			.on(
+				table.profileId,
+				table.unitId,
+				table.occurredAt.desc(),
+				table.createdAt.desc(),
+				table.id.desc(),
+			)
+			.where(sql`${table.deletedAt} is null`),
+		index("unit_progress_entry_unit_idx").on(table.unitId),
+		index("unit_progress_entry_content_structure_node_idx").on(table.contentStructureNodeId),
+		index("unit_progress_entry_content_structure_revision_idx").on(
+			table.contentStructureRevisionId,
+		),
+		check("unit_progress_entry_kind_check", inArray(table.entryKind, ProgressEntryKindValues)),
+		check(
+			"unit_progress_entry_date_precision_check",
+			inArray(table.datePrecision, ProgressDatePrecisionValues),
+		),
+		check(
+			"unit_progress_entry_source_kind_check",
+			inArray(table.sourceKind, ProgressSourceKindValues),
+		),
+		check("unit_progress_entry_value_check", sql`${table.progress} between 0 and 1`),
+		check(
+			"unit_progress_entry_completion_delta_check",
+			sql`${table.completionDelta} between 0 and 1`,
+		),
+		check("unit_progress_entry_total_time_check", sql`${table.totalTimeMs} >= 0`),
+		check(
+			"unit_progress_entry_completion_shape_check",
+			sql`${table.entryKind} <> 'completion' or (${table.status} = 'completed' and ${table.progress} = 1 and ${table.completionDelta} = 1 and ${table.contentStructureNodeId} is null)`,
+		),
+		check(
+			"unit_progress_entry_occurred_at_check",
+			sql`(${table.datePrecision} = 'unknown') = (${table.occurredAt} is null)`,
+		),
+		check(
+			"unit_progress_entry_source_length_check",
+			sql`(${table.sourceProvider} is null or char_length(${table.sourceProvider}) between 1 and 100)
+				and (${table.sourceExternalId} is null or char_length(${table.sourceExternalId}) between 1 and 500)`,
+		),
+		check(
+			"unit_progress_entry_deleted_at_check",
+			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
+		),
+	],
+);
+
 export const unitProgress = pgTable(
 	"unit_progress",
 	{
@@ -55,6 +174,7 @@ export const unitProgress = pgTable(
 		firstSeenAt: createTimestampMsColumn().defaultNow().notNull(),
 		lastSeenAt: createTimestampMsColumn().defaultNow().notNull(),
 		lastContentStructureNodeId: uuid(),
+		currentEntryId: uuid(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -66,11 +186,17 @@ export const unitProgress = pgTable(
 			foreignColumns: [contentStructureNode.id, contentStructureNode.ownerUnitId],
 			name: "unit_progress_last_content_structure_node_fkey",
 		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.currentEntryId],
+			foreignColumns: [unitProgressEntry.id],
+			name: "unit_progress_current_entry_fkey",
+		}).onDelete("set null"),
 		index("unit_progress_unit_status_idx").on(table.unitId, table.status),
 		index("unit_progress_profile_seen_idx")
 			.on(table.profileId, table.lastSeenAt.desc(), table.unitId)
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_last_content_structure_node_idx").on(table.lastContentStructureNodeId),
+		index("unit_progress_current_entry_idx").on(table.currentEntryId),
 		check("unit_progress_value_check", sql`${table.progress} between 0 and 1`),
 		check(
 			"unit_progress_count_check",
@@ -81,5 +207,29 @@ export const unitProgress = pgTable(
 			"unit_progress_deleted_at_check",
 			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
 		),
+	],
+);
+
+/** A Review Post's optional point-in-time Progress checkpoint. */
+export const postProgressEntry = pgTable(
+	"post_progress_entry",
+	{
+		postId: uuid()
+			.primaryKey()
+			.references(() => post.id, { onDelete: "cascade" }),
+		progressEntryId: uuid().notNull(),
+		position: fractionalIndexPosition().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.progressEntryId],
+			foreignColumns: [unitProgressEntry.id],
+			name: "post_progress_entry_progress_entry_fkey",
+		}).onDelete("cascade"),
+		unique("post_progress_entry_progress_entry_key").on(table.progressEntryId),
+		unique("post_progress_entry_post_position_key").on(table.postId, table.position),
+		index("post_progress_entry_progress_entry_idx").on(table.progressEntryId),
 	],
 );

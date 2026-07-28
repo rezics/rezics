@@ -197,6 +197,16 @@ export const verbatimTerms = {
 		category: "format",
 		rationale: "Linked-data format name.",
 	},
+	csv: {
+		value: "CSV",
+		category: "format",
+		rationale: "Comma-separated values data format name.",
+	},
+	progressCsvHeader: {
+		value: "unitId,entryKind,status,progress,occurredAt,datePrecision,totalTimeMs,sourceExternalId,affectsCurrent,lastContentStructureNodeId",
+		category: "identifier",
+		rationale: "Canonical, ordered header contract for Progress history imports.",
+	},
 	mime: {
 		value: "MIME",
 		category: "format",

@@ -319,12 +319,17 @@ function BookProgressFields({
 				<NativeSelect
 					disabled={progress.chaptersPending || Boolean(progress.chaptersError)}
 					id="unit-progress-chapter"
-					onChange={(event) =>
+					onChange={(event) => {
+						const selectedNodeId = event.currentTarget.value;
+						const estimate = progress.chapters.find(
+							(chapter) => chapter.id === selectedNodeId,
+						)?.estimatedPercentage;
 						onChange((current) => ({
 							...current,
-							lastNodeId: event.currentTarget.value,
-						}))
-					}
+							lastNodeId: selectedNodeId,
+							percentage: String(estimate ?? current.percentage),
+						}));
+					}}
 					value={draft.lastNodeId}
 				>
 					<NativeSelectOption value="">{copy.noChapter}</NativeSelectOption>
@@ -334,6 +339,9 @@ function BookProgressFields({
 						</NativeSelectOption>
 					))}
 				</NativeSelect>
+				{draft.lastNodeId ? (
+					<p className="text-sm text-muted-foreground">{copy.estimatedFromContents}</p>
+				) : null}
 				<RequestFailure error={progress.chaptersError} fallback={t.ui.retryLater} />
 			</Field>
 		</>

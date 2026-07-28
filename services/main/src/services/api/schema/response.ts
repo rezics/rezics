@@ -27,6 +27,9 @@ import {
 	ContentRatingValues,
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
+	ProgressDatePrecisionValues,
+	ProgressEntryKindValues,
+	ProgressSourceKindValues,
 	ProgressStatusValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
@@ -707,6 +710,9 @@ export const PreferencesResponse = t.Object({
 	preferredLanguages: t.Array(ContentLanguage),
 });
 const ProgressStatusResponse = t.UnionEnum(ProgressStatusValues);
+const ProgressEntryKindResponse = t.UnionEnum(ProgressEntryKindValues);
+const ProgressDatePrecisionResponse = t.UnionEnum(ProgressDatePrecisionValues);
+const ProgressSourceKindResponse = t.UnionEnum(ProgressSourceKindValues);
 export const ProgressListResponse = t.Object({
 	items: t.Array(
 		t.Object({
@@ -736,9 +742,53 @@ export const ProgressResponse = t.Object({
 	firstSeenAt: DateTime,
 	lastSeenAt: DateTime,
 	lastContentStructureNodeId: t.Nullable(Uuid),
+	currentEntryId: t.Nullable(Uuid),
 	lastReadAnchor: t.Nullable(t.Unknown()),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+});
+export const ProgressEntryResponse = t.Object({
+	id: Uuid,
+	profileId: Uuid,
+	unitId: Uuid,
+	entryKind: ProgressEntryKindResponse,
+	status: ProgressStatusResponse,
+	progress: t.Number({ minimum: 0, maximum: 1 }),
+	completionDelta: t.Integer({ minimum: 0, maximum: 1 }),
+	totalTimeMs: t.Integer({ minimum: 0 }),
+	lastContentStructureNodeId: t.Nullable(Uuid),
+	contentStructureRevisionId: t.Nullable(Uuid),
+	occurredAt: t.Nullable(DateTime),
+	datePrecision: ProgressDatePrecisionResponse,
+	sourceKind: ProgressSourceKindResponse,
+	sourceProvider: NullableText,
+	sourceExternalId: NullableText,
+	affectsCurrent: t.Boolean(),
+	reviewId: t.Nullable(Uuid),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const ProgressEntryListResponse = t.Object({
+	items: t.Array(ProgressEntryResponse),
+	nextCursor: NullableText,
+});
+const ReviewProgressEntryResponse = t.Object({
+	id: Uuid,
+	unitId: Uuid,
+	entryKind: ProgressEntryKindResponse,
+	status: ProgressStatusResponse,
+	progress: t.Number({ minimum: 0, maximum: 1 }),
+	completionDelta: t.Integer({ minimum: 0, maximum: 1 }),
+	totalTimeMs: t.Integer({ minimum: 0 }),
+	lastContentStructureNodeId: t.Nullable(Uuid),
+	occurredAt: t.Nullable(DateTime),
+	datePrecision: ProgressDatePrecisionResponse,
+	sourceKind: ProgressSourceKindResponse,
+	sourceProvider: NullableText,
+});
+export const ImportProgressResponse = t.Object({
+	createdCount: t.Integer({ minimum: 1, maximum: 500 }),
+	entryIds: t.Array(Uuid, { minItems: 1, maxItems: 500 }),
 });
 export const ProgressNodeListResponse = t.Object({
 	items: t.Array(
@@ -943,6 +993,7 @@ export const ReviewDetailResponse = t.Object({
 	updatedAt: DateTime,
 	subject: t.Nullable(t.Object(PostSubjectPresentationFields)),
 	scores: t.Array(PostAttachedScoreResponse),
+	progressEntry: t.Nullable(ReviewProgressEntryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canManageAttributions: t.Boolean(),

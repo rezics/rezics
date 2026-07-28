@@ -229,5 +229,6 @@ export default {
 	TagStructureChanged: `Ce ${tagStructureTerms.inline} a été modifié ailleurs. Actualisez la page et réessayez.`,
 	TagStructureDefinitionConflict: `Un ${tagStructureTerms.inline} identique existe déjà.`,
 	AssociationContextPostInvalid: `Le contexte de la relation doit être une ${postTerms.inline} de wiki.`,
+	ProgressEntryNotFound: "Cet événement de progression est introuvable.",
 	PostTagMentionVoteConflict: `Cette mention d’étiquette entre en conflit avec votre vote négatif existant sur la ${postTerms.inline}.`,
 } satisfies typeof import("../zh-Hant/errorCodes").default;

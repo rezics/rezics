@@ -9253,6 +9253,7 @@
 					"PollSingleChoiceInvalid",
 					"PollOptionInvalid",
 					"PollAlreadyClosed",
+					"ProgressEntryNotFound",
 					"ContentStructureInvalid",
 					"ContentStructureNotFound",
 					"ContentStructureRevisionConflict",
@@ -85570,6 +85571,285 @@
 				"x-rezics-policy-operation-id": "getApiProgress"
 			}
 		},
+		"/api/progress/import": {
+			"post": {
+				"summary": "Import Progress journal entries",
+				"tags": ["Progress"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["items", "sourceProvider"],
+								"properties": {
+									"items": {
+										"minItems": 1,
+										"maxItems": 500,
+										"type": "array",
+										"items": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"unitId",
+												"entryKind",
+												"status",
+												"occurredAt",
+												"datePrecision"
+											],
+											"properties": {
+												"unitId": { "format": "uuid", "type": "string" },
+												"entryKind": {
+													"default": "update",
+													"type": "string",
+													"enum": ["update", "completion"]
+												},
+												"status": {
+													"type": "string",
+													"enum": [
+														"backlog",
+														"active",
+														"paused",
+														"completed",
+														"dropped"
+													]
+												},
+												"progress": {
+													"minimum": 0,
+													"maximum": 1,
+													"type": "number"
+												},
+												"totalTimeMs": {
+													"minimum": 0,
+													"maximum": 9007199254740991,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{
+															"minimum": 0,
+															"maximum": 9007199254740991,
+															"type": "integer"
+														}
+													]
+												},
+												"lastContentStructureNodeId": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "uuid", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"occurredAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"datePrecision": {
+													"default": "instant",
+													"type": "string",
+													"enum": [
+														"instant",
+														"day",
+														"month",
+														"year",
+														"unknown"
+													]
+												},
+												"sourceProvider": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"minLength": 1,
+															"maxLength": 100,
+															"type": "string"
+														},
+														{ "type": "null" }
+													]
+												},
+												"sourceExternalId": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"minLength": 1,
+															"maxLength": 500,
+															"type": "string"
+														},
+														{ "type": "null" }
+													]
+												},
+												"affectsCurrent": {
+													"default": false,
+													"type": "boolean"
+												}
+											}
+										}
+									},
+									"sourceProvider": {
+										"minLength": 1,
+										"maxLength": 100,
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["createdCount", "entryIds"],
+									"properties": {
+										"createdCount": {
+											"minimum": 1,
+											"maximum": 500,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 1, "maximum": 500, "type": "integer" }
+											]
+										},
+										"entryIds": {
+											"minItems": 1,
+											"maxItems": 500,
+											"type": "array",
+											"items": { "format": "uuid", "type": "string" }
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ContentStructureNodeNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiProgressImport",
+				"x-rezics-policy-operation-id": "postApiProgressImport"
+			}
+		},
 		"/api/progress/{unitId}": {
 			"get": {
 				"summary": "Get progress state",
@@ -85617,6 +85897,7 @@
 														"firstSeenAt",
 														"lastSeenAt",
 														"lastContentStructureNodeId",
+														"currentEntryId",
 														"lastReadAnchor",
 														"createdAt",
 														"updatedAt"
@@ -85672,6 +85953,16 @@
 															"type": "string"
 														},
 														"lastContentStructureNodeId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"currentEntryId": {
 															"nullable": true,
 															"anyOf": [
 																{
@@ -85816,9 +86107,14 @@
 									"progress": { "minimum": 0, "maximum": 1, "type": "number" },
 									"totalTimeMs": {
 										"minimum": 0,
+										"maximum": 9007199254740991,
 										"anyOf": [
 											{ "format": "integer", "default": 0, "type": "string" },
-											{ "minimum": 0, "type": "integer" }
+											{
+												"minimum": 0,
+												"maximum": 9007199254740991,
+												"type": "integer"
+											}
 										]
 									},
 									"lastContentStructureNodeId": {
@@ -85852,6 +86148,7 @@
 										"firstSeenAt",
 										"lastSeenAt",
 										"lastContentStructureNodeId",
+										"currentEntryId",
 										"lastReadAnchor",
 										"createdAt",
 										"updatedAt"
@@ -85895,6 +86192,13 @@
 										"firstSeenAt": { "format": "date-time", "type": "string" },
 										"lastSeenAt": { "format": "date-time", "type": "string" },
 										"lastContentStructureNodeId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"currentEntryId": {
 											"nullable": true,
 											"anyOf": [
 												{ "format": "uuid", "type": "string" },
@@ -86073,6 +86377,1114 @@
 				"x-rezics-policy-operation-id": "deleteApiProgressByUnitId"
 			}
 		},
+		"/api/progress/{unitId}/entries": {
+			"get": {
+				"summary": "List Progress journal entries",
+				"tags": ["Progress"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "maxLength": 1024, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 30,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 30, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"profileId",
+													"unitId",
+													"entryKind",
+													"status",
+													"progress",
+													"completionDelta",
+													"totalTimeMs",
+													"lastContentStructureNodeId",
+													"contentStructureRevisionId",
+													"occurredAt",
+													"datePrecision",
+													"sourceKind",
+													"sourceProvider",
+													"sourceExternalId",
+													"affectsCurrent",
+													"reviewId",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"entryKind": {
+														"default": "update",
+														"type": "string",
+														"enum": ["update", "completion"]
+													},
+													"status": {
+														"default": "backlog",
+														"type": "string",
+														"enum": [
+															"backlog",
+															"active",
+															"paused",
+															"completed",
+															"dropped"
+														]
+													},
+													"progress": {
+														"minimum": 0,
+														"maximum": 1,
+														"type": "number"
+													},
+													"completionDelta": {
+														"minimum": 0,
+														"maximum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{
+																"minimum": 0,
+																"maximum": 1,
+																"type": "integer"
+															}
+														]
+													},
+													"totalTimeMs": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"lastContentStructureNodeId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"contentStructureRevisionId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"occurredAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"datePrecision": {
+														"default": "instant",
+														"type": "string",
+														"enum": [
+															"instant",
+															"day",
+															"month",
+															"year",
+															"unknown"
+														]
+													},
+													"sourceKind": {
+														"default": "rezics",
+														"type": "string",
+														"enum": ["rezics", "manual", "import"]
+													},
+													"sourceProvider": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"sourceExternalId": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"affectsCurrent": { "type": "boolean" },
+													"reviewId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiProgressByUnitIdEntries",
+				"x-rezics-policy-operation-id": "getApiProgressByUnitIdEntries"
+			},
+			"post": {
+				"summary": "Create a Progress journal entry",
+				"tags": ["Progress"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["entryKind", "status", "occurredAt", "datePrecision"],
+								"properties": {
+									"entryKind": {
+										"default": "update",
+										"type": "string",
+										"enum": ["update", "completion"]
+									},
+									"status": {
+										"type": "string",
+										"enum": [
+											"backlog",
+											"active",
+											"paused",
+											"completed",
+											"dropped"
+										]
+									},
+									"progress": { "minimum": 0, "maximum": 1, "type": "number" },
+									"totalTimeMs": {
+										"minimum": 0,
+										"maximum": 9007199254740991,
+										"anyOf": [
+											{ "format": "integer", "default": 0, "type": "string" },
+											{
+												"minimum": 0,
+												"maximum": 9007199254740991,
+												"type": "integer"
+											}
+										]
+									},
+									"lastContentStructureNodeId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"occurredAt": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "date-time", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"datePrecision": {
+										"default": "instant",
+										"type": "string",
+										"enum": ["instant", "day", "month", "year", "unknown"]
+									},
+									"sourceProvider": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 100, "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"sourceExternalId": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 500, "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"affectsCurrent": { "default": false, "type": "boolean" },
+									"sourceKind": { "type": "string", "enum": ["manual", "import"] }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"profileId",
+										"unitId",
+										"entryKind",
+										"status",
+										"progress",
+										"completionDelta",
+										"totalTimeMs",
+										"lastContentStructureNodeId",
+										"contentStructureRevisionId",
+										"occurredAt",
+										"datePrecision",
+										"sourceKind",
+										"sourceProvider",
+										"sourceExternalId",
+										"affectsCurrent",
+										"reviewId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"profileId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"entryKind": {
+											"default": "update",
+											"type": "string",
+											"enum": ["update", "completion"]
+										},
+										"status": {
+											"default": "backlog",
+											"type": "string",
+											"enum": [
+												"backlog",
+												"active",
+												"paused",
+												"completed",
+												"dropped"
+											]
+										},
+										"progress": {
+											"minimum": 0,
+											"maximum": 1,
+											"type": "number"
+										},
+										"completionDelta": {
+											"minimum": 0,
+											"maximum": 1,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "maximum": 1, "type": "integer" }
+											]
+										},
+										"totalTimeMs": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"lastContentStructureNodeId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"contentStructureRevisionId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"occurredAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"datePrecision": {
+											"default": "instant",
+											"type": "string",
+											"enum": ["instant", "day", "month", "year", "unknown"]
+										},
+										"sourceKind": {
+											"default": "rezics",
+											"type": "string",
+											"enum": ["rezics", "manual", "import"]
+										},
+										"sourceProvider": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"sourceExternalId": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"affectsCurrent": { "type": "boolean" },
+										"reviewId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ContentStructureNodeNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiProgressByUnitIdEntries",
+				"x-rezics-policy-operation-id": "postApiProgressByUnitIdEntries"
+			}
+		},
+		"/api/progress/{unitId}/entries/{entryId}": {
+			"put": {
+				"summary": "Replace a Progress journal entry",
+				"tags": ["Progress"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "entryId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": [
+									"entryKind",
+									"status",
+									"occurredAt",
+									"datePrecision",
+									"sourceKind"
+								],
+								"properties": {
+									"entryKind": {
+										"default": "update",
+										"type": "string",
+										"enum": ["update", "completion"]
+									},
+									"status": {
+										"type": "string",
+										"enum": [
+											"backlog",
+											"active",
+											"paused",
+											"completed",
+											"dropped"
+										]
+									},
+									"progress": { "minimum": 0, "maximum": 1, "type": "number" },
+									"totalTimeMs": {
+										"minimum": 0,
+										"maximum": 9007199254740991,
+										"anyOf": [
+											{ "format": "integer", "default": 0, "type": "string" },
+											{
+												"minimum": 0,
+												"maximum": 9007199254740991,
+												"type": "integer"
+											}
+										]
+									},
+									"lastContentStructureNodeId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"occurredAt": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "date-time", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"datePrecision": {
+										"default": "instant",
+										"type": "string",
+										"enum": ["instant", "day", "month", "year", "unknown"]
+									},
+									"sourceProvider": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 100, "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"sourceExternalId": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 500, "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"affectsCurrent": { "default": false, "type": "boolean" },
+									"sourceKind": {
+										"default": "rezics",
+										"type": "string",
+										"enum": ["rezics", "manual", "import"]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"profileId",
+										"unitId",
+										"entryKind",
+										"status",
+										"progress",
+										"completionDelta",
+										"totalTimeMs",
+										"lastContentStructureNodeId",
+										"contentStructureRevisionId",
+										"occurredAt",
+										"datePrecision",
+										"sourceKind",
+										"sourceProvider",
+										"sourceExternalId",
+										"affectsCurrent",
+										"reviewId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"profileId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"entryKind": {
+											"default": "update",
+											"type": "string",
+											"enum": ["update", "completion"]
+										},
+										"status": {
+											"default": "backlog",
+											"type": "string",
+											"enum": [
+												"backlog",
+												"active",
+												"paused",
+												"completed",
+												"dropped"
+											]
+										},
+										"progress": {
+											"minimum": 0,
+											"maximum": 1,
+											"type": "number"
+										},
+										"completionDelta": {
+											"minimum": 0,
+											"maximum": 1,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "maximum": 1, "type": "integer" }
+											]
+										},
+										"totalTimeMs": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"lastContentStructureNodeId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"contentStructureRevisionId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"occurredAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"datePrecision": {
+											"default": "instant",
+											"type": "string",
+											"enum": ["instant", "day", "month", "year", "unknown"]
+										},
+										"sourceKind": {
+											"default": "rezics",
+											"type": "string",
+											"enum": ["rezics", "manual", "import"]
+										},
+										"sourceProvider": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"sourceExternalId": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"affectsCurrent": { "type": "boolean" },
+										"reviewId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ProgressEntryNotFound",
+														"ContentStructureNodeNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiProgressByUnitIdEntriesByEntryId",
+				"x-rezics-policy-operation-id": "putApiProgressByUnitIdEntriesByEntryId"
+			},
+			"delete": {
+				"summary": "Delete a Progress journal entry",
+				"tags": ["Progress"],
+				"responses": {
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ProgressEntryNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "entryId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiProgressByUnitIdEntriesByEntryId",
+				"x-rezics-policy-operation-id": "deleteApiProgressByUnitIdEntriesByEntryId"
+			}
+		},
 		"/api/progress/{unitId}/nodes": {
 			"get": {
 				"summary": "List completed Content Structure nodes",
@@ -86221,9 +87633,14 @@
 								"properties": {
 									"totalTimeMs": {
 										"minimum": 0,
+										"maximum": 9007199254740991,
 										"anyOf": [
 											{ "format": "integer", "default": 0, "type": "string" },
-											{ "minimum": 0, "type": "integer" }
+											{
+												"minimum": 0,
+												"maximum": 9007199254740991,
+												"type": "integer"
+											}
 										]
 									}
 								}
@@ -86250,6 +87667,7 @@
 										"firstSeenAt",
 										"lastSeenAt",
 										"lastContentStructureNodeId",
+										"currentEntryId",
 										"lastReadAnchor",
 										"createdAt",
 										"updatedAt"
@@ -86293,6 +87711,13 @@
 										"firstSeenAt": { "format": "date-time", "type": "string" },
 										"lastSeenAt": { "format": "date-time", "type": "string" },
 										"lastContentStructureNodeId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"currentEntryId": {
 											"nullable": true,
 											"anyOf": [
 												{ "format": "uuid", "type": "string" },
@@ -105310,6 +106735,7 @@
 								"required": ["targetId", "language", "title", "body"],
 								"properties": {
 									"targetId": { "format": "uuid", "type": "string" },
+									"progressEntryId": { "format": "uuid", "type": "string" },
 									"realmId": { "format": "uuid", "type": "string" },
 									"score": {
 										"additionalProperties": false,
@@ -105704,7 +107130,10 @@
 														"code": {
 															"default": "ScoreContextUnitUnsupported",
 															"type": "string",
-															"enum": ["ScoreContextUnitUnsupported"]
+															"enum": [
+																"ScoreContextUnitUnsupported",
+																"ValidationError"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -105821,6 +107250,7 @@
 										"updatedAt",
 										"subject",
 										"scores",
+										"progressEntry",
 										"capabilities"
 									],
 									"properties": {
@@ -106479,6 +107909,130 @@
 													}
 												}
 											}
+										},
+										"progressEntry": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": [
+														"id",
+														"unitId",
+														"entryKind",
+														"status",
+														"progress",
+														"completionDelta",
+														"totalTimeMs",
+														"lastContentStructureNodeId",
+														"occurredAt",
+														"datePrecision",
+														"sourceKind",
+														"sourceProvider"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"unitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"entryKind": {
+															"default": "update",
+															"type": "string",
+															"enum": ["update", "completion"]
+														},
+														"status": {
+															"default": "backlog",
+															"type": "string",
+															"enum": [
+																"backlog",
+																"active",
+																"paused",
+																"completed",
+																"dropped"
+															]
+														},
+														"progress": {
+															"minimum": 0,
+															"maximum": 1,
+															"type": "number"
+														},
+														"completionDelta": {
+															"minimum": 0,
+															"maximum": 1,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{
+																	"minimum": 0,
+																	"maximum": 1,
+																	"type": "integer"
+																}
+															]
+														},
+														"totalTimeMs": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"lastContentStructureNodeId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"occurredAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"datePrecision": {
+															"default": "instant",
+															"type": "string",
+															"enum": [
+																"instant",
+																"day",
+																"month",
+																"year",
+																"unknown"
+															]
+														},
+														"sourceKind": {
+															"default": "rezics",
+															"type": "string",
+															"enum": ["rezics", "manual", "import"]
+														},
+														"sourceProvider": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"capabilities": {
 											"type": "object",
@@ -112593,6 +114147,7 @@
 												"updatedAt",
 												"subject",
 												"scores",
+												"progressEntry",
 												"capabilities"
 											],
 											"properties": {
@@ -113291,6 +114846,137 @@
 															}
 														}
 													}
+												},
+												"progressEntry": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"type": "object",
+															"required": [
+																"id",
+																"unitId",
+																"entryKind",
+																"status",
+																"progress",
+																"completionDelta",
+																"totalTimeMs",
+																"lastContentStructureNodeId",
+																"occurredAt",
+																"datePrecision",
+																"sourceKind",
+																"sourceProvider"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"unitId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"entryKind": {
+																	"default": "update",
+																	"type": "string",
+																	"enum": ["update", "completion"]
+																},
+																"status": {
+																	"default": "backlog",
+																	"type": "string",
+																	"enum": [
+																		"backlog",
+																		"active",
+																		"paused",
+																		"completed",
+																		"dropped"
+																	]
+																},
+																"progress": {
+																	"minimum": 0,
+																	"maximum": 1,
+																	"type": "number"
+																},
+																"completionDelta": {
+																	"minimum": 0,
+																	"maximum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 0,
+																			"maximum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																"totalTimeMs": {
+																	"minimum": 0,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 0,
+																			"type": "integer"
+																		}
+																	]
+																},
+																"lastContentStructureNodeId": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		{ "type": "null" }
+																	]
+																},
+																"occurredAt": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"format": "date-time",
+																			"type": "string"
+																		},
+																		{ "type": "null" }
+																	]
+																},
+																"datePrecision": {
+																	"default": "instant",
+																	"type": "string",
+																	"enum": [
+																		"instant",
+																		"day",
+																		"month",
+																		"year",
+																		"unknown"
+																	]
+																},
+																"sourceKind": {
+																	"default": "rezics",
+																	"type": "string",
+																	"enum": [
+																		"rezics",
+																		"manual",
+																		"import"
+																	]
+																},
+																"sourceProvider": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
 												},
 												"capabilities": {
 													"type": "object",

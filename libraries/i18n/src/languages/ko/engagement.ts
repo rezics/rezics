@@ -108,6 +108,7 @@ export default {
 		book: {
 			title: "읽기 진행률",
 			summaryTitle: "나의 읽기",
+			progressLabel: "읽기 완료율",
 			dialogDescription:
 				"읽기 상태와 현재 위치를 기록하세요. 이 읽기를 완료하면 완료된 읽기 수가 하나 더 추가됩니다.",
 			listSummary: insert("{{percent}}% 읽음 · 완료된 읽기 {{count}}", {
@@ -119,6 +120,15 @@ export default {
 			completedCount: "완료된 읽기",
 			lastChapter: "현재 챕터",
 			noChapter: "선택된 챕터가 없습니다",
+			estimatedFromContents:
+				"선택한 챕터와 목차의 콘텐츠 분량을 기준으로 추정했습니다. 직접 조정할 수도 있습니다.",
+			history: {
+				completion: insert("{{date}}에 이 책을 다 읽었습니다.", { date: String }),
+				update: insert("{{date}}에 {{percent}}%까지 읽었습니다.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "이 책 평가하기",
 			recordAction: "읽기 기록",
 			startAction: "읽기 시작",
@@ -145,6 +155,7 @@ export default {
 		media: {
 			title: "진행 상황 보기",
 			summaryTitle: "내 보기",
+			progressLabel: "시청 완료율",
 			dialogDescription:
 				"시청 상태와 재생 위치를 기록하세요. 이 시청을 완료하면 완료 시청 횟수가 1 증가합니다.",
 			listSummary: insert("{{percent}}% 시청 · 완료 시청 {{count}}회", {
@@ -155,6 +166,13 @@ export default {
 			progress: "재생 진행",
 			completedCount: "완료 시청",
 			totalMinutes: "총 시청 시간",
+			history: {
+				completion: insert("{{date}}에 이 작품을 다 봤습니다.", { date: String }),
+				update: insert("{{date}}에 {{percent}}%까지 시청했습니다.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "이 작품 평가",
 			recordAction: "시청 기록",
 			startAction: "시청 시작",
@@ -181,6 +199,7 @@ export default {
 		software: {
 			title: "사용 기록",
 			summaryTitle: "나의 사용 기록",
+			progressLabel: "사용 진행률",
 			dialogDescription:
 				"사용 상태와 총 시간을 기록하세요. 이 사용을 완료하면 완료 횟수가 1 증가합니다.",
 			listSummary: insert("{{count}} 완료 · {{minutes}} 분", {
@@ -190,6 +209,13 @@ export default {
 			status: "사용 상태",
 			completedCount: "완료 횟수",
 			totalMinutes: "총 사용 시간(분)",
+			history: {
+				completion: insert("{{date}}에 한 번의 사용을 완료했습니다.", { date: String }),
+				update: insert("{{date}}에 사용 진행률을 {{percent}}%로 기록했습니다.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "이 소프트웨어 평가하기",
 			recordAction: "사용 기록",
 			startAction: "사용 시작",
@@ -213,6 +239,81 @@ export default {
 				dropped: "사용 중단됨",
 			},
 		},
+	},
+	retryProgress: "진행률 다시 불러오기",
+	progressPercent: insert("{{percent}}%", { percent: Number }),
+	viewProgressHistory: "발자취 보기",
+	progressJournal: {
+		title: "나의 발자취",
+		description:
+			"상태 변경을 편집 가능한 이벤트로 남기고 다른 플랫폼의 기록도 보관할 수 있습니다.",
+		backToUnit: "작품으로 돌아가기",
+		backToProgress: "진행 목록으로 돌아가기",
+		historyTitle: "진행 기록",
+		updateNow: "현재 진행률 업데이트",
+		addHistory: "과거 기록 추가",
+		addHistoryDescription:
+			"과거 진행 변경을 추가합니다. 기본적으로 현재 진행률은 바뀌지 않습니다.",
+		importHistory: "기록 가져오기",
+		noEntries: "아직 진행 발자취가 없습니다.",
+		loadMore: "더 불러오기",
+		unknownDate: "날짜 미상",
+		affectsCurrentShort: "현재 진행률",
+		entryDetails: "이벤트 상세",
+		entryKind: "이벤트 유형",
+		kinds: { update: "진행률 업데이트", completion: "1회 완료" },
+		status: "상태",
+		percentage: "완료율",
+		totalMinutes: "누적 시간(분)",
+		occurredAt: "발생 시점",
+		datePrecision: "날짜 정확도",
+		precision: {
+			instant: "정확한 시각",
+			day: "날짜",
+			month: "월",
+			year: "연도",
+			unknown: "날짜 미상",
+		},
+		source: "출처",
+		sourceKinds: { rezics: "여기에서 기록", manual: "직접 추가", import: "가져온 기록" },
+		sourceProvider: "출처 플랫폼",
+		sourceProviderPlaceholder: "예: 이전에 사용하던 플랫폼",
+		sourceProviderDescription: "선택 사항입니다. 이 기록이 원래 있던 플랫폼을 표시합니다.",
+		sourceExternalId: "외부 기록 식별자",
+		affectsCurrent: "이 이벤트를 현재 진행률로 사용",
+		affectsCurrentDescription:
+			"사용하면 이 작품에 표시되는 현재 상태와 진행률이 업데이트됩니다.",
+		saveEntry: "이벤트 저장",
+		editEntry: "이벤트 편집",
+		editDescription: "이 상태 변경의 날짜, 진행률 또는 출처를 수정합니다.",
+		deleteEntry: "이벤트 삭제",
+		deletePrompt: "이 진행 이벤트를 삭제하고 진행률 집계와 완료 횟수를 다시 계산합니다.",
+		completionIncrement: "완료 횟수 증가",
+		writeReview: "이 발자취 리뷰하기",
+		viewReview: "연결된 리뷰 보기",
+		linkedReview: "이 리뷰에 연결된 발자취",
+		reviewBindingNotice: "이 리뷰는 진행 페이지에서 선택한 발자취에 연결됩니다.",
+		importDescription:
+			"다른 플랫폼의 과거 발자취를 가져옵니다. 기본적으로 현재 진행률은 바뀌지 않습니다.",
+		importFormat: "파일 형식",
+		importFormatDescription:
+			"첫 행은 다음 열 순서와 정확히 같아야 하며 이후 각 행은 하나의 이벤트입니다.",
+		importFormatRules: insert(
+			"{{format}}의 진행 값은 0~1입니다. 날짜는 지정한 정확도에 맞춰 시각, 날짜, 월 또는 연도로 입력하세요.",
+			{ format: String },
+		),
+		importProviderDescription: "이번에 가져오는 모든 이벤트에 이 출처 플랫폼이 표시됩니다.",
+		importFile: "가져올 파일",
+		importInvalidLine: insert(
+			"{{line}}번째 행의 형식이 올바르지 않습니다. 수정 후 다시 시도하세요.",
+			{
+				line: Number,
+			},
+		),
+		importReady: insert("이벤트 {{count}}개를 읽었으며 가져올 준비가 되었습니다.", {
+			count: Number,
+		}),
+		importComplete: insert("이벤트 {{count}}개를 성공적으로 가져왔습니다.", { count: Number }),
 	},
 	progressNotRecorded: "기록되지 않음",
 	completionCountChange: insert("완료 횟수가 {{current}}에서 {{next}}로 증가합니다.", {

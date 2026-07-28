@@ -108,6 +108,7 @@ export default {
 		book: {
 			title: "Reading progress",
 			summaryTitle: "My reading",
+			progressLabel: "Reading completion",
 			dialogDescription:
 				"Record your reading status and current position. Completing this read adds one to your completed reads.",
 			listSummary: insert("{{percent}}% read · {{count}} completed reads", {
@@ -119,6 +120,15 @@ export default {
 			completedCount: "Completed reads",
 			lastChapter: "Current chapter",
 			noChapter: "No chapter selected",
+			estimatedFromContents:
+				"Estimated from the selected chapter and contents; you can still adjust it.",
+			history: {
+				completion: insert("Finished this book on {{date}}.", { date: String }),
+				update: insert("Reached {{percent}}% on {{date}}.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Rate this book",
 			recordAction: "Record reading",
 			startAction: "Start reading",
@@ -145,6 +155,7 @@ export default {
 		media: {
 			title: "Viewing progress",
 			summaryTitle: "My viewing",
+			progressLabel: "Viewing completion",
 			dialogDescription:
 				"Record your viewing status and playback position. Completing this view adds one to your complete views.",
 			listSummary: insert("{{percent}}% viewed · {{count}} complete views", {
@@ -155,6 +166,13 @@ export default {
 			progress: "Playback progress",
 			completedCount: "Complete views",
 			totalMinutes: "Total viewing minutes",
+			history: {
+				completion: insert("Finished watching this work on {{date}}.", { date: String }),
+				update: insert("Reached {{percent}}% on {{date}}.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Rate this work",
 			recordAction: "Record viewing",
 			startAction: "Start watching",
@@ -181,6 +199,7 @@ export default {
 		software: {
 			title: "Usage record",
 			summaryTitle: "My usage",
+			progressLabel: "Usage progress",
 			dialogDescription:
 				"Record your usage status and total time. Completing this use adds one to your completions.",
 			listSummary: insert("{{count}} completions · {{minutes}} minutes", {
@@ -190,6 +209,13 @@ export default {
 			status: "Usage status",
 			completedCount: "Completions",
 			totalMinutes: "Total usage minutes",
+			history: {
+				completion: insert("Completed a use on {{date}}.", { date: String }),
+				update: insert("Recorded {{percent}}% usage progress on {{date}}.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Rate this software",
 			recordAction: "Record usage",
 			startAction: "Start using",
@@ -213,6 +239,87 @@ export default {
 				dropped: "Stopped using",
 			},
 		},
+	},
+	retryProgress: "Reload progress",
+	progressPercent: insert("{{percent}}%", { percent: Number }),
+	viewProgressHistory: "View progress journal",
+	progressJournal: {
+		title: "My progress journal",
+		description:
+			"Every status change is an editable event, including history from other platforms.",
+		backToUnit: "Back to work",
+		backToProgress: "Back to progress",
+		historyTitle: "Progress history",
+		updateNow: "Update current progress",
+		addHistory: "Add past entry",
+		addHistoryDescription:
+			"Add a past progress change without changing your current progress by default.",
+		importHistory: "Import history",
+		noEntries: "No progress events yet.",
+		loadMore: "Load more",
+		unknownDate: "Unknown date",
+		affectsCurrentShort: "Current progress",
+		entryDetails: "Event details",
+		entryKind: "Event type",
+		kinds: {
+			update: "Progress update",
+			completion: "Completion",
+		},
+		status: "Status",
+		percentage: "Completion percentage",
+		totalMinutes: "Total minutes",
+		occurredAt: "When it happened",
+		datePrecision: "Date precision",
+		precision: {
+			instant: "Exact time",
+			day: "Day",
+			month: "Month",
+			year: "Year",
+			unknown: "Unknown date",
+		},
+		source: "Source",
+		sourceKinds: {
+			rezics: "Recorded here",
+			manual: "Added manually",
+			import: "Imported",
+		},
+		sourceProvider: "Source platform",
+		sourceProviderPlaceholder: "For example, your previous platform",
+		sourceProviderDescription:
+			"Optional; identifies the platform where this event was originally recorded.",
+		sourceExternalId: "External record identifier",
+		affectsCurrent: "Use this event as current progress",
+		affectsCurrentDescription:
+			"When enabled, this event updates the status and progress currently shown for this work.",
+		saveEntry: "Save event",
+		editEntry: "Edit event",
+		editDescription: "Correct the date, progress, or source for this status change.",
+		deleteEntry: "Delete event",
+		deletePrompt:
+			"This progress event will be deleted, and progress totals and completions will be recalculated.",
+		completionIncrement: "Completion increase",
+		writeReview: "Review this progress event",
+		viewReview: "View linked review",
+		linkedReview: "Progress linked to this review",
+		reviewBindingNotice:
+			"This review will be linked to the progress event you selected from the progress page.",
+		importDescription:
+			"Bring in history from another platform. Imported events do not change current progress by default.",
+		importFormat: "File format",
+		importFormatDescription:
+			"The first row must use this exact column order. Every later row is one event.",
+		importFormatRules: insert(
+			"Progress in {{format}} is a value from 0 to 1. Format each date as an instant, day, month, or year to match its precision.",
+			{ format: String },
+		),
+		importProviderDescription:
+			"Every event in this import will be marked as coming from this platform.",
+		importFile: "Import file",
+		importInvalidLine: insert("Row {{line}} is invalid. Correct it and try again.", {
+			line: Number,
+		}),
+		importReady: insert("Read {{count}} events and ready to import.", { count: Number }),
+		importComplete: insert("Successfully imported {{count}} events.", { count: Number }),
 	},
 	progressNotRecorded: "Not recorded",
 	completionCountChange: insert("Completion count will increase from {{current}} to {{next}}.", {

@@ -409,12 +409,22 @@ import type {
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses,
 	GetApiProgressOptions,
 	GetApiProgressResponses,
+	PostApiProgressImportOptions,
+	PostApiProgressImportResponses,
 	GetApiProgressByUnitIdOptions,
 	GetApiProgressByUnitIdResponses,
 	PutApiProgressByUnitIdOptions,
 	PutApiProgressByUnitIdResponses,
 	DeleteApiProgressByUnitIdOptions,
 	DeleteApiProgressByUnitIdResponses,
+	GetApiProgressByUnitIdEntriesOptions,
+	GetApiProgressByUnitIdEntriesResponses,
+	PostApiProgressByUnitIdEntriesOptions,
+	PostApiProgressByUnitIdEntriesResponses,
+	PutApiProgressByUnitIdEntriesByEntryIdOptions,
+	PutApiProgressByUnitIdEntriesByEntryIdResponses,
+	DeleteApiProgressByUnitIdEntriesByEntryIdOptions,
+	DeleteApiProgressByUnitIdEntriesByEntryIdResponses,
 	GetApiProgressByUnitIdNodesOptions,
 	GetApiProgressByUnitIdNodesResponses,
 	PostApiProgressByUnitIdCompleteOptions,
@@ -4691,6 +4701,26 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Import Progress journal entries
+ * {@link /api/progress/import}
+ */
+export function postApiProgressImport<ThrowOnError extends boolean = true>(
+	options: Options<PostApiProgressImportOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiProgressImportResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/progress/import",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiProgressImportResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Get progress state
  * {@link /api/progress/:unitId}
  */
@@ -4748,6 +4778,86 @@ export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List Progress journal entries
+ * {@link /api/progress/:unitId/entries}
+ */
+export function getApiProgressByUnitIdEntries<ThrowOnError extends boolean = true>(
+	options: Options<GetApiProgressByUnitIdEntriesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiProgressByUnitIdEntriesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/progress/{unitId}/entries",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiProgressByUnitIdEntriesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create a Progress journal entry
+ * {@link /api/progress/:unitId/entries}
+ */
+export function postApiProgressByUnitIdEntries<ThrowOnError extends boolean = true>(
+	options: Options<PostApiProgressByUnitIdEntriesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiProgressByUnitIdEntriesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/progress/{unitId}/entries",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiProgressByUnitIdEntriesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace a Progress journal entry
+ * {@link /api/progress/:unitId/entries/:entryId}
+ */
+export function putApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiProgressByUnitIdEntriesByEntryIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/progress/{unitId}/entries/{entryId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Delete a Progress journal entry
+ * {@link /api/progress/:unitId/entries/:entryId}
+ */
+export function deleteApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiProgressByUnitIdEntriesByEntryIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/progress/{unitId}/entries/{entryId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>>;
 }
 
 /**

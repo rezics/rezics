@@ -208,5 +208,6 @@ export default {
 	TagStructureChanged: `This ${tagStructureTerms.inline} changed elsewhere. Refresh and try again.`,
 	TagStructureDefinitionConflict: `An identical ${tagStructureTerms.inline} already exists.`,
 	AssociationContextPostInvalid: `The relationship context must be a wiki ${postTerms.label}.`,
+	ProgressEntryNotFound: "This progress event could not be found.",
 	PostTagMentionVoteConflict: `This Tag mention conflicts with your existing downvote on the ${postTerms.label}.`,
 } satisfies typeof import("../zh-Hant/errorCodes").default;

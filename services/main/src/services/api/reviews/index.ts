@@ -12,6 +12,7 @@ import {
 } from "../../units/localization";
 import {
 	post,
+	postProgressEntry,
 	postReplyStat,
 	postScore,
 	realmUnit,
@@ -21,6 +22,7 @@ import {
 	unit,
 	unitOwnership,
 	unitLocalization,
+	unitProgressEntry,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
@@ -36,6 +38,7 @@ import {
 } from "../../posts/targeting";
 import { getPostSubjectPresentation } from "../../posts/presentation";
 import { selectPostScores } from "../../posts/scores";
+import { selectPostProgressEntry } from "../../posts/progress";
 import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
@@ -344,6 +347,35 @@ export default new Elysia()
 							}
 						: undefined;
 					const id = await database.transaction(async (tx) => {
+						if (body.progressEntryId) {
+							const [progressEntry] = await tx
+								.select({ id: unitProgressEntry.id })
+								.from(unitProgressEntry)
+								.where(
+									and(
+										eq(unitProgressEntry.id, body.progressEntryId),
+										eq(unitProgressEntry.profileId, profile.unitId),
+										eq(unitProgressEntry.unitId, body.targetId),
+										isNull(unitProgressEntry.deletedAt),
+									),
+								)
+								.limit(1)
+								.for("update");
+							if (!progressEntry)
+								throw new ValidationError({
+									progressEntryId:
+										"Progress entry must belong to the current Profile and Review target",
+								});
+							const [existingBinding] = await tx
+								.select({ postId: postProgressEntry.postId })
+								.from(postProgressEntry)
+								.where(eq(postProgressEntry.progressEntryId, body.progressEntryId))
+								.limit(1);
+							if (existingBinding)
+								throw new ValidationError({
+									progressEntryId: "Progress entry already has a Review",
+								});
+						}
 						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
 							tx,
 							body.targetId,
@@ -401,6 +433,12 @@ export default new Elysia()
 								position: fractionalPositionAt(0),
 							});
 						}
+						if (body.progressEntryId)
+							await tx.insert(postProgressEntry).values({
+								postId: created.id,
+								progressEntryId: body.progressEntryId,
+								position: fractionalPositionAt(0),
+							});
 						if (body.realmId) {
 							await ensurePostMountTargetingAllowed(tx, {
 								postId: created.id,
@@ -438,6 +476,7 @@ export default new Elysia()
 						]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 							"ScoreContextUnitUnsupported",
+							"ValidationError",
 						]),
 					},
 					detail: { summary: "Create review", tags: ["Reviews"] },
@@ -503,6 +542,7 @@ export default new Elysia()
 					const [
 						attributionMap,
 						scores,
+						progressEntries,
 						subject,
 						canEdit,
 						canManageAttributions,
@@ -519,6 +559,7 @@ export default new Elysia()
 								value,
 							})),
 						),
+						selectPostProgressEntry(review.id),
 						subjectPromise,
 						authorization.unit.canUpdate(params.reviewId, ["localizations"]),
 						authorization.unit.canUpdate(params.reviewId, ["credit-attributions"]),
@@ -542,6 +583,23 @@ export default new Elysia()
 						replyCount: toSafeInteger(review.replyCount, "reply count"),
 						subject,
 						scores,
+						progressEntry: progressEntries[0]
+							? {
+									id: progressEntries[0].id,
+									unitId: progressEntries[0].unitId,
+									entryKind: progressEntries[0].entryKind,
+									status: progressEntries[0].status,
+									progress: progressEntries[0].progress,
+									completionDelta: progressEntries[0].completionDelta,
+									totalTimeMs: Number(progressEntries[0].totalTimeMs),
+									lastContentStructureNodeId:
+										progressEntries[0].lastContentStructureNodeId,
+									occurredAt: progressEntries[0].occurredAt,
+									datePrecision: progressEntries[0].datePrecision,
+									sourceKind: progressEntries[0].sourceKind,
+									sourceProvider: progressEntries[0].sourceProvider,
+								}
+							: null,
 						capabilities: {
 							canEdit,
 							canManageAttributions,

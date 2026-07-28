@@ -24,9 +24,11 @@ export interface ReviewComposerTarget {
 
 export function ReviewComposer({
 	onCreated,
+	progressEntryId,
 	target: fixedTarget,
 }: {
 	onCreated: (reviewId: string) => void | Promise<void>;
+	progressEntryId?: string;
 	target?: ReviewComposerTarget;
 }) {
 	const create = usePostApiReviews();
@@ -62,6 +64,7 @@ export function ReviewComposer({
 				const result = await create.mutateAsync({
 					body: {
 						targetId: selectedTarget.id,
+						...(progressEntryId ? { progressEntryId } : {}),
 						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
 						...(score !== undefined && scoreContext
 							? { score: { contextUnitId: scoreContext.id, value: score } }
@@ -96,6 +99,11 @@ export function ReviewComposer({
 		<>
 			<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
 				<FieldGroup>
+					{progressEntryId ? (
+						<p className="rounded-lg bg-primary/8 px-4 py-3 text-sm">
+							{t.engagement.progressJournal.reviewBindingNotice}
+						</p>
+					) : null}
 					{fixedTarget ? null : (
 						<Field required>
 							<FieldLabel>{t.engagement.reviewTarget}</FieldLabel>

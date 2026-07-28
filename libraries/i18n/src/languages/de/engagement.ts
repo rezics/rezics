@@ -108,6 +108,7 @@ export default {
 		book: {
 			title: "Lesefortschritt",
 			summaryTitle: "Mein Lesen",
+			progressLabel: "Lesefortschritt",
 			dialogDescription:
 				"Erfasse deinen Lesestatus und deine aktuelle Position. Beim Abschließen erhöht sich die Anzahl deiner abgeschlossenen Lesedurchgänge um eins.",
 			listSummary: insert("{{percent}} % gelesen · {{count}} abgeschlossene Lesedurchgänge", {
@@ -119,6 +120,15 @@ export default {
 			completedCount: "Abgeschlossene Lesedurchgänge",
 			lastChapter: "Aktuelles Kapitel",
 			noChapter: "Kein Kapitel ausgewählt",
+			estimatedFromContents:
+				"Aus dem gewählten Kapitel und dem Umfang des Inhalts geschätzt; du kannst den Wert anpassen.",
+			history: {
+				completion: insert("Dieses Buch am {{date}} fertig gelesen.", { date: String }),
+				update: insert("Am {{date}} {{percent}} % erreicht.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Dieses Buch bewerten",
 			recordAction: "Lesen erfassen",
 			startAction: "Lesen beginnen",
@@ -145,6 +155,7 @@ export default {
 		media: {
 			title: "Wiedergabefortschritt",
 			summaryTitle: "Meine Wiedergabe",
+			progressLabel: "Wiedergabefortschritt",
 			dialogDescription:
 				"Erfasse deinen Wiedergabestatus und deine aktuelle Position. Beim Abschließen erhöht sich die Anzahl der vollständigen Wiedergaben um eins.",
 			listSummary: insert("{{percent}} % angesehen · {{count}} vollständige Wiedergaben", {
@@ -155,6 +166,15 @@ export default {
 			progress: "Wiedergabefortschritt",
 			completedCount: "Vollständige Wiedergaben",
 			totalMinutes: "Gesamte Wiedergabezeit in Minuten",
+			history: {
+				completion: insert("Dieses Werk am {{date}} vollständig angesehen.", {
+					date: String,
+				}),
+				update: insert("Am {{date}} {{percent}} % angesehen.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Dieses Werk bewerten",
 			recordAction: "Wiedergabe erfassen",
 			startAction: "Ansehen beginnen",
@@ -181,6 +201,7 @@ export default {
 		software: {
 			title: "Nutzungsprotokoll",
 			summaryTitle: "Meine Nutzung",
+			progressLabel: "Nutzungsfortschritt",
 			dialogDescription:
 				"Erfasse deinen Nutzungsstatus und die Gesamtzeit. Beim Abschließen erhöht sich die Anzahl deiner Abschlüsse um eins.",
 			listSummary: insert("{{count}} Abschlüsse · {{minutes}} Minuten", {
@@ -190,6 +211,13 @@ export default {
 			status: "Nutzungsstatus",
 			completedCount: "Abschlüsse",
 			totalMinutes: "Gesamte Nutzungszeit in Minuten",
+			history: {
+				completion: insert("Am {{date}} eine Nutzung abgeschlossen.", { date: String }),
+				update: insert("Am {{date}} {{percent}} % Nutzungsfortschritt erfasst.", {
+					date: String,
+					percent: Number,
+				}),
+			},
 			scoreAction: "Diese Software bewerten",
 			recordAction: "Nutzung erfassen",
 			startAction: "Nutzung beginnen",
@@ -213,6 +241,85 @@ export default {
 				dropped: "Nutzung abgebrochen",
 			},
 		},
+	},
+	retryProgress: "Fortschritt neu laden",
+	progressPercent: insert("{{percent}} %", { percent: Number }),
+	viewProgressHistory: "Fortschrittsverlauf ansehen",
+	progressJournal: {
+		title: "Mein Fortschrittsverlauf",
+		description:
+			"Jede Statusänderung bleibt als bearbeitbares Ereignis erhalten, auch aus anderen Plattformen.",
+		backToUnit: "Zurück zum Werk",
+		backToProgress: "Zurück zum Fortschritt",
+		historyTitle: "Fortschrittsverlauf",
+		updateNow: "Aktuellen Fortschritt ändern",
+		addHistory: "Früheren Eintrag hinzufügen",
+		addHistoryDescription:
+			"Füge eine frühere Änderung hinzu, ohne standardmäßig den aktuellen Fortschritt zu ändern.",
+		importHistory: "Verlauf importieren",
+		noEntries: "Noch keine Fortschrittsereignisse.",
+		loadMore: "Mehr laden",
+		unknownDate: "Datum unbekannt",
+		affectsCurrentShort: "Aktueller Fortschritt",
+		entryDetails: "Ereignisdetails",
+		entryKind: "Ereignistyp",
+		kinds: { update: "Fortschrittsänderung", completion: "Abschluss" },
+		status: "Status",
+		percentage: "Fortschritt in Prozent",
+		totalMinutes: "Gesamtminuten",
+		occurredAt: "Zeitpunkt",
+		datePrecision: "Datumsgenauigkeit",
+		precision: {
+			instant: "Genauer Zeitpunkt",
+			day: "Tag",
+			month: "Monat",
+			year: "Jahr",
+			unknown: "Datum unbekannt",
+		},
+		source: "Quelle",
+		sourceKinds: { rezics: "Hier erfasst", manual: "Manuell ergänzt", import: "Importiert" },
+		sourceProvider: "Quellplattform",
+		sourceProviderPlaceholder: "Zum Beispiel deine frühere Plattform",
+		sourceProviderDescription:
+			"Optional; bezeichnet die Plattform, auf der dieses Ereignis ursprünglich erfasst wurde.",
+		sourceExternalId: "Externe Datensatzkennung",
+		affectsCurrent: "Dieses Ereignis als aktuellen Fortschritt verwenden",
+		affectsCurrentDescription:
+			"Wenn aktiviert, aktualisiert dieses Ereignis den derzeit angezeigten Status und Fortschritt.",
+		saveEntry: "Ereignis speichern",
+		editEntry: "Ereignis bearbeiten",
+		editDescription: "Korrigiere Datum, Fortschritt oder Quelle dieser Statusänderung.",
+		deleteEntry: "Ereignis löschen",
+		deletePrompt:
+			"Dieses Fortschrittsereignis wird gelöscht; Fortschritt und Abschlüsse werden neu berechnet.",
+		completionIncrement: "Zusätzliche Abschlüsse",
+		writeReview: "Dieses Ereignis rezensieren",
+		viewReview: "Verknüpfte Rezension ansehen",
+		linkedReview: "Mit dieser Rezension verknüpfter Fortschritt",
+		reviewBindingNotice:
+			"Diese Rezension wird mit dem auf der Fortschrittsseite gewählten Ereignis verknüpft.",
+		importDescription:
+			"Übernimm frühere Ereignisse von einer anderen Plattform. Der aktuelle Fortschritt bleibt standardmäßig unverändert.",
+		importFormat: "Dateiformat",
+		importFormatDescription:
+			"Die erste Zeile muss genau diese Spaltenreihenfolge verwenden. Jede weitere Zeile ist ein Ereignis.",
+		importFormatRules: insert(
+			"Der Fortschrittswert in {{format}} liegt zwischen 0 und 1. Datumswerte werden passend zur Genauigkeit als Zeitpunkt, Tag, Monat oder Jahr angegeben.",
+			{ format: String },
+		),
+		importProviderDescription:
+			"Alle Ereignisse dieses Imports werden mit dieser Quellplattform markiert.",
+		importFile: "Importdatei",
+		importInvalidLine: insert(
+			"Zeile {{line}} ist ungültig. Bitte korrigieren und erneut versuchen.",
+			{
+				line: Number,
+			},
+		),
+		importReady: insert("{{count}} Ereignisse gelesen und zum Import bereit.", {
+			count: Number,
+		}),
+		importComplete: insert("{{count}} Ereignisse erfolgreich importiert.", { count: Number }),
 	},
 	progressNotRecorded: "Nicht erfasst",
 	completionCountChange: insert(
