@@ -23,6 +23,15 @@ export default {
 	FreshSessionRequired:
 		"Vuelve a iniciar sesión antes de realizar una acción administrativa sensible.",
 	EmailVerificationRequired: "Verifica tu correo electrónico para continuar.",
+	AccountSuspended: "Esta cuenta está suspendida.",
+	AccountClosed: "Esta cuenta está cerrada.",
+	UserAccountStateRevisionConflict:
+		"El estado de la cuenta ha cambiado. Recarga e inténtalo de nuevo.",
+	UserSelfStatusChangeForbidden: "No puedes suspender ni cerrar tu propia cuenta.",
+	PlatformUserManagerRequired:
+		"La plataforma debe conservar al menos un gestor de usuarios activo.",
+	UserAccountStateExpiryInvalid: "El fin de la suspensión debe ser posterior a la hora actual.",
+	SessionNotFound: "No se ha encontrado esta sesión.",
 	AccountRestricted: "Esta cuenta tiene restringida esa acción.",
 	UnitNotFound: "No se ha encontrado este contenido.",
 	UnitPermissionForbidden: "No tienes el permiso necesario para este contenido.",

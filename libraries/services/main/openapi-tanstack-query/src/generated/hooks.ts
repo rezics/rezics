@@ -768,6 +768,50 @@ import type {
 	PutApiPlatformAccessProfilesByProfileIdStatus409,
 	PutApiPlatformAccessProfilesByProfileIdStatus422,
 	PutApiPlatformAccessProfilesByProfileIdStatus500,
+	GetApiPlatformUsersOptions,
+	GetApiPlatformUsersStatus200,
+	GetApiPlatformUsersStatus400,
+	GetApiPlatformUsersStatus401,
+	GetApiPlatformUsersStatus403,
+	GetApiPlatformUsersStatus422,
+	GetApiPlatformUsersStatus500,
+	GetApiPlatformUsersByUserIdOptions,
+	GetApiPlatformUsersByUserIdStatus200,
+	GetApiPlatformUsersByUserIdStatus401,
+	GetApiPlatformUsersByUserIdStatus403,
+	GetApiPlatformUsersByUserIdStatus404,
+	GetApiPlatformUsersByUserIdStatus422,
+	GetApiPlatformUsersByUserIdStatus500,
+	PutApiPlatformUsersByUserIdAccountStateOptions,
+	PutApiPlatformUsersByUserIdAccountStateStatus200,
+	PutApiPlatformUsersByUserIdAccountStateStatus400,
+	PutApiPlatformUsersByUserIdAccountStateStatus401,
+	PutApiPlatformUsersByUserIdAccountStateStatus403,
+	PutApiPlatformUsersByUserIdAccountStateStatus404,
+	PutApiPlatformUsersByUserIdAccountStateStatus409,
+	PutApiPlatformUsersByUserIdAccountStateStatus422,
+	PutApiPlatformUsersByUserIdAccountStateStatus500,
+	GetApiPlatformUsersByUserIdSessionsOptions,
+	GetApiPlatformUsersByUserIdSessionsStatus200,
+	GetApiPlatformUsersByUserIdSessionsStatus401,
+	GetApiPlatformUsersByUserIdSessionsStatus403,
+	GetApiPlatformUsersByUserIdSessionsStatus404,
+	GetApiPlatformUsersByUserIdSessionsStatus422,
+	GetApiPlatformUsersByUserIdSessionsStatus500,
+	DeleteApiPlatformUsersByUserIdSessionsOptions,
+	DeleteApiPlatformUsersByUserIdSessionsStatus200,
+	DeleteApiPlatformUsersByUserIdSessionsStatus401,
+	DeleteApiPlatformUsersByUserIdSessionsStatus403,
+	DeleteApiPlatformUsersByUserIdSessionsStatus404,
+	DeleteApiPlatformUsersByUserIdSessionsStatus422,
+	DeleteApiPlatformUsersByUserIdSessionsStatus500,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500,
 	GetApiTagsByTagIdOptions,
 	GetApiTagsByTagIdStatus200,
 	GetApiTagsByTagIdStatus401,
@@ -2139,6 +2183,12 @@ import {
 	getApiPlatformAccessProfiles,
 	getApiPlatformAccessProfilesByProfileId,
 	putApiPlatformAccessProfilesByProfileId,
+	getApiPlatformUsers,
+	getApiPlatformUsersByUserId,
+	putApiPlatformUsersByUserIdAccountState,
+	getApiPlatformUsersByUserIdSessions,
+	deleteApiPlatformUsersByUserIdSessions,
+	deleteApiPlatformUsersByUserIdSessionsBySessionId,
 	getApiTagsByTagId,
 	postApiTagStructures,
 	getApiTagStructuresByStructureId,
@@ -14138,6 +14188,632 @@ export function usePutApiPlatformAccessProfilesByProfileId<TContext>(
 			| PutApiPlatformAccessProfilesByProfileIdStatus500
 		>,
 		PutApiPlatformAccessProfilesByProfileIdOptions,
+		TContext
+	>;
+}
+
+export const getApiPlatformUsersQueryKey = ({
+	query,
+}: Omit<GetApiPlatformUsersOptions, "headers"> = {}) =>
+	[{ url: "/api/platform-users" }, ...(query ? [query] : [])] as const;
+
+type GetApiPlatformUsersQueryKey = ReturnType<typeof getApiPlatformUsersQueryKey>;
+
+export function getApiPlatformUsersQueryOptions(
+	{ query }: GetApiPlatformUsersOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiPlatformUsersQueryKey({ query });
+	return queryOptions<
+		GetApiPlatformUsersStatus200,
+		ResponseErrorConfig<
+			| GetApiPlatformUsersStatus400
+			| GetApiPlatformUsersStatus401
+			| GetApiPlatformUsersStatus403
+			| GetApiPlatformUsersStatus422
+			| GetApiPlatformUsersStatus500
+		>,
+		GetApiPlatformUsersStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiPlatformUsers({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List platform users
+ * {@link /api/platform-users}
+ */
+export function useGetApiPlatformUsers<
+	TData = GetApiPlatformUsersStatus200,
+	TQueryData = GetApiPlatformUsersStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformUsersQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?: GetApiPlatformUsersOptions["query"] | (() => GetApiPlatformUsersOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiPlatformUsersStatus200,
+				ResponseErrorConfig<
+					| GetApiPlatformUsersStatus400
+					| GetApiPlatformUsersStatus401
+					| GetApiPlatformUsersStatus403
+					| GetApiPlatformUsersStatus422
+					| GetApiPlatformUsersStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiPlatformUsersQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiPlatformUsersQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiPlatformUsersStatus400
+			| GetApiPlatformUsersStatus401
+			| GetApiPlatformUsersStatus403
+			| GetApiPlatformUsersStatus422
+			| GetApiPlatformUsersStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiPlatformUsersByUserIdQueryKey = ({
+	path,
+}: Omit<GetApiPlatformUsersByUserIdOptions, "headers">) =>
+	[{ url: "/api/platform-users/:userId", params: path }] as const;
+
+type GetApiPlatformUsersByUserIdQueryKey = ReturnType<typeof getApiPlatformUsersByUserIdQueryKey>;
+
+export function getApiPlatformUsersByUserIdQueryOptions(
+	{ path }: GetApiPlatformUsersByUserIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiPlatformUsersByUserIdQueryKey({ path });
+	return queryOptions<
+		GetApiPlatformUsersByUserIdStatus200,
+		ResponseErrorConfig<
+			| GetApiPlatformUsersByUserIdStatus401
+			| GetApiPlatformUsersByUserIdStatus403
+			| GetApiPlatformUsersByUserIdStatus404
+			| GetApiPlatformUsersByUserIdStatus422
+			| GetApiPlatformUsersByUserIdStatus500
+		>,
+		GetApiPlatformUsersByUserIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiPlatformUsersByUserId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get one platform user
+ * {@link /api/platform-users/:userId}
+ */
+export function useGetApiPlatformUsersByUserId<
+	TData = GetApiPlatformUsersByUserIdStatus200,
+	TQueryData = GetApiPlatformUsersByUserIdStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformUsersByUserIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiPlatformUsersByUserIdOptions["path"]
+			| (() => GetApiPlatformUsersByUserIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiPlatformUsersByUserIdStatus200,
+				ResponseErrorConfig<
+					| GetApiPlatformUsersByUserIdStatus401
+					| GetApiPlatformUsersByUserIdStatus403
+					| GetApiPlatformUsersByUserIdStatus404
+					| GetApiPlatformUsersByUserIdStatus422
+					| GetApiPlatformUsersByUserIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiPlatformUsersByUserIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiPlatformUsersByUserIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiPlatformUsersByUserIdStatus401
+			| GetApiPlatformUsersByUserIdStatus403
+			| GetApiPlatformUsersByUserIdStatus404
+			| GetApiPlatformUsersByUserIdStatus422
+			| GetApiPlatformUsersByUserIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiPlatformUsersByUserIdAccountStateMutationKey = () =>
+	[{ url: "/api/platform-users/:userId/account-state" }] as const;
+
+export function putApiPlatformUsersByUserIdAccountStateMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiPlatformUsersByUserIdAccountStateMutationKey();
+	return mutationOptions<
+		PutApiPlatformUsersByUserIdAccountStateStatus200,
+		ResponseErrorConfig<
+			| PutApiPlatformUsersByUserIdAccountStateStatus400
+			| PutApiPlatformUsersByUserIdAccountStateStatus401
+			| PutApiPlatformUsersByUserIdAccountStateStatus403
+			| PutApiPlatformUsersByUserIdAccountStateStatus404
+			| PutApiPlatformUsersByUserIdAccountStateStatus409
+			| PutApiPlatformUsersByUserIdAccountStateStatus422
+			| PutApiPlatformUsersByUserIdAccountStateStatus500
+		>,
+		PutApiPlatformUsersByUserIdAccountStateOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiPlatformUsersByUserIdAccountState({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace a platform user account state
+ * {@link /api/platform-users/:userId/account-state}
+ */
+export function usePutApiPlatformUsersByUserIdAccountState<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiPlatformUsersByUserIdAccountStateStatus200,
+			ResponseErrorConfig<
+				| PutApiPlatformUsersByUserIdAccountStateStatus400
+				| PutApiPlatformUsersByUserIdAccountStateStatus401
+				| PutApiPlatformUsersByUserIdAccountStateStatus403
+				| PutApiPlatformUsersByUserIdAccountStateStatus404
+				| PutApiPlatformUsersByUserIdAccountStateStatus409
+				| PutApiPlatformUsersByUserIdAccountStateStatus422
+				| PutApiPlatformUsersByUserIdAccountStateStatus500
+			>,
+			PutApiPlatformUsersByUserIdAccountStateOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiPlatformUsersByUserIdAccountStateMutationKey();
+
+	const baseOptions = putApiPlatformUsersByUserIdAccountStateMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiPlatformUsersByUserIdAccountStateStatus200,
+		ResponseErrorConfig<
+			| PutApiPlatformUsersByUserIdAccountStateStatus400
+			| PutApiPlatformUsersByUserIdAccountStateStatus401
+			| PutApiPlatformUsersByUserIdAccountStateStatus403
+			| PutApiPlatformUsersByUserIdAccountStateStatus404
+			| PutApiPlatformUsersByUserIdAccountStateStatus409
+			| PutApiPlatformUsersByUserIdAccountStateStatus422
+			| PutApiPlatformUsersByUserIdAccountStateStatus500
+		>,
+		PutApiPlatformUsersByUserIdAccountStateOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiPlatformUsersByUserIdAccountStateStatus200,
+		ResponseErrorConfig<
+			| PutApiPlatformUsersByUserIdAccountStateStatus400
+			| PutApiPlatformUsersByUserIdAccountStateStatus401
+			| PutApiPlatformUsersByUserIdAccountStateStatus403
+			| PutApiPlatformUsersByUserIdAccountStateStatus404
+			| PutApiPlatformUsersByUserIdAccountStateStatus409
+			| PutApiPlatformUsersByUserIdAccountStateStatus422
+			| PutApiPlatformUsersByUserIdAccountStateStatus500
+		>,
+		PutApiPlatformUsersByUserIdAccountStateOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiPlatformUsersByUserIdAccountStateStatus200,
+		ResponseErrorConfig<
+			| PutApiPlatformUsersByUserIdAccountStateStatus400
+			| PutApiPlatformUsersByUserIdAccountStateStatus401
+			| PutApiPlatformUsersByUserIdAccountStateStatus403
+			| PutApiPlatformUsersByUserIdAccountStateStatus404
+			| PutApiPlatformUsersByUserIdAccountStateStatus409
+			| PutApiPlatformUsersByUserIdAccountStateStatus422
+			| PutApiPlatformUsersByUserIdAccountStateStatus500
+		>,
+		PutApiPlatformUsersByUserIdAccountStateOptions,
+		TContext
+	>;
+}
+
+export const getApiPlatformUsersByUserIdSessionsQueryKey = ({
+	path,
+}: Omit<GetApiPlatformUsersByUserIdSessionsOptions, "headers">) =>
+	[{ url: "/api/platform-users/:userId/sessions", params: path }] as const;
+
+type GetApiPlatformUsersByUserIdSessionsQueryKey = ReturnType<
+	typeof getApiPlatformUsersByUserIdSessionsQueryKey
+>;
+
+export function getApiPlatformUsersByUserIdSessionsQueryOptions(
+	{ path }: GetApiPlatformUsersByUserIdSessionsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiPlatformUsersByUserIdSessionsQueryKey({ path });
+	return queryOptions<
+		GetApiPlatformUsersByUserIdSessionsStatus200,
+		ResponseErrorConfig<
+			| GetApiPlatformUsersByUserIdSessionsStatus401
+			| GetApiPlatformUsersByUserIdSessionsStatus403
+			| GetApiPlatformUsersByUserIdSessionsStatus404
+			| GetApiPlatformUsersByUserIdSessionsStatus422
+			| GetApiPlatformUsersByUserIdSessionsStatus500
+		>,
+		GetApiPlatformUsersByUserIdSessionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiPlatformUsersByUserIdSessions({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List a platform user's sessions
+ * {@link /api/platform-users/:userId/sessions}
+ */
+export function useGetApiPlatformUsersByUserIdSessions<
+	TData = GetApiPlatformUsersByUserIdSessionsStatus200,
+	TQueryData = GetApiPlatformUsersByUserIdSessionsStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformUsersByUserIdSessionsQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiPlatformUsersByUserIdSessionsOptions["path"]
+			| (() => GetApiPlatformUsersByUserIdSessionsOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiPlatformUsersByUserIdSessionsStatus200,
+				ResponseErrorConfig<
+					| GetApiPlatformUsersByUserIdSessionsStatus401
+					| GetApiPlatformUsersByUserIdSessionsStatus403
+					| GetApiPlatformUsersByUserIdSessionsStatus404
+					| GetApiPlatformUsersByUserIdSessionsStatus422
+					| GetApiPlatformUsersByUserIdSessionsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiPlatformUsersByUserIdSessionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiPlatformUsersByUserIdSessionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiPlatformUsersByUserIdSessionsStatus401
+			| GetApiPlatformUsersByUserIdSessionsStatus403
+			| GetApiPlatformUsersByUserIdSessionsStatus404
+			| GetApiPlatformUsersByUserIdSessionsStatus422
+			| GetApiPlatformUsersByUserIdSessionsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const deleteApiPlatformUsersByUserIdSessionsMutationKey = () =>
+	[{ url: "/api/platform-users/:userId/sessions" }] as const;
+
+export function deleteApiPlatformUsersByUserIdSessionsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiPlatformUsersByUserIdSessionsMutationKey();
+	return mutationOptions<
+		DeleteApiPlatformUsersByUserIdSessionsStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiPlatformUsersByUserIdSessions({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Revoke all platform user sessions
+ * {@link /api/platform-users/:userId/sessions}
+ */
+export function useDeleteApiPlatformUsersByUserIdSessions<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiPlatformUsersByUserIdSessionsStatus200,
+			ResponseErrorConfig<
+				| DeleteApiPlatformUsersByUserIdSessionsStatus401
+				| DeleteApiPlatformUsersByUserIdSessionsStatus403
+				| DeleteApiPlatformUsersByUserIdSessionsStatus404
+				| DeleteApiPlatformUsersByUserIdSessionsStatus422
+				| DeleteApiPlatformUsersByUserIdSessionsStatus500
+			>,
+			DeleteApiPlatformUsersByUserIdSessionsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiPlatformUsersByUserIdSessionsMutationKey();
+
+	const baseOptions = deleteApiPlatformUsersByUserIdSessionsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiPlatformUsersByUserIdSessionsStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiPlatformUsersByUserIdSessionsStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiPlatformUsersByUserIdSessionsStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsOptions,
+		TContext
+	>;
+}
+
+export const deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationKey = () =>
+	[{ url: "/api/platform-users/:userId/sessions/:sessionId" }] as const;
+
+export function deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationKey();
+	return mutationOptions<
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiPlatformUsersByUserIdSessionsBySessionId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Revoke a platform user session
+ * {@link /api/platform-users/:userId/sessions/:sessionId}
+ */
+export function useDeleteApiPlatformUsersByUserIdSessionsBySessionId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401
+				| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403
+				| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404
+				| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422
+				| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500
+			>,
+			DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationKey();
+
+	const baseOptions = deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422
+			| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500
+		>,
+		DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
 		TContext
 	>;
 }

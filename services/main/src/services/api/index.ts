@@ -32,6 +32,7 @@ import reviews from "./reviews";
 import search from "./search";
 import slugAddresses from "./slug-addresses";
 import platformAccess from "./platform-access";
+import platformUsers from "./platform-users";
 import tags from "./tags";
 import tokens from "./tokens";
 import tokenInfo from "./token-info";
@@ -177,6 +178,7 @@ export default new Elysia({ normalize: "typebox" })
 				.use(docks)
 				.use(users)
 				.use(platformAccess)
+				.use(platformUsers)
 				.use(tags)
 				.use(slugAddresses)
 				.use(units)

@@ -9150,6 +9150,8 @@
 					"InteractiveSessionRequired",
 					"FreshSessionRequired",
 					"EmailVerificationRequired",
+					"AccountSuspended",
+					"AccountClosed",
 					"AccountRestricted",
 					"RealmCapabilityRequired",
 					"RealmRulesAcceptanceRequired",
@@ -9224,6 +9226,11 @@
 					"PreferencesNotFound",
 					"UserNotFound",
 					"UserSelfBlockForbidden",
+					"UserAccountStateRevisionConflict",
+					"UserSelfStatusChangeForbidden",
+					"PlatformUserManagerRequired",
+					"UserAccountStateExpiryInvalid",
+					"SessionNotFound",
 					"SoftwareSystemRequirementSourceInvalid",
 					"SeriesReleaseNotFound",
 					"ZonePageNotFound",
@@ -35959,6 +35966,12 @@
 						"in": "query",
 						"required": false,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "targetId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
 				"responses": {
@@ -45924,6 +45937,10 @@
 															"platform.access.read",
 															"platform.access.manage",
 															"platform.audit.read",
+															"platform.user.read",
+															"platform.user.status.update",
+															"platform.session.read",
+															"platform.session.revoke",
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
@@ -50108,6 +50125,10 @@
 													"platform.access.read",
 													"platform.access.manage",
 													"platform.audit.read",
+													"platform.user.read",
+													"platform.user.status.update",
+													"platform.session.read",
+													"platform.session.revoke",
 													"entity.associations.override",
 													"unit.edit",
 													"platform.development_preview.access",
@@ -50262,6 +50283,10 @@
 																		"platform.access.read",
 																		"platform.access.manage",
 																		"platform.audit.read",
+																		"platform.user.read",
+																		"platform.user.status.update",
+																		"platform.session.read",
+																		"platform.session.revoke",
 																		"entity.associations.override",
 																		"unit.edit",
 																		"platform.development_preview.access",
@@ -50420,6 +50445,10 @@
 															"platform.access.read",
 															"platform.access.manage",
 															"platform.audit.read",
+															"platform.user.read",
+															"platform.user.status.update",
+															"platform.session.read",
+															"platform.session.revoke",
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
@@ -50568,7 +50597,7 @@
 								"properties": {
 									"expectedRevision": { "minLength": 1, "type": "string" },
 									"grants": {
-										"maxItems": 22,
+										"maxItems": 26,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -50583,6 +50612,10 @@
 														"platform.access.read",
 														"platform.access.manage",
 														"platform.audit.read",
+														"platform.user.read",
+														"platform.user.status.update",
+														"platform.session.read",
+														"platform.session.revoke",
 														"entity.associations.override",
 														"unit.edit",
 														"platform.development_preview.access",
@@ -50662,6 +50695,10 @@
 															"platform.access.read",
 															"platform.access.manage",
 															"platform.audit.read",
+															"platform.user.read",
+															"platform.user.status.update",
+															"platform.session.read",
+															"platform.session.revoke",
 															"entity.associations.override",
 															"unit.edit",
 															"platform.development_preview.access",
@@ -50855,6 +50892,1425 @@
 				},
 				"operationId": "putApiPlatform-accessProfilesByProfileId",
 				"x-rezics-policy-operation-id": "putApiPlatform-accessProfilesByProfileId"
+			}
+		},
+		"/api/platform-users": {
+			"get": {
+				"summary": "List platform users",
+				"tags": ["Platform Users"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 500, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					},
+					{
+						"name": "search",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "state",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"default": "active",
+							"type": "string",
+							"enum": ["active", "suspended", "closed"]
+						}
+					},
+					{
+						"name": "emailVerified",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "boolean" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"userId",
+													"profileId",
+													"name",
+													"email",
+													"emailVerified",
+													"accountState",
+													"activeSessionCount",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"userId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"profileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"name": { "type": "string" },
+													"email": { "type": "string" },
+													"emailVerified": { "type": "boolean" },
+													"accountState": {
+														"type": "object",
+														"required": [
+															"state",
+															"reason",
+															"note",
+															"expiresAt",
+															"revision",
+															"updatedAt",
+															"updatedByProfileId"
+														],
+														"properties": {
+															"state": {
+																"default": "active",
+																"type": "string",
+																"enum": [
+																	"active",
+																	"suspended",
+																	"closed"
+																]
+															},
+															"reason": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"default": "security",
+																		"type": "string",
+																		"enum": [
+																			"security",
+																			"policy_violation",
+																			"compromised",
+																			"user_request",
+																			"legal",
+																			"other"
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"note": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"expiresAt": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"revision": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"updatedAt": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"updatedByProfileId": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
+													},
+													"activeSessionCount": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": [
+														"AuthenticationRequired",
+														"InteractiveSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AccountSuspended",
+													"type": "string",
+													"enum": [
+														"AccountSuspended",
+														"AccountClosed",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiPlatform-users",
+				"x-rezics-policy-operation-id": "getApiPlatform-users"
+			}
+		},
+		"/api/platform-users/{userId}": {
+			"get": {
+				"summary": "Get one platform user",
+				"tags": ["Platform Users"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"userId",
+										"profileId",
+										"name",
+										"email",
+										"emailVerified",
+										"accountState",
+										"activeSessionCount",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"userId": { "format": "uuid", "type": "string" },
+										"profileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"name": { "type": "string" },
+										"email": { "type": "string" },
+										"emailVerified": { "type": "boolean" },
+										"accountState": {
+											"type": "object",
+											"required": [
+												"state",
+												"reason",
+												"note",
+												"expiresAt",
+												"revision",
+												"updatedAt",
+												"updatedByProfileId"
+											],
+											"properties": {
+												"state": {
+													"default": "active",
+													"type": "string",
+													"enum": ["active", "suspended", "closed"]
+												},
+												"reason": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"default": "security",
+															"type": "string",
+															"enum": [
+																"security",
+																"policy_violation",
+																"compromised",
+																"user_request",
+																"legal",
+																"other"
+															]
+														},
+														{ "type": "null" }
+													]
+												},
+												"note": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"expiresAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"revision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"updatedAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"updatedByProfileId": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "uuid", "type": "string" },
+														{ "type": "null" }
+													]
+												}
+											}
+										},
+										"activeSessionCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": [
+														"AuthenticationRequired",
+														"InteractiveSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AccountSuspended",
+													"type": "string",
+													"enum": [
+														"AccountSuspended",
+														"AccountClosed",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UserNotFound",
+													"type": "string",
+													"enum": ["UserNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiPlatform-usersByUserId",
+				"x-rezics-policy-operation-id": "getApiPlatform-usersByUserId"
+			}
+		},
+		"/api/platform-users/{userId}/account-state": {
+			"put": {
+				"summary": "Replace a platform user account state",
+				"tags": ["Platform Users"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["expectedRevision", "state"],
+										"properties": {
+											"expectedRevision": {
+												"minimum": 0,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{ "minimum": 0, "type": "integer" }
+												]
+											},
+											"state": { "const": "active", "type": "string" }
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["expectedRevision", "state", "reason"],
+										"properties": {
+											"expectedRevision": {
+												"minimum": 0,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{ "minimum": 0, "type": "integer" }
+												]
+											},
+											"state": { "const": "suspended", "type": "string" },
+											"reason": {
+												"default": "security",
+												"type": "string",
+												"enum": [
+													"security",
+													"policy_violation",
+													"compromised",
+													"user_request",
+													"legal",
+													"other"
+												]
+											},
+											"note": {
+												"minLength": 1,
+												"maxLength": 2000,
+												"type": "string"
+											},
+											"expiresAt": { "format": "date-time", "type": "string" }
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["expectedRevision", "state", "reason"],
+										"properties": {
+											"expectedRevision": {
+												"minimum": 0,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{ "minimum": 0, "type": "integer" }
+												]
+											},
+											"state": { "const": "closed", "type": "string" },
+											"reason": {
+												"default": "security",
+												"type": "string",
+												"enum": [
+													"security",
+													"policy_violation",
+													"compromised",
+													"user_request",
+													"legal",
+													"other"
+												]
+											},
+											"note": {
+												"minLength": 1,
+												"maxLength": 2000,
+												"type": "string"
+											}
+										}
+									}
+								]
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"state",
+										"reason",
+										"note",
+										"expiresAt",
+										"revision",
+										"updatedAt",
+										"updatedByProfileId"
+									],
+									"properties": {
+										"state": {
+											"default": "active",
+											"type": "string",
+											"enum": ["active", "suspended", "closed"]
+										},
+										"reason": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"default": "security",
+													"type": "string",
+													"enum": [
+														"security",
+														"policy_violation",
+														"compromised",
+														"user_request",
+														"legal",
+														"other"
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"note": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"expiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"revision": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"updatedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"updatedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": [
+														"AuthenticationRequired",
+														"InteractiveSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AccountSuspended",
+													"type": "string",
+													"enum": [
+														"AccountSuspended",
+														"AccountClosed",
+														"FreshSessionRequired",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UserNotFound",
+													"type": "string",
+													"enum": ["UserNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UserAccountStateRevisionConflict",
+													"type": "string",
+													"enum": [
+														"UserAccountStateRevisionConflict",
+														"UserSelfStatusChangeForbidden",
+														"PlatformUserManagerRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UserAccountStateExpiryInvalid",
+															"type": "string",
+															"enum": [
+																"UserAccountStateExpiryInvalid"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiPlatform-usersByUserIdAccount-state",
+				"x-rezics-policy-operation-id": "putApiPlatform-usersByUserIdAccount-state"
+			}
+		},
+		"/api/platform-users/{userId}/sessions": {
+			"get": {
+				"summary": "List a platform user's sessions",
+				"tags": ["Platform Users"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"expiresAt",
+													"createdAt",
+													"updatedAt",
+													"ipAddress",
+													"userAgent",
+													"current"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"expiresAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"ipAddress": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"userAgent": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"current": { "type": "boolean" }
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": [
+														"AuthenticationRequired",
+														"InteractiveSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AccountSuspended",
+													"type": "string",
+													"enum": [
+														"AccountSuspended",
+														"AccountClosed",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UserNotFound",
+													"type": "string",
+													"enum": ["UserNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiPlatform-usersByUserIdSessions",
+				"x-rezics-policy-operation-id": "getApiPlatform-usersByUserIdSessions"
+			},
+			"delete": {
+				"summary": "Revoke all platform user sessions",
+				"tags": ["Platform Users"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["revokedCount"],
+									"properties": {
+										"revokedCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": [
+														"AuthenticationRequired",
+														"InteractiveSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AccountSuspended",
+													"type": "string",
+													"enum": [
+														"AccountSuspended",
+														"AccountClosed",
+														"FreshSessionRequired",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UserNotFound",
+													"type": "string",
+													"enum": ["UserNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiPlatform-usersByUserIdSessions",
+				"x-rezics-policy-operation-id": "deleteApiPlatform-usersByUserIdSessions"
+			}
+		},
+		"/api/platform-users/{userId}/sessions/{sessionId}": {
+			"delete": {
+				"summary": "Revoke a platform user session",
+				"tags": ["Platform Users"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "sessionId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["revokedCount"],
+									"properties": {
+										"revokedCount": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": [
+														"AuthenticationRequired",
+														"InteractiveSessionRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AccountSuspended",
+													"type": "string",
+													"enum": [
+														"AccountSuspended",
+														"AccountClosed",
+														"FreshSessionRequired",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SessionNotFound",
+													"type": "string",
+													"enum": ["SessionNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiPlatform-usersByUserIdSessionsBySessionId",
+				"x-rezics-policy-operation-id": "deleteApiPlatform-usersByUserIdSessionsBySessionId"
 			}
 		},
 		"/api/tags/{tagId}": {

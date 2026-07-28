@@ -241,6 +241,18 @@ import type {
 	GetApiPlatformAccessProfilesByProfileIdResponses,
 	PutApiPlatformAccessProfilesByProfileIdOptions,
 	PutApiPlatformAccessProfilesByProfileIdResponses,
+	GetApiPlatformUsersOptions,
+	GetApiPlatformUsersResponses,
+	GetApiPlatformUsersByUserIdOptions,
+	GetApiPlatformUsersByUserIdResponses,
+	PutApiPlatformUsersByUserIdAccountStateOptions,
+	PutApiPlatformUsersByUserIdAccountStateResponses,
+	GetApiPlatformUsersByUserIdSessionsOptions,
+	GetApiPlatformUsersByUserIdSessionsResponses,
+	DeleteApiPlatformUsersByUserIdSessionsOptions,
+	DeleteApiPlatformUsersByUserIdSessionsResponses,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
+	DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses,
 	GetApiTagsByTagIdOptions,
 	GetApiTagsByTagIdResponses,
 	PostApiTagStructuresOptions,
@@ -2889,6 +2901,114 @@ export function putApiPlatformAccessProfilesByProfileId<ThrowOnError extends boo
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List platform users
+ * {@link /api/platform-users}
+ */
+export function getApiPlatformUsers<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformUsersOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiPlatformUsersResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/platform-users",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiPlatformUsersResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get one platform user
+ * {@link /api/platform-users/:userId}
+ */
+export function getApiPlatformUsersByUserId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformUsersByUserIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiPlatformUsersByUserIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/platform-users/{userId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiPlatformUsersByUserIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace a platform user account state
+ * {@link /api/platform-users/:userId/account-state}
+ */
+export function putApiPlatformUsersByUserIdAccountState<ThrowOnError extends boolean = true>(
+	options: Options<PutApiPlatformUsersByUserIdAccountStateOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiPlatformUsersByUserIdAccountStateResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/platform-users/{userId}/account-state",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiPlatformUsersByUserIdAccountStateResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List a platform user's sessions
+ * {@link /api/platform-users/:userId/sessions}
+ */
+export function getApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformUsersByUserIdSessionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/platform-users/{userId}/sessions",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revoke all platform user sessions
+ * {@link /api/platform-users/:userId/sessions}
+ */
+export function deleteApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiPlatformUsersByUserIdSessionsOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/platform-users/{userId}/sessions",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<DeleteApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revoke a platform user session
+ * {@link /api/platform-users/:userId/sessions/:sessionId}
+ */
+export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/platform-users/{userId}/sessions/{sessionId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses, ThrowOnError>
+	>;
 }
 
 /**

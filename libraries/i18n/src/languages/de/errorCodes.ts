@@ -23,6 +23,13 @@ export default {
 	FreshSessionRequired:
 		"Melde dich erneut an, bevor du eine vertrauliche Verwaltungsaktion ausführst.",
 	EmailVerificationRequired: "Bestätige deine E-Mail-Adresse, um fortzufahren.",
+	AccountSuspended: "Dieses Konto ist derzeit gesperrt.",
+	AccountClosed: "Dieses Konto ist geschlossen.",
+	UserAccountStateRevisionConflict: "Der Kontostatus wurde geändert. Bitte neu laden.",
+	UserSelfStatusChangeForbidden: "Du kannst dein eigenes Konto nicht sperren oder schließen.",
+	PlatformUserManagerRequired: "Mindestens ein aktiver Benutzerverwalter muss erhalten bleiben.",
+	UserAccountStateExpiryInvalid: "Das Ende der Sperre muss in der Zukunft liegen.",
+	SessionNotFound: "Diese Sitzung wurde nicht gefunden.",
 	AccountRestricted: "Dieses Konto darf diese Aktion nicht ausführen.",
 	UnitNotFound: "Dieser Inhalt wurde nicht gefunden.",
 	UnitPermissionForbidden: "Dir fehlt die erforderliche Berechtigung für diesen Inhalt.",

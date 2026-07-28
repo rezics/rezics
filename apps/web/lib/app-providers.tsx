@@ -14,7 +14,7 @@ import { TranslatedUiProvider } from "@/features/application-shell/components/ui
 import { PwaLifecycle } from "@/features/pwa/pwa-lifecycle";
 import { TranslationProvider } from "@/i18n/client";
 import type { RootTranslationNamespaces } from "@/i18n/namespaces";
-import { shouldRetry } from "@/lib/query-policy";
+import { QueryClientDefaultOptions } from "@/lib/query-policy";
 import { urlStateOptions } from "@/lib/search-params";
 
 export function AppProviders({
@@ -29,7 +29,7 @@ export function AppProviders({
 	const [queryClient] = useState(
 		() =>
 			new QueryClient({
-				defaultOptions: { queries: { staleTime: 30_000, retry: shouldRetry } },
+				defaultOptions: QueryClientDefaultOptions,
 			}),
 	);
 

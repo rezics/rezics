@@ -50,6 +50,10 @@ export default {
 		"platform.access.read": "Consultar las asignaciones de acceso a la plataforma",
 		"platform.access.manage": "Gestionar las asignaciones de acceso a la plataforma",
 		"platform.audit.read": "Consultar el registro de auditoría de la plataforma",
+		"platform.user.read": "Consultar los usuarios de la plataforma",
+		"platform.user.status.update": "Gestionar el estado de las cuentas",
+		"platform.session.read": "Consultar las sesiones de los usuarios",
+		"platform.session.revoke": "Revocar sesiones de usuarios",
 		"entity.associations.override":
 			"Omitir los permisos de asociación de entidades de catálogo",
 		"unit.edit": "Editar todas las Units",

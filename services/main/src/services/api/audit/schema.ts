@@ -18,6 +18,7 @@ export const AuditEventsQuery = t.Object(
 		actorProfileId: t.Optional(Uuid),
 		authorityKind: t.Optional(t.UnionEnum(AuditAuthorityKindValues)),
 		authorityId: t.Optional(Uuid),
+		targetId: t.Optional(Uuid),
 	},
 	{ additionalProperties: false },
 );

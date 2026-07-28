@@ -23,6 +23,7 @@ export default new Elysia({ prefix: "/audit" }).use(session).get(
 			predicates.push(eq(auditEvent.actorProfileId, query.actorProfileId));
 		if (query.authorityKind) predicates.push(eq(auditEvent.authorityKind, query.authorityKind));
 		if (query.authorityId) predicates.push(eq(auditEvent.authorityId, query.authorityId));
+		if (query.targetId) predicates.push(eq(auditEvent.targetId, query.targetId));
 		const cursor = query.cursor ? decodeAuditCursor(query.cursor) : undefined;
 		if (query.cursor && !cursor) throw new InvalidPaginationCursor();
 		if (cursor) {

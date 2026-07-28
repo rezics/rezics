@@ -7,6 +7,7 @@ import { Authorization } from "../authorization";
 import { database } from "../database";
 import { users } from "../database/schema";
 import type { ApiPermission } from "./api-permissions";
+import { ensureAccountAuthenticationAllowed } from "./account-state";
 import { fromApiKeyPermissions, isApiPermission } from "./api-permissions";
 import {
 	ApiTokenPermissionRequired,
@@ -128,6 +129,7 @@ function bearerToken(headers: Headers) {
 async function resolveInteractiveSession(headers: Headers): Promise<SessionIdentity | undefined> {
 	const session = await auth.api.getSession({ headers });
 	if (!session) return undefined;
+	await ensureAccountAuthenticationAllowed(session.user.id);
 	const profile = await ensureProfile(session.user);
 	return {
 		user: session.user,
@@ -178,6 +180,7 @@ async function resolveApiKey(
 			.where(eq(users.id, verified.key.referenceId))
 			.limit(1);
 		if (!user) throw new AuthenticationRequired();
+		await ensureAccountAuthenticationAllowed(user.id);
 		const profile = await ensureProfile(user);
 		return {
 			user,

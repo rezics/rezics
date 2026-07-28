@@ -4823,6 +4823,8 @@ export const ApiErrorCode = {
 	InteractiveSessionRequired: "InteractiveSessionRequired",
 	FreshSessionRequired: "FreshSessionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
 	AccountRestricted: "AccountRestricted",
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
@@ -4897,6 +4899,11 @@ export const ApiErrorCode = {
 	PreferencesNotFound: "PreferencesNotFound",
 	UserNotFound: "UserNotFound",
 	UserSelfBlockForbidden: "UserSelfBlockForbidden",
+	UserAccountStateRevisionConflict: "UserAccountStateRevisionConflict",
+	UserSelfStatusChangeForbidden: "UserSelfStatusChangeForbidden",
+	PlatformUserManagerRequired: "PlatformUserManagerRequired",
+	UserAccountStateExpiryInvalid: "UserAccountStateExpiryInvalid",
+	SessionNotFound: "SessionNotFound",
 	SoftwareSystemRequirementSourceInvalid: "SoftwareSystemRequirementSourceInvalid",
 	SeriesReleaseNotFound: "SeriesReleaseNotFound",
 	ZonePageNotFound: "ZonePageNotFound",
@@ -24806,6 +24813,12 @@ export type GetApiAuditEventsQuery = {
 	 * @type string | undefined
 	 */
 	authorityId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	targetId?: string;
 };
 
 export const GetApiAuditEventsStatus200ItemsCategoryEnum = {
@@ -33837,6 +33850,10 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"platform.access.read": "platform.access.read",
 	"platform.access.manage": "platform.access.manage",
 	"platform.audit.read": "platform.audit.read",
+	"platform.user.read": "platform.user.read",
+	"platform.user.status.update": "platform.user.status.update",
+	"platform.session.read": "platform.session.read",
+	"platform.session.revoke": "platform.session.revoke",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -38004,6 +38021,10 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"platform.access.read": "platform.access.read",
 	"platform.access.manage": "platform.access.manage",
 	"platform.audit.read": "platform.audit.read",
+	"platform.user.read": "platform.user.read",
+	"platform.user.status.update": "platform.user.status.update",
+	"platform.session.read": "platform.session.read",
+	"platform.session.revoke": "platform.session.revoke",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -38118,6 +38139,10 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"platform.access.read": "platform.access.read",
 	"platform.access.manage": "platform.access.manage",
 	"platform.audit.read": "platform.audit.read",
+	"platform.user.read": "platform.user.read",
+	"platform.user.status.update": "platform.user.status.update",
+	"platform.session.read": "platform.session.read",
+	"platform.session.revoke": "platform.session.revoke",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -38289,6 +38314,10 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"platform.access.read": "platform.access.read",
 	"platform.access.manage": "platform.access.manage",
 	"platform.audit.read": "platform.audit.read",
+	"platform.user.read": "platform.user.read",
+	"platform.user.status.update": "platform.user.status.update",
+	"platform.session.read": "platform.session.read",
+	"platform.session.revoke": "platform.session.revoke",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -38485,6 +38514,10 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"platform.access.read": "platform.access.read",
 	"platform.access.manage": "platform.access.manage",
 	"platform.audit.read": "platform.audit.read",
+	"platform.user.read": "platform.user.read",
+	"platform.user.status.update": "platform.user.status.update",
+	"platform.session.read": "platform.session.read",
+	"platform.session.revoke": "platform.session.revoke",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -38717,6 +38750,10 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"platform.access.read": "platform.access.read",
 	"platform.access.manage": "platform.access.manage",
 	"platform.audit.read": "platform.audit.read",
+	"platform.user.read": "platform.user.read",
+	"platform.user.status.update": "platform.user.status.update",
+	"platform.session.read": "platform.session.read",
+	"platform.session.revoke": "platform.session.revoke",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
@@ -38797,6 +38834,1359 @@ export type PutApiPlatformAccessProfilesByProfileIdResponse =
 	| PutApiPlatformAccessProfilesByProfileIdStatus409
 	| PutApiPlatformAccessProfilesByProfileIdStatus422
 	| PutApiPlatformAccessProfilesByProfileIdStatus500;
+
+export const GetApiPlatformUsersState = {
+	active: "active",
+	suspended: "suspended",
+	closed: "closed",
+} as const;
+
+export type GetApiPlatformUsersState =
+	(typeof GetApiPlatformUsersState)[keyof typeof GetApiPlatformUsersState];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	search?: string;
+	/**
+	 * @default 'active'
+	 * @type string | undefined
+	 */
+	state?: GetApiPlatformUsersState;
+	/**
+	 * @type boolean | undefined
+	 */
+	emailVerified?: boolean;
+};
+
+export const GetApiPlatformUsersStatus200ItemsAccountStateStateEnum = {
+	active: "active",
+	suspended: "suspended",
+	closed: "closed",
+} as const;
+
+export type GetApiPlatformUsersStatus200ItemsAccountStateStateEnum =
+	(typeof GetApiPlatformUsersStatus200ItemsAccountStateStateEnum)[keyof typeof GetApiPlatformUsersStatus200ItemsAccountStateStateEnum];
+
+export const GetApiPlatformUsersStatus200ItemsAccountStateReason = {
+	security: "security",
+	policy_violation: "policy_violation",
+	compromised: "compromised",
+	user_request: "user_request",
+	legal: "legal",
+	other: "other",
+} as const;
+
+export type GetApiPlatformUsersStatus200ItemsAccountStateReason =
+	(typeof GetApiPlatformUsersStatus200ItemsAccountStateReason)[keyof typeof GetApiPlatformUsersStatus200ItemsAccountStateReason];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		userId: string;
+		profileId: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		name: string;
+		/**
+		 * @type string
+		 */
+		email: string;
+		/**
+		 * @type boolean
+		 */
+		emailVerified: boolean;
+		/**
+		 * @type object
+		 */
+		accountState: {
+			/**
+			 * @default 'active'
+			 * @type string
+			 */
+			state: GetApiPlatformUsersStatus200ItemsAccountStateStateEnum;
+			reason: (GetApiPlatformUsersStatus200ItemsAccountStateReason | null) | null;
+			note: (string | null) | null;
+			expiresAt: (string | null) | null;
+			revision: string | number;
+			updatedAt: (string | null) | null;
+			updatedByProfileId: (string | null) | null;
+		};
+		activeSessionCount: string | number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiPlatformUsersStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetApiPlatformUsersStatus401ErrorCodeEnum =
+	(typeof GetApiPlatformUsersStatus401ErrorCodeEnum)[keyof typeof GetApiPlatformUsersStatus401ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetApiPlatformUsersStatus401ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiPlatformUsersStatus403ErrorCodeEnum = {
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiPlatformUsersStatus403ErrorCodeEnum =
+	(typeof GetApiPlatformUsersStatus403ErrorCodeEnum)[keyof typeof GetApiPlatformUsersStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AccountSuspended'
+		 * @type string
+		 */
+		code: GetApiPlatformUsersStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersOptions = {
+	body?: never;
+	path?: never;
+	query?: GetApiPlatformUsersQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersResponses = {
+	"200": GetApiPlatformUsersStatus200;
+	"400": GetApiPlatformUsersStatus400;
+	"401": GetApiPlatformUsersStatus401;
+	"403": GetApiPlatformUsersStatus403;
+	"422": GetApiPlatformUsersStatus422;
+	"500": GetApiPlatformUsersStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiPlatformUsersResponse =
+	| GetApiPlatformUsersStatus200
+	| GetApiPlatformUsersStatus400
+	| GetApiPlatformUsersStatus401
+	| GetApiPlatformUsersStatus403
+	| GetApiPlatformUsersStatus422
+	| GetApiPlatformUsersStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+};
+
+export const GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum = {
+	active: "active",
+	suspended: "suspended",
+	closed: "closed",
+} as const;
+
+export type GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum =
+	(typeof GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum)[keyof typeof GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum];
+
+export const GetApiPlatformUsersByUserIdStatus200AccountStateReason = {
+	security: "security",
+	policy_violation: "policy_violation",
+	compromised: "compromised",
+	user_request: "user_request",
+	legal: "legal",
+	other: "other",
+} as const;
+
+export type GetApiPlatformUsersByUserIdStatus200AccountStateReason =
+	(typeof GetApiPlatformUsersByUserIdStatus200AccountStateReason)[keyof typeof GetApiPlatformUsersByUserIdStatus200AccountStateReason];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+	profileId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	name: string;
+	/**
+	 * @type string
+	 */
+	email: string;
+	/**
+	 * @type boolean
+	 */
+	emailVerified: boolean;
+	/**
+	 * @type object
+	 */
+	accountState: {
+		/**
+		 * @default 'active'
+		 * @type string
+		 */
+		state: GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum;
+		reason: (GetApiPlatformUsersByUserIdStatus200AccountStateReason | null) | null;
+		note: (string | null) | null;
+		expiresAt: (string | null) | null;
+		revision: string | number;
+		updatedAt: (string | null) | null;
+		updatedByProfileId: (string | null) | null;
+	};
+	activeSessionCount: string | number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const GetApiPlatformUsersByUserIdStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetApiPlatformUsersByUserIdStatus401ErrorCodeEnum =
+	(typeof GetApiPlatformUsersByUserIdStatus401ErrorCodeEnum)[keyof typeof GetApiPlatformUsersByUserIdStatus401ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetApiPlatformUsersByUserIdStatus401ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiPlatformUsersByUserIdStatus403ErrorCodeEnum = {
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiPlatformUsersByUserIdStatus403ErrorCodeEnum =
+	(typeof GetApiPlatformUsersByUserIdStatus403ErrorCodeEnum)[keyof typeof GetApiPlatformUsersByUserIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AccountSuspended'
+		 * @type string
+		 */
+		code: GetApiPlatformUsersByUserIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdOptions = {
+	body?: never;
+	path: GetApiPlatformUsersByUserIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdResponses = {
+	"200": GetApiPlatformUsersByUserIdStatus200;
+	"401": GetApiPlatformUsersByUserIdStatus401;
+	"403": GetApiPlatformUsersByUserIdStatus403;
+	"404": GetApiPlatformUsersByUserIdStatus404;
+	"422": GetApiPlatformUsersByUserIdStatus422;
+	"500": GetApiPlatformUsersByUserIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiPlatformUsersByUserIdResponse =
+	| GetApiPlatformUsersByUserIdStatus200
+	| GetApiPlatformUsersByUserIdStatus401
+	| GetApiPlatformUsersByUserIdStatus403
+	| GetApiPlatformUsersByUserIdStatus404
+	| GetApiPlatformUsersByUserIdStatus422
+	| GetApiPlatformUsersByUserIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStatePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+};
+
+export const PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum = {
+	active: "active",
+	suspended: "suspended",
+	closed: "closed",
+} as const;
+
+export type PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum =
+	(typeof PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum)[keyof typeof PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum];
+
+export const PutApiPlatformUsersByUserIdAccountStateStatus200Reason = {
+	security: "security",
+	policy_violation: "policy_violation",
+	compromised: "compromised",
+	user_request: "user_request",
+	legal: "legal",
+	other: "other",
+} as const;
+
+export type PutApiPlatformUsersByUserIdAccountStateStatus200Reason =
+	(typeof PutApiPlatformUsersByUserIdAccountStateStatus200Reason)[keyof typeof PutApiPlatformUsersByUserIdAccountStateStatus200Reason];
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateStatus200 = {
+	/**
+	 * @default 'active'
+	 * @type string
+	 */
+	state: PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum;
+	reason: (PutApiPlatformUsersByUserIdAccountStateStatus200Reason | null) | null;
+	note: (string | null) | null;
+	expiresAt: (string | null) | null;
+	revision: string | number;
+	updatedAt: (string | null) | null;
+	updatedByProfileId: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateStatus400 = MalformedRequestBody;
+
+export const PutApiPlatformUsersByUserIdAccountStateStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type PutApiPlatformUsersByUserIdAccountStateStatus401ErrorCodeEnum =
+	(typeof PutApiPlatformUsersByUserIdAccountStateStatus401ErrorCodeEnum)[keyof typeof PutApiPlatformUsersByUserIdAccountStateStatus401ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: PutApiPlatformUsersByUserIdAccountStateStatus401ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiPlatformUsersByUserIdAccountStateStatus403ErrorCodeEnum = {
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PutApiPlatformUsersByUserIdAccountStateStatus403ErrorCodeEnum =
+	(typeof PutApiPlatformUsersByUserIdAccountStateStatus403ErrorCodeEnum)[keyof typeof PutApiPlatformUsersByUserIdAccountStateStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AccountSuspended'
+		 * @type string
+		 */
+		code: PutApiPlatformUsersByUserIdAccountStateStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiPlatformUsersByUserIdAccountStateStatus409ErrorCodeEnum = {
+	UserAccountStateRevisionConflict: "UserAccountStateRevisionConflict",
+	UserSelfStatusChangeForbidden: "UserSelfStatusChangeForbidden",
+	PlatformUserManagerRequired: "PlatformUserManagerRequired",
+} as const;
+
+export type PutApiPlatformUsersByUserIdAccountStateStatus409ErrorCodeEnum =
+	(typeof PutApiPlatformUsersByUserIdAccountStateStatus409ErrorCodeEnum)[keyof typeof PutApiPlatformUsersByUserIdAccountStateStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserAccountStateRevisionConflict'
+		 * @type string
+		 */
+		code: PutApiPlatformUsersByUserIdAccountStateStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiPlatformUsersByUserIdAccountStateStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UserAccountStateExpiryInvalid'
+				 * @type string
+				 */
+				code: "UserAccountStateExpiryInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateStatus500 = InternalError;
+
+export const PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum = {
+	security: "security",
+	policy_violation: "policy_violation",
+	compromised: "compromised",
+	user_request: "user_request",
+	legal: "legal",
+	other: "other",
+} as const;
+
+export type PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum =
+	(typeof PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum)[keyof typeof PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum];
+
+export type PutApiPlatformUsersByUserIdAccountStateBody =
+	| {
+			expectedRevision: string | number;
+			/**
+			 * @type string
+			 */
+			state: "active";
+	  }
+	| {
+			expectedRevision: string | number;
+			/**
+			 * @type string
+			 */
+			state: "suspended";
+			/**
+			 * @default 'security'
+			 * @type string
+			 */
+			reason: PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum;
+			/**
+			 * @minLength 1
+			 * @maxLength 2000
+			 * @type string | undefined
+			 */
+			note?: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string | undefined
+			 */
+			expiresAt?: string;
+	  }
+	| {
+			expectedRevision: string | number;
+			/**
+			 * @type string
+			 */
+			state: "closed";
+			/**
+			 * @default 'security'
+			 * @type string
+			 */
+			reason: PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum;
+			/**
+			 * @minLength 1
+			 * @maxLength 2000
+			 * @type string | undefined
+			 */
+			note?: string;
+	  };
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateOptions = {
+	body: PutApiPlatformUsersByUserIdAccountStateBody;
+	path: PutApiPlatformUsersByUserIdAccountStatePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiPlatformUsersByUserIdAccountStateResponses = {
+	"200": PutApiPlatformUsersByUserIdAccountStateStatus200;
+	"400": PutApiPlatformUsersByUserIdAccountStateStatus400;
+	"401": PutApiPlatformUsersByUserIdAccountStateStatus401;
+	"403": PutApiPlatformUsersByUserIdAccountStateStatus403;
+	"404": PutApiPlatformUsersByUserIdAccountStateStatus404;
+	"409": PutApiPlatformUsersByUserIdAccountStateStatus409;
+	"422": PutApiPlatformUsersByUserIdAccountStateStatus422;
+	"500": PutApiPlatformUsersByUserIdAccountStateStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiPlatformUsersByUserIdAccountStateResponse =
+	| PutApiPlatformUsersByUserIdAccountStateStatus200
+	| PutApiPlatformUsersByUserIdAccountStateStatus400
+	| PutApiPlatformUsersByUserIdAccountStateStatus401
+	| PutApiPlatformUsersByUserIdAccountStateStatus403
+	| PutApiPlatformUsersByUserIdAccountStateStatus404
+	| PutApiPlatformUsersByUserIdAccountStateStatus409
+	| PutApiPlatformUsersByUserIdAccountStateStatus422
+	| PutApiPlatformUsersByUserIdAccountStateStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		ipAddress: (string | null) | null;
+		userAgent: (string | null) | null;
+		/**
+		 * @type boolean
+		 */
+		current: boolean;
+	}[];
+};
+
+export const GetApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type GetApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum =
+	(typeof GetApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum)[keyof typeof GetApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: GetApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum = {
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum =
+	(typeof GetApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum)[keyof typeof GetApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AccountSuspended'
+		 * @type string
+		 */
+		code: GetApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsOptions = {
+	body?: never;
+	path: GetApiPlatformUsersByUserIdSessionsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPlatformUsersByUserIdSessionsResponses = {
+	"200": GetApiPlatformUsersByUserIdSessionsStatus200;
+	"401": GetApiPlatformUsersByUserIdSessionsStatus401;
+	"403": GetApiPlatformUsersByUserIdSessionsStatus403;
+	"404": GetApiPlatformUsersByUserIdSessionsStatus404;
+	"422": GetApiPlatformUsersByUserIdSessionsStatus422;
+	"500": GetApiPlatformUsersByUserIdSessionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiPlatformUsersByUserIdSessionsResponse =
+	| GetApiPlatformUsersByUserIdSessionsStatus200
+	| GetApiPlatformUsersByUserIdSessionsStatus401
+	| GetApiPlatformUsersByUserIdSessionsStatus403
+	| GetApiPlatformUsersByUserIdSessionsStatus404
+	| GetApiPlatformUsersByUserIdSessionsStatus422
+	| GetApiPlatformUsersByUserIdSessionsStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsStatus200 = {
+	revokedCount: string | number;
+};
+
+export const DeleteApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type DeleteApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum =
+	(typeof DeleteApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum)[keyof typeof DeleteApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: DeleteApiPlatformUsersByUserIdSessionsStatus401ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum = {
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type DeleteApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum =
+	(typeof DeleteApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum)[keyof typeof DeleteApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AccountSuspended'
+		 * @type string
+		 */
+		code: DeleteApiPlatformUsersByUserIdSessionsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsOptions = {
+	body?: never;
+	path: DeleteApiPlatformUsersByUserIdSessionsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsResponses = {
+	"200": DeleteApiPlatformUsersByUserIdSessionsStatus200;
+	"401": DeleteApiPlatformUsersByUserIdSessionsStatus401;
+	"403": DeleteApiPlatformUsersByUserIdSessionsStatus403;
+	"404": DeleteApiPlatformUsersByUserIdSessionsStatus404;
+	"422": DeleteApiPlatformUsersByUserIdSessionsStatus422;
+	"500": DeleteApiPlatformUsersByUserIdSessionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsResponse =
+	| DeleteApiPlatformUsersByUserIdSessionsStatus200
+	| DeleteApiPlatformUsersByUserIdSessionsStatus401
+	| DeleteApiPlatformUsersByUserIdSessionsStatus403
+	| DeleteApiPlatformUsersByUserIdSessionsStatus404
+	| DeleteApiPlatformUsersByUserIdSessionsStatus422
+	| DeleteApiPlatformUsersByUserIdSessionsStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	userId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sessionId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200 = {
+	revokedCount: string | number;
+};
+
+export const DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401ErrorCodeEnum = {
+	AuthenticationRequired: "AuthenticationRequired",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+} as const;
+
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401ErrorCodeEnum =
+	(typeof DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401ErrorCodeEnum)[keyof typeof DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403ErrorCodeEnum = {
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AccountSuspended'
+		 * @type string
+		 */
+		code: DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SessionNotFound'
+		 * @type string
+		 */
+		code: "SessionNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions = {
+	body?: never;
+	path: DeleteApiPlatformUsersByUserIdSessionsBySessionIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses = {
+	"200": DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200;
+	"401": DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401;
+	"403": DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403;
+	"404": DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404;
+	"422": DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422;
+	"500": DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponse =
+	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus200
+	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus401
+	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus403
+	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404
+	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422
+	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500;
 
 /**
  * @type object

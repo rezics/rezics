@@ -51,6 +51,10 @@ export default {
 		"platform.access.read": "Consulter les attributions d’accès à la plateforme",
 		"platform.access.manage": "Gérer les attributions d’accès à la plateforme",
 		"platform.audit.read": "Consulter le journal d’audit de la plateforme",
+		"platform.user.read": "Consulter les utilisateurs de la plateforme",
+		"platform.user.status.update": "Gérer l’état des comptes utilisateurs",
+		"platform.session.read": "Consulter les sessions des utilisateurs",
+		"platform.session.revoke": "Révoquer les sessions des utilisateurs",
 		"entity.associations.override":
 			"Contourner les autorisations d’association des entités de catalogue",
 		"unit.edit": "Modifier toutes les Units",

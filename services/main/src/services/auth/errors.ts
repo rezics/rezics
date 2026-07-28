@@ -46,6 +46,22 @@ export class EmailVerificationRequired extends Data.TaggedError("EmailVerificati
 	readonly message = "Email verification required";
 }
 
+export class AccountSuspended extends Data.TaggedError("AccountSuspended") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = AccountSuspended.status;
+	readonly message = "Account is suspended";
+
+	constructor(readonly suspendedUntil: Date | null) {
+		super();
+	}
+}
+
+export class AccountClosed extends Data.TaggedError("AccountClosed") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = AccountClosed.status;
+	readonly message = "Account is closed";
+}
+
 export const AuthErrors = [
 	AuthenticationRequired,
 	ApiTokenPermissionRequired,
@@ -53,4 +69,6 @@ export const AuthErrors = [
 	InteractiveSessionRequired,
 	FreshSessionRequired,
 	EmailVerificationRequired,
+	AccountSuspended,
+	AccountClosed,
 ] as const;

@@ -109,6 +109,15 @@ describe("permission schema", () => {
 		expect(expandPlatformCapabilities(["platform.audit.read"])).toEqual([
 			"platform.audit.read",
 		]);
+		expect(expandPlatformCapabilities(["platform.user.status.update"])).toEqual([
+			"platform.user.read",
+			"platform.user.status.update",
+		]);
+		expect(expandPlatformCapabilities(["platform.session.revoke"])).toEqual([
+			"platform.user.read",
+			"platform.session.read",
+			"platform.session.revoke",
+		]);
 	});
 });
 

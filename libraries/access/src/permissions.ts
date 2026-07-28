@@ -83,6 +83,10 @@ export const PlatformCapabilityValues = [
 	"platform.access.read",
 	"platform.access.manage",
 	"platform.audit.read",
+	"platform.user.read",
+	"platform.user.status.update",
+	"platform.session.read",
+	"platform.session.revoke",
 	"entity.associations.override",
 	"unit.edit",
 	DevelopmentPreviewCapability,
@@ -126,6 +130,29 @@ export const PlatformCapabilityDefinitions = {
 		action: "read",
 		rationale:
 			"Global security audit data contains sensitive operational context and requires an independent read boundary.",
+	},
+	"platform.user.read": {
+		resource: "platform.user",
+		action: "read",
+		rationale:
+			"Sign-in identity and account-state data is sensitive and independently grantable from platform access administration.",
+	},
+	"platform.user.status.update": {
+		resource: "platform.user.status",
+		action: "update",
+		rationale:
+			"Suspending, closing, or restoring a platform account changes every authenticated product surface.",
+	},
+	"platform.session.read": {
+		resource: "platform.session",
+		action: "read",
+		rationale:
+			"Session metadata contains security-sensitive device, network, and activity context.",
+	},
+	"platform.session.revoke": {
+		resource: "platform.session",
+		action: "revoke",
+		rationale: "Revoking a session immediately invalidates an authenticated credential.",
 	},
 	"entity.associations.override": {
 		resource: "entity.associations",
@@ -234,6 +261,8 @@ export const PlatformCapabilityImplications: Partial<
 	Record<PlatformCapability, readonly PlatformCapability[]>
 > = {
 	"platform.access.manage": ["platform.access.read"],
+	"platform.user.status.update": ["platform.user.read"],
+	"platform.session.revoke": ["platform.session.read", "platform.user.read"],
 	"realm.members.manage": ["realm.members.read"],
 };
 

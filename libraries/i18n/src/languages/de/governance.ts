@@ -50,6 +50,10 @@ export default {
 		"platform.access.read": "Vergaben von Plattformzugriff anzeigen",
 		"platform.access.manage": "Vergaben von Plattformzugriff verwalten",
 		"platform.audit.read": "Plattformprotokoll anzeigen",
+		"platform.user.read": "Plattformbenutzer anzeigen",
+		"platform.user.status.update": "Kontostatus von Benutzern verwalten",
+		"platform.session.read": "Benutzersitzungen anzeigen",
+		"platform.session.revoke": "Benutzersitzungen widerrufen",
 		"entity.associations.override":
 			"Berechtigungen für Zuordnungen zu Katalogentitäten übergehen",
 		"unit.edit": "Alle Units bearbeiten",

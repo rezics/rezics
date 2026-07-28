@@ -267,6 +267,17 @@ export const RealmRuleAcknowledgementModeValues = ["explicit", "implicit_on_foll
 export const RealmMemberStateValues = ["active", "pending", "muted", "removed", "banned"] as const;
 export const RealmPinKindValues = ["pinned", "highlight"] as const;
 export const RealmUnitStatusValues = ["pending", "visible", "hidden", "removed"] as const;
+export const UserAccountStateValues = ["active", "suspended", "closed"] as const;
+export type UserAccountState = (typeof UserAccountStateValues)[number];
+export const UserAccountStateReasonValues = [
+	"security",
+	"policy_violation",
+	"compromised",
+	"user_request",
+	"legal",
+	"other",
+] as const;
+export type UserAccountStateReason = (typeof UserAccountStateReasonValues)[number];
 export const RealmUnitMutationCommandValues = [
 	"approve",
 	"hide",

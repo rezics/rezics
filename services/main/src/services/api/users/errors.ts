@@ -37,10 +37,51 @@ export class UserSelfBlockForbidden extends Data.TaggedError("UserSelfBlockForbi
 	readonly message = "You cannot block yourself";
 }
 
+export class UserAccountStateRevisionConflict extends Data.TaggedError(
+	"UserAccountStateRevisionConflict",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UserAccountStateRevisionConflict.status;
+	readonly message = "Account state changed after it was loaded";
+}
+
+export class UserSelfStatusChangeForbidden extends Data.TaggedError(
+	"UserSelfStatusChangeForbidden",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UserSelfStatusChangeForbidden.status;
+	readonly message = "You cannot suspend or close your own account";
+}
+
+export class PlatformUserManagerRequired extends Data.TaggedError("PlatformUserManagerRequired") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = PlatformUserManagerRequired.status;
+	readonly message = "At least one active platform user manager is required";
+}
+
+export class UserAccountStateExpiryInvalid extends Data.TaggedError(
+	"UserAccountStateExpiryInvalid",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = UserAccountStateExpiryInvalid.status;
+	readonly message = "Suspension expiry must be in the future";
+}
+
+export class SessionNotFound extends Data.TaggedError("SessionNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = SessionNotFound.status;
+	readonly message = "Session not found";
+}
+
 export const UserErrors = [
 	ProfileNotFound,
 	ProfileChanged,
 	PreferencesNotFound,
 	UserNotFound,
 	UserSelfBlockForbidden,
+	UserAccountStateRevisionConflict,
+	UserSelfStatusChangeForbidden,
+	PlatformUserManagerRequired,
+	UserAccountStateExpiryInvalid,
+	SessionNotFound,
 ] as const;

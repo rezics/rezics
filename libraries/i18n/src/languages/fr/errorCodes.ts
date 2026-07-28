@@ -23,6 +23,15 @@ export default {
 		"Connectez-vous de manière interactive pour gérer les identifiants.",
 	FreshSessionRequired: "Reconnectez-vous avant d’effectuer une action administrative sensible.",
 	EmailVerificationRequired: "Vérifiez votre adresse e-mail pour continuer.",
+	AccountSuspended: "Ce compte est actuellement suspendu.",
+	AccountClosed: "Ce compte est fermé.",
+	UserAccountStateRevisionConflict: "L’état du compte a changé. Rechargez puis réessayez.",
+	UserSelfStatusChangeForbidden: "Vous ne pouvez pas suspendre ni fermer votre propre compte.",
+	PlatformUserManagerRequired:
+		"La plateforme doit conserver au moins un gestionnaire d’utilisateurs actif.",
+	UserAccountStateExpiryInvalid:
+		"La fin de la suspension doit être postérieure à l’heure actuelle.",
+	SessionNotFound: "Cette session est introuvable.",
 	AccountRestricted: "Ce compte n’est pas autorisé à effectuer cette action.",
 	UnitNotFound: "Ce contenu est introuvable.",
 	UnitPermissionForbidden: "Vous ne disposez pas de l’autorisation requise pour ce contenu.",
