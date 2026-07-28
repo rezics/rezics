@@ -21,6 +21,7 @@ import {
 	unitLocalization,
 	unitLocalizationContentMetric,
 } from "../../database/schema";
+import { findPostTargetingLock } from "../../posts/targeting";
 import { recordUnitRevision } from "../../units/history";
 import {
 	createContentStructure,
@@ -754,18 +755,23 @@ export default new Elysia()
 			if (!isContentStructureNodeReadable(canEditBook, node.unitStatus, node.unitVisibility))
 				throw new ChapterNotFound();
 			const localizationLanguages = query.localizationLanguages ?? [];
-			const localizations = await database
-				.select({
-					language: unitLocalization.language,
-					position: unitLocalization.position,
-					title: unitLocalization.title,
-					content: unitLocalization.content,
-					contentStatus: unitLocalization.contentStatus,
-					updatedAt: unitLocalization.updatedAt,
-				})
-				.from(unitLocalization)
-				.where(eq(unitLocalization.unitId, params.chapterId))
-				.orderBy(unitLocalization.position, unitLocalization.language);
+			const [localizations, targetingLock] = await Promise.all([
+				database
+					.select({
+						language: unitLocalization.language,
+						position: unitLocalization.position,
+						title: unitLocalization.title,
+						content: unitLocalization.content,
+						contentStatus: unitLocalization.contentStatus,
+						updatedAt: unitLocalization.updatedAt,
+					})
+					.from(unitLocalization)
+					.where(eq(unitLocalization.unitId, params.chapterId))
+					.orderBy(unitLocalization.position, unitLocalization.language),
+				findPostTargetingLock(database, {
+					targets: [{ relation: "root", unitId: params.chapterId }],
+				}),
+			]);
 			const selected = selectReaderChapterLocalization(localizations, {
 				canEditBook,
 				exactLanguage: query.language,
@@ -839,6 +845,7 @@ export default new Elysia()
 				updatedAt: selected.updatedAt,
 				previousChapterId: index > 0 ? (chapterIds[index - 1] ?? null) : null,
 				nextChapterId: index >= 0 ? (chapterIds[index + 1] ?? null) : null,
+				capabilities: { canReply: !targetingLock },
 			};
 		},
 		{

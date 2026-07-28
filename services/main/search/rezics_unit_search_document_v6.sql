@@ -104,7 +104,7 @@ SELECT
 			'updatedAt', extract(epoch FROM unit_row.updated_at)::bigint,
 			'publishedAt', CASE WHEN unit_row.published_at IS NULL THEN NULL ELSE extract(epoch FROM unit_row.published_at)::bigint END,
 			'followerCount', coalesce(follow_stat.follower_count, 0),
-			'replyCount', CASE WHEN post_row.kind = 'post' THEN coalesce(reply_stat.undeleted_descendant_count, 0) ELSE coalesce(reply_stat.undeleted_direct_count, 0) END,
+			'replyCount', CASE WHEN post_row.kind = 'reply' THEN coalesce(reply_stat.undeleted_direct_count, 0) ELSE coalesce(reply_stat.undeleted_descendant_count, 0) END,
 			'recommendationSnapshotId', recommendation_data.snapshot_id,
 			'recommendationBest', coalesce(recommendation_data.engagement_24h, 0),
 			'engagement24h', coalesce(recommendation_data.engagement_24h, 0)

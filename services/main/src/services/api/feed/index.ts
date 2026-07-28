@@ -858,7 +858,9 @@ export async function hydrateFeedItems(
 		.where(and(inArray(unit.id, pageIds), getFeedEligibilityCondition(viewer, scope, asOf)));
 	if (!rows.length) return [];
 	const validIds = rows.map(({ id }) => id);
-	const postIds = rows.filter(({ postKind }) => postKind === "post").map(({ id }) => id);
+	const rootPostIds = rows
+		.filter(({ unitKind, postKind }) => unitKind === "post" && postKind !== "reply")
+		.map(({ id }) => id);
 	const replyIds = rows.filter(({ postKind }) => postKind === "reply").map(({ id }) => id);
 	const reviewIds = rows.filter(({ postKind }) => postKind === "review").map(({ id }) => id);
 	const collectionIds = rows
@@ -895,14 +897,14 @@ export async function hydrateFeedItems(
 		realmMemberCounts,
 		reviewScores,
 	] = await Promise.all([
-		postIds.length
+		rootPostIds.length
 			? database
 					.select({
 						id: postReplyStat.postId,
 						count: postReplyStat.visibleDescendantCount,
 					})
 					.from(postReplyStat)
-					.where(inArray(postReplyStat.postId, postIds))
+					.where(inArray(postReplyStat.postId, rootPostIds))
 			: [],
 		replyIds.length
 			? database

@@ -82795,7 +82795,8 @@
 										"status",
 										"updatedAt",
 										"previousChapterId",
-										"nextChapterId"
+										"nextChapterId",
+										"capabilities"
 									],
 									"properties": {
 										"nodeId": { "format": "uuid", "type": "string" },
@@ -83144,6 +83145,11 @@
 												{ "format": "uuid", "type": "string" },
 												{ "type": "null" }
 											]
+										},
+										"capabilities": {
+											"type": "object",
+											"required": ["canReply"],
+											"properties": { "canReply": { "type": "boolean" } }
 										}
 									}
 								}
@@ -103943,6 +103949,7 @@
 										"summary",
 										"language",
 										"body",
+										"replyCount",
 										"createdAt",
 										"updatedAt",
 										"subject",
@@ -104494,6 +104501,16 @@
 												{ "type": "null" }
 											]
 										},
+										"replyCount": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
 										"subject": {
@@ -104602,13 +104619,15 @@
 												"canEdit",
 												"canManageAttributions",
 												"canManageAccess",
-												"canManageScores"
+												"canManageScores",
+												"canReply"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAttributions": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
-												"canManageScores": { "type": "boolean" }
+												"canManageScores": { "type": "boolean" },
+												"canReply": { "type": "boolean" }
 											}
 										}
 									}
@@ -110277,6 +110296,7 @@
 												"summary",
 												"language",
 												"body",
+												"replyCount",
 												"createdAt",
 												"updatedAt",
 												"subject",
@@ -110853,6 +110873,16 @@
 														{ "type": "null" }
 													]
 												},
+												"replyCount": {
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
+												},
 												"createdAt": {
 													"format": "date-time",
 													"type": "string"
@@ -110976,7 +111006,8 @@
 														"canEdit",
 														"canManageAttributions",
 														"canManageAccess",
-														"canManageScores"
+														"canManageScores",
+														"canReply"
 													],
 													"properties": {
 														"canEdit": { "type": "boolean" },
@@ -110984,7 +111015,8 @@
 															"type": "boolean"
 														},
 														"canManageAccess": { "type": "boolean" },
-														"canManageScores": { "type": "boolean" }
+														"canManageScores": { "type": "boolean" },
+														"canReply": { "type": "boolean" }
 													}
 												}
 											}

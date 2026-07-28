@@ -78,6 +78,11 @@ export function PostDetailPage({
 				<div className="grid min-w-0 items-start gap-10">
 					<div className="flex min-w-0 flex-col gap-8">
 						<ReviewPostDetail review={post} />
+						<ReplyPostThread
+							canReply={post.capabilities.canReply}
+							realmId={realmId}
+							rootPostId={post.id}
+						/>
 						<RelatedPostRecommendations postId={post.id} />
 					</div>
 				</div>
@@ -141,7 +146,7 @@ export function PostDetailPage({
 						replyCount={Number(post.replyCount)}
 						variant="thread"
 					/>
-					{selectedRealm && post.postKind !== "wiki" ? (
+					{selectedRealm ? (
 						<div className="grid gap-3 border-border-weak border-y py-4 lg:hidden">
 							<PostRealmContextSelector
 								onValueChange={changeRealm}
@@ -155,17 +160,15 @@ export function PostDetailPage({
 							/>
 						</div>
 					) : null}
-					{post.postKind !== "wiki" ? (
-						<ReplyPostThread
-							canReply={post.capabilities.canReply}
-							parentPostId={post.postKind === "reply" ? post.id : undefined}
-							realmId={realmId}
-							rootPostId={post.rootPostId ?? post.id}
-						/>
-					) : null}
+					<ReplyPostThread
+						canReply={post.capabilities.canReply}
+						parentPostId={post.postKind === "reply" ? post.id : undefined}
+						realmId={realmId}
+						rootPostId={post.rootPostId ?? post.id}
+					/>
 					<RelatedPostRecommendations postId={post.id} />
 				</div>
-				{selectedRealm && post.postKind !== "wiki" ? (
+				{selectedRealm ? (
 					<aside className="sticky top-20 hidden min-w-0 flex-col gap-3 lg:flex">
 						<PostRealmContextSelector
 							onValueChange={changeRealm}

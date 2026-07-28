@@ -73,11 +73,13 @@ export function ReplyPostThread({
 	parentPostId,
 	realmId,
 	canReply,
+	signInDestination,
 }: {
 	rootPostId: string;
 	parentPostId?: string;
 	realmId?: string;
 	canReply: boolean;
+	signInDestination?: string;
 }) {
 	const { t } = useTranslation(["actions", "posts", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
@@ -137,10 +139,13 @@ export function ReplyPostThread({
 			) : (
 				<SignInButton
 					className="h-11 w-full justify-start rounded-xl text-muted-foreground"
-					destination={postHref(
-						parentPostId ?? rootPostId,
-						realmId ? { kind: "realm", realmId } : undefined,
-					)}
+					destination={
+						signInDestination ??
+						postHref(
+							parentPostId ?? rootPostId,
+							realmId ? { kind: "realm", realmId } : undefined,
+						)
+					}
 					variant="outline"
 				>
 					{t.posts.signInToReply}

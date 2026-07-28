@@ -936,6 +936,7 @@ export const ReviewDetailResponse = t.Object({
 	summary: NullableText,
 	language: ContentLanguage,
 	body: t.Nullable(PortableTextDocument),
+	replyCount: t.Integer(),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	subject: t.Nullable(t.Object(PostSubjectPresentationFields)),
@@ -945,6 +946,7 @@ export const ReviewDetailResponse = t.Object({
 		canManageAttributions: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageScores: t.Boolean(),
+		canReply: t.Boolean(),
 	}),
 });
 export const PostDetailResponse = t.Union([
@@ -1067,6 +1069,7 @@ export const ChapterDetailResponse = t.Object({
 	updatedAt: DateTime,
 	previousChapterId: t.Nullable(Uuid),
 	nextChapterId: t.Nullable(Uuid),
+	capabilities: t.Object({ canReply: t.Boolean() }),
 });
 export const ReplyResponse = t.Object({
 	id: Uuid,

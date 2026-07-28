@@ -48,6 +48,7 @@ import { ContentLanguageControl } from "@/features/content-languages/components/
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { ReplyPostThread } from "@/features/posts/reply-thread";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -520,6 +521,13 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								<span />
 							)}
 						</footer>
+						<div className="mt-10 border-t pt-8">
+							<ReplyPostThread
+								canReply={query.data.capabilities.canReply}
+								rootPostId={chapterId}
+								signInDestination={`/units/book/${bookId}/read/${chapterId}#replies`}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>

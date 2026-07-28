@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { DateTime } from ".";
 import {
 	toPortableTextResponse,
+	ChapterDetailResponse,
 	ContentMetricResponse,
 	FeedNonReviewPostItemResponse,
 	FeedReviewItemResponse,
@@ -133,13 +134,16 @@ describe("API response values", () => {
 		expect(ReviewDetailResponse.required).toContain("postKind");
 		expect(ReviewDetailResponse.required).toContain("subject");
 		expect(ReviewDetailResponse.required).toContain("scores");
+		expect(ReviewDetailResponse.required).toContain("replyCount");
 		expect(ReviewDetailResponse.properties.capabilities.required).toEqual([
 			"canEdit",
 			"canManageAttributions",
 			"canManageAccess",
 			"canManageScores",
+			"canReply",
 		]);
 		expect(WikiPostDetailResponse.properties.postKind.const).toBe("wiki");
+		expect(ChapterDetailResponse.properties.capabilities.required).toEqual(["canReply"]);
 		expect(ReactionSummaryResponse.required).toContain("viewerReaction");
 	});
 

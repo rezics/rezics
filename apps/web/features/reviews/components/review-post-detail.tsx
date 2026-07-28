@@ -60,6 +60,7 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 	return (
 		<>
 			<PostDetailArticle
+				commentsHref="#replies"
 				engagementOverflow={
 					editHref || review.capabilities.canEdit ? (
 						<>
@@ -130,6 +131,7 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 					createdAt: review.createdAt,
 					scores: review.scores,
 				}}
+				replyCount={Number(review.replyCount)}
 				variant="thread"
 			/>
 			<RequestFailure error={remove.error} fallback={t.ui.retryLater} />

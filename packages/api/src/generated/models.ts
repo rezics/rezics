@@ -64051,6 +64051,15 @@ export type GetApiChaptersByChapterIdStatus200 = {
 	updatedAt: string;
 	previousChapterId: (string | null) | null;
 	nextChapterId: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canReply: boolean;
+	};
 };
 
 export const GetApiChaptersByChapterIdStatus404ErrorCodeEnum = {
@@ -76105,6 +76114,7 @@ export type GetApiReviewsByReviewIdStatus200 = {
 				)[];
 		  } | null)
 		| null;
+	replyCount: string | number;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -76189,6 +76199,10 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		 * @type boolean
 		 */
 		canManageScores: boolean;
+		/**
+		 * @type boolean
+		 */
+		canReply: boolean;
 	};
 };
 
@@ -81154,6 +81168,7 @@ export type GetApiPostsByPostIdStatus200 =
 						)[];
 				  } | null)
 				| null;
+			replyCount: string | number;
 			/**
 			 * @description
 			 * Format: `date-time`
@@ -81238,6 +81253,10 @@ export type GetApiPostsByPostIdStatus200 =
 				 * @type boolean
 				 */
 				canManageScores: boolean;
+				/**
+				 * @type boolean
+				 */
+				canReply: boolean;
 			};
 	  }
 	| {

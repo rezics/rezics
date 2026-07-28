@@ -12,6 +12,7 @@ import {
 } from "../../units/localization";
 import {
 	post,
+	postReplyStat,
 	postScore,
 	realmUnit,
 	recommendationUnitStat,
@@ -31,6 +32,7 @@ import { ensureScoreContextParticipation, resolveScoreContext } from "../../scor
 import {
 	ensurePostMountTargetingAllowed,
 	ensureSubjectPostTargetingAllowed,
+	findPostTargetingLock,
 } from "../../posts/targeting";
 import { getPostSubjectPresentation } from "../../posts/presentation";
 import { selectPostScores } from "../../posts/scores";
@@ -459,11 +461,13 @@ export default new Elysia()
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 							body: unitLocalization.content,
+							replyCount: sql<unknown>`coalesce(${postReplyStat.undeletedDescendantCount}, 0)`,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
+						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
 						.innerJoin(
 							unitLocalization,
 							and(
@@ -504,6 +508,8 @@ export default new Elysia()
 						canManageAttributions,
 						accessDecision,
 						canManageScores,
+						replyCreationDecision,
+						targetingLock,
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([review.id], localizationLanguages),
 						selectPostScores(review.id).then((items) =>
@@ -518,6 +524,13 @@ export default new Elysia()
 						authorization.unit.canUpdate(params.reviewId, ["credit-attributions"]),
 						authorization.unit.decide(params.reviewId, "unit.access.manage"),
 						authorization.unit.canUpdate(params.reviewId, ["relations", "scores"]),
+						query.realmId
+							? authorization.unit.decide(query.realmId, "realm.post.replies.create")
+							: Promise.resolve({ allowed: true } as const),
+						findPostTargetingLock(database, {
+							targets: [{ relation: "root", unitId: review.id }],
+							...(query.realmId ? { realmId: query.realmId } : {}),
+						}),
 					]);
 					return {
 						...review,
@@ -526,6 +539,7 @@ export default new Elysia()
 						attributions: attributionMap.get(review.id) ?? [],
 						targetId,
 						body: review.body === null ? null : toPortableTextResponse(review.body),
+						replyCount: toSafeInteger(review.replyCount, "reply count"),
 						subject,
 						scores,
 						capabilities: {
@@ -533,6 +547,7 @@ export default new Elysia()
 							canManageAttributions,
 							canManageAccess: accessDecision.allowed,
 							canManageScores,
+							canReply: replyCreationDecision.allowed && !targetingLock,
 						},
 					};
 				},
