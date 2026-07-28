@@ -30,7 +30,9 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
+import { ForbiddenPage } from "@/features/status-pages/forbidden-page";
 import { useTranslation } from "@/i18n/client";
+import { getAccessibleConsoleSectionIds } from "../model/console-access";
 import type { ConsoleSectionId } from "../model/console-section";
 import {
 	ConsoleOverviewHref,
@@ -123,22 +125,25 @@ function ConsoleNavigation({
 
 function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode }) {
 	const pathname = usePathname();
-	const { t } = useTranslation(["console", "errors"]);
+	const { t } = useTranslation(["console"]);
 	const me = useGetApiUsersMe();
 	if (me.isPending) return <QueryPending />;
 	if (me.isError || !me.data)
 		return <QueryFailure error={me.error} retry={() => void me.refetch()} />;
 
 	const capabilities = new Set(me.data.platformCapabilities);
-	const canReadUsers = capabilities.has("platform.user.read");
+	const accessibleSectionIds = new Set(
+		getAccessibleConsoleSectionIds(me.data.platformCapabilities),
+	);
+	const canReadUsers = accessibleSectionIds.has("users");
 	const canManageUserStatus = capabilities.has("platform.user.status.update");
 	const canReadSessions = capabilities.has("platform.session.read");
 	const canRevokeSessions = capabilities.has("platform.session.revoke");
 	const canReadAccess = capabilities.has("platform.access.read");
 	const canManageAccess = capabilities.has("platform.access.manage");
-	const canModerate = capabilities.has("platform.moderate");
-	const canReadAudit = capabilities.has("platform.audit.read");
-	const canManageTokenPolicies = capabilities.has("platform.api_token_policy.manage");
+	const canModerate = accessibleSectionIds.has("moderation");
+	const canReadAudit = accessibleSectionIds.has("audit");
+	const canManageTokenPolicies = accessibleSectionIds.has("token-policies");
 	const labels = t.console.sections;
 	const sections = [
 		...(canReadUsers
@@ -187,12 +192,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 			: []),
 	] satisfies readonly ConsoleNavigationSection[];
 
-	if (sections.length === 0)
-		return (
-			<p className="mx-auto max-w-4xl px-4 py-10 text-destructive text-sm">
-				{t.errors.forbidden}
-			</p>
-		);
+	if (sections.length === 0) return <ForbiddenPage />;
 
 	const currentSectionId = parseConsoleSection(pathname);
 	const userWorkspace = currentSectionId === "users";

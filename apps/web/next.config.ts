@@ -1,6 +1,9 @@
 import type { NextConfig } from "vinext";
 
 const nextConfig = {
+	experimental: {
+		authInterrupts: true,
+	},
 	async headers() {
 		return [
 			{

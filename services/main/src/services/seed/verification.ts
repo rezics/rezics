@@ -7,7 +7,9 @@ import {
 	moderationCase,
 	notification,
 	apiTokenPolicyBinding,
+	platformCapabilityGrant,
 	postScore,
+	profile,
 	profileRealmTagSubscription,
 	profileUnitTag,
 	recommendationSnapshot,
@@ -138,6 +140,7 @@ export async function verifySeedDatabase(
 		coverageContractResults,
 		notificationsResult,
 		moderationCasesResult,
+		demoPlatformGrantResult,
 	] = await Promise.all([
 		database
 			.select({ value: count() })
@@ -194,12 +197,22 @@ export async function verifySeedDatabase(
 		),
 		database.select({ value: count() }).from(notification),
 		database.select({ value: count() }).from(moderationCase),
+		database
+			.select({ value: count() })
+			.from(platformCapabilityGrant)
+			.innerJoin(profile, eq(platformCapabilityGrant.profileId, profile.id))
+			.innerJoin(users, eq(profile.authUserId, users.id))
+			.where(eq(users.email, DemoCredentials.email)),
 	]);
 	const seededUnits = seededUnitsResult[0]?.value ?? 0;
 	const missingContentMetrics = missingContentMetricsResult[0]?.value ?? 0;
 	const activeRecommendationSnapshots = activeSnapshotsResult[0]?.value ?? 0;
 	requirePositive(seededUnits, "Seed service produced no non-Bootstrap Units");
 	requirePositive(demoUsers.length, "Seed service did not create the demo identity");
+	requireZero(
+		demoPlatformGrantResult[0]?.value ?? 0,
+		"Seed demo identity must not receive platform capability grants",
+	);
 	for (const [kind, fixture] of [
 		["book", SeedFixtureTitles.book],
 		["media", SeedFixtureTitles.media],

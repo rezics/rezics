@@ -52,6 +52,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { profileHref } from "@/features/profiles/profile-route";
 import { AccessInvitationsHref } from "@/features/notifications/routing/notification-routes";
+import { hasConsoleAccess } from "@/features/console/model/console-access";
 import { useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 import type { ThemePreference } from "../hooks/use-theme-preference";
@@ -111,11 +112,7 @@ function useUserMenuModel({
 	const name = profile?.name?.trim() || fallbackName.trim() || t.ui.unnamed;
 	const initial = Array.from(name)[0]?.toLocaleUpperCase(locale);
 	const publicProfileHref = profile ? profileHref(profile) : "/settings/profile";
-	const canAccessConsole =
-		profile?.platformCapabilities.some(
-			(capability) =>
-				capability === "platform.access.read" || capability === "platform.audit.read",
-		) ?? false;
+	const canAccessConsole = profile ? hasConsoleAccess(profile.platformCapabilities) : false;
 
 	const signOut = async () => {
 		await authClient.signOut();

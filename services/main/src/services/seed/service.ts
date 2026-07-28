@@ -1946,39 +1946,25 @@ async function seedStructure(
 			.set({ postTargetingLocked: true })
 			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.unitId)));
 
+	const platformGrantProfiles = profiles.slice(1);
 	await writeBatches(
 		Array.from({ length: SeedPlan.capabilityGrants }, (_, index) => {
 			const createdAt = data.pastDate(365);
 			const revoked = index % 13 === 0;
 			return {
-				profileId: itemAt(profiles, index * 7).id,
+				profileId: itemAt(platformGrantProfiles, index * 7).id,
 				capability: itemAt(PlatformCapabilityValues, index),
-				grantedByProfileId: itemAt(profiles, index * 11 + 1).id,
+				grantedByProfileId: itemAt(platformGrantProfiles, index * 11 + 1).id,
 				expiresAt: index % 5 === 0 ? data.futureDate(365) : null,
 				revokedAt: revoked ? new Date(createdAt.getTime() + 86_400_000) : null,
-				revokedByProfileId: revoked ? itemAt(profiles, index * 13 + 2).id : null,
+				revokedByProfileId: revoked
+					? itemAt(platformGrantProfiles, index * 13 + 2).id
+					: null,
 				createdAt,
 				updatedAt: createdAt,
 			};
 		}),
 		(batch) => tx.insert(platformCapabilityGrant).values(batch),
-	);
-	const platformAdministrator = itemAt(profiles, 0);
-	await tx.insert(platformCapabilityGrant).values(
-		(
-			[
-				"platform.api_token_policy.manage",
-				"platform.access.manage",
-				"platform.audit.read",
-				"unit.slug.manage",
-				"unit.slug.namespace.manage",
-				"unit.slug.redirect.release",
-			] as const
-		).map((capability) => ({
-			profileId: platformAdministrator.id,
-			capability,
-			grantedByProfileId: platformAdministrator.id,
-		})),
 	);
 	await writeBatches(
 		catalog.zones.flatMap((zoneUnit, zoneIndex) =>
