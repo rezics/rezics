@@ -19,7 +19,11 @@ import {
 	DialogBody,
 	DialogContent,
 	DialogHeader,
+	Field,
+	FieldLabel,
 	Input,
+	NativeSelect,
+	NativeSelectOption,
 	PermissionMatrix,
 	type PermissionMatrixLabels,
 	type PermissionMatrixResource,
@@ -55,6 +59,14 @@ const AuthenticatedPermissions = new Set<Permission>([
 	"entity.association.subject.request",
 	"entity.association.subject.direct",
 ]);
+const AccessScopeOptions = [
+	{ id: "root", scope: [] },
+	{ id: "creditAttributions", scope: ["credit-attributions"] },
+	{ id: "subjectAssociations", scope: ["subject-associations"] },
+	{ id: "creditTargets", scope: ["associations", "credit"] },
+	{ id: "subjectTargets", scope: ["associations", "subject"] },
+] as const;
+type AccessScopeId = (typeof AccessScopeOptions)[number]["id"];
 
 function subjectKey(subject: Subject) {
 	switch (subject.kind) {
@@ -83,9 +95,47 @@ function displayLabel(subject: AccessSubject, authenticatedLabel: string) {
 	return subject.label ?? subjectKey(subject.subject);
 }
 
-export function UnitAccessManager({ unitId }: { unitId: string }) {
+export function UnitAccessManager({
+	unitId,
+	includeEntityTargetScopes = false,
+}: {
+	unitId: string;
+	includeEntityTargetScopes?: boolean;
+}) {
 	const { t } = useTranslation(["governance"]);
-	const query = useGetApiGovernanceUnitByUnitIdAccess({ path: { unitId } });
+	const [scopeId, setScopeId] = useState<AccessScopeId>("root");
+	const scope = AccessScopeOptions.find((candidate) => candidate.id === scopeId)?.scope ?? [];
+	const scopeOptions = includeEntityTargetScopes
+		? AccessScopeOptions
+		: AccessScopeOptions.filter(
+				(option) => option.id !== "creditTargets" && option.id !== "subjectTargets",
+			);
+	return (
+		<div className="grid gap-6">
+			<Field>
+				<FieldLabel>{t.governance.access.scopeSelectorLabel}</FieldLabel>
+				<NativeSelect
+					onChange={(event) => setScopeId(event.currentTarget.value as AccessScopeId)}
+					value={scopeId}
+				>
+					{scopeOptions.map((option) => (
+						<NativeSelectOption key={option.id} value={option.id}>
+							{t.governance.access.scopeOptions[option.id]}
+						</NativeSelectOption>
+					))}
+				</NativeSelect>
+			</Field>
+			<ScopedUnitAccessManager key={scopeId} scope={scope} unitId={unitId} />
+		</div>
+	);
+}
+
+function ScopedUnitAccessManager({ unitId, scope }: { unitId: string; scope: readonly string[] }) {
+	const { t } = useTranslation(["governance"]);
+	const query = useGetApiGovernanceUnitByUnitIdAccess({
+		path: { unitId },
+		query: { scope: [...scope] },
+	});
 
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
@@ -114,13 +164,14 @@ export function UnitAccessManager({ unitId }: { unitId: string }) {
 						permissions={query.data.permissions.filter((permission) =>
 							AuthenticatedPermissions.has(permission),
 						)}
+						scope={scope}
 						subject={authenticated}
 						unitId={unitId}
 					/>
 				</CardContent>
 			</Card>
 
-			<SubjectAccessTable snapshot={query.data} unitId={unitId} />
+			<SubjectAccessTable scope={scope} snapshot={query.data} unitId={unitId} />
 		</div>
 	);
 }
@@ -175,10 +226,12 @@ function usePermissionMatrix(
 function InlineSubjectEditor({
 	unitId,
 	permissions,
+	scope,
 	subject,
 }: {
 	unitId: string;
 	permissions: readonly Permission[];
+	scope: readonly string[];
 	subject: AccessSubject;
 }) {
 	const { t } = useTranslation(["governance"]);
@@ -199,11 +252,14 @@ function InlineSubjectEditor({
 						value.has(matrixValue(permission, "grant")),
 					),
 					restrictions: [],
-					scope: [],
+					scope: [...scope],
 				},
 			});
 			queryClient.setQueryData(
-				getApiGovernanceUnitByUnitIdAccessQueryKey({ path: { unitId } }),
+				getApiGovernanceUnitByUnitIdAccessQueryKey({
+					path: { unitId },
+					query: { scope: [...scope] },
+				}),
 				snapshot,
 			);
 		} catch {
@@ -230,7 +286,15 @@ function InlineSubjectEditor({
 	);
 }
 
-function SubjectAccessTable({ unitId, snapshot }: { unitId: string; snapshot: AccessSnapshot }) {
+function SubjectAccessTable({
+	unitId,
+	scope,
+	snapshot,
+}: {
+	unitId: string;
+	scope: readonly string[];
+	snapshot: AccessSnapshot;
+}) {
 	const { t } = useTranslation(["governance"]);
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase());
@@ -415,6 +479,7 @@ function SubjectAccessTable({ unitId, snapshot }: { unitId: string; snapshot: Ac
 						if (!open) setSelected(null);
 					}}
 					permissions={snapshot.permissions}
+					scope={scope}
 					subject={selected}
 					unitId={unitId}
 				/>
@@ -536,11 +601,13 @@ function AddSubjectDialog({
 function SubjectAccessSheet({
 	unitId,
 	permissions,
+	scope,
 	subject,
 	onOpenChange,
 }: {
 	unitId: string;
 	permissions: readonly Permission[];
+	scope: readonly string[];
 	subject: AccessSubject;
 	onOpenChange: (open: boolean) => void;
 }) {
@@ -566,11 +633,14 @@ function SubjectAccessSheet({
 					restrictions: permissions.filter((permission) =>
 						value.has(matrixValue(permission, "restrict")),
 					),
-					scope: [],
+					scope: [...scope],
 				},
 			});
 			queryClient.setQueryData(
-				getApiGovernanceUnitByUnitIdAccessQueryKey({ path: { unitId } }),
+				getApiGovernanceUnitByUnitIdAccessQueryKey({
+					path: { unitId },
+					query: { scope: [...scope] },
+				}),
 				snapshot,
 			);
 			onOpenChange(false);

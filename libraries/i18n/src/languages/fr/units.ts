@@ -9,6 +9,23 @@ const { forms: metadataTerms } = frTerminology.metadata;
 
 export default {
 	types: { book: "Livre", software: "Logiciel", media: "Média", series: "Série" },
+	creation: {
+		modeLabel: "Mode de création",
+		ownedWork: "Mon œuvre",
+		ownedWorkDescription: "Votre profil possède et administre cette œuvre.",
+		publicEntry: "Entrée publique",
+		publicEntryDescription:
+			"Propriété de la communauté et modifiable par toute personne connectée ; la personne qui la crée ne reçoit aucun droit particulier.",
+		publisherEntity: "Entité éditrice",
+		publisherOwnedDescription:
+			"Une entité éditrice est obligatoire pour votre œuvre. Une demande de consentement est envoyée si l’association directe est limitée.",
+		publisherPublicDescription:
+			"L’entité éditrice est facultative. Si un consentement est requis, l’entrée publique envoie une demande, pas une invitation.",
+		versionRole: "Type de version",
+		mainVersion: "Version principale",
+		variantVersion: "Variante",
+		mainVersionEntity: "Version principale associée",
+	},
 	attributionRoles: {
 		author: "Auteur",
 		"co-author": "Coauteur",

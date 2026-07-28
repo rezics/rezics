@@ -7595,6 +7595,10 @@
 														{ "const": "license", "type": "string" },
 														{ "const": "tag", "type": "string" },
 														{ "const": "credit", "type": "string" },
+														{
+															"const": "publisher-profile",
+															"type": "string"
+														},
 														{ "const": "realm", "type": "string" },
 														{ "const": "zone", "type": "string" },
 														{ "const": "subject", "type": "string" },
@@ -7717,6 +7721,10 @@
 														{ "const": "license", "type": "string" },
 														{ "const": "tag", "type": "string" },
 														{ "const": "credit", "type": "string" },
+														{
+															"const": "publisher-profile",
+															"type": "string"
+														},
 														{ "const": "realm", "type": "string" },
 														{ "const": "zone", "type": "string" },
 														{ "const": "subject", "type": "string" },
@@ -7842,6 +7850,10 @@
 														{ "const": "license", "type": "string" },
 														{ "const": "tag", "type": "string" },
 														{ "const": "credit", "type": "string" },
+														{
+															"const": "publisher-profile",
+															"type": "string"
+														},
 														{ "const": "realm", "type": "string" },
 														{ "const": "zone", "type": "string" },
 														{ "const": "subject", "type": "string" },
@@ -7993,6 +8005,10 @@
 																},
 																{
 																	"const": "credit",
+																	"type": "string"
+																},
+																{
+																	"const": "publisher-profile",
 																	"type": "string"
 																},
 																{
@@ -8189,6 +8205,10 @@
 																	"type": "string"
 																},
 																{
+																	"const": "publisher-profile",
+																	"type": "string"
+																},
+																{
 																	"const": "realm",
 																	"type": "string"
 																},
@@ -8365,6 +8385,10 @@
 														{ "const": "license", "type": "string" },
 														{ "const": "tag", "type": "string" },
 														{ "const": "credit", "type": "string" },
+														{
+															"const": "publisher-profile",
+															"type": "string"
+														},
 														{ "const": "realm", "type": "string" },
 														{ "const": "zone", "type": "string" },
 														{ "const": "subject", "type": "string" },
@@ -8567,6 +8591,7 @@
 										"license",
 										"tag",
 										"credit",
+										"publisher-profile",
 										"realm",
 										"zone",
 										"subject",
@@ -8925,6 +8950,7 @@
 										"license",
 										"tag",
 										"credit",
+										"publisher-profile",
 										"realm",
 										"zone",
 										"subject",
@@ -57860,411 +57886,1013 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["localization"],
-								"properties": {
-									"localization": {
+								"anyOf": [
+									{
 										"additionalProperties": false,
 										"type": "object",
-										"required": ["language", "title"],
+										"required": [
+											"catalogMode",
+											"publisher",
+											"version",
+											"localization"
+										],
 										"properties": {
-											"language": {
-												"type": "string",
-												"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
-											},
-											"title": {
-												"minLength": 1,
-												"maxLength": 500,
+											"catalogMode": {
+												"const": "owned_work",
 												"type": "string"
 											},
-											"summary": { "maxLength": 2000, "type": "string" },
-											"description": {
+											"publisher": {
 												"additionalProperties": false,
-												"$id": "PortableTextDocument",
 												"type": "object",
-												"required": ["_type", "_key", "content"],
+												"required": ["entityId"],
 												"properties": {
-													"_type": {
-														"const": "portable-text",
+													"entityId": {
+														"format": "uuid",
 														"type": "string"
-													},
-													"_key": {
-														"pattern": "^[0-9a-f]{12}$",
-														"$id": "BlockKey",
-														"type": "string"
-													},
-													"content": {
-														"$id": "PortableText",
-														"type": "array",
-														"items": {
-															"$id": "PortableTextBlock",
-															"anyOf": [
-																{
-																	"additionalProperties": {
-																		"$id": "#/components/schemas/JsonValue",
-																		"anyOf": [
-																			{ "type": "null" },
-																			{ "type": "boolean" },
-																			{ "type": "number" },
-																			{ "type": "string" },
-																			{
-																				"type": "array",
-																				"items": {
-																					"$ref": "#/components/schemas/JsonValue"
-																				}
-																			},
-																			{
-																				"type": "object",
-																				"patternProperties": {
-																					"^(.*)$": {
-																						"$ref": "#/components/schemas/JsonValue"
-																					}
-																				}
-																			}
-																		]
-																	},
-																	"$id": "PortableTextTextBlock",
-																	"type": "object",
-																	"required": [
-																		"_key",
-																		"_type",
-																		"children"
-																	],
-																	"properties": {
-																		"_key": {
-																			"type": "string"
-																		},
-																		"_type": {
-																			"const": "block",
-																			"type": "string"
-																		},
-																		"children": {
-																			"type": "array",
-																			"items": {
-																				"$id": "PortableTextChild",
-																				"anyOf": [
-																					{
-																						"additionalProperties": false,
-																						"$id": "PortableTextSpan",
-																						"type": "object",
-																						"required": [
-																							"_key",
-																							"_type",
-																							"text"
-																						],
-																						"properties": {
-																							"_key": {
-																								"type": "string"
-																							},
-																							"_type": {
-																								"const": "span",
-																								"type": "string"
-																							},
-																							"text": {
-																								"type": "string"
-																							},
-																							"marks": {
-																								"type": "array",
-																								"items": {
-																									"type": "string"
-																								}
-																							}
-																						}
-																					},
-																					{
-																						"additionalProperties": false,
-																						"$id": "PortableTextUnitMention",
-																						"type": "object",
-																						"required": [
-																							"_key",
-																							"_type",
-																							"unitId"
-																						],
-																						"properties": {
-																							"_key": {
-																								"type": "string"
-																							},
-																							"_type": {
-																								"const": "unit-mention",
-																								"type": "string"
-																							},
-																							"unitId": {
-																								"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-																								"type": "string"
-																							}
-																						}
-																					}
-																				]
-																			}
-																		},
-																		"markDefs": {
-																			"type": "array",
-																			"items": {
-																				"additionalProperties": {
-																					"$id": "#/components/schemas/JsonValue",
-																					"anyOf": [
-																						{
-																							"type": "null"
-																						},
-																						{
-																							"type": "boolean"
-																						},
-																						{
-																							"type": "number"
-																						},
-																						{
-																							"type": "string"
-																						},
-																						{
-																							"type": "array",
-																							"items": {
-																								"$ref": "#/components/schemas/JsonValue"
-																							}
-																						},
-																						{
-																							"type": "object",
-																							"patternProperties": {
-																								"^(.*)$": {
-																									"$ref": "#/components/schemas/JsonValue"
-																								}
-																							}
-																						}
-																					]
-																				},
-																				"$id": "PortableTextObject",
-																				"type": "object",
-																				"required": [
-																					"_key",
-																					"_type"
-																				],
-																				"properties": {
-																					"_key": {
-																						"type": "string"
-																					},
-																					"_type": {
-																						"type": "string"
-																					}
-																				}
-																			}
-																		},
-																		"listItem": {
-																			"type": "string"
-																		},
-																		"style": {
-																			"type": "string"
-																		},
-																		"level": {
-																			"minimum": 1,
-																			"type": "integer"
-																		}
-																	}
-																},
-																{
-																	"additionalProperties": false,
-																	"$id": "PortableTextImage",
-																	"type": "object",
-																	"required": [
-																		"_key",
-																		"_type",
-																		"assetId"
-																	],
-																	"properties": {
-																		"_key": {
-																			"type": "string"
-																		},
-																		"_type": {
-																			"const": "image",
-																			"type": "string"
-																		},
-																		"assetId": {
-																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-																			"type": "string"
-																		},
-																		"alt": { "type": "string" },
-																		"caption": {
-																			"type": "string"
-																		}
-																	}
-																},
-																{
-																	"additionalProperties": {
-																		"$id": "#/components/schemas/JsonValue",
-																		"anyOf": [
-																			{ "type": "null" },
-																			{ "type": "boolean" },
-																			{ "type": "number" },
-																			{ "type": "string" },
-																			{
-																				"type": "array",
-																				"items": {
-																					"$ref": "#/components/schemas/JsonValue"
-																				}
-																			},
-																			{
-																				"type": "object",
-																				"patternProperties": {
-																					"^(.*)$": {
-																						"$ref": "#/components/schemas/JsonValue"
-																					}
-																				}
-																			}
-																		]
-																	},
-																	"type": "object",
-																	"required": ["_key", "_type"],
-																	"properties": {
-																		"_key": {
-																			"type": "string"
-																		},
-																		"_type": {
-																			"pattern": "^(?!(?:block|image)$).+",
-																			"type": "string"
-																		}
-																	}
-																}
-															]
-														}
 													}
 												}
 											},
-											"avatar": {
-												"nullable": true,
+											"version": {
 												"anyOf": [
 													{
-														"anyOf": [
-															{
-																"additionalProperties": false,
-																"type": "object",
-																"required": ["type", "image"],
-																"properties": {
-																	"type": {
-																		"const": "image",
-																		"type": "string"
-																	},
-																	"image": {
-																		"type": "object",
-																		"required": ["assetId"],
-																		"properties": {
-																			"assetId": {
-																				"format": "uuid",
-																				"type": "string"
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["kind"],
+														"properties": {
+															"kind": {
+																"const": "main",
+																"type": "string"
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["kind", "mainUnitId"],
+														"properties": {
+															"kind": {
+																"const": "variant",
+																"type": "string"
+															},
+															"mainUnitId": {
+																"format": "uuid",
+																"type": "string"
+															}
+														}
+													}
+												]
+											},
+											"localization": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["language", "title"],
+												"properties": {
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": {
+														"minLength": 1,
+														"maxLength": 500,
+														"type": "string"
+													},
+													"summary": {
+														"maxLength": 2000,
+														"type": "string"
+													},
+													"description": {
+														"additionalProperties": false,
+														"$id": "PortableTextDocument",
+														"type": "object",
+														"required": ["_type", "_key", "content"],
+														"properties": {
+															"_type": {
+																"const": "portable-text",
+																"type": "string"
+															},
+															"_key": {
+																"pattern": "^[0-9a-f]{12}$",
+																"$id": "BlockKey",
+																"type": "string"
+															},
+															"content": {
+																"$id": "PortableText",
+																"type": "array",
+																"items": {
+																	"$id": "PortableTextBlock",
+																	"anyOf": [
+																		{
+																			"additionalProperties": {
+																				"$id": "#/components/schemas/JsonValue",
+																				"anyOf": [
+																					{
+																						"type": "null"
+																					},
+																					{
+																						"type": "boolean"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "array",
+																						"items": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					},
+																					{
+																						"type": "object",
+																						"patternProperties": {
+																							"^(.*)$": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"$id": "PortableTextTextBlock",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"children"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "block",
+																					"type": "string"
+																				},
+																				"children": {
+																					"type": "array",
+																					"items": {
+																						"$id": "PortableTextChild",
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"$id": "PortableTextSpan",
+																								"type": "object",
+																								"required": [
+																									"_key",
+																									"_type",
+																									"text"
+																								],
+																								"properties": {
+																									"_key": {
+																										"type": "string"
+																									},
+																									"_type": {
+																										"const": "span",
+																										"type": "string"
+																									},
+																									"text": {
+																										"type": "string"
+																									},
+																									"marks": {
+																										"type": "array",
+																										"items": {
+																											"type": "string"
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"$id": "PortableTextUnitMention",
+																								"type": "object",
+																								"required": [
+																									"_key",
+																									"_type",
+																									"unitId"
+																								],
+																								"properties": {
+																									"_key": {
+																										"type": "string"
+																									},
+																									"_type": {
+																										"const": "unit-mention",
+																										"type": "string"
+																									},
+																									"unitId": {
+																										"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																										"type": "string"
+																									}
+																								}
+																							}
+																						]
+																					}
+																				},
+																				"markDefs": {
+																					"type": "array",
+																					"items": {
+																						"additionalProperties": {
+																							"$id": "#/components/schemas/JsonValue",
+																							"anyOf": [
+																								{
+																									"type": "null"
+																								},
+																								{
+																									"type": "boolean"
+																								},
+																								{
+																									"type": "number"
+																								},
+																								{
+																									"type": "string"
+																								},
+																								{
+																									"type": "array",
+																									"items": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								},
+																								{
+																									"type": "object",
+																									"patternProperties": {
+																										"^(.*)$": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									}
+																								}
+																							]
+																						},
+																						"$id": "PortableTextObject",
+																						"type": "object",
+																						"required": [
+																							"_key",
+																							"_type"
+																						],
+																						"properties": {
+																							"_key": {
+																								"type": "string"
+																							},
+																							"_type": {
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				"listItem": {
+																					"type": "string"
+																				},
+																				"style": {
+																					"type": "string"
+																				},
+																				"level": {
+																					"minimum": 1,
+																					"type": "integer"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": {
+																				"$id": "#/components/schemas/JsonValue",
+																				"anyOf": [
+																					{
+																						"type": "null"
+																					},
+																					{
+																						"type": "boolean"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "array",
+																						"items": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					},
+																					{
+																						"type": "object",
+																						"patternProperties": {
+																							"^(.*)$": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"pattern": "^(?!(?:block|image)$).+",
+																					"type": "string"
+																				}
 																			}
 																		}
-																	}
+																	]
 																}
-															},
+															}
+														}
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
 															{
-																"additionalProperties": false,
-																"type": "object",
-																"required": ["type", "emoji"],
-																"properties": {
-																	"type": {
-																		"const": "emoji",
-																		"type": "string"
-																	},
-																	"emoji": {
-																		"format": "single-emoji-grapheme",
-																		"maxLength": 64,
-																		"type": "string"
-																	}
-																}
-															},
-															{
-																"additionalProperties": false,
-																"type": "object",
-																"required": ["type", "icon"],
-																"properties": {
-																	"type": {
-																		"const": "icon",
-																		"type": "string"
-																	},
-																	"icon": {
+																"anyOf": [
+																	{
 																		"additionalProperties": false,
 																		"type": "object",
 																		"required": [
-																			"provider",
-																			"prefix",
-																			"name"
+																			"type",
+																			"image"
 																		],
 																		"properties": {
-																			"provider": {
-																				"const": "font-awesome",
+																			"type": {
+																				"const": "image",
 																				"type": "string"
 																			},
-																			"prefix": {
-																				"type": "string",
-																				"enum": [
-																					"fas",
-																					"fab"
-																				]
+																			"image": {
+																				"type": "object",
+																				"required": [
+																					"assetId"
+																				],
+																				"properties": {
+																					"assetId": {
+																						"format": "uuid",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"emoji"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "emoji",
+																				"type": "string"
 																			},
-																			"name": {
-																				"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-																				"maxLength": 128,
+																			"emoji": {
+																				"format": "single-emoji-grapheme",
+																				"maxLength": 64,
 																				"type": "string"
 																			}
 																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"icon"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "icon",
+																				"type": "string"
+																			},
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"provider",
+																					"prefix",
+																					"name"
+																				],
+																				"properties": {
+																					"provider": {
+																						"const": "font-awesome",
+																						"type": "string"
+																					},
+																					"prefix": {
+																						"type": "string",
+																						"enum": [
+																							"fas",
+																							"fab"
+																						]
+																					},
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
 																	}
-																}
-															}
+																]
+															},
+															{ "type": "null" }
 														]
 													},
-													{ "type": "null" }
+													"bannerAssetId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"coverAssetId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											},
+											"visibility": {
+												"anyOf": [
+													{ "const": "public", "type": "string" },
+													{ "const": "unlisted", "type": "string" },
+													{ "const": "private", "type": "string" }
 												]
 											},
-											"bannerAssetId": {
-												"nullable": true,
+											"contentRating": {
+												"type": "string",
+												"enum": ["general", "r15", "r18", "r18g"]
+											},
+											"aiDisclosure": {
 												"anyOf": [
-													{ "format": "uuid", "type": "string" },
-													{ "type": "null" }
+													{ "const": "unknown", "type": "string" },
+													{ "const": "none", "type": "string" },
+													{ "const": "ai_assisted", "type": "string" },
+													{ "const": "ai_originated", "type": "string" },
+													{
+														"const": "machine_generated",
+														"type": "string"
+													}
 												]
 											},
-											"coverAssetId": {
+											"license": {
 												"nullable": true,
 												"anyOf": [
-													{ "format": "uuid", "type": "string" },
+													{
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0"
+														]
+													},
 													{ "type": "null" }
 												]
 											}
 										}
 									},
-									"visibility": {
-										"type": "string",
-										"enum": ["public", "unlisted", "private"]
-									},
-									"contentRating": {
-										"type": "string",
-										"enum": ["general", "r15", "r18", "r18g"]
-									},
-									"aiDisclosure": {
-										"type": "string",
-										"enum": [
-											"unknown",
-											"none",
-											"ai_assisted",
-											"ai_originated",
-											"machine_generated"
-										]
-									},
-									"license": {
-										"nullable": true,
-										"anyOf": [
-											{
-												"type": "string",
-												"enum": [
-													"cc-by-nc-sa-4.0",
-													"cc-by-sa-4.0",
-													"all-rights-reserved",
-													"cc-by-nc-4.0",
-													"cc-by-4.0",
-													"cc0-1.0"
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["catalogMode", "version", "localization"],
+										"properties": {
+											"catalogMode": {
+												"const": "public_entry",
+												"type": "string"
+											},
+											"publisher": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["entityId"],
+												"properties": {
+													"entityId": {
+														"format": "uuid",
+														"type": "string"
+													}
+												}
+											},
+											"version": {
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["kind"],
+														"properties": {
+															"kind": {
+																"const": "main",
+																"type": "string"
+															}
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["kind", "mainUnitId"],
+														"properties": {
+															"kind": {
+																"const": "variant",
+																"type": "string"
+															},
+															"mainUnitId": {
+																"format": "uuid",
+																"type": "string"
+															}
+														}
+													}
 												]
 											},
-											{ "type": "null" }
-										]
+											"localization": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["language", "title"],
+												"properties": {
+													"language": {
+														"type": "string",
+														"enum": [
+															"zh",
+															"en",
+															"ja",
+															"ko",
+															"de",
+															"fr",
+															"es"
+														]
+													},
+													"title": {
+														"minLength": 1,
+														"maxLength": 500,
+														"type": "string"
+													},
+													"summary": {
+														"maxLength": 2000,
+														"type": "string"
+													},
+													"description": {
+														"additionalProperties": false,
+														"$id": "PortableTextDocument",
+														"type": "object",
+														"required": ["_type", "_key", "content"],
+														"properties": {
+															"_type": {
+																"const": "portable-text",
+																"type": "string"
+															},
+															"_key": {
+																"pattern": "^[0-9a-f]{12}$",
+																"$id": "BlockKey",
+																"type": "string"
+															},
+															"content": {
+																"$id": "PortableText",
+																"type": "array",
+																"items": {
+																	"$id": "PortableTextBlock",
+																	"anyOf": [
+																		{
+																			"additionalProperties": {
+																				"$id": "#/components/schemas/JsonValue",
+																				"anyOf": [
+																					{
+																						"type": "null"
+																					},
+																					{
+																						"type": "boolean"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "array",
+																						"items": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					},
+																					{
+																						"type": "object",
+																						"patternProperties": {
+																							"^(.*)$": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"$id": "PortableTextTextBlock",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"children"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "block",
+																					"type": "string"
+																				},
+																				"children": {
+																					"type": "array",
+																					"items": {
+																						"$id": "PortableTextChild",
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"$id": "PortableTextSpan",
+																								"type": "object",
+																								"required": [
+																									"_key",
+																									"_type",
+																									"text"
+																								],
+																								"properties": {
+																									"_key": {
+																										"type": "string"
+																									},
+																									"_type": {
+																										"const": "span",
+																										"type": "string"
+																									},
+																									"text": {
+																										"type": "string"
+																									},
+																									"marks": {
+																										"type": "array",
+																										"items": {
+																											"type": "string"
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"$id": "PortableTextUnitMention",
+																								"type": "object",
+																								"required": [
+																									"_key",
+																									"_type",
+																									"unitId"
+																								],
+																								"properties": {
+																									"_key": {
+																										"type": "string"
+																									},
+																									"_type": {
+																										"const": "unit-mention",
+																										"type": "string"
+																									},
+																									"unitId": {
+																										"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																										"type": "string"
+																									}
+																								}
+																							}
+																						]
+																					}
+																				},
+																				"markDefs": {
+																					"type": "array",
+																					"items": {
+																						"additionalProperties": {
+																							"$id": "#/components/schemas/JsonValue",
+																							"anyOf": [
+																								{
+																									"type": "null"
+																								},
+																								{
+																									"type": "boolean"
+																								},
+																								{
+																									"type": "number"
+																								},
+																								{
+																									"type": "string"
+																								},
+																								{
+																									"type": "array",
+																									"items": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								},
+																								{
+																									"type": "object",
+																									"patternProperties": {
+																										"^(.*)$": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									}
+																								}
+																							]
+																						},
+																						"$id": "PortableTextObject",
+																						"type": "object",
+																						"required": [
+																							"_key",
+																							"_type"
+																						],
+																						"properties": {
+																							"_key": {
+																								"type": "string"
+																							},
+																							"_type": {
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				"listItem": {
+																					"type": "string"
+																				},
+																				"style": {
+																					"type": "string"
+																				},
+																				"level": {
+																					"minimum": 1,
+																					"type": "integer"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": {
+																				"$id": "#/components/schemas/JsonValue",
+																				"anyOf": [
+																					{
+																						"type": "null"
+																					},
+																					{
+																						"type": "boolean"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "array",
+																						"items": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					},
+																					{
+																						"type": "object",
+																						"patternProperties": {
+																							"^(.*)$": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"pattern": "^(?!(?:block|image)$).+",
+																					"type": "string"
+																				}
+																			}
+																		}
+																	]
+																}
+															}
+														}
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"image"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"image": {
+																				"type": "object",
+																				"required": [
+																					"assetId"
+																				],
+																				"properties": {
+																					"assetId": {
+																						"format": "uuid",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"emoji"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "emoji",
+																				"type": "string"
+																			},
+																			"emoji": {
+																				"format": "single-emoji-grapheme",
+																				"maxLength": 64,
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"icon"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "icon",
+																				"type": "string"
+																			},
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"provider",
+																					"prefix",
+																					"name"
+																				],
+																				"properties": {
+																					"provider": {
+																						"const": "font-awesome",
+																						"type": "string"
+																					},
+																					"prefix": {
+																						"type": "string",
+																						"enum": [
+																							"fas",
+																							"fab"
+																						]
+																					},
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"bannerAssetId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"coverAssetId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											},
+											"visibility": {
+												"anyOf": [
+													{ "const": "public", "type": "string" },
+													{ "const": "unlisted", "type": "string" },
+													{ "const": "private", "type": "string" }
+												]
+											},
+											"contentRating": {
+												"type": "string",
+												"enum": ["general", "r15", "r18", "r18g"]
+											},
+											"aiDisclosure": {
+												"anyOf": [
+													{ "const": "unknown", "type": "string" },
+													{ "const": "none", "type": "string" },
+													{ "const": "ai_assisted", "type": "string" },
+													{ "const": "ai_originated", "type": "string" },
+													{
+														"const": "machine_generated",
+														"type": "string"
+													}
+												]
+											},
+											"license": {
+												"nullable": true,
+												"anyOf": [
+													{
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0"
+														]
+													},
+													{ "type": "null" }
+												]
+											}
+										}
 									}
-								}
+								]
 							}
 						}
 					},
@@ -60114,7 +60742,8 @@
 													"enum": [
 														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
-														"AccountRestricted"
+														"AccountRestricted",
+														"EntityAssociationRestricted"
 													]
 												},
 												"message": { "type": "string" },
@@ -60142,7 +60771,44 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "ImageAssetNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"ImageAssetNotFound",
+														"EntityEntryNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitVariantKindMismatch",
+													"type": "string",
+													"enum": [
+														"UnitVariantKindMismatch",
+														"UnitVariantTargetIsVariant",
+														"UnitVariantSourceHasVariants",
+														"UnitVariantChanged",
+														"UnitVariantMainUnavailable"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -64175,7 +64841,11 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "ImageAssetNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"ImageAssetNotFound",
+														"EntityEntryNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -70726,7 +71396,11 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "ImageAssetNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"ImageAssetNotFound",
+														"EntityEntryNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -72561,6 +73235,12 @@
 						"schema": { "maxLength": 64, "type": "string" }
 					},
 					{
+						"name": "query",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
+					},
+					{
 						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
@@ -72815,8 +73495,12 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["localization"],
+								"required": ["catalogMode", "localization"],
 								"properties": {
+									"catalogMode": {
+										"type": "string",
+										"enum": ["owned_work", "public_entry"]
+									},
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
 									"localization": {
 										"additionalProperties": false,
@@ -73337,6 +74021,7 @@
 										"createdAt",
 										"updatedAt",
 										"localizations",
+										"attributions",
 										"owner",
 										"capabilities",
 										"creditAttributions",
@@ -73960,6 +74645,256 @@
 												}
 											}
 										},
+										"attributions": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"role",
+													"position",
+													"creditedUnit"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"creditedUnit": {
+														"type": "object",
+														"required": [
+															"id",
+															"kind",
+															"language",
+															"slugAddress",
+															"title",
+															"summary",
+															"avatar"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"kind": {
+																"default": "slug_namespace",
+																"type": "string",
+																"enum": [
+																	"slug_namespace",
+																	"profile",
+																	"book",
+																	"software",
+																	"media",
+																	"release",
+																	"entity",
+																	"label",
+																	"tag",
+																	"structure",
+																	"series",
+																	"zone",
+																	"zone_page",
+																	"collection",
+																	"post",
+																	"poll",
+																	"realm",
+																	"realm_rule"
+																]
+															},
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															"slugAddress": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"slug",
+																			"scopeUnitId",
+																			"canonicalPath"
+																		],
+																		"properties": {
+																			"slug": {
+																				"minLength": 1,
+																				"maxLength": 63,
+																				"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																				"type": "string"
+																			},
+																			"scopeUnitId": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"canonicalPath": {
+																				"minItems": 2,
+																				"maxItems": 3,
+																				"type": "array",
+																				"items": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				}
+																			}
+																		}
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"title": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"summary": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"avatar": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"image"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"image": {
+																						"type": "object",
+																						"required": [
+																							"id",
+																							"url"
+																						],
+																						"properties": {
+																							"id": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"url": {
+																								"type": "string"
+																							}
+																						}
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"emoji"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "emoji",
+																						"type": "string"
+																					},
+																					"emoji": {
+																						"maxLength": 64,
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"icon"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "icon",
+																						"type": "string"
+																					},
+																					"icon": {
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"provider",
+																							"prefix",
+																							"name"
+																						],
+																						"properties": {
+																							"provider": {
+																								"const": "font-awesome",
+																								"type": "string"
+																							},
+																							"prefix": {
+																								"type": "string",
+																								"enum": [
+																									"fas",
+																									"fab"
+																								]
+																							},
+																							"name": {
+																								"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																								"maxLength": 128,
+																								"type": "string"
+																							}
+																						}
+																					}
+																				}
+																			}
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
+													}
+												}
+											}
+										},
 										"owner": {
 											"nullable": true,
 											"anyOf": [
@@ -74175,12 +75110,14 @@
 											"type": "object",
 											"required": [
 												"canEdit",
+												"canEditCreditAttributions",
 												"canManageAccess",
 												"canManageCreditAssociations",
 												"canManageSubjectAssociations"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canEditCreditAttributions": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageCreditAssociations": {
 													"type": "boolean"
@@ -76455,12 +77392,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -77024,12 +77966,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -84986,6 +85933,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -85176,6 +86127,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -85363,6 +86318,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -85575,6 +86534,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -85777,6 +86740,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -85984,6 +86951,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -86478,6 +87449,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -86668,6 +87643,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -86855,6 +87834,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -87067,6 +88050,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -87269,6 +88256,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -87476,6 +88467,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -88296,6 +89291,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -88486,6 +89485,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -88673,6 +89676,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -88885,6 +89892,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -89087,6 +90098,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -89294,6 +90309,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -94607,6 +95626,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -94797,6 +95820,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -94984,6 +96011,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -95196,6 +96227,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -95398,6 +96433,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -95605,6 +96644,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -96708,6 +97751,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -96898,6 +97945,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -97085,6 +98136,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -97297,6 +98352,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -97499,6 +98558,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -97706,6 +98769,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -98200,6 +99267,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -98390,6 +99461,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -98577,6 +99652,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -98789,6 +99868,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -98991,6 +100074,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -99198,6 +100285,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -108134,6 +109225,431 @@
 				},
 				"operationId": "postApiPosts",
 				"x-rezics-policy-operation-id": "postApiPosts"
+			}
+		},
+		"/api/posts/wiki": {
+			"post": {
+				"summary": "Create Wiki",
+				"tags": ["Posts"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["accessMode", "title", "body", "language"],
+								"properties": {
+									"accessMode": {
+										"type": "string",
+										"enum": ["public_entry", "restricted"]
+									},
+									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
+									"body": {
+										"additionalProperties": false,
+										"$id": "PortableTextDocument",
+										"type": "object",
+										"required": ["_type", "_key", "content"],
+										"properties": {
+											"_type": { "const": "portable-text", "type": "string" },
+											"_key": {
+												"pattern": "^[0-9a-f]{12}$",
+												"$id": "BlockKey",
+												"type": "string"
+											},
+											"content": {
+												"$id": "PortableText",
+												"type": "array",
+												"items": {
+													"$id": "PortableTextBlock",
+													"anyOf": [
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"$id": "PortableTextTextBlock",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"children"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "block",
+																	"type": "string"
+																},
+																"children": {
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextChild",
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextSpan",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"text"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "span",
+																						"type": "string"
+																					},
+																					"text": {
+																						"type": "string"
+																					},
+																					"marks": {
+																						"type": "array",
+																						"items": {
+																							"type": "string"
+																						}
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextUnitMention",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"unitId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "unit-mention",
+																						"type": "string"
+																					},
+																					"unitId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																},
+																"markDefs": {
+																	"type": "array",
+																	"items": {
+																		"additionalProperties": {
+																			"$id": "#/components/schemas/JsonValue",
+																			"anyOf": [
+																				{ "type": "null" },
+																				{
+																					"type": "boolean"
+																				},
+																				{
+																					"type": "number"
+																				},
+																				{
+																					"type": "string"
+																				},
+																				{
+																					"type": "array",
+																					"items": {
+																						"$ref": "#/components/schemas/JsonValue"
+																					}
+																				},
+																				{
+																					"type": "object",
+																					"patternProperties": {
+																						"^(.*)$": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"$id": "PortableTextObject",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"type": "string"
+																			}
+																		}
+																	}
+																},
+																"listItem": { "type": "string" },
+																"style": { "type": "string" },
+																"level": {
+																	"minimum": 1,
+																	"type": "integer"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"type": "object",
+															"required": ["_key", "_type"],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"pattern": "^(?!(?:block|image)$).+",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										}
+									},
+									"language": {
+										"type": "string",
+										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+									},
+									"realmId": { "format": "uuid", "type": "string" },
+									"subjectId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["id"],
+									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "EntityEntryNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmRulesAcceptanceRequired",
+													"type": "string",
+													"enum": [
+														"RealmRulesAcceptanceRequired",
+														"PostTargetingLocked"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiPostsWiki",
+				"x-rezics-policy-operation-id": "postApiPostsWiki"
 			}
 		},
 		"/api/posts/{postId}": {
@@ -126763,6 +128279,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -126953,6 +128473,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -127140,6 +128664,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -127352,6 +128880,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -127554,6 +129086,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -127761,6 +129297,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -128104,6 +129644,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -128294,6 +129838,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -128481,6 +130029,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -128693,6 +130245,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -128895,6 +130451,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -129102,6 +130662,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -130048,6 +131612,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -130238,6 +131806,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -130425,6 +131997,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -130637,6 +132213,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -130839,6 +132419,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -131046,6 +132630,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -131389,6 +132977,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -131579,6 +133171,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -131766,6 +133362,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -131978,6 +133578,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -132180,6 +133784,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -132387,6 +133995,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -137460,6 +139072,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -137650,6 +139266,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -137837,6 +139457,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -138049,6 +139673,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -138251,6 +139879,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -138458,6 +140090,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -138801,6 +140437,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -138991,6 +140631,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -139178,6 +140822,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -139390,6 +141038,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -139592,6 +141244,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -139799,6 +141455,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -140695,6 +142355,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -140885,6 +142549,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -141072,6 +142740,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -141284,6 +142956,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -141486,6 +143162,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -141693,6 +143373,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -142036,6 +143720,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -142226,6 +143914,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -142413,6 +144105,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -142625,6 +144321,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -142827,6 +144527,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -143034,6 +144738,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -148195,6 +149903,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -148385,6 +150097,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -148572,6 +150288,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -148784,6 +150504,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -148986,6 +150710,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -149193,6 +150921,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -149536,6 +151268,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -149726,6 +151462,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -149913,6 +151653,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -150125,6 +151869,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -150327,6 +152075,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -150534,6 +152286,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -151447,6 +153203,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -151637,6 +153397,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -151824,6 +153588,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -152036,6 +153804,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -152238,6 +154010,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -152445,6 +154221,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -152788,6 +154568,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -152978,6 +154762,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -153165,6 +154953,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -153377,6 +155169,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -153579,6 +155375,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -153786,6 +155586,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -154693,6 +156497,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -154883,6 +156691,10 @@
 																					"type": "string"
 																				},
 																				{
+																					"const": "publisher-profile",
+																					"type": "string"
+																				},
+																				{
 																					"const": "realm",
 																					"type": "string"
 																				},
@@ -155070,6 +156882,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -155282,6 +157098,10 @@
 																							"type": "string"
 																						},
 																						{
+																							"const": "publisher-profile",
+																							"type": "string"
+																						},
+																						{
 																							"const": "realm",
 																							"type": "string"
 																						},
@@ -155484,6 +157304,10 @@
 																						},
 																						{
 																							"const": "credit",
+																							"type": "string"
+																						},
+																						{
+																							"const": "publisher-profile",
 																							"type": "string"
 																						},
 																						{
@@ -155691,6 +157515,10 @@
 																				},
 																				{
 																					"const": "credit",
+																					"type": "string"
+																				},
+																				{
+																					"const": "publisher-profile",
 																					"type": "string"
 																				},
 																				{
@@ -156034,6 +157862,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -156224,6 +158056,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -156411,6 +158247,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -156623,6 +158463,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -156825,6 +158669,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -157032,6 +158880,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -162410,6 +164262,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -162600,6 +164456,10 @@
 																						"type": "string"
 																					},
 																					{
+																						"const": "publisher-profile",
+																						"type": "string"
+																					},
+																					{
 																						"const": "realm",
 																						"type": "string"
 																					},
@@ -162787,6 +164647,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -162999,6 +164863,10 @@
 																								"type": "string"
 																							},
 																							{
+																								"const": "publisher-profile",
+																								"type": "string"
+																							},
+																							{
 																								"const": "realm",
 																								"type": "string"
 																							},
@@ -163201,6 +165069,10 @@
 																							},
 																							{
 																								"const": "credit",
+																								"type": "string"
+																							},
+																							{
+																								"const": "publisher-profile",
 																								"type": "string"
 																							},
 																							{
@@ -163408,6 +165280,10 @@
 																					},
 																					{
 																						"const": "credit",
+																						"type": "string"
+																					},
+																					{
+																						"const": "publisher-profile",
 																						"type": "string"
 																					},
 																					{
@@ -163715,6 +165591,7 @@
 														"license",
 														"tag",
 														"credit",
+														"publisher-profile",
 														"realm",
 														"zone",
 														"subject",
@@ -163900,6 +165777,10 @@
 																								},
 																								{
 																									"const": "credit",
+																									"type": "string"
+																								},
+																								{
+																									"const": "publisher-profile",
 																									"type": "string"
 																								},
 																								{
@@ -164093,6 +165974,10 @@
 																									"type": "string"
 																								},
 																								{
+																									"const": "publisher-profile",
+																									"type": "string"
+																								},
+																								{
 																									"const": "realm",
 																									"type": "string"
 																								},
@@ -164280,6 +166165,10 @@
 																								},
 																								{
 																									"const": "credit",
+																									"type": "string"
+																								},
+																								{
+																									"const": "publisher-profile",
 																									"type": "string"
 																								},
 																								{
@@ -164492,6 +166381,10 @@
 																											"type": "string"
 																										},
 																										{
+																											"const": "publisher-profile",
+																											"type": "string"
+																										},
+																										{
 																											"const": "realm",
 																											"type": "string"
 																										},
@@ -164694,6 +166587,10 @@
 																										},
 																										{
 																											"const": "credit",
+																											"type": "string"
+																										},
+																										{
+																											"const": "publisher-profile",
 																											"type": "string"
 																										},
 																										{
@@ -164901,6 +166798,10 @@
 																								},
 																								{
 																									"const": "credit",
+																									"type": "string"
+																								},
+																								{
+																									"const": "publisher-profile",
 																									"type": "string"
 																								},
 																								{
@@ -165219,6 +167120,7 @@
 																	"license",
 																	"tag",
 																	"credit",
+																	"publisher-profile",
 																	"realm",
 																	"zone",
 																	"subject",
@@ -165536,6 +167438,10 @@
 																									"type": "string"
 																								},
 																								{
+																									"const": "publisher-profile",
+																									"type": "string"
+																								},
+																								{
 																									"const": "realm",
 																									"type": "string"
 																								},
@@ -165726,6 +167632,10 @@
 																									"type": "string"
 																								},
 																								{
+																									"const": "publisher-profile",
+																									"type": "string"
+																								},
+																								{
 																									"const": "realm",
 																									"type": "string"
 																								},
@@ -165913,6 +167823,10 @@
 																								},
 																								{
 																									"const": "credit",
+																									"type": "string"
+																								},
+																								{
+																									"const": "publisher-profile",
 																									"type": "string"
 																								},
 																								{
@@ -166125,6 +168039,10 @@
 																											"type": "string"
 																										},
 																										{
+																											"const": "publisher-profile",
+																											"type": "string"
+																										},
+																										{
 																											"const": "realm",
 																											"type": "string"
 																										},
@@ -166327,6 +168245,10 @@
 																										},
 																										{
 																											"const": "credit",
+																											"type": "string"
+																										},
+																										{
+																											"const": "publisher-profile",
 																											"type": "string"
 																										},
 																										{
@@ -166534,6 +168456,10 @@
 																								},
 																								{
 																									"const": "credit",
+																									"type": "string"
+																								},
+																								{
+																									"const": "publisher-profile",
 																									"type": "string"
 																								},
 																								{
@@ -166852,6 +168778,7 @@
 																	"license",
 																	"tag",
 																	"credit",
+																	"publisher-profile",
 																	"realm",
 																	"zone",
 																	"subject",

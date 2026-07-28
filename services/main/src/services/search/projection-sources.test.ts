@@ -7,7 +7,7 @@ import { CurrentProjectionSources, HistoryProjectionSources } from "./projection
 
 const migrationDirectory = fileURLToPath(new URL("../database/migrations", import.meta.url));
 const currentEnrichment = fileURLToPath(
-	new URL("../../../search/rezics_unit_search_document_v6.sql", import.meta.url),
+	new URL("../../../search/rezics_unit_search_document_v7.sql", import.meta.url),
 );
 
 describe("search projection source registry", () => {
@@ -42,5 +42,19 @@ describe("search projection source registry", () => {
 		expect(sql).toContain("scope = array[]::text[]");
 		expect(sql).toContain("FROM public.unit_ownership");
 		expect(sql).not.toContain("FROM public.unit_access_binding");
+	});
+
+	it("invalidates works when an Entity publisher chain changes", async () => {
+		const sql = await readFile(currentEnrichment, "utf8");
+		expect(sql).toContain("AS publisher_data");
+		expect(sql).toContain("entity_profile.source_unit_id = publisher_entity.id");
+		const migrations = (
+			await Promise.all(
+				(await readdir(migrationDirectory))
+					.filter((name) => name.endsWith(".sql"))
+					.map((name) => readFile(`${migrationDirectory}/${name}`, "utf8")),
+			)
+		).join("\n");
+		expect(migrations).toContain("search_touch_publisher_chain_statement");
 	});
 });

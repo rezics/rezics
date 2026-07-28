@@ -13,7 +13,7 @@ import {
 	LocalizationInput,
 	Uuid,
 } from "../schema";
-import { CatalogUnitType, VariantUnitType } from "../units/schema";
+import { CatalogEntryMode, CatalogUnitType, VariantUnitType } from "../units/schema";
 
 export const CreateCatalogUnitBody = t.Object(
 	{
@@ -24,9 +24,20 @@ export const CreateCatalogUnitBody = t.Object(
 );
 export type CreateCatalogUnitBody = Static<typeof CreateCatalogUnitBody>;
 
+export const CreateEntityBody = t.Object(
+	{
+		catalogMode: CatalogEntryMode,
+		kind: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
+		localization: LocalizationInput,
+	},
+	{ additionalProperties: false },
+);
+export type CreateEntityBody = Static<typeof CreateEntityBody>;
+
 export const ListEntityEntriesQuery = t.Object(
 	{
 		kind: t.Optional(t.String({ maxLength: 64 })),
+		query: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
 		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	},
@@ -79,6 +90,22 @@ export type AddUnitLinkBody = Static<typeof AddUnitLinkBody>;
 
 export const UnitUnitParams = t.Object({ type: CatalogUnitType, unitId: Uuid });
 export type UnitUnitParams = Static<typeof UnitUnitParams>;
+
+export const AttributionUnitType = t.Union([CatalogUnitType, t.Literal("entity")]);
+export type AttributionUnitType = Static<typeof AttributionUnitType>;
+
+export const AttributionUnitParams = t.Object({
+	type: AttributionUnitType,
+	unitId: Uuid,
+});
+export type AttributionUnitParams = Static<typeof AttributionUnitParams>;
+
+export const AttributionAssociationParams = t.Object({
+	type: AttributionUnitType,
+	unitId: Uuid,
+	associationId: Uuid,
+});
+export type AttributionAssociationParams = Static<typeof AttributionAssociationParams>;
 
 export const UnitAssociationParams = t.Object({
 	type: CatalogUnitType,

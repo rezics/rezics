@@ -11,7 +11,10 @@ import type { ContentLanguage } from "@rezics/i18n";
 import { parseNullablePublicationLicenseId, type PublicationLicenseId } from "@rezics/license";
 
 import type { Authorization } from "../authorization";
-import { createCommunityCatalogAccess } from "../authorization/unit/ownership";
+import {
+	createProfileOwnedUnitAccess,
+	createPublicEditableUnitAccess,
+} from "../authorization/unit/ownership";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
@@ -31,6 +34,7 @@ import {
 	book,
 	catalogUnitContentLicense,
 	contentStructure,
+	creditAttribution,
 	entity,
 	software,
 	media,
@@ -47,7 +51,13 @@ import {
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
-import { UnitChanged, UnitNotFound } from "./errors";
+import {
+	UnitChanged,
+	UnitNotFound,
+	UnitVariantKindMismatch,
+	UnitVariantMainUnavailable,
+	UnitVariantTargetIsVariant,
+} from "./errors";
 import { recordUnitRevision } from "./history";
 import { insertUnit } from "./create";
 import { transitionUnitStatus } from "./status";
@@ -56,17 +66,31 @@ import {
 	getAttributionSummariesWithStatisticsByUnitIds,
 } from "./attribution";
 import { getUnitVariantContext } from "./variants";
-import { ensureUnitVariantLifecycle } from "./variant-policy";
+import { ensureUnitVariantLifecycle, isDiscoverableVariantUnit } from "./variant-policy";
 import { presentAvatar } from "./avatar";
 import { listPublishedBookContentMetrics } from "../content-metrics/service";
 import { getAssociationContextPostsByAssociationIds } from "./association-context";
+import { createAssociationRequestInTransaction } from "./association-proposals";
+import { resolvePublisherAttributionCreationMode } from "./attribution-authorization";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
 type StoredUnitLocalization = typeof unitLocalization.$inferSelect;
+const PublisherRequestLifetimeMs = 30 * 24 * 60 * 60 * 1_000;
 
-export interface CreateUnitInput {
+type CreateUnitAccessInput =
+	| {
+			readonly catalogMode: "owned_work";
+			readonly publisher: { readonly entityId: string };
+	  }
+	| {
+			readonly catalogMode: "public_entry";
+			readonly publisher?: { readonly entityId: string };
+	  };
+
+export type CreateUnitInput = CreateUnitAccessInput & {
+	version: { readonly kind: "main" } | { readonly kind: "variant"; readonly mainUnitId: string };
 	localization: {
 		language: ContentLanguage;
 		title: string;
@@ -80,7 +104,7 @@ export interface CreateUnitInput {
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: PublicationLicenseId | null;
-}
+};
 
 export interface UpdateUnitInput {
 	updatedAt: string;
@@ -183,10 +207,62 @@ export async function createUnit(
 			unitId: created.id,
 			...toUnitLocalizationStorage(input.localization),
 		});
-		await createCommunityCatalogAccess(tx, created.id, ownerId, [
-			"unit.update",
-			"unit.status.update",
-		]);
+		if (input.catalogMode === "owned_work")
+			await createProfileOwnedUnitAccess(tx, created.id, ownerId);
+		else
+			await createPublicEditableUnitAccess(tx, created.id, [
+				"unit.update",
+				"unit.status.update",
+			]);
+		if (input.version.kind === "variant") {
+			const [main] = await tx
+				.select({
+					id: unit.id,
+					kind: unit.kind,
+					status: unit.status,
+					visibility: unit.visibility,
+					moderationStatus: unit.moderationStatus,
+					deletedAt: unit.deletedAt,
+					parentMainUnitId: unitVariant.mainUnitId,
+				})
+				.from(unit)
+				.leftJoin(unitVariant, eq(unitVariant.variantUnitId, unit.id))
+				.where(eq(unit.id, input.version.mainUnitId))
+				.limit(1);
+			if (!main || main.deletedAt) throw new UnitVariantMainUnavailable();
+			if (main.kind !== kind) throw new UnitVariantKindMismatch();
+			if (main.parentMainUnitId) throw new UnitVariantTargetIsVariant();
+			const decision = await authorization.unit.decideInTransaction(tx, main.id, "unit.read");
+			if (!decision.allowed) throw new UnitVariantMainUnavailable();
+			if (isDiscoverableVariantUnit(created) && !isDiscoverableVariantUnit(main))
+				throw new UnitVariantMainUnavailable();
+			await tx.insert(unitVariant).values({
+				variantUnitId: created.id,
+				mainUnitId: main.id,
+				unitKind: kind,
+			});
+		}
+		if (input.publisher) {
+			const publisherMode = await resolvePublisherAttributionCreationMode(
+				authorization,
+				tx,
+				input.publisher.entityId,
+			);
+			if (publisherMode === "direct")
+				await tx.insert(creditAttribution).values({
+					sourceUnitId: created.id,
+					creditedUnitId: input.publisher.entityId,
+					role: "publisher",
+				});
+			else
+				await createAssociationRequestInTransaction(tx, authorization, ownerId, {
+					sourceUnitId: created.id,
+					targetUnitId: input.publisher.entityId,
+					kind: "credit",
+					role: "publisher",
+					expiresAt: new Date(Date.now() + PublisherRequestLifetimeMs),
+				});
+		}
 		const bookStructureSnapshot = bookStructure
 			? ContentStructureSnapshotSchema.parse({
 					version: 1,

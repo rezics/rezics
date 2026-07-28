@@ -153,6 +153,7 @@ export default {
 		license: "Licencia",
 		tag: "Etiqueta",
 		credit: "Crédito",
+		"publisher-profile": "Perfil de la entidad editorial",
 		realm: realmTerms.label,
 		"realm-tag-vote": `Votación de etiquetas del ${realmTerms.inline}`,
 		zone: zoneTerms.label,

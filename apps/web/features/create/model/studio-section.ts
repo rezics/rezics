@@ -33,13 +33,13 @@ export const StudioSectionCreateHrefs = {
 	realm: "/realms/new",
 	zone: "/zones/new",
 	post: "/posts/new",
+	wiki: "/wiki/new",
 	collection: "/collections/new",
 	review: "/reviews/new",
 	poll: "/polls/new",
 } as const satisfies Partial<Record<StudioSectionId, string>>;
 
 export function studioSectionCreateHref(sectionId: StudioSectionId): string | undefined {
-	if (sectionId === "wiki") return undefined;
 	return StudioSectionCreateHrefs[sectionId];
 }
 

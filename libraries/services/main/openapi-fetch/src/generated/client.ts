@@ -481,6 +481,8 @@ import type {
 	GetApiPostsResponses,
 	PostApiPostsOptions,
 	PostApiPostsResponses,
+	PostApiPostsWikiOptions,
+	PostApiPostsWikiResponses,
 	GetApiPostsByPostIdOptions,
 	GetApiPostsByPostIdResponses,
 	PatchApiPostsByPostIdOptions,
@@ -5361,6 +5363,26 @@ export function postApiPosts<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<PostApiPostsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create Wiki
+ * {@link /api/posts/wiki}
+ */
+export function postApiPostsWiki<ThrowOnError extends boolean = true>(
+	options: Options<PostApiPostsWikiOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiPostsWikiResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/posts/wiki",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiPostsWikiResponses, ThrowOnError>>;
 }
 
 /**

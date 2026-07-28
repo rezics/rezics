@@ -797,9 +797,11 @@ export const EntityDetailResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	localizations: t.Array(LocalizationResponse),
+	attributions: t.Array(UnitAttributionSummaryResponse),
 	owner: t.Nullable(UnitSummaryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
+		canEditCreditAttributions: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageCreditAssociations: t.Boolean(),
 		canManageSubjectAssociations: t.Boolean(),

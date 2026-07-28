@@ -27,7 +27,7 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v6_20260725",
+		indexUid: "rezics_units_v7_20260728",
 		projectionVersion: 6,
 		settingsFingerprint: "a".repeat(64),
 	}),

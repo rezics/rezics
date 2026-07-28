@@ -52,7 +52,7 @@ describe("Profile content page requests", () => {
 				"unit:collection",
 				"post:picture",
 			]),
-		).toEqual(["unit:collection", "post:picture"]);
+		).toEqual(["unit:book", "unit:collection", "post:picture"]);
 	});
 
 	it("parses only Profile feed content kinds from the URL", () => {
@@ -61,6 +61,6 @@ describe("Profile content page requests", () => {
 			profileContentParser.parseServerSide(
 				"unit:entity,unit:book,post:review,post:picture,unknown",
 			),
-		).toEqual(["unit:entity", "post:review", "post:picture"]);
+		).toEqual(["unit:entity", "unit:book", "post:review", "post:picture"]);
 	});
 });

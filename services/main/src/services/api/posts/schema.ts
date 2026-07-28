@@ -29,6 +29,22 @@ export const CreatePostBody = t.Object({
 });
 export type CreatePostBody = Static<typeof CreatePostBody>;
 
+export const CreateWikiBody = t.Object(
+	{
+		accessMode: t.Union([
+			t.Literal("public_entry"),
+			t.Literal("restricted"),
+		]),
+		title: t.String({ minLength: 1, maxLength: 500 }),
+		body: PortableTextDocument,
+		language: ContentLanguage,
+		realmId: t.Optional(Uuid),
+		subjectId: t.Optional(Uuid),
+	},
+	{ additionalProperties: false },
+);
+export type CreateWikiBody = Static<typeof CreateWikiBody>;
+
 export const PostParams = t.Object({ postId: Uuid });
 export type PostParams = Static<typeof PostParams>;
 export const GetPostQuery = t.Object(

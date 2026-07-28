@@ -52,6 +52,7 @@ import {
 import {
 	CreateReplyBody,
 	CreatePostBody,
+	CreateWikiBody,
 	GetPostQuery,
 	ListRepliesQuery,
 	ListPostsQuery,
@@ -74,6 +75,11 @@ import {
 } from "./errors";
 import { selectReplyTree } from "./reply-tree-query";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
+import {
+	createProfileOwnedUnitAccess,
+	createPublicEditableUnitAccess,
+} from "../../authorization/unit/ownership";
+import { OfficialProfileIds } from "../../bootstrap/manifest";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
@@ -372,6 +378,98 @@ export default new Elysia()
 						]),
 					},
 					detail: { summary: "Create post", tags: ["Posts"] },
+				},
+			)
+			.post(
+				"/wiki",
+				async ({ profile, authorization, body }) => {
+					await authorization.realm.ensureUnitCreation(
+						body.realmId,
+						"realm.units.create",
+					);
+					if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
+					const id = await database.transaction(async (tx) => {
+						if (body.subjectId)
+							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
+								tx,
+								body.subjectId,
+							);
+						const created = await insertUnit(tx, {
+							kind: "post",
+							status: "published",
+							visibility: "public",
+							publishedAt: new Date(),
+							statusActor: { kind: "profile", profileId: profile.unitId },
+						});
+						await ensureSubjectPostTargetingAllowed(tx, {
+							sourcePostId: created.id,
+							subjectUnitId: body.subjectId,
+							...(body.realmId ? { realmId: body.realmId } : {}),
+						});
+						await tx.insert(post).values({
+							id: created.id,
+							kind: "wiki",
+							subjectUnitId: body.subjectId,
+						});
+						await tx.insert(unitLocalization).values({
+							unitId: created.id,
+							language: body.language,
+							title: body.title,
+							content: body.body,
+							contentStatus: "published",
+						});
+						await applyNewPostTagMentionVotes(tx, {
+							postId: created.id,
+							profileId: profile.unitId,
+							nextBody: body.body,
+						});
+						if (body.accessMode === "public_entry")
+							await createPublicEditableUnitAccess(tx, created.id);
+						else await createProfileOwnedUnitAccess(tx, created.id, profile.unitId);
+						await createProfilePublisherAttribution(tx, {
+							sourceUnitId: created.id,
+							profileId:
+								body.accessMode === "public_entry"
+									? OfficialProfileIds.community
+									: profile.unitId,
+						});
+						if (body.realmId) {
+							await ensurePostMountTargetingAllowed(tx, {
+								postId: created.id,
+								realmId: body.realmId,
+							});
+							await tx
+								.insert(realmUnit)
+								.values({ realmId: body.realmId, unitId: created.id });
+						}
+						await recordUnitRevision(tx, {
+							unitId: created.id,
+							actorProfileId: profile.unitId,
+							event: "create",
+						});
+						return created.id;
+					});
+					return { id };
+				},
+				{
+					access: "contribute:unit:create",
+					body: CreateWikiBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"RealmCapabilityRequired",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"EntityEntryNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"RealmRulesAcceptanceRequired",
+							"PostTargetingLocked",
+						]),
+					},
+					detail: { summary: "Create Wiki", tags: ["Posts"] },
 				},
 			)
 			.get(

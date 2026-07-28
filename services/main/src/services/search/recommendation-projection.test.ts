@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const enrichmentPath = fileURLToPath(
-	new URL("../../../search/rezics_unit_search_document_v6.sql", import.meta.url),
+	new URL("../../../search/rezics_unit_search_document_v7.sql", import.meta.url),
 );
 const workerPath = fileURLToPath(new URL("../recommendations/worker.ts", import.meta.url));
 

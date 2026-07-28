@@ -26,6 +26,13 @@ export default {
 	cancel: "キャンセル",
 	noInvitations: "招待はありません。",
 	creditAssociations: "クレジット関連",
+	publisherAttributions: "出版者クレジット",
+	publisherAttributionDescription:
+		"相手のプロフィールで許可されている場合は出版者を直接追加できます。許可されていない場合は、下で出版者の関連付けを申請してください。",
+	publisherProfile: "出版者プロフィール",
+	addPublisher: "出版者を追加",
+	removePublisher: "出版者を削除",
+	noPublishers: "出版者は登録されていません。",
 	subjectAssociations: "対象関連",
 	associationProposals: "関連提案",
 	associationProposalDescription: "実際の関連は、相手が提案を承諾した後にのみ作成されます。",
@@ -74,6 +81,14 @@ export default {
 		cancelled: "キャンセル済み",
 	},
 	access: {
+		scopeSelectorLabel: "権限の範囲",
+		scopeOptions: {
+			root: "項目全体",
+			creditAttributions: "参照元のクレジット帰属",
+			subjectAssociations: "参照元の主題関連付け",
+			creditTargets: "エンティティ対象のクレジット帰属",
+			subjectTargets: "エンティティ対象の主題関連付け",
+		},
 		publicTitle: "公開権限",
 		publicDescription: `サインインしているすべての${verbatimTerms.rezics.value}ユーザーに直接付与された権限。このグローバルなベースラインは個々の対象とは別に管理されます。`,
 		authenticatedLabel: "サインインしているすべてのユーザー",

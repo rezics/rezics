@@ -269,7 +269,7 @@ describe("Search Feature v1", () => {
 		expect(compiled.request.searchExpression).toMatchObject({ operator: "all" });
 	});
 
-	it("scopes Profile search to credited content and owned catalog Units", () => {
+	it("scopes Profile search to publisher chains and current Realm or Zone ownership", () => {
 		const compiled = compileSearchFeatureInput({
 			document: createDefaultSearchDocument("global"),
 			contexts: [{ kind: "profile", profileId: ProfileId }],
@@ -284,20 +284,64 @@ describe("Search Feature v1", () => {
 					operator: "all",
 					clauses: [
 						{
-							field: "category",
-							operator: "any-of",
-							values: ["posts", "reviews"],
+							operator: "any",
+							clauses: [
+								{
+									field: "category",
+									operator: "any-of",
+									values: ["posts", "reviews", "entity", "collections"],
+								},
+								{
+									operator: "all",
+									clauses: [
+										{
+											field: "category",
+											operator: "equals",
+											value: "units",
+										},
+										{
+											field: "kind",
+											operator: "any-of",
+											values: ["book", "media", "software"],
+										},
+									],
+								},
+							],
 						},
-						{ field: "credit", operator: "equals", value: ProfileId },
+						{
+							field: "publisher-profile",
+							operator: "equals",
+							value: ProfileId,
+						},
 					],
 				},
 				{
 					operator: "all",
 					clauses: [
 						{
-							field: "category",
-							operator: "any-of",
-							values: ["entity", "collections"],
+							operator: "any",
+							clauses: [
+								{
+									field: "category",
+									operator: "equals",
+									value: "realms",
+								},
+								{
+									operator: "all",
+									clauses: [
+										{
+											field: "category",
+											operator: "equals",
+											value: "units",
+										},
+										{
+											field: "kind",
+											operator: "equals",
+											value: "zone",
+										},
+									],
+								},
+							],
 						},
 						{ field: "owner", operator: "equals", value: ProfileId },
 					],

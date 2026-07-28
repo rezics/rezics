@@ -87,6 +87,7 @@ export const CreditAttributionRolesByUnitKind = {
 		"director",
 		"producer",
 		"writer",
+		"publisher",
 		"composer",
 		"actor",
 		"narrator",
@@ -94,8 +95,9 @@ export const CreditAttributionRolesByUnitKind = {
 		"distributor",
 	],
 	series: ["author", "editor", "publisher"],
+	entity: ["publisher"],
 } as const satisfies Record<
-	"book" | "software" | "media" | "series",
+	"book" | "software" | "media" | "series" | "entity",
 	readonly CreditAttributionRole[]
 >;
 export type CreditAttributionUnitKind = keyof typeof CreditAttributionRolesByUnitKind;
@@ -115,6 +117,10 @@ export type AssociationRole = CreditAttributionRole | SubjectAssociationRole;
 
 export function isCreditAttributionRole(value: string): value is CreditAttributionRole {
 	return (CreditAttributionRoleValues as readonly string[]).includes(value);
+}
+
+export function isCreditAttributionUnitKind(kind: UnitKind): kind is CreditAttributionUnitKind {
+	return Object.hasOwn(CreditAttributionRolesByUnitKind, kind);
 }
 
 export function isCreditAttributionRoleForUnitKind(

@@ -26,6 +26,13 @@ export default {
 	cancel: "撤销",
 	noInvitations: "当前没有邀请。",
 	creditAssociations: "署名关联",
+	publisherAttributions: "出版者标记",
+	publisherAttributionDescription:
+		"如果对方的个人资料允许，可以直接添加出版者；否则请在下方提出出版者关联请求。",
+	publisherProfile: "出版者个人资料",
+	addPublisher: "添加出版者",
+	removePublisher: "移除出版者",
+	noPublishers: "尚未标记出版者。",
 	subjectAssociations: "主题关联",
 	associationProposals: "关联提案",
 	associationProposalDescription: "提案经另一方接受后才会创建实际关联。",
@@ -74,6 +81,14 @@ export default {
 		cancelled: "已撤销",
 	},
 	access: {
+		scopeSelectorLabel: "权限范围",
+		scopeOptions: {
+			root: "整个内容单元",
+			creditAttributions: "来源：贡献署名",
+			subjectAssociations: "来源：主题关联",
+			creditTargets: "目录条目目标：贡献署名",
+			subjectTargets: "目录条目目标：主题关联",
+		},
 		publicTitle: "公共权限",
 		publicDescription: `直接授予所有已登录 ${verbatimTerms.rezics.value} 用户的权限。这是全局基线，因此与个别授权对象分开管理。`,
 		authenticatedLabel: "所有已登录用户",

@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -38,7 +38,10 @@ import {
 	AddUnitCreditBody,
 	AddUnitSubjectAssociationBody,
 	AddUnitLinkBody,
+	AttributionAssociationParams,
+	AttributionUnitParams,
 	CreateCatalogUnitBody,
+	CreateEntityBody,
 	EntityDetailQuery,
 	EntityLocalizationParams,
 	ListEntityEntriesQuery,
@@ -201,6 +204,9 @@ export default new Elysia()
 							and(
 								publiclyReadableUnitCondition(),
 								query.kind ? eq(entity.kind, query.kind) : undefined,
+								query.query
+									? ilike(unitLocalization.title, `%${query.query}%`)
+									: undefined,
 							),
 						)
 						.orderBy(desc(unit.createdAt))
@@ -247,7 +253,7 @@ export default new Elysia()
 				}),
 				{
 					access: "contribute:unit:create",
-					body: CreateCatalogUnitBody,
+					body: CreateEntityBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
@@ -283,6 +289,13 @@ export default new Elysia()
 						localizationLanguages,
 					);
 					if (!selectedLocalization) throw new EntityEntryNotFound();
+					const attributions =
+						(
+							await getAttributionSummariesByUnitIds(
+								[params.unitId],
+								localizationLanguages,
+							)
+						).get(params.unitId) ?? [];
 					const localizations = storedLocalizations.map((row) => ({
 						unitId: row.unitId,
 						language: row.language,
@@ -355,21 +368,29 @@ export default new Elysia()
 								)
 							).get(owner.profileId) ?? null)
 						: null;
-					const [canEdit, accessDecision, creditDecision, subjectDecision] =
-						await Promise.all([
-							identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
-							identity.authorization.unit.decide(params.unitId, "unit.access.manage"),
-							identity.authorization.unit.decide(
-								params.unitId,
-								"unit.association.manage",
-								["associations", "credit"],
-							),
-							identity.authorization.unit.decide(
-								params.unitId,
-								"unit.association.manage",
-								["associations", "subject"],
-							),
-						]);
+					const [
+						canEdit,
+						canEditCreditAttributions,
+						accessDecision,
+						creditDecision,
+						subjectDecision,
+					] = await Promise.all([
+						identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
+						identity.authorization.unit.canUpdate(params.unitId, [
+							"credit-attributions",
+						]),
+						identity.authorization.unit.decide(params.unitId, "unit.access.manage"),
+						identity.authorization.unit.decide(
+							params.unitId,
+							"unit.association.manage",
+							["associations", "credit"],
+						),
+						identity.authorization.unit.decide(
+							params.unitId,
+							"unit.association.manage",
+							["associations", "subject"],
+						),
+					]);
 					return {
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
@@ -378,9 +399,11 @@ export default new Elysia()
 						banner: presentImageAsset(selectedLocalization.bannerAssetId, "banner"),
 						cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
 						localizations,
+						attributions,
 						owner: ownerSummary,
 						capabilities: {
 							canEdit,
+							canEditCreditAttributions,
 							canManageAccess: accessDecision.allowed,
 							canManageCreditAssociations: creditDecision.allowed,
 							canManageSubjectAssociations: subjectDecision.allowed,
@@ -755,7 +778,7 @@ export default new Elysia()
 				},
 				{
 					access: "contribute:unit:update",
-					params: UnitUnitParams,
+					params: AttributionUnitParams,
 					body: AddUnitCreditBody,
 					response: {
 						[StatusCodes.OK]: CreditAttributionResponse,
@@ -802,7 +825,7 @@ export default new Elysia()
 				},
 				{
 					access: "write:unit:update",
-					params: UnitAssociationParams,
+					params: AttributionAssociationParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,

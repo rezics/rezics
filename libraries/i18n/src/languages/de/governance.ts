@@ -26,6 +26,13 @@ export default {
 	cancel: "Abbrechen",
 	noInvitations: "Es gibt keine Einladungen.",
 	creditAssociations: "Mitwirkendenzuordnungen",
+	publisherAttributions: "Verlagszuordnungen",
+	publisherAttributionDescription:
+		"Fügen Sie einen Verlag direkt hinzu, wenn dessen Profil dies erlaubt; andernfalls stellen Sie unten eine Zuordnungsanfrage.",
+	publisherProfile: "Verlagsprofil",
+	addPublisher: "Verlag hinzufügen",
+	removePublisher: "Verlag entfernen",
+	noPublishers: "Es ist kein Verlag zugeordnet.",
 	subjectAssociations: "Themenzuordnungen",
 	associationProposals: "Zuordnungsvorschläge",
 	associationProposalDescription:
@@ -77,6 +84,14 @@ export default {
 		cancelled: "Storniert",
 	},
 	access: {
+		scopeSelectorLabel: "Berechtigungsbereich",
+		scopeOptions: {
+			root: "Gesamte Einheit",
+			creditAttributions: "Quellseitige Mitwirkungszuordnungen",
+			subjectAssociations: "Quellseitige Themenzuordnungen",
+			creditTargets: "Entitätsziel: Mitwirkungszuordnungen",
+			subjectTargets: "Entitätsziel: Themenzuordnungen",
+		},
 		publicTitle: "Öffentliche Berechtigungen",
 		publicDescription: `Berechtigungen, die allen angemeldeten Benutzern von ${verbatimTerms.rezics.value} direkt gewährt werden. Diese globale Grundlage wird getrennt von einzelnen Subjekten verwaltet.`,
 		authenticatedLabel: "Alle angemeldeten Benutzer",

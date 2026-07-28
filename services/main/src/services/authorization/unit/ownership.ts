@@ -39,6 +39,36 @@ async function grantProfilePermissions(
 }
 
 /**
+ * Creates a community-governed Unit that every authenticated Profile may edit.
+ *
+ * The creator intentionally receives no ownership or direct grant. Their access
+ * is exactly the same authenticated grant available to every other Profile.
+ */
+export async function createPublicEditableUnitAccess(
+	tx: DatabaseTransaction,
+	unitId: string,
+	authenticatedPermissions: readonly UnitPermission[] = ["unit.update"],
+): Promise<void> {
+	await tx.insert(unitOwnership).values({
+		unitId,
+		profileId: OfficialProfileIds.community,
+		assignedByProfileId: OfficialProfileIds.community,
+	});
+	await tx
+		.insert(unitAccessGrant)
+		.values(
+			expandUnitPermissions(authenticatedPermissions).map((permission) => ({
+				unitId,
+				subjectKind: "authenticated" as const,
+				permission,
+				scope: [],
+				grantedByProfileId: OfficialProfileIds.community,
+			})),
+		)
+		.onConflictDoNothing();
+}
+
+/**
  * Community catalog entries are stewarded by the ordinary Rezics Community Profile,
  * while their submitter receives explicit editing permissions without ownership.
  */

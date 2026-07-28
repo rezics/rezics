@@ -9,6 +9,23 @@ const { forms: metadataTerms } = deTerminology.metadata;
 
 export default {
 	types: { book: "Buch", software: "Software", media: "Medien", series: "Reihe" },
+	creation: {
+		modeLabel: "Erstellungsart",
+		ownedWork: "Mein Werk",
+		ownedWorkDescription: "Dein Profil besitzt und verwaltet dieses Werk.",
+		publicEntry: "Öffentlicher Eintrag",
+		publicEntryDescription:
+			"Im Besitz der Community und für alle angemeldeten Personen bearbeitbar; die erstellende Person erhält keine Sonderrechte.",
+		publisherEntity: "Verlags-Entität",
+		publisherOwnedDescription:
+			"Für dein Werk ist ein Verlag erforderlich. Bei eingeschränkter Direktzuordnung wird eine Zustimmungsanfrage gesendet.",
+		publisherPublicDescription:
+			"Ein Verlag ist optional. Ist Zustimmung nötig, sendet der öffentliche Eintrag eine Anfrage statt einer Einladung.",
+		versionRole: "Versionsart",
+		mainVersion: "Hauptversion",
+		variantVersion: "Variantenversion",
+		mainVersionEntity: "Zugehörige Hauptversion",
+	},
 	attributionRoles: {
 		author: "Autor",
 		"co-author": "Co-Autor",

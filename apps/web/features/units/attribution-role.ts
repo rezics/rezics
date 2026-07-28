@@ -32,6 +32,7 @@ export const CreditAttributionRolesByUnitType = {
 		"director",
 		"producer",
 		"writer",
+		"publisher",
 		"composer",
 		"actor",
 		"narrator",

@@ -12,6 +12,13 @@ export default {
 	untitled: `제목 없는 ${postTerms.inline}`,
 	unknownAttribution: "출처 없음",
 	publisher: "게시자",
+	wikiCreateTitle: "위키 항목 만들기",
+	wikiAccessMode: "편집 권한",
+	wikiPublicEntry: "공개 항목",
+	wikiPublicDescription:
+		"로그인한 모든 사용자가 편집할 수 있으며 생성자에게 별도 권한은 부여되지 않습니다.",
+	wikiRestricted: "제한됨",
+	wikiRestrictedDescription: "생성자와 나중에 명시적으로 권한을 받은 사용자만 편집할 수 있습니다.",
 	replies: `${postTerms.plural}에 답글`,
 	replyPost: `${postTerms.inline}에 답글`,
 	signInToReply: "답글을 달려면 로그인하십시오",

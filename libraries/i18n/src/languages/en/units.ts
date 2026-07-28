@@ -9,6 +9,23 @@ const { forms: metadataTerms } = enTerminology.metadata;
 
 export default {
 	types: { book: "Book", software: "Software", media: "Media", series: "Series" },
+	creation: {
+		modeLabel: "Creation mode",
+		ownedWork: "My work",
+		ownedWorkDescription: "Your Profile owns and governs this work.",
+		publicEntry: "Public entry",
+		publicEntryDescription:
+			"Community-owned and editable by every signed-in user; the creator receives no special access.",
+		publisherEntity: "Publisher Entity",
+		publisherOwnedDescription:
+			"A publisher is required for your work. A consent request is sent when direct association is restricted.",
+		publisherPublicDescription:
+			"A publisher is optional. When consent is required, the public entry sends a request, not an invitation.",
+		versionRole: "Version type",
+		mainVersion: "Main version",
+		variantVersion: "Variant version",
+		mainVersionEntity: "Related Main version",
+	},
 	attributionRoles: {
 		author: "Author",
 		"co-author": "Co-author",

@@ -442,6 +442,56 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 			? sql`not (${match})`
 			: match;
 	}
+	if (filter.field === "publisher-profile") {
+		const publisherProfiles = sql`array(
+			select resolved_publisher.profile_id
+			from (
+				select direct_credit.credited_unit_id as profile_id
+				from public.credit_attribution as direct_credit
+				join public.unit as direct_profile
+					on direct_profile.id = direct_credit.credited_unit_id
+					and direct_profile.kind = 'profile'
+					and direct_profile.status = 'published'
+					and direct_profile.visibility <> 'private'
+					and direct_profile.moderation_status = 'approved'
+					and direct_profile.deleted_at is null
+				where direct_credit.source_unit_id = ${unit.id}
+					and direct_credit.role = 'publisher'
+					and ${unit.kind} in ('entity', 'collection', 'post')
+				union
+				select entity_profile.credited_unit_id as profile_id
+				from public.credit_attribution as work_publisher
+				join public.unit as publisher_entity
+					on publisher_entity.id = work_publisher.credited_unit_id
+					and publisher_entity.kind = 'entity'
+					and publisher_entity.status = 'published'
+					and publisher_entity.visibility <> 'private'
+					and publisher_entity.moderation_status = 'approved'
+					and publisher_entity.deleted_at is null
+				join public.credit_attribution as entity_profile
+					on entity_profile.source_unit_id = publisher_entity.id
+					and entity_profile.role = 'publisher'
+				join public.unit as publisher_profile
+					on publisher_profile.id = entity_profile.credited_unit_id
+					and publisher_profile.kind = 'profile'
+					and publisher_profile.status = 'published'
+					and publisher_profile.visibility <> 'private'
+					and publisher_profile.moderation_status = 'approved'
+					and publisher_profile.deleted_at is null
+				where work_publisher.source_unit_id = ${unit.id}
+					and work_publisher.role = 'publisher'
+					and ${unit.kind} in ('book', 'media', 'software')
+			) as resolved_publisher
+		)`;
+		const values = scalarStrings(filterValues(filter), filter.field);
+		const match =
+			filter.operator === "all-of"
+				? sql`${publisherProfiles} @> ${toUuidArray(values)}`
+				: sql`${publisherProfiles} && ${toUuidArray(values)}`;
+		return filter.operator === "not-equals" || filter.operator === "none-of"
+			? sql`not (${match})`
+			: match;
+	}
 	if (filter.field === "owner") {
 		const owners = sql`array(
 			select distinct ${unitOwnership.profileId}

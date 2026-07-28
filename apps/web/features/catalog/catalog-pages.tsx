@@ -259,6 +259,7 @@ export function EntityDetailPage({ id }: { id: string }) {
 						</Button>
 					) : null}
 					{query.data.capabilities.canManageAccess ||
+					query.data.capabilities.canEditCreditAttributions ||
 					query.data.capabilities.canManageCreditAssociations ||
 					query.data.capabilities.canManageSubjectAssociations ? (
 						<Button asChild className="w-fit" variant="outline">
@@ -466,10 +467,12 @@ export function EntityCreatePage() {
 		"governance",
 		"media",
 		"ui",
+		"units",
 	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
+	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">("owned_work");
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiEntities({
@@ -487,6 +490,7 @@ export function EntityCreatePage() {
 		try {
 			await create.mutateAsync({
 				body: {
+					catalogMode,
 					kind: String(form.get("kind") ?? "person"),
 					localization: {
 						language: toContentLanguage(locale.target),
@@ -507,6 +511,32 @@ export function EntityCreatePage() {
 		<CreateFrame title={t.catalog.newEntity}>
 			<form onSubmit={submit}>
 				<FieldGroup>
+					<Field required>
+						<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
+						<NativeSelect
+							name="catalogMode"
+							onChange={(event) =>
+								setCatalogMode(
+									event.currentTarget.value === "public_entry"
+										? "public_entry"
+										: "owned_work",
+								)
+							}
+							value={catalogMode}
+						>
+							<NativeSelectOption value="owned_work">
+								{t.units.creation.ownedWork}
+							</NativeSelectOption>
+							<NativeSelectOption value="public_entry">
+								{t.units.creation.publicEntry}
+							</NativeSelectOption>
+						</NativeSelect>
+						<p className="text-muted-foreground text-sm">
+							{catalogMode === "owned_work"
+								? t.units.creation.ownedWorkDescription
+								: t.units.creation.publicEntryDescription}
+						</p>
+					</Field>
 					<Field required>
 						<FieldLabel>{t.ui.title}</FieldLabel>
 						<Input name="title" required maxLength={500} />

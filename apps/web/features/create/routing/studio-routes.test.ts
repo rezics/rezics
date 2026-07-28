@@ -20,6 +20,6 @@ describe("Studio routes", () => {
 		expect(studioContentHref("review", "unit-id")).toBe("/posts/unit-id");
 		expect(studioContentHref("wiki", "unit-id")).toBe("/posts/unit-id");
 		expect(studioSectionCreateHref("book")).toBe("/units/book/new");
-		expect(studioSectionCreateHref("wiki")).toBeUndefined();
+		expect(studioSectionCreateHref("wiki")).toBe("/wiki/new");
 	});
 });

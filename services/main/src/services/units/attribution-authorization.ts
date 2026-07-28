@@ -4,6 +4,7 @@ import type { Authorization } from "../authorization";
 import { associationTargetScope } from "../authorization/unit/scope";
 import type { DatabaseTransaction } from "../database";
 import { entity, unit } from "../database/schema";
+import { EntityAssociationRestricted, EntityEntryNotFound } from "../entities/errors";
 import { UnitNotFound } from "./errors";
 
 async function isEntityTarget(tx: DatabaseTransaction, targetUnitId: string): Promise<boolean> {
@@ -78,4 +79,40 @@ export async function ensureCreditAttributionInvitationAllowed(
 		"unit.association.manage",
 		associationTargetScope("credit"),
 	);
+}
+
+export type PublisherAttributionCreationMode = "direct" | "request";
+
+/**
+ * Resolves the consent path for assigning an Entity as a new work's publisher.
+ *
+ * Direct association and a pending request are deliberately distinct outcomes;
+ * a restricted Entity never becomes attributed until its controller accepts.
+ */
+export async function resolvePublisherAttributionCreationMode(
+	authorization: Authorization<string>,
+	tx: DatabaseTransaction,
+	entityId: string,
+): Promise<PublisherAttributionCreationMode> {
+	await lockAttributionTarget(tx, entityId);
+	if (!(await isEntityTarget(tx, entityId))) throw new EntityEntryNotFound();
+	if (
+		await authorization.entity.allowsAssociationCommand(
+			tx,
+			entityId,
+			"credit",
+			"direct",
+		)
+	)
+		return "direct";
+	if (
+		await authorization.entity.allowsAssociationCommand(
+			tx,
+			entityId,
+			"credit",
+			"request",
+		)
+	)
+		return "request";
+	throw new EntityAssociationRestricted("credit", "request");
 }

@@ -83,6 +83,7 @@ const TemplateDefinitions = {
 			"root",
 			"parent",
 			"owner",
+			"publisher-profile",
 		],
 		constraints: [],
 		visible: new Set<SearchField>(["category", "kind", "language", "content-rating", "tag"]),
@@ -534,12 +535,32 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 							operator: "all",
 							clauses: [
 								{
-									field: "category",
-									operator: "any-of",
-									values: ["posts", "reviews"],
+									operator: "any",
+									clauses: [
+										{
+											field: "category",
+											operator: "any-of",
+											values: ["posts", "reviews", "entity", "collections"],
+										},
+										{
+											operator: "all",
+											clauses: [
+												{
+													field: "category",
+													operator: "equals",
+													value: "units",
+												},
+												{
+													field: "kind",
+													operator: "any-of",
+													values: ["book", "media", "software"],
+												},
+											],
+										},
+									],
 								},
 								{
-									field: "credit",
+									field: "publisher-profile",
 									operator: "equals",
 									value: profile.profileId,
 								},
@@ -549,9 +570,29 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 							operator: "all",
 							clauses: [
 								{
-									field: "category",
-									operator: "any-of",
-									values: ["entity", "collections"],
+									operator: "any",
+									clauses: [
+										{
+											field: "category",
+											operator: "equals",
+											value: "realms",
+										},
+										{
+											operator: "all",
+											clauses: [
+												{
+													field: "category",
+													operator: "equals",
+													value: "units",
+												},
+												{
+													field: "kind",
+													operator: "equals",
+													value: "zone",
+												},
+											],
+										},
+									],
 								},
 								{
 									field: "owner",

@@ -8,6 +8,8 @@ import {
 	type AssociationKind,
 	type CreditAttributionRole,
 	isCreditAttributionRole,
+	isCreditAttributionRoleForUnitKind,
+	isCreditAttributionUnitKind,
 	isSubjectAssociationRole,
 	type SubjectAssociationRole,
 } from "../database/schema/contract-values";
@@ -30,6 +32,7 @@ import {
 	AssociationProposalConflict,
 	AssociationProposalExpired,
 	AssociationProposalNotFound,
+	AssociationProposalRoleInvalid,
 	UnitNotFound,
 } from "./errors";
 import { ensureWikiAssociationContextPost } from "./association-context";
@@ -129,6 +132,26 @@ async function ensureSourceUnitExists(tx: DatabaseTransaction, sourceUnitId: str
 	if (!record) throw new UnitNotFound();
 }
 
+async function ensureCreditSourceRoleAllowed(
+	tx: DatabaseTransaction,
+	sourceUnitId: string,
+	role: CreditAttributionRole,
+) {
+	const [record] = await tx
+		.select({ kind: unit.kind })
+		.from(unit)
+		.where(and(eq(unit.id, sourceUnitId), isNull(unit.deletedAt)))
+		.limit(1);
+	if (!record) throw new UnitNotFound();
+	// Catalog kinds with a domain role matrix must honor it. Other Unit kinds
+	// retain the generic credit vocabulary used by their existing proposal UI.
+	if (
+		isCreditAttributionUnitKind(record.kind) &&
+		!isCreditAttributionRoleForUnitKind(record.kind, role)
+	)
+		throw new AssociationProposalRoleInvalid();
+}
+
 async function ensureNoRelationshipOrProposal(
 	tx: DatabaseTransaction,
 	input: AssociationTargetInput,
@@ -212,36 +235,47 @@ export async function createAssociationRequest(
 	actorProfileId: string,
 	input: CreateAssociationProposalInput,
 ) {
-	return database.transaction(async (tx) => {
-		await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetUnitId);
-		await authorization.unit.ensureInTransaction(
-			tx,
-			input.sourceUnitId,
-			"unit.update",
-			sourceAssociationScope(input.kind),
-		);
-		if (input.kind === "credit")
-			await ensureCreditAttributionRequestAllowed(authorization, tx, input.targetUnitId);
-		else {
-			if (input.contextPostId) {
-				await authorization.unit.ensureCanRead(
-					input.contextPostId,
-					() => new AssociationContextPostInvalid(),
-				);
-				await ensureWikiAssociationContextPost(tx, input.contextPostId);
-			}
-			await authorization.entity.ensureAssociationRequestAllowed(
-				tx,
-				input.targetUnitId,
-				input.kind,
+	return database.transaction((tx) =>
+		createAssociationRequestInTransaction(tx, authorization, actorProfileId, input),
+	);
+}
+
+export async function createAssociationRequestInTransaction(
+	tx: DatabaseTransaction,
+	authorization: Authorization<string>,
+	actorProfileId: string,
+	input: CreateAssociationProposalInput,
+) {
+	if (input.sourceUnitId === input.targetUnitId) throw new AssociationProposalConflict();
+	await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetUnitId);
+	await authorization.unit.ensureInTransaction(
+		tx,
+		input.sourceUnitId,
+		"unit.update",
+		sourceAssociationScope(input.kind),
+	);
+	if (input.kind === "credit") {
+		await ensureCreditSourceRoleAllowed(tx, input.sourceUnitId, input.role);
+		await ensureCreditAttributionRequestAllowed(authorization, tx, input.targetUnitId);
+	} else {
+		if (input.contextPostId) {
+			await authorization.unit.ensureCanRead(
+				input.contextPostId,
+				() => new AssociationContextPostInvalid(),
 			);
+			await ensureWikiAssociationContextPost(tx, input.contextPostId);
 		}
-		await ensureNoRelationshipOrProposal(tx, input);
-		return insertProposal(tx, {
-			...input,
-			direction: "request",
-			createdByProfileId: actorProfileId,
-		});
+		await authorization.entity.ensureAssociationRequestAllowed(
+			tx,
+			input.targetUnitId,
+			input.kind,
+		);
+	}
+	await ensureNoRelationshipOrProposal(tx, input);
+	return insertProposal(tx, {
+		...input,
+		direction: "request",
+		createdByProfileId: actorProfileId,
 	});
 }
 
@@ -269,7 +303,9 @@ export async function createAssociationInvitation(
 				input.kind,
 			);
 		}
-		await ensureSourceUnitExists(tx, input.sourceUnitId);
+		if (input.kind === "credit")
+			await ensureCreditSourceRoleAllowed(tx, input.sourceUnitId, input.role);
+		else await ensureSourceUnitExists(tx, input.sourceUnitId);
 		await ensureNoRelationshipOrProposal(tx, input);
 		return insertProposal(tx, {
 			...input,
@@ -405,6 +441,7 @@ async function materializeProposal(
 	if (proposal.kind === "credit") {
 		if (!isCreditAttributionRole(proposal.role))
 			throw new TypeError("Stored credit proposal has an invalid role");
+		await ensureCreditSourceRoleAllowed(tx, proposal.sourceUnitId, proposal.role);
 		const [last] = await tx
 			.select({ position: creditAttribution.position })
 			.from(creditAttribution)

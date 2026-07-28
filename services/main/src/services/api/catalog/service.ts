@@ -7,6 +7,7 @@ import { recordUnitRevision } from "../../units/history";
 import {
 	createCommunityCatalogAccess,
 	createProfileOwnedUnitAccess,
+	createPublicEditableUnitAccess,
 } from "../../authorization/unit/ownership";
 import { insertUnit } from "../../units/create";
 import {
@@ -14,12 +15,24 @@ import {
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
-import type { CreateCatalogUnitBody } from "./schema";
+import { createProfilePublisherAttribution } from "../../units/attribution";
+import { OfficialProfileIds } from "../../bootstrap/manifest";
+import type { CreateCatalogUnitBody, CreateEntityBody } from "./schema";
 
+export function createCatalogUnit(
+	type: "entity",
+	ownerId: string,
+	body: CreateEntityBody,
+): Promise<string>;
+export function createCatalogUnit(
+	type: "tag",
+	ownerId: string,
+	body: CreateCatalogUnitBody,
+): Promise<string>;
 export async function createCatalogUnit(
 	type: "entity" | "tag",
 	ownerId: string,
-	body: CreateCatalogUnitBody,
+	body: CreateCatalogUnitBody | CreateEntityBody,
 ) {
 	return database.transaction(async (tx) => {
 		await ensureImageAssetsAttachable(
@@ -35,7 +48,11 @@ export async function createCatalogUnit(
 			statusActor: { kind: "profile", profileId: ownerId },
 		});
 		if (type === "entity") {
+			if (!("catalogMode" in body))
+				throw new TypeError("Entity creation requires a catalog mode");
 			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
+			const grantedByProfileId =
+				body.catalogMode === "public_entry" ? OfficialProfileIds.community : ownerId;
 			await tx.insert(unitAccessGrant).values(
 				(
 					[
@@ -49,15 +66,24 @@ export async function createCatalogUnit(
 					subjectKind: "authenticated" as const,
 					permission,
 					scope: [],
-					grantedByProfileId: ownerId,
+					grantedByProfileId,
 				})),
 			);
 		} else await tx.insert(tag).values({ id: created.id });
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId: created.id, ...toUnitLocalizationStorage(body.localization) });
-		if (type === "entity") await createProfileOwnedUnitAccess(tx, created.id, ownerId);
-		else await createCommunityCatalogAccess(tx, created.id, ownerId);
+		if (type === "entity") {
+			if (!("catalogMode" in body))
+				throw new TypeError("Entity creation requires a catalog mode");
+			if (body.catalogMode === "owned_work") {
+				await createProfileOwnedUnitAccess(tx, created.id, ownerId);
+				await createProfilePublisherAttribution(tx, {
+					sourceUnitId: created.id,
+					profileId: ownerId,
+				});
+			} else await createPublicEditableUnitAccess(tx, created.id);
+		} else await createCommunityCatalogAccess(tx, created.id, ownerId);
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,

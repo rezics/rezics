@@ -69,15 +69,43 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		throw new EntityAssociationRestricted(kind, command);
 	}
 
+	async allowsAssociationCommand(
+		this: EntityAuthorization<string>,
+		tx: DatabaseTransaction,
+		entityId: string,
+		kind: AssociationKind,
+		command: EntityAssociationCommand,
+	): Promise<boolean> {
+		await lockEntityAssociationState(tx, entityId);
+		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
+		try {
+			await this.ensureAssociationCommandAllowedForExistingEntity(
+				tx,
+				entityId,
+				kind,
+				command,
+			);
+			return true;
+		} catch (error) {
+			if (
+				error &&
+				typeof error === "object" &&
+				"_tag" in error &&
+				error._tag === "EntityAssociationRestricted"
+			)
+				return false;
+			throw error;
+		}
+	}
+
 	async ensureAssociationAllowed(
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
 		entityId: string,
 		kind: AssociationKind,
 	): Promise<void> {
-		await lockEntityAssociationState(tx, entityId);
-		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
-		await this.ensureAssociationCommandAllowedForExistingEntity(tx, entityId, kind, "direct");
+		if (!(await this.allowsAssociationCommand(tx, entityId, kind, "direct")))
+			throw new EntityAssociationRestricted(kind, "direct");
 	}
 
 	async ensureAssociationRequestAllowed(
@@ -86,9 +114,8 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		entityId: string,
 		kind: AssociationKind,
 	): Promise<void> {
-		await lockEntityAssociationState(tx, entityId);
-		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
-		await this.ensureAssociationCommandAllowedForExistingEntity(tx, entityId, kind, "request");
+		if (!(await this.allowsAssociationCommand(tx, entityId, kind, "request")))
+			throw new EntityAssociationRestricted(kind, "request");
 	}
 
 	async ensureAssociationInvitationAllowed(
@@ -97,14 +124,8 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		entityId: string,
 		kind: AssociationKind,
 	): Promise<void> {
-		await lockEntityAssociationState(tx, entityId);
-		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
-		await this.ensureAssociationCommandAllowedForExistingEntity(
-			tx,
-			entityId,
-			kind,
-			"invitation",
-		);
+		if (!(await this.allowsAssociationCommand(tx, entityId, kind, "invitation")))
+			throw new EntityAssociationRestricted(kind, "invitation");
 	}
 
 	async ensureSubjectAssociationAllowedIfEntity(

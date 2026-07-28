@@ -55,6 +55,7 @@ import {
 import { FavoritesDeleteForbidden, FavoritesEditForbidden } from "./errors";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { ValidationError } from "../errors";
+import { createProfilePublisherAttribution } from "../../units/attribution";
 
 const CollectionNotFoundResponse = toApiErrorResponse(["CollectionNotFound"]);
 const CollectionMutationNotFoundResponse = toApiErrorResponse([
@@ -227,6 +228,10 @@ export default new Elysia({ prefix: "/collections" })
 					unitId: created.id,
 					profileId: profile.unitId,
 					assignedByProfileId: profile.unitId,
+				});
+				await createProfilePublisherAttribution(tx, {
+					sourceUnitId: created.id,
+					profileId: profile.unitId,
 				});
 				await recordUnitRevision(tx, {
 					unitId: created.id,

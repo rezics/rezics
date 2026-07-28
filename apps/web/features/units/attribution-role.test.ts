@@ -12,6 +12,7 @@ describe("attribution role model", () => {
 		expect(CreditAttributionRolesByUnitType.book).toContain("translator");
 		expect(CreditAttributionRolesByUnitType.software).toContain("developer");
 		expect(CreditAttributionRolesByUnitType.media).toContain("director");
+		expect(CreditAttributionRolesByUnitType.media).toContain("publisher");
 		expect(CreditAttributionRolesByUnitType.media).not.toContain("author");
 	});
 

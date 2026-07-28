@@ -26,6 +26,13 @@ export default {
 	cancel: "취소",
 	noInvitations: "초대장이 없습니다.",
 	creditAssociations: "크레딧 연결",
+	publisherAttributions: "출판자 표시",
+	publisherAttributionDescription:
+		"상대 프로필에서 허용하면 출판자를 바로 추가할 수 있습니다. 허용되지 않으면 아래에서 출판자 연결을 요청하세요.",
+	publisherProfile: "출판자 프로필",
+	addPublisher: "출판자 추가",
+	removePublisher: "출판자 삭제",
+	noPublishers: "표시된 출판자가 없습니다.",
 	subjectAssociations: "주제 연결",
 	associationProposals: "연결 제안",
 	associationProposalDescription: "상대방이 제안을 수락한 후에야 실제 연결이 생성됩니다.",
@@ -74,6 +81,14 @@ export default {
 		cancelled: "취소됨",
 	},
 	access: {
+		scopeSelectorLabel: "권한 범위",
+		scopeOptions: {
+			root: "전체 콘텐츠 단위",
+			creditAttributions: "출처 크레딧 귀속",
+			subjectAssociations: "출처 주제 연결",
+			creditTargets: "엔터티 대상 크레딧 귀속",
+			subjectTargets: "엔터티 대상 주제 연결",
+		},
 		publicTitle: "공개 권한",
 		publicDescription: `모든 로그인한 ${verbatimTerms.rezics.value} 사용자에게 직접 부여된 권한. 이 글로벌 기준은 개별 주체와 별도로 관리됩니다.`,
 		authenticatedLabel: "모든 로그인 사용자",

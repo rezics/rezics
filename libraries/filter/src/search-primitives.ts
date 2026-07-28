@@ -68,6 +68,7 @@ export const SearchScalarFieldValues = [
 	"license",
 	"tag",
 	"credit",
+	"publisher-profile",
 	"realm",
 	"zone",
 	"subject",

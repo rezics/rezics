@@ -10,6 +10,20 @@ const { forms: metadataTerms } = zhHansTerminology.metadata;
 
 export default {
 	types: { book: "书籍", software: "软件", media: "媒体", series: "系列" },
+	creation: {
+		modeLabel: "创建方式",
+		ownedWork: "我的作品",
+		ownedWorkDescription: "由你的个人资料拥有并管理这项作品。",
+		publicEntry: "公共条目",
+		publicEntryDescription: "由社区拥有，所有已登录用户都能编辑；创建者不会获得特殊权限。",
+		publisherEntity: "出版者条目",
+		publisherOwnedDescription: "我的作品必须选择出版者；若对方限制直接关联，系统会发送同意请求。",
+		publisherPublicDescription: "公共条目可选填出版者；若需要同意，系统会发送请求，而不是邀请。",
+		versionRole: "版本类型",
+		mainVersion: "主要版本",
+		variantVersion: "变体版本",
+		mainVersionEntity: "关联的主要版本",
+	},
 	attributionRoles: {
 		author: "作者",
 		"co-author": "共同作者",

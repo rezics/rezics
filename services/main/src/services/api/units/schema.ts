@@ -24,6 +24,27 @@ export type CatalogUnitType = Static<typeof CatalogUnitType>;
 export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
 export const CatalogUnitTypeParams = t.Object({ type: CatalogUnitType });
 
+export const CatalogEntryMode = t.Union([
+	t.Literal("owned_work"),
+	t.Literal("public_entry"),
+]);
+export type CatalogEntryMode = Static<typeof CatalogEntryMode>;
+
+export const PublisherEntityInput = t.Object(
+	{ entityId: Uuid },
+	{ additionalProperties: false },
+);
+export type PublisherEntityInput = Static<typeof PublisherEntityInput>;
+
+export const UnitVersionInput = t.Union([
+	t.Object({ kind: t.Literal("main") }, { additionalProperties: false }),
+	t.Object(
+		{ kind: t.Literal("variant"), mainUnitId: Uuid },
+		{ additionalProperties: false },
+	),
+]);
+export type UnitVersionInput = Static<typeof UnitVersionInput>;
+
 export const UnitStatusEventParams = t.Object({ unitId: Uuid });
 export const ResolveUnitPresentationsBody = t.Object(
 	{ ids: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }) },
@@ -72,16 +93,33 @@ export const UnitSeriesMembershipListResponse = t.Object({
 
 const UnitLocalizationInput = LocalizationInput;
 
-export const CreateUnitBody = t.Object(
-	{
-		localization: UnitLocalizationInput,
-		visibility: LifecycleInput.visibility,
-		contentRating: LifecycleInput.contentRating,
-		aiDisclosure: LifecycleInput.aiDisclosure,
-		license: LifecycleInput.license,
-	},
-	{ additionalProperties: false },
-);
+const CreateUnitFields = {
+	version: UnitVersionInput,
+	localization: UnitLocalizationInput,
+	visibility: LifecycleInput.visibility,
+	contentRating: LifecycleInput.contentRating,
+	aiDisclosure: LifecycleInput.aiDisclosure,
+	license: LifecycleInput.license,
+} as const;
+
+export const CreateUnitBody = t.Union([
+	t.Object(
+		{
+			catalogMode: t.Literal("owned_work"),
+			publisher: PublisherEntityInput,
+			...CreateUnitFields,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			catalogMode: t.Literal("public_entry"),
+			publisher: t.Optional(PublisherEntityInput),
+			...CreateUnitFields,
+		},
+		{ additionalProperties: false },
+	),
+]);
 export type CreateUnitBody = Static<typeof CreateUnitBody>;
 
 const UnitDetailsInput = t.Object(

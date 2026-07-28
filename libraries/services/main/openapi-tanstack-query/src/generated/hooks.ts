@@ -970,6 +970,7 @@ import type {
 	PostApiUnitsByTypeStatus401,
 	PostApiUnitsByTypeStatus403,
 	PostApiUnitsByTypeStatus404,
+	PostApiUnitsByTypeStatus409,
 	PostApiUnitsByTypeStatus422,
 	PostApiUnitsByTypeStatus429,
 	PostApiUnitsByTypeStatus500,
@@ -1599,6 +1600,15 @@ import type {
 	PostApiPostsStatus422,
 	PostApiPostsStatus429,
 	PostApiPostsStatus500,
+	PostApiPostsWikiOptions,
+	PostApiPostsWikiStatus200,
+	PostApiPostsWikiStatus400,
+	PostApiPostsWikiStatus403,
+	PostApiPostsWikiStatus404,
+	PostApiPostsWikiStatus409,
+	PostApiPostsWikiStatus422,
+	PostApiPostsWikiStatus429,
+	PostApiPostsWikiStatus500,
 	GetApiPostsByPostIdOptions,
 	GetApiPostsByPostIdStatus200,
 	GetApiPostsByPostIdStatus404,
@@ -2249,6 +2259,7 @@ import {
 	putApiPostsByPostIdScores,
 	getApiPosts,
 	postApiPosts,
+	postApiPostsWiki,
 	getApiPostsByPostId,
 	patchApiPostsByPostId,
 	deleteApiPostsByPostId,
@@ -17224,6 +17235,7 @@ export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
+			| PostApiUnitsByTypeStatus409
 			| PostApiUnitsByTypeStatus422
 			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
@@ -17257,6 +17269,7 @@ export function usePostApiUnitsByType<TContext>(
 				| PostApiUnitsByTypeStatus401
 				| PostApiUnitsByTypeStatus403
 				| PostApiUnitsByTypeStatus404
+				| PostApiUnitsByTypeStatus409
 				| PostApiUnitsByTypeStatus422
 				| PostApiUnitsByTypeStatus429
 				| PostApiUnitsByTypeStatus500
@@ -17278,6 +17291,7 @@ export function usePostApiUnitsByType<TContext>(
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
+			| PostApiUnitsByTypeStatus409
 			| PostApiUnitsByTypeStatus422
 			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
@@ -17293,6 +17307,7 @@ export function usePostApiUnitsByType<TContext>(
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
+			| PostApiUnitsByTypeStatus409
 			| PostApiUnitsByTypeStatus422
 			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
@@ -17313,6 +17328,7 @@ export function usePostApiUnitsByType<TContext>(
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
+			| PostApiUnitsByTypeStatus409
 			| PostApiUnitsByTypeStatus422
 			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
@@ -26791,6 +26807,112 @@ export function usePostApiPosts<TContext>(
 			| PostApiPostsStatus500
 		>,
 		PostApiPostsOptions,
+		TContext
+	>;
+}
+
+export const postApiPostsWikiMutationKey = () => [{ url: "/api/posts/wiki" }] as const;
+
+export function postApiPostsWikiMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiPostsWikiMutationKey();
+	return mutationOptions<
+		PostApiPostsWikiStatus200,
+		ResponseErrorConfig<
+			| PostApiPostsWikiStatus400
+			| PostApiPostsWikiStatus403
+			| PostApiPostsWikiStatus404
+			| PostApiPostsWikiStatus409
+			| PostApiPostsWikiStatus422
+			| PostApiPostsWikiStatus429
+			| PostApiPostsWikiStatus500
+		>,
+		PostApiPostsWikiOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiPostsWiki({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create Wiki
+ * {@link /api/posts/wiki}
+ */
+export function usePostApiPostsWiki<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiPostsWikiStatus200,
+			ResponseErrorConfig<
+				| PostApiPostsWikiStatus400
+				| PostApiPostsWikiStatus403
+				| PostApiPostsWikiStatus404
+				| PostApiPostsWikiStatus409
+				| PostApiPostsWikiStatus422
+				| PostApiPostsWikiStatus429
+				| PostApiPostsWikiStatus500
+			>,
+			PostApiPostsWikiOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiPostsWikiMutationKey();
+
+	const baseOptions = postApiPostsWikiMutationOptions(config) as UseMutationOptions<
+		PostApiPostsWikiStatus200,
+		ResponseErrorConfig<
+			| PostApiPostsWikiStatus400
+			| PostApiPostsWikiStatus403
+			| PostApiPostsWikiStatus404
+			| PostApiPostsWikiStatus409
+			| PostApiPostsWikiStatus422
+			| PostApiPostsWikiStatus429
+			| PostApiPostsWikiStatus500
+		>,
+		PostApiPostsWikiOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiPostsWikiStatus200,
+		ResponseErrorConfig<
+			| PostApiPostsWikiStatus400
+			| PostApiPostsWikiStatus403
+			| PostApiPostsWikiStatus404
+			| PostApiPostsWikiStatus409
+			| PostApiPostsWikiStatus422
+			| PostApiPostsWikiStatus429
+			| PostApiPostsWikiStatus500
+		>,
+		PostApiPostsWikiOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiPostsWikiStatus200,
+		ResponseErrorConfig<
+			| PostApiPostsWikiStatus400
+			| PostApiPostsWikiStatus403
+			| PostApiPostsWikiStatus404
+			| PostApiPostsWikiStatus409
+			| PostApiPostsWikiStatus422
+			| PostApiPostsWikiStatus429
+			| PostApiPostsWikiStatus500
+		>,
+		PostApiPostsWikiOptions,
 		TContext
 	>;
 }

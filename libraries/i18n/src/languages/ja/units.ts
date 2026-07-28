@@ -9,6 +9,23 @@ const { forms: metadataTerms } = jaTerminology.metadata;
 
 export default {
 	types: { book: "書籍", software: "ソフトウェア", media: "メディア", series: "シリーズ" },
+	creation: {
+		modeLabel: "作成方法",
+		ownedWork: "自分の作品",
+		ownedWorkDescription: "あなたのプロフィールがこの作品を所有し、管理します。",
+		publicEntry: "公開項目",
+		publicEntryDescription:
+			"コミュニティが所有し、ログイン中の全員が編集できます。作成者に特別な権限は付与されません。",
+		publisherEntity: "発行者エンティティ",
+		publisherOwnedDescription:
+			"自分の作品には発行者が必要です。直接関連付けが制限されている場合は同意リクエストを送信します。",
+		publisherPublicDescription:
+			"発行者は任意です。同意が必要な場合、公開項目から招待ではなくリクエストを送信します。",
+		versionRole: "バージョン種別",
+		mainVersion: "メインバージョン",
+		variantVersion: "派生バージョン",
+		mainVersionEntity: "関連するメインバージョン",
+	},
 	attributionRoles: {
 		author: "著者",
 		"co-author": "共著者",

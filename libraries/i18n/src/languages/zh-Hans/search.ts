@@ -151,6 +151,7 @@ export default {
 		license: "授权",
 		tag: "标签",
 		credit: "署名",
+		"publisher-profile": "出版者个人资料",
 		realm: realmTerms.label,
 		"realm-tag-vote": `${realmTerms.label}标签投票`,
 		zone: zoneTerms.label,

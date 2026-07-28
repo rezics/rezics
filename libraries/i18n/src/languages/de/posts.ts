@@ -12,6 +12,14 @@ export default {
 	untitled: `${postTerms.label} ohne Titel`,
 	unknownAttribution: "Keine Zuordnung",
 	publisher: "Herausgeber",
+	wikiCreateTitle: "Wiki-Eintrag erstellen",
+	wikiAccessMode: "Bearbeitungszugriff",
+	wikiPublicEntry: "Öffentlicher Eintrag",
+	wikiPublicDescription:
+		"Alle angemeldeten Personen können ihn bearbeiten; die erstellende Person erhält keine Sonderrechte.",
+	wikiRestricted: "Eingeschränkt",
+	wikiRestrictedDescription:
+		"Nur die erstellende und später ausdrücklich berechtigte Personen können ihn bearbeiten.",
 	replies: `Antwort-${postTerms.pluralLabel}`,
 	replyPost: `Antwort-${postTerms.inline}`,
 	signInToReply: "Zum Antworten anmelden",

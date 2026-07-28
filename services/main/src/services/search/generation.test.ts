@@ -19,7 +19,7 @@ import { getSearchSettingsFingerprint } from "./settings";
 
 const currentGeneration = {
 	id: "019f8293-faf7-7521-98d5-9cd4ea6c77f5",
-	indexUid: "rezics_units_v6_20260725",
+	indexUid: "rezics_units_v7_20260728",
 	projectionVersion: CurrentSearchProjectionVersion,
 	settingsFingerprint: getSearchSettingsFingerprint("current"),
 } as const;

@@ -9,6 +9,23 @@ const { forms: metadataTerms } = koTerminology.metadata;
 
 export default {
 	types: { book: "책", software: "소프트웨어", media: "미디어", series: "시리즈" },
+	creation: {
+		modeLabel: "생성 방식",
+		ownedWork: "내 작품",
+		ownedWorkDescription: "내 프로필이 이 작품을 소유하고 관리합니다.",
+		publicEntry: "공개 항목",
+		publicEntryDescription:
+			"커뮤니티가 소유하며 로그인한 모든 사용자가 편집할 수 있습니다. 생성자에게 별도 권한은 부여되지 않습니다.",
+		publisherEntity: "게시자 엔터티",
+		publisherOwnedDescription:
+			"내 작품에는 게시자가 필요합니다. 직접 연결이 제한된 경우 동의 요청을 보냅니다.",
+		publisherPublicDescription:
+			"게시자는 선택 사항입니다. 동의가 필요하면 공개 항목에서 초대가 아닌 요청을 보냅니다.",
+		versionRole: "버전 유형",
+		mainVersion: "메인 버전",
+		variantVersion: "변형 버전",
+		mainVersionEntity: "연결할 메인 버전",
+	},
 	attributionRoles: {
 		author: "작가",
 		"co-author": "공동 작가",

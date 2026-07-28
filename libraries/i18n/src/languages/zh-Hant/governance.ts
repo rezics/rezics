@@ -26,6 +26,13 @@ export default {
 	cancel: "撤銷",
 	noInvitations: "目前沒有邀請。",
 	creditAssociations: "署名關聯",
+	publisherAttributions: "出版者標示",
+	publisherAttributionDescription:
+		"若對方的個人檔案允許，可直接加入出版者；否則請在下方提出出版者關聯請求。",
+	publisherProfile: "出版者個人檔案",
+	addPublisher: "加入出版者",
+	removePublisher: "移除出版者",
+	noPublishers: "尚未標示出版者。",
 	subjectAssociations: "主題關聯",
 	associationProposals: "關聯提案",
 	associationProposalDescription: "提案經另一方接受後才會建立實際關聯。",
@@ -74,6 +81,14 @@ export default {
 		cancelled: "已撤銷",
 	},
 	access: {
+		scopeSelectorLabel: "權限範圍",
+		scopeOptions: {
+			root: "整個內容單元",
+			creditAttributions: "來源：貢獻署名",
+			subjectAssociations: "來源：主題關聯",
+			creditTargets: "目錄條目目標：貢獻署名",
+			subjectTargets: "目錄條目目標：主題關聯",
+		},
 		publicTitle: "公共權限",
 		publicDescription: `直接授予所有已登入 ${verbatimTerms.rezics.value} 使用者的權限。這是全域基線，因此與個別授權對象分開管理。`,
 		authenticatedLabel: "所有已登入使用者",

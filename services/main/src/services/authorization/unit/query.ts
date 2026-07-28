@@ -38,7 +38,7 @@ export function getUnitReadCondition(
 		eq(target.moderationStatus, "approved"),
 		isNull(target.deletedAt),
 	);
-	if (!profileId) return visible;
+	if (!profileId || options.discoverableOnly) return visible;
 
 	const ownership = exists(
 		database

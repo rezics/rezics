@@ -12,6 +12,14 @@ export default {
 	untitled: `Untitled ${postTerms.inline}`,
 	unknownAttribution: "No attribution",
 	publisher: "Publisher",
+	wikiCreateTitle: "Create Wiki entry",
+	wikiAccessMode: "Editing access",
+	wikiPublicEntry: "Public entry",
+	wikiPublicDescription:
+		"Every signed-in user can edit it; the creator receives no special access.",
+	wikiRestricted: "Restricted",
+	wikiRestrictedDescription:
+		"Only the creator and people explicitly authorized later can edit it.",
 	replies: `Reply ${postTerms.plural}`,
 	replyPost: `Reply ${postTerms.inline}`,
 	signInToReply: "Sign in to reply",

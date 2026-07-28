@@ -27,6 +27,13 @@ export default {
 	cancel: "Annuler",
 	noInvitations: "Il n’y a aucune invitation.",
 	creditAssociations: "Associations de crédit",
+	publisherAttributions: "Crédits d’éditeur",
+	publisherAttributionDescription:
+		"Ajoutez directement un éditeur si son profil l’autorise ; sinon, envoyez ci-dessous une demande d’association.",
+	publisherProfile: "Profil de l’éditeur",
+	addPublisher: "Ajouter l’éditeur",
+	removePublisher: "Retirer l’éditeur",
+	noPublishers: "Aucun éditeur n’est crédité.",
 	subjectAssociations: "Associations de sujet",
 	associationProposals: "Propositions d’association",
 	associationProposalDescription:
@@ -77,6 +84,14 @@ export default {
 		cancelled: "Annulée",
 	},
 	access: {
+		scopeSelectorLabel: "Portée des autorisations",
+		scopeOptions: {
+			root: "Élément entier",
+			creditAttributions: "Attributions de contribution de la source",
+			subjectAssociations: "Associations de sujet de la source",
+			creditTargets: "Cible entité : attributions de contribution",
+			subjectTargets: "Cible entité : associations de sujet",
+		},
 		publicTitle: "Autorisations publiques",
 		publicDescription: `Autorisations accordées directement à chaque utilisateur connecté à ${verbatimTerms.rezics.value}. Ce socle global est géré séparément des sujets individuels.`,
 		authenticatedLabel: "Tous les utilisateurs connectés",

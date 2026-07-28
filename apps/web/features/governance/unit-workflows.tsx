@@ -1,10 +1,13 @@
 "use client";
 
 import {
+	type GetApiEntitiesByUnitIdStatus200,
 	type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum,
+	getApiEntitiesByUnitIdQueryKey,
 	getApiGovernanceUnitAccessInvitationsQueryKey,
 	getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey,
 	getApiUnitByUnitIdAssociationProposalsQueryKey,
+	useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
 	useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId,
 	useDeleteApiUnitByUnitIdAssociationProposalsByProposalId,
 	useGetApiEntitiesByUnitId,
@@ -19,6 +22,7 @@ import {
 	usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline,
 	usePostApiUnitByUnitIdAssociationProposalsInvitations,
 	usePostApiUnitByUnitIdAssociationProposalsRequests,
+	usePostApiUnitsByTypeByUnitIdCreditAttributions,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -46,6 +50,7 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { UnitAccessManager } from "./components/unit-access-manager";
 import {
+	type CreditAttributionRole,
 	CreditAttributionRoles,
 	isKnownAttributionRole,
 	isSubjectAssociationRole,
@@ -377,10 +382,14 @@ function AssociationProposalManager({
 	unitId,
 	side,
 	kind,
+	entityPublisherOnly = false,
+	creditRoles,
 }: {
 	unitId: string;
 	side: AssociationSide;
 	kind: AssociationKind;
+	entityPublisherOnly?: boolean;
+	creditRoles?: readonly CreditAttributionRole[];
 }) {
 	const { t, locale } = useTranslation(["errors", "governance", "ui", "units"]);
 	const queryClient = useQueryClient();
@@ -494,8 +503,13 @@ function AssociationProposalManager({
 									: t.governance.sourceUnit}
 							</FieldLabel>
 							<UnitPicker
+								index={entityPublisherOnly ? "users" : undefined}
 								kinds={
-									kind === "subject" && side === "source" ? ["entity"] : undefined
+									entityPublisherOnly
+										? ["profile"]
+										: kind === "subject" && side === "source"
+											? ["entity"]
+											: undefined
 								}
 								onValueChange={setRelatedUnitId}
 								value={relatedUnitId}
@@ -506,7 +520,7 @@ function AssociationProposalManager({
 								<FieldLabel>{t.governance.associationRole}</FieldLabel>
 								<NativeSelect name="role" required>
 									{(kind === "credit"
-										? CreditAttributionRoles
+										? (creditRoles ?? CreditAttributionRoles)
 										: SubjectAssociationRoles
 									).map((role) => (
 										<NativeSelectOption key={role} value={role}>
@@ -662,21 +676,158 @@ function AssociationProposalManager({
 	);
 }
 
-export function UnitAssociationProposalManager({ unitId }: { unitId: string }) {
+export function UnitAssociationProposalManager({
+	unitId,
+	creditRoles,
+}: {
+	unitId: string;
+	creditRoles?: readonly CreditAttributionRole[];
+}) {
 	return (
 		<>
-			<UnitAttributionProposalManager unitId={unitId} />
+			<UnitAttributionProposalManager creditRoles={creditRoles} unitId={unitId} />
 			<AssociationProposalManager kind="subject" side="source" unitId={unitId} />
 		</>
 	);
 }
 
-export function UnitAttributionProposalManager({ unitId }: { unitId: string }) {
-	return <AssociationProposalManager kind="credit" side="source" unitId={unitId} />;
+export function UnitAttributionProposalManager({
+	unitId,
+	creditRoles,
+}: {
+	unitId: string;
+	creditRoles?: readonly CreditAttributionRole[];
+}) {
+	return (
+		<AssociationProposalManager
+			creditRoles={creditRoles}
+			kind="credit"
+			side="source"
+			unitId={unitId}
+		/>
+	);
 }
 
 export function ProfileAttributionProposalManager({ profileId }: { profileId: string }) {
 	return <AssociationProposalManager kind="credit" side="target" unitId={profileId} />;
+}
+
+function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStatus200 }) {
+	const { t } = useTranslation(["errors", "governance", "ui"]);
+	const localizationLanguages = useLocalizationLanguages();
+	const queryClient = useQueryClient();
+	const queryOptions = {
+		path: { unitId: entity.id },
+		query: { localizationLanguages },
+	} as const;
+	const refresh = () =>
+		queryClient.invalidateQueries({
+			queryKey: getApiEntitiesByUnitIdQueryKey(queryOptions),
+		});
+	const add = usePostApiUnitsByTypeByUnitIdCreditAttributions({
+		mutation: { onSuccess: refresh },
+	});
+	const remove = useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId({
+		mutation: { onSuccess: refresh },
+	});
+	const [publisherProfileId, setPublisherProfileId] = useState<string>();
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>{t.governance.publisherAttributions}</CardTitle>
+				<CardDescription>{t.governance.publisherAttributionDescription}</CardDescription>
+			</CardHeader>
+			<CardContent className="grid gap-6">
+				<form
+					onSubmit={async (event) => {
+						event.preventDefault();
+						if (!publisherProfileId) return;
+						try {
+							await add.mutateAsync({
+								path: { type: "entity", unitId: entity.id },
+								body: {
+									creditedUnitId: publisherProfileId,
+									role: "publisher",
+								},
+							});
+							setPublisherProfileId(undefined);
+						} catch {
+							// The typed mutation state supplies the visible API error.
+						}
+					}}
+				>
+					<FieldGroup>
+						<Field required>
+							<FieldLabel>{t.governance.publisherProfile}</FieldLabel>
+							<UnitPicker
+								index="users"
+								kinds={["profile"]}
+								onValueChange={setPublisherProfileId}
+								value={publisherProfileId}
+							/>
+						</Field>
+						<Button
+							disabled={!publisherProfileId}
+							isLoading={add.isPending}
+							type="submit"
+							variant="solid"
+						>
+							{t.governance.addPublisher}
+						</Button>
+						<RequestFailure error={add.error} />
+					</FieldGroup>
+				</form>
+				<div className="grid gap-3">
+					{entity.attributions.map((attribution) => {
+						const label = attribution.creditedUnit.title ?? attribution.creditedUnit.id;
+						return (
+							<div
+								className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 text-sm"
+								key={attribution.id}
+							>
+								{attribution.creditedUnit.kind === "profile" ? (
+									<Link
+										href={profileHref({
+											id: attribution.creditedUnit.id,
+											slugAddress: attribution.creditedUnit.slugAddress,
+										})}
+									>
+										{label}
+									</Link>
+								) : (
+									<span>{label}</span>
+								)}
+								<Button
+									isLoading={
+										remove.isPending &&
+										remove.variables?.path.associationId === attribution.id
+									}
+									onClick={() =>
+										void remove.mutateAsync({
+											path: {
+												type: "entity",
+												unitId: entity.id,
+												associationId: attribution.id,
+											},
+										})
+									}
+									size="sm"
+									variant="outline"
+								>
+									{t.governance.removePublisher}
+								</Button>
+							</div>
+						);
+					})}
+					{entity.attributions.length === 0 ? (
+						<p className="text-muted-foreground text-sm">{t.governance.noPublishers}</p>
+					) : null}
+				</div>
+				<RequestFailure error={remove.error} />
+			</CardContent>
+		</Card>
+	);
 }
 
 export function ReceivedAccessInvitationsPage() {
@@ -701,7 +852,11 @@ export function EntityGovernancePage({ id }: { id: string }) {
 	const { capabilities } = entity.data;
 	const canManageAssociations =
 		capabilities.canManageCreditAssociations || capabilities.canManageSubjectAssociations;
-	if (!capabilities.canManageAccess && !canManageAssociations)
+	if (
+		!capabilities.canManageAccess &&
+		!capabilities.canEditCreditAttributions &&
+		!canManageAssociations
+	)
 		return (
 			<WorkflowFrame title={t.governance.title}>
 				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
@@ -709,7 +864,21 @@ export function EntityGovernancePage({ id }: { id: string }) {
 		);
 	return (
 		<WorkflowFrame title={t.governance.title}>
-			{capabilities.canManageAccess ? <UnitAccessManager unitId={id} /> : null}
+			{capabilities.canManageAccess ? (
+				<UnitAccessManager includeEntityTargetScopes unitId={id} />
+			) : null}
+			{capabilities.canEditCreditAttributions ? (
+				<>
+					<EntityPublisherManager entity={entity.data} />
+					<AssociationProposalManager
+						creditRoles={["publisher"]}
+						entityPublisherOnly
+						kind="credit"
+						side="source"
+						unitId={id}
+					/>
+				</>
+			) : null}
 			{capabilities.canManageCreditAssociations ? (
 				<AssociationProposalManager kind="credit" side="target" unitId={id} />
 			) : null}

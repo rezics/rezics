@@ -26,6 +26,13 @@ export default {
 	cancel: "Cancel",
 	noInvitations: "There are no invitations.",
 	creditAssociations: "Credit associations",
+	publisherAttributions: "Publisher attributions",
+	publisherAttributionDescription:
+		"Add a publisher directly when its Profile allows it; otherwise send a publisher association request below.",
+	publisherProfile: "Publisher Profile",
+	addPublisher: "Add publisher",
+	removePublisher: "Remove publisher",
+	noPublishers: "No publisher is attributed.",
 	subjectAssociations: "Subject associations",
 	associationProposals: "Association proposals",
 	associationProposalDescription:
@@ -75,6 +82,14 @@ export default {
 		cancelled: "Cancelled",
 	},
 	access: {
+		scopeSelectorLabel: "Permission scope",
+		scopeOptions: {
+			root: "Whole Unit",
+			creditAttributions: "Source credit attributions",
+			subjectAssociations: "Source subject associations",
+			creditTargets: "Entity target credit attributions",
+			subjectTargets: "Entity target subject associations",
+		},
 		publicTitle: "Public permissions",
 		publicDescription:
 			"Permissions granted directly to every signed-in Rezics user. This global baseline is managed separately from individual subjects.",

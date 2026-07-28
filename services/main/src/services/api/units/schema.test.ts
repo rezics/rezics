@@ -11,11 +11,16 @@ import {
 } from "./schema";
 
 const localization = { language: "en", title: "Example" };
+const publicMainUnit = {
+	catalogMode: "public_entry",
+	version: { kind: "main" },
+	localization,
+} as const;
 
 describe("Unit publication License inputs", () => {
 	it("accepts registered License IDs and null", () => {
-		expect(Check(CreateUnitBody, { localization, license: "cc-by-4.0" })).toBe(true);
-		expect(Check(CreateUnitBody, { localization, license: null })).toBe(true);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, license: "cc-by-4.0" })).toBe(true);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, license: null })).toBe(true);
 		expect(
 			Check(UpdateUnitBody, {
 				updatedAt: "2026-07-21T00:00:00.000Z",
@@ -25,8 +30,46 @@ describe("Unit publication License inputs", () => {
 	});
 
 	it("rejects arbitrary text and external identifier casing", () => {
-		expect(Check(CreateUnitBody, { localization, license: "custom terms" })).toBe(false);
-		expect(Check(CreateUnitBody, { localization, license: "CC-BY-4.0" })).toBe(false);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, license: "custom terms" })).toBe(false);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, license: "CC-BY-4.0" })).toBe(false);
+	});
+});
+
+describe("Catalog creation semantics", () => {
+	it("requires a publisher Entity for owned works", () => {
+		expect(
+			Check(CreateUnitBody, {
+				catalogMode: "owned_work",
+				version: { kind: "main" },
+				localization,
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateUnitBody, {
+				catalogMode: "owned_work",
+				publisher: { entityId: "019b0000-0000-7000-8000-000000000001" },
+				version: { kind: "main" },
+				localization,
+			}),
+		).toBe(true);
+	});
+
+	it("requires a Main Unit only for Variants", () => {
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				version: { kind: "variant" },
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateUnitBody, {
+				...publicMainUnit,
+				version: {
+					kind: "variant",
+					mainUnitId: "019b0000-0000-7000-8000-000000000002",
+				},
+			}),
+		).toBe(true);
 	});
 });
 

@@ -56,11 +56,16 @@ import { getReadableUnitPresentationsByIds } from "../../units/attribution";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
-const UnitMutationNotFoundResponse = toApiErrorResponse(["UnitNotFound", "ImageAssetNotFound"]);
+const UnitMutationNotFoundResponse = toApiErrorResponse([
+	"UnitNotFound",
+	"ImageAssetNotFound",
+	"EntityEntryNotFound",
+]);
 const UnitCreateForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
+	"EntityAssociationRestricted",
 ]);
 const UnitLocalizationOrderBadRequestResponse = toApiErrorResponse([
 	"UnitLocalizationOrderInvalid",
@@ -264,6 +269,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitCreateForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
 			},
 			detail: { summary: "Create unit", tags: ["Units"] },
 		},

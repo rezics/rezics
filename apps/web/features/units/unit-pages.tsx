@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
-import { PageHeading } from "@rezics/ui";
+import { EntityPicker, type EntityPickerValue, PageHeading } from "@rezics/ui";
 import { UnitList } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -169,6 +169,12 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
+	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">(
+		"owned_work",
+	);
+	const [publisher, setPublisher] = useState<EntityPickerValue>();
+	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
+	const [mainVersion, setMainVersion] = useState<EntityPickerValue>();
 	const create = usePostApiUnitsByType({
 		mutation: {
 			onSuccess: async (unit) => {
@@ -184,6 +190,8 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const form = new FormData(event.currentTarget);
 		const summary = String(form.get("summary") ?? "").trim();
 		const submittedLicense = form.get("license");
+		if (catalogMode === "owned_work" && !publisher) return;
+		if (versionKind === "variant" && !mainVersion) return;
 		if (
 			submittedLicense !== null &&
 			submittedLicense !== "" &&
@@ -191,41 +199,58 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		)
 			return;
 		try {
+			const version =
+				versionKind === "variant" && mainVersion
+					? ({ kind: "variant", mainUnitId: mainVersion.id } as const)
+					: ({ kind: "main" } as const);
+			const common = {
+				version,
+				localization: {
+					language: toContentLanguage(locale.target),
+					title: String(form.get("title") ?? "").trim(),
+					...(summary ? { summary } : {}),
+					coverAssetId: cover?.id ?? null,
+				},
+				visibility:
+					form.get("visibility") === "private"
+						? ("private" as const)
+						: form.get("visibility") === "unlisted"
+							? ("unlisted" as const)
+							: ("public" as const),
+				contentRating:
+					form.get("contentRating") === "r15"
+						? ("r15" as const)
+						: form.get("contentRating") === "r18"
+							? ("r18" as const)
+							: form.get("contentRating") === "r18g"
+								? ("r18g" as const)
+								: ("general" as const),
+				aiDisclosure:
+					form.get("aiDisclosure") === "none"
+						? ("none" as const)
+						: form.get("aiDisclosure") === "ai_assisted"
+							? ("ai_assisted" as const)
+							: form.get("aiDisclosure") === "ai_originated"
+								? ("ai_originated" as const)
+								: form.get("aiDisclosure") === "machine_generated"
+									? ("machine_generated" as const)
+									: ("unknown" as const),
+				license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
+			};
 			await create.mutateAsync({
 				path: { type },
-				body: {
-					localization: {
-						language: toContentLanguage(locale.target),
-						title: String(form.get("title") ?? "").trim(),
-						...(summary ? { summary } : {}),
-						coverAssetId: cover?.id ?? null,
-					},
-					visibility:
-						form.get("visibility") === "private"
-							? "private"
-							: form.get("visibility") === "unlisted"
-								? "unlisted"
-								: "public",
-					contentRating:
-						form.get("contentRating") === "r15"
-							? "r15"
-							: form.get("contentRating") === "r18"
-								? "r18"
-								: form.get("contentRating") === "r18g"
-									? "r18g"
-									: "general",
-					aiDisclosure:
-						form.get("aiDisclosure") === "none"
-							? "none"
-							: form.get("aiDisclosure") === "ai_assisted"
-								? "ai_assisted"
-								: form.get("aiDisclosure") === "ai_originated"
-									? "ai_originated"
-									: form.get("aiDisclosure") === "machine_generated"
-										? "machine_generated"
-										: "unknown",
-					license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
-				},
+				body:
+					catalogMode === "owned_work" && publisher
+						? {
+								catalogMode,
+								publisher: { entityId: publisher.id },
+								...common,
+							}
+						: {
+								catalogMode: "public_entry",
+								...(publisher ? { publisher: { entityId: publisher.id } } : {}),
+								...common,
+							},
 			});
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -241,6 +266,99 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<FieldLabel>{t.ui.title}</FieldLabel>
 							<Input maxLength={500} name="title" required />
 						</Field>
+						<Field required>
+							<FieldLabel>{t.units.creation.modeLabel}</FieldLabel>
+							<NativeSelect
+								name="catalogMode"
+								onChange={(event) =>
+									setCatalogMode(
+										event.currentTarget.value === "public_entry"
+											? "public_entry"
+											: "owned_work",
+									)
+								}
+								value={catalogMode}
+							>
+								<NativeSelectOption value="owned_work">
+									{t.units.creation.ownedWork}
+								</NativeSelectOption>
+								<NativeSelectOption value="public_entry">
+									{t.units.creation.publicEntry}
+								</NativeSelectOption>
+							</NativeSelect>
+							<p className="text-muted-foreground text-sm">
+								{catalogMode === "owned_work"
+									? t.units.creation.ownedWorkDescription
+									: t.units.creation.publicEntryDescription}
+							</p>
+						</Field>
+						<Field required={catalogMode === "owned_work"}>
+							<FieldLabel>{t.units.creation.publisherEntity}</FieldLabel>
+							<EntityPicker
+								index="entity"
+								onChange={setPublisher}
+								onClear={() => setPublisher(undefined)}
+								value={publisher}
+							/>
+							<p className="text-muted-foreground text-sm">
+								{catalogMode === "owned_work"
+									? t.units.creation.publisherOwnedDescription
+									: t.units.creation.publisherPublicDescription}
+							</p>
+							{publisher ? (
+								<Button
+									onClick={() => setPublisher(undefined)}
+									size="xs"
+									type="button"
+									variant="quiet"
+								>
+									{t.ui.clear}
+								</Button>
+							) : null}
+						</Field>
+						<Field required>
+							<FieldLabel>{t.units.creation.versionRole}</FieldLabel>
+							<NativeSelect
+								name="versionKind"
+								onChange={(event) =>
+									setVersionKind(
+										event.currentTarget.value === "variant"
+											? "variant"
+											: "main",
+									)
+								}
+								value={versionKind}
+							>
+								<NativeSelectOption value="main">
+									{t.units.creation.mainVersion}
+								</NativeSelectOption>
+								<NativeSelectOption value="variant">
+									{t.units.creation.variantVersion}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
+						{versionKind === "variant" ? (
+							<Field required>
+								<FieldLabel>{t.units.creation.mainVersionEntity}</FieldLabel>
+								<EntityPicker
+									index="units"
+									kind={type}
+									onChange={setMainVersion}
+									onClear={() => setMainVersion(undefined)}
+									value={mainVersion}
+								/>
+								{mainVersion ? (
+									<Button
+										onClick={() => setMainVersion(undefined)}
+										size="xs"
+										type="button"
+										variant="quiet"
+									>
+										{t.ui.clear}
+									</Button>
+								) : null}
+							</Field>
+						) : null}
 						<Field>
 							<FieldLabel>{t.ui.summary}</FieldLabel>
 							<Textarea maxLength={2000} name="summary" />
@@ -318,7 +436,15 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							</NativeSelect>
 						</Field>
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-						<Button variant="solid" isLoading={create.isPending} type="submit">
+						<Button
+							disabled={
+								(catalogMode === "owned_work" && !publisher) ||
+								(versionKind === "variant" && !mainVersion)
+							}
+							variant="solid"
+							isLoading={create.isPending}
+							type="submit"
+						>
 							{t.actions.create}
 						</Button>
 					</FieldGroup>

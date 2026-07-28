@@ -113,6 +113,16 @@ export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchField
 		meilisearch: ["equality"],
 		residual: false,
 	},
+	"publisher-profile": {
+		categories: ["units", "entity", "posts", "collections", "reviews"],
+		scalar: "uuid",
+		operators: equality,
+		facet: "none",
+		sort: "none",
+		documentPath: "filters.publisherProfileIds",
+		meilisearch: ["equality"],
+		residual: true,
+	},
 	realm: {
 		categories: allCategories,
 		scalar: "uuid",
@@ -184,7 +194,7 @@ export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchField
 		residual: false,
 	},
 	owner: {
-		categories: ["entity", "collections"],
+		categories: ["units", "entity", "realms", "collections"],
 		scalar: "uuid",
 		operators: equality,
 		facet: "postgres-authorized",

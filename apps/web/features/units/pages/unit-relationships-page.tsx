@@ -5,6 +5,7 @@ import { UnitAssociationProposalManager } from "@/features/governance/unit-workf
 import { useUnitManagement } from "../components/unit-management-workspace";
 import { UnitSectionHeader } from "../components/unit-section-header";
 import { UnitRelationships } from "../unit-edit";
+import { CreditAttributionRolesByUnitType } from "../attribution-role";
 
 export function UnitRelationshipsPage() {
 	const { t } = useTranslation(["errors", "units"]);
@@ -19,7 +20,10 @@ export function UnitRelationshipsPage() {
 			/>
 			<UnitRelationships type={type} unit={unit} />
 			<div className="mt-6 grid gap-6">
-				<UnitAssociationProposalManager unitId={unit.id} />
+				<UnitAssociationProposalManager
+					creditRoles={CreditAttributionRolesByUnitType[type]}
+					unitId={unit.id}
+				/>
 			</div>
 		</section>
 	);

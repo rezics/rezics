@@ -26,6 +26,13 @@ export default {
 	cancel: "Cancelar",
 	noInvitations: "No hay ninguna invitación.",
 	creditAssociations: "Asociaciones de crédito",
+	publisherAttributions: "Créditos de editorial",
+	publisherAttributionDescription:
+		"Añade directamente una editorial si su perfil lo permite; en caso contrario, envía abajo una solicitud de asociación.",
+	publisherProfile: "Perfil de la editorial",
+	addPublisher: "Añadir editorial",
+	removePublisher: "Quitar editorial",
+	noPublishers: "No hay ninguna editorial acreditada.",
 	subjectAssociations: "Asociaciones de tema",
 	associationProposals: "Propuestas de asociación",
 	associationProposalDescription:
@@ -77,6 +84,14 @@ export default {
 		cancelled: "Cancelada",
 	},
 	access: {
+		scopeSelectorLabel: "Alcance de los permisos",
+		scopeOptions: {
+			root: "Elemento completo",
+			creditAttributions: "Atribuciones de crédito de la fuente",
+			subjectAssociations: "Asociaciones de tema de la fuente",
+			creditTargets: "Destino entidad: atribuciones de crédito",
+			subjectTargets: "Destino entidad: asociaciones de tema",
+		},
 		publicTitle: "Permisos públicos",
 		publicDescription: `Permisos concedidos directamente a todos los usuarios que hayan iniciado sesión en ${verbatimTerms.rezics.value}. Esta base global se gestiona por separado de los sujetos individuales.`,
 		authenticatedLabel: "Todos los usuarios que hayan iniciado sesión",

@@ -31,6 +31,7 @@ import {
 	CommunityCatalogUnitKindValues,
 	CreditAttributionRoleValues,
 	isCreditAttributionRoleForUnitKind,
+	isCreditAttributionUnitKind,
 	DockKindValues,
 	DockKindsByUnitKind,
 	moderationAction,
@@ -336,6 +337,9 @@ describe("database schema contracts", () => {
 		expect(CreditAttributionRoleValues).toContain("translator");
 		expect(isCreditAttributionRoleForUnitKind("book", "author")).toBe(true);
 		expect(isCreditAttributionRoleForUnitKind("media", "author")).toBe(false);
+		expect(isCreditAttributionRoleForUnitKind("entity", "publisher")).toBe(true);
+		expect(isCreditAttributionUnitKind("entity")).toBe(true);
+		expect(isCreditAttributionUnitKind("profile")).toBe(false);
 		expect(SubjectAssociationRoleValues).toContain("primary_character");
 		expect(SubjectAssociationRoleValues).toContain("source_work");
 		expect(getTableConfig(subjectAssociation).checks.map(({ name }) => name)).toContain(

@@ -153,6 +153,7 @@ export default {
 		license: "Lizenz",
 		tag: "Tag",
 		credit: "Mitwirkende",
+		"publisher-profile": "Verlagsprofil",
 		realm: realmTerms.label,
 		"realm-tag-vote": `Tag-Abstimmung im ${realmTerms.inline}`,
 		zone: zoneTerms.label,

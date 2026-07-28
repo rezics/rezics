@@ -152,6 +152,7 @@ export default {
 		license: "ライセンス",
 		tag: "タグ",
 		credit: "クレジット",
+		"publisher-profile": "発行者プロフィール",
 		realm: realmTerms.label,
 		"realm-tag-vote": `${realmTerms.label} タグ投票`,
 		zone: zoneTerms.label,

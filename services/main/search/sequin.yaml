@@ -28,9 +28,9 @@ databases:
           interval_ms: 3000
 
 functions:
-    - name: "rezics-unit-search-document-v6"
+    - name: "rezics-unit-search-document-v7"
       type: "enrichment"
-      file: "rezics_unit_search_document_v6.sql"
+      file: "rezics_unit_search_document_v7.sql"
     - name: "rezics-unit-search-transform-v1"
       type: "transform"
       file: "current-transform.exs"
@@ -50,7 +50,7 @@ functions:
       file: "history-routing.exs"
 
 sinks:
-    - name: "${MEILISEARCH_CURRENT_SINK_NAME:-rezics-units-v6-20260728}"
+    - name: "${MEILISEARCH_CURRENT_SINK_NAME:-rezics-units-v7-20260728}"
       database: "rezics-authoritative"
       source:
           include_tables:
@@ -62,11 +62,11 @@ sinks:
           - name: "public.search_unit_projection_source"
             group_column_names: ["unit_id"]
       initial_backfill: true
-      enrichment: "rezics-unit-search-document-v6"
+      enrichment: "rezics-unit-search-document-v7"
       transform: "rezics-unit-search-transform-v1"
       routing: "rezics-unit-search-routing-v1"
       annotations:
-          routing_index_name: &current_index_name "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v6_20260728}"
+          routing_index_name: &current_index_name "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v7_20260728}"
       load_shedding_policy: "pause_on_full"
       destination:
           type: "meilisearch"

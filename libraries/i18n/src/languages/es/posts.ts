@@ -12,6 +12,14 @@ export default {
 	untitled: `${postTerms.label} sin título`,
 	unknownAttribution: "Sin atribución",
 	publisher: "Editorial",
+	wikiCreateTitle: "Crear entrada Wiki",
+	wikiAccessMode: "Permiso de edición",
+	wikiPublicEntry: "Entrada pública",
+	wikiPublicDescription:
+		"Cualquier persona con sesión iniciada puede editarla; quien la crea no recibe permisos especiales.",
+	wikiRestricted: "Restringida",
+	wikiRestrictedDescription:
+		"Solo quien la crea y las personas autorizadas explícitamente después pueden editarla.",
 	replies: `${postTerms.pluralLabel} de respuesta`,
 	replyPost: `${postTerms.label} de respuesta`,
 	signInToReply: "Inicia sesión para responder",

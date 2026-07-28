@@ -155,6 +155,7 @@ export default {
 		license: "Licence",
 		tag: "Étiquette",
 		credit: "Crédit",
+		"publisher-profile": "Profil de l’entité éditrice",
 		realm: realmTerms.label,
 		"realm-tag-vote": `Vote d’étiquette du ${realmTerms.inline}`,
 		zone: zoneTerms.label,

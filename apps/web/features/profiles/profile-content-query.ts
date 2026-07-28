@@ -4,8 +4,13 @@ import { parseAsArrayOf, parseAsStringLiteral } from "nuqs/server";
 import type { SearchFeedRequest } from "@/features/content-feed/data/search-feed-list";
 
 export const ProfileContentKindValues = [
+	"unit:book",
+	"unit:software",
+	"unit:media",
 	"unit:entity",
+	"unit:zone",
 	"unit:collection",
+	"unit:realm",
 	"post:post",
 	"post:excerpt",
 	"post:review",

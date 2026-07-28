@@ -12,6 +12,13 @@ export default {
 	untitled: `タイトル未設定の ${postTerms.inline}`,
 	unknownAttribution: "表示なし",
 	publisher: "発行者",
+	wikiCreateTitle: "ウィキ項目を作成",
+	wikiAccessMode: "編集権限",
+	wikiPublicEntry: "公開項目",
+	wikiPublicDescription:
+		"ログイン中の全員が編集できます。作成者に特別な権限は付与されません。",
+	wikiRestricted: "制限付き",
+	wikiRestrictedDescription: "作成者と、後から明示的に許可された人だけが編集できます。",
 	replies: `${postTerms.plural} に返信`,
 	replyPost: `${postTerms.inline} に返信`,
 	signInToReply: "返信するにはサインイン",

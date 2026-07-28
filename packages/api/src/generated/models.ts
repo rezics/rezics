@@ -3871,6 +3871,7 @@ export const SearchDocumentV1ControlsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
+	"publisher-profile": "publisher-profile",
 	realm: "realm",
 	zone: "zone",
 	subject: "subject",
@@ -4109,6 +4110,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
+						| "publisher-profile"
 						| "realm"
 						| "zone"
 						| "subject"
@@ -4156,6 +4158,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
+						| "publisher-profile"
 						| "realm"
 						| "zone"
 						| "subject"
@@ -4203,6 +4206,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
+						| "publisher-profile"
 						| "realm"
 						| "zone"
 						| "subject"
@@ -4251,6 +4255,7 @@ export type SearchDocumentV1 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -4299,6 +4304,7 @@ export type SearchDocumentV1 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -4348,6 +4354,7 @@ export type SearchDocumentV1 = {
 						| "license"
 						| "tag"
 						| "credit"
+						| "publisher-profile"
 						| "realm"
 						| "zone"
 						| "subject"
@@ -4628,6 +4635,7 @@ export const SearchFeatureDefinitionV1ControlsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
+	"publisher-profile": "publisher-profile",
 	realm: "realm",
 	zone: "zone",
 	subject: "subject",
@@ -46262,6 +46270,7 @@ export const PostApiUnitsByTypeStatus403ErrorCodeEnum = {
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
 } as const;
 
 export type PostApiUnitsByTypeStatus403ErrorCodeEnum =
@@ -46298,6 +46307,7 @@ export type PostApiUnitsByTypeStatus403 = {
 export const PostApiUnitsByTypeStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ImageAssetNotFound: "ImageAssetNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
 } as const;
 
 export type PostApiUnitsByTypeStatus404ErrorCodeEnum =
@@ -46316,6 +46326,45 @@ export type PostApiUnitsByTypeStatus404 = {
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByTypeStatus409ErrorCodeEnum = {
+	UnitVariantKindMismatch: "UnitVariantKindMismatch",
+	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
+	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
+	UnitVariantChanged: "UnitVariantChanged",
+	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
+} as const;
+
+export type PostApiUnitsByTypeStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitVariantKindMismatch'
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -46386,15 +46435,6 @@ export const PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum = {
 export type PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum];
 
-export const PostApiUnitsByTypeRequestVisibilityEnum = {
-	public: "public",
-	unlisted: "unlisted",
-	private: "private",
-} as const;
-
-export type PostApiUnitsByTypeRequestVisibilityEnum =
-	(typeof PostApiUnitsByTypeRequestVisibilityEnum)[keyof typeof PostApiUnitsByTypeRequestVisibilityEnum];
-
 export const PostApiUnitsByTypeRequestContentRatingEnum = {
 	general: "general",
 	r15: "r15",
@@ -46404,17 +46444,6 @@ export const PostApiUnitsByTypeRequestContentRatingEnum = {
 
 export type PostApiUnitsByTypeRequestContentRatingEnum =
 	(typeof PostApiUnitsByTypeRequestContentRatingEnum)[keyof typeof PostApiUnitsByTypeRequestContentRatingEnum];
-
-export const PostApiUnitsByTypeRequestAiDisclosureEnum = {
-	unknown: "unknown",
-	none: "none",
-	ai_assisted: "ai_assisted",
-	ai_originated: "ai_originated",
-	machine_generated: "machine_generated",
-} as const;
-
-export type PostApiUnitsByTypeRequestAiDisclosureEnum =
-	(typeof PostApiUnitsByTypeRequestAiDisclosureEnum)[keyof typeof PostApiUnitsByTypeRequestAiDisclosureEnum];
 
 export const PostApiUnitsByTypeRequestLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -46428,60 +46457,129 @@ export const PostApiUnitsByTypeRequestLicense = {
 export type PostApiUnitsByTypeRequestLicense =
 	(typeof PostApiUnitsByTypeRequestLicense)[keyof typeof PostApiUnitsByTypeRequestLicense];
 
-/**
- * @type object
- */
-export type PostApiUnitsByTypeBody = {
-	/**
-	 * @type object
-	 */
-	localization: {
-		/**
-		 * @type string
-		 */
-		language: PostApiUnitsByTypeRequestLocalizationLanguageEnum;
-		/**
-		 * @minLength 1
-		 * @maxLength 500
-		 * @type string
-		 */
-		title: string;
-		/**
-		 * @maxLength 2000
-		 * @type string | undefined
-		 */
-		summary?: string;
-		/**
-		 * @type object | undefined
-		 */
-		description?: {
+export type PostApiUnitsByTypeBody =
+	| {
 			/**
 			 * @type string
 			 */
-			_type: "portable-text";
+			catalogMode: "owned_work";
 			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
+			 * @type object
 			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			content: (
+			publisher: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+			};
+			version:
 				| {
 						/**
 						 * @type string
 						 */
-						_key: string;
+						kind: "main";
+				  }
+				| {
 						/**
 						 * @type string
 						 */
-						_type: "block";
+						kind: "variant";
 						/**
-						 * @type array
+						 * @description
+						 * Format: `uuid`
+						 * @type string
 						 */
-						children: (
-							| {
+						mainUnitId: string;
+				  };
+			/**
+			 * @type object
+			 */
+			localization: {
+				/**
+				 * @type string
+				 */
+				language: PostApiUnitsByTypeRequestLocalizationLanguageEnum;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @maxLength 2000
+				 * @type string | undefined
+				 */
+				summary?: string;
+				/**
+				 * @type object | undefined
+				 */
+				description?: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
 									/**
 									 * @type string
 									 */
@@ -46489,177 +46587,393 @@ export type PostApiUnitsByTypeBody = {
 									/**
 									 * @type string
 									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "unit-mention";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									unitId: string;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
-		};
-		avatar?:
-			| (
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+				avatar?:
 					| (
-							| {
-									/**
-									 * @type string
-									 */
-									type: "image";
-									/**
-									 * @type object
-									 */
-									image: {
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										assetId: string;
-									};
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "emoji";
-									/**
-									 * @description
-									 * Format: `single-emoji-grapheme`
-									 * @maxLength 64
-									 * @type string
-									 */
-									emoji: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "icon";
-									/**
-									 * @type object
-									 */
-									icon: {
-										/**
-										 * @type string
-										 */
-										provider: "font-awesome";
-										/**
-										 * @type string
-										 */
-										prefix: PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum;
-										/**
-										 * @maxLength 128
-										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-										 * @type string
-										 */
-										name: string;
-									};
-							  }
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												assetId: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @description
+											 * Format: `single-emoji-grapheme`
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
 					  )
-					| null
-			  )
-			| null;
-		bannerAssetId?: (string | null) | null;
-		coverAssetId?: (string | null) | null;
-	};
-	/**
-	 * @type string | undefined
-	 */
-	visibility?: PostApiUnitsByTypeRequestVisibilityEnum;
-	/**
-	 * @type string | undefined
-	 */
-	contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
-	/**
-	 * @type string | undefined
-	 */
-	aiDisclosure?: PostApiUnitsByTypeRequestAiDisclosureEnum;
-	license?: (PostApiUnitsByTypeRequestLicense | null) | null;
-};
+					| null;
+				bannerAssetId?: (string | null) | null;
+				coverAssetId?: (string | null) | null;
+			};
+			visibility?: "public" | "unlisted" | "private";
+			/**
+			 * @type string | undefined
+			 */
+			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
+			aiDisclosure?:
+				"unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
+			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
+	  }
+	| {
+			/**
+			 * @type string
+			 */
+			catalogMode: "public_entry";
+			/**
+			 * @type object | undefined
+			 */
+			publisher?: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				entityId: string;
+			};
+			version:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "main";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "variant";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						mainUnitId: string;
+				  };
+			/**
+			 * @type object
+			 */
+			localization: {
+				/**
+				 * @type string
+				 */
+				language: PostApiUnitsByTypeRequestLocalizationLanguageEnum;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @maxLength 2000
+				 * @type string | undefined
+				 */
+				summary?: string;
+				/**
+				 * @type object | undefined
+				 */
+				description?: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+				avatar?:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												assetId: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @description
+											 * Format: `single-emoji-grapheme`
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
+					  )
+					| null;
+				bannerAssetId?: (string | null) | null;
+				coverAssetId?: (string | null) | null;
+			};
+			visibility?: "public" | "unlisted" | "private";
+			/**
+			 * @type string | undefined
+			 */
+			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
+			aiDisclosure?:
+				"unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
+			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
+	  };
 
 /**
  * @type object
@@ -46680,6 +46994,7 @@ export type PostApiUnitsByTypeResponses = {
 	"401": PostApiUnitsByTypeStatus401;
 	"403": PostApiUnitsByTypeStatus403;
 	"404": PostApiUnitsByTypeStatus404;
+	"409": PostApiUnitsByTypeStatus409;
 	"422": PostApiUnitsByTypeStatus422;
 	"429": PostApiUnitsByTypeStatus429;
 	"500": PostApiUnitsByTypeStatus500;
@@ -46694,6 +47009,7 @@ export type PostApiUnitsByTypeResponse =
 	| PostApiUnitsByTypeStatus401
 	| PostApiUnitsByTypeStatus403
 	| PostApiUnitsByTypeStatus404
+	| PostApiUnitsByTypeStatus409
 	| PostApiUnitsByTypeStatus422
 	| PostApiUnitsByTypeStatus429
 	| PostApiUnitsByTypeStatus500;
@@ -49008,6 +49324,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus403 = {
 export const PatchApiUnitsByTypeByUnitIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ImageAssetNotFound: "ImageAssetNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus404ErrorCodeEnum =
@@ -53226,6 +53543,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403 = {
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ImageAssetNotFound: "ImageAssetNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum =
@@ -55242,6 +55560,12 @@ export type GetApiEntitiesQuery = {
 	 */
 	kind?: string;
 	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	query?: string;
+	/**
 	 * @type array | undefined
 	 */
 	localizationLanguages?: GetApiEntitiesLocalizationLanguagesEnum[];
@@ -55509,6 +55833,14 @@ export type PostApiEntitiesStatus429 = {
  */
 export type PostApiEntitiesStatus500 = InternalError;
 
+export const PostApiEntitiesRequestCatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type PostApiEntitiesRequestCatalogModeEnum =
+	(typeof PostApiEntitiesRequestCatalogModeEnum)[keyof typeof PostApiEntitiesRequestCatalogModeEnum];
+
 export const PostApiEntitiesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -55534,6 +55866,10 @@ export type PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum =
  * @type object
  */
 export type PostApiEntitiesBody = {
+	/**
+	 * @type string
+	 */
+	catalogMode: PostApiEntitiesRequestCatalogModeEnum;
 	/**
 	 * @minLength 1
 	 * @maxLength 64
@@ -55865,6 +56201,75 @@ export const GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum = 
 
 export type GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum];
+
+export const GetApiEntitiesByUnitIdStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200AttributionsRoleEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200AttributionsRoleEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200AttributionsRoleEnum];
+
+export const GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitKindEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitKindEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitKindEnum];
+
+export const GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitLanguageEnum];
+
+export const GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum];
 
 export const GetApiEntitiesByUnitIdStatus200OwnerKindEnum = {
 	slug_namespace: "slug_namespace",
@@ -56330,6 +56735,137 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	/**
+	 * @type array
+	 */
+	attributions: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'author'
+		 * @type string
+		 */
+		role: GetApiEntitiesByUnitIdStatus200AttributionsRoleEnum;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @type object
+		 */
+		creditedUnit: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'slug_namespace'
+			 * @type string
+			 */
+			kind: GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitKindEnum;
+			/**
+			 * @type string
+			 */
+			language: GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitLanguageEnum;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
+	}[];
 	owner:
 		| ({
 				/**
@@ -56444,6 +56980,10 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canEditCreditAttributions: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -58371,7 +58911,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
  * @type object
  */
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsPath = {
-	type: ("book" | "software" | "media") | "series";
+	type: (("book" | "software" | "media") | "series") | "entity";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -58803,7 +59343,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsResponse =
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdPath = {
-	type: ("book" | "software" | "media") | "series";
+	type: (("book" | "software" | "media") | "series") | "entity";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -66053,6 +66593,7 @@ export type PostApiCollectionsStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -66100,6 +66641,7 @@ export type PostApiCollectionsStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -66147,6 +66689,7 @@ export type PostApiCollectionsStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -66195,6 +66738,7 @@ export type PostApiCollectionsStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -66243,6 +66787,7 @@ export type PostApiCollectionsStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -66292,6 +66837,7 @@ export type PostApiCollectionsStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67012,6 +67558,7 @@ export type PostApiCollectionsBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67059,6 +67606,7 @@ export type PostApiCollectionsBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67106,6 +67654,7 @@ export type PostApiCollectionsBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67154,6 +67703,7 @@ export type PostApiCollectionsBody = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -67202,6 +67752,7 @@ export type PostApiCollectionsBody = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -67251,6 +67802,7 @@ export type PostApiCollectionsBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67605,6 +68157,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67652,6 +68205,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67699,6 +68253,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -67747,6 +68302,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -67795,6 +68351,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -67844,6 +68401,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -70703,6 +71261,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -70750,6 +71309,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -70797,6 +71357,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -70845,6 +71406,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -70893,6 +71455,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -70942,6 +71505,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -71484,6 +72048,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -71531,6 +72096,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -71578,6 +72144,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -71626,6 +72193,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -71674,6 +72242,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -71723,6 +72292,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -72548,6 +73118,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -72595,6 +73166,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -72642,6 +73214,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -72690,6 +73263,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -72738,6 +73312,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -72787,6 +73362,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "license"
 								| "tag"
 								| "credit"
+								| "publisher-profile"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -80052,6 +80628,385 @@ export type PostApiPostsResponse =
 	| PostApiPostsStatus422
 	| PostApiPostsStatus429
 	| PostApiPostsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus400 = MalformedRequestBody;
+
+export const PostApiPostsWikiStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type PostApiPostsWikiStatus403ErrorCodeEnum =
+	(typeof PostApiPostsWikiStatus403ErrorCodeEnum)[keyof typeof PostApiPostsWikiStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiPostsWikiStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiPostsWikiStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+} as const;
+
+export type PostApiPostsWikiStatus404ErrorCodeEnum =
+	(typeof PostApiPostsWikiStatus404ErrorCodeEnum)[keyof typeof PostApiPostsWikiStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiPostsWikiStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiPostsWikiStatus409ErrorCodeEnum = {
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+	PostTargetingLocked: "PostTargetingLocked",
+} as const;
+
+export type PostApiPostsWikiStatus409ErrorCodeEnum =
+	(typeof PostApiPostsWikiStatus409ErrorCodeEnum)[keyof typeof PostApiPostsWikiStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmRulesAcceptanceRequired'
+		 * @type string
+		 */
+		code: PostApiPostsWikiStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiStatus500 = InternalError;
+
+export const PostApiPostsWikiRequestAccessModeEnum = {
+	public_entry: "public_entry",
+	restricted: "restricted",
+} as const;
+
+export type PostApiPostsWikiRequestAccessModeEnum =
+	(typeof PostApiPostsWikiRequestAccessModeEnum)[keyof typeof PostApiPostsWikiRequestAccessModeEnum];
+
+export const PostApiPostsWikiRequestLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiPostsWikiRequestLanguageEnum =
+	(typeof PostApiPostsWikiRequestLanguageEnum)[keyof typeof PostApiPostsWikiRequestLanguageEnum];
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiBody = {
+	/**
+	 * @type string
+	 */
+	accessMode: PostApiPostsWikiRequestAccessModeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string
+	 */
+	title: string;
+	/**
+	 * @type object
+	 */
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "unit-mention";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	/**
+	 * @type string
+	 */
+	language: PostApiPostsWikiRequestLanguageEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	realmId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	subjectId?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiOptions = {
+	body: PostApiPostsWikiBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiPostsWikiResponses = {
+	"200": PostApiPostsWikiStatus200;
+	"400": PostApiPostsWikiStatus400;
+	"403": PostApiPostsWikiStatus403;
+	"404": PostApiPostsWikiStatus404;
+	"409": PostApiPostsWikiStatus409;
+	"422": PostApiPostsWikiStatus422;
+	"429": PostApiPostsWikiStatus429;
+	"500": PostApiPostsWikiStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiPostsWikiResponse =
+	| PostApiPostsWikiStatus200
+	| PostApiPostsWikiStatus400
+	| PostApiPostsWikiStatus403
+	| PostApiPostsWikiStatus404
+	| PostApiPostsWikiStatus409
+	| PostApiPostsWikiStatus422
+	| PostApiPostsWikiStatus429
+	| PostApiPostsWikiStatus500;
 
 /**
  * @type object
@@ -94142,6 +95097,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -94189,6 +95145,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -94236,6 +95193,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -94284,6 +95242,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -94332,6 +95291,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -94381,6 +95341,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -94535,6 +95496,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -94582,6 +95544,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -94629,6 +95592,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -94677,6 +95641,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -94725,6 +95690,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -94774,6 +95740,7 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -97271,6 +98238,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -97318,6 +98286,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -97365,6 +98334,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -97413,6 +98383,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -97461,6 +98432,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -97510,6 +98482,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -97664,6 +98637,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -97711,6 +98685,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -97758,6 +98733,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -97806,6 +98782,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -97854,6 +98831,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -97903,6 +98881,7 @@ export type PostApiSearchFeaturesByTemplateFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -98913,6 +99892,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -98960,6 +99940,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -99007,6 +99988,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -99055,6 +100037,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -99103,6 +100086,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -99152,6 +100136,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -99306,6 +100291,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -99353,6 +100339,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -99400,6 +100387,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -99448,6 +100436,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -99496,6 +100485,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -99545,6 +100535,7 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -102017,6 +103008,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -102064,6 +103056,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -102111,6 +103104,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -102159,6 +103153,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -102207,6 +103202,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -102256,6 +103252,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -102410,6 +103407,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -102457,6 +103455,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -102504,6 +103503,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -102552,6 +103552,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -102600,6 +103601,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -102649,6 +103651,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -103680,6 +104683,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -103727,6 +104731,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -103774,6 +104779,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -103822,6 +104828,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -103870,6 +104877,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -103919,6 +104927,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -104073,6 +105082,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -104120,6 +105130,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -104167,6 +105178,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -104215,6 +105227,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -104263,6 +105276,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -104312,6 +105326,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -104946,6 +105961,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -104993,6 +106009,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -105040,6 +106057,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -105088,6 +106106,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -105136,6 +106155,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -105185,6 +106205,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -105339,6 +106360,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -105386,6 +106408,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -105433,6 +106456,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -105481,6 +106505,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -105529,6 +106554,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -105578,6 +106604,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -108060,6 +109087,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -108107,6 +109135,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -108154,6 +109183,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -108202,6 +109232,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -108250,6 +109281,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -108299,6 +109331,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "license"
 							| "tag"
 							| "credit"
+							| "publisher-profile"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -108453,6 +109486,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -108500,6 +109534,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -108547,6 +109582,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -108595,6 +109631,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -108643,6 +109680,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -108692,6 +109730,7 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -109340,6 +110379,7 @@ export const PostApiSearchSharedQueriesStatus201DocumentSelectionsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
+	"publisher-profile": "publisher-profile",
 	realm: "realm",
 	zone: "zone",
 	subject: "subject",
@@ -109434,6 +110474,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -109481,6 +110522,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -109528,6 +110570,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -109576,6 +110619,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "license"
 												| "tag"
 												| "credit"
+												| "publisher-profile"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -109624,6 +110668,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "license"
 												| "tag"
 												| "credit"
+												| "publisher-profile"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -109673,6 +110718,7 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -109964,6 +111010,7 @@ export const PostApiSearchSharedQueriesRequestSelectionsFieldEnum = {
 	license: "license",
 	tag: "tag",
 	credit: "credit",
+	"publisher-profile": "publisher-profile",
 	realm: "realm",
 	zone: "zone",
 	subject: "subject",
@@ -110048,6 +111095,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -110095,6 +111143,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -110142,6 +111191,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -110190,6 +111240,7 @@ export type PostApiSearchSharedQueriesBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -110238,6 +111289,7 @@ export type PostApiSearchSharedQueriesBody = {
 											| "license"
 											| "tag"
 											| "credit"
+											| "publisher-profile"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -110287,6 +111339,7 @@ export type PostApiSearchSharedQueriesBody = {
 									| "license"
 									| "tag"
 									| "credit"
+									| "publisher-profile"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -110527,6 +111580,7 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentSelectionsFieldEnum =
 	license: "license",
 	tag: "tag",
 	credit: "credit",
+	"publisher-profile": "publisher-profile",
 	realm: "realm",
 	zone: "zone",
 	subject: "subject",
@@ -110621,6 +111675,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -110668,6 +111723,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -110715,6 +111771,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -110763,6 +111820,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "license"
 												| "tag"
 												| "credit"
+												| "publisher-profile"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -110811,6 +111869,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "license"
 												| "tag"
 												| "credit"
+												| "publisher-profile"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -110860,6 +111919,7 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "license"
 										| "tag"
 										| "credit"
+										| "publisher-profile"
 										| "realm"
 										| "zone"
 										| "subject"
