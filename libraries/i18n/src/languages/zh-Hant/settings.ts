@@ -6,11 +6,12 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
+const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
 	workspace: {
 		title: "設定",
-		description: `管理個人資料、使用偏好、標籤來源、帳戶安全與 ${verbatimTerms.api.value} 權杖。`,
+		description: `管理個人資料、使用偏好、隱私、標籤來源、帳戶安全與 ${verbatimTerms.api.value} 權杖。`,
 		backToApplication: "返回應用程式",
 		backToOverview: "返回設定",
 		navigation: "設定導覽",
@@ -23,6 +24,10 @@ export default {
 			preferences: {
 				label: "偏好設定",
 				description: `選擇介面語言、內容語言、內容分級、預設評分${realmTerms.label}與預設授權。`,
+			},
+			privacy: {
+				label: "隱私",
+				description: "控制你的評分與進度是否能向其他人顯示。",
 			},
 			tagSources: {
 				label: "標籤來源",
@@ -41,6 +46,17 @@ export default {
 				description: "建立、限制、停用及撤銷供自動化工具使用的存取權杖。",
 			},
 		},
+	},
+	privacy: {
+		title: "隱私設定",
+		description: "設定評分與目前進度的整體公開上限。",
+		scoreTitle: "評分",
+		scoreDescription: "此設定限制其他人能否在你的個人資料或相關評論中看到評分。",
+		progressTitle: "進度",
+		progressDescription: "此設定限制其他人能否在你的個人資料或相關評論中看到目前進度。",
+		categoryRule:
+			"整體設定是公開上限，不會改寫每筆資料原本的可見性。若設為私密，公開項目會暫時隱藏；恢復公開後，原本公開的項目會再次顯示。",
+		unlistedRule: `「不列出」不會出現在個人資料中，但可在你明確連結的評論或${postTerms.label}中顯示。「私密」只有你能看到。`,
 	},
 	profile: "個人資料",
 	slugAddress: unitSlugTerms.label,

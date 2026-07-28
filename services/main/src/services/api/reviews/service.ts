@@ -1,4 +1,7 @@
-import { score } from "../../database/schema";
+import { eq } from "drizzle-orm";
+
+import { profilePreference, score } from "../../database/schema";
+import type { ResourceVisibility } from "../../database/schema/contract-values";
 import type { DatabaseTransaction } from "../../database";
 
 export async function upsertScore(
@@ -7,15 +10,36 @@ export async function upsertScore(
 	targetId: string,
 	contextUnitId: string,
 	value: number,
+	visibility?: ResourceVisibility,
 ) {
+	const resolvedVisibility =
+		visibility ??
+		(
+			await tx
+				.select({ visibility: profilePreference.scoreVisibility })
+				.from(profilePreference)
+				.where(eq(profilePreference.profileId, userId))
+				.limit(1)
+		)[0]?.visibility;
+	if (!resolvedVisibility) throw new Error("Score visibility preference was not found");
 	const [entry] = await tx
 		.insert(score)
-		.values({ profileId: userId, unitId: targetId, contextUnitId, value })
+		.values({
+			profileId: userId,
+			unitId: targetId,
+			contextUnitId,
+			value,
+			visibility: resolvedVisibility,
+		})
 		.onConflictDoUpdate({
 			target: [score.profileId, score.unitId, score.contextUnitId],
-			set: { value, updatedAt: new Date() },
+			set: {
+				value,
+				...(visibility === undefined ? {} : { visibility }),
+				updatedAt: new Date(),
+			},
 		})
-		.returning({ id: score.id });
+		.returning({ id: score.id, visibility: score.visibility });
 	if (!entry) throw new Error("Score upsert did not return an id");
-	return entry.id;
+	return entry;
 }

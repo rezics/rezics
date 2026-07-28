@@ -6,7 +6,7 @@ import {
 	ProgressSourceKindValues,
 	ProgressStatusValues,
 } from "../../database/schema/contract-values";
-import { DateTime, LocalizationLanguageQuery, Uuid } from "../schema";
+import { DateTime, LocalizationLanguageQuery, ResourceVisibility, Uuid } from "../schema";
 import { ProgressResponse } from "../schema/response";
 
 const ProgressStatus = t.Union(ProgressStatusValues.map((value) => t.Literal(value)));
@@ -46,6 +46,7 @@ export const UpsertProgressBody = t.Object(
 		progress: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
 		totalTimeMs: t.Optional(SafeDurationMs),
 		lastContentStructureNodeId: t.Optional(t.Nullable(Uuid)),
+		visibility: t.Optional(ResourceVisibility),
 	},
 	{ additionalProperties: false },
 );
@@ -54,6 +55,7 @@ export type UpsertProgressBody = Static<typeof UpsertProgressBody>;
 export const CompleteProgressBody = t.Object(
 	{
 		totalTimeMs: t.Optional(SafeDurationMs),
+		visibility: t.Optional(ResourceVisibility),
 	},
 	{ additionalProperties: false },
 );

@@ -7,11 +7,12 @@ const { forms: realmTerms } = enTerminology.realm;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 const { forms: metadataTerms } = enTerminology.metadata;
+const { forms: postTerms } = enTerminology.post;
 
 export default {
 	workspace: {
 		title: "Settings",
-		description: `Manage your profile, preferences, Tag sources, account security, and ${verbatimTerms.api.value} tokens.`,
+		description: `Manage your profile, preferences, privacy, Tag sources, account security, and ${verbatimTerms.api.value} tokens.`,
 		backToApplication: "Back to the application",
 		backToOverview: "Back to settings",
 		navigation: "Settings navigation",
@@ -24,6 +25,10 @@ export default {
 			preferences: {
 				label: "Preferences",
 				description: `Choose interface and content languages, ratings, a default scoring ${realmTerms.label}, and a default license.`,
+			},
+			privacy: {
+				label: "Privacy",
+				description: "Control whether other people can see your Scores and Progress.",
 			},
 			tagSources: {
 				label: "Tag sources",
@@ -43,6 +48,19 @@ export default {
 					"Create, limit, disable, and revoke access tokens for automation tools.",
 			},
 		},
+	},
+	privacy: {
+		title: "Privacy",
+		description: "Set the overall disclosure ceiling for Scores and current Progress.",
+		scoreTitle: "Scores",
+		scoreDescription:
+			"Limits whether other people can see your Scores on your Profile or in related reviews.",
+		progressTitle: "Progress",
+		progressDescription:
+			"Limits whether other people can see your current Progress on your Profile or in related reviews.",
+		categoryRule:
+			"This overall setting is a visibility ceiling and does not rewrite individual records. Setting it to private temporarily hides public items; restoring public makes those items visible again.",
+		unlistedRule: `Unlisted items stay off your Profile but may appear in a review or ${postTerms.label} you explicitly link. Private items are visible only to you.`,
 	},
 	profile: "Profile",
 	slugAddress: unitSlugTerms.label,

@@ -14,12 +14,14 @@ import type { SearchCategory } from "@rezics/filter";
 import { useEffect, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";
 import type { UnitScore } from "../model/score-value";
 
 export interface ScoreContextOption {
 	readonly id: string;
 	readonly label: string;
 	readonly score?: UnitScore;
+	readonly visibility?: ResourceVisibility;
 }
 
 export type ScoreContextSearchCategory = SearchCategory | "all";
@@ -86,11 +88,12 @@ export function ScoreContextPicker({
 				.then(
 					(hits) => {
 						if (request.signal.aborted) return;
-						const scores = new Map(options.map((option) => [option.id, option.score]));
+						const existing = new Map(options.map((option) => [option.id, option]));
 						const matches = hits.map((hit) => ({
 							id: hit.id,
 							label: hit.label,
-							score: scores.get(hit.id),
+							score: existing.get(hit.id)?.score,
+							visibility: existing.get(hit.id)?.visibility,
 						}));
 						set(includeSelected(matches, value));
 					},

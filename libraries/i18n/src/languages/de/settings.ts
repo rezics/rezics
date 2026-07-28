@@ -26,6 +26,11 @@ export default {
 				label: "Voreinstellungen",
 				description: `Wähle Oberflächen- und Inhaltssprachen, Einstufungen, einen standardmäßigen Bewertungs-${realmTerms.inline} und eine Standardlizenz.`,
 			},
+			privacy: {
+				label: "Datenschutz",
+				description:
+					"Lege fest, ob andere deine Bewertungen und Fortschritte sehen können.",
+			},
 			tagSources: {
 				label: "Tag-Quellen",
 				description: `Wähle und ordne die ${realmTerms.plural}, deren Tag-Bewertungen du sehen möchtest.`,
@@ -44,6 +49,21 @@ export default {
 					"Erstelle, begrenze, deaktiviere und widerrufe Zugriffstoken für Automatisierungswerkzeuge.",
 			},
 		},
+	},
+	privacy: {
+		title: "Datenschutz",
+		description:
+			"Lege die allgemeine Sichtbarkeitsgrenze für Bewertungen und den aktuellen Fortschritt fest.",
+		scoreTitle: "Bewertungen",
+		scoreDescription:
+			"Begrenzt, ob andere deine Bewertungen im Profil oder in verknüpften Rezensionen sehen können.",
+		progressTitle: "Fortschritt",
+		progressDescription:
+			"Begrenzt, ob andere deinen aktuellen Fortschritt im Profil oder in verknüpften Rezensionen sehen können.",
+		categoryRule:
+			"Diese allgemeine Einstellung ist eine Sichtbarkeitsgrenze und ändert keine einzelnen Einträge. Privat blendet öffentliche Einträge vorübergehend aus; nach der Rückkehr zu öffentlich werden sie wieder sichtbar.",
+		unlistedRule:
+			"Nicht gelistete Einträge erscheinen nicht im Profil, können aber in ausdrücklich verknüpften Rezensionen oder Beiträgen sichtbar sein. Private Einträge siehst nur du.",
 	},
 	profile: "Profil",
 	slugAddress: unitSlugTerms.label,

@@ -172,7 +172,8 @@ export type SlugAddressKind = (typeof SlugAddressKindValues)[number];
 
 export const UnitStatusValues = ["draft", "published", "archived"] as const;
 export const UnitStatusActorKindValues = ["profile", "system", "import"] as const;
-export const UnitVisibilityValues = ["public", "unlisted", "private"] as const;
+export const ResourceVisibilityValues = ["public", "unlisted", "private"] as const;
+export type ResourceVisibility = (typeof ResourceVisibilityValues)[number];
 export const ContentRatingValues = ["general", "r15", "r18", "r18g"] as const;
 export type ContentRating = (typeof ContentRatingValues)[number];
 export const DefaultContentRatingValues = [

@@ -5,10 +5,12 @@ import { FollowingStatusResponse } from "../schema/action-response";
 import {
 	CollectionConfigV1,
 	FollowingListQuery,
+	ProfileActivityQuery,
 	PublicProfileQuery,
 	ReplacePreferencesBody,
 	StudioContentListQuery,
 	UpdateDisplayPreferencesBody,
+	UpdatePrivacyPreferencesBody,
 	UpdateProfileBody,
 } from "./schema";
 
@@ -74,6 +76,32 @@ describe("public profile localization query", () => {
 		expect(Check(PublicProfileQuery, { localizationLanguages: [] })).toBe(false);
 		expect(Check(PublicProfileQuery, { localizationLanguages: ["en", "en"] })).toBe(false);
 		expect(Check(PublicProfileQuery, { language: "en" })).toBe(false);
+	});
+});
+
+describe("Profile privacy contracts", () => {
+	it("accepts only explicit Score and Progress category visibility controls", () => {
+		expect(
+			Check(UpdatePrivacyPreferencesBody, {
+				scoreVisibility: "private",
+				progressVisibility: "unlisted",
+			}),
+		).toBe(true);
+		expect(Check(UpdatePrivacyPreferencesBody, { scoreVisibility: "public" })).toBe(true);
+		expect(Check(UpdatePrivacyPreferencesBody, {})).toBe(false);
+		expect(Check(UpdatePrivacyPreferencesBody, { scoreVisibility: "followers" })).toBe(false);
+		expect(Check(UpdatePrivacyPreferencesBody, { unitVisibility: "private" })).toBe(false);
+	});
+
+	it("bounds public Profile activity reads", () => {
+		expect(
+			Check(ProfileActivityQuery, {
+				localizationLanguages: ["zh", "en"],
+				limit: 20,
+			}),
+		).toBe(true);
+		expect(Check(ProfileActivityQuery, { limit: 0 })).toBe(false);
+		expect(Check(ProfileActivityQuery, { limit: 51 })).toBe(false);
 	});
 });
 

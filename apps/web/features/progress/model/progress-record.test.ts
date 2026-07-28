@@ -22,6 +22,7 @@ const activeBook: UnitProgressRecord = {
 	progress: 0.42,
 	status: "active",
 	totalTimeMs: 0,
+	visibility: "private",
 };
 
 describe("progress record input", () => {

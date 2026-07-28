@@ -37,7 +37,7 @@ import {
 	type UnitKind,
 	UnitKindValues,
 	UnitStatusValues,
-	UnitVisibilityValues,
+	ResourceVisibilityValues,
 	toEnumValues,
 } from "./contract-values";
 import {
@@ -51,7 +51,10 @@ import {
 import { users } from "./auth";
 
 export const unitStatus = pgEnum("unit_status", toEnumValues(UnitStatusValues));
-export const unitVisibility = pgEnum("unit_visibility", toEnumValues(UnitVisibilityValues));
+export const resourceVisibility = pgEnum(
+	"resource_visibility",
+	toEnumValues(ResourceVisibilityValues),
+);
 export const contentRating = pgEnum("content_rating", toEnumValues(ContentRatingValues));
 export const aiDisclosure = pgEnum("ai_disclosure", toEnumValues(AiDisclosureValues));
 export const moderationStatus = pgEnum("moderation_status", toEnumValues(ModerationStatusValues));
@@ -73,7 +76,7 @@ export const unit = pgTable(
 		id: createUuidv7PrimaryKey(),
 		kind: text().$type<UnitKind>().notNull(),
 		status: unitStatus().default("draft").notNull(),
-		visibility: unitVisibility().default("public").notNull(),
+		visibility: resourceVisibility().default("public").notNull(),
 		contentRating: contentRating().default("general").notNull(),
 		aiDisclosure: aiDisclosure().default("unknown").notNull(),
 		/** Public-facing License selected for this Unit's work; never a grant to REZICS. */

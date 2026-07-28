@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
-import { ContentLanguage, LocalizationLanguageQuery, Uuid } from "../schema";
+import { ContentLanguage, LocalizationLanguageQuery, ResourceVisibility, Uuid } from "../schema";
 
 export const ReviewSortValues = ["best", "new"] as const;
 export const ReviewSortSchema = t.UnionEnum(ReviewSortValues, { default: "best" });
@@ -102,6 +102,7 @@ export type ScoreTargetParams = Static<typeof ScoreTargetParams>;
 export const SetScoreBody = t.Object({
 	contextUnitId: Uuid,
 	score: t.Integer({ minimum: 1, maximum: 10 }),
+	visibility: t.Optional(ResourceVisibility),
 });
 export type SetScoreBody = Static<typeof SetScoreBody>;
 

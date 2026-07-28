@@ -5,6 +5,7 @@ import {
 	type GetApiProgressByUnitIdStatus200,
 	useDeleteApiProgressByUnitId,
 	useGetApiProgressByUnitId,
+	useGetApiUsersMePreferences,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
 	usePostApiProgressByUnitIdComplete,
 	usePutApiProgressByUnitId,
@@ -22,6 +23,10 @@ import {
 } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import {
+	isResourceVisibility,
+	type ResourceVisibility,
+} from "@/features/privacy/model/resource-visibility";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -53,11 +58,12 @@ interface UnitProgressContextValue {
 	readonly chaptersPending: boolean;
 	readonly closeEditor: () => void;
 	readonly completeCurrentProgress: (
-		update?: Pick<UnitProgressUpdate, "totalTimeMs">,
+		update?: Pick<UnitProgressUpdate, "totalTimeMs" | "visibility">,
 	) => Promise<boolean>;
 	readonly completionError: unknown;
 	readonly completionFeedbackCount: number | undefined;
 	readonly currentEntryId: string | null;
+	readonly defaultVisibility: ResourceVisibility;
 	readonly domain: UnitProgressDomain;
 	readonly editorOpen: boolean;
 	readonly isCompleting: boolean;
@@ -96,6 +102,9 @@ export function UnitProgressProvider({
 		{ path: { unitId: domain.unitId } },
 		{ query: { enabled: authenticated } },
 	);
+	const preferences = useGetApiUsersMePreferences({
+		query: { enabled: authenticated },
+	});
 	const chaptersQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
 		{ query: { enabled: authenticated && domain.type === "book" } },
@@ -139,14 +148,16 @@ export function UnitProgressProvider({
 		});
 	}, [chaptersQuery.data?.items]);
 	const displayedRecord = completionPreview ?? confirmedRecord;
+	const defaultVisibility =
+		preferences.data?.progressVisibility ?? ("private" satisfies ResourceVisibility);
 	const state = useMemo(
 		() =>
 			deriveUnitProgressState({
 				authenticated,
 				record: displayedRecord,
-				recordError: recordQuery.error,
-				recordFailed: recordQuery.isError,
-				recordPending: recordQuery.isPending,
+				recordError: recordQuery.error ?? preferences.error,
+				recordFailed: recordQuery.isError || preferences.isError,
+				recordPending: recordQuery.isPending || preferences.isPending,
 				sessionPending: session.isPending,
 			}),
 		[
@@ -155,6 +166,9 @@ export function UnitProgressProvider({
 			recordQuery.error,
 			recordQuery.isError,
 			recordQuery.isPending,
+			preferences.error,
+			preferences.isError,
+			preferences.isPending,
 			session.isPending,
 		],
 	);
@@ -207,7 +221,9 @@ export function UnitProgressProvider({
 	);
 
 	const completeCurrentProgress = useCallback(
-		async (update?: Pick<UnitProgressUpdate, "totalTimeMs">): Promise<boolean> => {
+		async (
+			update?: Pick<UnitProgressUpdate, "totalTimeMs" | "visibility">,
+		): Promise<boolean> => {
 			if (completionInFlight.current) return false;
 			completionInFlight.current = true;
 			setCompletionFeedbackCount(undefined);
@@ -215,10 +231,14 @@ export function UnitProgressProvider({
 			try {
 				const updated = await completionMutation.mutateAsync({
 					path: { unitId: domain.unitId },
-					body:
-						update?.totalTimeMs === undefined
+					body: {
+						...(update?.totalTimeMs === undefined
 							? {}
-							: { totalTimeMs: update.totalTimeMs },
+							: { totalTimeMs: update.totalTimeMs }),
+						...(update?.visibility === undefined
+							? {}
+							: { visibility: update.visibility }),
+					},
 				});
 				queryClient.setQueryData(progressQueryKey, {
 					state: "tracked",
@@ -287,6 +307,7 @@ export function UnitProgressProvider({
 			completionError: completionMutation.error,
 			completionFeedbackCount,
 			currentEntryId,
+			defaultVisibility,
 			domain,
 			editorOpen,
 			isCompleting: completionPreview !== undefined,
@@ -313,6 +334,7 @@ export function UnitProgressProvider({
 			completionMutation.error,
 			completionPreview,
 			currentEntryId,
+			defaultVisibility,
 			domain,
 			editorOpen,
 			openEditor,
@@ -349,6 +371,7 @@ function toUnitProgressRecord(value: {
 	readonly progress: number;
 	readonly status: string;
 	readonly totalTimeMs: number | string;
+	readonly visibility: string;
 }): UnitProgressRecord {
 	return {
 		completedCount: toNonNegativeApiInteger(value.completedCount),
@@ -356,5 +379,6 @@ function toUnitProgressRecord(value: {
 		progress: clampProgress(value.progress),
 		status: toProgressStatus(value.status),
 		totalTimeMs: Math.max(0, toFiniteApiNumber(value.totalTimeMs) ?? 0),
+		visibility: isResourceVisibility(value.visibility) ? value.visibility : "private",
 	};
 }

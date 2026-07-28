@@ -17,7 +17,7 @@ import {
 	StoredUiLocaleValues,
 	UnitKindValues,
 	UnitStatusValues,
-	UnitVisibilityValues,
+	ResourceVisibilityValues,
 } from "../../database/schema/contract-values";
 import { isFractionalPosition } from "../../ordering/position";
 
@@ -62,6 +62,12 @@ export type StoredUiLocale = Static<typeof StoredUiLocale>;
 /** A persisted Unit discriminator accepted and returned by the public API. */
 export const UnitKind = t.UnionEnum(UnitKindValues, { default: undefined });
 export type UnitKind = Static<typeof UnitKind>;
+
+/** A persisted disclosure control shared by Units, Scores, and Progress. */
+export const ResourceVisibility = t.UnionEnum(ResourceVisibilityValues, {
+	default: undefined,
+});
+export type ResourceVisibility = Static<typeof ResourceVisibility>;
 
 /** A REZICS publication License ID accepted and returned by the public API. */
 export const PublicationLicense = t.UnionEnum(PublicationLicenseIds, {
@@ -146,7 +152,7 @@ export type LocalizationInput = Static<typeof LocalizationInput>;
 
 export const LifecycleInput = {
 	status: t.Optional(t.Union(UnitStatusValues.map((value) => t.Literal(value)))),
-	visibility: t.Optional(t.Union(UnitVisibilityValues.map((value) => t.Literal(value)))),
+	visibility: t.Optional(ResourceVisibility),
 	contentRating: t.Optional(ContentRating),
 	aiDisclosure: t.Optional(t.Union(AiDisclosureValues.map((value) => t.Literal(value)))),
 	license: t.Optional(t.Nullable(PublicationLicense)),

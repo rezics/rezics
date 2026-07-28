@@ -4,8 +4,8 @@ import { PortableTextDocument } from "@rezics/block";
 
 import {
 	ContentLanguageValues,
+	ResourceVisibilityValues,
 	UnitStatusValues,
-	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
 import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addresses/schema";
 import {
@@ -17,6 +17,7 @@ import {
 	FractionalPosition,
 	LocalizationLanguageQuery,
 	PublicationLicense,
+	ResourceVisibility,
 	StoredUiLocale,
 	UnitKind,
 	Uuid,
@@ -76,7 +77,7 @@ export const StudioContentListQuery = t.Object(
 		permission: t.Optional(StudioPermission),
 		workState: t.Optional(StudioWorkState),
 		status: t.Optional(t.UnionEnum(UnitStatusValues, { default: undefined })),
-		visibility: t.Optional(t.UnionEnum(UnitVisibilityValues, { default: undefined })),
+		visibility: t.Optional(t.UnionEnum(ResourceVisibilityValues, { default: undefined })),
 		sort: t.Optional(StudioSort),
 		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ maxLength: 1_024 })),
@@ -96,7 +97,7 @@ export const StudioContentListResponse = t.Object({
 			title: t.Nullable(t.String()),
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			status: t.UnionEnum(UnitStatusValues),
-			visibility: t.UnionEnum(UnitVisibilityValues),
+			visibility: t.UnionEnum(ResourceVisibilityValues),
 			relations: t.Array(StudioRelation, { minItems: 1, uniqueItems: true }),
 			workState: StudioWorkState,
 			permissions: t.Array(StudioPermission, { uniqueItems: true }),
@@ -176,6 +177,15 @@ export const UpdateDisplayPreferencesBody = t.Object(
 );
 export type UpdateDisplayPreferencesBody = Static<typeof UpdateDisplayPreferencesBody>;
 
+export const UpdatePrivacyPreferencesBody = t.Object(
+	{
+		scoreVisibility: t.Optional(ResourceVisibility),
+		progressVisibility: t.Optional(ResourceVisibility),
+	},
+	{ additionalProperties: false, minProperties: 1 },
+);
+export type UpdatePrivacyPreferencesBody = Static<typeof UpdatePrivacyPreferencesBody>;
+
 export const ReplacePreferencesBody = t.Object(
 	{
 		interfaceLocale: StoredUiLocale,
@@ -207,6 +217,15 @@ export const PublicProfileQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
 export type PublicProfileQuery = Static<typeof PublicProfileQuery>;
+
+export const ProfileActivityQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
+export type ProfileActivityQuery = Static<typeof ProfileActivityQuery>;
 
 export const UserIdParams = t.Object({ id: Uuid });
 export type UserIdParams = Static<typeof UserIdParams>;

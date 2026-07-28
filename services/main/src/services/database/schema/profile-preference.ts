@@ -21,7 +21,7 @@ import {
 	type StoredUiLocale,
 	StoredUiLocaleValues,
 } from "./contract-values";
-import { contentRating, profile, unit } from "./core";
+import { contentRating, profile, resourceVisibility, unit } from "./core";
 
 export const profilePreference = pgTable(
 	"profile_preference",
@@ -32,6 +32,8 @@ export const profilePreference = pgTable(
 		defaultLicense: text().$type<PublicationLicenseId>(),
 		defaultRealmManageMode: boolean().default(false).notNull(),
 		defaultScoreContextUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
+		scoreVisibility: resourceVisibility().default("private").notNull(),
+		progressVisibility: resourceVisibility().default("private").notNull(),
 		personalizedFeed: boolean().default(true).notNull(),
 		filterFeedByPreferredLanguages: boolean().default(false).notNull(),
 		collectionConfig: createJsonObjectColumn(),

@@ -74,14 +74,20 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 	const isCurrentUser = me.data?.id === user.id;
 	const canFollow = Boolean(session && me.data && !isCurrentUser);
 	const contentHref = profileHref(user, "content");
+	const activityHref = profileHref(user, "activity");
 	const activeSection: ProfileSection =
-		pathname === contentHref || pathname.startsWith(`${contentHref}/`) ? "content" : "profile";
+		pathname === contentHref || pathname.startsWith(`${contentHref}/`)
+			? "content"
+			: pathname === activityHref || pathname.startsWith(`${activityHref}/`)
+				? "activity"
+				: "profile";
 	const joinedAt = new Date(user.createdAt);
 	const joinedDate = Number.isNaN(joinedAt.getTime())
 		? null
 		: new Intl.DateTimeFormat(locale.target, { dateStyle: "medium" }).format(joinedAt);
 	const tabs = [
 		{ value: "profile", label: t.profiles.tabs.profile, href: profileHref(user) },
+		{ value: "activity", label: t.profiles.tabs.activity, href: activityHref },
 		{ value: "content", label: t.profiles.tabs.content, href: contentHref },
 	] as const;
 

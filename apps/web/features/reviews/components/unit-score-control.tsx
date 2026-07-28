@@ -15,11 +15,18 @@ import {
 	DialogHeader,
 	Field,
 	FieldLabel,
+	NativeSelect,
+	NativeSelectOption,
 	Rating,
 } from "@rezics/ui";
 import { useMemo, useState } from "react";
 
 import { useAuthPortal } from "@/features/auth/auth-portal";
+import {
+	isResourceVisibility,
+	ResourceVisibilityValues,
+	type ResourceVisibility,
+} from "@/features/privacy/model/resource-visibility";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -56,6 +63,7 @@ export function UnitScoreControl({
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [selectedContext, setSelectedContext] = useState<ScoreContextOption>();
 	const [draftScore, setDraftScore] = useState<UnitScore>();
+	const [draftVisibility, setDraftVisibility] = useState<ResourceVisibility>("private");
 	const [pendingDefaultScore, setPendingDefaultScore] = useState<UnitScore>();
 	const copy = t.engagement.progressByType[type];
 
@@ -70,6 +78,7 @@ export function UnitScoreControl({
 								id: item.contextUnitId,
 								label: item.contextUnitTitle ?? item.contextUnitId,
 								score,
+								visibility: item.visibility,
 							},
 						];
 			}) ?? [],
@@ -79,8 +88,15 @@ export function UnitScoreControl({
 		const defaultContext = defaultScoreContext.context;
 		if (!defaultContext || scoredContexts.some(({ id }) => id === defaultContext.id))
 			return scoredContexts;
-		return [{ ...defaultContext, score: undefined }, ...scoredContexts];
-	}, [defaultScoreContext.context, scoredContexts]);
+		return [
+			{
+				...defaultContext,
+				score: undefined,
+				visibility: defaultScoreContext.visibility,
+			},
+			...scoredContexts,
+		];
+	}, [defaultScoreContext.context, defaultScoreContext.visibility, scoredContexts]);
 	const defaultScore = defaultScoreContext.context
 		? scoredContexts.find(({ id }) => id === defaultScoreContext.context?.id)?.score
 		: undefined;
@@ -96,13 +112,14 @@ export function UnitScoreControl({
 	async function saveScore(
 		context: ScoreContextOption,
 		score: UnitScore,
+		visibility: ResourceVisibility,
 		closeAfterSave: boolean,
 	) {
 		const isDefaultContext = context.id === defaultScoreContext.context?.id;
 		if (isDefaultContext) setPendingDefaultScore(score);
 		try {
 			await mutation.mutateAsync({
-				body: { contextUnitId: context.id, score },
+				body: { contextUnitId: context.id, score, visibility },
 				path: { targetId },
 			});
 			await Promise.all([
@@ -127,9 +144,14 @@ export function UnitScoreControl({
 		mutation.reset();
 		const option =
 			contextOptions.find(({ id }) => id === defaultContext.id) ??
-			({ ...defaultContext, score: undefined } satisfies ScoreContextOption);
+			({
+				...defaultContext,
+				score: undefined,
+				visibility: defaultScoreContext.visibility,
+			} satisfies ScoreContextOption);
 		setSelectedContext(option);
 		setDraftScore(option.score);
+		setDraftVisibility(option.visibility ?? defaultScoreContext.visibility);
 		setDialogOpen(true);
 	}
 
@@ -170,7 +192,12 @@ export function UnitScoreControl({
 							const nextScore = starValueToUnitScore(value);
 							if (!context || nextScore === undefined) return;
 							mutation.reset();
-							void saveScore(context, nextScore, false);
+							void saveScore(
+								context,
+								nextScore,
+								defaultScoreContext.visibility,
+								false,
+							);
 						}}
 						value={displayedScore === undefined ? 0 : displayedScore / 2}
 					/>
@@ -207,6 +234,9 @@ export function UnitScoreControl({
 								onChange={(context) => {
 									setSelectedContext(context);
 									setDraftScore(context.score);
+									setDraftVisibility(
+										context.visibility ?? defaultScoreContext.visibility,
+									);
 									mutation.reset();
 								}}
 								options={contextOptions}
@@ -219,6 +249,23 @@ export function UnitScoreControl({
 									})}
 								</p>
 							) : null}
+						</Field>
+						<Field>
+							<FieldLabel htmlFor="score-visibility">{t.ui.visibility}</FieldLabel>
+							<NativeSelect
+								id="score-visibility"
+								onChange={(event) => {
+									if (isResourceVisibility(event.target.value))
+										setDraftVisibility(event.target.value);
+								}}
+								value={draftVisibility}
+							>
+								{ResourceVisibilityValues.map((visibility) => (
+									<NativeSelectOption key={visibility} value={visibility}>
+										{t.ui[visibility]}
+									</NativeSelectOption>
+								))}
+							</NativeSelect>
 						</Field>
 						<div className="grid justify-items-center gap-2">
 							<Rating
@@ -256,7 +303,12 @@ export function UnitScoreControl({
 							isLoading={mutation.isPending}
 							onClick={() => {
 								if (selectedContext && draftScore !== undefined)
-									void saveScore(selectedContext, draftScore, true);
+									void saveScore(
+										selectedContext,
+										draftScore,
+										draftVisibility,
+										true,
+									);
 							}}
 							variant="solid"
 						>

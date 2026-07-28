@@ -7,6 +7,7 @@ const { forms: realmTerms } = koTerminology.realm;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = koTerminology.publicationLicense;
 const { forms: metadataTerms } = koTerminology.metadata;
+const { forms: postTerms } = koTerminology.post;
 
 export default {
 	workspace: {
@@ -25,6 +26,10 @@ export default {
 				label: "환경 설정",
 				description: `인터페이스 및 콘텐츠 언어, 등급, 기본 점수 ${realmTerms.label} 및 기본 라이선스를 선택하세요.`,
 			},
+			privacy: {
+				label: "개인정보 보호",
+				description: "다른 사람이 내 평점과 진행 상황을 볼 수 있는지 관리합니다.",
+			},
 			tagSources: {
 				label: "태그 소스",
 				description: `태그 판단을 보고 싶은 ${realmTerms.plural}를 선택하고 순서를 정하세요.`,
@@ -42,6 +47,18 @@ export default {
 				description: "자동화 도구용 액세스 토큰을 생성, 제한, 비활성화 및 취소하세요.",
 			},
 		},
+	},
+	privacy: {
+		title: "개인정보 보호",
+		description: "평점과 현재 진행 상황의 전체 공개 범위 상한을 설정합니다.",
+		scoreTitle: "평점",
+		scoreDescription: "프로필이나 관련 리뷰에서 다른 사람이 내 평점을 볼 수 있는지 제한합니다.",
+		progressTitle: "진행 상황",
+		progressDescription:
+			"프로필이나 관련 리뷰에서 다른 사람이 현재 진행 상황을 볼 수 있는지 제한합니다.",
+		categoryRule:
+			"전체 설정은 공개 범위의 상한이며 개별 항목의 설정을 바꾸지 않습니다. 비공개로 설정하면 공개 항목도 일시적으로 숨겨지고, 다시 공개로 바꾸면 원래 공개였던 항목이 다시 표시됩니다.",
+		unlistedRule: `일부 공개 항목은 프로필에는 나타나지 않지만 명시적으로 연결한 리뷰나 ${postTerms.label}에는 표시될 수 있습니다. 비공개 항목은 본인만 볼 수 있습니다.`,
 	},
 	profile: "프로필",
 	slugAddress: unitSlugTerms.label,

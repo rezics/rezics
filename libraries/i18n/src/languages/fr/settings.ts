@@ -7,6 +7,7 @@ const { forms: realmTerms } = frTerminology.realm;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = frTerminology.publicationLicense;
 const { forms: metadataTerms } = frTerminology.metadata;
+const { forms: postTerms } = frTerminology.post;
 
 export default {
 	workspace: {
@@ -25,6 +26,10 @@ export default {
 			preferences: {
 				label: "Préférences",
 				description: `Choisissez les langues de l’interface et du contenu, les classifications, un ${realmTerms.inline} de notation par défaut et une licence par défaut.`,
+			},
+			privacy: {
+				label: "Confidentialité",
+				description: "Contrôlez si les autres peuvent voir vos notes et votre progression.",
 			},
 			tagSources: {
 				label: "Sources d’étiquettes",
@@ -45,6 +50,20 @@ export default {
 					"Créez, limitez, désactivez et révoquez des jetons d’accès pour les outils d’automatisation.",
 			},
 		},
+	},
+	privacy: {
+		title: "Confidentialité",
+		description:
+			"Définissez la limite globale de visibilité des notes et de la progression actuelle.",
+		scoreTitle: "Notes",
+		scoreDescription:
+			"Limite l’affichage de vos notes aux autres personnes sur votre profil ou dans les critiques associées.",
+		progressTitle: "Progression",
+		progressDescription:
+			"Limite l’affichage de votre progression actuelle aux autres personnes sur votre profil ou dans les critiques associées.",
+		categoryRule:
+			"Ce réglage global est une limite de visibilité et ne modifie pas les éléments individuels. Le mode privé masque temporairement les éléments publics ; ils réapparaissent lorsque vous rétablissez le mode public.",
+		unlistedRule: `Les éléments non répertoriés restent absents de votre profil, mais peuvent apparaître dans une critique ou une ${postTerms.inline} que vous liez explicitement. Les éléments privés ne sont visibles que par vous.`,
 	},
 	profile: "Profil",
 	slugAddress: unitSlugTerms.label,

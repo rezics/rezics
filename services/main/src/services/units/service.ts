@@ -38,6 +38,7 @@ import {
 	entity,
 	software,
 	media,
+	profilePreference,
 	series,
 	unit,
 	subjectAssociation,
@@ -434,11 +435,24 @@ export async function getUnit(
 		);
 	const [progressCounts] = await database
 		.select({
+			total: sql<unknown>`count(*)`,
 			active: sql<unknown>`count(*) filter (where ${unitProgress.status} = 'active')`,
 			backlog: sql<unknown>`count(*) filter (where ${unitProgress.status} = 'backlog')`,
 		})
 		.from(unitProgress)
-		.where(and(eq(unitProgress.unitId, base.id), isNull(unitProgress.deletedAt)));
+		.innerJoin(profilePreference, eq(profilePreference.profileId, unitProgress.profileId))
+		.where(
+			and(
+				eq(unitProgress.unitId, base.id),
+				isNull(unitProgress.deletedAt),
+				eq(profilePreference.progressVisibility, "public"),
+				eq(unitProgress.visibility, "public"),
+			),
+		);
+	const visibleProgressCount = toSafeInteger(
+		progressCounts?.total ?? 0,
+		"visible progress count",
+	);
 	const variantContext: UnitDetail["variantContext"] =
 		kind === "series"
 			? { role: "standalone" }
@@ -503,10 +517,16 @@ export async function getUnit(
 			score: toSafeInteger(tag.score ?? 0n, "tag vote score"),
 			voteCount: toSafeInteger(tag.voteCount ?? 0n, "tag vote count"),
 		})),
-		progressStatistics: {
-			active: toSafeInteger(progressCounts?.active ?? 0, "active progress count"),
-			backlog: toSafeInteger(progressCounts?.backlog ?? 0, "backlog progress count"),
-		},
+		progressStatistics:
+			visibleProgressCount < 5
+				? null
+				: {
+						active: toSafeInteger(progressCounts?.active ?? 0, "active progress count"),
+						backlog: toSafeInteger(
+							progressCounts?.backlog ?? 0,
+							"backlog progress count",
+						),
+					},
 		versions:
 			kind === "series"
 				? []

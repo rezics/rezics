@@ -12,6 +12,7 @@ describe("Review Score association options", () => {
 						contextUnitId: "context-1",
 						contextUnitTitle: "Global",
 						value: 8,
+						visibility: "public",
 						updatedAt: "2026-07-26T00:00:00.000Z",
 					},
 				],
@@ -42,6 +43,7 @@ describe("Review Score association options", () => {
 						contextUnitId: "context-1",
 						contextUnitTitle: null,
 						value: 10,
+						visibility: "private",
 						updatedAt: "2026-07-26T00:00:00.000Z",
 					},
 					{
@@ -49,6 +51,7 @@ describe("Review Score association options", () => {
 						contextUnitId: "context-2",
 						contextUnitTitle: null,
 						value: 11,
+						visibility: "unlisted",
 						updatedAt: "2026-07-26T00:00:00.000Z",
 					},
 				],

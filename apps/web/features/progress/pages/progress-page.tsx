@@ -187,11 +187,16 @@ function ProgressListItem({
 				</CardAction>
 			</CardHeader>
 			<CardContent>
-				<Badge variant="secondary">
-					{type
-						? t.engagement.progressByType[type].statuses[toProgressStatus(item.status)]
-						: item.status}
-				</Badge>
+				<div className="flex flex-wrap gap-2">
+					<Badge variant="secondary">
+						{type
+							? t.engagement.progressByType[type].statuses[
+									toProgressStatus(item.status)
+								]
+							: item.status}
+					</Badge>
+					<Badge variant="secondary">{t.ui[item.visibility]}</Badge>
+				</div>
 			</CardContent>
 		</Card>
 	);

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
@@ -15,6 +15,8 @@ import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { resolveIdentity } from "../../auth/session";
+import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
@@ -30,6 +32,7 @@ import {
 	postScore,
 	postReply,
 	postReplyStat,
+	profilePreference,
 	score,
 	scoreStat,
 	collectionItem,
@@ -99,6 +102,8 @@ import {
 
 const preferredLocalization = alias(unitLocalization, "preferred_localization");
 const feedContextRealm = alias(unit, "feed_context_realm");
+const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
+const feedReviewScoreContextUnit = alias(unit, "feed_review_score_context_unit");
 
 interface FeedRealmContextSummary {
 	readonly id: string;
@@ -391,17 +396,48 @@ export function getFeedEligibilityCondition(
 			: undefined,
 		scope.subjectId ? eq(post.subjectUnitId, scope.subjectId) : undefined,
 		scope.reviewScore
-			? sql`exists (
-				select 1
-				from post_score scoped_post_score
-				inner join score scoped_score on scoped_score.id = scoped_post_score.score_id
-				where scoped_post_score.post_id = ${post.id}
-					and scoped_score.context_unit_id = ${scope.reviewScore.contextUnitId}
-					and scoped_score.value in (${sql.join(
-						scope.reviewScore.values.map((value) => sql`${value}`),
-						sql`, `,
-					)})
-			)`
+			? exists(
+					database
+						.select({ scoreId: score.id })
+						.from(postScore)
+						.innerJoin(score, eq(score.id, postScore.scoreId))
+						.innerJoin(
+							profilePreference,
+							eq(profilePreference.profileId, score.profileId),
+						)
+						.innerJoin(
+							feedReviewScoreTargetUnit,
+							eq(feedReviewScoreTargetUnit.id, score.unitId),
+						)
+						.innerJoin(
+							feedReviewScoreContextUnit,
+							eq(feedReviewScoreContextUnit.id, score.contextUnitId),
+						)
+						.where(
+							and(
+								eq(postScore.postId, post.id),
+								eq(score.contextUnitId, scope.reviewScore.contextUnitId),
+								inArray(score.value, scope.reviewScore.values),
+								getProfileActivityReadCondition({
+									ownerProfileId: score.profileId,
+									categoryVisibility: profilePreference.scoreVisibility,
+									itemVisibility: score.visibility,
+									viewerProfileId: viewer.profileId,
+									surface: "linked",
+								}),
+								getUnitReadCondition(
+									viewer.profileId,
+									{},
+									feedReviewScoreTargetUnit,
+								),
+								getUnitReadCondition(
+									viewer.profileId,
+									{},
+									feedReviewScoreContextUnit,
+								),
+							),
+						),
+				)
 			: undefined,
 		scope.filter
 			? compileUnitPredicateSql(scope.filter, {
@@ -1058,7 +1094,29 @@ export async function hydrateFeedItems(
 					})
 					.from(postScore)
 					.innerJoin(score, eq(score.id, postScore.scoreId))
-					.where(inArray(postScore.postId, reviewIds))
+					.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
+					.innerJoin(
+						feedReviewScoreTargetUnit,
+						eq(feedReviewScoreTargetUnit.id, score.unitId),
+					)
+					.innerJoin(
+						feedReviewScoreContextUnit,
+						eq(feedReviewScoreContextUnit.id, score.contextUnitId),
+					)
+					.where(
+						and(
+							inArray(postScore.postId, reviewIds),
+							getProfileActivityReadCondition({
+								ownerProfileId: score.profileId,
+								categoryVisibility: profilePreference.scoreVisibility,
+								itemVisibility: score.visibility,
+								viewerProfileId: viewer.profileId,
+								surface: "linked",
+							}),
+							getUnitReadCondition(viewer.profileId, {}, feedReviewScoreTargetUnit),
+							getUnitReadCondition(viewer.profileId, {}, feedReviewScoreContextUnit),
+						),
+					)
 					.orderBy(asc(postScore.postId), asc(postScore.position), asc(score.id))
 			: [],
 	]);

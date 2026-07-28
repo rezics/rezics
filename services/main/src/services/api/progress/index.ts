@@ -184,6 +184,7 @@ export default new Elysia({ prefix: "/progress" })
 					firstSeenAt: unitProgress.firstSeenAt,
 					lastSeenAt: unitProgress.lastSeenAt,
 					lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
+					visibility: unitProgress.visibility,
 					deletedAt: unitProgress.deletedAt,
 					type: unit.kind,
 					language: unitLocalization.language,
@@ -550,6 +551,17 @@ export default new Elysia({ prefix: "/progress" })
 					sourceKind: "rezics",
 					affectsCurrent: true,
 				});
+				if (body.visibility !== undefined)
+					await tx
+						.update(unitProgress)
+						.set({ visibility: body.visibility, updatedAt: new Date() })
+						.where(
+							and(
+								eq(unitProgress.profileId, profile.unitId),
+								eq(unitProgress.unitId, params.unitId),
+								isNull(unitProgress.deletedAt),
+							),
+						);
 			});
 			return selectProgressSnapshot(profile.unitId, params.unitId);
 		},
@@ -584,6 +596,17 @@ export default new Elysia({ prefix: "/progress" })
 					sourceKind: "rezics",
 					affectsCurrent: true,
 				});
+				if (body.visibility !== undefined)
+					await tx
+						.update(unitProgress)
+						.set({ visibility: body.visibility, updatedAt: new Date() })
+						.where(
+							and(
+								eq(unitProgress.profileId, profile.unitId),
+								eq(unitProgress.unitId, params.unitId),
+								isNull(unitProgress.deletedAt),
+							),
+						);
 			});
 			return selectProgressSnapshot(profile.unitId, params.unitId);
 		},

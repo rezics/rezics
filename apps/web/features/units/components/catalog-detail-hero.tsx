@@ -115,11 +115,13 @@ export function CatalogDetailHero<Type extends CatalogDetailUnitType>({
 					</ShowMoreContent>
 				) : null}
 
-				<UnitProgressStatistics
-					active={toNonNegativeApiInteger(unit.progressStatistics.active)}
-					backlog={toNonNegativeApiInteger(unit.progressStatistics.backlog)}
-					type={type}
-				/>
+				{unit.progressStatistics ? (
+					<UnitProgressStatistics
+						active={toNonNegativeApiInteger(unit.progressStatistics.active)}
+						backlog={toNonNegativeApiInteger(unit.progressStatistics.backlog)}
+						type={type}
+					/>
+				) : null}
 			</div>
 		</section>
 	);

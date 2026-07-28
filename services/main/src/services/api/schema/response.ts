@@ -20,6 +20,7 @@ import {
 	FractionalPosition,
 	OrdinalPosition,
 	PublicationLicense,
+	ResourceVisibility,
 	StoredUiLocale,
 	Uuid,
 } from ".";
@@ -353,7 +354,7 @@ export const UnitDetailResponse = t.Object({
 			updatedAt: DateTime,
 		}),
 	),
-	progressStatistics: UnitProgressStatisticsResponse,
+	progressStatistics: t.Nullable(UnitProgressStatisticsResponse),
 	versions: t.Array(
 		t.Object({
 			id: Uuid,
@@ -703,6 +704,8 @@ export const PreferencesResponse = t.Object({
 	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean(),
 	defaultScoreContextUnitId: Uuid,
+	scoreVisibility: ResourceVisibility,
+	progressVisibility: ResourceVisibility,
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
 	filterFeedByPreferredLanguages: t.Boolean(),
@@ -711,6 +714,39 @@ export const PreferencesResponse = t.Object({
 		uniqueItems: true,
 	}),
 	preferredLanguages: t.Array(ContentLanguage),
+});
+export const PrivacyPreferencesResponse = t.Object({
+	scoreVisibility: ResourceVisibility,
+	progressVisibility: ResourceVisibility,
+});
+export const ProfileActivityResponse = t.Object({
+	scores: t.Array(
+		t.Object({
+			scoreId: Uuid,
+			unitId: Uuid,
+			unitKind: t.UnionEnum(UnitKindValues),
+			unitLanguage: t.Nullable(ContentLanguage),
+			unitTitle: NullableText,
+			contextUnitId: Uuid,
+			contextTitle: NullableText,
+			value: t.Integer({ minimum: 1, maximum: 10 }),
+			visibility: ResourceVisibility,
+			updatedAt: DateTime,
+		}),
+	),
+	progress: t.Array(
+		t.Object({
+			unitId: Uuid,
+			unitKind: t.UnionEnum(UnitKindValues),
+			unitLanguage: t.Nullable(ContentLanguage),
+			unitTitle: NullableText,
+			status: t.UnionEnum(ProgressStatusValues),
+			progress: t.Number({ minimum: 0, maximum: 1 }),
+			completedCount: t.Integer({ minimum: 0 }),
+			visibility: ResourceVisibility,
+			lastSeenAt: DateTime,
+		}),
+	),
 });
 const ProgressStatusResponse = t.UnionEnum(ProgressStatusValues);
 const ProgressEntryKindResponse = t.UnionEnum(ProgressEntryKindValues);
@@ -728,6 +764,7 @@ export const ProgressListResponse = t.Object({
 			lastSeenAt: DateTime,
 			lastContentStructureNodeId: t.Nullable(Uuid),
 			lastReadAnchor: t.Nullable(t.Unknown()),
+			visibility: ResourceVisibility,
 			type: t.String(),
 			language: ContentLanguage,
 			title: NullableText,
@@ -747,6 +784,7 @@ export const ProgressResponse = t.Object({
 	lastContentStructureNodeId: t.Nullable(Uuid),
 	currentEntryId: t.Nullable(Uuid),
 	lastReadAnchor: t.Nullable(t.Unknown()),
+	visibility: ResourceVisibility,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -776,18 +814,13 @@ export const ProgressEntryListResponse = t.Object({
 	nextCursor: NullableText,
 });
 const ReviewProgressEntryResponse = t.Object({
-	id: Uuid,
 	unitId: Uuid,
 	entryKind: ProgressEntryKindResponse,
 	status: ProgressStatusResponse,
 	progress: t.Number({ minimum: 0, maximum: 1 }),
 	completionDelta: t.Integer({ minimum: 0, maximum: 1 }),
-	totalTimeMs: t.Integer({ minimum: 0 }),
-	lastContentStructureNodeId: t.Nullable(Uuid),
 	occurredAt: t.Nullable(DateTime),
 	datePrecision: ProgressDatePrecisionResponse,
-	sourceKind: ProgressSourceKindResponse,
-	sourceProvider: NullableText,
 });
 export const ImportProgressResponse = t.Object({
 	createdCount: t.Integer({ minimum: 1, maximum: 500 }),

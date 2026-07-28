@@ -11,6 +11,7 @@ import {
 	type ProgressSourceKind,
 	type ProgressStatus,
 	postProgressEntry,
+	profilePreference,
 	unitProgress,
 	unitProgressEntry,
 } from "../../database/schema";
@@ -236,6 +237,12 @@ export async function refreshProgressSnapshot(
 		return;
 	}
 	const completedCount = toSafeInteger(statistics.completedCount, "progress completion count");
+	const [preference] = await tx
+		.select({ visibility: profilePreference.progressVisibility })
+		.from(profilePreference)
+		.where(eq(profilePreference.profileId, profileId))
+		.limit(1);
+	if (!preference) throw new Error("Progress visibility preference was not found");
 	await tx
 		.insert(unitProgress)
 		.values({
@@ -249,6 +256,7 @@ export async function refreshProgressSnapshot(
 			lastSeenAt: statistics.lastSeenAt,
 			lastContentStructureNodeId: current?.contentStructureNodeId ?? null,
 			currentEntryId: current?.id ?? null,
+			visibility: preference.visibility,
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({

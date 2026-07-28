@@ -6,6 +6,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: unitSlugTerms } = zhHansTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = zhHansTerminology.publicationLicense;
+const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
 	workspace: {
@@ -24,6 +25,10 @@ export default {
 				label: "偏好设置",
 				description: `选择接口语言、内容语言、内容分级、默认评分${realmTerms.label}与默认授权。`,
 			},
+			privacy: {
+				label: "隐私",
+				description: "控制其他人能否看到你的评分和进度。",
+			},
 			tagSources: {
 				label: "标签来源",
 				description: `选择并排序要显示作品标签判断的${realmTerms.label}来源。`,
@@ -41,6 +46,17 @@ export default {
 				description: "创建、限制、停用及撤销供自动化工具使用的访问令牌。",
 			},
 		},
+	},
+	privacy: {
+		title: "隐私设置",
+		description: "设置评分和当前进度的整体公开上限。",
+		scoreTitle: "评分",
+		scoreDescription: "限制其他人能否在你的个人资料或相关评论中看到评分。",
+		progressTitle: "进度",
+		progressDescription: "限制其他人能否在你的个人资料或相关评论中看到当前进度。",
+		categoryRule:
+			"整体设置是可见性上限，不会改写每条数据原有的可见性。设为私密后，公开项目会暂时隐藏；恢复公开后，原本公开的项目会再次显示。",
+		unlistedRule: `“不列出”不会出现在个人资料中，但可在你明确关联的评论或${postTerms.label}中显示。“私密”仅你可见。`,
 	},
 	profile: "个人资料",
 	slugAddress: unitSlugTerms.label,

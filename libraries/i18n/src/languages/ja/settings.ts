@@ -7,6 +7,7 @@ const { forms: realmTerms } = jaTerminology.realm;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = jaTerminology.publicationLicense;
 const { forms: metadataTerms } = jaTerminology.metadata;
+const { forms: postTerms } = jaTerminology.post;
 
 export default {
 	workspace: {
@@ -26,6 +27,10 @@ export default {
 				label: "設定",
 				description: `インターフェースと言語、評価、デフォルトのスコアリング${realmTerms.label}、デフォルトライセンスを選択します。`,
 			},
+			privacy: {
+				label: "プライバシー",
+				description: "評価と進捗をほかの利用者に表示するかを管理します。",
+			},
 			tagSources: {
 				label: "タグソース",
 				description: `タグ判断を確認したい${realmTerms.plural}を選択して順序を決めます。`,
@@ -44,6 +49,19 @@ export default {
 					"自動化ツール用のアクセス トークンを作成、制限、無効化、取り消します。",
 			},
 		},
+	},
+	privacy: {
+		title: "プライバシー",
+		description: "評価と現在の進捗に対する全体の公開上限を設定します。",
+		scoreTitle: "評価",
+		scoreDescription:
+			"プロフィールや関連レビューで、ほかの利用者に評価を表示するかを制限します。",
+		progressTitle: "進捗",
+		progressDescription:
+			"プロフィールや関連レビューで、ほかの利用者に現在の進捗を表示するかを制限します。",
+		categoryRule:
+			"この全体設定は公開範囲の上限であり、各項目の設定を書き換えません。非公開にすると公開項目も一時的に隠れ、公開へ戻すと元の公開項目が再び表示されます。",
+		unlistedRule: `限定公開の項目はプロフィールには表示されませんが、明示的に関連付けたレビューや${postTerms.label}には表示できます。非公開の項目は自分だけが閲覧できます。`,
 	},
 	profile: "プロフィール",
 	slugAddress: unitSlugTerms.label,

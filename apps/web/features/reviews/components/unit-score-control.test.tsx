@@ -17,8 +17,11 @@ const state = vi.hoisted(() => ({
 		value: string | number;
 		contextUnitTitle: string | null;
 		updatedAt: string;
+		visibility: "public" | "unlisted" | "private";
 	}[],
-	mutateAsync: vi.fn(() => Promise.resolve({ scoreId: "score-id", score: 8 })),
+	mutateAsync: vi.fn(() =>
+		Promise.resolve({ scoreId: "score-id", score: 8, visibility: "private" }),
+	),
 	resetMutation: vi.fn(),
 	invalidateQueries: vi.fn(() => Promise.resolve()),
 	invalidateReviews: vi.fn(() => Promise.resolve()),
@@ -103,6 +106,7 @@ vi.mock("../data/default-score-context", () => ({
 		},
 		error: null,
 		isPending: false,
+		visibility: "private",
 	}),
 }));
 
@@ -160,6 +164,7 @@ describe("UnitScoreControl", () => {
 			body: {
 				contextUnitId: "019b76da-a800-7300-8000-000000000002",
 				score: 8,
+				visibility: "private",
 			},
 			path: { targetId: "019f92b9-cb0d-7cb6-a55a-1d5ecedc0949" },
 		});
@@ -181,6 +186,7 @@ describe("UnitScoreControl", () => {
 				value: 8,
 				contextUnitTitle: "REZICS 評分",
 				updatedAt: "2026-07-24T14:00:00.000Z",
+				visibility: "public",
 			},
 		];
 		renderControl();

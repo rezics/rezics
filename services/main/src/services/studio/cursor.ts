@@ -16,14 +16,14 @@ import {
 } from "../api/users/schema";
 import {
 	ContentLanguageValues,
+	ResourceVisibilityValues,
 	UnitStatusValues,
-	UnitVisibilityValues,
 } from "../database/schema/contract-values";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import { parseJsonCursor } from "../pagination";
 
 type UnitStatus = NonNullable<StudioContentListQuery["status"]>;
-type UnitVisibility = NonNullable<StudioContentListQuery["visibility"]>;
+type ResourceVisibility = NonNullable<StudioContentListQuery["visibility"]>;
 
 const StudioCursor = t.Object(
 	{
@@ -33,7 +33,7 @@ const StudioCursor = t.Object(
 		permission: t.Nullable(t.UnionEnum(StudioPermissionValues, { default: undefined })),
 		workState: t.Nullable(t.UnionEnum(StudioWorkStateValues, { default: undefined })),
 		status: t.Nullable(t.UnionEnum(UnitStatusValues, { default: undefined })),
-		visibility: t.Nullable(t.UnionEnum(UnitVisibilityValues, { default: undefined })),
+		visibility: t.Nullable(t.UnionEnum(ResourceVisibilityValues, { default: undefined })),
 		sort: t.UnionEnum(StudioSortValues, { default: undefined }),
 		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues, { default: undefined }), {
 			uniqueItems: true,
@@ -51,7 +51,7 @@ export type StudioCursorScope = {
 	readonly permission?: StudioPermission;
 	readonly workState?: StudioWorkState;
 	readonly status?: UnitStatus;
-	readonly visibility?: UnitVisibility;
+	readonly visibility?: ResourceVisibility;
 	readonly sort: StudioSort;
 	readonly localizationLanguages: readonly ContentLanguage[];
 };

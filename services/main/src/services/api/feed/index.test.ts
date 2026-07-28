@@ -208,9 +208,11 @@ describe("feed eligibility SQL", () => {
 			),
 		);
 
-		expect(query.sql).toContain("scoped_post_score");
-		expect(query.sql).toContain("scoped_score.context_unit_id");
-		expect(query.sql).toContain("scoped_score.value in");
+		expect(query.sql).toContain('"post_score"."post_id"');
+		expect(query.sql).toContain('"score"."context_unit_id"');
+		expect(query.sql).toContain('"score"."value" in');
+		expect(query.sql).toContain('"profile_preference"."score_visibility"');
+		expect(query.sql).toContain('"score"."visibility"');
 		expect(query.params).toEqual(
 			expect.arrayContaining(["review", contextUnitId, 8, 9, 10, "general"]),
 		);

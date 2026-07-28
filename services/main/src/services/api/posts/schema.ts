@@ -6,6 +6,7 @@ import {
 	FractionalPosition,
 	ContentLanguage,
 	LocalizationLanguageQuery,
+	ResourceVisibility,
 	Uuid,
 } from "../schema";
 
@@ -31,10 +32,7 @@ export type CreatePostBody = Static<typeof CreatePostBody>;
 
 export const CreateWikiBody = t.Object(
 	{
-		accessMode: t.Union([
-			t.Literal("public_entry"),
-			t.Literal("restricted"),
-		]),
+		accessMode: t.Union([t.Literal("public_entry"), t.Literal("restricted")]),
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		body: PortableTextDocument,
 		language: ContentLanguage,
@@ -70,6 +68,7 @@ export const PostScoreResponse = t.Object({
 	unitId: Uuid,
 	contextUnitId: Uuid,
 	value: t.Integer({ minimum: 1, maximum: 10 }),
+	visibility: ResourceVisibility,
 	position: FractionalPosition,
 	updatedAt: DateTime,
 });

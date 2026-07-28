@@ -9,6 +9,7 @@ import {
 	contentStructure,
 	contentStructureNode,
 	unitLocalizationContentMetric,
+	unitProgress,
 	creditAttribution,
 	unitAssociationProposal,
 	subjectAssociation,
@@ -502,6 +503,8 @@ describe("database schema contracts", () => {
 		expect(scoreConfig.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"score_profile_unit_context_unit_key",
 		);
+		expect(score.visibility.enumValues).toEqual(["public", "unlisted", "private"]);
+		expect(score.visibility.hasDefault).toBe(true);
 
 		const display = getTableConfig(postScore);
 		expect(display.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
@@ -529,6 +532,17 @@ describe("database schema contracts", () => {
 		expect(preference.checks.map((constraint) => constraint.name)).toContain(
 			"profile_preference_content_ratings_check",
 		);
+		expect(profilePreference.scoreVisibility.enumValues).toEqual([
+			"public",
+			"unlisted",
+			"private",
+		]);
+		expect(profilePreference.progressVisibility.enumValues).toEqual([
+			"public",
+			"unlisted",
+			"private",
+		]);
+		expect(unitProgress.visibility.enumValues).toEqual(["public", "unlisted", "private"]);
 	});
 
 	it("separates optional Unit slug addresses from ID-addressed Units", () => {

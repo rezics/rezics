@@ -7,6 +7,7 @@ const { forms: realmTerms } = esTerminology.realm;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
 const { forms: publicationLicenseTerms } = esTerminology.publicationLicense;
 const { forms: metadataTerms } = esTerminology.metadata;
+const { forms: postTerms } = esTerminology.post;
 
 export default {
 	workspace: {
@@ -25,6 +26,11 @@ export default {
 			preferences: {
 				label: "Preferencias",
 				description: `Elige los idiomas de la interfaz y del contenido, las clasificaciones, un ${realmTerms.inline} de puntuación predeterminado y una licencia predeterminada.`,
+			},
+			privacy: {
+				label: "Privacidad",
+				description:
+					"Controla si otras personas pueden ver tus puntuaciones y tu progreso.",
 			},
 			tagSources: {
 				label: "Fuentes de etiquetas",
@@ -46,6 +52,20 @@ export default {
 					"Crea, limita, deshabilita y revoca tokens de acceso para herramientas de automatización.",
 			},
 		},
+	},
+	privacy: {
+		title: "Privacidad",
+		description:
+			"Define el límite general de visibilidad de tus puntuaciones y progreso actual.",
+		scoreTitle: "Puntuaciones",
+		scoreDescription:
+			"Limita si otras personas pueden ver tus puntuaciones en tu perfil o en reseñas relacionadas.",
+		progressTitle: "Progreso",
+		progressDescription:
+			"Limita si otras personas pueden ver tu progreso actual en tu perfil o en reseñas relacionadas.",
+		categoryRule:
+			"Este ajuste general es un límite de visibilidad y no modifica los registros individuales. Al hacerlo privado, los elementos públicos se ocultan temporalmente; al volver a público, reaparecen.",
+		unlistedRule: `Los elementos no listados no aparecen en tu perfil, pero pueden mostrarse en una reseña o ${postTerms.inline} que enlaces expresamente. Los privados solo son visibles para ti.`,
 	},
 	profile: "Perfil",
 	slugAddress: unitSlugTerms.label,

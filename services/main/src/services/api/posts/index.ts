@@ -143,8 +143,8 @@ export default new Elysia()
 			.get(
 				"/:postId/scores",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
-						.authorization;
+					const identity = await resolveIdentity(request.headers, "unit:read");
+					const { authorization } = identity;
 					await authorization.unit.ensureCanRead(params.postId, () => new PostNotFound());
 					const [record] = await database
 						.select({ id: post.id })
@@ -152,7 +152,9 @@ export default new Elysia()
 						.where(eq(post.id, params.postId))
 						.limit(1);
 					if (!record) throw new PostNotFound();
-					return { items: await selectPostScores(params.postId) };
+					return {
+						items: await selectPostScores(params.postId, identity.profile?.unitId),
+					};
 				},
 				{
 					params: PostParams,
@@ -165,7 +167,7 @@ export default new Elysia()
 			)
 			.put(
 				"/:postId/scores",
-				async ({ params, authorization, body }) => {
+				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.postId, [
 						["relations", "scores"],
 					]);
@@ -182,7 +184,12 @@ export default new Elysia()
 							const found = await tx
 								.select({ id: score.id })
 								.from(score)
-								.where(inArray(score.id, scoreIds));
+								.where(
+									and(
+										inArray(score.id, scoreIds),
+										eq(score.profileId, profile.unitId),
+									),
+								);
 							if (found.length !== scoreIds.length) throw new PostScoreNotFound();
 						}
 						await tx.delete(postScore).where(eq(postScore.postId, params.postId));
@@ -195,7 +202,9 @@ export default new Elysia()
 								})),
 							);
 					});
-					return { items: await selectPostScores(params.postId) };
+					return {
+						items: await selectPostScores(params.postId, profile.unitId),
+					};
 				},
 				{
 					access: "contribute:unit:update",
@@ -476,8 +485,9 @@ export default new Elysia()
 			.get(
 				"/:postId",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
-						.authorization;
+					const identity = await resolveIdentity(request.headers, "unit:read");
+					const { authorization } = identity;
+					const viewerProfileId = identity.profile?.unitId;
 					const localizationLanguages = query.localizationLanguages ?? [];
 					await authorization.unit.ensureCanRead(
 						params.postId,
@@ -557,7 +567,7 @@ export default new Elysia()
 						canManageScores,
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
-						selectPostScores(row.id).then((items) =>
+						selectPostScores(row.id, viewerProfileId).then((items) =>
 							items.map(({ scoreId, contextUnitId, value }) => ({
 								scoreId,
 								contextUnitId,
@@ -565,7 +575,7 @@ export default new Elysia()
 							})),
 						),
 						row.postKind === "review"
-							? selectPostProgressEntry(row.id)
+							? selectPostProgressEntry(row.id, viewerProfileId)
 							: Promise.resolve([]),
 						subjectPromise,
 						row.postKind === "wiki"
@@ -613,19 +623,13 @@ export default new Elysia()
 							body: row.body === null ? null : toPortableTextResponse(row.body),
 							progressEntry: progressEntries[0]
 								? {
-										id: progressEntries[0].id,
 										unitId: progressEntries[0].unitId,
 										entryKind: progressEntries[0].entryKind,
 										status: progressEntries[0].status,
 										progress: progressEntries[0].progress,
 										completionDelta: progressEntries[0].completionDelta,
-										totalTimeMs: Number(progressEntries[0].totalTimeMs),
-										lastContentStructureNodeId:
-											progressEntries[0].lastContentStructureNodeId,
 										occurredAt: progressEntries[0].occurredAt,
 										datePrecision: progressEntries[0].datePrecision,
-										sourceKind: progressEntries[0].sourceKind,
-										sourceProvider: progressEntries[0].sourceProvider,
 									}
 								: null,
 							capabilities: {

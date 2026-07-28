@@ -41,6 +41,7 @@ const activeRecord: UnitProgressRecord = {
 	progress: 0.4,
 	status: "active",
 	totalTimeMs: 0,
+	visibility: "private",
 };
 
 function setProgressState(

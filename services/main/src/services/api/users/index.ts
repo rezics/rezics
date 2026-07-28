@@ -1,6 +1,7 @@
 import { DevelopmentPreviewCapability, PlatformCapabilityValues } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
-import { and, eq, or } from "drizzle-orm";
+import { and, desc, eq, isNull, or } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import Elysia from "elysia";
 import { parseNullablePublicationLicenseId } from "@rezics/license";
 import { OfficialRealmUnitIds } from "@rezics/slug";
@@ -11,16 +12,21 @@ import {
 	avatarReferenceToColumns,
 	isFirstUnitLocalization,
 	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
 	unit,
 	profile as profileTable,
 	profileBlock,
+	score,
 	unitFollow,
 	profilePreference,
 	unitLocalization,
+	unitProgress,
 } from "../../database/schema";
+import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { ensureScoreContextParticipation } from "../../scores/context";
 import { UnitNotFound } from "../../units/errors";
@@ -38,6 +44,8 @@ import {
 	toApiErrorResponse,
 	CurrentProfileResponse,
 	PreferencesResponse,
+	PrivacyPreferencesResponse,
+	ProfileActivityResponse,
 	PublicProfileResponse,
 } from "../schema/response";
 import { PublicSlugAddressResponse } from "../slug-addresses/schema";
@@ -57,6 +65,8 @@ import {
 	UserIdParams,
 	UserLookupParams,
 	PublicProfileQuery,
+	ProfileActivityQuery,
+	UpdatePrivacyPreferencesBody,
 } from "./schema";
 import { getProfile, presentProfile, PublicProfileSelection } from "./service";
 import {
@@ -91,6 +101,8 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 		defaultRealmManageMode: preference.defaultRealmManageMode,
 		defaultScoreContextUnitId:
 			preference.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score,
+		scoreVisibility: preference.scoreVisibility,
+		progressVisibility: preference.progressVisibility,
 		collectionConfig: parseCollectionConfig(preference.collectionConfig),
 		personalizedFeed: preference.personalizedFeed,
 		filterFeedByPreferredLanguages: preference.filterFeedByPreferredLanguages,
@@ -98,6 +110,10 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 		preferredLanguages: preference.preferredLanguages,
 	};
 }
+
+const activityScoreTargetUnit = alias(unit, "profile_activity_score_target_unit");
+const activityScoreContextUnit = alias(unit, "profile_activity_score_context_unit");
+const activityProgressTargetUnit = alias(unit, "profile_activity_progress_target_unit");
 
 export default new Elysia({ prefix: "/users" })
 	.use(session)
@@ -307,6 +323,42 @@ export default new Elysia({ prefix: "/users" })
 		},
 	)
 	.patch(
+		"/me/privacy",
+		async ({ profile, body }) => {
+			const [preference] = await database
+				.update(profilePreference)
+				.set({
+					...(body.scoreVisibility === undefined
+						? {}
+						: { scoreVisibility: body.scoreVisibility }),
+					...(body.progressVisibility === undefined
+						? {}
+						: { progressVisibility: body.progressVisibility }),
+				})
+				.where(eq(profilePreference.profileId, profile.unitId))
+				.returning({
+					scoreVisibility: profilePreference.scoreVisibility,
+					progressVisibility: profilePreference.progressVisibility,
+				});
+			if (!preference) throw new PreferencesNotFound();
+			return preference;
+		},
+		{
+			access: "session-only",
+			body: UpdatePrivacyPreferencesBody,
+			response: {
+				[StatusCodes.OK]: PrivacyPreferencesResponse,
+				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["InteractiveSessionRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+			},
+			detail: {
+				operationId: "updateCurrentUserPrivacy",
+				summary: "Update current user's Score and Progress privacy",
+				tags: ["Users", "First-party Preview"],
+			},
+		},
+	)
+	.patch(
 		"/me/preferences",
 		async ({ profile, body }) => {
 			const [preference] = await database
@@ -463,6 +515,150 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Update followed Unit presentation", tags: ["Users"] },
+		},
+	)
+	.get(
+		"/:id/activity",
+		async ({ params, query, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			const viewerProfileId = identity.profile?.unitId;
+			const referencedUnitReadOptions = {
+				discoverableOnly: viewerProfileId !== params.id,
+			};
+			const [owner] = await database
+				.select({ id: profileTable.id })
+				.from(profileTable)
+				.innerJoin(unit, eq(unit.id, profileTable.id))
+				.where(
+					and(
+						eq(profileTable.id, params.id),
+						eq(unit.kind, "profile"),
+						getUnitReadCondition(viewerProfileId, referencedUnitReadOptions),
+					),
+				)
+				.limit(1);
+			if (!owner) throw new UserNotFound();
+			const localizationLanguages = query.localizationLanguages ?? [];
+			const limit = query.limit ?? 20;
+			const [scores, progress] = await Promise.all([
+				database
+					.select({
+						scoreId: score.id,
+						unitId: score.unitId,
+						unitKind: activityScoreTargetUnit.kind,
+						unitLanguage: resolvedUnitLocalizationLanguage(
+							activityScoreTargetUnit.id,
+							localizationLanguages,
+						),
+						unitTitle: resolvedUnitLocalizationTitle(
+							activityScoreTargetUnit.id,
+							localizationLanguages,
+						),
+						contextUnitId: score.contextUnitId,
+						contextTitle: resolvedUnitLocalizationTitle(
+							activityScoreContextUnit.id,
+							localizationLanguages,
+						),
+						value: score.value,
+						visibility: score.visibility,
+						updatedAt: score.updatedAt,
+					})
+					.from(score)
+					.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
+					.innerJoin(
+						activityScoreTargetUnit,
+						eq(activityScoreTargetUnit.id, score.unitId),
+					)
+					.innerJoin(
+						activityScoreContextUnit,
+						eq(activityScoreContextUnit.id, score.contextUnitId),
+					)
+					.where(
+						and(
+							eq(score.profileId, params.id),
+							getProfileActivityReadCondition({
+								ownerProfileId: score.profileId,
+								categoryVisibility: profilePreference.scoreVisibility,
+								itemVisibility: score.visibility,
+								viewerProfileId,
+								surface: "profile",
+							}),
+							getUnitReadCondition(
+								viewerProfileId,
+								referencedUnitReadOptions,
+								activityScoreTargetUnit,
+							),
+							getUnitReadCondition(
+								viewerProfileId,
+								referencedUnitReadOptions,
+								activityScoreContextUnit,
+							),
+						),
+					)
+					.orderBy(desc(score.updatedAt), desc(score.id))
+					.limit(limit),
+				database
+					.select({
+						unitId: unitProgress.unitId,
+						unitKind: activityProgressTargetUnit.kind,
+						unitLanguage: resolvedUnitLocalizationLanguage(
+							activityProgressTargetUnit.id,
+							localizationLanguages,
+						),
+						unitTitle: resolvedUnitLocalizationTitle(
+							activityProgressTargetUnit.id,
+							localizationLanguages,
+						),
+						status: unitProgress.status,
+						progress: unitProgress.progress,
+						completedCount: unitProgress.completedCount,
+						visibility: unitProgress.visibility,
+						lastSeenAt: unitProgress.lastSeenAt,
+					})
+					.from(unitProgress)
+					.innerJoin(
+						profilePreference,
+						eq(profilePreference.profileId, unitProgress.profileId),
+					)
+					.innerJoin(
+						activityProgressTargetUnit,
+						eq(activityProgressTargetUnit.id, unitProgress.unitId),
+					)
+					.where(
+						and(
+							eq(unitProgress.profileId, params.id),
+							isNull(unitProgress.deletedAt),
+							getProfileActivityReadCondition({
+								ownerProfileId: unitProgress.profileId,
+								categoryVisibility: profilePreference.progressVisibility,
+								itemVisibility: unitProgress.visibility,
+								viewerProfileId,
+								surface: "profile",
+							}),
+							getUnitReadCondition(
+								viewerProfileId,
+								referencedUnitReadOptions,
+								activityProgressTargetUnit,
+							),
+						),
+					)
+					.orderBy(desc(unitProgress.lastSeenAt), desc(unitProgress.unitId))
+					.limit(limit),
+			]);
+			return { scores, progress } satisfies typeof ProfileActivityResponse.static;
+		},
+		{
+			params: UserLookupParams,
+			query: ProfileActivityQuery,
+			response: {
+				[StatusCodes.OK]: ProfileActivityResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
+			},
+			detail: {
+				operationId: "getUserProfileActivity",
+				summary: "Get visible Score and Progress activity for a public Profile",
+				tags: ["Users"],
+			},
 		},
 	)
 	.get(

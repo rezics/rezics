@@ -35597,6 +35597,24 @@ export const GetApiUsersMePreferencesStatus200DefaultLicense = {
 export type GetApiUsersMePreferencesStatus200DefaultLicense =
 	(typeof GetApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof GetApiUsersMePreferencesStatus200DefaultLicense];
 
+export const GetApiUsersMePreferencesStatus200ScoreVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetApiUsersMePreferencesStatus200ScoreVisibilityEnum =
+	(typeof GetApiUsersMePreferencesStatus200ScoreVisibilityEnum)[keyof typeof GetApiUsersMePreferencesStatus200ScoreVisibilityEnum];
+
+export const GetApiUsersMePreferencesStatus200ProgressVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetApiUsersMePreferencesStatus200ProgressVisibilityEnum =
+	(typeof GetApiUsersMePreferencesStatus200ProgressVisibilityEnum)[keyof typeof GetApiUsersMePreferencesStatus200ProgressVisibilityEnum];
+
 export const GetApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 	grid: "grid",
 	list: "list",
@@ -35657,6 +35675,14 @@ export type GetApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	defaultScoreContextUnitId: string;
+	/**
+	 * @type string
+	 */
+	scoreVisibility: GetApiUsersMePreferencesStatus200ScoreVisibilityEnum;
+	/**
+	 * @type string
+	 */
+	progressVisibility: GetApiUsersMePreferencesStatus200ProgressVisibilityEnum;
 	collectionConfig:
 		| ({
 				/**
@@ -35813,6 +35839,24 @@ export const PatchApiUsersMePreferencesStatus200DefaultLicense = {
 export type PatchApiUsersMePreferencesStatus200DefaultLicense =
 	(typeof PatchApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof PatchApiUsersMePreferencesStatus200DefaultLicense];
 
+export const PatchApiUsersMePreferencesStatus200ScoreVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200ScoreVisibilityEnum =
+	(typeof PatchApiUsersMePreferencesStatus200ScoreVisibilityEnum)[keyof typeof PatchApiUsersMePreferencesStatus200ScoreVisibilityEnum];
+
+export const PatchApiUsersMePreferencesStatus200ProgressVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200ProgressVisibilityEnum =
+	(typeof PatchApiUsersMePreferencesStatus200ProgressVisibilityEnum)[keyof typeof PatchApiUsersMePreferencesStatus200ProgressVisibilityEnum];
+
 export const PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 	grid: "grid",
 	list: "list",
@@ -35873,6 +35917,14 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	defaultScoreContextUnitId: string;
+	/**
+	 * @type string
+	 */
+	scoreVisibility: PatchApiUsersMePreferencesStatus200ScoreVisibilityEnum;
+	/**
+	 * @type string
+	 */
+	progressVisibility: PatchApiUsersMePreferencesStatus200ProgressVisibilityEnum;
 	collectionConfig:
 		| ({
 				/**
@@ -36080,6 +36132,24 @@ export const PutApiUsersMePreferencesStatus200DefaultLicense = {
 export type PutApiUsersMePreferencesStatus200DefaultLicense =
 	(typeof PutApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof PutApiUsersMePreferencesStatus200DefaultLicense];
 
+export const PutApiUsersMePreferencesStatus200ScoreVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PutApiUsersMePreferencesStatus200ScoreVisibilityEnum =
+	(typeof PutApiUsersMePreferencesStatus200ScoreVisibilityEnum)[keyof typeof PutApiUsersMePreferencesStatus200ScoreVisibilityEnum];
+
+export const PutApiUsersMePreferencesStatus200ProgressVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PutApiUsersMePreferencesStatus200ProgressVisibilityEnum =
+	(typeof PutApiUsersMePreferencesStatus200ProgressVisibilityEnum)[keyof typeof PutApiUsersMePreferencesStatus200ProgressVisibilityEnum];
+
 export const PutApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 	grid: "grid",
 	list: "list",
@@ -36140,6 +36210,14 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	defaultScoreContextUnitId: string;
+	/**
+	 * @type string
+	 */
+	scoreVisibility: PutApiUsersMePreferencesStatus200ScoreVisibilityEnum;
+	/**
+	 * @type string
+	 */
+	progressVisibility: PutApiUsersMePreferencesStatus200ProgressVisibilityEnum;
 	collectionConfig:
 		| ({
 				/**
@@ -36461,6 +36539,174 @@ export type PutApiUsersMePreferencesResponse =
 	| PutApiUsersMePreferencesStatus422
 	| PutApiUsersMePreferencesStatus429
 	| PutApiUsersMePreferencesStatus500;
+
+export const UpdateCurrentUserPrivacyStatus200ScoreVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type UpdateCurrentUserPrivacyStatus200ScoreVisibilityEnum =
+	(typeof UpdateCurrentUserPrivacyStatus200ScoreVisibilityEnum)[keyof typeof UpdateCurrentUserPrivacyStatus200ScoreVisibilityEnum];
+
+export const UpdateCurrentUserPrivacyStatus200ProgressVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type UpdateCurrentUserPrivacyStatus200ProgressVisibilityEnum =
+	(typeof UpdateCurrentUserPrivacyStatus200ProgressVisibilityEnum)[keyof typeof UpdateCurrentUserPrivacyStatus200ProgressVisibilityEnum];
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyStatus200 = {
+	/**
+	 * @type string
+	 */
+	scoreVisibility: UpdateCurrentUserPrivacyStatus200ScoreVisibilityEnum;
+	/**
+	 * @type string
+	 */
+	progressVisibility: UpdateCurrentUserPrivacyStatus200ProgressVisibilityEnum;
+};
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PreferencesNotFound'
+		 * @type string
+		 */
+		code: "PreferencesNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyStatus500 = InternalError;
+
+export const UpdateCurrentUserPrivacyRequestScoreVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type UpdateCurrentUserPrivacyRequestScoreVisibilityEnum =
+	(typeof UpdateCurrentUserPrivacyRequestScoreVisibilityEnum)[keyof typeof UpdateCurrentUserPrivacyRequestScoreVisibilityEnum];
+
+export const UpdateCurrentUserPrivacyRequestProgressVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type UpdateCurrentUserPrivacyRequestProgressVisibilityEnum =
+	(typeof UpdateCurrentUserPrivacyRequestProgressVisibilityEnum)[keyof typeof UpdateCurrentUserPrivacyRequestProgressVisibilityEnum];
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyBody = {
+	/**
+	 * @type string | undefined
+	 */
+	scoreVisibility?: UpdateCurrentUserPrivacyRequestScoreVisibilityEnum;
+	/**
+	 * @type string | undefined
+	 */
+	progressVisibility?: UpdateCurrentUserPrivacyRequestProgressVisibilityEnum;
+};
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyOptions = {
+	body: UpdateCurrentUserPrivacyBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type UpdateCurrentUserPrivacyResponses = {
+	"200": UpdateCurrentUserPrivacyStatus200;
+	"400": UpdateCurrentUserPrivacyStatus400;
+	"401": UpdateCurrentUserPrivacyStatus401;
+	"404": UpdateCurrentUserPrivacyStatus404;
+	"422": UpdateCurrentUserPrivacyStatus422;
+	"500": UpdateCurrentUserPrivacyStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type UpdateCurrentUserPrivacyResponse =
+	| UpdateCurrentUserPrivacyStatus200
+	| UpdateCurrentUserPrivacyStatus400
+	| UpdateCurrentUserPrivacyStatus401
+	| UpdateCurrentUserPrivacyStatus404
+	| UpdateCurrentUserPrivacyStatus422
+	| UpdateCurrentUserPrivacyStatus500;
 
 export const GetApiUsersMeFollowingKind = {
 	slug_namespace: "slug_namespace",
@@ -37343,6 +37589,303 @@ export type PatchApiUsersMeFollowingByUnitIdResponse =
 	| PatchApiUsersMeFollowingByUnitIdStatus422
 	| PatchApiUsersMeFollowingByUnitIdStatus429
 	| PatchApiUsersMeFollowingByUnitIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+export const GetUserProfileActivityLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetUserProfileActivityLocalizationLanguagesEnum =
+	(typeof GetUserProfileActivityLocalizationLanguagesEnum)[keyof typeof GetUserProfileActivityLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetUserProfileActivityLocalizationLanguagesEnum[];
+	/**
+	 * @default 20
+	 */
+	limit?: string | number;
+};
+
+export const GetUserProfileActivityStatus200ScoresUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetUserProfileActivityStatus200ScoresUnitKindEnum =
+	(typeof GetUserProfileActivityStatus200ScoresUnitKindEnum)[keyof typeof GetUserProfileActivityStatus200ScoresUnitKindEnum];
+
+export const GetUserProfileActivityStatus200ScoresUnitLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetUserProfileActivityStatus200ScoresUnitLanguage =
+	(typeof GetUserProfileActivityStatus200ScoresUnitLanguage)[keyof typeof GetUserProfileActivityStatus200ScoresUnitLanguage];
+
+export const GetUserProfileActivityStatus200ScoresVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetUserProfileActivityStatus200ScoresVisibilityEnum =
+	(typeof GetUserProfileActivityStatus200ScoresVisibilityEnum)[keyof typeof GetUserProfileActivityStatus200ScoresVisibilityEnum];
+
+export const GetUserProfileActivityStatus200ProgressUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetUserProfileActivityStatus200ProgressUnitKindEnum =
+	(typeof GetUserProfileActivityStatus200ProgressUnitKindEnum)[keyof typeof GetUserProfileActivityStatus200ProgressUnitKindEnum];
+
+export const GetUserProfileActivityStatus200ProgressUnitLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetUserProfileActivityStatus200ProgressUnitLanguage =
+	(typeof GetUserProfileActivityStatus200ProgressUnitLanguage)[keyof typeof GetUserProfileActivityStatus200ProgressUnitLanguage];
+
+export const GetUserProfileActivityStatus200ProgressStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type GetUserProfileActivityStatus200ProgressStatusEnum =
+	(typeof GetUserProfileActivityStatus200ProgressStatusEnum)[keyof typeof GetUserProfileActivityStatus200ProgressStatusEnum];
+
+export const GetUserProfileActivityStatus200ProgressVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetUserProfileActivityStatus200ProgressVisibilityEnum =
+	(typeof GetUserProfileActivityStatus200ProgressVisibilityEnum)[keyof typeof GetUserProfileActivityStatus200ProgressVisibilityEnum];
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityStatus200 = {
+	/**
+	 * @type array
+	 */
+	scores: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		scoreId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @default 'slug_namespace'
+		 * @type string
+		 */
+		unitKind: GetUserProfileActivityStatus200ScoresUnitKindEnum;
+		unitLanguage: (GetUserProfileActivityStatus200ScoresUnitLanguage | null) | null;
+		unitTitle: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contextUnitId: string;
+		contextTitle: (string | null) | null;
+		value: string | number;
+		/**
+		 * @type string
+		 */
+		visibility: GetUserProfileActivityStatus200ScoresVisibilityEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	progress: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @default 'slug_namespace'
+		 * @type string
+		 */
+		unitKind: GetUserProfileActivityStatus200ProgressUnitKindEnum;
+		unitLanguage: (GetUserProfileActivityStatus200ProgressUnitLanguage | null) | null;
+		unitTitle: (string | null) | null;
+		/**
+		 * @default 'backlog'
+		 * @type string
+		 */
+		status: GetUserProfileActivityStatus200ProgressStatusEnum;
+		/**
+		 * @minLength 0
+		 * @maxLength 1
+		 * @type number
+		 */
+		progress: number;
+		completedCount: string | number;
+		/**
+		 * @type string
+		 */
+		visibility: GetUserProfileActivityStatus200ProgressVisibilityEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastSeenAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UserNotFound'
+		 * @type string
+		 */
+		code: "UserNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityOptions = {
+	body?: never;
+	path: GetUserProfileActivityPath;
+	query?: GetUserProfileActivityQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetUserProfileActivityResponses = {
+	"200": GetUserProfileActivityStatus200;
+	"404": GetUserProfileActivityStatus404;
+	"422": GetUserProfileActivityStatus422;
+	"500": GetUserProfileActivityStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetUserProfileActivityResponse =
+	| GetUserProfileActivityStatus200
+	| GetUserProfileActivityStatus404
+	| GetUserProfileActivityStatus422
+	| GetUserProfileActivityStatus500;
 
 /**
  * @type object
@@ -47220,13 +47763,12 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-	/**
-	 * @type object
-	 */
-	progressStatistics: {
-		active: string | number;
-		backlog: string | number;
-	};
+	progressStatistics:
+		| ({
+				active: string | number;
+				backlog: string | number;
+		  } | null)
+		| null;
 	/**
 	 * @type array
 	 */
@@ -47572,6 +48114,15 @@ export const PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum = {
 export type PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum];
 
+export const PostApiUnitsByTypeRequestVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PostApiUnitsByTypeRequestVisibilityEnum =
+	(typeof PostApiUnitsByTypeRequestVisibilityEnum)[keyof typeof PostApiUnitsByTypeRequestVisibilityEnum];
+
 export const PostApiUnitsByTypeRequestContentRatingEnum = {
 	general: "general",
 	r15: "r15",
@@ -47844,7 +48395,10 @@ export type PostApiUnitsByTypeBody =
 				bannerAssetId?: (string | null) | null;
 				coverAssetId?: (string | null) | null;
 			};
-			visibility?: "public" | "unlisted" | "private";
+			/**
+			 * @type string | undefined
+			 */
+			visibility?: PostApiUnitsByTypeRequestVisibilityEnum;
 			/**
 			 * @type string | undefined
 			 */
@@ -48102,7 +48656,10 @@ export type PostApiUnitsByTypeBody =
 				bannerAssetId?: (string | null) | null;
 				coverAssetId?: (string | null) | null;
 			};
-			visibility?: "public" | "unlisted" | "private";
+			/**
+			 * @type string | undefined
+			 */
+			visibility?: PostApiUnitsByTypeRequestVisibilityEnum;
 			/**
 			 * @type string | undefined
 			 */
@@ -49113,13 +49670,12 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-	/**
-	 * @type object
-	 */
-	progressStatistics: {
-		active: string | number;
-		backlog: string | number;
-	};
+	progressStatistics:
+		| ({
+				active: string | number;
+				backlog: string | number;
+		  } | null)
+		| null;
 	/**
 	 * @type array
 	 */
@@ -50269,13 +50825,12 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-	/**
-	 * @type object
-	 */
-	progressStatistics: {
-		active: string | number;
-		backlog: string | number;
-	};
+	progressStatistics:
+		| ({
+				active: string | number;
+				backlog: string | number;
+		  } | null)
+		| null;
 	/**
 	 * @type array
 	 */
@@ -51872,13 +52427,12 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-	/**
-	 * @type object
-	 */
-	progressStatistics: {
-		active: string | number;
-		backlog: string | number;
-	};
+	progressStatistics:
+		| ({
+				active: string | number;
+				backlog: string | number;
+		  } | null)
+		| null;
 	/**
 	 * @type array
 	 */
@@ -53199,13 +53753,12 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-	/**
-	 * @type object
-	 */
-	progressStatistics: {
-		active: string | number;
-		backlog: string | number;
-	};
+	progressStatistics:
+		| ({
+				active: string | number;
+				backlog: string | number;
+		  } | null)
+		| null;
 	/**
 	 * @type array
 	 */
@@ -54536,13 +55089,12 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
-	/**
-	 * @type object
-	 */
-	progressStatistics: {
-		active: string | number;
-		backlog: string | number;
-	};
+	progressStatistics:
+		| ({
+				active: string | number;
+				backlog: string | number;
+		  } | null)
+		| null;
 	/**
 	 * @type array
 	 */
@@ -66617,6 +67169,15 @@ export const GetApiProgressStatus200ItemsStatusEnum = {
 export type GetApiProgressStatus200ItemsStatusEnum =
 	(typeof GetApiProgressStatus200ItemsStatusEnum)[keyof typeof GetApiProgressStatus200ItemsStatusEnum];
 
+export const GetApiProgressStatus200ItemsVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetApiProgressStatus200ItemsVisibilityEnum =
+	(typeof GetApiProgressStatus200ItemsVisibilityEnum)[keyof typeof GetApiProgressStatus200ItemsVisibilityEnum];
+
 export const GetApiProgressStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -66669,6 +67230,10 @@ export type GetApiProgressStatus200 = {
 		lastSeenAt: string;
 		lastContentStructureNodeId: (string | null) | null;
 		lastReadAnchor: (void | null) | null;
+		/**
+		 * @type string
+		 */
+		visibility: GetApiProgressStatus200ItemsVisibilityEnum;
 		/**
 		 * @type string
 		 */
@@ -66991,6 +67556,15 @@ export const GetApiProgressByUnitIdStatus200RecordStatusEnum = {
 export type GetApiProgressByUnitIdStatus200RecordStatusEnum =
 	(typeof GetApiProgressByUnitIdStatus200RecordStatusEnum)[keyof typeof GetApiProgressByUnitIdStatus200RecordStatusEnum];
 
+export const GetApiProgressByUnitIdStatus200RecordVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetApiProgressByUnitIdStatus200RecordVisibilityEnum =
+	(typeof GetApiProgressByUnitIdStatus200RecordVisibilityEnum)[keyof typeof GetApiProgressByUnitIdStatus200RecordVisibilityEnum];
+
 export type GetApiProgressByUnitIdStatus200 =
 	| {
 			/**
@@ -67049,6 +67623,10 @@ export type GetApiProgressByUnitIdStatus200 =
 				lastContentStructureNodeId: (string | null) | null;
 				currentEntryId: (string | null) | null;
 				lastReadAnchor: (void | null) | null;
+				/**
+				 * @type string
+				 */
+				visibility: GetApiProgressByUnitIdStatus200RecordVisibilityEnum;
 				/**
 				 * @description
 				 * Format: `date-time`
@@ -67180,6 +67758,15 @@ export const PutApiProgressByUnitIdStatus200StatusEnum = {
 export type PutApiProgressByUnitIdStatus200StatusEnum =
 	(typeof PutApiProgressByUnitIdStatus200StatusEnum)[keyof typeof PutApiProgressByUnitIdStatus200StatusEnum];
 
+export const PutApiProgressByUnitIdStatus200VisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PutApiProgressByUnitIdStatus200VisibilityEnum =
+	(typeof PutApiProgressByUnitIdStatus200VisibilityEnum)[keyof typeof PutApiProgressByUnitIdStatus200VisibilityEnum];
+
 /**
  * @type object
  */
@@ -67226,6 +67813,10 @@ export type PutApiProgressByUnitIdStatus200 = {
 	lastContentStructureNodeId: (string | null) | null;
 	currentEntryId: (string | null) | null;
 	lastReadAnchor: (void | null) | null;
+	/**
+	 * @type string
+	 */
+	visibility: PutApiProgressByUnitIdStatus200VisibilityEnum;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -67326,6 +67917,15 @@ export const PutApiProgressByUnitIdRequestStatusEnum = {
 export type PutApiProgressByUnitIdRequestStatusEnum =
 	(typeof PutApiProgressByUnitIdRequestStatusEnum)[keyof typeof PutApiProgressByUnitIdRequestStatusEnum];
 
+export const PutApiProgressByUnitIdRequestVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PutApiProgressByUnitIdRequestVisibilityEnum =
+	(typeof PutApiProgressByUnitIdRequestVisibilityEnum)[keyof typeof PutApiProgressByUnitIdRequestVisibilityEnum];
+
 /**
  * @type object
  */
@@ -67342,6 +67942,10 @@ export type PutApiProgressByUnitIdBody = {
 	progress?: number;
 	totalTimeMs?: string | number;
 	lastContentStructureNodeId?: (string | null) | null;
+	/**
+	 * @type string | undefined
+	 */
+	visibility?: PutApiProgressByUnitIdRequestVisibilityEnum;
 };
 
 /**
@@ -68669,6 +69273,15 @@ export const PostApiProgressByUnitIdCompleteStatus200StatusEnum = {
 export type PostApiProgressByUnitIdCompleteStatus200StatusEnum =
 	(typeof PostApiProgressByUnitIdCompleteStatus200StatusEnum)[keyof typeof PostApiProgressByUnitIdCompleteStatus200StatusEnum];
 
+export const PostApiProgressByUnitIdCompleteStatus200VisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PostApiProgressByUnitIdCompleteStatus200VisibilityEnum =
+	(typeof PostApiProgressByUnitIdCompleteStatus200VisibilityEnum)[keyof typeof PostApiProgressByUnitIdCompleteStatus200VisibilityEnum];
+
 /**
  * @type object
  */
@@ -68715,6 +69328,10 @@ export type PostApiProgressByUnitIdCompleteStatus200 = {
 	lastContentStructureNodeId: (string | null) | null;
 	currentEntryId: (string | null) | null;
 	lastReadAnchor: (void | null) | null;
+	/**
+	 * @type string
+	 */
+	visibility: PostApiProgressByUnitIdCompleteStatus200VisibilityEnum;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -68796,11 +69413,24 @@ export type PostApiProgressByUnitIdCompleteStatus429 = {
  */
 export type PostApiProgressByUnitIdCompleteStatus500 = InternalError;
 
+export const PostApiProgressByUnitIdCompleteRequestVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PostApiProgressByUnitIdCompleteRequestVisibilityEnum =
+	(typeof PostApiProgressByUnitIdCompleteRequestVisibilityEnum)[keyof typeof PostApiProgressByUnitIdCompleteRequestVisibilityEnum];
+
 /**
  * @type object
  */
 export type PostApiProgressByUnitIdCompleteBody = {
 	totalTimeMs?: string | number;
+	/**
+	 * @type string | undefined
+	 */
+	visibility?: PostApiProgressByUnitIdCompleteRequestVisibilityEnum;
 };
 
 /**
@@ -79269,15 +79899,6 @@ export const GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum = {
 export type GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum =
 	(typeof GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum)[keyof typeof GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum];
 
-export const GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum = {
-	rezics: "rezics",
-	manual: "manual",
-	import: "import",
-} as const;
-
-export type GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum =
-	(typeof GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum)[keyof typeof GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum];
-
 /**
  * @type object
  */
@@ -79637,12 +80258,6 @@ export type GetApiReviewsByReviewIdStatus200 = {
 				 * Format: `uuid`
 				 * @type string
 				 */
-				id: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
 				unitId: string;
 				/**
 				 * @default 'update'
@@ -79661,20 +80276,12 @@ export type GetApiReviewsByReviewIdStatus200 = {
 				 */
 				progress: number;
 				completionDelta: string | number;
-				totalTimeMs: string | number;
-				lastContentStructureNodeId: (string | null) | null;
 				occurredAt: (string | null) | null;
 				/**
 				 * @default 'instant'
 				 * @type string
 				 */
 				datePrecision: GetApiReviewsByReviewIdStatus200ProgressEntryDatePrecisionEnum;
-				/**
-				 * @default 'rezics'
-				 * @type string
-				 */
-				sourceKind: GetApiReviewsByReviewIdStatus200ProgressEntrySourceKindEnum;
-				sourceProvider: (string | null) | null;
 		  } | null)
 		| null;
 	/**
@@ -80279,6 +80886,15 @@ export type PutApiScoresByTargetIdPath = {
 	targetId: string;
 };
 
+export const PutApiScoresByTargetIdStatus200VisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PutApiScoresByTargetIdStatus200VisibilityEnum =
+	(typeof PutApiScoresByTargetIdStatus200VisibilityEnum)[keyof typeof PutApiScoresByTargetIdStatus200VisibilityEnum];
+
 /**
  * @type object
  */
@@ -80290,6 +80906,10 @@ export type PutApiScoresByTargetIdStatus200 = {
 	 */
 	scoreId: string;
 	score: string | number;
+	/**
+	 * @type string
+	 */
+	visibility: PutApiScoresByTargetIdStatus200VisibilityEnum;
 };
 
 /**
@@ -80409,6 +81029,15 @@ export type PutApiScoresByTargetIdStatus429 = {
  */
 export type PutApiScoresByTargetIdStatus500 = InternalError;
 
+export const PutApiScoresByTargetIdRequestVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PutApiScoresByTargetIdRequestVisibilityEnum =
+	(typeof PutApiScoresByTargetIdRequestVisibilityEnum)[keyof typeof PutApiScoresByTargetIdRequestVisibilityEnum];
+
 /**
  * @type object
  */
@@ -80420,6 +81049,10 @@ export type PutApiScoresByTargetIdBody = {
 	 */
 	contextUnitId: string;
 	score: string | number;
+	/**
+	 * @type string | undefined
+	 */
+	visibility?: PutApiScoresByTargetIdRequestVisibilityEnum;
 };
 
 /**
@@ -80619,6 +81252,15 @@ export type GetApiScoresByTargetIdViewerQuery = {
 	localizationLanguages?: GetApiScoresByTargetIdViewerLocalizationLanguagesEnum[];
 };
 
+export const GetApiScoresByTargetIdViewerStatus200ItemsVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetApiScoresByTargetIdViewerStatus200ItemsVisibilityEnum =
+	(typeof GetApiScoresByTargetIdViewerStatus200ItemsVisibilityEnum)[keyof typeof GetApiScoresByTargetIdViewerStatus200ItemsVisibilityEnum];
+
 /**
  * @type object
  */
@@ -80640,6 +81282,10 @@ export type GetApiScoresByTargetIdViewerStatus200 = {
 		 */
 		contextUnitId: string;
 		value: string | number;
+		/**
+		 * @type string
+		 */
+		visibility: GetApiScoresByTargetIdViewerStatus200ItemsVisibilityEnum;
 		contextUnitTitle: (string | null) | null;
 		/**
 		 * @description
@@ -82317,6 +82963,15 @@ export type GetApiPostsByPostIdScoresPath = {
 	postId: string;
 };
 
+export const GetApiPostsByPostIdScoresStatus200ItemsVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type GetApiPostsByPostIdScoresStatus200ItemsVisibilityEnum =
+	(typeof GetApiPostsByPostIdScoresStatus200ItemsVisibilityEnum)[keyof typeof GetApiPostsByPostIdScoresStatus200ItemsVisibilityEnum];
+
 /**
  * @type object
  */
@@ -82350,6 +83005,10 @@ export type GetApiPostsByPostIdScoresStatus200 = {
 		 */
 		contextUnitId: string;
 		value: string | number;
+		/**
+		 * @type string
+		 */
+		visibility: GetApiPostsByPostIdScoresStatus200ItemsVisibilityEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -82446,6 +83105,15 @@ export type PutApiPostsByPostIdScoresPath = {
 	postId: string;
 };
 
+export const PutApiPostsByPostIdScoresStatus200ItemsVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PutApiPostsByPostIdScoresStatus200ItemsVisibilityEnum =
+	(typeof PutApiPostsByPostIdScoresStatus200ItemsVisibilityEnum)[keyof typeof PutApiPostsByPostIdScoresStatus200ItemsVisibilityEnum];
+
 /**
  * @type object
  */
@@ -82479,6 +83147,10 @@ export type PutApiPostsByPostIdScoresStatus200 = {
 		 */
 		contextUnitId: string;
 		value: string | number;
+		/**
+		 * @type string
+		 */
+		visibility: PutApiPostsByPostIdScoresStatus200ItemsVisibilityEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -84050,15 +84722,6 @@ export const GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum = {
 export type GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum =
 	(typeof GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum)[keyof typeof GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum];
 
-export const GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum = {
-	rezics: "rezics",
-	manual: "manual",
-	import: "import",
-} as const;
-
-export type GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum =
-	(typeof GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum)[keyof typeof GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum];
-
 export type GetApiPostsByPostIdStatus200 =
 	| {
 			/**
@@ -85156,12 +85819,6 @@ export type GetApiPostsByPostIdStatus200 =
 						 * Format: `uuid`
 						 * @type string
 						 */
-						id: string;
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
 						unitId: string;
 						/**
 						 * @default 'update'
@@ -85180,20 +85837,12 @@ export type GetApiPostsByPostIdStatus200 =
 						 */
 						progress: number;
 						completionDelta: string | number;
-						totalTimeMs: string | number;
-						lastContentStructureNodeId: (string | null) | null;
 						occurredAt: (string | null) | null;
 						/**
 						 * @default 'instant'
 						 * @type string
 						 */
 						datePrecision: GetApiPostsByPostIdStatus200ProgressEntryDatePrecisionEnum;
-						/**
-						 * @default 'rezics'
-						 * @type string
-						 */
-						sourceKind: GetApiPostsByPostIdStatus200ProgressEntrySourceKindEnum;
-						sourceProvider: (string | null) | null;
 				  } | null)
 				| null;
 			/**

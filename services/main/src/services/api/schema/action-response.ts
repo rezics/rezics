@@ -1,7 +1,15 @@
 import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
-import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, UnitKind, Uuid } from ".";
+import {
+	ContentLanguage,
+	DateTime,
+	FractionalPosition,
+	OrdinalPosition,
+	ResourceVisibility,
+	UnitKind,
+	Uuid,
+} from ".";
 import {
 	RealmMemberStateValues,
 	RealmRuleAcknowledgementModeValues,
@@ -19,7 +27,11 @@ export const NoContentResponse = {
 export const SavedResponse = t.Object({ saved: t.Boolean() });
 export const FavoriteResponse = t.Object({ favorited: t.Boolean(), collectionId: Uuid });
 
-export const ScoreResponse = t.Object({ scoreId: Uuid, score: t.Integer() });
+export const ScoreResponse = t.Object({
+	scoreId: Uuid,
+	score: t.Integer(),
+	visibility: ResourceVisibility,
+});
 export const ScoreAggregateResponse = t.Object({
 	totalScore: t.Integer(),
 	totalCount: t.Integer(),
@@ -31,6 +43,7 @@ export const ViewerScoreListResponse = t.Object({
 			scoreId: Uuid,
 			contextUnitId: Uuid,
 			value: t.Integer({ minimum: 1, maximum: 10 }),
+			visibility: ResourceVisibility,
 			contextUnitTitle: t.Nullable(t.String()),
 			updatedAt: DateTime,
 		}),

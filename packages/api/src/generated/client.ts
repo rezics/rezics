@@ -215,6 +215,8 @@ import type {
 	PatchApiUsersMePreferencesResponses,
 	PutApiUsersMePreferencesOptions,
 	PutApiUsersMePreferencesResponses,
+	UpdateCurrentUserPrivacyOptions,
+	UpdateCurrentUserPrivacyResponses,
 	GetApiUsersMeFollowingOptions,
 	GetApiUsersMeFollowingResponses,
 	GetApiUsersMeFollowingByUnitIdOptions,
@@ -225,6 +227,8 @@ import type {
 	DeleteApiUsersMeFollowingByUnitIdResponses,
 	PatchApiUsersMeFollowingByUnitIdOptions,
 	PatchApiUsersMeFollowingByUnitIdResponses,
+	GetUserProfileActivityOptions,
+	GetUserProfileActivityResponses,
 	GetApiUsersByIdOptions,
 	GetApiUsersByIdResponses,
 	GetApiUsersMeBlocksOptions,
@@ -2672,6 +2676,23 @@ export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Update current user's Score and Progress privacy
+ * {@link /api/users/me/privacy}
+ */
+export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
+	options: Options<UpdateCurrentUserPrivacyOptions, ThrowOnError>,
+): Promise<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/users/me/privacy",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>>;
+}
+
+/**
  * @summary List Units followed by the current user
  * {@link /api/users/me/following}
  */
@@ -2769,6 +2790,20 @@ export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = 
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get visible Score and Progress activity for a public Profile
+ * {@link /api/users/:id/activity}
+ */
+export function getUserProfileActivity<ThrowOnError extends boolean = true>(
+	options: Options<GetUserProfileActivityOptions, ThrowOnError>,
+): Promise<RequestResult<GetUserProfileActivityResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/users/{id}/activity", ...config }) as Promise<
+		RequestResult<GetUserProfileActivityResponses, ThrowOnError>
+	>;
 }
 
 /**

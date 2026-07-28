@@ -25,6 +25,7 @@ describe("progress API contract", () => {
 			lastContentStructureNodeId: null,
 			currentEntryId: null,
 			lastReadAnchor: null,
+			visibility: "private",
 			createdAt: "2026-07-26T00:00:00.000Z",
 			updatedAt: "2026-07-26T01:00:00.000Z",
 		};
@@ -55,6 +56,8 @@ describe("progress API contract", () => {
 	it("allows completion to retain an updated cumulative time", () => {
 		expect(Check(CompleteProgressBody, {})).toBe(true);
 		expect(Check(CompleteProgressBody, { totalTimeMs: 3_600_000 })).toBe(true);
+		expect(Check(CompleteProgressBody, { visibility: "public" })).toBe(true);
+		expect(Check(CompleteProgressBody, { visibility: "followers" })).toBe(false);
 		expect(Check(CompleteProgressBody, { totalTimeMs: -1 })).toBe(false);
 		expect(Check(CompleteProgressBody, { totalTimeMs: Number.MAX_SAFE_INTEGER + 1 })).toBe(
 			false,

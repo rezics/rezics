@@ -6,12 +6,14 @@ describe("settings routes", () => {
 	it("builds section routes", () => {
 		expect(settingsSectionHref("security")).toBe("/settings/security");
 		expect(settingsSectionHref("tokens")).toBe("/settings/tokens");
+		expect(settingsSectionHref("privacy")).toBe("/settings/privacy");
 		expect(settingsSectionHref("tag-sources")).toBe("/settings/tag-sources");
 	});
 
 	it.each([
 		["/settings/profile", "profile"],
 		["/settings/preferences/", "preferences"],
+		["/settings/privacy", "privacy"],
 		["/settings/tag-sources", "tag-sources"],
 		["/settings/tokens", "tokens"],
 		["/settings", undefined],

@@ -8,6 +8,7 @@ import {
 	ListReviewsQuery,
 	ListViewerScoresQuery,
 	resolveReviewScoreFilter,
+	SetScoreBody,
 } from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
@@ -56,6 +57,23 @@ describe("viewer Score list schema", () => {
 		expect(Check(ListViewerScoresQuery, { localizationLanguages: ["zh"] })).toBe(true);
 		expect(Check(ListViewerScoresQuery, { language: "zh" })).toBe(false);
 		expect(Check(ListViewerScoresQuery, { localizationLanguages: ["zh-Hant"] })).toBe(false);
+	});
+
+	it("accepts an optional per-Score visibility control", () => {
+		expect(
+			Check(SetScoreBody, {
+				contextUnitId: realmId,
+				score: 8,
+				visibility: "unlisted",
+			}),
+		).toBe(true);
+		expect(
+			Check(SetScoreBody, {
+				contextUnitId: realmId,
+				score: 8,
+				visibility: "followers",
+			}),
+		).toBe(false);
 	});
 });
 

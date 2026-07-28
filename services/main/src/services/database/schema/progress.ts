@@ -34,7 +34,7 @@ import {
 } from "./columns";
 import { contentStructureNode } from "./content-structure";
 import { contentStructureRevision } from "./content-structure-history";
-import { profile, unit } from "./core";
+import { profile, resourceVisibility, unit } from "./core";
 import { post } from "./post";
 
 export const progressStatus = pgEnum("progress_status", toEnumValues(ProgressStatusValues));
@@ -175,6 +175,7 @@ export const unitProgress = pgTable(
 		lastSeenAt: createTimestampMsColumn().defaultNow().notNull(),
 		lastContentStructureNodeId: uuid(),
 		currentEntryId: uuid(),
+		visibility: resourceVisibility().default("private").notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -195,6 +196,9 @@ export const unitProgress = pgTable(
 		index("unit_progress_profile_seen_idx")
 			.on(table.profileId, table.lastSeenAt.desc(), table.unitId)
 			.where(sql`${table.deletedAt} is null`),
+		index("unit_progress_public_profile_seen_idx")
+			.on(table.profileId, table.lastSeenAt.desc(), table.unitId)
+			.where(sql`${table.deletedAt} is null and ${table.visibility} = 'public'`),
 		index("unit_progress_last_content_structure_node_idx").on(table.lastContentStructureNodeId),
 		index("unit_progress_current_entry_idx").on(table.currentEntryId),
 		check("unit_progress_value_check", sql`${table.progress} between 0 and 1`),
@@ -210,7 +214,15 @@ export const unitProgress = pgTable(
 	],
 );
 
-/** A Review Post's optional point-in-time Progress checkpoint. */
+/**
+ * A Progress checkpoint linked by a Review Post.
+ *
+ * @remarks
+ * This relation intentionally renders the current mutable journal entry.
+ * Editing, deleting, or restricting its owning Progress may change or remove
+ * the Progress shown by the Post. Introduce immutable snapshots only if
+ * historical point-in-time rendering becomes a product guarantee.
+ */
 export const postProgressEntry = pgTable(
 	"post_progress_entry",
 	{

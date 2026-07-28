@@ -34,6 +34,11 @@ import { RotateCcw, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
+import {
+	isResourceVisibility,
+	ResourceVisibilityValues,
+	type ResourceVisibility,
+} from "@/features/privacy/model/resource-visibility";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
 	changeProgressDraftStatus,
@@ -76,6 +81,9 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 	const { t } = useTranslation(["engagement", "errors", "ui"]);
 	const [sourceRecord] = useState(record);
 	const [draft, setDraft] = useState(() => createProgressDraft(record));
+	const [visibility, setVisibility] = useState<ResourceVisibility>(
+		record?.visibility ?? progress.defaultVisibility,
+	);
 	const [invalid, setInvalid] = useState(false);
 	const [removeOpen, setRemoveOpen] = useState(false);
 	const copy = t.engagement.progressByType[progress.domain.type];
@@ -90,7 +98,9 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 		}
 		setInvalid(false);
 		await progress.completeCurrentProgress(
-			update.totalTimeMs === undefined ? undefined : { totalTimeMs: update.totalTimeMs },
+			update.totalTimeMs === undefined
+				? { visibility }
+				: { totalTimeMs: update.totalTimeMs, visibility },
 		);
 	}
 
@@ -106,7 +116,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 			return;
 		}
 		setInvalid(false);
-		await progress.saveProgress(update);
+		await progress.saveProgress({ ...update, visibility });
 	}
 
 	async function confirmRemove() {
@@ -129,6 +139,23 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 							t={t}
 							type={progress.domain.type}
 						/>
+						<Field>
+							<FieldLabel htmlFor="progress-visibility">{t.ui.visibility}</FieldLabel>
+							<NativeSelect
+								id="progress-visibility"
+								onChange={(event) => {
+									if (isResourceVisibility(event.target.value))
+										setVisibility(event.target.value);
+								}}
+								value={visibility}
+							>
+								{ResourceVisibilityValues.map((value) => (
+									<NativeSelectOption key={value} value={value}>
+										{t.ui[value]}
+									</NativeSelectOption>
+								))}
+							</NativeSelect>
+						</Field>
 						{progress.domain.type === "book" ? (
 							<BookProgressFields draft={draft} onChange={setDraft} />
 						) : progress.domain.type === "media" ? (

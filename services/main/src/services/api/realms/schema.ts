@@ -12,7 +12,7 @@ import {
 	RealmUnitStatusValues,
 	RealmUnitMutationCommandValues,
 	UnitStatusValues,
-	UnitVisibilityValues,
+	ResourceVisibilityValues,
 } from "../../database/schema/contract-values";
 import {
 	DateTime,
@@ -24,7 +24,7 @@ import {
 } from "../schema";
 import { ModerationActionResponse } from "../governance/schema";
 
-const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
+const RealmVisibility = t.Union(ResourceVisibilityValues.map((value) => t.Literal(value)));
 
 const RealmJoinPolicy = t.Union(RealmJoinPolicyValues.map((value) => t.Literal(value)));
 

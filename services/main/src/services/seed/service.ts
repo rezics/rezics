@@ -152,7 +152,7 @@ import { createSeedRunOptions, includesSeedScenario, type SeedRunOptions } from 
 
 type UnitKind = (typeof unit.$inferSelect)["kind"];
 type UnitStatus = (typeof unit.$inferSelect)["status"];
-type UnitVisibility = (typeof unit.$inferSelect)["visibility"];
+type ResourceVisibility = (typeof unit.$inferSelect)["visibility"];
 type ModerationStatus = (typeof unit.$inferSelect)["moderationStatus"];
 
 type LocalizationKind = "description" | "post" | "reply" | "poll" | "title";
@@ -163,7 +163,7 @@ interface UnitDescriptor {
 	ownerProfileId: string;
 	localizationKind: LocalizationKind;
 	status: UnitStatus;
-	visibility: UnitVisibility;
+	visibility: ResourceVisibility;
 	moderationStatus: ModerationStatus;
 	publishedAt: Date | null;
 	createdAt: Date;
@@ -512,6 +512,8 @@ async function seedProfiles(
 				interfaceLocale,
 				defaultLicense: index % 3 === 0 ? ("cc-by-4.0" as const) : null,
 				defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+				scoreVisibility: itemAt(["public", "unlisted", "private"] as const, index),
+				progressVisibility: itemAt(["public", "private", "unlisted"] as const, index),
 				personalizedFeed: index % 10 !== 0 || index === 0,
 				contentRatings:
 					index % 7 === 0 ? ["general" as const, "r15" as const] : ["general" as const],
@@ -2060,6 +2062,10 @@ async function seedInteractions(
 					),
 					completedCount: progress === 1 ? 1 : 0,
 					totalTimeMs: BigInt((index + 1) * 900_000),
+					visibility: itemAt(
+						["public", "unlisted", "private"] as const,
+						profileIndex + index,
+					),
 					firstSeenAt: createdAt,
 					lastSeenAt,
 					lastContentStructureNodeId:
@@ -2159,6 +2165,10 @@ async function seedInteractions(
 					unitId: target.id,
 					contextUnitId: realmUnit.id,
 					value: 1 + ((profileIndex + index * 3) % 10),
+					visibility: itemAt(
+						["public", "unlisted", "private"] as const,
+						profileIndex + index,
+					),
 					createdAt,
 					updatedAt: createdAt,
 				};

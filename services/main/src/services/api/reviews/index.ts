@@ -420,7 +420,7 @@ export default new Elysia()
 							profileId: profile.unitId,
 						});
 						if (validatedScore) {
-							const scoreId = await upsertScore(
+							const storedScore = await upsertScore(
 								tx,
 								profile.unitId,
 								body.targetId,
@@ -429,7 +429,7 @@ export default new Elysia()
 							);
 							await tx.insert(postScore).values({
 								postId: created.id,
-								scoreId,
+								scoreId: storedScore.id,
 								position: fractionalPositionAt(0),
 							});
 						}
@@ -485,8 +485,9 @@ export default new Elysia()
 			.get(
 				"/:reviewId",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
-						.authorization;
+					const identity = await resolveIdentity(request.headers, "unit:read");
+					const { authorization } = identity;
+					const viewerProfileId = identity.profile?.unitId;
 					await authorization.unit.ensureCanRead(
 						params.reviewId,
 						() => new UnitNotFound("Review"),
@@ -552,14 +553,14 @@ export default new Elysia()
 						targetingLock,
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([review.id], localizationLanguages),
-						selectPostScores(review.id).then((items) =>
+						selectPostScores(review.id, viewerProfileId).then((items) =>
 							items.map(({ scoreId, contextUnitId, value }) => ({
 								scoreId,
 								contextUnitId,
 								value,
 							})),
 						),
-						selectPostProgressEntry(review.id),
+						selectPostProgressEntry(review.id, viewerProfileId),
 						subjectPromise,
 						authorization.unit.canUpdate(params.reviewId, ["localizations"]),
 						authorization.unit.canUpdate(params.reviewId, ["credit-attributions"]),
@@ -585,19 +586,13 @@ export default new Elysia()
 						scores,
 						progressEntry: progressEntries[0]
 							? {
-									id: progressEntries[0].id,
 									unitId: progressEntries[0].unitId,
 									entryKind: progressEntries[0].entryKind,
 									status: progressEntries[0].status,
 									progress: progressEntries[0].progress,
 									completionDelta: progressEntries[0].completionDelta,
-									totalTimeMs: Number(progressEntries[0].totalTimeMs),
-									lastContentStructureNodeId:
-										progressEntries[0].lastContentStructureNodeId,
 									occurredAt: progressEntries[0].occurredAt,
 									datePrecision: progressEntries[0].datePrecision,
-									sourceKind: progressEntries[0].sourceKind,
-									sourceProvider: progressEntries[0].sourceProvider,
 								}
 							: null,
 						capabilities: {
@@ -727,16 +722,21 @@ export default new Elysia()
 						authorization,
 						body.contextUnitId,
 					);
-					const scoreId = await database.transaction((tx) =>
+					const storedScore = await database.transaction((tx) =>
 						upsertScore(
 							tx,
 							profile.unitId,
 							params.targetId,
 							context.contextUnitId,
 							body.score,
+							body.visibility,
 						),
 					);
-					return { scoreId, score: body.score };
+					return {
+						scoreId: storedScore.id,
+						score: body.score,
+						visibility: storedScore.visibility,
+					};
 				},
 				{
 					access: "contribute:interaction:write",
@@ -762,6 +762,7 @@ export default new Elysia()
 							scoreId: score.id,
 							contextUnitId: score.contextUnitId,
 							value: score.value,
+							visibility: score.visibility,
 							contextUnitTitle: resolvedUnitLocalizationTitle(
 								score.contextUnitId,
 								query.localizationLanguages,

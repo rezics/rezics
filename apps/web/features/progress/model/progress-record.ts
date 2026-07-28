@@ -13,6 +13,7 @@ export interface UnitProgressRecord<Status extends ProgressStatus = ProgressStat
 	readonly progress: number;
 	readonly status: Status;
 	readonly totalTimeMs: number;
+	readonly visibility: ResourceVisibility;
 }
 
 export type TrackedUnitProgressState = {
@@ -34,6 +35,7 @@ export interface UnitProgressUpdate {
 	readonly progress: number;
 	readonly status: ProgressStatus;
 	readonly totalTimeMs?: number;
+	readonly visibility?: ResourceVisibility;
 }
 
 const EmptyProgressRecord: UnitProgressRecord = {
@@ -42,6 +44,7 @@ const EmptyProgressRecord: UnitProgressRecord = {
 	progress: 0,
 	status: "active",
 	totalTimeMs: 0,
+	visibility: "private",
 };
 const MaximumTotalMinutes = Math.floor(Number.MAX_SAFE_INTEGER / 60_000);
 
@@ -210,3 +213,4 @@ function parseTotalMinutes(value: string): number | undefined {
 	const parsed = parseNonNegativeInteger(value);
 	return parsed !== undefined && parsed <= MaximumTotalMinutes ? parsed : undefined;
 }
+import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";

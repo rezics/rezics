@@ -694,6 +694,13 @@ import type {
 	PutApiUsersMePreferencesStatus422,
 	PutApiUsersMePreferencesStatus429,
 	PutApiUsersMePreferencesStatus500,
+	UpdateCurrentUserPrivacyOptions,
+	UpdateCurrentUserPrivacyStatus200,
+	UpdateCurrentUserPrivacyStatus400,
+	UpdateCurrentUserPrivacyStatus401,
+	UpdateCurrentUserPrivacyStatus404,
+	UpdateCurrentUserPrivacyStatus422,
+	UpdateCurrentUserPrivacyStatus500,
 	GetApiUsersMeFollowingOptions,
 	GetApiUsersMeFollowingStatus200,
 	GetApiUsersMeFollowingStatus400,
@@ -725,6 +732,11 @@ import type {
 	PatchApiUsersMeFollowingByUnitIdStatus422,
 	PatchApiUsersMeFollowingByUnitIdStatus429,
 	PatchApiUsersMeFollowingByUnitIdStatus500,
+	GetUserProfileActivityOptions,
+	GetUserProfileActivityStatus200,
+	GetUserProfileActivityStatus404,
+	GetUserProfileActivityStatus422,
+	GetUserProfileActivityStatus500,
 	GetApiUsersByIdOptions,
 	GetApiUsersByIdStatus200,
 	GetApiUsersByIdStatus404,
@@ -2211,11 +2223,13 @@ import {
 	getApiUsersMePreferences,
 	patchApiUsersMePreferences,
 	putApiUsersMePreferences,
+	updateCurrentUserPrivacy,
 	getApiUsersMeFollowing,
 	getApiUsersMeFollowingByUnitId,
 	putApiUsersMeFollowingByUnitId,
 	deleteApiUsersMeFollowingByUnitId,
 	patchApiUsersMeFollowingByUnitId,
+	getUserProfileActivity,
 	getApiUsersById,
 	getApiUsersMeBlocks,
 	putApiUsersByIdBlock,
@@ -13127,6 +13141,107 @@ export function usePutApiUsersMePreferences<TContext>(
 	>;
 }
 
+export const updateCurrentUserPrivacyMutationKey = () =>
+	[{ url: "/api/users/me/privacy" }] as const;
+
+export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = updateCurrentUserPrivacyMutationKey();
+	return mutationOptions<
+		UpdateCurrentUserPrivacyStatus200,
+		ResponseErrorConfig<
+			| UpdateCurrentUserPrivacyStatus400
+			| UpdateCurrentUserPrivacyStatus401
+			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus422
+			| UpdateCurrentUserPrivacyStatus500
+		>,
+		UpdateCurrentUserPrivacyOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await updateCurrentUserPrivacy({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update current user's Score and Progress privacy
+ * {@link /api/users/me/privacy}
+ */
+export function useUpdateCurrentUserPrivacy<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			UpdateCurrentUserPrivacyStatus200,
+			ResponseErrorConfig<
+				| UpdateCurrentUserPrivacyStatus400
+				| UpdateCurrentUserPrivacyStatus401
+				| UpdateCurrentUserPrivacyStatus404
+				| UpdateCurrentUserPrivacyStatus422
+				| UpdateCurrentUserPrivacyStatus500
+			>,
+			UpdateCurrentUserPrivacyOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? updateCurrentUserPrivacyMutationKey();
+
+	const baseOptions = updateCurrentUserPrivacyMutationOptions(config) as UseMutationOptions<
+		UpdateCurrentUserPrivacyStatus200,
+		ResponseErrorConfig<
+			| UpdateCurrentUserPrivacyStatus400
+			| UpdateCurrentUserPrivacyStatus401
+			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus422
+			| UpdateCurrentUserPrivacyStatus500
+		>,
+		UpdateCurrentUserPrivacyOptions,
+		TContext
+	>;
+
+	return useMutation<
+		UpdateCurrentUserPrivacyStatus200,
+		ResponseErrorConfig<
+			| UpdateCurrentUserPrivacyStatus400
+			| UpdateCurrentUserPrivacyStatus401
+			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus422
+			| UpdateCurrentUserPrivacyStatus500
+		>,
+		UpdateCurrentUserPrivacyOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		UpdateCurrentUserPrivacyStatus200,
+		ResponseErrorConfig<
+			| UpdateCurrentUserPrivacyStatus400
+			| UpdateCurrentUserPrivacyStatus401
+			| UpdateCurrentUserPrivacyStatus404
+			| UpdateCurrentUserPrivacyStatus422
+			| UpdateCurrentUserPrivacyStatus500
+		>,
+		UpdateCurrentUserPrivacyOptions,
+		TContext
+	>;
+}
+
 export const getApiUsersMeFollowingQueryKey = ({
 	query,
 }: Omit<GetApiUsersMeFollowingOptions, "headers"> = {}) =>
@@ -13621,6 +13736,106 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 		PatchApiUsersMeFollowingByUnitIdOptions,
 		TContext
 	>;
+}
+
+export const getUserProfileActivityQueryKey = ({
+	path,
+	query,
+}: Omit<GetUserProfileActivityOptions, "headers">) =>
+	[{ url: "/api/users/:id/activity", params: path }, ...(query ? [query] : [])] as const;
+
+type GetUserProfileActivityQueryKey = ReturnType<typeof getUserProfileActivityQueryKey>;
+
+export function getUserProfileActivityQueryOptions(
+	{ path, query }: GetUserProfileActivityOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getUserProfileActivityQueryKey({ path, query });
+	return queryOptions<
+		GetUserProfileActivityStatus200,
+		ResponseErrorConfig<
+			| GetUserProfileActivityStatus404
+			| GetUserProfileActivityStatus422
+			| GetUserProfileActivityStatus500
+		>,
+		GetUserProfileActivityStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getUserProfileActivity({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get visible Score and Progress activity for a public Profile
+ * {@link /api/users/:id/activity}
+ */
+export function useGetUserProfileActivity<
+	TData = GetUserProfileActivityStatus200,
+	TQueryData = GetUserProfileActivityStatus200,
+	TQueryKey extends QueryKey = GetUserProfileActivityQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetUserProfileActivityOptions["path"] | (() => GetUserProfileActivityOptions["path"]);
+		query?:
+			GetUserProfileActivityOptions["query"] | (() => GetUserProfileActivityOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetUserProfileActivityStatus200,
+				ResponseErrorConfig<
+					| GetUserProfileActivityStatus404
+					| GetUserProfileActivityStatus422
+					| GetUserProfileActivityStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getUserProfileActivityQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getUserProfileActivityQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetUserProfileActivityStatus404
+			| GetUserProfileActivityStatus422
+			| GetUserProfileActivityStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const getApiUsersByIdQueryKey = ({ path, query }: Omit<GetApiUsersByIdOptions, "headers">) =>
