@@ -5,7 +5,12 @@ import { sql } from "drizzle-orm";
 import { env } from "../config";
 import { database } from "../database";
 import { InvalidSearch, SearchUnavailable } from "./errors";
-import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
+import {
+	resolveCurrentSearchFilterDefinition,
+	resolveCurrentSearchSortDefinition,
+	searchFilterValues,
+	type SearchFieldDefinition,
+} from "./field-registry";
 import type { SearchExpression } from "./query";
 import type { SearchCategory, SearchSort } from "./schema";
 
@@ -48,24 +53,11 @@ function literal(value: SearchScalar, definition: SearchFieldDefinition): string
 	return String(value);
 }
 
-function valuesOf(filter: SearchControlPredicate): readonly SearchScalar[] {
-	if (filter.field === "realm-tag-vote") return [];
-	if ("values" in filter) return filter.values;
-	if ("value" in filter) return [filter.value];
-	return [filter.lower, filter.upper].filter(
-		(value): value is SearchScalar => value !== undefined,
-	);
-}
-
 function compileOneFilter(
 	category: SearchCategory,
 	filter: SearchControlPredicate,
 ): string | undefined {
-	const definition = CurrentSearchFieldRegistry[filter.field];
-	if (!definition || !definition.categories.includes(category))
-		throw new InvalidSearch(`${filter.field} is not supported by the ${category} category`);
-	if (!(definition.operators as readonly string[]).includes(filter.operator))
-		throw new InvalidSearch(`${filter.operator} is not supported for ${filter.field}`);
+	const definition = resolveCurrentSearchFilterDefinition(category, filter);
 	// A residual-only field cannot be safely pushed through arbitrary NOT/OR trees.
 	// Omitting the entire expression keeps the engine stage a strict superset.
 	if (definition.meilisearch.length === 0) return undefined;
@@ -87,7 +79,7 @@ function compileOneFilter(
 			bounds.push(`${path} <= ${literal(filter.upper, definition)}`);
 		predicate = bounds.join(" AND ");
 	} else {
-		const values = valuesOf(filter);
+		const values = searchFilterValues(filter);
 		if (filter.operator === "all-of")
 			predicate = values
 				.map((value) => `${path} = ${literal(value, definition)}`)
@@ -140,24 +132,12 @@ async function coarseAccessFilter(profileId: string | undefined): Promise<string
 	return `(${terms.join(" OR ")})`;
 }
 
-function meilisearchSort(sort: SearchSort): string[] {
-	if (sort === "relevance") return [];
-	if (sort === "best")
-		return ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"];
-	const separator = sort.lastIndexOf(":");
-	const field = sort.slice(0, separator);
-	const direction = sort.endsWith(":desc") ? "desc" : "asc";
-	const path: Record<string, string> = {
-		createdAt: "ranking.createdAt",
-		updatedAt: "ranking.updatedAt",
-		publishedAt: "ranking.publishedAt",
-		followerCount: "ranking.followerCount",
-		replyCount: "ranking.replyCount",
-		closesAt: "filters.closesAt",
-	};
-	const attribute = path[field];
-	if (!attribute) throw new InvalidSearch(`Unsupported search sort ${sort}`);
-	return [`${attribute}:${direction}`, "id:asc"];
+function meilisearchSort(
+	category: SearchCategory,
+	sort: SearchSort,
+	query: string,
+): readonly string[] {
+	return resolveCurrentSearchSortDefinition(category, sort, query).meilisearch;
 }
 
 function meilisearchMatchingStrategy(sort: SearchSort): "frequency" | "last" {
@@ -227,7 +207,7 @@ async function executeCandidateSearch(
 				indexUid: query.indexUid,
 				q: query.query,
 				filter: filters,
-				sort: meilisearchSort(query.sort),
+				sort: meilisearchSort(query.category, query.sort, query.query),
 				matchingStrategy: meilisearchMatchingStrategy(query.sort),
 				offset: query.offset,
 				limit: query.limit,

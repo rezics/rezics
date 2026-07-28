@@ -7,6 +7,7 @@ import {
 	type UnitPredicate,
 } from "@rezics/filter";
 import { ZoneBoundaryDocument, parseDocument } from "@rezics/block";
+import { getActiveObservability } from "@rezics/observability";
 import { eq } from "drizzle-orm";
 
 import { database } from "../database";
@@ -23,6 +24,8 @@ import {
 } from "./query";
 import type { SearchCategory } from "./schema";
 import { searchDomain, searchDomainFacets } from "./service";
+
+const { logger } = getActiveObservability();
 
 async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	categories: SearchCategory[];
@@ -136,42 +139,63 @@ export async function executeCompiledSearch(
 		)
 	)
 		throw new InvalidSearch("Search cursor exceeds the configured result window");
-	const results = (
-		await Promise.all(
-			scope.categories.map(async (category) => {
-				try {
-					const specializedExpression = searchExpression
-						? specializeSearchExpressionForCategory(category, searchExpression)
-						: undefined;
-					if (specializedExpression?.state === "match-none") return null;
-					const domainRequest = {
-						profileId,
-						query: compiled.query,
-						offset: cursor?.categories[category]?.offset ?? 0,
-						limit: compiled.pageSize,
-						sort: compiled.sort,
-						...(specializedExpression?.state === "expression"
-							? { searchExpression: specializedExpression.expression }
-							: {}),
-						domainFilter,
-						scopeUnitId: scope.scopeUnitId,
-						includeScopeDescendants: scope.includeScopeDescendants,
-					};
-					const [group, facets] = await Promise.all([
-						searchDomain(category, domainRequest),
-						searchDomainFacets(category, domainRequest, compiled.facets),
-					]);
+	const outcomes = await Promise.all(
+		scope.categories.map(async (category) => {
+			try {
+				const specializedExpression = searchExpression
+					? specializeSearchExpressionForCategory(category, searchExpression)
+					: undefined;
+				if (specializedExpression?.state === "match-none")
+					return { state: "skipped", category } as const;
+				const domainRequest = {
+					profileId,
+					query: compiled.query,
+					offset: cursor?.categories[category]?.offset ?? 0,
+					limit: compiled.pageSize,
+					sort: compiled.sort,
+					...(specializedExpression?.state === "expression"
+						? { searchExpression: specializedExpression.expression }
+						: {}),
+					domainFilter,
+					scopeUnitId: scope.scopeUnitId,
+					includeScopeDescendants: scope.includeScopeDescendants,
+				};
+				const [group, facets] = await Promise.all([
+					searchDomain(category, domainRequest),
+					searchDomainFacets(category, domainRequest, compiled.facets),
+				]);
+				return {
+					state: "result",
+					category,
+					group: { index: category, ...group },
+					facets,
+				} as const;
+			} catch (cause) {
+				if (cause instanceof InvalidSearch)
 					return {
-						group: { index: category, ...group },
-						facets,
-					};
-				} catch (cause) {
-					if (cause instanceof InvalidSearch) return null;
-					throw cause;
-				}
-			}),
-		)
-	).filter((result): result is NonNullable<typeof result> => result !== null);
+						state: "invalid",
+						category,
+						reason: cause.message,
+					} as const;
+				throw cause;
+			}
+		}),
+	);
+	const results = outcomes.filter(
+		(outcome): outcome is Extract<(typeof outcomes)[number], { readonly state: "result" }> =>
+			outcome.state === "result",
+	);
+	if (!results.length && scope.categories.length)
+		logger.warn("Search expression was rejected by every selected category", {
+			eventName: "search.expression.unsupported",
+			attributes: {
+				failures: outcomes.flatMap((outcome) =>
+					outcome.state === "invalid"
+						? [{ category: outcome.category, reason: outcome.reason }]
+						: [],
+				),
+			},
+		});
 	if (!results.length && scope.categories.length)
 		throw new InvalidSearch("No selected Search category supports this filter combination");
 	const groups = results.map((result) => result.group);

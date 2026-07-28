@@ -1,4 +1,14 @@
-import type { SearchCategory, SearchField, SearchOperator } from "@rezics/filter";
+import type {
+	SearchCategory,
+	SearchControlPredicate,
+	SearchField,
+	SearchOperator,
+	SearchScalar,
+	SearchSort,
+} from "@rezics/filter";
+import { SearchCategoryValues } from "@rezics/filter";
+
+import { InvalidSearch } from "./errors";
 
 export type SearchScalarKind =
 	"boolean" | "date" | "integer" | "string" | "uuid" | "realm-tag-vote";
@@ -18,6 +28,12 @@ export interface SearchFieldDefinition {
 	readonly applicabilityPath?: string;
 }
 
+export interface SearchSortDefinition {
+	readonly categories: readonly SearchCategory[];
+	readonly requiresQuery: boolean;
+	readonly meilisearch: readonly string[];
+}
+
 const allCategories: readonly SearchCategory[] = [
 	"units",
 	"users",
@@ -32,7 +48,7 @@ const allCategories: readonly SearchCategory[] = [
 const equality = ["equals", "not-equals", "any-of", "all-of", "none-of"] as const;
 const range = ["range", "exists"] as const;
 
-export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchFieldDefinition>> = {
+export const CurrentSearchFieldRegistry = {
 	category: {
 		categories: allCategories,
 		scalar: "string",
@@ -475,7 +491,228 @@ export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchField
 		residual: true,
 		applicabilityPath: "unitType",
 	},
-};
+} as const satisfies Readonly<Record<SearchField, SearchFieldDefinition>>;
+
+export const CurrentSearchSortRegistry = {
+	best: {
+		categories: SearchCategoryValues,
+		requiresQuery: false,
+		meilisearch: ["ranking.recommendationBest:desc", "ranking.updatedAt:desc", "id:asc"],
+	},
+	relevance: {
+		categories: SearchCategoryValues,
+		requiresQuery: true,
+		meilisearch: [],
+	},
+	"createdAt:asc": {
+		categories: SearchCategoryValues,
+		requiresQuery: false,
+		meilisearch: ["ranking.createdAt:asc", "id:asc"],
+	},
+	"createdAt:desc": {
+		categories: SearchCategoryValues,
+		requiresQuery: false,
+		meilisearch: ["ranking.createdAt:desc", "id:asc"],
+	},
+	"updatedAt:asc": {
+		categories: SearchCategoryValues,
+		requiresQuery: false,
+		meilisearch: ["ranking.updatedAt:asc", "id:asc"],
+	},
+	"updatedAt:desc": {
+		categories: SearchCategoryValues,
+		requiresQuery: false,
+		meilisearch: ["ranking.updatedAt:desc", "id:asc"],
+	},
+	"publishedAt:asc": {
+		categories: ["units"],
+		requiresQuery: false,
+		meilisearch: ["ranking.publishedAt:asc", "id:asc"],
+	},
+	"publishedAt:desc": {
+		categories: ["units"],
+		requiresQuery: false,
+		meilisearch: ["ranking.publishedAt:desc", "id:asc"],
+	},
+	"followerCount:asc": {
+		categories: ["users", "realms"],
+		requiresQuery: false,
+		meilisearch: ["ranking.followerCount:asc", "id:asc"],
+	},
+	"followerCount:desc": {
+		categories: ["users", "realms"],
+		requiresQuery: false,
+		meilisearch: ["ranking.followerCount:desc", "id:asc"],
+	},
+	"replyCount:asc": {
+		categories: ["posts"],
+		requiresQuery: false,
+		meilisearch: ["ranking.replyCount:asc", "id:asc"],
+	},
+	"replyCount:desc": {
+		categories: ["posts"],
+		requiresQuery: false,
+		meilisearch: ["ranking.replyCount:desc", "id:asc"],
+	},
+	"closesAt:asc": {
+		categories: ["polls"],
+		requiresQuery: false,
+		meilisearch: ["filters.closesAt:asc", "id:asc"],
+	},
+	"closesAt:desc": {
+		categories: ["polls"],
+		requiresQuery: false,
+		meilisearch: ["filters.closesAt:desc", "id:asc"],
+	},
+} as const satisfies Readonly<Record<SearchSort, SearchSortDefinition>>;
+
+const UuidPattern =
+	/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+
+/** Returns the complete server-owned capability definition for a public Search field. */
+export function getCurrentSearchFieldDefinition(field: SearchField): SearchFieldDefinition {
+	return CurrentSearchFieldRegistry[field];
+}
+
+/** Tests category applicability without duplicating the registry's capability matrix. */
+export function supportsCurrentSearchField(category: SearchCategory, field: SearchField): boolean {
+	return (CurrentSearchFieldRegistry[field].categories as readonly SearchCategory[]).includes(
+		category,
+	);
+}
+
+/** Tests whether a sort is part of a category's server-owned query contract. */
+export function supportsCurrentSearchSort(category: SearchCategory, sort: SearchSort): boolean {
+	return (CurrentSearchSortRegistry[sort].categories as readonly SearchCategory[]).includes(
+		category,
+	);
+}
+
+/**
+ * Resolves and validates a sort before an engine adapter consumes its binding.
+ *
+ * @internal
+ */
+export function resolveCurrentSearchSortDefinition(
+	category: SearchCategory,
+	sort: SearchSort,
+	query: string,
+): SearchSortDefinition {
+	const definition = CurrentSearchSortRegistry[sort];
+	if (!(definition.categories as readonly SearchCategory[]).includes(category))
+		throw new InvalidSearch(`${sort} is not supported by the ${category} category`);
+	if (definition.requiresQuery && !query.trim())
+		throw new InvalidSearch(`${sort} requires a text query`);
+	return definition;
+}
+
+export function searchFilterValues(filter: SearchControlPredicate): readonly SearchScalar[] {
+	if (filter.field === "realm-tag-vote") return [];
+	if ("values" in filter) return filter.values;
+	if ("value" in filter) return [filter.value];
+	return [filter.lower, filter.upper].filter(
+		(value): value is SearchScalar => value !== undefined,
+	);
+}
+
+function assertScalar(field: SearchField, scalar: SearchScalarKind, value: SearchScalar): void {
+	const valid =
+		scalar === "boolean"
+			? typeof value === "boolean"
+			: scalar === "integer"
+				? typeof value === "number" && Number.isSafeInteger(value)
+				: scalar === "uuid"
+					? typeof value === "string" && UuidPattern.test(value)
+					: scalar === "date"
+						? typeof value === "string" && Number.isFinite(Date.parse(value))
+						: scalar === "string"
+							? typeof value === "string" && value.length > 0 && value.length <= 500
+							: false;
+	if (!valid) throw new InvalidSearch(`Search field ${field} has an invalid ${scalar} value`);
+}
+
+/** Proves one scalar against the field's server-owned value contract. */
+export function assertCurrentSearchFieldScalar(field: SearchField, value: SearchScalar): void {
+	assertScalar(field, getCurrentSearchFieldDefinition(field).scalar, value);
+}
+
+function assertRealmTagVoteFilter(
+	filter: Extract<SearchControlPredicate, { readonly field: "realm-tag-vote" }>,
+): void {
+	if (!UuidPattern.test(filter.realmId) || !UuidPattern.test(filter.tagId))
+		throw new InvalidSearch("Realm Tag vote requires UUID Realm and Tag values");
+	for (const [name, range] of [
+		["score", filter.score],
+		["voteCount", filter.voteCount],
+	] as const) {
+		if (
+			(range?.lower !== undefined && !Number.isSafeInteger(range.lower)) ||
+			(range?.upper !== undefined && !Number.isSafeInteger(range.upper))
+		)
+			throw new InvalidSearch(`Realm Tag vote ${name} requires safe integer bounds`);
+		if (
+			name === "voteCount" &&
+			((range?.lower !== undefined && range.lower < 0) ||
+				(range?.upper !== undefined && range.upper < 0))
+		)
+			throw new InvalidSearch("Realm Tag vote voteCount requires non-negative bounds");
+		if (range?.lower !== undefined && range.upper !== undefined && range.lower > range.upper)
+			throw new InvalidSearch(`Realm Tag vote ${name} lower bound exceeds its upper bound`);
+	}
+}
+
+/**
+ * Proves the operator and scalar-value semantics shared by every Search
+ * surface and engine adapter.
+ *
+ * @internal
+ */
+export function assertCurrentSearchFilterValue(filter: SearchControlPredicate): void {
+	const definition = getCurrentSearchFieldDefinition(filter.field);
+	if (!(definition.operators as readonly SearchOperator[]).includes(filter.operator))
+		throw new InvalidSearch(`${filter.operator} is not supported for ${filter.field}`);
+	if (filter.field === "realm-tag-vote") {
+		assertRealmTagVoteFilter(filter);
+		return;
+	}
+	if (filter.operator === "exists") {
+		const value: unknown = filter.value;
+		if (typeof value !== "boolean")
+			throw new InvalidSearch(`${filter.field} exists requires a boolean value`);
+		return;
+	}
+	for (const value of searchFilterValues(filter))
+		assertScalar(filter.field, definition.scalar, value);
+	if (filter.operator === "range" && filter.lower !== undefined && filter.upper !== undefined) {
+		const lower =
+			definition.scalar === "date" && typeof filter.lower === "string"
+				? Date.parse(filter.lower)
+				: filter.lower;
+		const upper =
+			definition.scalar === "date" && typeof filter.upper === "string"
+				? Date.parse(filter.upper)
+				: filter.upper;
+		if (typeof lower === "number" && typeof upper === "number" && lower > upper)
+			throw new InvalidSearch(`${filter.field} lower bound exceeds its upper bound`);
+	}
+}
+
+/**
+ * Proves that a predicate is supported by the public field contract before an
+ * engine adapter compiles it.
+ *
+ * @internal
+ */
+export function resolveCurrentSearchFilterDefinition(
+	category: SearchCategory,
+	filter: SearchControlPredicate,
+): SearchFieldDefinition {
+	const definition = getCurrentSearchFieldDefinition(filter.field);
+	if (!(definition.categories as readonly SearchCategory[]).includes(category))
+		throw new InvalidSearch(`${filter.field} is not supported by the ${category} category`);
+	assertCurrentSearchFilterValue(filter);
+	return definition;
+}
 
 export const HistorySearchFieldRegistry = {
 	"unit-id": { documentPath: "unitId", scalar: "uuid", operators: equality },

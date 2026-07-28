@@ -71,17 +71,7 @@ export interface DomainSearchRequest {
 	domainFilter?: UnitPredicate;
 }
 
-const CommonSortableAttributes = ["createdAt", "updatedAt"] as const;
-const CommonFilterableAttributes = [
-	"Languages",
-	"realmId",
-	"tagId",
-	"contentRating",
-	"aiDisclosure",
-	"license",
-] as const;
-
-export const SearchFieldByFilterableAttribute = {
+export const SearchFieldByDomainRequestFilter = {
 	Languages: "language",
 	kind: "kind",
 	contentRating: "content-rating",
@@ -101,66 +91,3 @@ export const SearchFieldByFilterableAttribute = {
 	resultsVisibility: "results-visibility",
 	closesAt: "closed",
 } as const satisfies Record<string, SearchScalarField>;
-
-export type SearchFilterableAttribute = keyof typeof SearchFieldByFilterableAttribute;
-
-export const SearchCategoryRules = {
-	units: {
-		filterableAttributes: [...CommonFilterableAttributes, "kind", "contentLicensed"],
-		sortableAttributes: [...CommonSortableAttributes, "publishedAt"],
-	},
-	users: {
-		filterableAttributes: CommonFilterableAttributes,
-		sortableAttributes: [...CommonSortableAttributes, "followerCount"],
-	},
-	entity: {
-		filterableAttributes: [...CommonFilterableAttributes, "kind", "ownerId"],
-		sortableAttributes: CommonSortableAttributes,
-	},
-	tags: {
-		filterableAttributes: CommonFilterableAttributes,
-		sortableAttributes: CommonSortableAttributes,
-	},
-	"tag-structures": {
-		filterableAttributes: [],
-		sortableAttributes: CommonSortableAttributes,
-	},
-	posts: {
-		filterableAttributes: [
-			"creditedUnitId",
-			...CommonFilterableAttributes,
-			"kind",
-			"subjectId",
-			"rootId",
-			"parentId",
-		],
-		sortableAttributes: [...CommonSortableAttributes, "replyCount"],
-	},
-	realms: {
-		filterableAttributes: [...CommonFilterableAttributes, "joinPolicy"],
-		sortableAttributes: [...CommonSortableAttributes, "followerCount"],
-	},
-	collections: {
-		filterableAttributes: [...CommonFilterableAttributes, "ownerId"],
-		sortableAttributes: CommonSortableAttributes,
-	},
-	reviews: {
-		filterableAttributes: [...CommonFilterableAttributes, "creditedUnitId", "targetId", "kind"],
-		sortableAttributes: CommonSortableAttributes,
-	},
-	polls: {
-		filterableAttributes: [
-			...CommonFilterableAttributes,
-			"multiple",
-			"resultsVisibility",
-			"closesAt",
-		],
-		sortableAttributes: [...CommonSortableAttributes, "closesAt"],
-	},
-} as const satisfies Record<
-	SearchCategory,
-	{
-		readonly filterableAttributes: readonly SearchFilterableAttribute[];
-		readonly sortableAttributes: readonly string[];
-	}
->;

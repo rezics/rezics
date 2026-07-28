@@ -33,11 +33,21 @@ empty successful search.
 
 ## Filter semantics
 
+- `UnitFilter` is the API-level selection contract. Full-text Search is its positive
+  service-backed `search` constraint; relational selection remains under `where`. Search does not
+  participate in recursive `OR` or `NOT`, because those operators would require cross-engine
+  relevance and negation semantics that neither engine can prove independently.
+- Clients render a resolved Search Feature definition and submit only filter state, contexts, and
+  injections. They never compile PostgreSQL SQL, Meilisearch filters, sort paths, or another
+  engine-specific query language. The server validates the runtime schema, normalizes every
+  control and Domain Search adapter property into one `SearchExpression`, then compiles that
+  expression for each engine.
 - Search Feature expressions are specialized for each target category before engine compilation.
   Category predicates become constants, impossible Boolean branches are removed, and only fields
-  reachable for that category are checked against `field-registry.ts`. Domain Search filter
-  mappings must remain a supported subset of that registry; the capability contract test enforces
-  this boundary.
+  reachable for that category are checked against `field-registry.ts`. The field and sort
+  registries are the only capability matrices; Domain Search's flat request shape is an adapter
+  into the same expression, not a second execution path. PostgreSQL remains authoritative, while
+  Meilisearch may omit a pushdown only when doing so preserves a candidate superset.
 - `kind` is the searchable content subtype, not the Unit storage type. It maps to the Unit kind
   for catalog Units, the Entity kind for Entities, the Post kind for Posts, and the reviewed
   subject's Unit kind for Reviews. Categories without a meaningful subtype do not expose this

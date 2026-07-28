@@ -23,7 +23,14 @@ import {
 } from "@rezics/filter";
 
 import { InvalidSearch } from "./errors";
-import { CurrentSearchFieldRegistry, type SearchFieldDefinition } from "./field-registry";
+import {
+	assertCurrentSearchFieldScalar,
+	assertCurrentSearchFilterValue,
+	getCurrentSearchFieldDefinition,
+	searchFilterValues,
+	supportsCurrentSearchSort,
+	type SearchFieldDefinition,
+} from "./field-registry";
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
@@ -192,9 +199,7 @@ const StaticOptions: Partial<Record<SearchField, readonly SearchScalar[]>> = {
 };
 
 function fieldDefinition(field: SearchField): SearchFieldDefinition {
-	const definition = CurrentSearchFieldRegistry[field];
-	if (!definition) throw new InvalidSearch(`Search field ${field} is not implemented`);
-	return definition;
+	return getCurrentSearchFieldDefinition(field);
 }
 
 function componentFor(definition: SearchFieldDefinition): ResolvedSearchControl["component"] {
@@ -248,9 +253,15 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 		if (control.optionPolicy && control.optionPolicy.kind !== "all")
 			for (const value of control.optionPolicy.values) validateScalar(control.field, value);
 	}
-	for (const configuration of [document.sort.search, document.sort.feed])
+	for (const configuration of [document.sort.search, document.sort.feed]) {
 		if (!configuration.options.every((sort) => template.sorts.includes(sort)))
 			throw new InvalidSearch("Search document sort is outside its template");
+		for (const sort of configuration.options)
+			if (document.categories.some((category) => !supportsCurrentSearchSort(category, sort)))
+				throw new InvalidSearch(
+					`Search sort ${sort} does not apply to every document category`,
+				);
+	}
 	if (document.results.maxPageSize > template.maxPageSize)
 		throw new InvalidSearch("Search document page size exceeds its template");
 	if (document.results.maxResultWindow > template.maxResultWindow)
@@ -377,66 +388,16 @@ export function resolveSearchDocument(
 	return { document, controls } as const;
 }
 
-function filterValues(filter: SearchControlPredicate): readonly SearchScalar[] {
-	if (filter.field === "realm-tag-vote") return [];
-	if ("values" in filter) return filter.values;
-	if ("value" in filter) return [filter.value];
-	return [filter.lower, filter.upper].filter(
-		(value): value is SearchScalar => value !== undefined,
-	);
-}
-
 function sameScalar(left: SearchScalar, right: SearchScalar): boolean {
 	return typeof left === typeof right && left === right;
 }
 
-const UuidPattern =
-	/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-const DatePattern = /^\d{4}-\d{2}-\d{2}$/;
-
 function validateScalar(field: SearchField, value: SearchScalar): void {
-	const scalar = fieldDefinition(field).scalar;
-	if (scalar === "realm-tag-vote")
-		throw new InvalidSearch(`Search field ${field} does not accept scalar values`);
-	const valid =
-		scalar === "boolean"
-			? typeof value === "boolean"
-			: scalar === "integer"
-				? typeof value === "number" && Number.isSafeInteger(value)
-				: scalar === "uuid"
-					? typeof value === "string" && UuidPattern.test(value)
-					: scalar === "date"
-						? typeof value === "string" && DatePattern.test(value)
-						: typeof value === "string";
-	if (!valid) throw new InvalidSearch(`Search field ${field} has an invalid ${scalar} value`);
+	assertCurrentSearchFieldScalar(field, value);
 }
 
 function validateFilterValue(filter: SearchControlPredicate): void {
-	if (filter.field === "realm-tag-vote") {
-		if (filter.operator !== "matches")
-			throw new InvalidSearch("Realm Tag vote requires the matches operator");
-		for (const [name, range] of [
-			["score", filter.score],
-			["voteCount", filter.voteCount],
-		] as const)
-			if (range) {
-				if (
-					(range.lower !== undefined && !Number.isSafeInteger(range.lower)) ||
-					(range.upper !== undefined && !Number.isSafeInteger(range.upper))
-				)
-					throw new InvalidSearch(`Realm Tag vote ${name} requires safe integer bounds`);
-				if (
-					range.lower !== undefined &&
-					range.upper !== undefined &&
-					range.lower > range.upper
-				)
-					throw new InvalidSearch(
-						`Realm Tag vote ${name} lower bound exceeds its upper bound`,
-					);
-			}
-		return;
-	}
-	for (const value of filterValues(filter)) validateScalar(filter.field, value);
+	assertCurrentSearchFilterValue(filter);
 }
 
 function validateControlValue(
@@ -452,7 +413,7 @@ function validateControlValue(
 	const options = control.optionSource?.kind === "static" ? control.optionSource.options : null;
 	if (
 		options &&
-		!filterValues(value.filter).every((item) =>
+		!searchFilterValues(value.filter).every((item) =>
 			options.some((option) => sameScalar(option.value, item)),
 		)
 	)
@@ -461,7 +422,7 @@ function validateControlValue(
 	if (
 		policy &&
 		policy.kind !== "all" &&
-		!filterValues(value.filter).every((item) => {
+		!searchFilterValues(value.filter).every((item) => {
 			const listed = policy.values.some((allowed) => sameScalar(allowed, item));
 			return policy.kind === "include" ? listed : !listed;
 		})

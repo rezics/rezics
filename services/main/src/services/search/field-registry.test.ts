@@ -1,17 +1,22 @@
 import { describe, expect, it } from "vitest";
+import { SearchFieldValues, SearchSortValues } from "@rezics/filter";
 
-import { CurrentSearchFieldRegistry } from "./field-registry";
-import { SearchCategories, SearchCategoryRules, SearchFieldByFilterableAttribute } from "./schema";
+import { CurrentSearchFieldRegistry, CurrentSearchSortRegistry } from "./field-registry";
+import { SearchFieldByDomainRequestFilter } from "./schema";
 
 describe("Search field capability contract", () => {
-	it("supports every filter combination exposed by the Domain Search API", () => {
-		for (const category of SearchCategories)
-			for (const attribute of SearchCategoryRules[category].filterableAttributes) {
-				const field = SearchFieldByFilterableAttribute[attribute];
-				expect(
-					CurrentSearchFieldRegistry[field]?.categories,
-					`${category}.${attribute} maps to unsupported Search field ${field}`,
-				).toContain(category);
-			}
+	it("describes every public Search field exactly once", () => {
+		expect(Object.keys(CurrentSearchFieldRegistry).sort()).toEqual(
+			[...SearchFieldValues].sort(),
+		);
+	});
+
+	it("describes every public Search sort exactly once", () => {
+		expect(Object.keys(CurrentSearchSortRegistry).sort()).toEqual([...SearchSortValues].sort());
+	});
+
+	it("maps every Domain Search adapter property to a described field", () => {
+		for (const field of Object.values(SearchFieldByDomainRequestFilter))
+			expect(CurrentSearchFieldRegistry[field]).toBeDefined();
 	});
 });
