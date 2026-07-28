@@ -19,6 +19,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { SettingsOverviewHref } from "../routing/settings-routes";
 
 type ListSessionsResult = Awaited<ReturnType<typeof authClient.listSessions>>;
@@ -38,7 +39,7 @@ function formatDate(value: Date | string, locale: string) {
 
 export function SecuritySettingsPage() {
 	const { t, locale } = useTranslation(["settings", "ui"]);
-	const currentSession = authClient.useSession();
+	const currentSession = useHydratedSession();
 	const [sessionList, setSessionList] = useState<SessionListState>({ status: "pending" });
 	const [passwordState, setPasswordState] = useState<"idle" | "pending" | "saved" | "error">(
 		"idle",

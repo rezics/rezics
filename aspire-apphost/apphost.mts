@@ -204,7 +204,6 @@ if (meilisearch && meilisearchQueryKey) {
 }
 
 const apiEndpoint = await api.getEndpoint("http");
-api = api.withEnvironment("BETTER_AUTH_URL", apiEndpoint);
 
 let worker = builder
 	.addBunApp("recommendation-worker", "../services/main", "src/worker.ts")
@@ -286,6 +285,8 @@ const web = await builder
 	.waitFor(api);
 const webEndpoint = await web.getEndpoint("http");
 
-await api.withEnvironment("BETTER_AUTH_TRUSTED_ORIGINS", webEndpoint);
+await api
+	.withEnvironment("BETTER_AUTH_URL", webEndpoint)
+	.withEnvironment("BETTER_AUTH_TRUSTED_ORIGINS", webEndpoint);
 
 await builder.build().run();

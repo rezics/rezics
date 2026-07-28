@@ -53,9 +53,14 @@ product interface copy in `@rezics/i18n`; localized fixture content is data, not
 production translation namespace. Cosmos exposes UI locale and content language
 as independent controls so mixed-language product states remain representable.
 
-## Authentication development
+## Authentication and backend routing
 
-The frontend accesses Better Auth through `/api/auth`. The development server proxies that path to `http://localhost:3001`, keeping session cookies first-party. Start the backend alongside the frontend, and configure an equivalent reverse proxy for `/api/auth` in deployed environments.
+The frontend accesses the backend through same-origin `/api` and `/image-assets`
+routes, keeping Better Auth session cookies first-party. The development server
+proxies those routes directly. Production builds serve equivalent route handlers,
+which forward to the internal HTTP(S) origin configured by `REZICS_API_ORIGIN`.
+Set `BETTER_AUTH_URL` to the public frontend origin so authentication redirects and
+secure cookie policy use the browser-facing URL.
 
 ## PWA
 

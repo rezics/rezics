@@ -3,7 +3,7 @@
 import type { UiLocale } from "@rezics/i18n";
 import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
 import { useGetApiNotificationsUnreadCount } from "@rezics/openapi-tanstack-query";
-import { Button, ChoiceSelect } from "@rezics/ui";
+import { Button, ChoiceSelect, Skeleton } from "@rezics/ui";
 import { Bell, Plus, UserRound } from "lucide-react";
 
 import { normalizeUnreadCount } from "@/features/notifications/model/unread-count";
@@ -25,6 +25,16 @@ export interface HeaderLocaleSelection {
 export interface HeaderThemeSelection {
 	preference: ThemePreference;
 	onChange: (preference: ThemePreference) => void;
+}
+
+export function RestoringHeaderActions() {
+	return (
+		<div aria-hidden className="flex items-center gap-2">
+			<Skeleton className="size-11 rounded-xl lg:h-9 lg:w-24" />
+			<Skeleton className="size-11 rounded-full" />
+			<Skeleton className="size-11 rounded-full" />
+		</div>
+	);
 }
 
 function CreateAction({ href, label }: { href: string; label: string }) {

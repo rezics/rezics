@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import socialCard from "@rezics/brand/social-card.png?url&no-inline";
 import { FontAwesomeVersion, isFontAwesomeLicense, type FontAwesomeLicense } from "@rezics/avatar";
 
 import { AppProviders } from "@/lib/app-providers";
+import { getInitialAuthSession } from "@/features/auth/server/initial-session.server";
 import { RootTranslationNamespaces } from "@/i18n/namespaces";
 import { getTranslation } from "@/i18n/server";
 import { appTheme, appThemeCss } from "@/lib/theme";
@@ -69,7 +71,11 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-	const { locale, snapshot } = await getTranslation(RootTranslationNamespaces);
+	const requestHeaders = await headers();
+	const [{ locale, snapshot }, initialSession] = await Promise.all([
+		getTranslation(RootTranslationNamespaces),
+		getInitialAuthSession(requestHeaders),
+	]);
 	const fontAwesomeCss = fontAwesomeKitCssUrl();
 	const fontAwesomeLicense = fontAwesomeKitLicense();
 	return (
@@ -110,7 +116,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 				/>
 			</head>
 			<body className="min-w-80">
-				<AppProviders initialTranslation={snapshot}>{children}</AppProviders>
+				<AppProviders initialSession={initialSession} initialTranslation={snapshot}>
+					{children}
+				</AppProviders>
 			</body>
 		</html>
 	);

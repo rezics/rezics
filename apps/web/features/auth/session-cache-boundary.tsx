@@ -3,19 +3,19 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, type ReactNode } from "react";
 
-import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 export function SessionCacheBoundary({ children }: { children: ReactNode }) {
-	const { data: session, isPending } = authClient.useSession();
+	const session = useHydratedSession();
 	const queryClient = useQueryClient();
-	const identity = session?.user.id ?? null;
 	const previous = useRef<string | null | undefined>(undefined);
 
 	useEffect(() => {
-		if (isPending) return;
+		if (session.status === "restoring" || session.status === "error") return;
+		const identity = session.data?.user.id ?? null;
 		if (previous.current !== undefined && previous.current !== identity) queryClient.clear();
 		previous.current = identity;
-	}, [identity, isPending, queryClient]);
+	}, [queryClient, session.data, session.status]);
 
 	return children;
 }

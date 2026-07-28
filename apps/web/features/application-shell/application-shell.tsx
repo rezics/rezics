@@ -11,7 +11,7 @@ import {
 	usePatchApiUsersMePreferences,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { AppShell as SharedAppShell } from "@rezics/ui";
+import { AppShell as SharedAppShell, Button } from "@rezics/ui";
 import { toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
 import { followingManagementHref } from "@/features/following/routing/following-route";
@@ -20,7 +20,11 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AppLink } from "./components/app-link";
-import { SignedInHeaderActions, SignedOutHeaderActions } from "./components/header-actions";
+import {
+	RestoringHeaderActions,
+	SignedInHeaderActions,
+	SignedOutHeaderActions,
+} from "./components/header-actions";
 import { HeaderSearchProvider, useCurrentHeaderSearch } from "./header-search";
 import { useThemePreference } from "./hooks/use-theme-preference";
 import { sidebarFollowingHref } from "./routing/sidebar-following";
@@ -44,7 +48,8 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const headerSearch = useCurrentHeaderSearch();
-	const { data: session } = useHydratedSession();
+	const authSession = useHydratedSession();
+	const session = authSession.data;
 	const { t, locale } = useTranslation([
 		"actions",
 		"betterAuthErrorCodes",
@@ -166,15 +171,21 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 							}}
 						/>
 					) : (
-						<SignedOutHeaderActions
-							createLabel={t.actions.create}
-							locale={localeSelection}
-							loginLabel={t.actions.login}
-							theme={{
-								preference: theme.preference,
-								onChange: theme.setPreference,
-							}}
-						/>
+						<>
+							{authSession.status === "anonymous" ? (
+								<SignedOutHeaderActions
+									createLabel={t.actions.create}
+									locale={localeSelection}
+									loginLabel={t.actions.login}
+									theme={{
+										preference: theme.preference,
+										onChange: theme.setPreference,
+									}}
+								/>
+							) : (
+								<RestoringHeaderActions />
+							)}
+						</>
 					)
 				}
 				link={AppLink}
@@ -236,14 +247,29 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 			>
 				{children}
 			</SharedAppShell>
-			{updateInterfaceLocale.error ? (
-				<div className="pointer-events-none fixed inset-x-4 top-16 z-[60] flex justify-end">
-					<div className="max-w-sm rounded-xl border border-destructive/30 bg-background px-4 py-3 shadow-lg">
-						<RequestFailure
-							error={updateInterfaceLocale.error}
-							fallback={t.ui.retryLater}
-						/>
-					</div>
+			{authSession.status === "error" || updateInterfaceLocale.error ? (
+				<div className="pointer-events-none fixed inset-x-4 top-16 z-[60] flex flex-col items-end gap-2">
+					{authSession.status === "error" ? (
+						<div className="pointer-events-auto max-w-sm rounded-xl border border-destructive/30 bg-background px-4 py-3 shadow-lg">
+							<RequestFailure error={authSession.error} fallback={t.ui.retryLater} />
+							<Button
+								className="mt-2"
+								onClick={() => void authSession.refetch()}
+								size="sm"
+								variant="quiet"
+							>
+								{t.actions.retry}
+							</Button>
+						</div>
+					) : null}
+					{updateInterfaceLocale.error ? (
+						<div className="max-w-sm rounded-xl border border-destructive/30 bg-background px-4 py-3 shadow-lg">
+							<RequestFailure
+								error={updateInterfaceLocale.error}
+								fallback={t.ui.retryLater}
+							/>
+						</div>
+					) : null}
 				</div>
 			) : null}
 		</>
