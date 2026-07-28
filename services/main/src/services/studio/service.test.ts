@@ -50,10 +50,10 @@ function activitySelect(rows: readonly object[]) {
 function candidate() {
 	return {
 		id: UnitId,
-		relevantAt: RelevantAt,
+		relevantAt: RelevantAt.toISOString(),
 		lastVisitedAt: null,
 		bucket: false,
-		sortAt: RelevantAt,
+		sortAt: RelevantAt.toISOString(),
 	};
 }
 
@@ -116,7 +116,7 @@ describe("Studio work presentation", () => {
 					authorizationUnitId: UnitId,
 					relation: "assigned",
 					scope: [],
-					createdAt: RelevantAt,
+					createdAt: RelevantAt.toISOString(),
 				},
 			],
 		});
@@ -136,6 +136,31 @@ describe("Studio work presentation", () => {
 			relations: ["assigned"],
 			workState: "blocked",
 			permissions: [],
+			assignedAt: RelevantAt,
 		});
+	});
+
+	it("rejects an invalid raw assignment timestamp at the database boundary", async () => {
+		execute.mockResolvedValueOnce({ rows: [candidate()] }).mockResolvedValueOnce({
+			rows: [
+				{
+					id: "019b76da-a800-7300-8000-000000000004",
+					resourceUnitId: UnitId,
+					authorizationUnitId: UnitId,
+					relation: "assigned",
+					scope: [],
+					createdAt: "not-a-timestamp",
+				},
+			],
+		});
+		select.mockImplementationOnce(() => activitySelect([]));
+
+		await expect(
+			listStudioContent({
+				profileId: ProfileId,
+				authorization: deniedAuthorization(),
+				query: { section: "book", view: "assigned", sort: "recent", limit: 1 },
+			}),
+		).rejects.toThrow("Studio assignment.createdAt is not a valid date");
 	});
 });

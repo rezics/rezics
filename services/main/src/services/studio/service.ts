@@ -47,6 +47,14 @@ type CandidateRow = {
 	readonly sortAt: Date;
 };
 
+type RawCandidateRow = {
+	readonly id: string;
+	readonly relevantAt: unknown;
+	readonly lastVisitedAt: unknown;
+	readonly bucket: boolean;
+	readonly sortAt: unknown;
+};
+
 type StudioAssignmentRow = {
 	readonly id: string;
 	readonly resourceUnitId: string;
@@ -54,6 +62,10 @@ type StudioAssignmentRow = {
 	readonly relation: "assigned" | "delegated";
 	readonly scope: string[];
 	readonly createdAt: Date;
+};
+
+type RawStudioAssignmentRow = Omit<StudioAssignmentRow, "createdAt"> & {
+	readonly createdAt: unknown;
 };
 
 type ActivityRow = {
@@ -282,7 +294,7 @@ async function selectCandidateBatch(input: {
 	const visibilityCondition = input.query.visibility
 		? sql`and resource.visibility = ${input.query.visibility}`
 		: sql``;
-	const result = await database.execute<CandidateRow>(sql`
+	const result = await database.execute<RawCandidateRow>(sql`
 		with candidate_event as materialized (
 			${candidateSources(input.profileId, view)}
 		),
@@ -320,7 +332,16 @@ async function selectCandidateBatch(input: {
 		order by ranked.bucket desc, ranked.sort_at desc, ranked.id desc
 		limit ${input.limit}
 	`);
-	return result.rows;
+	return result.rows.map((row) => ({
+		id: row.id,
+		relevantAt: dateValue(row.relevantAt, "candidate.relevantAt"),
+		lastVisitedAt:
+			row.lastVisitedAt === null
+				? null
+				: dateValue(row.lastVisitedAt, "candidate.lastVisitedAt"),
+		bucket: row.bucket,
+		sortAt: dateValue(row.sortAt, "candidate.sortAt"),
+	}));
 }
 
 async function loadAssignments(
@@ -328,7 +349,7 @@ async function loadAssignments(
 	resourceUnitIds: readonly string[],
 ): Promise<StudioAssignmentRow[]> {
 	if (!resourceUnitIds.length) return [];
-	const result = await database.execute<StudioAssignmentRow>(sql`
+	const result = await database.execute<RawStudioAssignmentRow>(sql`
 		select
 			assignment.id,
 			coalesce(book_owner.owner_unit_id, assignment.unit_id) as "resourceUnitId",
@@ -394,13 +415,17 @@ async function loadAssignments(
 				${toUuidArray(resourceUnitIds)}
 			)
 	`);
-	return result.rows;
+	return result.rows.map((row) => ({
+		...row,
+		createdAt: dateValue(row.createdAt, "assignment.createdAt"),
+	}));
 }
 
-function dateValue(value: Date, field: string): Date {
-	if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
-	const parsed = new Date(value);
-	if (Number.isNaN(parsed.getTime())) throw new TypeError(`Studio ${field} is not a valid date`);
+function dateValue(value: unknown, field: string): Date {
+	const parsed =
+		value instanceof Date ? value : typeof value === "string" ? new Date(value) : undefined;
+	if (!parsed || Number.isNaN(parsed.getTime()))
+		throw new TypeError(`Studio ${field} is not a valid date`);
 	return parsed;
 }
 
@@ -534,15 +559,13 @@ async function presentCandidate(input: {
 		assignedAt: assigned.length
 			? new Date(Math.min(...assigned.map(({ createdAt }) => createdAt.getTime())))
 			: null,
-		lastVisitedAt: input.candidate.lastVisitedAt
-			? dateValue(input.candidate.lastVisitedAt, "lastVisitedAt")
-			: null,
-		relevantAt: dateValue(input.candidate.relevantAt, "relevantAt"),
+		lastVisitedAt: input.candidate.lastVisitedAt,
+		relevantAt: input.candidate.relevantAt,
 		createdAt: resource.createdAt,
 		updatedAt: resource.updatedAt,
 		cursorBoundary: {
 			bucket: input.candidate.bucket,
-			sortAt: dateValue(input.candidate.sortAt, "sortAt"),
+			sortAt: input.candidate.sortAt,
 			unitId: resource.id,
 		},
 	};
@@ -605,7 +628,7 @@ export async function listStudioContent(input: {
 		if (!lastScanned) break;
 		scanCursor = {
 			bucket: lastScanned.bucket,
-			sortAt: dateValue(lastScanned.sortAt, "sortAt"),
+			sortAt: lastScanned.sortAt,
 			unitId: lastScanned.id,
 		};
 		exhausted = candidates.length < batchLimit;
