@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { PostRealmContext } from "./post-realm-context";
-import { selectPostRealmContext } from "./post-realm-context";
+import { resolvePostRealmContext } from "./post-realm-context";
 
 function realm(id: string): PostRealmContext {
 	return {
@@ -18,17 +18,22 @@ describe("post Realm context selection", () => {
 	it("uses the requested mounted Realm when available", () => {
 		const realms = [realm("first"), realm("requested")];
 
-		expect(selectPostRealmContext(realms, "requested")?.id).toBe("requested");
+		expect(resolvePostRealmContext(realms, "requested")).toEqual({
+			kind: "realm",
+			realm: realms[1],
+		});
 	});
 
-	it("does not infer a Realm without an explicit valid request", () => {
+	it("uses the explicit global context without a Realm request", () => {
 		const realms = [realm("first"), realm("second")];
 
-		expect(selectPostRealmContext(realms)).toBeUndefined();
-		expect(selectPostRealmContext(realms, "missing")).toBeUndefined();
+		expect(resolvePostRealmContext(realms)).toEqual({ kind: "global" });
 	});
 
-	it("keeps the empty state explicit", () => {
-		expect(selectPostRealmContext([])).toBeUndefined();
+	it("falls back to the global context for an unavailable Realm request", () => {
+		expect(resolvePostRealmContext([realm("available")], "missing")).toEqual({
+			kind: "global",
+		});
+		expect(resolvePostRealmContext([], "missing")).toEqual({ kind: "global" });
 	});
 });

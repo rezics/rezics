@@ -62,14 +62,16 @@ export default {
 	compareTitle: "Différences entre les versions",
 	before: "Avant",
 	after: "Après",
+	back: "Retour",
 	realm: realmTerms.label,
+	globalContext: "Global",
 	selectRealmContext: `Choisir le ${realmTerms.inline} de contexte`,
 	realmContextCard: `Informations sur le ${realmTerms.inline}`,
+	realmSummary: `Présentation du ${realmTerms.inline}`,
 	subject: "Sujet",
 	clearRealm: `Retirer le ${realmTerms.inline}`,
 	clearSubject: "Retirer le sujet",
 	attributions: "Crédits",
-	viewRealm: `Afficher le ${realmTerms.inline}`,
 	workspace: {
 		description:
 			"Modifiez le contenu, les relations d’attribution, les accès et l’historique des versions.",

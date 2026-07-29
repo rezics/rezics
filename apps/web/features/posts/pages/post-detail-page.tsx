@@ -18,14 +18,18 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { PostDetailArticle } from "../components/post-detail-article";
 import { PostOverflowMenu } from "../components/post-overflow-menu";
 import {
-	PostRealmContextLink,
+	PostRealmContextBar,
 	PostRealmContextCard,
 	PostRealmContextSelector,
 } from "../components/post-realm-context";
 import { PostSubjectHero } from "../components/post-subject-hero";
 import { usePostDetailContext } from "../data/post-detail-context";
 import { getPostManagementSectionIds } from "../model/post-management-section";
-import { selectPostRealmContext } from "../model/post-realm-context";
+import {
+	resolvePostRealmContext,
+	type PostRealmContextSelection,
+} from "../model/post-realm-context";
+import { resolvePostPresentationTitle } from "../model/post-presentation-title";
 import { RelatedPostRecommendations } from "../post-list";
 import { ReplyPostThread } from "../reply-thread";
 import { postManagementSectionHref } from "../routing/post-management-routes";
@@ -46,13 +50,16 @@ export function PostDetailPage({
 	readonly renderWikiBody?: (post: WikiPost) => ReactNode;
 	readonly returnToDiscussion?: boolean;
 }) {
-	const { t } = useTranslation(["posts", "units"]);
+	const { t } = useTranslation(["posts", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const router = useApplicationRouter();
-	const realmId = context?.kind === "realm" ? context.realmId : undefined;
+	const requestedRealmId = context?.kind === "realm" ? context.realmId : undefined;
 	const query = useGetApiPostsByPostId({
 		path: { postId: id },
-		query: { ...(realmId ? { realmId } : {}), localizationLanguages },
+		query: {
+			...(requestedRealmId ? { realmId: requestedRealmId } : {}),
+			localizationLanguages,
+		},
 	});
 	useLocalizationFallbackToast({
 		actualLanguage: query.data?.language ?? null,
@@ -61,30 +68,96 @@ export function PostDetailPage({
 	});
 	const contextQuery = usePostDetailContext(id);
 	const realms = contextQuery.data?.realms ?? [];
-	const selectedRealm =
-		context?.kind === "zone" ? undefined : selectPostRealmContext(realms, realmId);
+	const hasRealmContext = context?.kind !== "zone";
+	const realmContext = resolvePostRealmContext(realms, requestedRealmId);
+	const selectedRealm = realmContext.kind === "realm" ? realmContext.realm : undefined;
+	const realmId = selectedRealm?.id;
 	const wikiZone =
 		query.data?.postKind === "wiki" && query.data.subject?.type === "zone"
 			? query.data.subject
 			: undefined;
 	useEffect(() => {
-		if (!wikiZone || context?.kind === "zone") return;
-		router.replace(postHref(id, { kind: "zone", zone: { id: wikiZone.id } }));
-	}, [context?.kind, id, router, wikiZone]);
+		if (wikiZone && context?.kind !== "zone") {
+			router.replace(postHref(id, { kind: "zone", zone: { id: wikiZone.id } }));
+			return;
+		}
+		if (
+			context?.kind === "realm" &&
+			contextQuery.data !== undefined &&
+			realmContext.kind === "global"
+		)
+			router.replace(postHref(id), { scroll: false });
+	}, [context?.kind, contextQuery.data, id, realmContext.kind, router, wikiZone]);
 
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data) return <QueryPending />;
+	if (hasRealmContext && contextQuery.isError)
+		return (
+			<QueryFailure error={contextQuery.error} retry={() => void contextQuery.refetch()} />
+		);
+	if (!query.data || (hasRealmContext && contextQuery.data === undefined))
+		return <QueryPending />;
 	const post = query.data;
 	const discussionHref =
 		returnToDiscussion && post.subject && isCatalogDetailUnitType(post.subject.type)
 			? catalogDetailHref(post.subject.type, post.subject.id, "discussion")
 			: undefined;
 	if (wikiZone && context?.kind !== "zone") return <QueryPending />;
+	const changeRealm = (nextContext: PostRealmContextSelection) => {
+		if (
+			nextContext.kind === realmContext.kind &&
+			(nextContext.kind === "global" || nextContext.realm.id === selectedRealm?.id)
+		)
+			return;
+		router.replace(
+			nextContext.kind === "global"
+				? postHref(post.id)
+				: postHref(post.id, { kind: "realm", realmId: nextContext.realm.id }),
+			{
+				scroll: false,
+			},
+		);
+	};
+	const mobileRealmContext = hasRealmContext ? (
+		<div className="grid gap-3 border-border-weak border-y py-4 lg:hidden">
+			<PostRealmContextSelector
+				onValueChange={changeRealm}
+				realms={realms}
+				value={realmContext}
+			/>
+			{selectedRealm ? (
+				<UnitDockRenderer
+					ownerUnitId={selectedRealm.id}
+					target={{ ownerKind: "realm", dockKind: "main" }}
+				/>
+			) : null}
+		</div>
+	) : null;
+	const desktopRealmContext = hasRealmContext ? (
+		<aside className="sticky top-20 hidden min-w-0 flex-col gap-3 lg:flex">
+			<PostRealmContextSelector
+				onValueChange={changeRealm}
+				realms={realms}
+				value={realmContext}
+			/>
+			{selectedRealm ? (
+				<>
+					<PostRealmContextCard realm={selectedRealm} />
+					<UnitDockRenderer
+						ownerUnitId={selectedRealm.id}
+						target={{ ownerKind: "realm", dockKind: "main" }}
+					/>
+				</>
+			) : null}
+		</aside>
+	) : null;
+
 	if (post.postKind === "review")
 		return (
 			<main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
-				{discussionHref ? (
+				{selectedRealm ? (
+					<PostRealmContextBar realm={selectedRealm} />
+				) : !hasRealmContext && discussionHref ? (
 					<Button asChild className="w-fit" variant="outline">
 						<Link href={discussionHref}>
 							<ArrowLeft aria-hidden />
@@ -93,9 +166,15 @@ export function PostDetailPage({
 					</Button>
 				) : null}
 				{post.subject ? <PostSubjectHero subject={post.subject} /> : null}
-				<div className="grid min-w-0 items-start gap-10">
+				<div
+					className={cn(
+						"grid min-w-0 items-start gap-10",
+						hasRealmContext && "lg:grid-cols-[minmax(0,1fr)_19rem]",
+					)}
+				>
 					<div className="flex min-w-0 flex-col gap-8">
 						<ReviewPostDetail review={post} />
+						{mobileRealmContext}
 						<ReplyPostThread
 							canReply={post.capabilities.canReply}
 							realmId={realmId}
@@ -103,21 +182,25 @@ export function PostDetailPage({
 						/>
 						<RelatedPostRecommendations postId={post.id} />
 					</div>
+					{desktopRealmContext}
 				</div>
 			</main>
 		);
-	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
+	const title = resolvePostPresentationTitle(post, {
+		postBy: t.posts.postFallbackTitle,
+		reviewOf: t.posts.reviewFallbackTitle,
+		reply: t.posts.replyPost,
+		unknownAttribution: t.posts.unknownAttribution,
+		unnamedSubject: t.ui.unnamed,
+		untitled: t.posts.untitled,
+	});
 	const managementSectionId = getPostManagementSectionIds(post)[0];
-	const changeRealm = (nextRealmId: string) => {
-		if (nextRealmId === realmId) return;
-		router.replace(postHref(post.id, { kind: "realm", realmId: nextRealmId }), {
-			scroll: false,
-		});
-	};
 
 	return (
 		<main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
-			{discussionHref ? (
+			{selectedRealm ? (
+				<PostRealmContextBar realm={selectedRealm} />
+			) : !hasRealmContext && discussionHref ? (
 				<Button asChild className="w-fit" variant="outline">
 					<Link href={discussionHref}>
 						<ArrowLeft aria-hidden />
@@ -129,7 +212,7 @@ export function PostDetailPage({
 			<div
 				className={cn(
 					"grid min-w-0 items-start gap-10",
-					selectedRealm && "lg:grid-cols-[minmax(0,1fr)_19rem]",
+					hasRealmContext && "lg:grid-cols-[minmax(0,1fr)_19rem]",
 				)}
 			>
 				<div className="flex min-w-0 flex-col gap-8">
@@ -165,7 +248,9 @@ export function PostDetailPage({
 							attributions: post.attributions,
 							realmId: realmId ?? null,
 							language: post.language,
-							title,
+							title: title.value,
+							titleLanguage: title.language ?? null,
+							summary: post.summary,
 							body: post.body,
 							createdAt: post.createdAt,
 							scores: post.scores,
@@ -173,20 +258,7 @@ export function PostDetailPage({
 						replyCount={Number(post.replyCount)}
 						variant="thread"
 					/>
-					{selectedRealm ? (
-						<div className="grid gap-3 border-border-weak border-y py-4 lg:hidden">
-							<PostRealmContextSelector
-								onValueChange={changeRealm}
-								realms={realms}
-								value={selectedRealm.id}
-							/>
-							<PostRealmContextLink realm={selectedRealm} />
-							<UnitDockRenderer
-								ownerUnitId={selectedRealm.id}
-								target={{ ownerKind: "realm", dockKind: "main" }}
-							/>
-						</div>
-					) : null}
+					{mobileRealmContext}
 					<ReplyPostThread
 						canReply={post.capabilities.canReply}
 						parentPostId={post.postKind === "reply" ? post.id : undefined}
@@ -195,20 +267,7 @@ export function PostDetailPage({
 					/>
 					<RelatedPostRecommendations postId={post.id} />
 				</div>
-				{selectedRealm ? (
-					<aside className="sticky top-20 hidden min-w-0 flex-col gap-3 lg:flex">
-						<PostRealmContextSelector
-							onValueChange={changeRealm}
-							realms={realms}
-							value={selectedRealm.id}
-						/>
-						<PostRealmContextCard realm={selectedRealm} />
-						<UnitDockRenderer
-							ownerUnitId={selectedRealm.id}
-							target={{ ownerKind: "realm", dockKind: "main" }}
-						/>
-					</aside>
-				) : null}
+				{desktopRealmContext}
 			</div>
 		</main>
 	);

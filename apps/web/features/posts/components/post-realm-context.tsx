@@ -1,15 +1,26 @@
 "use client";
 
-import { ArrowUpRightIcon } from "lucide-react";
+import { ArrowLeftIcon, Globe2Icon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 
-import { Button, Card, CardContent, ChoiceSelect, IdentityAvatar, cn } from "@rezics/ui";
-import { useChineseContentTexts } from "@/features/content-language-display/chinese-content-display-context";
-import { RealmInfoCard } from "@/features/realms/components/realm-info-card";
+import { Button, Card, CardContent, ChoiceSelect, IdentityAvatar } from "@rezics/ui";
+import {
+	useChineseContentText,
+	useChineseContentTexts,
+} from "@/features/content-language-display/chinese-content-display-context";
 import { realmHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
-import type { PostRealmContext } from "../model/post-realm-context";
+import type { PostRealmContext, PostRealmContextSelection } from "../model/post-realm-context";
+
+const GlobalContextOptionValue = "global";
+
+type RealmContextOptionValue = `realm:${string}`;
+type PostRealmContextOptionValue = typeof GlobalContextOptionValue | RealmContextOptionValue;
+
+function realmContextOptionValue(realmId: string): RealmContextOptionValue {
+	return `realm:${realmId}`;
+}
 
 function realmName(realm: PostRealmContext, unnamed: string): string {
 	return realm.title ?? unnamed;
@@ -34,9 +45,9 @@ export function PostRealmContextSelector({
 	realms,
 	value,
 }: {
-	readonly onValueChange: (realmId: string) => void;
+	readonly onValueChange: (selection: PostRealmContextSelection) => void;
 	readonly realms: readonly PostRealmContext[];
-	readonly value?: string;
+	readonly value: PostRealmContextSelection;
 }) {
 	const { t } = useTranslation(["posts", "ui"]);
 	const sourceTexts = useMemo(
@@ -54,23 +65,43 @@ export function PostRealmContextSelector({
 		[realms, t.ui.unnamed],
 	);
 	const displayedTexts = useChineseContentTexts(sourceTexts);
-	const options = realms.map((realm, index) => {
-		const name = displayedTexts[index * 2] ?? realmName(realm, t.ui.unnamed);
-		const summary = displayedTexts[index * 2 + 1];
-		return {
-			value: realm.id,
-			label: name,
-			...(summary ? { description: summary } : {}),
+	const options = [
+		{
+			value: GlobalContextOptionValue,
+			label: t.posts.globalContext,
 			icon: (
-				<IdentityAvatar
-					avatar={realm.avatar}
-					className="mt-0.5"
-					fallback={realmInitials(name)}
-					size="sm"
-				/>
+				<span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-muted">
+					<Globe2Icon aria-hidden className="size-3.5" />
+				</span>
 			),
-		};
-	});
+		},
+		...realms.map((realm, index) => {
+			const name = displayedTexts[index * 2] ?? realmName(realm, t.ui.unnamed);
+			const summary = displayedTexts[index * 2 + 1];
+			return {
+				value: realmContextOptionValue(realm.id),
+				label: name,
+				...(summary ? { description: summary } : {}),
+				icon: (
+					<IdentityAvatar
+						avatar={realm.avatar}
+						className="mt-0.5"
+						fallback={realmInitials(name)}
+						size="sm"
+					/>
+				),
+			};
+		}),
+	] satisfies readonly {
+		readonly value: PostRealmContextOptionValue;
+		readonly label: string;
+		readonly description?: string;
+		readonly icon: ReactNode;
+	}[];
+	const selectedValue =
+		value.kind === "global"
+			? GlobalContextOptionValue
+			: realmContextOptionValue(value.realm.id);
 
 	return (
 		<ChoiceSelect
@@ -78,70 +109,89 @@ export function PostRealmContextSelector({
 			ariaLabel={t.posts.selectRealmContext}
 			className="w-full justify-between"
 			contentClassName="w-[min(22rem,calc(100vw-2rem))]"
-			onValueChange={([realmId]) => {
-				if (realmId) onValueChange(realmId);
+			onValueChange={([nextValue]) => {
+				if (!nextValue) return;
+				if (nextValue === GlobalContextOptionValue) {
+					onValueChange({ kind: "global" });
+					return;
+				}
+				const realm = realms.find(
+					(candidate) => realmContextOptionValue(candidate.id) === nextValue,
+				);
+				if (realm) onValueChange({ kind: "realm", realm });
 			}}
 			options={options}
 			placeholder={t.posts.selectRealmContext}
 			size="lg"
-			value={value ? [value] : []}
+			value={[selectedValue]}
 		/>
 	);
 }
 
 /**
- * Keeps the selected Realm reachable wherever the full dock is unavailable.
+ * Presents the active Realm identity and navigation above a contextual Post.
  *
  * @alpha
  */
-export function PostRealmContextLink({
-	className,
-	realm,
-}: {
-	readonly className?: string;
-	readonly realm: PostRealmContext;
-}) {
-	const { t } = useTranslation(["posts"]);
+export function PostRealmContextBar({ realm }: { readonly realm: PostRealmContext }) {
+	const { t } = useTranslation(["posts", "ui"]);
+	const contextHref = realmHref(realm);
+	const name = useChineseContentText(
+		realmName(realm, t.ui.unnamed),
+		realm.title ? realm.language : undefined,
+	);
+	const identity = (
+		<>
+			<IdentityAvatar
+				avatar={realm.avatar}
+				fallback={realmInitials(name)}
+				imageAlt={name}
+				size="md"
+			/>
+			<span className="min-w-0 truncate font-heading font-bold text-sm sm:text-base">
+				{name}
+			</span>
+		</>
+	);
+
 	return (
-		<Button asChild className={cn("w-full", className)} size="sm" variant="secondary">
-			<Link href={realmHref(realm)}>
-				{t.posts.viewRealm}
-				<ArrowUpRightIcon aria-hidden data-icon="inline-end" />
+		<div className="flex min-w-0 items-center gap-2">
+			<Button asChild className="-ms-1" size="icon-md" variant="quiet">
+				<Link aria-label={t.posts.back} href={contextHref}>
+					<ArrowLeftIcon aria-hidden />
+				</Link>
+			</Button>
+			<Link
+				className="flex min-w-0 items-center gap-2 rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/32"
+				href={contextHref}
+			>
+				{identity}
 			</Link>
-		</Button>
+		</div>
 	);
 }
 
 /**
- * Renders the selected Realm's stable identity and navigation context.
+ * Renders the selected Realm's summary without duplicating the identity shown
+ * in the context bar.
  *
  * @remarks
  * This system-owned card is deliberately separate from authored Unit Docks.
- * It does not own the Realm selector, and product routes may place a configured
- * Realm main Dock after it without coupling either lifecycle.
+ * It does not own the Realm selector or navigation.
  *
  * @alpha
  */
 export function PostRealmContextCard({ realm }: { readonly realm: PostRealmContext }) {
-	const { t } = useTranslation(["posts", "ui"]);
-	const name = realmName(realm, t.ui.unnamed);
+	const { t } = useTranslation(["posts"]);
+	const summary = useChineseContentText(realm.summary ?? "", realm.language);
+	if (!summary) return null;
 
 	return (
 		<Card asChild className="gap-0 rounded-xl py-0">
 			<section aria-label={t.posts.realmContextCard}>
-				<CardContent className="grid gap-4 p-4">
-					<RealmInfoCard
-						realm={{
-							id: realm.id,
-							name,
-							initials: realmInitials(name),
-							...(realm.title ? { language: realm.language } : {}),
-							avatar: realm.avatar,
-							...(realm.slugAddress ? { slug: realm.slugAddress.slug } : {}),
-							...(realm.summary ? { summary: realm.summary } : {}),
-						}}
-					/>
-					<PostRealmContextLink realm={realm} />
+				<CardContent className="grid gap-1.5 p-4">
+					<p className="font-semibold text-sm">{t.posts.realmSummary}</p>
+					<p className="text-muted-foreground text-sm leading-5">{summary}</p>
 				</CardContent>
 			</section>
 		</Card>
