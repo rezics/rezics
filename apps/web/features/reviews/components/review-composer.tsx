@@ -6,8 +6,9 @@ import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
-import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input } from "@rezics/ui";
+import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input, Textarea } from "@rezics/ui";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { optionalPostLocalizationText } from "@/features/posts/model/post-localization-input";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
@@ -33,7 +34,7 @@ export function ReviewComposer({
 }) {
 	const create = usePostApiReviews();
 	const queryClient = useQueryClient();
-	const { locale, t } = useTranslation(["engagement", "errors", "ui"]);
+	const { locale, t } = useTranslation(["engagement", "errors", "posts", "ui"]);
 	const [target, setTarget] = useState<ReviewComposerTarget>();
 	const [realm, setRealm] = useState<ReviewComposerTarget>();
 	const [score, setScore] = useState<number>();
@@ -52,11 +53,8 @@ export function ReviewComposer({
 			return;
 		}
 		const form = new FormData(formElement);
-		const title = String(form.get("title") ?? "").trim();
-		if (!title) {
-			setInvalid(true);
-			return;
-		}
+		const title = optionalPostLocalizationText(form, "title");
+		const summary = optionalPostLocalizationText(form, "summary");
 		setInvalid(false);
 		const selectedRealm = realm;
 		try {
@@ -70,10 +68,8 @@ export function ReviewComposer({
 							? { score: { contextUnitId: scoreContext.id, value: score } }
 							: {}),
 						language: toContentLanguage(locale.target),
-						title,
-						...(String(form.get("summary") ?? "").trim()
-							? { summary: String(form.get("summary") ?? "").trim() }
-							: {}),
+						...(title ? { title } : {}),
+						...(summary ? { summary } : {}),
 						body: writePortableText(body),
 					},
 				});
@@ -117,13 +113,13 @@ export function ReviewComposer({
 							{t.engagement.reviewScoreContextHint}
 						</p>
 					</Field>
-					<Field required>
-						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input maxLength={500} name="title" required />
+					<Field>
+						<FieldLabel>{t.posts.titleOptional}</FieldLabel>
+						<Input maxLength={500} name="title" />
 					</Field>
 					<Field>
-						<FieldLabel>{t.ui.summary}</FieldLabel>
-						<Input maxLength={2000} name="summary" />
+						<FieldLabel>{t.posts.summaryOptional}</FieldLabel>
+						<Textarea maxLength={2_000} name="summary" />
 					</Field>
 					<ScoreInput disabled={!scoreContext} onChange={setScore} value={score} />
 					<PortableTextEditor

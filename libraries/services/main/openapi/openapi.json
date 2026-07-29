@@ -107887,7 +107887,7 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["targetId", "language", "title", "body"],
+								"required": ["targetId", "language", "body"],
 								"properties": {
 									"targetId": { "format": "uuid", "type": "string" },
 									"progressEntryId": { "format": "uuid", "type": "string" },
@@ -107921,7 +107921,11 @@
 										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 									},
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
-									"summary": { "maxLength": 2000, "type": "string" },
+									"summary": {
+										"minLength": 1,
+										"maxLength": 2000,
+										"type": "string"
+									},
 									"body": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",
@@ -109233,14 +109237,26 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["language", "title", "body"],
+								"required": ["language", "title", "summary", "body"],
 								"properties": {
 									"language": {
 										"type": "string",
 										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 									},
-									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
-									"summary": { "maxLength": 2000, "type": "string" },
+									"title": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 500, "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"summary": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 2000, "type": "string" },
+											{ "type": "null" }
+										]
+									},
 									"body": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",
@@ -112243,6 +112259,7 @@
 													"body",
 													"replyCount",
 													"title",
+													"summary",
 													"latestRevisionId",
 													"createdAt",
 													"updatedAt"
@@ -112837,6 +112854,13 @@
 															{ "type": "null" }
 														]
 													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
 													"latestRevisionId": {
 														"nullable": true,
 														"anyOf": [
@@ -112889,9 +112913,14 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["title", "body", "language"],
+								"required": ["body", "language"],
 								"properties": {
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
+									"summary": {
+										"minLength": 1,
+										"maxLength": 2000,
+										"type": "string"
+									},
 									"body": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",
@@ -116910,13 +116939,32 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["language", "title", "body", "baseRevisionId"],
+								"required": [
+									"language",
+									"title",
+									"summary",
+									"body",
+									"baseRevisionId"
+								],
 								"properties": {
 									"language": {
 										"type": "string",
 										"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 									},
-									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
+									"title": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 500, "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"summary": {
+										"nullable": true,
+										"anyOf": [
+											{ "minLength": 1, "maxLength": 2000, "type": "string" },
+											{ "type": "null" }
+										]
+									},
 									"body": {
 										"additionalProperties": false,
 										"$id": "PortableTextDocument",

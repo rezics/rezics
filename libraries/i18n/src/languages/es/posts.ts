@@ -1,4 +1,5 @@
 import { esTerminology } from "@rezics/i18n/terminology/es";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `Editar la ${postTerms.inline}`,
 	publish: "Publicar",
 	untitled: `${postTerms.label} sin título`,
+	titleOptional: "Título (opcional)",
+	summaryOptional: "Resumen (opcional)",
+	postFallbackTitle: insert(`${postTerms.label} de {{author}}`, { author: String }),
+	reviewFallbackTitle: insert("Reseña de {{author}} sobre {{subject}}", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "Sin atribución",
 	publisher: "Editorial",
 	wikiCreateTitle: "Crear entrada Wiki",
@@ -70,10 +78,10 @@ export default {
 		sections: {
 			main: {
 				label: "Contenido",
-				postDescription: `Edita el título y el contenido de la ${postTerms.inline}.`,
+				postDescription: `Edita el título opcional, el resumen y el contenido de la ${postTerms.inline}.`,
 				replyDescription: `Edita el contenido de la ${postTerms.inline} de respuesta.`,
 				reviewDescription:
-					"Edita el título, el resumen, el contenido y la puntuación asociados a la reseña.",
+					"Edita el título opcional, el resumen, el contenido y la puntuación asociados a la reseña.",
 			},
 			attributions: {
 				label: "Relaciones de atribución",

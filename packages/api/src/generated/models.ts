@@ -79874,10 +79874,11 @@ export type PostApiReviewsBody = {
 	/**
 	 * @minLength 1
 	 * @maxLength 500
-	 * @type string
+	 * @type string | undefined
 	 */
-	title: string;
+	title?: string;
 	/**
+	 * @minLength 1
 	 * @maxLength 2000
 	 * @type string | undefined
 	 */
@@ -80872,17 +80873,8 @@ export type PatchApiReviewsByReviewIdBody = {
 	 * @type string
 	 */
 	language: PatchApiReviewsByReviewIdRequestLanguageEnum;
-	/**
-	 * @minLength 1
-	 * @maxLength 500
-	 * @type string
-	 */
-	title: string;
-	/**
-	 * @maxLength 2000
-	 * @type string | undefined
-	 */
-	summary?: string;
+	title: (string | null) | null;
+	summary: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -84077,6 +84069,7 @@ export type GetApiPostsStatus200 = {
 		};
 		replyCount: string | number;
 		title: (string | null) | null;
+		summary: (string | null) | null;
 		latestRevisionId: (string | null) | null;
 		/**
 		 * @description
@@ -84307,9 +84300,15 @@ export type PostApiPostsBody = {
 	/**
 	 * @minLength 1
 	 * @maxLength 500
-	 * @type string
+	 * @type string | undefined
 	 */
-	title: string;
+	title?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	summary?: string;
 	/**
 	 * @type object
 	 */
@@ -86821,12 +86820,8 @@ export type PatchApiPostsByPostIdBody = {
 	 * @type string
 	 */
 	language: PatchApiPostsByPostIdRequestLanguageEnum;
-	/**
-	 * @minLength 1
-	 * @maxLength 500
-	 * @type string
-	 */
-	title: string;
+	title: (string | null) | null;
+	summary: (string | null) | null;
 	/**
 	 * @type object
 	 */

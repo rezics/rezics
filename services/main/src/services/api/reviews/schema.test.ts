@@ -9,6 +9,7 @@ import {
 	ListViewerScoresQuery,
 	resolveReviewScoreFilter,
 	SetScoreBody,
+	UpdateReviewBody,
 } from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
@@ -16,13 +17,24 @@ const realmId = "019b76da-a800-7300-8000-000000000002";
 const review = {
 	targetId,
 	language: "en",
-	title: "A review",
 	body: createPortableTextDocument([], "0123456789ab"),
 };
 
 describe("review creation schema", () => {
-	it("keeps Score optional", () => {
+	it("keeps title, summary, and Score optional", () => {
 		expect(Check(CreateReviewBody, review)).toBe(true);
+		expect(
+			Check(CreateReviewBody, {
+				...review,
+				title: "A review",
+				summary: "A concise preview",
+			}),
+		).toBe(true);
+	});
+
+	it("rejects blank authored metadata", () => {
+		expect(Check(CreateReviewBody, { ...review, title: "" })).toBe(false);
+		expect(Check(CreateReviewBody, { ...review, summary: "" })).toBe(false);
 	});
 
 	it("accepts a context-addressed Score", () => {
@@ -48,6 +60,20 @@ describe("review creation schema", () => {
 				score: { contextUnitId: realmId, value: 8, copied: true },
 			}),
 		).toBe(false);
+	});
+});
+
+describe("review update schema", () => {
+	it("uses explicit nulls to clear authored metadata during replacement", () => {
+		expect(
+			Check(UpdateReviewBody, {
+				language: "en",
+				title: null,
+				summary: null,
+				body: review.body,
+			}),
+		).toBe(true);
+		expect(Check(UpdateReviewBody, { language: "en", body: review.body })).toBe(false);
 	});
 });
 

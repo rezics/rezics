@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 import { CardContent, cn, Cover, IdentityAvatar } from "@rezics/ui";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { resolvePostPresentationTitle } from "@/features/posts/model/post-presentation-title";
 import { postHref, type PostInteractionContext } from "@/features/posts/url";
 import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
 import { realmHref } from "@/features/slugs/unit-route";
@@ -138,8 +139,16 @@ export function FeedPostCard({
 					title: subjectTitle,
 				}
 			: undefined;
-	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
-	const displayedTitle = useChineseContentText(title, post.language);
+	const titleMessages = {
+		postBy: t.posts.postFallbackTitle,
+		reviewOf: t.posts.reviewFallbackTitle,
+		reply: t.posts.replyPost,
+		unknownAttribution: t.posts.unknownAttribution,
+		unnamedSubject: t.ui.unnamed,
+		untitled: t.posts.untitled,
+	};
+	const title = resolvePostPresentationTitle(post, titleMessages);
+	const displayedTitle = useChineseContentText(title.value, title.language);
 	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
 	const attributions = toFeedAttributionContexts(post.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
@@ -189,7 +198,16 @@ export function FeedPostCard({
 						className="flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
 						href={postHref(post.replyContext.rootPostId, context)}
 					>
-						{t.feed.replyingIn} {post.replyContext.title ?? t.posts.untitled}
+						{t.feed.replyingIn}{" "}
+						{
+							resolvePostPresentationTitle(
+								{
+									...post.replyContext,
+									postKind: "post",
+								},
+								titleMessages,
+							).value
+						}
 					</Link>
 				) : null}
 				<FeedItemMain href={href} onOpen={trackOpen}>
@@ -199,7 +217,11 @@ export function FeedPostCard({
 					>
 						{displayedTitle}
 					</h2>
-					{post.body ? (
+					{post.summary ? (
+						<p className="mt-2 text-muted-foreground text-sm leading-6">
+							{displayedSummary}
+						</p>
+					) : post.body ? (
 						<div className="prose prose-sm mt-2 max-w-none text-muted-foreground leading-6">
 							<LocalizedPortableTextContent
 								language={post.language}
@@ -207,10 +229,6 @@ export function FeedPostCard({
 								variant="preview"
 							/>
 						</div>
-					) : post.summary ? (
-						<p className="mt-2 text-muted-foreground text-sm leading-6">
-							{displayedSummary}
-						</p>
 					) : null}
 				</FeedItemMain>
 				{excerptSource ? (

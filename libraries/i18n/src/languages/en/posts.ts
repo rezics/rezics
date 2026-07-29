@@ -1,4 +1,5 @@
 import { enTerminology } from "@rezics/i18n/terminology/en";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `Edit ${postTerms.inline}`,
 	publish: "Publish",
 	untitled: `Untitled ${postTerms.inline}`,
+	titleOptional: "Title (optional)",
+	summaryOptional: "Summary (optional)",
+	postFallbackTitle: insert(`${postTerms.label} by {{author}}`, { author: String }),
+	reviewFallbackTitle: insert("Review of {{subject}} by {{author}}", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "No attribution",
 	publisher: "Publisher",
 	wikiCreateTitle: "Create Wiki entry",
@@ -69,9 +77,10 @@ export default {
 		sections: {
 			main: {
 				label: "Content",
-				postDescription: `Edit the ${postTerms.inline} title and body.`,
+				postDescription: `Edit the optional ${postTerms.inline} title, summary, and body.`,
 				replyDescription: `Edit the reply ${postTerms.inline} body.`,
-				reviewDescription: "Edit the review title, summary, body, and Score association.",
+				reviewDescription:
+					"Edit the review’s optional title, summary, body, and Score association.",
 			},
 			attributions: {
 				label: "Credit relationships",

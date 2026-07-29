@@ -1,4 +1,5 @@
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `編輯${postTerms.label}`,
 	publish: "發布",
 	untitled: `未命名${postTerms.label}`,
+	titleOptional: "標題（選填）",
+	summaryOptional: "摘要（選填）",
+	postFallbackTitle: insert(`{{author}}的${postTerms.label}`, { author: String }),
+	reviewFallbackTitle: insert("{{author}}對《{{subject}}》的評論", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "未提供署名",
 	publisher: "發佈者",
 	wikiCreateTitle: "建立共筆條目",
@@ -67,9 +75,9 @@ export default {
 		sections: {
 			main: {
 				label: "內容",
-				postDescription: `編輯${postTerms.label}的標題與內容。`,
+				postDescription: `編輯${postTerms.label}的選填標題、摘要與內容。`,
 				replyDescription: `編輯回覆${postTerms.label}的內容。`,
-				reviewDescription: "編輯評論的標題、摘要、內容與評分關聯。",
+				reviewDescription: "編輯評論的選填標題、摘要、內容與評分關聯。",
 			},
 			attributions: {
 				label: "署名關係",

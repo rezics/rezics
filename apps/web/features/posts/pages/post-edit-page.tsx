@@ -6,7 +6,7 @@ import {
 	type GetApiPostsByPostIdStatus200,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
-import { Button, Field, FieldGroup, FieldLabel, Input, Spinner } from "@rezics/ui";
+import { Button, Field, FieldGroup, FieldLabel, Input, Spinner, Textarea } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState, type FormEvent } from "react";
@@ -24,6 +24,7 @@ import {
 	useOrdinaryPostManagement,
 	usePostManagement,
 } from "../components/post-management-workspace";
+import { nullablePostLocalizationText } from "../model/post-localization-input";
 import { invalidatePostQueries } from "../query";
 import { postDetailHref } from "../routing/post-management-routes";
 
@@ -77,14 +78,15 @@ function OrdinaryPostEditForm({ post }: { post: OrdinaryPost }) {
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const title = String(new FormData(event.currentTarget).get("title") ?? "").trim();
-		if (!title || !body.length || !post.latestRevisionId) return;
+		const form = new FormData(event.currentTarget);
+		if (!body.length || !post.latestRevisionId) return;
 		update.mutate(
 			{
 				path: { postId: post.id },
 				body: {
 					language: selectedLanguage,
-					title,
+					title: nullablePostLocalizationText(form, "title"),
+					summary: nullablePostLocalizationText(form, "summary"),
 					body: writePortableText(
 						body,
 						selectedLanguageIsPending ? undefined : post.body,
@@ -106,13 +108,20 @@ function OrdinaryPostEditForm({ post }: { post: OrdinaryPost }) {
 	return (
 		<form onChange={() => setDirty(true)} onSubmit={submit}>
 			<FieldGroup>
-				<Field required>
-					<FieldLabel>{t.ui.title}</FieldLabel>
+				<Field>
+					<FieldLabel>{t.posts.titleOptional}</FieldLabel>
 					<Input
 						defaultValue={selectedLanguageIsPending ? "" : (post.title ?? "")}
 						maxLength={500}
 						name="title"
-						required
+					/>
+				</Field>
+				<Field>
+					<FieldLabel>{t.posts.summaryOptional}</FieldLabel>
+					<Textarea
+						defaultValue={selectedLanguageIsPending ? "" : (post.summary ?? "")}
+						maxLength={2_000}
+						name="summary"
 					/>
 				</Field>
 				<PostEditorFields

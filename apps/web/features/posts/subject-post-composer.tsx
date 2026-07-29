@@ -6,7 +6,16 @@ import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ComponentProps, type FormEvent } from "react";
 
-import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input, Spinner } from "@rezics/ui";
+import {
+	Button,
+	EntityPicker,
+	Field,
+	FieldGroup,
+	FieldLabel,
+	Input,
+	Spinner,
+	Textarea,
+} from "@rezics/ui";
 import {
 	PortableTextEditor,
 	preloadPortableTextEditor,
@@ -16,6 +25,7 @@ import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { writePortableText } from "@/lib/block";
+import { optionalPostLocalizationText } from "./model/post-localization-input";
 import { invalidatePostQueries } from "./query";
 
 interface PickedRealm {
@@ -58,8 +68,10 @@ export function SubjectPostComposer({
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const title = String(new FormData(event.currentTarget).get("title") ?? "").trim();
-		if (!title || !body.length) {
+		const form = new FormData(event.currentTarget);
+		const title = optionalPostLocalizationText(form, "title");
+		const summary = optionalPostLocalizationText(form, "summary");
+		if (!body.length) {
 			setInvalid(true);
 			return;
 		}
@@ -69,7 +81,8 @@ export function SubjectPostComposer({
 			await rulesAcknowledgement.run(async () => {
 				const result = await create.mutateAsync({
 					body: {
-						title,
+						...(title ? { title } : {}),
+						...(summary ? { summary } : {}),
 						language: toContentLanguage(locale.target),
 						body: writePortableText(body),
 						subjectId,
@@ -89,9 +102,13 @@ export function SubjectPostComposer({
 			{expanded ? (
 				<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
-						<Field required>
-							<FieldLabel>{t.ui.title}</FieldLabel>
-							<Input maxLength={500} name="title" required />
+						<Field>
+							<FieldLabel>{t.posts.titleOptional}</FieldLabel>
+							<Input maxLength={500} name="title" />
+						</Field>
+						<Field>
+							<FieldLabel>{t.posts.summaryOptional}</FieldLabel>
+							<Textarea maxLength={2_000} name="summary" />
 						</Field>
 						<Field>
 							<FieldLabel>{t.posts.realm}</FieldLabel>

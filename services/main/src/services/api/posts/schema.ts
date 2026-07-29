@@ -21,8 +21,14 @@ export const ListPostsQuery = t.Object(
 );
 export type ListPostsQuery = Static<typeof ListPostsQuery>;
 
+const OptionalPostTitle = t.Optional(t.String({ minLength: 1, maxLength: 500 }));
+const OptionalPostSummary = t.Optional(t.String({ minLength: 1, maxLength: 2_000 }));
+const NullablePostTitle = t.Nullable(t.String({ minLength: 1, maxLength: 500 }));
+const NullablePostSummary = t.Nullable(t.String({ minLength: 1, maxLength: 2_000 }));
+
 export const CreatePostBody = t.Object({
-	title: t.String({ minLength: 1, maxLength: 500 }),
+	title: OptionalPostTitle,
+	summary: OptionalPostSummary,
 	body: PortableTextDocument,
 	language: ContentLanguage,
 	realmId: t.Optional(Uuid),
@@ -76,7 +82,8 @@ export const PostScoreListResponse = t.Object({ items: t.Array(PostScoreResponse
 
 export const UpdatePostBody = t.Object({
 	language: ContentLanguage,
-	title: t.String({ minLength: 1, maxLength: 500 }),
+	title: NullablePostTitle,
+	summary: NullablePostSummary,
 	body: PortableTextDocument,
 	baseRevisionId: Uuid,
 	editSummary: t.Optional(t.String({ maxLength: 500 })),

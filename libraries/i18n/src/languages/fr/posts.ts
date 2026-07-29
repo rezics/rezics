@@ -1,4 +1,5 @@
 import { frTerminology } from "@rezics/i18n/terminology/fr";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `Modifier la ${postTerms.inline}`,
 	publish: "Publier",
 	untitled: `${postTerms.label} sans titre`,
+	titleOptional: "Titre (facultatif)",
+	summaryOptional: "Résumé (facultatif)",
+	postFallbackTitle: insert(`${postTerms.label} de {{author}}`, { author: String }),
+	reviewFallbackTitle: insert("Avis de {{author}} sur {{subject}}", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "Aucune attribution",
 	publisher: "Éditeur",
 	wikiCreateTitle: "Créer une entrée Wiki",
@@ -70,10 +78,10 @@ export default {
 		sections: {
 			main: {
 				label: "Contenu",
-				postDescription: `Modifiez le titre et le contenu de la ${postTerms.inline}.`,
+				postDescription: `Modifiez le titre facultatif, le résumé et le contenu de la ${postTerms.inline}.`,
 				replyDescription: `Modifiez le contenu de la ${postTerms.inline} de réponse.`,
 				reviewDescription:
-					"Modifiez le titre, le résumé, le contenu et la note associés à l’avis.",
+					"Modifiez le titre facultatif, le résumé, le contenu et la note associés à l’avis.",
 			},
 			attributions: {
 				label: "Relations d’attribution",

@@ -53,6 +53,8 @@ describe("PostDetailArticle", () => {
 						realmId: null,
 						language: "zh",
 						title: "完整評論",
+						titleLanguage: "zh",
+						summary: "不暴雷的摘要",
 						body,
 						createdAt: "2026-07-25T04:00:00.000Z",
 						scores: [{ value: 8 }],
@@ -63,6 +65,7 @@ describe("PostDetailArticle", () => {
 
 		expect(screen.getByRole("heading", { level: 1, name: "完整評論" })).toBeTruthy();
 		expect(screen.getByText("8／10")).toBeTruthy();
+		expect(screen.getByText("不暴雷的摘要")).toBeTruthy();
 		expect(screen.getByText("完整評論內容")).toBeTruthy();
 		expect(container.querySelector('[data-slot="connected-reaction-bar"]')).toBeTruthy();
 	});
@@ -97,6 +100,7 @@ describe("PostDetailArticle", () => {
 						realmId: null,
 						language: "zh",
 						title: "開放式貼文",
+						titleLanguage: "zh",
 						body: null,
 						createdAt: "2026-07-25T04:00:00.000Z",
 						scores: [],

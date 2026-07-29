@@ -1,4 +1,5 @@
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `编辑${postTerms.label}`,
 	publish: "发布",
 	untitled: `未命名${postTerms.label}`,
+	titleOptional: "标题（选填）",
+	summaryOptional: "摘要（选填）",
+	postFallbackTitle: insert(`{{author}}的${postTerms.label}`, { author: String }),
+	reviewFallbackTitle: insert("{{author}}对《{{subject}}》的评论", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "未提供署名",
 	publisher: "发布者",
 	wikiCreateTitle: "创建协作条目",
@@ -67,9 +75,9 @@ export default {
 		sections: {
 			main: {
 				label: "内容",
-				postDescription: `编辑${postTerms.label}的标题与内容。`,
+				postDescription: `编辑${postTerms.label}的选填标题、摘要与内容。`,
 				replyDescription: `编辑回复${postTerms.label}的内容。`,
-				reviewDescription: "编辑评论的标题、摘要、内容与评分关联。",
+				reviewDescription: "编辑评论的选填标题、摘要、内容与评分关联。",
 			},
 			attributions: {
 				label: "署名关系",

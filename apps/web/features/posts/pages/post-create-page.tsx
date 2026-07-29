@@ -11,6 +11,7 @@ import {
 	FieldLabel,
 	Input,
 	PageHeading,
+	Textarea,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
@@ -24,6 +25,7 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { PostEditorFields } from "../components/post-editor-fields";
+import { optionalPostLocalizationText } from "../model/post-localization-input";
 import { invalidatePostQueries } from "../query";
 import { postHref } from "../url";
 
@@ -63,14 +65,16 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
-		const title = String(data.get("title") ?? "").trim();
-		if (!title || !body.length) return;
+		const title = optionalPostLocalizationText(data, "title");
+		const summary = optionalPostLocalizationText(data, "summary");
+		if (!body.length) return;
 		const selectedRealm = realm;
 		void rulesAcknowledgement
 			.run(async () => {
 				const post = await create.mutateAsync({
 					body: {
-						title,
+						...(title ? { title } : {}),
+						...(summary ? { summary } : {}),
 						language: toContentLanguage(locale.target),
 						body: writePortableText(body),
 						...(selectedRealm ? { realmId: selectedRealm.id } : {}),
@@ -94,9 +98,13 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 				<PageHeading title={t.posts.createTitle} />
 				<form onSubmit={submit}>
 					<FieldGroup>
-						<Field required>
-							<FieldLabel>{t.ui.title}</FieldLabel>
-							<Input maxLength={500} name="title" required />
+						<Field>
+							<FieldLabel>{t.posts.titleOptional}</FieldLabel>
+							<Input maxLength={500} name="title" />
+						</Field>
+						<Field>
+							<FieldLabel>{t.posts.summaryOptional}</FieldLabel>
+							<Textarea maxLength={2_000} name="summary" />
 						</Field>
 						<Field>
 							<FieldLabel>{t.posts.realm}</FieldLabel>

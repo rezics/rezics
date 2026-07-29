@@ -505,6 +505,7 @@ export const PostListResponse = t.Object({
 			body: PortableTextDocument,
 			replyCount: t.Integer(),
 			title: NullableText,
+			summary: NullableText,
 			latestRevisionId: t.Nullable(Uuid),
 			createdAt: DateTime,
 			updatedAt: DateTime,

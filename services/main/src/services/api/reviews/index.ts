@@ -400,8 +400,8 @@ export default new Elysia()
 						await tx.insert(unitLocalization).values({
 							unitId: created.id,
 							language: body.language,
-							title: body.title,
-							summary: body.summary,
+							title: body.title ?? null,
+							summary: body.summary ?? null,
 							content: body.body,
 							contentStatus: "published",
 						});

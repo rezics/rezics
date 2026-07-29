@@ -5,7 +5,7 @@ import {
 	usePatchApiReviewsByReviewId,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
-import { Button, Field, FieldGroup, FieldLabel, Input } from "@rezics/ui";
+import { Button, Field, FieldGroup, FieldLabel, Input, Textarea } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState, type FormEvent } from "react";
@@ -15,6 +15,7 @@ import { ContentLanguageControl } from "@/features/content-languages/components/
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { PostManagementSectionHeader } from "@/features/posts/components/post-management-section-header";
 import { useReviewManagement } from "@/features/posts/components/post-management-workspace";
+import { nullablePostLocalizationText } from "@/features/posts/model/post-localization-input";
 import { postDetailHref } from "@/features/posts/routing/post-management-routes";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -56,7 +57,7 @@ function ReviewEditForm({
 	const update = usePatchApiReviewsByReviewId();
 	const queryClient = useQueryClient();
 	const router = useApplicationRouter();
-	const { t } = useTranslation(["errors", "ui"]);
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
 		useContentLanguageEditor();
 	const [body, setBody] = useState<PortableTextValue>(() =>
@@ -77,10 +78,8 @@ function ReviewEditForm({
 				path: { reviewId: review.id },
 				body: {
 					language: selectedLanguage,
-					title: String(form.get("title") ?? "").trim(),
-					...(String(form.get("summary") ?? "").trim()
-						? { summary: String(form.get("summary") ?? "").trim() }
-						: {}),
+					title: nullablePostLocalizationText(form, "title"),
+					summary: nullablePostLocalizationText(form, "summary"),
 					body: writePortableText(
 						body,
 						selectedLanguageIsPending ? undefined : review.body,
@@ -108,20 +107,19 @@ function ReviewEditForm({
 			onSubmit={(event) => void submit(event)}
 		>
 			<FieldGroup>
-				<Field required>
-					<FieldLabel>{t.ui.title}</FieldLabel>
+				<Field>
+					<FieldLabel>{t.posts.titleOptional}</FieldLabel>
 					<Input
 						defaultValue={selectedLanguageIsPending ? "" : (review.title ?? "")}
 						maxLength={500}
 						name="title"
-						required
 					/>
 				</Field>
 				<Field>
-					<FieldLabel>{t.ui.summary}</FieldLabel>
-					<Input
+					<FieldLabel>{t.posts.summaryOptional}</FieldLabel>
+					<Textarea
 						defaultValue={selectedLanguageIsPending ? "" : (review.summary ?? "")}
-						maxLength={2000}
+						maxLength={2_000}
 						name="summary"
 					/>
 				</Field>

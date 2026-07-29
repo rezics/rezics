@@ -167,6 +167,60 @@ const review = {
 } satisfies FeedPost;
 
 describe("FeedPostCard", () => {
+	it("derives a localized title for a titleless Review", () => {
+		const titlelessReview = {
+			...review,
+			title: null,
+			attributions: [
+				{
+					id: "publisher-attribution",
+					role: "publisher",
+					position: "a0",
+					creditedUnit: {
+						id: "publisher",
+						kind: "profile",
+						language: "zh",
+						slugAddress: null,
+						title: "海豚號編輯部",
+						summary: null,
+						avatar: null,
+					},
+				},
+			],
+		} satisfies FeedPost;
+
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedPostCard post={titlelessReview} />
+			</TranslationProvider>,
+		);
+
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "海豚號編輯部對《Glorious Exploits》的評論",
+			}),
+		).toBeTruthy();
+	});
+
+	it("uses an authored summary instead of the body for the feed preview", () => {
+		const summarizedPost = {
+			...excerpt,
+			postKind: "post",
+			title: null,
+			summary: "手寫摘要",
+		} satisfies FeedPost;
+
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedPostCard post={summarizedPost} />
+			</TranslationProvider>,
+		);
+
+		expect(screen.getByText("手寫摘要")).toBeTruthy();
+		expect(screen.queryByText("We are all stories in the end.")).toBeNull();
+	});
+
 	it("renders an Excerpt source as an internal Unit link without a duplicate target card", () => {
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>

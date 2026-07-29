@@ -1,4 +1,5 @@
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `${postTerms.inline} を編集`,
 	publish: "公開",
 	untitled: `タイトル未設定の ${postTerms.inline}`,
+	titleOptional: "タイトル（任意）",
+	summaryOptional: "概要（任意）",
+	postFallbackTitle: insert(`{{author}}の${postTerms.inline}`, { author: String }),
+	reviewFallbackTitle: insert("{{author}}による「{{subject}}」のレビュー", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "表示なし",
 	publisher: "発行者",
 	wikiCreateTitle: "ウィキ項目を作成",
@@ -67,9 +75,9 @@ export default {
 		sections: {
 			main: {
 				label: "コンテンツ",
-				postDescription: `${postTerms.inline}のタイトルと本文を編集`,
+				postDescription: `${postTerms.inline}の任意のタイトル、概要、本文を編集`,
 				replyDescription: `返信${postTerms.inline}本文を編集`,
-				reviewDescription: "レビューのタイトル、概要、本文、およびスコア関連を編集",
+				reviewDescription: "レビューの任意のタイトル、概要、本文、およびスコア関連を編集",
 			},
 			attributions: {
 				label: "クレジット関係",

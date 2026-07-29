@@ -240,6 +240,7 @@ export default new Elysia()
 							body: unitLocalization.content,
 							replyCount,
 							title: unitLocalization.title,
+							summary: unitLocalization.summary,
 							latestRevisionId: unitRevisionHead.revisionId,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
@@ -333,7 +334,8 @@ export default new Elysia()
 						await tx.insert(unitLocalization).values({
 							unitId: created.id,
 							language: body.language,
-							title: body.title,
+							title: body.title ?? null,
+							summary: body.summary ?? null,
 							content: body.body,
 							contentStatus: "published",
 						});
@@ -702,12 +704,17 @@ export default new Elysia()
 								unitId: params.postId,
 								language: body.language,
 								title: body.title,
+								summary: body.summary,
 								content: body.body,
 								contentStatus: "published",
 							})
 							.onConflictDoUpdate({
 								target: [unitLocalization.unitId, unitLocalization.language],
-								set: { title: body.title, content: body.body },
+								set: {
+									title: body.title,
+									summary: body.summary,
+									content: body.body,
+								},
 							});
 						await applyNewPostTagMentionVotes(tx, {
 							postId: params.postId,

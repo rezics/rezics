@@ -1,4 +1,5 @@
 import { koTerminology } from "@rezics/i18n/terminology/ko";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `${postTerms.inline} 편집`,
 	publish: "게시",
 	untitled: `제목 없는 ${postTerms.inline}`,
+	titleOptional: "제목(선택 사항)",
+	summaryOptional: "요약(선택 사항)",
+	postFallbackTitle: insert(`{{author}}님의 ${postTerms.inline}`, { author: String }),
+	reviewFallbackTitle: insert("{{author}}님의 {{subject}} 리뷰", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "출처 없음",
 	publisher: "게시자",
 	wikiCreateTitle: "위키 항목 만들기",
@@ -69,9 +77,9 @@ export default {
 		sections: {
 			main: {
 				label: "콘텐츠",
-				postDescription: `${postTerms.inline} 제목과 본문 편집`,
+				postDescription: `${postTerms.inline}의 선택적 제목, 요약 및 본문 편집`,
 				replyDescription: `답글 ${postTerms.inline} 본문 편집`,
-				reviewDescription: "리뷰 제목, 요약, 본문 및 점수 연관편집",
+				reviewDescription: "리뷰의 선택적 제목, 요약, 본문 및 점수 연관 편집",
 			},
 			attributions: {
 				label: "크레딧 관계",

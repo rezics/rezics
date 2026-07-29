@@ -24,6 +24,10 @@ const ReviewScores = t.Array(t.Integer({ minimum: 1, maximum: 10 }), {
 	maxItems: 10,
 	uniqueItems: true,
 });
+const OptionalReviewTitle = t.Optional(t.String({ minLength: 1, maxLength: 500 }));
+const OptionalReviewSummary = t.Optional(t.String({ minLength: 1, maxLength: 2_000 }));
+const NullableReviewTitle = t.Nullable(t.String({ minLength: 1, maxLength: 500 }));
+const NullableReviewSummary = t.Nullable(t.String({ minLength: 1, maxLength: 2_000 }));
 
 export const ListReviewsQuery = t.Object(
 	{
@@ -71,8 +75,8 @@ export const CreateReviewBody = t.Object({
 		),
 	),
 	language: ContentLanguage,
-	title: t.String({ minLength: 1, maxLength: 500 }),
-	summary: t.Optional(t.String({ maxLength: 2_000 })),
+	title: OptionalReviewTitle,
+	summary: OptionalReviewSummary,
 	body: PortableTextDocument,
 });
 export type CreateReviewBody = Static<typeof CreateReviewBody>;
@@ -90,8 +94,8 @@ export type GetReviewQuery = Static<typeof GetReviewQuery>;
 
 export const UpdateReviewBody = t.Object({
 	language: ContentLanguage,
-	title: t.String({ minLength: 1, maxLength: 500 }),
-	summary: t.Optional(t.String({ maxLength: 2_000 })),
+	title: NullableReviewTitle,
+	summary: NullableReviewSummary,
 	body: PortableTextDocument,
 });
 export type UpdateReviewBody = Static<typeof UpdateReviewBody>;

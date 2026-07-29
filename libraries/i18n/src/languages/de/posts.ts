@@ -1,4 +1,5 @@
 import { deTerminology } from "@rezics/i18n/terminology/de";
+import { insert } from "native-i18n";
 
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
@@ -10,6 +11,13 @@ export default {
 	editTitle: `${postTerms.label} bearbeiten`,
 	publish: "Veröffentlichen",
 	untitled: `${postTerms.label} ohne Titel`,
+	titleOptional: "Titel (optional)",
+	summaryOptional: "Zusammenfassung (optional)",
+	postFallbackTitle: insert(`${postTerms.label} von {{author}}`, { author: String }),
+	reviewFallbackTitle: insert("Rezension zu {{subject}} von {{author}}", {
+		author: String,
+		subject: String,
+	}),
 	unknownAttribution: "Keine Zuordnung",
 	publisher: "Herausgeber",
 	wikiCreateTitle: "Wiki-Eintrag erstellen",
@@ -69,10 +77,10 @@ export default {
 		sections: {
 			main: {
 				label: "Inhalt",
-				postDescription: `Titel und Text des ${postTerms.inline}s bearbeiten.`,
+				postDescription: `Optionalen Titel, Zusammenfassung und Text des ${postTerms.inline}s bearbeiten.`,
 				replyDescription: `Text des Antwort-${postTerms.inline}s bearbeiten.`,
 				reviewDescription:
-					"Titel, Zusammenfassung, Text und Bewertungszuordnung der Rezension bearbeiten.",
+					"Optionalen Titel, Zusammenfassung, Text und Bewertungszuordnung der Rezension bearbeiten.",
 			},
 			attributions: {
 				label: "Zuordnungsbeziehungen",

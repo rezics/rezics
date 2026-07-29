@@ -1,7 +1,49 @@
+import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { ReplacePostScoresBody } from "./schema";
+import { CreatePostBody, ReplacePostScoresBody, UpdatePostBody } from "./schema";
+
+const body = createPortableTextDocument([], "0123456789ab");
+const baseRevisionId = "019b76da-a800-7300-8000-000000000001";
+
+describe("Post localization API contracts", () => {
+	it("allows creating a Post without a title or summary", () => {
+		expect(Check(CreatePostBody, { language: "en", body })).toBe(true);
+		expect(
+			Check(CreatePostBody, {
+				language: "en",
+				title: "A title",
+				summary: "A concise preview",
+				body,
+			}),
+		).toBe(true);
+	});
+
+	it("rejects blank authored metadata", () => {
+		expect(Check(CreatePostBody, { language: "en", title: "", body })).toBe(false);
+		expect(Check(CreatePostBody, { language: "en", summary: "", body })).toBe(false);
+	});
+
+	it("uses explicit nulls to clear authored metadata during replacement", () => {
+		expect(
+			Check(UpdatePostBody, {
+				language: "en",
+				title: null,
+				summary: null,
+				body,
+				baseRevisionId,
+			}),
+		).toBe(true);
+		expect(
+			Check(UpdatePostBody, {
+				language: "en",
+				body,
+				baseRevisionId,
+			}),
+		).toBe(false);
+	});
+});
 
 describe("Post Score API contracts", () => {
 	it("temporarily limits the replacement body to one Score", () => {

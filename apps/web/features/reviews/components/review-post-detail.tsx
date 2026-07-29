@@ -29,6 +29,7 @@ import {
 } from "@rezics/ui";
 import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-actions";
 import { PostDetailArticle } from "@/features/posts/components/post-detail-article";
+import { resolvePostPresentationTitle } from "@/features/posts/model/post-presentation-title";
 import { ProgressEventDescription } from "@/features/progress/components/progress-event-description";
 import { getPostManagementSectionIds } from "@/features/posts/model/post-management-section";
 import { invalidatePostQueries } from "@/features/posts/query";
@@ -43,8 +44,16 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 	const remove = useDeleteApiReviewsByReviewId();
 	const queryClient = useQueryClient();
 	const router = useApplicationRouter();
-	const { t } = useTranslation(["engagement", "ui"]);
+	const { t } = useTranslation(["engagement", "posts", "ui"]);
 	const [deleteOpen, setDeleteOpen] = useState(false);
+	const title = resolvePostPresentationTitle(review, {
+		postBy: t.posts.postFallbackTitle,
+		reviewOf: t.posts.reviewFallbackTitle,
+		reply: t.posts.replyPost,
+		unknownAttribution: t.posts.unknownAttribution,
+		unnamedSubject: t.ui.unnamed,
+		untitled: t.posts.untitled,
+	});
 	const managementSectionId = getPostManagementSectionIds(review)[0];
 	const editHref = managementSectionId
 		? postManagementSectionHref(review.id, managementSectionId)
@@ -151,7 +160,8 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 					attributions: review.attributions,
 					realmId: review.realmId,
 					language: review.language,
-					title: review.title ?? t.ui.unnamed,
+					title: title.value,
+					titleLanguage: title.language ?? null,
 					summary: review.summary,
 					body: review.body,
 					createdAt: review.createdAt,

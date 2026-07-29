@@ -41,6 +41,7 @@ export interface PostDetailArticleValue {
 	readonly realmId: string | null;
 	readonly language: ContentLanguage;
 	readonly title: string;
+	readonly titleLanguage: ContentLanguage | null;
 	readonly summary?: string | null;
 	readonly body: PortableTextDocument | null;
 	readonly createdAt: string;
@@ -65,7 +66,7 @@ export function PostDetailArticle({
 	readonly variant?: "card" | "thread";
 }) {
 	const { locale, t } = useTranslation(["feed", "posts"]);
-	const displayedTitle = useChineseContentText(post.title, post.language);
+	const displayedTitle = useChineseContentText(post.title, post.titleLanguage);
 	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
 	const attachedScore = post.scores[0];
 	const attachedScoreValue = attachedScore ? apiValueToUnitScore(attachedScore.value) : undefined;
@@ -86,6 +87,9 @@ export function PostDetailArticle({
 			>
 				{displayedTitle}
 			</h1>
+			{post.summary ? (
+				<p className="mt-4 text-muted-foreground text-lg leading-7">{displayedSummary}</p>
+			) : null}
 			{bodyContent !== undefined ? (
 				<div className="prose mt-5 max-w-none">{bodyContent}</div>
 			) : post.body ? (
@@ -96,8 +100,6 @@ export function PostDetailArticle({
 						variant="article"
 					/>
 				</div>
-			) : post.summary ? (
-				<p className="mt-4 text-muted-foreground leading-7">{displayedSummary}</p>
 			) : null}
 			<div className="mt-6 border-border-weak border-t pt-2">
 				<ConnectedFeedEngagementBar

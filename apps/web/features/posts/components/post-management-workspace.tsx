@@ -28,6 +28,7 @@ import {
 	getPostManagementSectionIds,
 	type PostManagementSectionId,
 } from "../model/post-management-section";
+import { resolvePostPresentationTitle } from "../model/post-presentation-title";
 import {
 	parsePostManagementSection,
 	postDetailHref,
@@ -135,7 +136,7 @@ function LoadedPostManagementWorkspace({
 	children: ReactNode;
 }) {
 	const pathname = usePathname();
-	const { t } = useTranslation(["engagement", "errors", "posts", "units"]);
+	const { t } = useTranslation(["errors", "posts", "ui", "units"]);
 	if (!canOpenPostManagement(resource.item))
 		return (
 			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
@@ -186,13 +187,14 @@ function LoadedPostManagementWorkspace({
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
 	const sectionAllowed =
 		currentSectionId !== undefined && visibleSectionIds.has(currentSectionId);
-	const title =
-		resource.item.title ??
-		(resource.item.postKind === "review"
-			? t.engagement.editReview
-			: resource.item.postKind === "reply"
-				? t.posts.replyPost
-				: t.posts.untitled);
+	const title = resolvePostPresentationTitle(resource.item, {
+		postBy: t.posts.postFallbackTitle,
+		reviewOf: t.posts.reviewFallbackTitle,
+		reply: t.posts.replyPost,
+		unknownAttribution: t.posts.unknownAttribution,
+		unnamedSubject: t.ui.unnamed,
+		untitled: t.posts.untitled,
+	}).value;
 	const navigation = (
 		<ManagementWorkspaceNavigation
 			ariaLabel={t.posts.workspace.navigation}
