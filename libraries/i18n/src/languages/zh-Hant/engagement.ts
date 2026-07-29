@@ -45,6 +45,10 @@ export default {
 	scoreRealm: `評分${realmTerms.label}`,
 	scoreGuidelines: "查看評分準則",
 	scoreEditorHint: `選擇${realmTerms.label}以修改既有評分，或在其他${realmTerms.label}新增評分。`,
+	itemVisibility: "單項可見性",
+	effectiveItemVisibility: insert("儲存後的實際可見性：{{visibility}}", {
+		visibility: String,
+	}),
 	editScores: "管理評分",
 	noScoredRealms: `尚未在任何${realmTerms.label}評分。`,
 	scoreAssociation: "評分關聯",

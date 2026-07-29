@@ -1,6 +1,7 @@
 "use client";
 
 import type { Translation } from "@rezics/i18n";
+import { useGetApiUsersMePreferences } from "@rezics/openapi-tanstack-query";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -18,6 +19,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	Field,
+	FieldDescription,
 	FieldGroup,
 	FieldLabel,
 	Input,
@@ -37,10 +39,12 @@ import { useTranslation } from "@/i18n/client";
 import {
 	DefaultResourceVisibility,
 	isResourceVisibility,
+	resolveEffectiveResourceVisibility,
 	ResourceVisibilityValues,
 	type ResourceVisibility,
 } from "@/features/privacy/model/resource-visibility";
 import { RequestFailure } from "@/i18n/request-failure";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import {
 	changeProgressDraftStatus,
 	createProgressDraft,
@@ -80,6 +84,10 @@ export function UnitProgressDialog() {
 function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null }) {
 	const progress = useUnitProgress();
 	const { t } = useTranslation(["engagement", "errors", "ui"]);
+	const session = useHydratedSession();
+	const preferences = useGetApiUsersMePreferences({
+		query: { enabled: !session.isPending && Boolean(session.data) },
+	});
 	const [sourceRecord] = useState(record);
 	const [draft, setDraft] = useState(() => createProgressDraft(record));
 	const [visibility, setVisibility] = useState<ResourceVisibility>(
@@ -91,6 +99,12 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 	const completing = isCompletionTransition(sourceRecord, draft.status);
 	const nextCompletedCount = (sourceRecord?.completedCount ?? 0) + 1;
 	const submittedVisibility = sourceRecord ? visibility : DefaultResourceVisibility;
+	const effectiveVisibility = preferences.data
+		? resolveEffectiveResourceVisibility(
+				preferences.data.progressVisibility,
+				submittedVisibility,
+			)
+		: undefined;
 
 	async function completeCurrentProgress() {
 		const update = createProgressUpdate(progress.domain.type, draft);
@@ -147,7 +161,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 						{sourceRecord ? (
 							<Field>
 								<FieldLabel htmlFor="progress-visibility">
-									{t.ui.visibility}
+									{t.engagement.itemVisibility}
 								</FieldLabel>
 								<NativeSelect
 									id="progress-visibility"
@@ -163,6 +177,13 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 										</NativeSelectOption>
 									))}
 								</NativeSelect>
+								{effectiveVisibility ? (
+									<FieldDescription>
+										{t.engagement.effectiveItemVisibility({
+											visibility: t.ui[effectiveVisibility],
+										})}
+									</FieldDescription>
+								) : null}
 							</Field>
 						) : null}
 						{progress.domain.type === "book" ? (

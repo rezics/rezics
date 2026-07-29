@@ -3,6 +3,7 @@
 import {
 	getApiScoresByTargetIdViewerQueryKey,
 	useGetApiScoresByTargetIdViewer,
+	useGetApiUsersMePreferences,
 	usePutApiScoresByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	Field,
+	FieldDescription,
 	FieldLabel,
 	NativeSelect,
 	NativeSelectOption,
@@ -25,6 +27,7 @@ import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import {
 	DefaultResourceVisibility,
 	isResourceVisibility,
+	resolveEffectiveResourceVisibility,
 	ResourceVisibilityValues,
 	type ResourceVisibility,
 } from "@/features/privacy/model/resource-visibility";
@@ -55,6 +58,9 @@ export function UnitScoreControl({
 	const { t } = useTranslation(["engagement", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const defaultScoreRealm = useDefaultScoreRealm();
+	const preferences = useGetApiUsersMePreferences({
+		query: { enabled: !sessionPending && Boolean(session) },
+	});
 	const viewerScores = useGetApiScoresByTargetIdViewer(
 		{
 			path: { targetId },
@@ -107,6 +113,9 @@ export function UnitScoreControl({
 	const viewerScoresPending = Boolean(session) && viewerScores.isPending;
 	const disabled =
 		sessionPending || defaultScoreRealm.isPending || viewerScoresPending || mutation.isPending;
+	const effectiveVisibility = preferences.data
+		? resolveEffectiveResourceVisibility(preferences.data.scoreVisibility, draftVisibility)
+		: undefined;
 
 	async function saveScore(
 		realm: ScoreRealmOption,
@@ -249,7 +258,7 @@ export function UnitScoreControl({
 						{selectedRealm?.score === undefined ? null : (
 							<Field>
 								<FieldLabel htmlFor="score-visibility">
-									{t.ui.visibility}
+									{t.engagement.itemVisibility}
 								</FieldLabel>
 								<NativeSelect
 									id="score-visibility"
@@ -265,6 +274,13 @@ export function UnitScoreControl({
 										</NativeSelectOption>
 									))}
 								</NativeSelect>
+								{effectiveVisibility ? (
+									<FieldDescription>
+										{t.engagement.effectiveItemVisibility({
+											visibility: t.ui[effectiveVisibility],
+										})}
+									</FieldDescription>
+								) : null}
 							</Field>
 						)}
 						<div className="grid justify-items-center gap-2">

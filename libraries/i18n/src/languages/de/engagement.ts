@@ -44,6 +44,11 @@ export default {
 	scoreRealm: `Bewertungs-${realmTerms.label}`,
 	scoreGuidelines: "Bewertungsrichtlinien anzeigen",
 	scoreEditorHint: `Wähle einen ${realmTerms.inline}, um eine vorhandene Bewertung zu aktualisieren oder eine Bewertung in einem anderen ${realmTerms.inline} hinzuzufügen.`,
+	itemVisibility: "Sichtbarkeit dieses Eintrags",
+	effectiveItemVisibility: insert(
+		"Tatsächliche Sichtbarkeit nach dem Speichern: {{visibility}}",
+		{ visibility: String },
+	),
 	editScores: "Bewertungen verwalten",
 	noScoredRealms: `Noch keine Bewertungen in einem ${realmTerms.inline}.`,
 	scoreAssociation: "Bewertungszuordnung",

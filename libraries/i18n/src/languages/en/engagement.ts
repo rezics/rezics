@@ -44,6 +44,10 @@ export default {
 	scoreRealm: `Scoring ${realmTerms.label}`,
 	scoreGuidelines: "View scoring guidelines",
 	scoreEditorHint: `Choose a ${realmTerms.label} to update an existing Score or add a Score in another ${realmTerms.label}.`,
+	itemVisibility: "Visibility of this item",
+	effectiveItemVisibility: insert("Actual visibility after saving: {{visibility}}", {
+		visibility: String,
+	}),
 	editScores: "Manage Scores",
 	noScoredRealms: `No Scores in any ${realmTerms.label} yet.`,
 	scoreAssociation: "Score association",

@@ -44,6 +44,10 @@ export default {
 	scoreRealm: `スコア${realmTerms.label}`,
 	scoreGuidelines: "評価ガイドラインを見る",
 	scoreEditorHint: `${realmTerms.label}を選択して既存のスコアを更新するか、別の${realmTerms.label}でスコアを追加します。`,
+	itemVisibility: "この項目の公開範囲",
+	effectiveItemVisibility: insert("保存後の実際の公開範囲：{{visibility}}", {
+		visibility: String,
+	}),
 	editScores: "スコア管理",
 	noScoredRealms: `現在、どの${realmTerms.label}にもスコアはありません。`,
 	scoreAssociation: "スコアの関連付け",

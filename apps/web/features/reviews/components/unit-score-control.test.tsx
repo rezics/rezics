@@ -6,10 +6,12 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { create } from "native-i18n";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";
 import { TranslationProvider } from "@/i18n/client";
 import { UnitScoreControl } from "./unit-score-control";
 
 const state = vi.hoisted(() => ({
+	scoreVisibility: "private" as ResourceVisibility,
 	viewerItems: [] as {
 		scoreId: string;
 		realmId: string;
@@ -72,6 +74,9 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 		data: { items: state.viewerItems },
 		error: null,
 		isPending: false,
+	}),
+	useGetApiUsersMePreferences: () => ({
+		data: { scoreVisibility: state.scoreVisibility },
 	}),
 	usePutApiScoresByTargetId: () => ({
 		error: null,
@@ -145,6 +150,7 @@ function renderControl() {
 }
 
 beforeEach(() => {
+	state.scoreVisibility = "private";
 	state.viewerItems = [];
 	state.mutateAsync.mockClear();
 	state.resetMutation.mockClear();
@@ -156,7 +162,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("UnitScoreControl", () => {
-	it("submits the first Hero rating as public and invalidates dependent review projections", async () => {
+	it("submits the first Hero rating as public under a private profile-wide ceiling", async () => {
 		renderControl();
 
 		fireEvent.click(screen.getByTestId("interactive-rating"));
@@ -199,12 +205,13 @@ describe("UnitScoreControl", () => {
 		expect((screen.getByRole("combobox", { name: "評分領域" }) as HTMLInputElement).value).toBe(
 			"REZICS 評分",
 		);
-		expect((screen.getByRole("combobox", { name: "可見性" }) as HTMLSelectElement).value).toBe(
-			"public",
-		);
+		expect(
+			(screen.getByRole("combobox", { name: "單項可見性" }) as HTMLSelectElement).value,
+		).toBe("public");
+		expect(screen.getByText("儲存後的實際可見性：私密")).toBeTruthy();
 		expect(state.mutateAsync).not.toHaveBeenCalled();
 
-		fireEvent.change(screen.getByRole("combobox", { name: "可見性" }), {
+		fireEvent.change(screen.getByRole("combobox", { name: "單項可見性" }), {
 			target: { value: "private" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "提交評分" }));

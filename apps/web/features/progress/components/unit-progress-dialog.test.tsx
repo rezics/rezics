@@ -6,12 +6,17 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { create } from "native-i18n";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";
 import { TranslationProvider } from "@/i18n/client";
 import type { UnitProgressDomain, UnitProgressRecord } from "../model/progress-record";
 import { UnitProgressDialog } from "./unit-progress-dialog";
 
 const progressContext = vi.hoisted(() => ({
 	current: {} as Record<string, unknown>,
+}));
+
+const privacyState = vi.hoisted(() => ({
+	progressVisibility: "private" as ResourceVisibility,
 }));
 
 const actions = vi.hoisted(() => ({
@@ -30,6 +35,16 @@ vi.mock("@/i18n/client", async () => {
 
 vi.mock("./unit-progress-provider", () => ({
 	useUnitProgress: () => progressContext.current,
+}));
+
+vi.mock("@rezics/openapi-tanstack-query", () => ({
+	useGetApiUsersMePreferences: () => ({
+		data: { progressVisibility: privacyState.progressVisibility },
+	}),
+}));
+
+vi.mock("@/lib/use-hydrated-session", () => ({
+	useHydratedSession: () => ({ data: { user: { id: "viewer" } }, isPending: false }),
 }));
 
 vi.stubGlobal(
@@ -99,16 +114,17 @@ function renderDialog() {
 
 beforeEach(() => {
 	for (const action of Object.values(actions)) action.mockClear();
+	privacyState.progressVisibility = "private";
 });
 
 afterEach(cleanup);
 
 describe("UnitProgressDialog", () => {
-	it("creates progress as public without showing an item visibility control", async () => {
+	it("creates progress as public under a private profile-wide ceiling", async () => {
 		setProgressState(null);
 		renderDialog();
 
-		expect(screen.queryByRole("combobox", { name: "可見性" })).toBeNull();
+		expect(screen.queryByRole("combobox", { name: "單項可見性" })).toBeNull();
 		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
 
 		await vi.waitFor(() =>
@@ -163,14 +179,15 @@ describe("UnitProgressDialog", () => {
 		);
 	});
 
-	it("offers visibility controls when editing existing progress", async () => {
+	it("offers an explicitly individual visibility control when editing existing progress", async () => {
 		setProgressState(existingRecord);
 		renderDialog();
 
 		const visibility = screen.getByRole("combobox", {
-			name: "可見性",
+			name: "單項可見性",
 		}) as HTMLSelectElement;
 		expect(visibility.value).toBe("private");
+		expect(screen.getByText("儲存後的實際可見性：私密")).toBeTruthy();
 		fireEvent.change(visibility, { target: { value: "unlisted" } });
 		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
 

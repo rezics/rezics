@@ -44,6 +44,10 @@ export default {
 	scoreRealm: `${realmTerms.label} de puntuación`,
 	scoreGuidelines: "Ver criterios de puntuación",
 	scoreEditorHint: `Elige un ${realmTerms.inline} para actualizar una puntuación existente o añadir una en otro ${realmTerms.inline}.`,
+	itemVisibility: "Visibilidad de este elemento",
+	effectiveItemVisibility: insert("Visibilidad efectiva después de guardar: {{visibility}}", {
+		visibility: String,
+	}),
 	editScores: "Gestionar puntuaciones",
 	noScoredRealms: `Todavía no hay puntuaciones en ningún ${realmTerms.inline}.`,
 	scoreAssociation: "Asociación de puntuación",
