@@ -26,12 +26,13 @@ import {
 } from "@rezics/ui";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useTranslation } from "@/i18n/client";
-import { getErrorText } from "@/i18n/errors";
+import { getErrorCode, getErrorText } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
 import { getSafeAuthDestination, type AuthPortalMode } from "@/lib/auth-redirect";
 import { authSearchParamsParsers } from "@/lib/search-params";
 import { AuthPortalContext, type AuthPortalOptions, useAuthPortal } from "./auth-portal-context";
 import { AuthPasswordField, AuthTextField } from "./components/auth-form-field";
+import { TurnstileWidget } from "./components/turnstile-widget";
 
 type AuthPortalState = {
 	destination: string;
@@ -59,7 +60,13 @@ export function SignInButton({
 	);
 }
 
-export function AuthPortalProvider({ children }: { children: ReactNode }) {
+export function AuthPortalProvider({
+	children,
+	turnstileSiteKey,
+}: {
+	children: ReactNode;
+	turnstileSiteKey: string;
+}) {
 	const pathname = usePathname();
 	const router = useApplicationRouter();
 	const [authQuery, setAuthQuery] = useQueryStates(authSearchParamsParsers);
@@ -156,6 +163,7 @@ export function AuthPortalProvider({ children }: { children: ReactNode }) {
 				onComplete={completeAuthentication}
 				onModeChange={setAuthPortalMode}
 				state={state}
+				turnstileSiteKey={turnstileSiteKey}
 			/>
 		</AuthPortalContext.Provider>
 	);
@@ -166,11 +174,13 @@ function AuthPortalDialog({
 	onClose,
 	onComplete,
 	onModeChange,
+	turnstileSiteKey,
 }: {
 	onClose: () => void;
 	onComplete: (destination: string) => void;
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 	state: AuthPortalState | null;
+	turnstileSiteKey: string;
 }) {
 	const { t } = useTranslation([
 		"actions",
@@ -198,6 +208,7 @@ function AuthPortalDialog({
 						onComplete={onComplete}
 						onModeChange={onModeChange}
 						state={state}
+						turnstileSiteKey={turnstileSiteKey}
 					/>
 				</DialogBody>
 			</DialogContent>
@@ -224,10 +235,12 @@ function AuthPortalForm({
 	state,
 	onComplete,
 	onModeChange,
+	turnstileSiteKey,
 }: {
 	onComplete: (destination: string) => void;
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 	state: AuthPortalState;
+	turnstileSiteKey: string;
 }) {
 	switch (state.mode) {
 		case "login":
@@ -239,7 +252,7 @@ function AuthPortalForm({
 				/>
 			);
 		case "register":
-			return <RegisterForm onModeChange={onModeChange} />;
+			return <RegisterForm onModeChange={onModeChange} turnstileSiteKey={turnstileSiteKey} />;
 		case "forgot-password":
 			return <ForgotPasswordForm onModeChange={onModeChange} />;
 		case "reset-password":
@@ -341,8 +354,10 @@ function LoginForm({
 
 function RegisterForm({
 	onModeChange,
+	turnstileSiteKey,
 }: {
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
+	turnstileSiteKey: string;
 }) {
 	const { locale, t } = useTranslation([
 		"actions",
@@ -354,12 +369,18 @@ function RegisterForm({
 	]);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+	const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 	const passwordVisibilityLabel = (visible: boolean) =>
 		visible ? t.auth.hidePassword : t.auth.showPassword;
 
 	async function onSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(undefined);
+		if (!turnstileToken) {
+			setError(t.auth.securityVerificationRequired);
+			return;
+		}
 		setIsSubmitting(true);
 
 		try {
@@ -370,11 +391,28 @@ function RegisterForm({
 				name: String(formData.get("name")),
 				password: String(formData.get("password")),
 				registrationContentLanguage: toContentLanguage(locale.target),
+				fetchOptions: {
+					headers: {
+						"x-captcha-response": turnstileToken,
+					},
+				},
 			});
-			if (result.error) setError(getErrorText(t, result.error, t.auth.registerFailed));
-			else onModeChange("verify-email", { email });
+			if (result.error) {
+				const errorCode = getErrorCode(result.error);
+				setError(
+					errorCode === "MISSING_RESPONSE"
+						? t.auth.securityVerificationRequired
+						: errorCode === "VERIFICATION_FAILED"
+							? t.auth.securityVerificationFailed
+							: getErrorText(t, result.error, t.auth.registerFailed),
+				);
+				setTurnstileToken(null);
+				setTurnstileResetKey((value) => value + 1);
+			} else onModeChange("verify-email", { email });
 		} catch (cause) {
 			setError(getErrorText(t, cause, t.auth.registerFailed));
+			setTurnstileToken(null);
+			setTurnstileResetKey((value) => value + 1);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -400,10 +438,19 @@ function RegisterForm({
 						name="password"
 						visibilityLabel={passwordVisibilityLabel}
 					/>
+					<TurnstileWidget
+						label={t.auth.securityVerificationLabel}
+						locale={locale.target}
+						onTokenChange={setTurnstileToken}
+						resetKey={turnstileResetKey}
+						siteKey={turnstileSiteKey}
+						unavailableMessage={t.auth.securityVerificationUnavailable}
+					/>
 					<FormError error={error} />
 					<Button
 						variant="solid"
 						className="w-full"
+						disabled={!turnstileToken || isSubmitting}
 						isLoading={isSubmitting}
 						size="xl"
 						type="submit"

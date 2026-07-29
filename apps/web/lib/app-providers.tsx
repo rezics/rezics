@@ -23,11 +23,13 @@ export function AppProviders({
 	dehydratedState,
 	initialSession,
 	initialTranslation,
+	turnstileSiteKey,
 }: {
 	children: ReactNode;
 	dehydratedState: DehydratedState;
 	initialSession: InitialAuthSession;
 	initialTranslation: TranslationSnapshot<typeof resources, typeof RootTranslationNamespaces>;
+	turnstileSiteKey: string;
 }) {
 	return (
 		<NuqsAdapter defaultOptions={urlStateOptions}>
@@ -39,7 +41,7 @@ export function AppProviders({
 								dehydratedState={dehydratedState}
 								initialSession={initialSession}
 							>
-								<AuthPortalProvider>
+								<AuthPortalProvider turnstileSiteKey={turnstileSiteKey}>
 									{children}
 									<Toaster />
 								</AuthPortalProvider>

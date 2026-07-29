@@ -37,6 +37,18 @@ function fontAwesomeKitLicense(): FontAwesomeLicense {
 	return value;
 }
 
+function turnstileSiteKey(): string {
+	const value = process.env.TURNSTILE_SITE_KEY?.trim();
+	if (!value) throw new Error("TURNSTILE_SITE_KEY is required");
+	const publicHostnameConfigured = process.env.TURNSTILE_ALLOWED_HOSTNAMES?.split(",")
+		.map((hostname) => hostname.trim())
+		.filter(Boolean)
+		.some((hostname) => !["localhost", "127.0.0.1"].includes(hostname));
+	if (publicHostnameConfigured && value === "1x00000000000000000000AA")
+		throw new Error("The Cloudflare Turnstile test site key cannot be used in production");
+	return value;
+}
+
 export async function generateMetadata(): Promise<Metadata> {
 	const { t } = await getTranslation(["brand"]);
 	return {
@@ -131,6 +143,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 					dehydratedState={dehydratedState}
 					initialSession={initialSession}
 					initialTranslation={snapshot}
+					turnstileSiteKey={turnstileSiteKey()}
 				>
 					{children}
 				</AppProviders>

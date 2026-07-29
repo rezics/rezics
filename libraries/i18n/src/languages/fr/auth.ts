@@ -16,6 +16,11 @@ export default {
 	forgotPassword: "Mot de passe oublié ?",
 	registerFailed: "L’inscription a échoué.",
 	registerDescription: "Créez un compte pour commencer à organiser et à discuter des contenus.",
+	securityVerificationLabel: "Vérification de sécurité",
+	securityVerificationFailed: "La vérification de sécurité a échoué. Réessayez.",
+	securityVerificationRequired: "Effectuez d’abord la vérification de sécurité.",
+	securityVerificationUnavailable:
+		"La vérification de sécurité est indisponible. Réessayez plus tard.",
 	haveAccount: "Vous avez déjà un compte ?",
 	createAccountTitle: "Créer un compte",
 	name: "Nom",

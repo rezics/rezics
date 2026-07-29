@@ -24,24 +24,15 @@ export type CatalogUnitType = Static<typeof CatalogUnitType>;
 export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
 export const CatalogUnitTypeParams = t.Object({ type: CatalogUnitType });
 
-export const CatalogEntryMode = t.Union([
-	t.Literal("owned_work"),
-	t.Literal("public_entry"),
-]);
+export const CatalogEntryMode = t.Union([t.Literal("owned_work"), t.Literal("public_entry")]);
 export type CatalogEntryMode = Static<typeof CatalogEntryMode>;
 
-export const PublisherEntityInput = t.Object(
-	{ entityId: Uuid },
-	{ additionalProperties: false },
-);
+export const PublisherEntityInput = t.Object({ entityId: Uuid }, { additionalProperties: false });
 export type PublisherEntityInput = Static<typeof PublisherEntityInput>;
 
 export const UnitVersionInput = t.Union([
 	t.Object({ kind: t.Literal("main") }, { additionalProperties: false }),
-	t.Object(
-		{ kind: t.Literal("variant"), mainUnitId: Uuid },
-		{ additionalProperties: false },
-	),
+	t.Object({ kind: t.Literal("variant"), mainUnitId: Uuid }, { additionalProperties: false }),
 ]);
 export type UnitVersionInput = Static<typeof UnitVersionInput>;
 

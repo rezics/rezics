@@ -1,6 +1,7 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { apiKey } from "@better-auth/api-key";
 import { betterAuth } from "better-auth/minimal";
+import { captcha } from "better-auth/plugins";
 import { getActiveObservability } from "@rezics/observability";
 import { ContentLanguageValues } from "@rezics/i18n";
 
@@ -13,6 +14,19 @@ import { getRequestTranslation } from "../i18n";
 const { logger } = getActiveObservability();
 
 export const CredentialControlFreshAgeSeconds = 60 * 10;
+
+function requireTurnstileConfiguration() {
+	if (!env.TURNSTILE_SECRET_KEY)
+		throw new Error("TURNSTILE_SECRET_KEY is required by the authentication service");
+	if (!env.TURNSTILE_ALLOWED_HOSTNAMES)
+		throw new Error("TURNSTILE_ALLOWED_HOSTNAMES is required by the authentication service");
+	return {
+		allowedHostnames: env.TURNSTILE_ALLOWED_HOSTNAMES,
+		secretKey: env.TURNSTILE_SECRET_KEY,
+	};
+}
+
+const turnstile = requireTurnstileConfiguration();
 
 export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
@@ -32,6 +46,13 @@ export const auth = betterAuth({
 		"/api-key/delete",
 	],
 	plugins: [
+		captcha({
+			provider: "cloudflare-turnstile",
+			secretKey: turnstile.secretKey,
+			endpoints: ["/sign-up/email"],
+			expectedAction: "turnstile-spin-v1",
+			allowedHostnames: turnstile.allowedHostnames,
+		}),
 		apiKey({
 			references: "user",
 			disableKeyHashing: false,

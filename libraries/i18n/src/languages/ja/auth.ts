@@ -16,6 +16,11 @@ export default {
 	forgotPassword: "パスワードをお忘れですか？",
 	registerFailed: "登録に失敗しました。",
 	registerDescription: "アカウントを作成して、キュレーションとディスカッションを始めましょう。",
+	securityVerificationLabel: "セキュリティ確認",
+	securityVerificationFailed: "セキュリティ確認に失敗しました。もう一度お試しください。",
+	securityVerificationRequired: "先にセキュリティ確認を完了してください。",
+	securityVerificationUnavailable:
+		"現在セキュリティ確認を利用できません。しばらくしてからもう一度お試しください。",
 	haveAccount: "すでにアカウントをお持ちですか？",
 	createAccountTitle: "アカウントを作成",
 	name: "名前",

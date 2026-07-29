@@ -16,6 +16,11 @@ export default {
 	forgotPassword: "¿Has olvidado la contraseña?",
 	registerFailed: "No se pudo completar el registro.",
 	registerDescription: "Crea una cuenta para empezar a organizar y debatir contenidos.",
+	securityVerificationLabel: "Verificación de seguridad",
+	securityVerificationFailed: "La verificación de seguridad ha fallado. Inténtalo de nuevo.",
+	securityVerificationRequired: "Completa primero la verificación de seguridad.",
+	securityVerificationUnavailable:
+		"La verificación de seguridad no está disponible. Inténtalo de nuevo más tarde.",
 	haveAccount: "¿Ya tienes una cuenta?",
 	createAccountTitle: "Crear una cuenta",
 	name: "Nombre",

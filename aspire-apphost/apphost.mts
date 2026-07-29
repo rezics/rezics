@@ -109,6 +109,12 @@ const betterAuthSecret = await builder.addParameter("better-auth-secret", {
 	value: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
 	secret: true,
 });
+const turnstileSiteKey = requireEnvironmentVariable("TURNSTILE_SITE_KEY");
+const turnstileSecretKey = await builder.addParameter("turnstile-secret-key", {
+	value: requireEnvironmentVariable("TURNSTILE_SECRET_KEY"),
+	secret: true,
+});
+const turnstileAllowedHostnames = requireEnvironmentVariable("TURNSTILE_ALLOWED_HOSTNAMES");
 const emailMode = resolveEmailMode(requireEnvironmentVariable("EMAIL_MODE"));
 const emailFrom = requireEnvironmentVariable("EMAIL_FROM");
 const emailFromName = process.env.EMAIL_FROM_NAME?.trim() || "Rezics";
@@ -178,6 +184,8 @@ let api = builder
 	.withEnvironment("HOST", "0.0.0.0")
 	.withEnvironment("DATABASE_URL", database)
 	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
+	.withEnvironment("TURNSTILE_SECRET_KEY", turnstileSecretKey)
+	.withEnvironment("TURNSTILE_ALLOWED_HOSTNAMES", turnstileAllowedHostnames)
 	.withEnvironment("EMAIL_MODE", emailMode)
 	.withEnvironment("EMAIL_FROM", emailFrom)
 	.withEnvironment("EMAIL_FROM_NAME", emailFromName)
@@ -280,6 +288,8 @@ const web = await builder
 		"FONT_AWESOME_KIT_LICENSE",
 		process.env.FONT_AWESOME_KIT_LICENSE?.trim() || "free",
 	)
+	.withEnvironment("TURNSTILE_SITE_KEY", turnstileSiteKey)
+	.withEnvironment("TURNSTILE_ALLOWED_HOSTNAMES", turnstileAllowedHostnames)
 	.withEnvironment("REZICS_API_ORIGIN", apiEndpoint)
 	.withReference(api)
 	.waitFor(api);

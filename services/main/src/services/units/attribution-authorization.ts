@@ -96,23 +96,9 @@ export async function resolvePublisherAttributionCreationMode(
 ): Promise<PublisherAttributionCreationMode> {
 	await lockAttributionTarget(tx, entityId);
 	if (!(await isEntityTarget(tx, entityId))) throw new EntityEntryNotFound();
-	if (
-		await authorization.entity.allowsAssociationCommand(
-			tx,
-			entityId,
-			"credit",
-			"direct",
-		)
-	)
+	if (await authorization.entity.allowsAssociationCommand(tx, entityId, "credit", "direct"))
 		return "direct";
-	if (
-		await authorization.entity.allowsAssociationCommand(
-			tx,
-			entityId,
-			"credit",
-			"request",
-		)
-	)
+	if (await authorization.entity.allowsAssociationCommand(tx, entityId, "credit", "request"))
 		return "request";
 	throw new EntityAssociationRestricted("credit", "request");
 }

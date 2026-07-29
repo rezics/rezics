@@ -3,6 +3,8 @@ const environment: Readonly<Record<string, string>> = {
 	BETTER_AUTH_SECRET: "test-secret-that-is-longer-than-thirty-two-characters",
 	BETTER_AUTH_URL: "http://localhost:3001",
 	BETTER_AUTH_TRUSTED_ORIGINS: "http://localhost:3000",
+	TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA",
+	TURNSTILE_ALLOWED_HOSTNAMES: "localhost,127.0.0.1",
 	EMAIL_MODE: "log",
 	EMAIL_FROM: "test@example.com",
 	EMAIL_FROM_NAME: "Rezics",
