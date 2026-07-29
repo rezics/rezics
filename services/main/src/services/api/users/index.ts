@@ -66,6 +66,7 @@ import {
 	UserLookupParams,
 	PublicProfileQuery,
 	ProfileActivityQuery,
+	ReplaceFollowingSettingsBody,
 	UpdatePrivacyPreferencesBody,
 } from "./schema";
 import { getProfile, presentProfile, PublicProfileSelection } from "./service";
@@ -73,6 +74,7 @@ import {
 	followUnit,
 	getFollowingStatus,
 	listFollowing,
+	replaceFollowingSettings,
 	unfollowUnit,
 	updateFollowingPresentation,
 } from "../../following/service";
@@ -468,6 +470,30 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Get current user's follow state for a Unit", tags: ["Users"] },
+		},
+	)
+	.put(
+		"/me/following/:unitId/settings",
+		async ({ profile, authorization, params, body }) =>
+			replaceFollowingSettings({
+				followerProfileId: profile.unitId,
+				unitId: params.unitId,
+				authorization: authorization.unit,
+				settings: body,
+			}),
+		{
+			access: "write:interaction:write",
+			params: FollowingUnitParams,
+			body: ReplaceFollowingSettingsBody,
+			response: {
+				[StatusCodes.OK]: FollowingStatusResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["FollowingTargetKindMismatch"]),
+			},
+			detail: {
+				summary: "Replace notification and personalization settings for a followed Unit",
+				tags: ["Users"],
+			},
 		},
 	)
 	.put(

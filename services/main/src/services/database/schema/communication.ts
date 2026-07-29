@@ -2,6 +2,7 @@ import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
+	foreignKey,
 	index,
 	integer,
 	pgEnum,
@@ -27,7 +28,7 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile, unit } from "./core";
+import { profile, unit, unitFollow } from "./core";
 
 export const notificationKind = pgEnum("notification_kind", toEnumValues(NotificationKindValues));
 export const notificationEmailStatus = pgEnum("notification_email_status", [
@@ -234,6 +235,35 @@ export const notificationPreference = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.profileId, table.kind] }),
 		index("notification_preference_kind_idx").on(table.kind),
+	],
+);
+
+/**
+ * Per-follow in-app delivery preference.
+ *
+ * A missing row keeps the platform default (`inApp = true`), so follow creation
+ * remains independent from notification settings. The composite foreign key
+ * makes the preference lifecycle follow the underlying relation.
+ */
+export const unitFollowNotificationPreference = pgTable(
+	"unit_follow_notification_preference",
+	{
+		followerProfileId: uuid().notNull(),
+		unitId: uuid().notNull(),
+		inApp: boolean().default(true).notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.followerProfileId, table.unitId] }),
+		foreignKey({
+			name: "unit_follow_notification_preference_follow_fkey",
+			columns: [table.followerProfileId, table.unitId],
+			foreignColumns: [unitFollow.followerProfileId, unitFollow.unitId],
+		}).onDelete("cascade"),
+		index("unit_follow_notification_preference_enabled_unit_idx")
+			.on(table.unitId, table.followerProfileId)
+			.where(sql`${table.inApp}`),
 	],
 );
 

@@ -47,6 +47,16 @@ export const CommunityCatalogUnitKindValues = [
 export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
 
 export type UnitKind = (typeof UnitKindValues)[number];
+export type NonRealmUnitKind = Exclude<UnitKind, "realm">;
+
+function deriveNonRealmUnitKindValues(): readonly [NonRealmUnitKind, ...NonRealmUnitKind[]] {
+	const values = UnitKindValues.filter((value): value is NonRealmUnitKind => value !== "realm");
+	const [first, ...rest] = values;
+	if (!first) throw new Error("UnitKindValues must contain a non-Realm kind");
+	return [first, ...rest];
+}
+
+export const NonRealmUnitKindValues = deriveNonRealmUnitKindValues();
 export type VariantCapableUnitKind = (typeof VariantCapableUnitKindValues)[number];
 
 export const CreditAttributionRoleValues = [

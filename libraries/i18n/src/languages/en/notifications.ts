@@ -23,6 +23,18 @@ export default {
 		emptyTitle: "No notifications yet",
 		emptyDescription: "New activity and system updates will appear here.",
 	},
+	followingSettings: {
+		triggerEnabled: `Open ${followTerms.gerund} notification settings; in-app notifications are on`,
+		triggerDisabled: `Open ${followTerms.gerund} notification settings; in-app notifications are off`,
+		title: `${followTerms.stateLabel} notification settings`,
+		description: `Choose in-app notifications and personalization sources for this ${followTerms.followed} Unit.`,
+		inAppTitle: "In-app notifications",
+		inAppDescription: `Show supported updates from this ${followTerms.followed} Unit in the notification center.`,
+		realmTagSourceTitle: `Load ${realmTerms.label} Tag votes`,
+		realmTagSourceDescription: `Add this ${realmTerms.inline} to your Tag sources and show its Tag-vote results on Unit detail pages. This setting does not create notifications.`,
+		unfollowKeepsRealmTagSource: `Unfollowing does not remove this ${realmTerms.inline} from your Tag sources.`,
+		cancel: "Cancel",
+	},
 	reply: {
 		title: `New reply on ${verbatimTerms.rezics.value}`,
 		body: "Someone replied to a conversation you joined.",

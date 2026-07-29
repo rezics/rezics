@@ -4871,6 +4871,7 @@ export const ApiErrorCode = {
 	SubjectAssociationNotFound: "SubjectAssociationNotFound",
 	UserSelfFollowForbidden: "UserSelfFollowForbidden",
 	UserFollowBlocked: "UserFollowBlocked",
+	FollowingTargetKindMismatch: "FollowingTargetKindMismatch",
 	ImageAssetNotFound: "ImageAssetNotFound",
 	ImageAssetUploadNotFound: "ImageAssetUploadNotFound",
 	ImageAssetUnsupportedType: "ImageAssetUnsupportedType",
@@ -37145,12 +37146,39 @@ export type GetApiUsersMeFollowingByUnitIdPath = {
 	unitId: string;
 };
 
+export const GetApiUsersMeFollowingByUnitIdStatus200KindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiUsersMeFollowingByUnitIdStatus200KindEnum =
+	(typeof GetApiUsersMeFollowingByUnitIdStatus200KindEnum)[keyof typeof GetApiUsersMeFollowingByUnitIdStatus200KindEnum];
+
 export type GetApiUsersMeFollowingByUnitIdStatus200 =
 	| {
 			/**
 			 * @type boolean
 			 */
 			following: true;
+			/**
+			 * @type string
+			 */
+			kind: "realm";
 			/**
 			 * @type boolean
 			 */
@@ -37163,12 +37191,54 @@ export type GetApiUsersMeFollowingByUnitIdStatus200 =
 			 * @type string
 			 */
 			position: string;
+			/**
+			 * @type boolean
+			 */
+			inAppNotificationsEnabled: boolean;
+			/**
+			 * @type boolean
+			 */
+			realmTagSourceSubscribed: boolean;
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: true;
+			/**
+			 * @type string
+			 */
+			kind: GetApiUsersMeFollowingByUnitIdStatus200KindEnum;
+			/**
+			 * @type boolean
+			 */
+			favorite: boolean;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+			/**
+			 * @type boolean
+			 */
+			inAppNotificationsEnabled: boolean;
+			/**
+			 * @type null
+			 */
+			realmTagSourceSubscribed: null;
 	  }
 	| {
 			/**
 			 * @type boolean
 			 */
 			following: false;
+			/**
+			 * @type string
+			 */
+			kind: "realm";
 			/**
 			 * @type null
 			 */
@@ -37177,6 +37247,40 @@ export type GetApiUsersMeFollowingByUnitIdStatus200 =
 			 * @type null
 			 */
 			position: null;
+			/**
+			 * @type null
+			 */
+			inAppNotificationsEnabled: null;
+			/**
+			 * @type boolean
+			 */
+			realmTagSourceSubscribed: boolean;
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: false;
+			/**
+			 * @type string
+			 */
+			kind: GetApiUsersMeFollowingByUnitIdStatus200KindEnum;
+			/**
+			 * @type null
+			 */
+			favorite: null;
+			/**
+			 * @type null
+			 */
+			position: null;
+			/**
+			 * @type null
+			 */
+			inAppNotificationsEnabled: null;
+			/**
+			 * @type null
+			 */
+			realmTagSourceSubscribed: null;
 	  };
 
 /**
@@ -37669,6 +37773,338 @@ export type PatchApiUsersMeFollowingByUnitIdResponse =
 	| PatchApiUsersMeFollowingByUnitIdStatus422
 	| PatchApiUsersMeFollowingByUnitIdStatus429
 	| PatchApiUsersMeFollowingByUnitIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum =
+	(typeof PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum)[keyof typeof PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum];
+
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus200 =
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: true;
+			/**
+			 * @type string
+			 */
+			kind: "realm";
+			/**
+			 * @type boolean
+			 */
+			favorite: boolean;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+			/**
+			 * @type boolean
+			 */
+			inAppNotificationsEnabled: boolean;
+			/**
+			 * @type boolean
+			 */
+			realmTagSourceSubscribed: boolean;
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: true;
+			/**
+			 * @type string
+			 */
+			kind: PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum;
+			/**
+			 * @type boolean
+			 */
+			favorite: boolean;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+			/**
+			 * @type boolean
+			 */
+			inAppNotificationsEnabled: boolean;
+			/**
+			 * @type null
+			 */
+			realmTagSourceSubscribed: null;
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: false;
+			/**
+			 * @type string
+			 */
+			kind: "realm";
+			/**
+			 * @type null
+			 */
+			favorite: null;
+			/**
+			 * @type null
+			 */
+			position: null;
+			/**
+			 * @type null
+			 */
+			inAppNotificationsEnabled: null;
+			/**
+			 * @type boolean
+			 */
+			realmTagSourceSubscribed: boolean;
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: false;
+			/**
+			 * @type string
+			 */
+			kind: PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum;
+			/**
+			 * @type null
+			 */
+			favorite: null;
+			/**
+			 * @type null
+			 */
+			position: null;
+			/**
+			 * @type null
+			 */
+			inAppNotificationsEnabled: null;
+			/**
+			 * @type null
+			 */
+			realmTagSourceSubscribed: null;
+	  };
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FollowingTargetKindMismatch'
+		 * @type string
+		 */
+		code: "FollowingTargetKindMismatch";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsStatus500 = InternalError;
+
+export const PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum =
+	(typeof PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum)[keyof typeof PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum];
+
+export type PutApiUsersMeFollowingByUnitIdSettingsBody =
+	| {
+			/**
+			 * @type string
+			 */
+			kind: "realm";
+			/**
+			 * @type boolean
+			 */
+			inAppNotificationsEnabled: boolean;
+			/**
+			 * @type boolean
+			 */
+			realmTagSourceSubscribed: boolean;
+	  }
+	| {
+			/**
+			 * @type string
+			 */
+			kind: PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum;
+			/**
+			 * @type boolean
+			 */
+			inAppNotificationsEnabled: boolean;
+			/**
+			 * @type null
+			 */
+			realmTagSourceSubscribed: null;
+	  };
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsOptions = {
+	body: PutApiUsersMeFollowingByUnitIdSettingsBody;
+	path: PutApiUsersMeFollowingByUnitIdSettingsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsResponses = {
+	"200": PutApiUsersMeFollowingByUnitIdSettingsStatus200;
+	"400": PutApiUsersMeFollowingByUnitIdSettingsStatus400;
+	"404": PutApiUsersMeFollowingByUnitIdSettingsStatus404;
+	"409": PutApiUsersMeFollowingByUnitIdSettingsStatus409;
+	"422": PutApiUsersMeFollowingByUnitIdSettingsStatus422;
+	"429": PutApiUsersMeFollowingByUnitIdSettingsStatus429;
+	"500": PutApiUsersMeFollowingByUnitIdSettingsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUsersMeFollowingByUnitIdSettingsResponse =
+	| PutApiUsersMeFollowingByUnitIdSettingsStatus200
+	| PutApiUsersMeFollowingByUnitIdSettingsStatus400
+	| PutApiUsersMeFollowingByUnitIdSettingsStatus404
+	| PutApiUsersMeFollowingByUnitIdSettingsStatus409
+	| PutApiUsersMeFollowingByUnitIdSettingsStatus422
+	| PutApiUsersMeFollowingByUnitIdSettingsStatus429
+	| PutApiUsersMeFollowingByUnitIdSettingsStatus500;
 
 /**
  * @type object

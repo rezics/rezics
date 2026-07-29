@@ -16,6 +16,7 @@ import {
 	DateTime,
 	FractionalPosition,
 	LocalizationLanguageQuery,
+	NonRealmUnitKind,
 	PublicationLicense,
 	ResourceVisibility,
 	StoredUiLocale,
@@ -252,3 +253,27 @@ export const UpdateFollowingBody = t.Object(
 	{ additionalProperties: false },
 );
 export type UpdateFollowingBody = Static<typeof UpdateFollowingBody>;
+
+const FollowingNotificationSettings = {
+	inAppNotificationsEnabled: t.Boolean(),
+} as const;
+
+export const ReplaceFollowingSettingsBody = t.Union([
+	t.Object(
+		{
+			kind: t.Literal("realm"),
+			...FollowingNotificationSettings,
+			realmTagSourceSubscribed: t.Boolean(),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			kind: NonRealmUnitKind,
+			...FollowingNotificationSettings,
+			realmTagSourceSubscribed: t.Null(),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type ReplaceFollowingSettingsBody = Static<typeof ReplaceFollowingSettingsBody>;

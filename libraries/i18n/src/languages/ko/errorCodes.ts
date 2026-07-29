@@ -61,6 +61,7 @@ export default {
 	UserNotFound: "사용자를 찾을 수 없습니다.",
 	UserSelfFollowForbidden: `자신을 ${followTerms.action}할 수 없습니다.`,
 	UserFollowBlocked: `차단된 사용자 간에는 ${followTerms.stateLabel}를 사용할 수 없습니다.`,
+	FollowingTargetKindMismatch: `${followTerms.actionLabel} 항목의 유형이 변경되었습니다. 설정을 다시 불러오세요.`,
 	UserSelfBlockForbidden: "자신을 차단할 수 없습니다.",
 	SoftwareSystemRequirementSourceInvalid:
 		"시스템 요구 사항 소스는 이 소프트웨어에 속해야 합니다.",

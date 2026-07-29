@@ -62,6 +62,7 @@ export default {
 	UserNotFound: "このユーザーは見つかりませんでした。",
 	UserSelfFollowForbidden: `自分自身を${followTerms.action}することはできません。`,
 	UserFollowBlocked: `${followTerms.stateLabel}は、ブロックされたユーザー間では利用できません。`,
+	FollowingTargetKindMismatch: `${followTerms.actionLabel}項目の種類が変更されました。設定を再読み込みしてください。`,
 	UserSelfBlockForbidden: "自分自身をブロックすることはできません。",
 	SoftwareSystemRequirementSourceInvalid:
 		"システム要件のソースは、このソフトウェアに属している必要があります。",

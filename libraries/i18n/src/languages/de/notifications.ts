@@ -24,6 +24,18 @@ export default {
 		emptyTitle: "Noch keine Benachrichtigungen",
 		emptyDescription: "Neue Aktivitäten und Systemmeldungen erscheinen hier.",
 	},
+	followingSettings: {
+		triggerEnabled: `Benachrichtigungseinstellungen für ${followTerms.actionLabel} öffnen; In-App-Benachrichtigungen sind eingeschaltet`,
+		triggerDisabled: `Benachrichtigungseinstellungen für ${followTerms.actionLabel} öffnen; In-App-Benachrichtigungen sind ausgeschaltet`,
+		title: `Benachrichtigungseinstellungen für ${followTerms.actionLabel}`,
+		description: `Wähle In-App-Benachrichtigungen und Personalisierungsquellen für diese ${followTerms.followed}e Unit.`,
+		inAppTitle: "In-App-Benachrichtigungen",
+		inAppDescription: `Unterstützte Aktualisierungen dieser ${followTerms.followed}en Unit in der Benachrichtigungszentrale anzeigen.`,
+		realmTagSourceTitle: `Tag-Abstimmungen des ${realmTerms.label}s laden`,
+		realmTagSourceDescription: `Füge diesen ${realmTerms.inline} deinen Tag-Quellen hinzu und zeige seine Tag-Abstimmungsergebnisse auf Unit-Detailseiten an. Diese Einstellung erzeugt keine Benachrichtigungen.`,
+		unfollowKeepsRealmTagSource: `${followTerms.undoActionLabel} lässt diesen ${realmTerms.inline} in deinen Tag-Quellen bestehen.`,
+		cancel: "Abbrechen",
+	},
 	reply: {
 		title: `Neue Antwort auf ${verbatimTerms.rezics.value}`,
 		body: "Jemand hat auf eine Unterhaltung geantwortet, an der du teilnimmst.",

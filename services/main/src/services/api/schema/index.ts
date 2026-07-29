@@ -14,10 +14,11 @@ import {
 	ChineseContentDisplayValues,
 	ContentLanguageValues,
 	ContentRatingValues,
+	NonRealmUnitKindValues,
+	ResourceVisibilityValues,
 	StoredUiLocaleValues,
 	UnitKindValues,
 	UnitStatusValues,
-	ResourceVisibilityValues,
 } from "../../database/schema/contract-values";
 import { isFractionalPosition } from "../../ordering/position";
 
@@ -62,6 +63,10 @@ export type StoredUiLocale = Static<typeof StoredUiLocale>;
 /** A persisted Unit discriminator accepted and returned by the public API. */
 export const UnitKind = t.UnionEnum(UnitKindValues, { default: undefined });
 export type UnitKind = Static<typeof UnitKind>;
+
+/** A persisted Unit discriminator excluding Realm-only settings branches. */
+export const NonRealmUnitKind = t.UnionEnum(NonRealmUnitKindValues, { default: undefined });
+export type NonRealmUnitKind = Static<typeof NonRealmUnitKind>;
 
 /** A persisted disclosure control shared by Units, Scores, and Progress. */
 export const ResourceVisibility = t.UnionEnum(ResourceVisibilityValues, {

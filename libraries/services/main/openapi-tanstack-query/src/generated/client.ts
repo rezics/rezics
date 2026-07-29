@@ -227,6 +227,8 @@ import type {
 	DeleteApiUsersMeFollowingByUnitIdResponses,
 	PatchApiUsersMeFollowingByUnitIdOptions,
 	PatchApiUsersMeFollowingByUnitIdResponses,
+	PutApiUsersMeFollowingByUnitIdSettingsOptions,
+	PutApiUsersMeFollowingByUnitIdSettingsResponses,
 	GetUserProfileActivityOptions,
 	GetUserProfileActivityResponses,
 	GetApiUsersByIdOptions,
@@ -2810,6 +2812,26 @@ export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = 
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace notification and personalization settings for a followed Unit
+ * {@link /api/users/me/following/:unitId/settings}
+ */
+export function putApiUsersMeFollowingByUnitIdSettings<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUsersMeFollowingByUnitIdSettingsOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUsersMeFollowingByUnitIdSettingsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/users/me/following/{unitId}/settings",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUsersMeFollowingByUnitIdSettingsResponses, ThrowOnError>>;
 }
 
 /**

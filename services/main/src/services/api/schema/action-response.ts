@@ -5,6 +5,7 @@ import {
 	ContentLanguage,
 	DateTime,
 	FractionalPosition,
+	NonRealmUnitKind,
 	OrdinalPosition,
 	ResourceVisibility,
 	UnitKind,
@@ -70,13 +71,35 @@ export const FollowResponse = t.Object({ following: t.Boolean() });
 export const FollowingStatusResponse = t.Union([
 	t.Object({
 		following: t.Literal(true),
+		kind: t.Literal("realm"),
 		favorite: t.Boolean(),
 		position: FractionalPosition,
+		inAppNotificationsEnabled: t.Boolean(),
+		realmTagSourceSubscribed: t.Boolean(),
+	}),
+	t.Object({
+		following: t.Literal(true),
+		kind: NonRealmUnitKind,
+		favorite: t.Boolean(),
+		position: FractionalPosition,
+		inAppNotificationsEnabled: t.Boolean(),
+		realmTagSourceSubscribed: t.Null(),
 	}),
 	t.Object({
 		following: t.Literal(false),
+		kind: t.Literal("realm"),
 		favorite: t.Null(),
 		position: t.Null(),
+		inAppNotificationsEnabled: t.Null(),
+		realmTagSourceSubscribed: t.Boolean(),
+	}),
+	t.Object({
+		following: t.Literal(false),
+		kind: NonRealmUnitKind,
+		favorite: t.Null(),
+		position: t.Null(),
+		inAppNotificationsEnabled: t.Null(),
+		realmTagSourceSubscribed: t.Null(),
 	}),
 ]);
 export const FollowingListResponse = t.Object({

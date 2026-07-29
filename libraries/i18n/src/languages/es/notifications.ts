@@ -24,6 +24,20 @@ export default {
 		emptyTitle: "Todavía no hay notificaciones",
 		emptyDescription: "La actividad nueva y las actualizaciones del sistema aparecerán aquí.",
 	},
+	followingSettings: {
+		triggerEnabled: `Abrir los ajustes de notificaciones del ${followTerms.gerund}; las notificaciones internas están activadas`,
+		triggerDisabled: `Abrir los ajustes de notificaciones del ${followTerms.gerund}; las notificaciones internas están desactivadas`,
+		title: `Ajustes de notificaciones del ${followTerms.gerund}`,
+		description:
+			"Elige las notificaciones internas y las fuentes de personalización para esta Unit seguida.",
+		inAppTitle: "Notificaciones internas",
+		inAppDescription:
+			"Mostrar en el centro de notificaciones las actualizaciones compatibles de esta Unit seguida.",
+		realmTagSourceTitle: `Cargar los votos de Tags de este ${realmTerms.inline}`,
+		realmTagSourceDescription: `Añade este ${realmTerms.inline} a tus fuentes de Tags y muestra los resultados de sus votos de Tags en las páginas de detalles de las Units. Este ajuste no crea notificaciones.`,
+		unfollowKeepsRealmTagSource: `${followTerms.undoActionLabel} no elimina este ${realmTerms.inline} de tus fuentes de Tags.`,
+		cancel: "Cancelar",
+	},
 	reply: {
 		title: `Nueva respuesta en ${verbatimTerms.rezics.value}`,
 		body: "Alguien ha respondido a una conversación en la que participas.",

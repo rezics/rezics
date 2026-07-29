@@ -24,6 +24,18 @@ export default {
 		emptyTitle: "Aucune notification pour le moment",
 		emptyDescription: "Les nouvelles activités et mises à jour système apparaîtront ici.",
 	},
+	followingSettings: {
+		triggerEnabled: `Ouvrir les réglages de notification du ${followTerms.gerund} ; les notifications dans l’application sont activées`,
+		triggerDisabled: `Ouvrir les réglages de notification du ${followTerms.gerund} ; les notifications dans l’application sont désactivées`,
+		title: `Réglages de notification du ${followTerms.gerund}`,
+		description: `Choisissez les notifications dans l’application et les sources de personnalisation de cette Unit ${followTerms.followed}e.`,
+		inAppTitle: "Notifications dans l’application",
+		inAppDescription: `Afficher dans le centre de notifications les mises à jour prises en charge par cette Unit ${followTerms.followed}e.`,
+		realmTagSourceTitle: `Charger les votes de Tags de ce ${realmTerms.inline}`,
+		realmTagSourceDescription: `Ajoutez ce ${realmTerms.inline} à vos sources de Tags et affichez les résultats de ses votes de Tags sur les pages détaillées des Units. Ce réglage ne crée aucune notification.`,
+		unfollowKeepsRealmTagSource: `${followTerms.undoActionLabel} ne retire pas ce ${realmTerms.inline} de vos sources de Tags.`,
+		cancel: "Annuler",
+	},
 	reply: {
 		title: `Nouvelle réponse sur ${verbatimTerms.rezics.value}`,
 		body: "Une personne a répondu à une conversation à laquelle vous participez.",

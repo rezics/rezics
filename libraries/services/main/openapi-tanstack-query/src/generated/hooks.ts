@@ -733,6 +733,14 @@ import type {
 	PatchApiUsersMeFollowingByUnitIdStatus422,
 	PatchApiUsersMeFollowingByUnitIdStatus429,
 	PatchApiUsersMeFollowingByUnitIdStatus500,
+	PutApiUsersMeFollowingByUnitIdSettingsOptions,
+	PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+	PutApiUsersMeFollowingByUnitIdSettingsStatus400,
+	PutApiUsersMeFollowingByUnitIdSettingsStatus404,
+	PutApiUsersMeFollowingByUnitIdSettingsStatus409,
+	PutApiUsersMeFollowingByUnitIdSettingsStatus422,
+	PutApiUsersMeFollowingByUnitIdSettingsStatus429,
+	PutApiUsersMeFollowingByUnitIdSettingsStatus500,
 	GetUserProfileActivityOptions,
 	GetUserProfileActivityStatus200,
 	GetUserProfileActivityStatus404,
@@ -1470,6 +1478,7 @@ import type {
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus500,
 	GetApiCollectionsOptions,
 	GetApiCollectionsStatus200,
+	GetApiCollectionsStatus400,
 	GetApiCollectionsStatus422,
 	GetApiCollectionsStatus500,
 	PostApiCollectionsOptions,
@@ -2230,6 +2239,7 @@ import {
 	putApiUsersMeFollowingByUnitId,
 	deleteApiUsersMeFollowingByUnitId,
 	patchApiUsersMeFollowingByUnitId,
+	putApiUsersMeFollowingByUnitIdSettings,
 	getUserProfileActivity,
 	getApiUsersById,
 	getApiUsersMeBlocks,
@@ -13748,6 +13758,116 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 	>;
 }
 
+export const putApiUsersMeFollowingByUnitIdSettingsMutationKey = () =>
+	[{ url: "/api/users/me/following/:unitId/settings" }] as const;
+
+export function putApiUsersMeFollowingByUnitIdSettingsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUsersMeFollowingByUnitIdSettingsMutationKey();
+	return mutationOptions<
+		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUsersMeFollowingByUnitIdSettings({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace notification and personalization settings for a followed Unit
+ * {@link /api/users/me/following/:unitId/settings}
+ */
+export function usePutApiUsersMeFollowingByUnitIdSettings<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+			ResponseErrorConfig<
+				| PutApiUsersMeFollowingByUnitIdSettingsStatus400
+				| PutApiUsersMeFollowingByUnitIdSettingsStatus404
+				| PutApiUsersMeFollowingByUnitIdSettingsStatus409
+				| PutApiUsersMeFollowingByUnitIdSettingsStatus422
+				| PutApiUsersMeFollowingByUnitIdSettingsStatus429
+				| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+			>,
+			PutApiUsersMeFollowingByUnitIdSettingsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUsersMeFollowingByUnitIdSettingsMutationKey();
+
+	const baseOptions = putApiUsersMeFollowingByUnitIdSettingsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
+			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		TContext
+	>;
+}
+
 export const getUserProfileActivityQueryKey = ({
 	path,
 	query,
@@ -24919,7 +25039,9 @@ export function getApiCollectionsQueryOptions(
 	const queryKey = getApiCollectionsQueryKey({ query });
 	return queryOptions<
 		GetApiCollectionsStatus200,
-		ResponseErrorConfig<GetApiCollectionsStatus422 | GetApiCollectionsStatus500>,
+		ResponseErrorConfig<
+			GetApiCollectionsStatus400 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500
+		>,
 		GetApiCollectionsStatus200,
 		typeof queryKey
 	>({
@@ -24954,7 +25076,11 @@ export function useGetApiCollections<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiCollectionsStatus200,
-				ResponseErrorConfig<GetApiCollectionsStatus422 | GetApiCollectionsStatus500>,
+				ResponseErrorConfig<
+					| GetApiCollectionsStatus400
+					| GetApiCollectionsStatus422
+					| GetApiCollectionsStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -24977,7 +25103,9 @@ export function useGetApiCollections<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiCollectionsStatus422 | GetApiCollectionsStatus500>
+		ResponseErrorConfig<
+			GetApiCollectionsStatus400 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;

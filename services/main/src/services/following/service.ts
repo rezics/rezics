@@ -4,7 +4,13 @@ import type { ContentLanguage } from "@rezics/i18n";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
-import { profileBlock, unit, unitFollow } from "../database/schema";
+import {
+	profileBlock,
+	profileRealmTagSubscription,
+	unit,
+	unitFollow,
+	unitFollowNotificationPreference,
+} from "../database/schema";
 import type { UnitKind } from "../database/schema/contract-values";
 import { UnitNotFound } from "../units/errors";
 import {
@@ -22,7 +28,7 @@ import {
 	encodeFollowingCursor,
 	type FollowingCursorBoundary,
 } from "./cursor";
-import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
+import { FollowingTargetKindMismatch, UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
 
 type FollowTarget = {
 	readonly id: string;
@@ -30,6 +36,18 @@ type FollowTarget = {
 };
 
 type FollowAuthorization = Pick<UnitAuthorization<string>, "ensureCanRead">;
+
+type ReplaceFollowingSettings =
+	| {
+			readonly kind: "realm";
+			readonly inAppNotificationsEnabled: boolean;
+			readonly realmTagSourceSubscribed: boolean;
+	  }
+	| {
+			readonly kind: Exclude<UnitKind, "realm">;
+			readonly inAppNotificationsEnabled: boolean;
+			readonly realmTagSourceSubscribed: null;
+	  };
 
 type ListFollowingInput = {
 	readonly followerProfileId: string;
@@ -179,8 +197,22 @@ export async function getFollowingStatus(input: {
 }) {
 	const target = await resolveFollowTarget(input.unitId, input.authorization);
 	const [record] = await database
-		.select({ favorite: unitFollow.favorite, position: unitFollow.position })
+		.select({
+			favorite: unitFollow.favorite,
+			position: unitFollow.position,
+			inAppNotificationsEnabled: unitFollowNotificationPreference.inApp,
+		})
 		.from(unitFollow)
+		.leftJoin(
+			unitFollowNotificationPreference,
+			and(
+				eq(
+					unitFollowNotificationPreference.followerProfileId,
+					unitFollow.followerProfileId,
+				),
+				eq(unitFollowNotificationPreference.unitId, unitFollow.unitId),
+			),
+		)
 		.where(
 			and(
 				eq(unitFollow.followerProfileId, input.followerProfileId),
@@ -188,9 +220,137 @@ export async function getFollowingStatus(input: {
 			),
 		)
 		.limit(1);
-	return record
-		? { following: true as const, favorite: record.favorite, position: record.position }
-		: { following: false as const, favorite: null, position: null };
+	if (target.kind === "realm") {
+		const realmTagSourceSubscribed = Boolean(
+			(
+				await database
+					.select({ realmId: profileRealmTagSubscription.realmId })
+					.from(profileRealmTagSubscription)
+					.where(
+						and(
+							eq(profileRealmTagSubscription.profileId, input.followerProfileId),
+							eq(profileRealmTagSubscription.realmId, target.id),
+						),
+					)
+					.limit(1)
+			)[0],
+		);
+		if (!record)
+			return {
+				following: false as const,
+				kind: target.kind,
+				favorite: null,
+				position: null,
+				inAppNotificationsEnabled: null,
+				realmTagSourceSubscribed,
+			};
+		return {
+			following: true as const,
+			kind: target.kind,
+			favorite: record.favorite,
+			position: record.position,
+			inAppNotificationsEnabled: record.inAppNotificationsEnabled ?? true,
+			realmTagSourceSubscribed,
+		};
+	}
+	if (!record)
+		return {
+			following: false as const,
+			kind: target.kind,
+			favorite: null,
+			position: null,
+			inAppNotificationsEnabled: null,
+			realmTagSourceSubscribed: null,
+		};
+	return {
+		following: true as const,
+		kind: target.kind,
+		favorite: record.favorite,
+		position: record.position,
+		inAppNotificationsEnabled: record.inAppNotificationsEnabled ?? true,
+		realmTagSourceSubscribed: null,
+	};
+}
+
+export async function replaceFollowingSettings(input: {
+	readonly followerProfileId: string;
+	readonly unitId: string;
+	readonly authorization: FollowAuthorization;
+	readonly settings: ReplaceFollowingSettings;
+}) {
+	const target = await resolveFollowTarget(input.unitId, input.authorization);
+	if (target.kind !== input.settings.kind) throw new FollowingTargetKindMismatch();
+
+	const follow = await database.transaction(async (tx) => {
+		const [record] = await tx
+			.select({ favorite: unitFollow.favorite, position: unitFollow.position })
+			.from(unitFollow)
+			.where(
+				and(
+					eq(unitFollow.followerProfileId, input.followerProfileId),
+					eq(unitFollow.unitId, target.id),
+				),
+			)
+			.limit(1);
+		if (!record) throw new UnitNotFound("Follow");
+
+		await tx
+			.insert(unitFollowNotificationPreference)
+			.values({
+				followerProfileId: input.followerProfileId,
+				unitId: target.id,
+				inApp: input.settings.inAppNotificationsEnabled,
+			})
+			.onConflictDoUpdate({
+				target: [
+					unitFollowNotificationPreference.followerProfileId,
+					unitFollowNotificationPreference.unitId,
+				],
+				set: {
+					inApp: input.settings.inAppNotificationsEnabled,
+					updatedAt: new Date(),
+				},
+			});
+
+		if (input.settings.kind === "realm") {
+			if (input.settings.realmTagSourceSubscribed)
+				await tx
+					.insert(profileRealmTagSubscription)
+					.values({
+						profileId: input.followerProfileId,
+						realmId: target.id,
+					})
+					.onConflictDoNothing();
+			else
+				await tx
+					.delete(profileRealmTagSubscription)
+					.where(
+						and(
+							eq(profileRealmTagSubscription.profileId, input.followerProfileId),
+							eq(profileRealmTagSubscription.realmId, target.id),
+						),
+					);
+		}
+		return record;
+	});
+
+	if (input.settings.kind === "realm")
+		return {
+			following: true as const,
+			kind: input.settings.kind,
+			favorite: follow.favorite,
+			position: follow.position,
+			inAppNotificationsEnabled: input.settings.inAppNotificationsEnabled,
+			realmTagSourceSubscribed: input.settings.realmTagSourceSubscribed,
+		};
+	return {
+		following: true as const,
+		kind: input.settings.kind,
+		favorite: follow.favorite,
+		position: follow.position,
+		inAppNotificationsEnabled: input.settings.inAppNotificationsEnabled,
+		realmTagSourceSubscribed: null,
+	};
 }
 
 export async function updateFollowingPresentation(

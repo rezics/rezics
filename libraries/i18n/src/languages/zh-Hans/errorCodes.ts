@@ -58,6 +58,7 @@ export default {
 	UserNotFound: "找不到这个用户。",
 	UserSelfFollowForbidden: `不能${followTerms.action}自己。`,
 	UserFollowBlocked: `存在封锁关系时不能${followTerms.action}。`,
+	FollowingTargetKindMismatch: `${followTerms.collectionLabel}的类型已变更，请重新加载设置。`,
 	UserSelfBlockForbidden: "不能封锁自己。",
 	SoftwareSystemRequirementSourceInvalid: "系统需求来源必须属于这个软件。",
 	SeriesReleaseNotFound: "找不到这个系列发行项目。",

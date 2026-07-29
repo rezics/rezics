@@ -9198,6 +9198,7 @@
 					"SubjectAssociationNotFound",
 					"UserSelfFollowForbidden",
 					"UserFollowBlocked",
+					"FollowingTargetKindMismatch",
 					"ImageAssetNotFound",
 					"ImageAssetUploadNotFound",
 					"ImageAssetUnsupportedType",
@@ -49296,25 +49297,130 @@
 									"anyOf": [
 										{
 											"type": "object",
-											"required": ["following", "favorite", "position"],
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
 											"properties": {
 												"following": { "const": true, "type": "boolean" },
+												"kind": { "const": "realm", "type": "string" },
 												"favorite": { "type": "boolean" },
 												"position": {
 													"format": "fractional-position",
 													"minLength": 2,
 													"maxLength": 512,
 													"type": "string"
-												}
+												},
+												"inAppNotificationsEnabled": { "type": "boolean" },
+												"realmTagSourceSubscribed": { "type": "boolean" }
 											}
 										},
 										{
 											"type": "object",
-											"required": ["following", "favorite", "position"],
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
+											"properties": {
+												"following": { "const": true, "type": "boolean" },
+												"kind": {
+													"type": "string",
+													"enum": [
+														"slug_namespace",
+														"profile",
+														"book",
+														"software",
+														"media",
+														"release",
+														"entity",
+														"label",
+														"tag",
+														"structure",
+														"series",
+														"zone",
+														"zone_page",
+														"collection",
+														"post",
+														"poll",
+														"realm_rule"
+													]
+												},
+												"favorite": { "type": "boolean" },
+												"position": {
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												},
+												"inAppNotificationsEnabled": { "type": "boolean" },
+												"realmTagSourceSubscribed": { "type": "null" }
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
 											"properties": {
 												"following": { "const": false, "type": "boolean" },
+												"kind": { "const": "realm", "type": "string" },
 												"favorite": { "type": "null" },
-												"position": { "type": "null" }
+												"position": { "type": "null" },
+												"inAppNotificationsEnabled": { "type": "null" },
+												"realmTagSourceSubscribed": { "type": "boolean" }
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
+											"properties": {
+												"following": { "const": false, "type": "boolean" },
+												"kind": {
+													"type": "string",
+													"enum": [
+														"slug_namespace",
+														"profile",
+														"book",
+														"software",
+														"media",
+														"release",
+														"entity",
+														"label",
+														"tag",
+														"structure",
+														"series",
+														"zone",
+														"zone_page",
+														"collection",
+														"post",
+														"poll",
+														"realm_rule"
+													]
+												},
+												"favorite": { "type": "null" },
+												"position": { "type": "null" },
+												"inAppNotificationsEnabled": { "type": "null" },
+												"realmTagSourceSubscribed": { "type": "null" }
 											}
 										}
 									]
@@ -49761,6 +49867,336 @@
 				},
 				"operationId": "patchApiUsersMeFollowingByUnitId",
 				"x-rezics-policy-operation-id": "patchApiUsersMeFollowingByUnitId"
+			}
+		},
+		"/api/users/me/following/{unitId}/settings": {
+			"put": {
+				"summary": "Replace notification and personalization settings for a followed Unit",
+				"tags": ["Users"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": [
+											"kind",
+											"inAppNotificationsEnabled",
+											"realmTagSourceSubscribed"
+										],
+										"properties": {
+											"kind": { "const": "realm", "type": "string" },
+											"inAppNotificationsEnabled": { "type": "boolean" },
+											"realmTagSourceSubscribed": { "type": "boolean" }
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": [
+											"kind",
+											"inAppNotificationsEnabled",
+											"realmTagSourceSubscribed"
+										],
+										"properties": {
+											"kind": {
+												"type": "string",
+												"enum": [
+													"slug_namespace",
+													"profile",
+													"book",
+													"software",
+													"media",
+													"release",
+													"entity",
+													"label",
+													"tag",
+													"structure",
+													"series",
+													"zone",
+													"zone_page",
+													"collection",
+													"post",
+													"poll",
+													"realm_rule"
+												]
+											},
+											"inAppNotificationsEnabled": { "type": "boolean" },
+											"realmTagSourceSubscribed": { "type": "null" }
+										}
+									}
+								]
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
+											"properties": {
+												"following": { "const": true, "type": "boolean" },
+												"kind": { "const": "realm", "type": "string" },
+												"favorite": { "type": "boolean" },
+												"position": {
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												},
+												"inAppNotificationsEnabled": { "type": "boolean" },
+												"realmTagSourceSubscribed": { "type": "boolean" }
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
+											"properties": {
+												"following": { "const": true, "type": "boolean" },
+												"kind": {
+													"type": "string",
+													"enum": [
+														"slug_namespace",
+														"profile",
+														"book",
+														"software",
+														"media",
+														"release",
+														"entity",
+														"label",
+														"tag",
+														"structure",
+														"series",
+														"zone",
+														"zone_page",
+														"collection",
+														"post",
+														"poll",
+														"realm_rule"
+													]
+												},
+												"favorite": { "type": "boolean" },
+												"position": {
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												},
+												"inAppNotificationsEnabled": { "type": "boolean" },
+												"realmTagSourceSubscribed": { "type": "null" }
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
+											"properties": {
+												"following": { "const": false, "type": "boolean" },
+												"kind": { "const": "realm", "type": "string" },
+												"favorite": { "type": "null" },
+												"position": { "type": "null" },
+												"inAppNotificationsEnabled": { "type": "null" },
+												"realmTagSourceSubscribed": { "type": "boolean" }
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"following",
+												"kind",
+												"favorite",
+												"position",
+												"inAppNotificationsEnabled",
+												"realmTagSourceSubscribed"
+											],
+											"properties": {
+												"following": { "const": false, "type": "boolean" },
+												"kind": {
+													"type": "string",
+													"enum": [
+														"slug_namespace",
+														"profile",
+														"book",
+														"software",
+														"media",
+														"release",
+														"entity",
+														"label",
+														"tag",
+														"structure",
+														"series",
+														"zone",
+														"zone_page",
+														"collection",
+														"post",
+														"poll",
+														"realm_rule"
+													]
+												},
+												"favorite": { "type": "null" },
+												"position": { "type": "null" },
+												"inAppNotificationsEnabled": { "type": "null" },
+												"realmTagSourceSubscribed": { "type": "null" }
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "FollowingTargetKindMismatch",
+													"type": "string",
+													"enum": ["FollowingTargetKindMismatch"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUsersMeFollowingByUnitIdSettings",
+				"x-rezics-policy-operation-id": "putApiUsersMeFollowingByUnitIdSettings"
 			}
 		},
 		"/api/users/{id}/activity": {

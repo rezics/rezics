@@ -22,6 +22,18 @@ export default {
 		emptyTitle: "目前沒有通知",
 		emptyDescription: "新的活動與系統更新會顯示在這裡。",
 	},
+	followingSettings: {
+		triggerEnabled: `開啟${followTerms.actionLabel}通知設定；站內通知已開啟`,
+		triggerDisabled: `開啟${followTerms.actionLabel}通知設定；站內通知已關閉`,
+		title: `${followTerms.actionLabel}通知設定`,
+		description: `選擇這個${followTerms.collectionLabel}的站內通知與個人化來源。`,
+		inAppTitle: "站內通知",
+		inAppDescription: `讓這個${followTerms.collectionLabel}支援的更新顯示在通知中心。`,
+		realmTagSourceTitle: `載入${realmTerms.label}標籤投票`,
+		realmTagSourceDescription: `將這個${realmTerms.inline}納入你的標籤來源，並在條目詳情頁顯示其標籤投票結果。這項設定不會產生通知。`,
+		unfollowKeepsRealmTagSource: `${followTerms.undoActionLabel}不會移除這個${realmTerms.inline}的標籤來源。`,
+		cancel: "取消",
+	},
 	reply: {
 		title: `${verbatimTerms.rezics.value} 有新的回覆`,
 		body: "有人回覆了你參與的內容。",

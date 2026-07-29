@@ -67,6 +67,7 @@ export default {
 	UserNotFound: "No se ha encontrado este usuario.",
 	UserSelfFollowForbidden: `No puedes ${followTerms.action}te a ti mismo.`,
 	UserFollowBlocked: `${followTerms.stateLabel} no está disponible entre usuarios bloqueados.`,
+	FollowingTargetKindMismatch: `El tipo de la Unit ${followTerms.followed} ha cambiado. Vuelve a cargar sus ajustes.`,
 	UserSelfBlockForbidden: "No puedes bloquearte a ti mismo.",
 	SoftwareSystemRequirementSourceInvalid:
 		"El origen del requisito del sistema debe pertenecer a este software.",

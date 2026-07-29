@@ -22,6 +22,18 @@ export default {
 		emptyTitle: "아직 알림 없음",
 		emptyDescription: "새로운 활동 및 시스템 업데이트가 여기에 나타납니다.",
 	},
+	followingSettings: {
+		triggerEnabled: `${followTerms.actionLabel} 알림 설정 열기. 앱 내 알림 켜짐`,
+		triggerDisabled: `${followTerms.actionLabel} 알림 설정 열기. 앱 내 알림 꺼짐`,
+		title: `${followTerms.actionLabel} 알림 설정`,
+		description: `이 ${followTerms.actionLabel} 항목의 앱 내 알림과 개인화 소스를 선택하세요.`,
+		inAppTitle: "앱 내 알림",
+		inAppDescription: "이 항목에서 지원하는 업데이트를 알림 센터에 표시합니다.",
+		realmTagSourceTitle: `${realmTerms.label} 태그 투표 불러오기`,
+		realmTagSourceDescription: `이 ${realmTerms.inline}을 태그 소스에 추가하고 유닛 상세 페이지에 태그 투표 결과를 표시합니다. 이 설정은 알림을 만들지 않습니다.`,
+		unfollowKeepsRealmTagSource: `${followTerms.undoActionLabel}해도 이 ${realmTerms.inline}은 태그 소스에서 제거되지 않습니다.`,
+		cancel: "취소",
+	},
 	reply: {
 		title: `${verbatimTerms.rezics.value}에 새 답글`,
 		body: "당신이 참여한 대화에 누군가가 답글을 남겼습니다.",

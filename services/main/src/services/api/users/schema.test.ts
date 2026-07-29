@@ -7,6 +7,7 @@ import {
 	FollowingListQuery,
 	ProfileActivityQuery,
 	PublicProfileQuery,
+	ReplaceFollowingSettingsBody,
 	ReplacePreferencesBody,
 	StudioContentListQuery,
 	UpdateDisplayPreferencesBody,
@@ -48,22 +49,65 @@ describe("following API contracts", () => {
 		expect(
 			Check(FollowingStatusResponse, {
 				following: true,
+				kind: "realm",
 				favorite: false,
 				position: "a0V",
+				inAppNotificationsEnabled: true,
+				realmTagSourceSubscribed: false,
 			}),
 		).toBe(true);
 		expect(
 			Check(FollowingStatusResponse, {
 				following: false,
+				kind: "book",
 				favorite: null,
 				position: null,
+				inAppNotificationsEnabled: null,
+				realmTagSourceSubscribed: null,
 			}),
 		).toBe(true);
 		expect(
 			Check(FollowingStatusResponse, {
 				following: false,
+				kind: "realm",
 				favorite: false,
 				position: "a0V",
+				inAppNotificationsEnabled: null,
+				realmTagSourceSubscribed: true,
+			}),
+		).toBe(false);
+		expect(
+			Check(FollowingStatusResponse, {
+				following: true,
+				kind: "book",
+				favorite: false,
+				position: "a0V",
+				inAppNotificationsEnabled: true,
+				realmTagSourceSubscribed: true,
+			}),
+		).toBe(false);
+	});
+
+	it("requires Realm-only personalization settings only for Realm targets", () => {
+		expect(
+			Check(ReplaceFollowingSettingsBody, {
+				kind: "realm",
+				inAppNotificationsEnabled: false,
+				realmTagSourceSubscribed: true,
+			}),
+		).toBe(true);
+		expect(
+			Check(ReplaceFollowingSettingsBody, {
+				kind: "book",
+				inAppNotificationsEnabled: true,
+				realmTagSourceSubscribed: null,
+			}),
+		).toBe(true);
+		expect(
+			Check(ReplaceFollowingSettingsBody, {
+				kind: "book",
+				inAppNotificationsEnabled: true,
+				realmTagSourceSubscribed: false,
 			}),
 		).toBe(false);
 	});

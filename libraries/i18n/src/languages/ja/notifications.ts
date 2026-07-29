@@ -22,6 +22,18 @@ export default {
 		emptyTitle: "通知はまだありません",
 		emptyDescription: "新しいアクティビティとシステム更新がここに表示されます。",
 	},
+	followingSettings: {
+		triggerEnabled: `${followTerms.actionLabel}通知設定を開く。サイト内通知はオン`,
+		triggerDisabled: `${followTerms.actionLabel}通知設定を開く。サイト内通知はオフ`,
+		title: `${followTerms.actionLabel}通知設定`,
+		description: `この${followTerms.actionLabel}項目のサイト内通知とパーソナライズ用ソースを選択します。`,
+		inAppTitle: "サイト内通知",
+		inAppDescription: "この項目が対応している更新を通知センターに表示します。",
+		realmTagSourceTitle: `${realmTerms.label}のタグ投票を読み込む`,
+		realmTagSourceDescription: `この${realmTerms.inline}をタグソースに追加し、ユニット詳細ページにタグ投票の結果を表示します。この設定から通知は送信されません。`,
+		unfollowKeepsRealmTagSource: `${followTerms.undoActionLabel}しても、この${realmTerms.inline}はタグソースから削除されません。`,
+		cancel: "キャンセル",
+	},
 	reply: {
 		title: `${verbatimTerms.rezics.value} に新しい返信`,
 		body: "参加した会話に誰かが返信しました。",

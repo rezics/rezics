@@ -38,6 +38,7 @@ import {
 	moderationAction,
 	moderationCase,
 	ModerationActionKindValues,
+	NonRealmUnitKindValues,
 	PostKindValues,
 	SubjectAssociationRoleValues,
 	profileRealmTagSubscription,
@@ -54,6 +55,7 @@ import {
 	unitAccessInvitation,
 	unitAccessRestriction,
 	unitFollow,
+	unitFollowNotificationPreference,
 	unitOwnership,
 	unitAliasVoteStat,
 	unitReactionStat,
@@ -608,6 +610,7 @@ describe("database schema contracts", () => {
 	it("keeps structural, Redirect, and platform capability meanings explicit", () => {
 		expect(UnitKindValues).toContain("slug_namespace");
 		expect(UnitKindValues).not.toContain("redirect");
+		expect(NonRealmUnitKindValues).toEqual(UnitKindValues.filter((kind) => kind !== "realm"));
 		expect(CommunityCatalogUnitKindValues).toEqual([
 			"book",
 			"software",
@@ -693,6 +696,20 @@ describe("database schema contracts", () => {
 				"profile_realm_tag_subscription_profile_position_idx",
 				"profile_realm_tag_subscription_realm_idx",
 			]),
+		);
+	});
+
+	it("scopes in-app notification delivery to an existing follow relation", () => {
+		const preference = getTableConfig(unitFollowNotificationPreference);
+		expect(preference.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"follower_profile_id",
+			"unit_id",
+		]);
+		expect(preference.foreignKeys.map((key) => key.getName())).toContain(
+			"unit_follow_notification_preference_follow_fkey",
+		);
+		expect(preference.indexes.map((index) => index.config.name)).toContain(
+			"unit_follow_notification_preference_enabled_unit_idx",
 		);
 	});
 
