@@ -121,16 +121,16 @@ function ProgressEntryEditor({
 									</FieldLabel>
 									<NativeSelect
 										id="progress-entry-status"
-										onChange={(event) =>
+										onChange={(event) => {
+											const value = event.currentTarget.value;
 											setDraft((current) => ({
 												...current,
 												status:
 													ProgressStatuses.find(
-														(status) =>
-															status === event.currentTarget.value,
+														(status) => status === value,
 													) ?? current.status,
-											}))
-										}
+											}));
+										}}
 										value={draft.status}
 									>
 										{ProgressStatuses.map((status) => (
@@ -214,14 +214,14 @@ function EntryKindField({
 			<FieldLabel htmlFor="progress-entry-kind">{copy.entryKind}</FieldLabel>
 			<NativeSelect
 				id="progress-entry-kind"
-				onChange={(event) =>
+				onChange={(event) => {
+					const value = event.currentTarget.value;
 					onChange((current) => ({
 						...current,
 						entryKind:
-							ProgressEntryKinds.find((kind) => kind === event.currentTarget.value) ??
-							current.entryKind,
-					}))
-				}
+							ProgressEntryKinds.find((kind) => kind === value) ?? current.entryKind,
+					}));
+				}}
 				value={draft.entryKind}
 			>
 				{ProgressEntryKinds.map((kind) => (
@@ -258,12 +258,13 @@ function PositionFields({
 						inputMode="decimal"
 						max={100}
 						min={0}
-						onChange={(event) =>
+						onChange={(event) => {
+							const percentage = event.currentTarget.value;
 							onChange((current) => ({
 								...current,
-								percentage: event.currentTarget.value,
-							}))
-						}
+								percentage,
+							}));
+						}}
 						required
 						type="number"
 						value={draft.percentage}
@@ -318,12 +319,13 @@ function PositionFields({
 						id="progress-entry-minutes"
 						inputMode="numeric"
 						min={0}
-						onChange={(event) =>
+						onChange={(event) => {
+							const totalMinutes = event.currentTarget.value;
 							onChange((current) => ({
 								...current,
-								totalMinutes: event.currentTarget.value,
-							}))
-						}
+								totalMinutes,
+							}));
+						}}
 						required
 						type="number"
 						value={draft.totalMinutes}
@@ -354,17 +356,17 @@ function DateFields({
 				</FieldLabel>
 				<NativeSelect
 					id="progress-entry-date-precision"
-					onChange={(event) =>
+					onChange={(event) => {
+						const value = event.currentTarget.value;
+						const datePrecision = ProgressDatePrecisions.find(
+							(precision) => precision === value,
+						);
 						onChange((current) => ({
 							...current,
-							datePrecision:
-								ProgressDatePrecisions.find(
-									(precision) => precision === event.currentTarget.value,
-								) ?? current.datePrecision,
-							dateValue:
-								event.currentTarget.value === "unknown" ? "" : current.dateValue,
-						}))
-					}
+							datePrecision: datePrecision ?? current.datePrecision,
+							dateValue: value === "unknown" ? "" : current.dateValue,
+						}));
+					}}
 					value={draft.datePrecision}
 				>
 					{ProgressDatePrecisions.map((precision) => (
@@ -380,12 +382,13 @@ function DateFields({
 					<Input
 						id="progress-entry-date"
 						{...(inputType === "number" ? { max: 9999, min: 1 } : {})}
-						onChange={(event) =>
+						onChange={(event) => {
+							const dateValue = event.currentTarget.value;
 							onChange((current) => ({
 								...current,
-								dateValue: event.currentTarget.value,
-							}))
-						}
+								dateValue,
+							}));
+						}}
 						required
 						type={inputType}
 						value={draft.dateValue}

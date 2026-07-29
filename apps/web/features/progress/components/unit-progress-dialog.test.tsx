@@ -2,12 +2,12 @@
 
 import { resources } from "@rezics/i18n/resources";
 import { UiProvider } from "@rezics/ui";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { create } from "native-i18n";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import type { UnitProgressRecord } from "../model/progress-record";
+import type { UnitProgressDomain, UnitProgressRecord } from "../model/progress-record";
 import { UnitProgressDialog } from "./unit-progress-dialog";
 
 const progressContext = vi.hoisted(() => ({
@@ -63,7 +63,10 @@ const existingRecord: UnitProgressRecord = {
 	visibility: "private",
 };
 
-function setProgressState(record: UnitProgressRecord | null) {
+function setProgressState(
+	record: UnitProgressRecord | null,
+	type: UnitProgressDomain["type"] = "software",
+) {
 	progressContext.current = {
 		...actions,
 		chapters: [],
@@ -71,7 +74,7 @@ function setProgressState(record: UnitProgressRecord | null) {
 		chaptersPending: false,
 		completionError: undefined,
 		domain: {
-			type: "software",
+			type,
 			unitId: "019f0000-0000-7000-8000-000000000001",
 		},
 		editorOpen: true,
@@ -111,6 +114,48 @@ describe("UnitProgressDialog", () => {
 		await vi.waitFor(() =>
 			expect(actions.saveProgress).toHaveBeenCalledWith({
 				progress: 0,
+				status: "active",
+				totalTimeMs: 0,
+				visibility: "public",
+			}),
+		);
+	});
+
+	it("keeps the entered total minutes when updating the draft", async () => {
+		setProgressState(null);
+		renderDialog();
+
+		const totalMinutes = screen.getByRole("spinbutton");
+		act(() => {
+			fireEvent.change(totalMinutes, { target: { value: "30" } });
+			fireEvent.change(totalMinutes, { target: { value: "90" } });
+		});
+		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
+
+		await vi.waitFor(() =>
+			expect(actions.saveProgress).toHaveBeenCalledWith({
+				progress: 0,
+				status: "active",
+				totalTimeMs: 5_400_000,
+				visibility: "public",
+			}),
+		);
+	});
+
+	it("keeps the entered percentage when updating the draft", async () => {
+		setProgressState(null, "media");
+		renderDialog();
+
+		const percentage = screen.getByRole("spinbutton", { name: "播放進度" });
+		act(() => {
+			fireEvent.change(percentage, { target: { value: "25" } });
+			fireEvent.change(percentage, { target: { value: "75" } });
+		});
+		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
+
+		await vi.waitFor(() =>
+			expect(actions.saveProgress).toHaveBeenCalledWith({
+				progress: 0.75,
 				status: "active",
 				totalTimeMs: 0,
 				visibility: "public",

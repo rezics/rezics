@@ -456,12 +456,13 @@ function PercentageField({
 					aria-label={label}
 					max={100}
 					min={0}
-					onChange={(event) =>
+					onChange={(event) => {
+						const percentage = event.currentTarget.value;
 						onChange((current) => ({
 							...current,
-							percentage: event.currentTarget.value,
-						}))
-					}
+							percentage,
+						}));
+					}}
 					step={1}
 					type="number"
 					value={draft.percentage}
@@ -486,12 +487,13 @@ function TotalMinutesField({
 			<Input
 				id="unit-progress-total-minutes"
 				min={0}
-				onChange={(event) =>
+				onChange={(event) => {
+					const totalMinutes = event.currentTarget.value;
 					onChange((current) => ({
 						...current,
-						totalMinutes: event.currentTarget.value,
-					}))
-				}
+						totalMinutes,
+					}));
+				}}
 				step={1}
 				type="number"
 				value={draft.totalMinutes}
