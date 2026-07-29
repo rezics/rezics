@@ -38,6 +38,7 @@ export const OfficialProfileManifest = [
 		authUserId: "019b76da-a800-7100-8000-000000000001",
 		accountId: "019b76da-a800-7110-8000-000000000001",
 		profileId: "019b76da-a800-7200-8000-000000000001",
+		favoritesCollectionId: "019b76da-a800-7250-8000-000000000001",
 		slug: "rezics-community",
 		name: `${RezicsBrandName} Community`,
 		localizations: [
@@ -51,6 +52,7 @@ export const OfficialProfileManifest = [
 		authUserId: "019b76da-a800-7100-8000-000000000002",
 		accountId: "019b76da-a800-7110-8000-000000000002",
 		profileId: "019b76da-a800-7200-8000-000000000002",
+		favoritesCollectionId: "019b76da-a800-7250-8000-000000000002",
 		slug: "rezics-editorial",
 		name: `${RezicsBrandName} Editorial`,
 		localizations: [
@@ -64,6 +66,7 @@ export const OfficialProfileManifest = [
 		authUserId: "019b76da-a800-7100-8000-000000000003",
 		accountId: "019b76da-a800-7110-8000-000000000003",
 		profileId: "019b76da-a800-7200-8000-000000000003",
+		favoritesCollectionId: "019b76da-a800-7250-8000-000000000003",
 		slug: "rezics-moderation",
 		name: `${RezicsBrandName} Moderation`,
 		localizations: [
@@ -90,6 +93,7 @@ export const BootstrapPlatformAdministratorProfile = {
 	authUserId: "019b76da-a800-7100-8000-000000000004",
 	accountId: "019b76da-a800-7110-8000-000000000004",
 	profileId: "019b76da-a800-7200-8000-000000000004",
+	favoritesCollectionId: "019b76da-a800-7250-8000-000000000004",
 	slug: "rezics-admin",
 	name: `${RezicsBrandName} Administrator`,
 	localizations: [
@@ -742,6 +746,7 @@ export const OfficialZoneManifest = [
 export const BootstrapUnitIds = [
 	...SlugNamespaceManifest.map((namespace) => namespace.id),
 	...BootstrapProfileManifest.map((profile) => profile.profileId),
+	...BootstrapProfileManifest.map((profile) => profile.favoritesCollectionId),
 	...BootstrapRealmManifest.map((realm) => realm.id),
 	...RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
 	...OfficialZoneManifest.map((zone) => zone.id),

@@ -9,6 +9,7 @@ import {
 	BootstrapProfileManifest,
 	BootstrapRealmManifest,
 	BootstrapPlatformAdministratorProfile,
+	BootstrapUnitIds,
 	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
@@ -55,6 +56,18 @@ describe("database bootstrap manifest", () => {
 				"zh",
 				"en",
 			]);
+		}
+	});
+
+	it("reserves one stable Favorites Collection identity for every bootstrap Profile", () => {
+		expect(BootstrapProfileManifest.map((profile) => profile.favoritesCollectionId)).toEqual([
+			"019b76da-a800-7250-8000-000000000001",
+			"019b76da-a800-7250-8000-000000000002",
+			"019b76da-a800-7250-8000-000000000003",
+			"019b76da-a800-7250-8000-000000000004",
+		]);
+		for (const profile of BootstrapProfileManifest) {
+			expect(BootstrapUnitIds).toContain(profile.favoritesCollectionId);
 		}
 	});
 

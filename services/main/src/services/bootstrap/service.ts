@@ -60,7 +60,10 @@ import {
 import type { ContentLanguage } from "../database/schema/contract-values";
 import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
 import { recordAuditEvent } from "../audit";
-import { ensureFavoritesInTransaction } from "../collections/favorites";
+import {
+	ensureFavoritesInTransaction,
+	ensureFixedFavoritesInTransaction,
+} from "../collections/favorites";
 import { lockPlatformAccess } from "../platform-access";
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
@@ -548,7 +551,21 @@ async function ensureBootstrapProfiles(
 
 async function ensureProfileFavorites(tx: DatabaseTransaction): Promise<void> {
 	const profiles = await tx.select({ id: profile.id }).from(profile);
-	for (const targetProfile of profiles) await ensureFavoritesInTransaction(tx, targetProfile.id);
+	const bootstrapProfiles = new Map<string, (typeof BootstrapProfileManifest)[number]>(
+		BootstrapProfileManifest.map((value) => [value.profileId, value] as const),
+	);
+	for (const targetProfile of profiles) {
+		const bootstrapProfile = bootstrapProfiles.get(targetProfile.id);
+		if (bootstrapProfile) {
+			await ensureFixedFavoritesInTransaction(tx, {
+				profileId: bootstrapProfile.profileId,
+				collectionId: bootstrapProfile.favoritesCollectionId,
+				createdAt: bootstrapEpoch(),
+			});
+		} else {
+			await ensureFavoritesInTransaction(tx, targetProfile.id);
+		}
+	}
 }
 
 async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Promise<void> {
@@ -1976,6 +1993,13 @@ async function isBootstrapReady(): Promise<boolean> {
 		profileFavorites.length === allProfiles.length &&
 		allProfiles.every((targetProfile) =>
 			profileFavorites.some((favorites) => favorites.profileId === targetProfile.id),
+		) &&
+		BootstrapProfileManifest.every((expected) =>
+			profileFavorites.some(
+				(actual) =>
+					actual.profileId === expected.profileId &&
+					actual.id === expected.favoritesCollectionId,
+			),
 		) &&
 		allProfiles.every((targetProfile) =>
 			profileScoreMemberships.some((membership) => membership.profileId === targetProfile.id),

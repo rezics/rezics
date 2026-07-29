@@ -209,8 +209,9 @@ const checks: readonly { name: string; query: SQL }[] = [
 				) reply_target group by target_id
 				union all
 				select item.unit_id, 0, 0, 0, count(*), 0, 0, 0, 0, 0
-				from collection_item item join collection owner on owner.id = item.collection_id
-				where owner.source = 'system' and owner.system_key = 'favorites'
+				from collection_item item
+				join profile_favorites_collection favorites
+					on favorites.collection_id = item.collection_id
 				group by item.unit_id
 				union all
 				select unit_id, 0, 0, 0, 0, count(*), 0, 0, 0, 0
