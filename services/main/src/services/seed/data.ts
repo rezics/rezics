@@ -39,8 +39,8 @@ export const SeedFixtureTitles = {
 		en: "REZICS Score",
 	},
 	zone: {
-		zh: "書庫",
-		en: "Book Library",
+		zh: "書籍",
+		en: "Books",
 	},
 } as const;
 

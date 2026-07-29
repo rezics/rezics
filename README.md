@@ -201,7 +201,7 @@ projections before running its verifier. Use the confirmed root
 `task --yes local:reset` workflow when replacing existing disposable data; it
 also coordinates the external search projection. CI runs `task seed:contract`
 against fresh infrastructure, including a full external-index rebuild and
-zone-scoped lookup of each official library fixture.
+zone-scoped lookup of each official catalog fixture.
 
 Existing databases created by the previous Drizzle migrator need a one-time
 baseline before their first Atlas-managed deployment. After taking a backup,

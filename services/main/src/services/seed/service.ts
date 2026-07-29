@@ -623,7 +623,7 @@ async function seedOfficialZoneCatalogFixtures(
 					summary:
 						language === "zh"
 							? "用來驗證官方資料庫搜尋、分面與內容動態的固定情境資料。"
-							: "Stable scenario content for official library search, facets, and feeds.",
+							: "Stable scenario content for official catalog search, facets, and feeds.",
 					description: createPortableTextDocument(data.portableText(language, 2)),
 					createdAt: value.createdAt,
 					updatedAt: value.updatedAt,

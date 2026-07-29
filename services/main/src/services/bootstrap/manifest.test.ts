@@ -78,7 +78,7 @@ describe("database bootstrap manifest", () => {
 		);
 	});
 
-	it("bootstraps the five official libraries as renderable Zones", () => {
+	it("bootstraps the five official catalog experiences as renderable Zones", () => {
 		expect(OfficialZoneManifest.map((value) => value.slug)).toEqual([
 			"book",
 			"media",
@@ -92,24 +92,24 @@ describe("database bootstrap manifest", () => {
 			),
 		).toEqual([
 			[
-				{ language: "zh", title: "書庫" },
-				{ language: "en", title: "Book Library" },
+				{ language: "zh", title: "書籍" },
+				{ language: "en", title: "Books" },
 			],
 			[
-				{ language: "zh", title: "媒體庫" },
-				{ language: "en", title: "Media Library" },
+				{ language: "zh", title: "媒體" },
+				{ language: "en", title: "Media" },
 			],
 			[
-				{ language: "zh", title: "軟體庫" },
-				{ language: "en", title: "Software Library" },
+				{ language: "zh", title: "軟體" },
+				{ language: "en", title: "Software" },
 			],
 			[
-				{ language: "zh", title: "領域庫" },
-				{ language: "en", title: "Realm Library" },
+				{ language: "zh", title: "領域" },
+				{ language: "en", title: "Realms" },
 			],
 			[
-				{ language: "zh", title: "專區庫" },
-				{ language: "en", title: "Zone Library" },
+				{ language: "zh", title: "專區" },
+				{ language: "en", title: "Zones" },
 			],
 		]);
 		expect(OfficialZoneManifest.map((value) => value.boundaryDocument)).toEqual([

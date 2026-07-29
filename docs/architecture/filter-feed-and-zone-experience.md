@@ -102,7 +102,7 @@ Readiness fails when any live Zone lacks either capability. Updating or deleting
 Zone Pages may not remove the final Feed Block, and the Zone Search API does not
 permit disabling Search.
 
-Official Bootstrap data includes Book, Media, Software, Realm, and Zone library
+Official Bootstrap data includes Book, Media, Software, Realm, and Zone catalog
 Zones. Each has its own kind boundary, default Search template, Feed home page,
 and deterministic Bootstrap identity.
 

@@ -529,12 +529,12 @@ export const OfficialZoneManifest = [
 		localizations: [
 			{
 				language: "zh",
-				title: "書庫",
+				title: "書籍",
 				summary: `瀏覽書籍，探索 ${RezicsBrandName} 上的新讀物。`,
 			},
 			{
 				language: "en",
-				title: "Book Library",
+				title: "Books",
 				summary: `Browse books and discover new reading across ${RezicsBrandName}.`,
 			},
 		],
@@ -558,9 +558,9 @@ export const OfficialZoneManifest = [
 				"b00757010008",
 				"b0075701000a",
 			],
-			zh: { title: "書庫首頁", body: "從書庫探索作品、版本與相關內容。" },
+			zh: { title: "書籍首頁", body: "探索書籍、版本與相關內容。" },
 			en: {
-				title: "Book Library Home",
+				title: "Books Home",
 				body: "Explore works, editions, and related content.",
 			},
 		}),
@@ -571,12 +571,12 @@ export const OfficialZoneManifest = [
 		localizations: [
 			{
 				language: "zh",
-				title: "媒體庫",
+				title: "媒體",
 				summary: `瀏覽 ${RezicsBrandName} 上的電影、電視、動畫與其他媒體。`,
 			},
 			{
 				language: "en",
-				title: "Media Library",
+				title: "Media",
 				summary: `Browse films, television, animation, and other media across ${RezicsBrandName}.`,
 			},
 		],
@@ -600,9 +600,9 @@ export const OfficialZoneManifest = [
 				"b00757020008",
 				"b0075702000a",
 			],
-			zh: { title: "媒體庫首頁", body: "從媒體庫探索電影、電視、動畫與相關內容。" },
+			zh: { title: "媒體首頁", body: "探索電影、電視、動畫與相關內容。" },
 			en: {
-				title: "Media Library Home",
+				title: "Media Home",
 				body: "Explore films, television, animation, and related content.",
 			},
 		}),
@@ -613,12 +613,12 @@ export const OfficialZoneManifest = [
 		localizations: [
 			{
 				language: "zh",
-				title: "軟體庫",
+				title: "軟體",
 				summary: `瀏覽 ${RezicsBrandName} 上的應用程式、工具與遊戲。`,
 			},
 			{
 				language: "en",
-				title: "Software Library",
+				title: "Software",
 				summary: `Browse applications, tools, and games across ${RezicsBrandName}.`,
 			},
 		],
@@ -642,9 +642,9 @@ export const OfficialZoneManifest = [
 				"b00757030008",
 				"b0075703000a",
 			],
-			zh: { title: "軟體庫首頁", body: "從軟體庫探索應用程式、工具、遊戲與相關內容。" },
+			zh: { title: "軟體首頁", body: "探索應用程式、工具、遊戲與相關內容。" },
 			en: {
-				title: "Software Library Home",
+				title: "Software Home",
 				body: "Explore applications, tools, games, and related content.",
 			},
 		}),
@@ -655,12 +655,12 @@ export const OfficialZoneManifest = [
 		localizations: [
 			{
 				language: "zh",
-				title: "領域庫",
+				title: "領域",
 				summary: `瀏覽與探索 ${RezicsBrandName} 上的領域。`,
 			},
 			{
 				language: "en",
-				title: "Realm Library",
+				title: "Realms",
 				summary: `Browse and discover Realms across ${RezicsBrandName}.`,
 			},
 		],
@@ -684,9 +684,9 @@ export const OfficialZoneManifest = [
 				"b00757040008",
 				"b0075704000a",
 			],
-			zh: { title: "領域庫首頁", body: "從領域庫探索社群、主題與相關內容。" },
+			zh: { title: "領域首頁", body: "探索社群、主題與相關內容。" },
 			en: {
-				title: "Realm Library Home",
+				title: "Realms Home",
 				body: "Explore communities, topics, and related content.",
 			},
 		}),
@@ -697,12 +697,12 @@ export const OfficialZoneManifest = [
 		localizations: [
 			{
 				language: "zh",
-				title: "專區庫",
+				title: "專區",
 				summary: `瀏覽與探索 ${RezicsBrandName} 上的專區。`,
 			},
 			{
 				language: "en",
-				title: "Zone Library",
+				title: "Zones",
 				summary: `Browse and discover Zones across ${RezicsBrandName}.`,
 			},
 		],
@@ -730,9 +730,9 @@ export const OfficialZoneManifest = [
 				"b00757050008",
 				"b0075705000a",
 			],
-			zh: { title: "專區庫首頁", body: "從專區庫探索各種策展與瀏覽體驗。" },
+			zh: { title: "專區首頁", body: "探索各種策展與瀏覽體驗。" },
 			en: {
-				title: "Zone Library Home",
+				title: "Zones Home",
 				body: "Explore curated browsing experiences across Zones.",
 			},
 		}),
