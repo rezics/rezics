@@ -29,6 +29,7 @@ export default {
 		close: "ユーザーメニューを閉じる",
 		viewProfile: "プロフィールを表示",
 		myContent: "自分のコンテンツ",
+		myReports: "自分の報告",
 		settings: "設定",
 		console: "管理コンソール",
 		invitations: "受け取ったアクセス招待",

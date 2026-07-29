@@ -1,9 +1,10 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import session from "../../auth/session";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
 import {
 	ActiveReportCaseStateValues,
@@ -24,6 +25,10 @@ import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
+import {
+	getPublicCanonicalUnitSlugAddresses,
+	type PublicCanonicalUnitSlugAddress,
+} from "../../units/slug-address";
 import {
 	getPlatformUnitModerationCommands,
 	isActiveReportCaseState,
@@ -46,6 +51,8 @@ import {
 	ListMyReportsQuery,
 	ListPlatformReportCasesQuery,
 	ListRealmReportsQuery,
+	MyReportListResponse,
+	type MyReportResponse,
 	PlatformReportCaseListResponse,
 	ReportDestinationsQuery,
 	ReportDestinationsResponse,
@@ -54,6 +61,7 @@ import {
 	ReportResponse,
 	ReportUnitParams,
 } from "./schema";
+import { decodeMyReportCursor, encodeMyReportCursor, toMyReportStatus } from "./my-report";
 
 type LocalizationLanguages = Parameters<typeof resolvedUnitLocalizationLanguage>[1];
 type ModerationCaseState = (typeof ModerationCaseStateValues)[number];
@@ -163,6 +171,65 @@ function presentPlatformReport(row: {
 	};
 }
 
+type PresentedReport =
+	ReturnType<typeof presentRealmReport> | ReturnType<typeof presentPlatformReport>;
+
+function compareReportsNewestFirst(
+	left: Pick<PresentedReport, "createdAt" | "id">,
+	right: Pick<PresentedReport, "createdAt" | "id">,
+): number {
+	const timeDifference = right.createdAt.getTime() - left.createdAt.getTime();
+	if (timeDifference !== 0) return timeDifference;
+	if (left.id === right.id) return 0;
+	return left.id < right.id ? 1 : -1;
+}
+
+async function listReadableReportTargets(
+	unitIds: readonly string[],
+	profileId: string,
+	localizationLanguages: LocalizationLanguages,
+) {
+	if (!unitIds.length) return [];
+	return database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+		})
+		.from(unit)
+		.where(and(inArray(unit.id, [...new Set(unitIds)]), getUnitReadCondition(profileId)));
+}
+
+type ReadableReportTarget = Awaited<ReturnType<typeof listReadableReportTargets>>[number];
+
+function presentMyReport(
+	report: PresentedReport,
+	target: ReadableReportTarget | undefined,
+	slugAddress: PublicCanonicalUnitSlugAddress | null,
+): MyReportResponse {
+	return {
+		id: report.id,
+		scope: report.scope,
+		status: toMyReportStatus(report.caseState),
+		target: target
+			? {
+					state: "available",
+					unit: {
+						...target,
+						slugAddress,
+					},
+				}
+			: { state: "unavailable" },
+		rule: {
+			language: report.rule.language,
+			title: report.rule.title,
+		},
+		details: report.details,
+		createdAt: report.createdAt,
+	};
+}
+
 async function hasCurrentRules(realmId: string): Promise<boolean> {
 	const [current] = await database
 		.select({ id: realmRuleRevision.id })
@@ -184,39 +251,95 @@ export default new Elysia().use(session).group("", (app) =>
 		.get(
 			"/reports/me",
 			async ({ profile, query }) => {
-				const limit = query.limit ?? 50;
+				const requestedReportId = query.reportId;
+				const limit = requestedReportId ? 1 : (query.limit ?? 30);
+				const cursor = decodeMyReportCursor(query.cursor);
+				const realmCursorCondition = cursor
+					? or(
+							lt(realmUnitReport.createdAt, cursor.createdAt),
+							and(
+								eq(realmUnitReport.createdAt, cursor.createdAt),
+								lt(realmUnitReport.id, cursor.id),
+							),
+						)
+					: undefined;
+				const platformCursorCondition = cursor
+					? or(
+							lt(platformUnitReport.createdAt, cursor.createdAt),
+							and(
+								eq(platformUnitReport.createdAt, cursor.createdAt),
+								lt(platformUnitReport.id, cursor.id),
+							),
+						)
+					: undefined;
 				const [realmRows, platformRows] = await Promise.all([
 					database
 						.select(realmReportSelection(query.localizationLanguages))
 						.from(realmUnitReport)
 						.innerJoin(moderationCase, eq(moderationCase.id, realmUnitReport.caseId))
-						.where(eq(realmUnitReport.reporterProfileId, profile.unitId))
+						.where(
+							and(
+								eq(realmUnitReport.reporterProfileId, profile.unitId),
+								requestedReportId
+									? eq(realmUnitReport.id, requestedReportId)
+									: undefined,
+								realmCursorCondition,
+							),
+						)
 						.orderBy(desc(realmUnitReport.createdAt), desc(realmUnitReport.id))
-						.limit(limit),
+						.limit(limit + 1),
 					database
 						.select(platformReportSelection(query.localizationLanguages))
 						.from(platformUnitReport)
 						.innerJoin(moderationCase, eq(moderationCase.id, platformUnitReport.caseId))
-						.where(eq(platformUnitReport.reporterProfileId, profile.unitId))
+						.where(
+							and(
+								eq(platformUnitReport.reporterProfileId, profile.unitId),
+								requestedReportId
+									? eq(platformUnitReport.id, requestedReportId)
+									: undefined,
+								platformCursorCondition,
+							),
+						)
 						.orderBy(desc(platformUnitReport.createdAt), desc(platformUnitReport.id))
-						.limit(limit),
+						.limit(limit + 1),
 				]);
-				const items = [
+				const ordered = [
 					...realmRows.map(presentRealmReport),
 					...platformRows.map(presentPlatformReport),
 				]
-					.sort(
-						(left, right) =>
-							right.createdAt.getTime() - left.createdAt.getTime() ||
-							right.id.localeCompare(left.id),
-					)
-					.slice(0, limit);
-				return { items };
+					.sort(compareReportsNewestFirst)
+					.slice(0, limit + 1);
+				const page = ordered.slice(0, limit);
+				const last = page.at(-1);
+				const nextCursor =
+					!requestedReportId && ordered.length > limit && last
+						? encodeMyReportCursor({ createdAt: last.createdAt, id: last.id })
+						: null;
+				const unitIds = page.map((report) => report.unitId);
+				const [targets, slugAddresses] = await Promise.all([
+					listReadableReportTargets(unitIds, profile.unitId, query.localizationLanguages),
+					getPublicCanonicalUnitSlugAddresses(unitIds),
+				]);
+				const targetById = new Map(targets.map((target) => [target.id, target]));
+				return {
+					items: page.map((report) =>
+						presentMyReport(
+							report,
+							targetById.get(report.unitId),
+							slugAddresses.get(report.unitId) ?? null,
+						),
+					),
+					nextCursor,
+				};
 			},
 			{
 				access: "report:write",
 				query: ListMyReportsQuery,
-				response: { [StatusCodes.OK]: ReportListResponse },
+				response: {
+					[StatusCodes.OK]: MyReportListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				},
 				detail: { summary: "List current user's Unit reports", tags: ["Reports"] },
 			},
 		)

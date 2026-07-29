@@ -37,6 +37,7 @@ import {
 	ArrowLeft,
 	ChevronRight,
 	FileText,
+	Flag,
 	Languages,
 	LogOut,
 	Mail,
@@ -52,6 +53,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { profileHref } from "@/features/profiles/profile-route";
 import { AccessInvitationsHref } from "@/features/notifications/routing/notification-routes";
+import { MyReportsHref } from "@/features/reports/routing/report-routes";
 import { hasConsoleAccess } from "@/features/console/model/console-access";
 import { useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
@@ -200,6 +202,12 @@ function DesktopUserMenu({
 						{t.nav.userMenu.myContent}
 					</MenuItem>
 				)}
+				<MenuItem asChild value="my-reports">
+					<Link href={MyReportsHref}>
+						<Flag aria-hidden />
+						{t.nav.userMenu.myReports}
+					</Link>
+				</MenuItem>
 
 				<MenuSeparator />
 
@@ -411,6 +419,12 @@ function MobileUserMenu(model: UserMenuModel) {
 									{t.nav.userMenu.myContent}
 								</Button>
 							)}
+							<Button asChild className={MobileMenuItemClassName} variant="quiet">
+								<Link href={MyReportsHref} onClick={close}>
+									<Flag aria-hidden />
+									{t.nav.userMenu.myReports}
+								</Link>
+							</Button>
 
 							<Separator className="my-1" />
 

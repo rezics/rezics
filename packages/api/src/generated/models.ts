@@ -16762,10 +16762,78 @@ export type GetApiReportsMeQuery = {
 	 */
 	localizationLanguages?: GetApiReportsMeLocalizationLanguagesEnum[];
 	/**
-	 * @default 50
+	 * @minLength 1
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 30
 	 */
 	limit?: string | number;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	reportId?: string;
 };
+
+export const GetApiReportsMeStatus200ItemsScopeEnum = {
+	realm: "realm",
+	platform: "platform",
+} as const;
+
+export type GetApiReportsMeStatus200ItemsScopeEnum =
+	(typeof GetApiReportsMeStatus200ItemsScopeEnum)[keyof typeof GetApiReportsMeStatus200ItemsScopeEnum];
+
+export const GetApiReportsMeStatus200ItemsStatusEnum = {
+	submitted: "submitted",
+	reviewing: "reviewing",
+	completed: "completed",
+	merged: "merged",
+	not_actioned: "not_actioned",
+} as const;
+
+export type GetApiReportsMeStatus200ItemsStatusEnum =
+	(typeof GetApiReportsMeStatus200ItemsStatusEnum)[keyof typeof GetApiReportsMeStatus200ItemsStatusEnum];
+
+export const GetApiReportsMeStatus200ItemsTargetUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiReportsMeStatus200ItemsTargetUnitKindEnum =
+	(typeof GetApiReportsMeStatus200ItemsTargetUnitKindEnum)[keyof typeof GetApiReportsMeStatus200ItemsTargetUnitKindEnum];
+
+export const GetApiReportsMeStatus200ItemsTargetUnitLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReportsMeStatus200ItemsTargetUnitLanguage =
+	(typeof GetApiReportsMeStatus200ItemsTargetUnitLanguage)[keyof typeof GetApiReportsMeStatus200ItemsTargetUnitLanguage];
 
 export const GetApiReportsMeStatus200ItemsRuleLanguageEnum = {
 	zh: "zh",
@@ -16780,21 +16848,6 @@ export const GetApiReportsMeStatus200ItemsRuleLanguageEnum = {
 export type GetApiReportsMeStatus200ItemsRuleLanguageEnum =
 	(typeof GetApiReportsMeStatus200ItemsRuleLanguageEnum)[keyof typeof GetApiReportsMeStatus200ItemsRuleLanguageEnum];
 
-export const GetApiReportsMeStatus200ItemsCaseStateEnum = {
-	new: "new",
-	triaged: "triaged",
-	assigned: "assigned",
-	actioned: "actioned",
-	resolved: "resolved",
-	duplicate: "duplicate",
-	rejected: "rejected",
-	escalated: "escalated",
-	reviewing: "reviewing",
-} as const;
-
-export type GetApiReportsMeStatus200ItemsCaseStateEnum =
-	(typeof GetApiReportsMeStatus200ItemsCaseStateEnum)[keyof typeof GetApiReportsMeStatus200ItemsCaseStateEnum];
-
 /**
  * @type object
  */
@@ -16802,152 +16855,122 @@ export type GetApiReportsMeStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: (
-		| {
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				caseId: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				unitId: string;
-				/**
-				 * @type object
-				 */
-				rule: {
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					revisionId: string;
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type string
+		 */
+		scope: GetApiReportsMeStatus200ItemsScopeEnum;
+		/**
+		 * @type string
+		 */
+		status: GetApiReportsMeStatus200ItemsStatusEnum;
+		target:
+			| {
 					/**
 					 * @type string
 					 */
-					language: GetApiReportsMeStatus200ItemsRuleLanguageEnum;
+					state: "available";
+					/**
+					 * @type object
+					 */
+					unit: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						kind: GetApiReportsMeStatus200ItemsTargetUnitKindEnum;
+						language: (GetApiReportsMeStatus200ItemsTargetUnitLanguage | null) | null;
+						title: (string | null) | null;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+					};
+			  }
+			| {
 					/**
 					 * @type string
 					 */
-					title: string;
-				};
-				details: (string | null) | null;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				reportedRevisionId: string;
-				/**
-				 * @type string
-				 */
-				caseState: GetApiReportsMeStatus200ItemsCaseStateEnum;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				createdAt: string;
-				/**
-				 * @type string
-				 */
-				scope: "realm";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				realmId: string;
-		  }
-		| {
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				caseId: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				unitId: string;
-				/**
-				 * @type object
-				 */
-				rule: {
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					revisionId: string;
-					/**
-					 * @type string
-					 */
-					language: GetApiReportsMeStatus200ItemsRuleLanguageEnum;
-					/**
-					 * @type string
-					 */
-					title: string;
-				};
-				details: (string | null) | null;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				reportedRevisionId: string;
-				/**
-				 * @type string
-				 */
-				caseState: GetApiReportsMeStatus200ItemsCaseStateEnum;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				createdAt: string;
-				/**
-				 * @type string
-				 */
-				scope: "platform";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				ruleSourceRealmId: string;
-		  }
-	)[];
+					state: "unavailable";
+			  };
+		/**
+		 * @type object
+		 */
+		rule: {
+			/**
+			 * @type string
+			 */
+			language: GetApiReportsMeStatus200ItemsRuleLanguageEnum;
+			/**
+			 * @type string
+			 */
+			title: string;
+		};
+		details: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiReportsMeStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -16999,6 +17022,7 @@ export type GetApiReportsMeOptions = {
  */
 export type GetApiReportsMeResponses = {
 	"200": GetApiReportsMeStatus200;
+	"400": GetApiReportsMeStatus400;
 	"422": GetApiReportsMeStatus422;
 	"429": GetApiReportsMeStatus429;
 	"500": GetApiReportsMeStatus500;
@@ -17009,6 +17033,7 @@ export type GetApiReportsMeResponses = {
  */
 export type GetApiReportsMeResponse =
 	| GetApiReportsMeStatus200
+	| GetApiReportsMeStatus400
 	| GetApiReportsMeStatus422
 	| GetApiReportsMeStatus429
 	| GetApiReportsMeStatus500;

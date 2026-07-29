@@ -29,6 +29,7 @@ export default {
 		close: "Close user menu",
 		viewProfile: "View profile",
 		myContent: "My content",
+		myReports: "My reports",
 		settings: "Settings",
 		console: "Management console",
 		invitations: "Received access invitations",

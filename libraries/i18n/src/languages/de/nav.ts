@@ -29,6 +29,7 @@ export default {
 		close: "Benutzermenü schließen",
 		viewProfile: "Profil anzeigen",
 		myContent: "Meine Inhalte",
+		myReports: "Meine Meldungen",
 		settings: "Einstellungen",
 		console: "Verwaltungskonsole",
 		invitations: "Erhaltene Zugriffseinladungen",

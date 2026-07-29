@@ -30,6 +30,7 @@ export default {
 		close: "Fermer le menu utilisateur",
 		viewProfile: "Afficher le profil",
 		myContent: "Mon contenu",
+		myReports: "Mes signalements",
 		settings: "Réglages",
 		console: "Console de gestion",
 		invitations: "Invitations d’accès reçues",

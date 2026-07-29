@@ -29,6 +29,7 @@ export default {
 		close: "关闭用户菜单",
 		viewProfile: "查看个人资料",
 		myContent: "我的内容",
+		myReports: "我的举报",
 		settings: "设置",
 		console: "管理主控台",
 		invitations: "收到的访问邀请",

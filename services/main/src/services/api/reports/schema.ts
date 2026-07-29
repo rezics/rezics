@@ -4,7 +4,8 @@ import {
 	ModerationCaseStateValues,
 	PlatformUnitModerationCommandValues,
 } from "../../database/schema/contract-values";
-import { ContentLanguage, DateTime, LocalizationLanguageQuery, Uuid } from "../schema";
+import { ContentLanguage, DateTime, LocalizationLanguageQuery, UnitKind, Uuid } from "../schema";
+import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 export const CreateReportBody = t.Object(
 	{
@@ -32,7 +33,12 @@ export const CreateReportQuery = t.Object(LocalizationLanguageQuery, {
 export type CreateReportQuery = Static<typeof CreateReportQuery>;
 
 export const ListMyReportsQuery = t.Object(
-	{ ...LocalizationLanguageQuery, ...LimitQuery },
+	{
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ minLength: 1, maxLength: 512 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
+		reportId: t.Optional(Uuid),
+	},
 	{ additionalProperties: false },
 );
 export type ListMyReportsQuery = Static<typeof ListMyReportsQuery>;
@@ -101,6 +107,64 @@ export const ReportResponse = t.Union([RealmUnitReportResponse, PlatformUnitRepo
 export type ReportResponse = Static<typeof ReportResponse>;
 
 export const ReportListResponse = t.Object({ items: t.Array(ReportResponse) });
+
+export const MyReportStatusValues = [
+	"submitted",
+	"reviewing",
+	"completed",
+	"merged",
+	"not_actioned",
+] as const;
+export const MyReportStatus = t.UnionEnum(MyReportStatusValues, { default: undefined });
+export type MyReportStatus = Static<typeof MyReportStatus>;
+
+const MyReportTargetResponse = t.Union([
+	t.Object(
+		{
+			state: t.Literal("available"),
+			unit: t.Object(
+				{
+					id: Uuid,
+					kind: UnitKind,
+					language: t.Nullable(ContentLanguage),
+					title: t.Nullable(t.String()),
+					slugAddress: NullablePublicSlugAddressResponse,
+				},
+				{ additionalProperties: false },
+			),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object({ state: t.Literal("unavailable") }, { additionalProperties: false }),
+]);
+
+export const MyReportResponse = t.Object(
+	{
+		id: Uuid,
+		scope: t.Union([t.Literal("realm"), t.Literal("platform")]),
+		status: MyReportStatus,
+		target: MyReportTargetResponse,
+		rule: t.Object(
+			{
+				language: ContentLanguage,
+				title: t.String(),
+			},
+			{ additionalProperties: false },
+		),
+		details: t.Nullable(t.String()),
+		createdAt: DateTime,
+	},
+	{ additionalProperties: false },
+);
+export type MyReportResponse = Static<typeof MyReportResponse>;
+
+export const MyReportListResponse = t.Object(
+	{
+		items: t.Array(MyReportResponse),
+		nextCursor: t.Nullable(t.String()),
+	},
+	{ additionalProperties: false },
+);
 
 export const ReportDestinationsResponse = t.Object({
 	items: t.Array(

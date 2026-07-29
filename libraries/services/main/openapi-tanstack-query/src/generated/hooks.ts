@@ -259,6 +259,7 @@ import type {
 	PostApiFeedQueryStatus500,
 	GetApiReportsMeOptions,
 	GetApiReportsMeStatus200,
+	GetApiReportsMeStatus400,
 	GetApiReportsMeStatus422,
 	GetApiReportsMeStatus429,
 	GetApiReportsMeStatus500,
@@ -6336,7 +6337,10 @@ export function getApiReportsMeQueryOptions(
 	return queryOptions<
 		GetApiReportsMeStatus200,
 		ResponseErrorConfig<
-			GetApiReportsMeStatus422 | GetApiReportsMeStatus429 | GetApiReportsMeStatus500
+			| GetApiReportsMeStatus400
+			| GetApiReportsMeStatus422
+			| GetApiReportsMeStatus429
+			| GetApiReportsMeStatus500
 		>,
 		GetApiReportsMeStatus200,
 		typeof queryKey
@@ -6371,7 +6375,10 @@ export function useGetApiReportsMe<
 			QueryObserverOptions<
 				GetApiReportsMeStatus200,
 				ResponseErrorConfig<
-					GetApiReportsMeStatus422 | GetApiReportsMeStatus429 | GetApiReportsMeStatus500
+					| GetApiReportsMeStatus400
+					| GetApiReportsMeStatus422
+					| GetApiReportsMeStatus429
+					| GetApiReportsMeStatus500
 				>,
 				TData,
 				TQueryData,
@@ -6396,7 +6403,10 @@ export function useGetApiReportsMe<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiReportsMeStatus422 | GetApiReportsMeStatus429 | GetApiReportsMeStatus500
+			| GetApiReportsMeStatus400
+			| GetApiReportsMeStatus422
+			| GetApiReportsMeStatus429
+			| GetApiReportsMeStatus500
 		>
 	> & { queryKey: TQueryKey };
 

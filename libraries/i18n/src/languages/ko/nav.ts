@@ -29,6 +29,7 @@ export default {
 		close: "사용자 메뉴 닫기",
 		viewProfile: "프로필 보기",
 		myContent: "내 콘텐츠",
+		myReports: "내 신고",
 		settings: "설정",
 		console: "관리 콘솔",
 		invitations: "받은 접근 초대",

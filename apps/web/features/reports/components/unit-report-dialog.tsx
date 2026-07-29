@@ -4,6 +4,7 @@ import {
 	useGetApiRealmsByRealmIdRules,
 	useGetApiReportsUnitsByUnitIdDestinations,
 	usePostApiReportsUnitsByUnitId,
+	getApiReportsMeQueryKey,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
@@ -26,13 +27,16 @@ import {
 } from "@rezics/ui";
 import { EllipsisIcon, FlagIcon } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectReportRealmId, selectReportRuleId } from "../model/report-selection";
+import { MyReportsHref } from "../routing/report-routes";
 
 export type UnitReportTarget = Readonly<{
 	unitId: string;
@@ -49,6 +53,8 @@ export function UnitReportDialog({
 	readonly onOpenChange: (open: boolean) => void;
 }) {
 	const { t } = useTranslation(["reports"]);
+	const router = useApplicationRouter();
+	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
 	const selectionContextKey = `${unitId}:${realmId ?? ""}`;
 	const [realmSelection, setRealmSelection] = useState({
@@ -100,7 +106,16 @@ export function UnitReportDialog({
 			setDetails("");
 			setRuleSelection({ realmId: "", value: "" });
 			onOpenChange(false);
-			toast.create({ title: t.reports.submitted, type: "success" });
+			await queryClient.invalidateQueries({ queryKey: getApiReportsMeQueryKey() });
+			toast.create({
+				title: t.reports.submitted,
+				description: t.reports.submittedDescription,
+				type: "success",
+				action: {
+					label: t.reports.viewMyReports,
+					onClick: () => router.push(MyReportsHref),
+				},
+			});
 		} catch {
 			// The typed mutation state renders the localized API error below.
 		}

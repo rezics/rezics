@@ -29,6 +29,7 @@ export default {
 		close: "關閉使用者選單",
 		viewProfile: "查看個人資料",
 		myContent: "我的內容",
+		myReports: "我的檢舉",
 		settings: "設定",
 		console: "管理主控台",
 		invitations: "收到的存取邀請",

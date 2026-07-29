@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@rezics/ui";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useState, type ReactNode } from "react";
 import type { TranslationSnapshot } from "native-i18n";
@@ -42,7 +43,10 @@ export function AppProviders({
 						<AuthSessionProvider initialSession={initialSession}>
 							<QueryClientProvider client={queryClient}>
 								<SessionCacheBoundary>
-									<AuthPortalProvider>{children}</AuthPortalProvider>
+									<AuthPortalProvider>
+										{children}
+										<Toaster />
+									</AuthPortalProvider>
 								</SessionCacheBoundary>
 							</QueryClientProvider>
 							<PwaLifecycle />
