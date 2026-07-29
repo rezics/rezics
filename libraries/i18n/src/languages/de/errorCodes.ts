@@ -39,6 +39,8 @@ export default {
 		"Die Ausgangsversion wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	ContentStructureRevisionConflict:
 		"Die Inhaltsstruktur wurde an anderer Stelle geändert. Aktualisiere die Seite und versuche es erneut.",
+	CollectionStructureRevisionConflict:
+		"Die Struktur der Einträge wurde an anderer Stelle geändert. Aktualisiere die Seite und versuche es erneut.",
 	DockRevisionConflict: `Der ${dockTerms.inline} wurde an anderer Stelle geändert. Aktualisiere die Seite und versuche es erneut.`,
 	DockNotFound: `Dieser ${dockTerms.inline} wurde nicht gefunden.`,
 	DockNotSupported: `Dieser Inhalt unterstützt diesen ${dockTerms.inline} nicht.`,

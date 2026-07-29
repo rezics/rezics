@@ -12,6 +12,7 @@ import {
 import {
 	collection as collectionTable,
 	collectionItem,
+	collectionStructureRevisionHead,
 	profileFavoritesCollection,
 	unit,
 	unitLocalization,
@@ -95,12 +96,17 @@ export async function getCollection(
 			favoritesProfileId: profileFavoritesCollection.profileId,
 			itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collectionTable.id})::int`,
 			latestRevisionId: unitRevisionHead.revisionId,
+			latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
 			createdAt: unit.createdAt,
 			updatedAt: unit.updatedAt,
 		})
 		.from(collectionTable)
 		.innerJoin(unit, eq(unit.id, collectionTable.id))
 		.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
+		.innerJoin(
+			collectionStructureRevisionHead,
+			eq(collectionStructureRevisionHead.collectionId, collectionTable.id),
+		)
 		.leftJoin(
 			profileFavoritesCollection,
 			eq(profileFavoritesCollection.collectionId, collectionTable.id),
@@ -203,7 +209,7 @@ export async function getCollectionContent(
 	const offset = decodeCollectionItemsCursor(
 		input.cursor,
 		collectionId,
-		collection.latestRevisionId,
+		collection.latestItemsRevisionId,
 	);
 	const limit = input.limit ?? 20;
 	const result = await database.execute<Record<string, unknown>>(sql`
@@ -278,7 +284,7 @@ export async function getCollectionContent(
 				? encodeCollectionItemsCursor({
 						v: 1,
 						collectionId,
-						revisionId: collection.latestRevisionId,
+						revisionId: collection.latestItemsRevisionId,
 						offset: offset + limit,
 					})
 				: null,

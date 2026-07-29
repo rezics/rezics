@@ -1,5 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import * as Data from "effect/Data";
+export { CollectionStructureRevisionConflict } from "../../collection-structure/errors";
+import { CollectionStructureRevisionConflict } from "../../collection-structure/errors";
 
 export class CollectionNotFound extends Data.TaggedError("CollectionNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
@@ -23,4 +25,5 @@ export const CollectionErrors = [
 	CollectionNotFound,
 	FavoritesEditForbidden,
 	FavoritesDeleteForbidden,
+	CollectionStructureRevisionConflict,
 ] as const;

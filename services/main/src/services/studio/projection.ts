@@ -332,6 +332,34 @@ export async function rebuildStudioWorkRelations(): Promise<void> {
 			)
 			select
 				revision.actor_profile_id,
+				revision.collection_id,
+				revision.collection_id,
+				array['collection', 'items']::text[],
+				'collection/items',
+				'contributed',
+				'collection_structure_revision',
+				min(revision.created_at),
+				max(revision.created_at),
+				count(*)::integer
+			from collection_structure_revision revision
+			where revision.actor_profile_id is not null
+			group by revision.actor_profile_id, revision.collection_id
+		`);
+		await tx.execute(sql`
+			insert into studio_work_relation (
+				profile_id,
+				resource_unit_id,
+				authorization_unit_id,
+				authorization_scope,
+				authorization_scope_key,
+				relation,
+				source,
+				first_at,
+				last_at,
+				activity_count
+			)
+			select
+				revision.actor_profile_id,
 				dock.unit_id,
 				dock.unit_id,
 				array['dock', dock.kind::text]::text[],

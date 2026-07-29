@@ -122,6 +122,10 @@ import {
 	getContentStructureHeadRevision,
 } from "../content-structure/history";
 import { loadContentStructureSnapshot } from "../content-structure/storage";
+import {
+	createCollectionStructureHistory,
+	getCollectionStructureHeadRevision,
+} from "../collection-structure/history";
 import { createDockHistory, getDockRevisionId } from "../api/docks/history";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { fractionalPositionAt } from "../ordering/position";
@@ -2977,6 +2981,13 @@ async function seedHistory(
 	catalog: SeedCatalog,
 	content: SeedContent,
 ): Promise<void> {
+	const storedCollections = await tx.select({ id: collection.id }).from(collection);
+	for (const storedCollection of storedCollections) {
+		if (await getCollectionStructureHeadRevision(tx, storedCollection.id)) continue;
+		await createCollectionStructureHistory(tx, {
+			collectionId: storedCollection.id,
+		});
+	}
 	const structures = await tx
 		.select({ id: contentStructure.id })
 		.from(contentStructure)

@@ -1,5 +1,11 @@
 import { type Static, t } from "elysia";
-import { LifecycleInput, LocalizationInput, LocalizationLanguageQuery, Uuid } from "../schema";
+import {
+	DateTime,
+	LifecycleInput,
+	LocalizationInput,
+	LocalizationLanguageQuery,
+	Uuid,
+} from "../schema";
 
 export const ListCollectionsQuery = t.Object(
 	{
@@ -56,7 +62,7 @@ export type CollectionItemParams = Static<typeof CollectionItemParams>;
 
 export const SaveCollectionItemBody = t.Object(
 	{
-		baseRevisionId: Uuid,
+		baseItemsRevisionId: Uuid,
 		placement: t.UnionEnum(["direct", "review-with-subject"]),
 		parentTargetId: t.Optional(t.Nullable(Uuid)),
 	},
@@ -66,7 +72,7 @@ export type SaveCollectionItemBody = Static<typeof SaveCollectionItemBody>;
 
 export const AddCollectionItemsBatchBody = t.Object(
 	{
-		baseRevisionId: Uuid,
+		baseItemsRevisionId: Uuid,
 		items: t.Array(
 			t.Object(
 				{
@@ -101,7 +107,7 @@ export type CollectionItemPlacement = Static<typeof CollectionItemPlacement>;
 
 export const MoveCollectionItemsBody = t.Object(
 	{
-		baseRevisionId: Uuid,
+		baseItemsRevisionId: Uuid,
 		targetIds: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
 		placement: CollectionItemPlacement,
 	},
@@ -115,6 +121,65 @@ export const CollectionRevisionBody = t.Object(
 );
 export type CollectionRevisionBody = Static<typeof CollectionRevisionBody>;
 
+export const CollectionItemsRevisionBody = t.Object(
+	{ baseItemsRevisionId: Uuid },
+	{ additionalProperties: false },
+);
+export type CollectionItemsRevisionBody = Static<typeof CollectionItemsRevisionBody>;
+
+export const CollectionStructureRevisionListQuery = t.Object(
+	{ limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })) },
+	{ additionalProperties: false },
+);
+export const CollectionStructureRevisionParams = t.Object({
+	collectionId: Uuid,
+	revisionId: Uuid,
+});
+export const CollectionStructureRevisionCompareQuery = t.Object(
+	{ from: Uuid, to: Uuid },
+	{ additionalProperties: false },
+);
+export const RestoreCollectionStructureRevisionBody = t.Object(
+	{
+		baseItemsRevisionId: Uuid,
+		message: t.Optional(t.String({ maxLength: 500 })),
+		minor: t.Optional(t.Boolean({ default: false })),
+	},
+	{ additionalProperties: false },
+);
+
+export const CollectionStructureRevisionSummaryResponse = t.Object({
+	id: Uuid,
+	parentRevisionId: t.Nullable(Uuid),
+	sourceRevisionId: t.Nullable(Uuid),
+	actorProfileId: t.Nullable(Uuid),
+	kind: t.UnionEnum(["create", "update", "restore"]),
+	editSummary: t.Nullable(t.String()),
+	minor: t.Boolean(),
+	replayByteSize: t.Integer({ minimum: 0 }),
+	checkpointByteSize: t.Integer({ minimum: 0 }),
+	createdAt: DateTime,
+});
+export const CollectionStructureRevisionListResponse = t.Object({
+	items: t.Array(CollectionStructureRevisionSummaryResponse),
+});
+export const CollectionStructureRevisionCompareResponse = t.Object({
+	fromRevisionId: Uuid,
+	toRevisionId: Uuid,
+	changes: t.Array(
+		t.Object({
+			path: t.String(),
+			before: t.Optional(t.Unknown()),
+			after: t.Optional(t.Unknown()),
+		}),
+	),
+});
+export const RestoreCollectionStructureRevisionResponse = t.Object({
+	updated: t.Literal(true),
+	latestItemsRevisionId: Uuid,
+	revisionCreated: t.Boolean(),
+});
+
 export const AddCollectionItemsBatchResponse = t.Object({
 	items: t.Array(
 		t.Object({
@@ -122,6 +187,7 @@ export const AddCollectionItemsBatchResponse = t.Object({
 			state: t.UnionEnum(["created", "existing"]),
 		}),
 	),
+	latestItemsRevisionId: Uuid,
 });
 
 export const FavoriteItemParams = t.Object({ targetId: Uuid });

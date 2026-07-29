@@ -465,6 +465,12 @@ import type {
 	PutApiCollectionsByCollectionIdItemsByTargetIdResponses,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses,
+	GetApiCollectionsByCollectionIdItemRevisionsOptions,
+	GetApiCollectionsByCollectionIdItemRevisionsResponses,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareOptions,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareResponses,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
 	PutApiCollectionsFavoritesItemsByTargetIdOptions,
 	PutApiCollectionsFavoritesItemsByTargetIdResponses,
 	DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -5246,6 +5252,78 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetId<
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List Collection item revisions
+ * {@link /api/collections/:collectionId/item-revisions}
+ */
+export function getApiCollectionsByCollectionIdItemRevisions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiCollectionsByCollectionIdItemRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/collections/{collectionId}/item-revisions",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Compare Collection item revisions
+ * {@link /api/collections/:collectionId/item-revisions/compare}
+ */
+export function getApiCollectionsByCollectionIdItemRevisionsCompare<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiCollectionsByCollectionIdItemRevisionsCompareOptions, ThrowOnError>,
+): Promise<
+	RequestResult<GetApiCollectionsByCollectionIdItemRevisionsCompareResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/collections/{collectionId}/item-revisions/compare",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiCollectionsByCollectionIdItemRevisionsCompareResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Restore a Collection item revision
+ * {@link /api/collections/:collectionId/item-revisions/:revisionId/restore}
+ */
+export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/collections/{collectionId}/item-revisions/{revisionId}/restore",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
+			ThrowOnError
+		>
 	>;
 }
 

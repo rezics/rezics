@@ -29,10 +29,14 @@ export const SavedResponse = t.Object({
 	saved: t.Boolean(),
 	latestRevisionId: Uuid,
 });
+export const SavedCollectionItemsResponse = t.Object({
+	saved: t.Boolean(),
+	latestItemsRevisionId: Uuid,
+});
 export const FavoriteResponse = t.Object({
 	favorited: t.Boolean(),
 	collectionId: Uuid,
-	latestRevisionId: Uuid,
+	latestItemsRevisionId: Uuid,
 });
 
 export const ScoreResponse = t.Object({

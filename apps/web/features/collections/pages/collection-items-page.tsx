@@ -107,7 +107,7 @@ export function CollectionItemsPage() {
 			await add.mutateAsync({
 				path: { collectionId: collection.id, targetId: selectedUnit.id },
 				body: {
-					baseRevisionId: collection.latestRevisionId,
+					baseItemsRevisionId: collection.latestItemsRevisionId,
 					placement: "direct",
 					parentTargetId: parentTargetId || null,
 				},
@@ -127,7 +127,7 @@ export function CollectionItemsPage() {
 					collectionId: collection.id,
 					targetId: item.membership.targetId,
 				},
-				body: { baseRevisionId: collection.latestRevisionId },
+				body: { baseItemsRevisionId: collection.latestItemsRevisionId },
 			});
 			setSelectedIds((current) => {
 				const next = new Set(current);
@@ -152,7 +152,7 @@ export function CollectionItemsPage() {
 			await move.mutateAsync({
 				path: { collectionId: collection.id },
 				body: {
-					baseRevisionId: collection.latestRevisionId,
+					baseItemsRevisionId: collection.latestItemsRevisionId,
 					targetIds: [...selectedIds],
 					placement,
 				},

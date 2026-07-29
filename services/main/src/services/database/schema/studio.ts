@@ -12,6 +12,7 @@ export const StudioWorkSourceValues = [
 	"unit_status",
 	"unit_revision",
 	"content_structure_revision",
+	"collection_structure_revision",
 	"dock_revision",
 ] as const;
 export type StudioWorkSource = (typeof StudioWorkSourceValues)[number];
@@ -83,6 +84,7 @@ export const studioWorkRelation = pgTable(
 				'unit_status',
 				'unit_revision',
 				'content_structure_revision',
+				'collection_structure_revision',
 				'dock_revision'
 			)`,
 		),
@@ -95,6 +97,7 @@ export const studioWorkRelation = pgTable(
 				${table.source} in (
 					'unit_revision',
 					'content_structure_revision',
+					'collection_structure_revision',
 					'dock_revision'
 				)
 			)`,

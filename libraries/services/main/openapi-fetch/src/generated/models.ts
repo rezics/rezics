@@ -5326,6 +5326,7 @@ export const ApiErrorCode = {
 	CollectionNotFound: "CollectionNotFound",
 	FavoritesEditForbidden: "FavoritesEditForbidden",
 	FavoritesDeleteForbidden: "FavoritesDeleteForbidden",
+	CollectionStructureRevisionConflict: "CollectionStructureRevisionConflict",
 	RealmNotFound: "RealmNotFound",
 	RealmMembershipNotFound: "RealmMembershipNotFound",
 	RealmOwnerLeaveForbidden: "RealmOwnerLeaveForbidden",
@@ -73141,6 +73142,12 @@ export type GetApiCollectionsStatus200 = {
 		 * @type string
 		 */
 		latestRevisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		latestItemsRevisionId: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		cover:
@@ -73510,6 +73517,12 @@ export type PostApiCollectionsStatus200 = {
 	 * @type string
 	 */
 	latestRevisionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestItemsRevisionId: string;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -74325,6 +74338,12 @@ export type GetApiCollectionsFavoritesStatus200 = {
 	 * @type string
 	 */
 	latestRevisionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestItemsRevisionId: string;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -77954,6 +77973,12 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 	latestRevisionId: string;
 	/**
 	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestItemsRevisionId: string;
+	/**
+	 * @description
 	 * Format: `date-time`
 	 * @type string
 	 */
@@ -78462,6 +78487,12 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 	 * @type string
 	 */
 	latestRevisionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestItemsRevisionId: string;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -79316,6 +79347,12 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus200 = {
 		 */
 		state: PostApiCollectionsByCollectionIdItemsBatchStatus200ItemsStateEnum;
 	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestItemsRevisionId: string;
 };
 
 /**
@@ -79418,10 +79455,10 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus409 =
 			 */
 			error: {
 				/**
-				 * @default 'UnitRevisionConflict'
+				 * @default 'CollectionStructureRevisionConflict'
 				 * @type string
 				 */
-				code: "UnitRevisionConflict";
+				code: "CollectionStructureRevisionConflict";
 				/**
 				 * @type string
 				 */
@@ -79502,7 +79539,7 @@ export type PostApiCollectionsByCollectionIdItemsBatchBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	baseRevisionId: string;
+	baseItemsRevisionId: string;
 	/**
 	 * @type array
 	 */
@@ -79578,7 +79615,7 @@ export type PostApiCollectionsByCollectionIdItemsMoveStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	latestRevisionId: string;
+	latestItemsRevisionId: string;
 };
 
 /**
@@ -79681,10 +79718,10 @@ export type PostApiCollectionsByCollectionIdItemsMoveStatus409 =
 			 */
 			error: {
 				/**
-				 * @default 'UnitRevisionConflict'
+				 * @default 'CollectionStructureRevisionConflict'
 				 * @type string
 				 */
-				code: "UnitRevisionConflict";
+				code: "CollectionStructureRevisionConflict";
 				/**
 				 * @type string
 				 */
@@ -79773,7 +79810,7 @@ export type PostApiCollectionsByCollectionIdItemsMoveBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	baseRevisionId: string;
+	baseItemsRevisionId: string;
 	/**
 	 * @type array
 	 */
@@ -79869,7 +79906,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	latestRevisionId: string;
+	latestItemsRevisionId: string;
 };
 
 /**
@@ -79972,10 +80009,10 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus409 =
 			 */
 			error: {
 				/**
-				 * @default 'UnitRevisionConflict'
+				 * @default 'CollectionStructureRevisionConflict'
 				 * @type string
 				 */
-				code: "UnitRevisionConflict";
+				code: "CollectionStructureRevisionConflict";
 				/**
 				 * @type string
 				 */
@@ -80064,7 +80101,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	baseRevisionId: string;
+	baseItemsRevisionId: string;
 	/**
 	 * @default 'direct'
 	 * @type string
@@ -80141,7 +80178,7 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	latestRevisionId: string;
+	latestItemsRevisionId: string;
 };
 
 /**
@@ -80216,10 +80253,10 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409 =
 			 */
 			error: {
 				/**
-				 * @default 'UnitRevisionConflict'
+				 * @default 'CollectionStructureRevisionConflict'
 				 * @type string
 				 */
-				code: "UnitRevisionConflict";
+				code: "CollectionStructureRevisionConflict";
 				/**
 				 * @type string
 				 */
@@ -80278,7 +80315,7 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	baseRevisionId: string;
+	baseItemsRevisionId: string;
 };
 
 /**
@@ -80319,6 +80356,532 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponse =
 /**
  * @type object
  */
+export type GetApiCollectionsByCollectionIdItemRevisionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	collectionId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsQuery = {
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiCollectionsByCollectionIdItemRevisionsStatus200ItemsKindEnum = {
+	create: "create",
+	update: "update",
+	restore: "restore",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemRevisionsStatus200ItemsKindEnum =
+	(typeof GetApiCollectionsByCollectionIdItemRevisionsStatus200ItemsKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemRevisionsStatus200ItemsKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		parentRevisionId: (string | null) | null;
+		sourceRevisionId: (string | null) | null;
+		actorProfileId: (string | null) | null;
+		/**
+		 * @default 'create'
+		 * @type string
+		 */
+		kind: GetApiCollectionsByCollectionIdItemRevisionsStatus200ItemsKindEnum;
+		editSummary: (string | null) | null;
+		/**
+		 * @type boolean
+		 */
+		minor: boolean;
+		replayByteSize: string | number;
+		checkpointByteSize: string | number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CollectionNotFound'
+		 * @type string
+		 */
+		code: "CollectionNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsOptions = {
+	body?: never;
+	path: GetApiCollectionsByCollectionIdItemRevisionsPath;
+	query?: GetApiCollectionsByCollectionIdItemRevisionsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsResponses = {
+	"200": GetApiCollectionsByCollectionIdItemRevisionsStatus200;
+	"404": GetApiCollectionsByCollectionIdItemRevisionsStatus404;
+	"422": GetApiCollectionsByCollectionIdItemRevisionsStatus422;
+	"500": GetApiCollectionsByCollectionIdItemRevisionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsResponse =
+	| GetApiCollectionsByCollectionIdItemRevisionsStatus200
+	| GetApiCollectionsByCollectionIdItemRevisionsStatus404
+	| GetApiCollectionsByCollectionIdItemRevisionsStatus422
+	| GetApiCollectionsByCollectionIdItemRevisionsStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsComparePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	collectionId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	from: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	to: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	fromRevisionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	toRevisionId: string;
+	/**
+	 * @type array
+	 */
+	changes: {
+		/**
+		 * @type string
+		 */
+		path: string;
+		/**
+		 * @type void | undefined
+		 */
+		before?: void;
+		/**
+		 * @type void | undefined
+		 */
+		after?: void;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CollectionNotFound'
+		 * @type string
+		 */
+		code: "CollectionNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CollectionStructureRevisionConflict'
+		 * @type string
+		 */
+		code: "CollectionStructureRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareOptions = {
+	body?: never;
+	path: GetApiCollectionsByCollectionIdItemRevisionsComparePath;
+	query: GetApiCollectionsByCollectionIdItemRevisionsCompareQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareResponses = {
+	"200": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200;
+	"404": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404;
+	"409": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409;
+	"422": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422;
+	"500": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareResponse =
+	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200
+	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
+	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
+	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422
+	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestorePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	collectionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	revisionId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200 = {
+	/**
+	 * @type boolean
+	 */
+	updated: true;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestItemsRevisionId: string;
+	/**
+	 * @type boolean
+	 */
+	revisionCreated: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400 =
+	MalformedRequestBody;
+
+export const PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
+	{
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+		UnitAccessRestricted: "UnitAccessRestricted",
+	} as const;
+
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CollectionNotFound'
+		 * @type string
+		 */
+		code: "CollectionNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'FavoritesEditForbidden'
+				 * @type string
+				 */
+				code: "FavoritesEditForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'CollectionStructureRevisionConflict'
+				 * @type string
+				 */
+				code: "CollectionStructureRevisionConflict";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422 =
+	ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseItemsRevisionId: string;
+	/**
+	 * @maxLength 500
+	 * @type string | undefined
+	 */
+	message?: string;
+	/**
+	 * @default false
+	 * @type boolean | undefined
+	 */
+	minor?: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions = {
+	body: PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreBody;
+	path: PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestorePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses = {
+	"200": PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200;
+	"400": PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400;
+	"403": PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403;
+	"404": PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404;
+	"409": PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409;
+	"422": PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422;
+	"500": PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponse =
+	| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200
+	| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400
+	| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403
+	| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404
+	| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409
+	| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422
+	| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiCollectionsFavoritesItemsByTargetIdPath = {
 	/**
 	 * @description
@@ -80347,7 +80910,7 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	latestRevisionId: string;
+	latestItemsRevisionId: string;
 };
 
 /**
@@ -80392,10 +80955,10 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus409 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitRevisionConflict'
+		 * @default 'CollectionStructureRevisionConflict'
 		 * @type string
 		 */
-		code: "UnitRevisionConflict";
+		code: "CollectionStructureRevisionConflict";
 		/**
 		 * @type string
 		 */
@@ -80454,7 +81017,7 @@ export type PutApiCollectionsFavoritesItemsByTargetIdBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	baseRevisionId: string;
+	baseItemsRevisionId: string;
 };
 
 /**
@@ -80523,7 +81086,7 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	latestRevisionId: string;
+	latestItemsRevisionId: string;
 };
 
 /**
@@ -80540,10 +81103,10 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus409 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitRevisionConflict'
+		 * @default 'CollectionStructureRevisionConflict'
 		 * @type string
 		 */
-		code: "UnitRevisionConflict";
+		code: "CollectionStructureRevisionConflict";
 		/**
 		 * @type string
 		 */
@@ -80602,7 +81165,7 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdBody = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	baseRevisionId: string;
+	baseItemsRevisionId: string;
 };
 
 /**

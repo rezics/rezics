@@ -41,6 +41,8 @@ export default {
 		"La versión de referencia ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	ContentStructureRevisionConflict:
 		"La estructura de contenido se ha modificado en otro lugar. Actualiza la página e inténtalo de nuevo.",
+	CollectionStructureRevisionConflict:
+		"La estructura de los elementos se ha modificado en otro lugar. Actualiza la página e inténtalo de nuevo.",
 	DockRevisionConflict: `La ${dockTerms.inline} se ha modificado en otro lugar. Actualiza la página e inténtalo de nuevo.`,
 	DockNotFound: `No se ha encontrado esta ${dockTerms.inline}.`,
 	DockNotSupported: `Este contenido no admite esa ${dockTerms.inline}.`,

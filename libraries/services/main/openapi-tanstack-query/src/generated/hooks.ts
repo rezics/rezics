@@ -1550,6 +1550,25 @@ import type {
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500,
+	GetApiCollectionsByCollectionIdItemRevisionsOptions,
+	GetApiCollectionsByCollectionIdItemRevisionsStatus200,
+	GetApiCollectionsByCollectionIdItemRevisionsStatus404,
+	GetApiCollectionsByCollectionIdItemRevisionsStatus422,
+	GetApiCollectionsByCollectionIdItemRevisionsStatus500,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareOptions,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422,
+	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500,
 	PutApiCollectionsFavoritesItemsByTargetIdOptions,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus200,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus400,
@@ -2416,6 +2435,9 @@ import {
 	postApiCollectionsByCollectionIdItemsMove,
 	putApiCollectionsByCollectionIdItemsByTargetId,
 	deleteApiCollectionsByCollectionIdItemsByTargetId,
+	getApiCollectionsByCollectionIdItemRevisions,
+	getApiCollectionsByCollectionIdItemRevisionsCompare,
+	postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore,
 	putApiCollectionsFavoritesItemsByTargetId,
 	deleteApiCollectionsFavoritesItemsByTargetId,
 	getApiReviews,
@@ -26241,6 +26263,342 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
+		TContext
+	>;
+}
+
+export const getApiCollectionsByCollectionIdItemRevisionsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiCollectionsByCollectionIdItemRevisionsOptions, "headers">) =>
+	[
+		{ url: "/api/collections/:collectionId/item-revisions", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiCollectionsByCollectionIdItemRevisionsQueryKey = ReturnType<
+	typeof getApiCollectionsByCollectionIdItemRevisionsQueryKey
+>;
+
+export function getApiCollectionsByCollectionIdItemRevisionsQueryOptions(
+	{ path, query }: GetApiCollectionsByCollectionIdItemRevisionsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiCollectionsByCollectionIdItemRevisionsQueryKey({ path, query });
+	return queryOptions<
+		GetApiCollectionsByCollectionIdItemRevisionsStatus200,
+		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus404
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus422
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus500
+		>,
+		GetApiCollectionsByCollectionIdItemRevisionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiCollectionsByCollectionIdItemRevisions({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Collection item revisions
+ * {@link /api/collections/:collectionId/item-revisions}
+ */
+export function useGetApiCollectionsByCollectionIdItemRevisions<
+	TData = GetApiCollectionsByCollectionIdItemRevisionsStatus200,
+	TQueryData = GetApiCollectionsByCollectionIdItemRevisionsStatus200,
+	TQueryKey extends QueryKey = GetApiCollectionsByCollectionIdItemRevisionsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiCollectionsByCollectionIdItemRevisionsOptions["path"]
+			| (() => GetApiCollectionsByCollectionIdItemRevisionsOptions["path"]);
+		query?:
+			| GetApiCollectionsByCollectionIdItemRevisionsOptions["query"]
+			| (() => GetApiCollectionsByCollectionIdItemRevisionsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiCollectionsByCollectionIdItemRevisionsStatus200,
+				ResponseErrorConfig<
+					| GetApiCollectionsByCollectionIdItemRevisionsStatus404
+					| GetApiCollectionsByCollectionIdItemRevisionsStatus422
+					| GetApiCollectionsByCollectionIdItemRevisionsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiCollectionsByCollectionIdItemRevisionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiCollectionsByCollectionIdItemRevisionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus404
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus422
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiCollectionsByCollectionIdItemRevisionsCompareQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiCollectionsByCollectionIdItemRevisionsCompareOptions, "headers">) =>
+	[
+		{ url: "/api/collections/:collectionId/item-revisions/compare", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiCollectionsByCollectionIdItemRevisionsCompareQueryKey = ReturnType<
+	typeof getApiCollectionsByCollectionIdItemRevisionsCompareQueryKey
+>;
+
+export function getApiCollectionsByCollectionIdItemRevisionsCompareQueryOptions(
+	{ path, query }: GetApiCollectionsByCollectionIdItemRevisionsCompareOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiCollectionsByCollectionIdItemRevisionsCompareQueryKey({ path, query });
+	return queryOptions<
+		GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
+		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500
+		>,
+		GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiCollectionsByCollectionIdItemRevisionsCompare({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Compare Collection item revisions
+ * {@link /api/collections/:collectionId/item-revisions/compare}
+ */
+export function useGetApiCollectionsByCollectionIdItemRevisionsCompare<
+	TData = GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
+	TQueryData = GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
+	TQueryKey extends QueryKey = GetApiCollectionsByCollectionIdItemRevisionsCompareQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareOptions["path"]
+			| (() => GetApiCollectionsByCollectionIdItemRevisionsCompareOptions["path"]);
+		query:
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareOptions["query"]
+			| (() => GetApiCollectionsByCollectionIdItemRevisionsCompareOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
+				ResponseErrorConfig<
+					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
+					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
+					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422
+					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiCollectionsByCollectionIdItemRevisionsCompareQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiCollectionsByCollectionIdItemRevisionsCompareQueryOptions(
+				resolvedParams,
+				config,
+			),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationKey = () =>
+	[{ url: "/api/collections/:collectionId/item-revisions/:revisionId/restore" }] as const;
+
+export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationKey();
+	return mutationOptions<
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore(
+				{ ...config, path, body, throwOnError: true },
+			);
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Restore a Collection item revision
+ * {@link /api/collections/:collectionId/item-revisions/:revisionId/restore}
+ */
+export function usePostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200,
+			ResponseErrorConfig<
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500
+			>,
+			PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationKey();
+
+	const baseOptions =
+		postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200,
+			ResponseErrorConfig<
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422
+				| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500
+			>,
+			PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus400
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus404
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422
+			| PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500
+		>,
+		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
 		TContext
 	>;
 }

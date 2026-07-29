@@ -13,6 +13,7 @@ import {
 import {
 	collection,
 	collectionItem,
+	collectionStructureRevisionHead,
 	creditAttribution,
 	post,
 	profileFavoritesCollection,
@@ -34,18 +35,30 @@ import {
 	CollectionParams,
 	CollectionDetailQuery,
 	CollectionItemsQuery,
+	CollectionItemsRevisionBody,
+	CollectionStructureRevisionCompareQuery,
+	CollectionStructureRevisionCompareResponse,
+	CollectionStructureRevisionListQuery,
+	CollectionStructureRevisionListResponse,
+	CollectionStructureRevisionParams,
 	CollectionRevisionBody,
 	CreateCollectionBody,
 	FavoriteItemParams,
 	ListCollectionsQuery,
 	MoveCollectionItemsBody,
 	SaveCollectionItemBody,
+	RestoreCollectionStructureRevisionBody,
+	RestoreCollectionStructureRevisionResponse,
 	UpdateCollectionBody,
 } from "./schema";
 import { ensureFavorites } from "../../collections/favorites";
 import { getCollection, getCollectionContent } from "./service";
 import { validateCollectionParent } from "./hierarchy";
-import { FavoriteResponse, NoContentResponse, SavedResponse } from "../schema/action-response";
+import {
+	FavoriteResponse,
+	NoContentResponse,
+	SavedCollectionItemsResponse,
+} from "../schema/action-response";
 import {
 	toApiErrorResponse,
 	CollectionContentResponse,
@@ -60,6 +73,13 @@ import { createProfilePublisherAttribution } from "../../units/attribution";
 import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { getUnitUpdateCondition } from "../../authorization/unit/query";
 import { collectionSubtreeIds, orderedCollectionMoveRoots } from "./move";
+import {
+	createCollectionStructureHistory,
+	getCollectionStructureRevisionState,
+	listCollectionStructureRevisions,
+	mutateCollectionStructureWithHistory,
+	restoreCollectionStructureRevision,
+} from "../../collection-structure/history";
 
 const CollectionNotFoundResponse = toApiErrorResponse(["CollectionNotFound"]);
 const CollectionMutationNotFoundResponse = toApiErrorResponse([
@@ -74,7 +94,57 @@ const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const FavoritesEditResponse = toApiErrorResponse(["FavoritesEditForbidden"]);
 const FavoritesDeleteResponse = toApiErrorResponse(["FavoritesDeleteForbidden"]);
 const UnitRevisionConflictResponse = toApiErrorResponse(["UnitRevisionConflict"]);
+const CollectionStructureRevisionConflictResponse = toApiErrorResponse([
+	"CollectionStructureRevisionConflict",
+]);
 const InvalidPaginationCursorResponse = toApiErrorResponse(["InvalidPaginationCursor"]);
+
+function escapeRevisionPathSegment(value: string): string {
+	return value.replaceAll("~", "~0").replaceAll("/", "~1");
+}
+
+function compareCollectionStructureStates(
+	before: Awaited<ReturnType<typeof getCollectionStructureRevisionState>>,
+	after: Awaited<ReturnType<typeof getCollectionStructureRevisionState>>,
+) {
+	const changes: Array<{ path: string; before?: unknown; after?: unknown }> = [];
+	const beforeById = new Map(before.items.map((item) => [item.targetUnitId, item]));
+	const afterById = new Map(after.items.map((item) => [item.targetUnitId, item]));
+	const targetIds = [...new Set([...beforeById.keys(), ...afterById.keys()])].sort();
+	for (const targetId of targetIds) {
+		const previous = beforeById.get(targetId);
+		const next = afterById.get(targetId);
+		const path = `/items/${escapeRevisionPathSegment(targetId)}`;
+		if (!previous) {
+			changes.push({ path, after: next });
+			continue;
+		}
+		if (!next) {
+			changes.push({ path, before: previous });
+			continue;
+		}
+		for (const field of [
+			"parentTargetUnitId",
+			"position",
+			"addedByProfileId",
+			"addedAt",
+		] as const) {
+			const previousValue = previous[field];
+			const nextValue = next[field];
+			const equal =
+				previousValue instanceof Date && nextValue instanceof Date
+					? previousValue.getTime() === nextValue.getTime()
+					: previousValue === nextValue;
+			if (!equal)
+				changes.push({
+					path: `${path}/${field}`,
+					before: previousValue,
+					after: nextValue,
+				});
+		}
+	}
+	return changes;
+}
 
 async function ensureEditableCollection(tx: DatabaseTransaction, collectionId: string) {
 	const [record] = await tx
@@ -194,6 +264,7 @@ export default new Elysia({ prefix: "/collections" })
 						? sql<boolean>`exists(select 1 from ${collectionItem} selected_item where selected_item.collection_id = ${collection.id} and selected_item.unit_id = ${query.targetId})`
 						: sql<boolean>`false`,
 					latestRevisionId: unitRevisionHead.revisionId,
+					latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
 					coverAssetId: unitLocalization.coverAssetId,
@@ -202,6 +273,10 @@ export default new Elysia({ prefix: "/collections" })
 				.from(collection)
 				.innerJoin(unit, eq(unit.id, collection.id))
 				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
+				.innerJoin(
+					collectionStructureRevisionHead,
+					eq(collectionStructureRevisionHead.collectionId, collection.id),
+				)
 				.leftJoin(
 					profileFavoritesCollection,
 					eq(profileFavoritesCollection.collectionId, collection.id),
@@ -328,6 +403,10 @@ export default new Elysia({ prefix: "/collections" })
 					unitId: created.id,
 					actorProfileId: profile.unitId,
 					event: "create",
+				});
+				await createCollectionStructureHistory(tx, {
+					collectionId: created.id,
+					actorProfileId: profile.unitId,
 				});
 				return created.id;
 			});
@@ -537,69 +616,75 @@ export default new Elysia({ prefix: "/collections" })
 			if (body.items.some(({ targetId }) => targetId === params.collectionId))
 				throw new ValidationError({ items: "a Collection cannot contain itself" });
 			return database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
-				);
-				await ensureEditableCollection(tx, params.collectionId);
-				for (const item of body.items) {
-					const decision = await authorization.unit.decideInTransaction(
-						tx,
-						item.targetId,
-						"unit.read",
-					);
-					if (!decision.allowed) throw new UnitNotFound();
-				}
-				const targetIds = body.items.map(({ targetId }) => targetId);
-				const existing = await tx
-					.select({ unitId: collectionItem.unitId })
-					.from(collectionItem)
-					.where(
-						and(
-							eq(collectionItem.collectionId, params.collectionId),
-							inArray(collectionItem.unitId, targetIds),
-						),
-					);
-				const existingIds = new Set(existing.map(({ unitId }) => unitId));
-				const pending = body.items.filter(({ targetId }) => !existingIds.has(targetId));
-				const [last] = await tx
-					.select({ position: collectionItem.position })
-					.from(collectionItem)
-					.where(
-						and(
-							eq(collectionItem.collectionId, params.collectionId),
-							isNull(collectionItem.parentUnitId),
-						),
-					)
-					.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
-					.limit(1);
-				let lastPosition = last?.position;
-				const values = pending.map((item) => {
-					const position = fractionalPositionBetween(lastPosition, null);
-					lastPosition = position;
-					return {
+				const result = await mutateCollectionStructureWithHistory(
+					tx,
+					{
 						collectionId: params.collectionId,
-						unitId: item.targetId,
-						parentUnitId: null,
-						position,
-						addedByProfileId: profile.unitId,
-					};
-				});
-				if (values.length) {
-					await tx.insert(collectionItem).values(values).onConflictDoNothing();
-					await recordUnitRevision(tx, {
-						unitId: params.collectionId,
 						actorProfileId: profile.unitId,
-						event: "update",
-						baseRevisionId: body.baseRevisionId,
-					});
-				}
+						baseRevisionId: body.baseItemsRevisionId,
+					},
+					async () => {
+						await ensureEditableCollection(tx, params.collectionId);
+						for (const item of body.items) {
+							const decision = await authorization.unit.decideInTransaction(
+								tx,
+								item.targetId,
+								"unit.read",
+							);
+							if (!decision.allowed) throw new UnitNotFound();
+						}
+						const targetIds = body.items.map(({ targetId }) => targetId);
+						const existing = await tx
+							.select({ unitId: collectionItem.unitId })
+							.from(collectionItem)
+							.where(
+								and(
+									eq(collectionItem.collectionId, params.collectionId),
+									inArray(collectionItem.unitId, targetIds),
+								),
+							);
+						const existingIds = new Set(existing.map(({ unitId }) => unitId));
+						const pending = body.items.filter(
+							({ targetId }) => !existingIds.has(targetId),
+						);
+						const [last] = await tx
+							.select({ position: collectionItem.position })
+							.from(collectionItem)
+							.where(
+								and(
+									eq(collectionItem.collectionId, params.collectionId),
+									isNull(collectionItem.parentUnitId),
+								),
+							)
+							.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+							.limit(1);
+						let lastPosition = last?.position;
+						const values = pending.map((item) => {
+							const position = fractionalPositionBetween(lastPosition, null);
+							lastPosition = position;
+							return {
+								collectionId: params.collectionId,
+								unitId: item.targetId,
+								parentUnitId: null,
+								position,
+								addedByProfileId: profile.unitId,
+							};
+						});
+						if (values.length)
+							await tx.insert(collectionItem).values(values).onConflictDoNothing();
+						return {
+							items: body.items.map(({ targetId }) => ({
+								targetId,
+								state: existingIds.has(targetId)
+									? ("existing" as const)
+									: ("created" as const),
+							})),
+						};
+					},
+				);
 				return {
-					items: body.items.map(({ targetId }) => ({
-						targetId,
-						state: existingIds.has(targetId)
-							? ("existing" as const)
-							: ("created" as const),
-					})),
+					items: result.items,
+					latestItemsRevisionId: result.revisionId,
 				};
 			});
 		},
@@ -614,7 +699,7 @@ export default new Elysia({ prefix: "/collections" })
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: t.Union([
 					FavoritesEditResponse,
-					UnitRevisionConflictResponse,
+					CollectionStructureRevisionConflictResponse,
 				]),
 			},
 			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
@@ -624,143 +709,151 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId/items/move",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const latestRevisionId = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
-				);
-				await ensureEditableCollection(tx, params.collectionId);
-				const memberships = await tx
-					.select({
-						unitId: collectionItem.unitId,
-						parentUnitId: collectionItem.parentUnitId,
-						position: collectionItem.position,
-					})
-					.from(collectionItem)
-					.where(eq(collectionItem.collectionId, params.collectionId))
-					.orderBy(
-						asc(collectionItem.parentUnitId),
-						asc(collectionItem.position),
-						asc(collectionItem.unitId),
-					);
-				const membershipById = new Map(
-					memberships.map((membership) => [membership.unitId, membership]),
-				);
-				const selectedIds = new Set(body.targetIds);
-				if (selectedIds.size !== body.targetIds.length)
-					throw new ValidationError({ targetIds: "targetId values must be unique" });
-				if (body.targetIds.some((targetId) => !membershipById.has(targetId)))
-					throw new ValidationError({
-						targetIds: "every moved item must belong to this Collection",
-					});
-				const moveRootIds = orderedCollectionMoveRoots(selectedIds, memberships);
-				const movingSubtreeIds = collectionSubtreeIds(moveRootIds, memberships);
+			const result = await database.transaction(async (tx) =>
+				mutateCollectionStructureWithHistory(
+					tx,
+					{
+						collectionId: params.collectionId,
+						actorProfileId: profile.unitId,
+						baseRevisionId: body.baseItemsRevisionId,
+					},
+					async () => {
+						await ensureEditableCollection(tx, params.collectionId);
+						const memberships = await tx
+							.select({
+								unitId: collectionItem.unitId,
+								parentUnitId: collectionItem.parentUnitId,
+								position: collectionItem.position,
+							})
+							.from(collectionItem)
+							.where(eq(collectionItem.collectionId, params.collectionId))
+							.orderBy(
+								asc(collectionItem.parentUnitId),
+								asc(collectionItem.position),
+								asc(collectionItem.unitId),
+							);
+						const membershipById = new Map(
+							memberships.map((membership) => [membership.unitId, membership]),
+						);
+						const selectedIds = new Set(body.targetIds);
+						if (selectedIds.size !== body.targetIds.length)
+							throw new ValidationError({
+								targetIds: "targetId values must be unique",
+							});
+						if (body.targetIds.some((targetId) => !membershipById.has(targetId)))
+							throw new ValidationError({
+								targetIds: "every moved item must belong to this Collection",
+							});
+						const moveRootIds = orderedCollectionMoveRoots(selectedIds, memberships);
+						const movingSubtreeIds = collectionSubtreeIds(moveRootIds, memberships);
 
-				let destinationParentId: string | null;
-				let beforePosition: string | null;
-				let afterPosition: string | null;
-				if (body.placement.kind === "after") {
-					const anchor = membershipById.get(body.placement.targetId);
-					if (!anchor)
-						throw new ValidationError({
-							placement: "the destination item must belong to this Collection",
-						});
-					if (movingSubtreeIds.has(anchor.unitId))
-						throw new ValidationError({
-							placement: "the destination cannot be inside a moved subtree",
-						});
-					destinationParentId = anchor.parentUnitId;
-					const siblings = memberships.filter(
-						(membership) =>
-							membership.parentUnitId === destinationParentId &&
-							!moveRootIds.includes(membership.unitId),
-					);
-					const anchorIndex = siblings.findIndex(
-						(membership) => membership.unitId === anchor.unitId,
-					);
-					if (anchorIndex < 0)
-						throw new ValidationError({ placement: "the destination is invalid" });
-					beforePosition = anchor.position;
-					afterPosition = siblings[anchorIndex + 1]?.position ?? null;
-				} else {
-					destinationParentId = body.placement.parentTargetId;
-					if (
-						destinationParentId &&
-						(!membershipById.has(destinationParentId) ||
-							movingSubtreeIds.has(destinationParentId))
-					)
-						throw new ValidationError({
-							placement: "the parent must be outside every moved subtree",
-						});
-					const siblings = memberships.filter(
-						(membership) =>
-							membership.parentUnitId === destinationParentId &&
-							!moveRootIds.includes(membership.unitId),
-					);
-					if (body.placement.kind === "start") {
-						beforePosition = null;
-						afterPosition = siblings[0]?.position ?? null;
-					} else {
-						beforePosition = siblings.at(-1)?.position ?? null;
-						afterPosition = null;
-					}
-				}
-				const positions = fractionalPositionsBetween(
-					beforePosition,
-					afterPosition,
-					moveRootIds.length,
-				);
-				for (const unitId of moveRootIds)
-					await tx
-						.update(collectionItem)
-						.set({
-							parentUnitId: destinationParentId,
-							position: `~moving-${unitId}`,
-						})
-						.where(
-							and(
-								eq(collectionItem.collectionId, params.collectionId),
-								eq(collectionItem.unitId, unitId),
-							),
+						let destinationParentId: string | null;
+						let beforePosition: string | null;
+						let afterPosition: string | null;
+						if (body.placement.kind === "after") {
+							const anchor = membershipById.get(body.placement.targetId);
+							if (!anchor)
+								throw new ValidationError({
+									placement:
+										"the destination item must belong to this Collection",
+								});
+							if (movingSubtreeIds.has(anchor.unitId))
+								throw new ValidationError({
+									placement: "the destination cannot be inside a moved subtree",
+								});
+							destinationParentId = anchor.parentUnitId;
+							const siblings = memberships.filter(
+								(membership) =>
+									membership.parentUnitId === destinationParentId &&
+									!moveRootIds.includes(membership.unitId),
+							);
+							const anchorIndex = siblings.findIndex(
+								(membership) => membership.unitId === anchor.unitId,
+							);
+							if (anchorIndex < 0)
+								throw new ValidationError({
+									placement: "the destination is invalid",
+								});
+							beforePosition = anchor.position;
+							afterPosition = siblings[anchorIndex + 1]?.position ?? null;
+						} else {
+							destinationParentId = body.placement.parentTargetId;
+							if (
+								destinationParentId &&
+								(!membershipById.has(destinationParentId) ||
+									movingSubtreeIds.has(destinationParentId))
+							)
+								throw new ValidationError({
+									placement: "the parent must be outside every moved subtree",
+								});
+							const siblings = memberships.filter(
+								(membership) =>
+									membership.parentUnitId === destinationParentId &&
+									!moveRootIds.includes(membership.unitId),
+							);
+							if (body.placement.kind === "start") {
+								beforePosition = null;
+								afterPosition = siblings[0]?.position ?? null;
+							} else {
+								beforePosition = siblings.at(-1)?.position ?? null;
+								afterPosition = null;
+							}
+						}
+						const positions = fractionalPositionsBetween(
+							beforePosition,
+							afterPosition,
+							moveRootIds.length,
 						);
-				for (const [index, unitId] of moveRootIds.entries()) {
-					const position = positions[index];
-					if (!position)
-						throw new Error("Fractional position generation returned too few values");
-					await tx
-						.update(collectionItem)
-						.set({
-							parentUnitId: destinationParentId,
-							position,
-						})
-						.where(
-							and(
-								eq(collectionItem.collectionId, params.collectionId),
-								eq(collectionItem.unitId, unitId),
-							),
-						);
-				}
-				const revision = await recordUnitRevision(tx, {
-					unitId: params.collectionId,
-					actorProfileId: profile.unitId,
-					event: "update",
-					baseRevisionId: body.baseRevisionId,
-				});
-				return revision.revisionId;
-			});
-			return { saved: true, latestRevisionId };
+						for (const unitId of moveRootIds)
+							await tx
+								.update(collectionItem)
+								.set({
+									parentUnitId: destinationParentId,
+									position: `~moving-${unitId}`,
+								})
+								.where(
+									and(
+										eq(collectionItem.collectionId, params.collectionId),
+										eq(collectionItem.unitId, unitId),
+									),
+								);
+						for (const [index, unitId] of moveRootIds.entries()) {
+							const position = positions[index];
+							if (!position)
+								throw new Error(
+									"Fractional position generation returned too few values",
+								);
+							await tx
+								.update(collectionItem)
+								.set({
+									parentUnitId: destinationParentId,
+									position,
+								})
+								.where(
+									and(
+										eq(collectionItem.collectionId, params.collectionId),
+										eq(collectionItem.unitId, unitId),
+									),
+								);
+						}
+						return { saved: true };
+					},
+				),
+			);
+			return { saved: result.saved, latestItemsRevisionId: result.revisionId };
 		},
 		{
 			access: "write:unit:update",
 			params: CollectionParams,
 			body: MoveCollectionItemsBody,
 			response: {
-				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.OK]: SavedCollectionItemsResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: t.Union([
 					FavoritesEditResponse,
-					UnitRevisionConflictResponse,
+					CollectionStructureRevisionConflictResponse,
 				]),
 			},
 			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
@@ -773,163 +866,168 @@ export default new Elysia({ prefix: "/collections" })
 			if (params.targetId === params.collectionId)
 				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
 			await authorization.unit.ensureCanRead(params.targetId);
-			const latestRevisionId = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
-				);
-				await ensureEditableCollection(tx, params.collectionId);
-				if (body.placement === "review-with-subject") {
-					if (body.parentTargetId !== undefined)
-						throw new ValidationError({
-							placement: "review placement derives its parent and position",
-						});
-					const [review] = await tx
-						.select({ kind: post.kind, subjectUnitId: post.subjectUnitId })
-						.from(post)
-						.where(eq(post.id, params.targetId))
-						.limit(1);
-					if (review?.kind !== "review" || !review.subjectUnitId)
-						throw new ValidationError({
-							targetId: "review placement requires a Review target",
-						});
-					if (review.subjectUnitId === params.collectionId)
-						throw new ValidationError({
-							targetId: "a Collection cannot contain itself as a Review subject",
-						});
-					const subjectDecision = await authorization.unit.decideInTransaction(
-						tx,
-						review.subjectUnitId,
-						"unit.read",
-					);
-					if (!subjectDecision.allowed) throw new UnitNotFound();
-					const [subjectMembership] = await tx
-						.select({ unitId: collectionItem.unitId })
-						.from(collectionItem)
-						.where(
-							and(
-								eq(collectionItem.collectionId, params.collectionId),
-								eq(collectionItem.unitId, review.subjectUnitId),
-							),
-						)
-						.limit(1);
-					if (!subjectMembership) {
-						await tx.insert(collectionItem).values({
-							collectionId: params.collectionId,
-							unitId: review.subjectUnitId,
-							parentUnitId: null,
-							position: await nextCollectionItemPosition(tx, params.collectionId),
-							addedByProfileId: profile.unitId,
-						});
-					}
-					await ensureValidCollectionParent(tx, {
+			const result = await database.transaction(async (tx) =>
+				mutateCollectionStructureWithHistory(
+					tx,
+					{
 						collectionId: params.collectionId,
-						targetId: params.targetId,
-						parentTargetId: review.subjectUnitId,
-					});
-					const [reviewMembership] = await tx
-						.select({
-							parentUnitId: collectionItem.parentUnitId,
-							position: collectionItem.position,
-						})
-						.from(collectionItem)
-						.where(
-							and(
-								eq(collectionItem.collectionId, params.collectionId),
-								eq(collectionItem.unitId, params.targetId),
-							),
-						)
-						.limit(1);
-					const position =
-						reviewMembership?.parentUnitId === review.subjectUnitId
-							? reviewMembership.position
-							: await nextCollectionItemPosition(
-									tx,
-									params.collectionId,
-									review.subjectUnitId,
-								);
-					await tx
-						.insert(collectionItem)
-						.values({
-							collectionId: params.collectionId,
-							unitId: params.targetId,
-							parentUnitId: review.subjectUnitId,
-							position,
-							addedByProfileId: profile.unitId,
-						})
-						.onConflictDoUpdate({
-							target: [collectionItem.collectionId, collectionItem.unitId],
-							set: {
-								parentUnitId: review.subjectUnitId,
-								position,
-							},
-						});
-				} else {
-					const parentTargetId = body.parentTargetId ?? null;
-					await ensureValidCollectionParent(tx, {
-						collectionId: params.collectionId,
-						targetId: params.targetId,
-						parentTargetId,
-					});
-					const [existing] = await tx
-						.select({
-							parentUnitId: collectionItem.parentUnitId,
-							position: collectionItem.position,
-						})
-						.from(collectionItem)
-						.where(
-							and(
-								eq(collectionItem.collectionId, params.collectionId),
-								eq(collectionItem.unitId, params.targetId),
-							),
-						)
-						.limit(1);
-					const position =
-						existing?.parentUnitId === parentTargetId
-							? existing.position
-							: await nextCollectionItemPosition(
-									tx,
-									params.collectionId,
-									parentTargetId,
-								);
-					await tx
-						.insert(collectionItem)
-						.values({
-							collectionId: params.collectionId,
-							unitId: params.targetId,
-							parentUnitId: parentTargetId,
-							position,
-							addedByProfileId: profile.unitId,
-						})
-						.onConflictDoUpdate({
-							target: [collectionItem.collectionId, collectionItem.unitId],
-							set: {
-								parentUnitId: parentTargetId,
-								position,
-							},
-						});
-				}
-				const revision = await recordUnitRevision(tx, {
-					unitId: params.collectionId,
-					actorProfileId: profile.unitId,
-					event: "update",
-					baseRevisionId: body.baseRevisionId,
-				});
-				return revision.revisionId;
-			});
-			return { saved: true, latestRevisionId };
+						actorProfileId: profile.unitId,
+						baseRevisionId: body.baseItemsRevisionId,
+					},
+					async () => {
+						await ensureEditableCollection(tx, params.collectionId);
+						if (body.placement === "review-with-subject") {
+							if (body.parentTargetId !== undefined)
+								throw new ValidationError({
+									placement: "review placement derives its parent and position",
+								});
+							const [review] = await tx
+								.select({ kind: post.kind, subjectUnitId: post.subjectUnitId })
+								.from(post)
+								.where(eq(post.id, params.targetId))
+								.limit(1);
+							if (review?.kind !== "review" || !review.subjectUnitId)
+								throw new ValidationError({
+									targetId: "review placement requires a Review target",
+								});
+							if (review.subjectUnitId === params.collectionId)
+								throw new ValidationError({
+									targetId:
+										"a Collection cannot contain itself as a Review subject",
+								});
+							const subjectDecision = await authorization.unit.decideInTransaction(
+								tx,
+								review.subjectUnitId,
+								"unit.read",
+							);
+							if (!subjectDecision.allowed) throw new UnitNotFound();
+							const [subjectMembership] = await tx
+								.select({ unitId: collectionItem.unitId })
+								.from(collectionItem)
+								.where(
+									and(
+										eq(collectionItem.collectionId, params.collectionId),
+										eq(collectionItem.unitId, review.subjectUnitId),
+									),
+								)
+								.limit(1);
+							if (!subjectMembership) {
+								await tx.insert(collectionItem).values({
+									collectionId: params.collectionId,
+									unitId: review.subjectUnitId,
+									parentUnitId: null,
+									position: await nextCollectionItemPosition(
+										tx,
+										params.collectionId,
+									),
+									addedByProfileId: profile.unitId,
+								});
+							}
+							await ensureValidCollectionParent(tx, {
+								collectionId: params.collectionId,
+								targetId: params.targetId,
+								parentTargetId: review.subjectUnitId,
+							});
+							const [reviewMembership] = await tx
+								.select({
+									parentUnitId: collectionItem.parentUnitId,
+									position: collectionItem.position,
+								})
+								.from(collectionItem)
+								.where(
+									and(
+										eq(collectionItem.collectionId, params.collectionId),
+										eq(collectionItem.unitId, params.targetId),
+									),
+								)
+								.limit(1);
+							const position =
+								reviewMembership?.parentUnitId === review.subjectUnitId
+									? reviewMembership.position
+									: await nextCollectionItemPosition(
+											tx,
+											params.collectionId,
+											review.subjectUnitId,
+										);
+							await tx
+								.insert(collectionItem)
+								.values({
+									collectionId: params.collectionId,
+									unitId: params.targetId,
+									parentUnitId: review.subjectUnitId,
+									position,
+									addedByProfileId: profile.unitId,
+								})
+								.onConflictDoUpdate({
+									target: [collectionItem.collectionId, collectionItem.unitId],
+									set: {
+										parentUnitId: review.subjectUnitId,
+										position,
+									},
+								});
+						} else {
+							const parentTargetId = body.parentTargetId ?? null;
+							await ensureValidCollectionParent(tx, {
+								collectionId: params.collectionId,
+								targetId: params.targetId,
+								parentTargetId,
+							});
+							const [existing] = await tx
+								.select({
+									parentUnitId: collectionItem.parentUnitId,
+									position: collectionItem.position,
+								})
+								.from(collectionItem)
+								.where(
+									and(
+										eq(collectionItem.collectionId, params.collectionId),
+										eq(collectionItem.unitId, params.targetId),
+									),
+								)
+								.limit(1);
+							const position =
+								existing?.parentUnitId === parentTargetId
+									? existing.position
+									: await nextCollectionItemPosition(
+											tx,
+											params.collectionId,
+											parentTargetId,
+										);
+							await tx
+								.insert(collectionItem)
+								.values({
+									collectionId: params.collectionId,
+									unitId: params.targetId,
+									parentUnitId: parentTargetId,
+									position,
+									addedByProfileId: profile.unitId,
+								})
+								.onConflictDoUpdate({
+									target: [collectionItem.collectionId, collectionItem.unitId],
+									set: {
+										parentUnitId: parentTargetId,
+										position,
+									},
+								});
+						}
+						return { saved: true };
+					},
+				),
+			);
+			return { saved: result.saved, latestItemsRevisionId: result.revisionId };
 		},
 		{
 			access: "write:unit:update",
 			params: CollectionItemParams,
 			body: SaveCollectionItemBody,
 			response: {
-				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.OK]: SavedCollectionItemsResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: t.Union([
 					FavoritesEditResponse,
-					UnitRevisionConflictResponse,
+					CollectionStructureRevisionConflictResponse,
 				]),
 			},
 			detail: { summary: "Save collection item", tags: ["Collections"] },
@@ -939,100 +1037,198 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId/items/:targetId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const latestRevisionId = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
-				);
-				await ensureEditableCollection(tx, params.collectionId);
-				const children = await tx
-					.select({
-						unitId: collectionItem.unitId,
-						position: collectionItem.position,
-					})
-					.from(collectionItem)
-					.where(
-						and(
-							eq(collectionItem.collectionId, params.collectionId),
-							eq(collectionItem.parentUnitId, params.targetId),
-						),
-					)
-					.orderBy(asc(collectionItem.position), asc(collectionItem.unitId));
-				if (children.length) {
-					const [lastRoot] = await tx
-						.select({ position: collectionItem.position })
-						.from(collectionItem)
-						.where(
-							and(
-								eq(collectionItem.collectionId, params.collectionId),
-								isNull(collectionItem.parentUnitId),
-								ne(collectionItem.unitId, params.targetId),
-							),
-						)
-						.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
-						.limit(1);
-					const positions = fractionalPositionsBetween(
-						lastRoot?.position,
-						null,
-						children.length,
-					);
-					for (const child of children)
-						await tx
-							.update(collectionItem)
-							.set({ parentUnitId: null, position: `~promoting-${child.unitId}` })
+			const result = await database.transaction(async (tx) =>
+				mutateCollectionStructureWithHistory(
+					tx,
+					{
+						collectionId: params.collectionId,
+						actorProfileId: profile.unitId,
+						baseRevisionId: body.baseItemsRevisionId,
+					},
+					async () => {
+						await ensureEditableCollection(tx, params.collectionId);
+						const children = await tx
+							.select({
+								unitId: collectionItem.unitId,
+								position: collectionItem.position,
+							})
+							.from(collectionItem)
 							.where(
 								and(
 									eq(collectionItem.collectionId, params.collectionId),
-									eq(collectionItem.unitId, child.unitId),
+									eq(collectionItem.parentUnitId, params.targetId),
 								),
+							)
+							.orderBy(asc(collectionItem.position), asc(collectionItem.unitId));
+						if (children.length) {
+							const [lastRoot] = await tx
+								.select({ position: collectionItem.position })
+								.from(collectionItem)
+								.where(
+									and(
+										eq(collectionItem.collectionId, params.collectionId),
+										isNull(collectionItem.parentUnitId),
+										ne(collectionItem.unitId, params.targetId),
+									),
+								)
+								.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+								.limit(1);
+							const positions = fractionalPositionsBetween(
+								lastRoot?.position,
+								null,
+								children.length,
 							);
-					for (const [index, child] of children.entries()) {
-						const position = positions[index];
-						if (!position)
-							throw new Error(
-								"Fractional position generation returned too few values",
-							);
+							for (const child of children)
+								await tx
+									.update(collectionItem)
+									.set({
+										parentUnitId: null,
+										position: `~promoting-${child.unitId}`,
+									})
+									.where(
+										and(
+											eq(collectionItem.collectionId, params.collectionId),
+											eq(collectionItem.unitId, child.unitId),
+										),
+									);
+							for (const [index, child] of children.entries()) {
+								const position = positions[index];
+								if (!position)
+									throw new Error(
+										"Fractional position generation returned too few values",
+									);
+								await tx
+									.update(collectionItem)
+									.set({ position })
+									.where(
+										and(
+											eq(collectionItem.collectionId, params.collectionId),
+											eq(collectionItem.unitId, child.unitId),
+										),
+									);
+							}
+						}
 						await tx
-							.update(collectionItem)
-							.set({ position })
+							.delete(collectionItem)
 							.where(
 								and(
 									eq(collectionItem.collectionId, params.collectionId),
-									eq(collectionItem.unitId, child.unitId),
+									eq(collectionItem.unitId, params.targetId),
 								),
 							);
-					}
-				}
-				await tx
-					.delete(collectionItem)
-					.where(
-						and(
-							eq(collectionItem.collectionId, params.collectionId),
-							eq(collectionItem.unitId, params.targetId),
-						),
-					);
-				const revision = await recordUnitRevision(tx, {
-					unitId: params.collectionId,
-					actorProfileId: profile.unitId,
-					event: "update",
-					baseRevisionId: body.baseRevisionId,
-				});
-				return revision.revisionId;
-			});
-			return { saved: false, latestRevisionId };
+						return { saved: false };
+					},
+				),
+			);
+			return { saved: result.saved, latestItemsRevisionId: result.revisionId };
 		},
 		{
 			access: "write:unit:update",
 			params: CollectionItemParams,
-			body: CollectionRevisionBody,
+			body: CollectionItemsRevisionBody,
 			response: {
-				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.OK]: SavedCollectionItemsResponse,
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.CONFLICT]: t.Union([
 					FavoritesEditResponse,
-					UnitRevisionConflictResponse,
+					CollectionStructureRevisionConflictResponse,
 				]),
 			},
 			detail: { summary: "Remove collection item", tags: ["Collections"] },
+		},
+	)
+	.get(
+		"/:collectionId/item-revisions",
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			await authorization.unit.ensureCanRead(params.collectionId);
+			return database.transaction(async (tx) => ({
+				items: await listCollectionStructureRevisions(
+					tx,
+					params.collectionId,
+					query.limit ?? 50,
+				),
+			}));
+		},
+		{
+			params: CollectionParams,
+			query: CollectionStructureRevisionListQuery,
+			response: {
+				[StatusCodes.OK]: CollectionStructureRevisionListResponse,
+				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
+			},
+			detail: { summary: "List Collection item revisions", tags: ["Collections"] },
+		},
+	)
+	.get(
+		"/:collectionId/item-revisions/compare",
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			await authorization.unit.ensureCanRead(params.collectionId);
+			return database.transaction(async (tx) => {
+				const [before, after] = await Promise.all([
+					getCollectionStructureRevisionState(tx, {
+						collectionId: params.collectionId,
+						revisionId: query.from,
+					}),
+					getCollectionStructureRevisionState(tx, {
+						collectionId: params.collectionId,
+						revisionId: query.to,
+					}),
+				]);
+				return {
+					fromRevisionId: query.from,
+					toRevisionId: query.to,
+					changes: compareCollectionStructureStates(before, after),
+				};
+			});
+		},
+		{
+			params: CollectionParams,
+			query: CollectionStructureRevisionCompareQuery,
+			response: {
+				[StatusCodes.OK]: CollectionStructureRevisionCompareResponse,
+				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
+				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
+			},
+			detail: { summary: "Compare Collection item revisions", tags: ["Collections"] },
+		},
+	)
+	.post(
+		"/:collectionId/item-revisions/:revisionId/restore",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensure(params.collectionId, "unit.history.restore");
+			const result = await database.transaction(async (tx) => {
+				await ensureEditableCollection(tx, params.collectionId);
+				return restoreCollectionStructureRevision(tx, {
+					collectionId: params.collectionId,
+					sourceRevisionId: params.revisionId,
+					baseRevisionId: body.baseItemsRevisionId,
+					actorProfileId: profile.unitId,
+					message: body.message,
+					minor: body.minor,
+				});
+			});
+			return {
+				updated: true as const,
+				latestItemsRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "session-only",
+			params: CollectionStructureRevisionParams,
+			body: RestoreCollectionStructureRevisionBody,
+			response: {
+				[StatusCodes.OK]: RestoreCollectionStructureRevisionResponse,
+				[StatusCodes.CONFLICT]: t.Union([
+					FavoritesEditResponse,
+					CollectionStructureRevisionConflictResponse,
+				]),
+				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
+			},
+			detail: { summary: "Restore a Collection item revision", tags: ["Collections"] },
 		},
 	)
 	.put(
@@ -1040,38 +1236,43 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanRead(params.targetId);
 			const collectionId = await ensureFavorites(profile.unitId);
-			const latestRevisionId = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${collectionId}::text, 0))`,
-				);
-				await tx
-					.insert(collectionItem)
-					.values({
+			const result = await database.transaction(async (tx) =>
+				mutateCollectionStructureWithHistory(
+					tx,
+					{
 						collectionId,
-						unitId: params.targetId,
-						parentUnitId: null,
-						position: await nextCollectionItemPosition(tx, collectionId),
-						addedByProfileId: profile.unitId,
-					})
-					.onConflictDoNothing();
-				const revision = await recordUnitRevision(tx, {
-					unitId: collectionId,
-					actorProfileId: profile.unitId,
-					event: "update",
-					baseRevisionId: body.baseRevisionId,
-				});
-				return revision.revisionId;
-			});
-			return { favorited: true, collectionId, latestRevisionId };
+						actorProfileId: profile.unitId,
+						baseRevisionId: body.baseItemsRevisionId,
+					},
+					async () => {
+						await tx
+							.insert(collectionItem)
+							.values({
+								collectionId,
+								unitId: params.targetId,
+								parentUnitId: null,
+								position: await nextCollectionItemPosition(tx, collectionId),
+								addedByProfileId: profile.unitId,
+							})
+							.onConflictDoNothing();
+						return { favorited: true };
+					},
+				),
+			);
+			return {
+				favorited: result.favorited,
+				collectionId,
+				latestItemsRevisionId: result.revisionId,
+			};
 		},
 		{
 			access: "write:unit:update",
 			params: FavoriteItemParams,
-			body: CollectionRevisionBody,
+			body: CollectionItemsRevisionBody,
 			response: {
 				[StatusCodes.OK]: FavoriteResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: UnitRevisionConflictResponse,
+				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
 			},
 			detail: { summary: "Favorite unit", tags: ["Collections"] },
 		},
@@ -1080,35 +1281,40 @@ export default new Elysia({ prefix: "/collections" })
 		"/favorites/items/:targetId",
 		async ({ params, profile, body }) => {
 			const collectionId = await ensureFavorites(profile.unitId);
-			const latestRevisionId = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${collectionId}::text, 0))`,
-				);
-				await tx
-					.delete(collectionItem)
-					.where(
-						and(
-							eq(collectionItem.collectionId, collectionId),
-							eq(collectionItem.unitId, params.targetId),
-						),
-					);
-				const revision = await recordUnitRevision(tx, {
-					unitId: collectionId,
-					actorProfileId: profile.unitId,
-					event: "update",
-					baseRevisionId: body.baseRevisionId,
-				});
-				return revision.revisionId;
-			});
-			return { favorited: false, collectionId, latestRevisionId };
+			const result = await database.transaction(async (tx) =>
+				mutateCollectionStructureWithHistory(
+					tx,
+					{
+						collectionId,
+						actorProfileId: profile.unitId,
+						baseRevisionId: body.baseItemsRevisionId,
+					},
+					async () => {
+						await tx
+							.delete(collectionItem)
+							.where(
+								and(
+									eq(collectionItem.collectionId, collectionId),
+									eq(collectionItem.unitId, params.targetId),
+								),
+							);
+						return { favorited: false };
+					},
+				),
+			);
+			return {
+				favorited: result.favorited,
+				collectionId,
+				latestItemsRevisionId: result.revisionId,
+			};
 		},
 		{
 			access: "write:unit:update",
 			params: FavoriteItemParams,
-			body: CollectionRevisionBody,
+			body: CollectionItemsRevisionBody,
 			response: {
 				[StatusCodes.OK]: FavoriteResponse,
-				[StatusCodes.CONFLICT]: UnitRevisionConflictResponse,
+				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
 			},
 			detail: { summary: "Remove favorite unit", tags: ["Collections"] },
 		},

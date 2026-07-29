@@ -9902,6 +9902,7 @@
 					"CollectionNotFound",
 					"FavoritesEditForbidden",
 					"FavoritesDeleteForbidden",
+					"CollectionStructureRevisionConflict",
 					"RealmNotFound",
 					"RealmMembershipNotFound",
 					"RealmOwnerLeaveForbidden",
@@ -94078,6 +94079,7 @@
 													"acceptsItems",
 													"attributions",
 													"latestRevisionId",
+													"latestItemsRevisionId",
 													"title",
 													"summary",
 													"cover",
@@ -94372,6 +94374,10 @@
 														}
 													},
 													"latestRevisionId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"latestItemsRevisionId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -94871,6 +94877,7 @@
 										"itemCount",
 										"attributions",
 										"latestRevisionId",
+										"latestItemsRevisionId",
 										"createdAt",
 										"updatedAt",
 										"localizations",
@@ -95150,6 +95157,10 @@
 											}
 										},
 										"latestRevisionId": { "format": "uuid", "type": "string" },
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
 										"localizations": {
@@ -95486,6 +95497,7 @@
 										"itemCount",
 										"attributions",
 										"latestRevisionId",
+										"latestItemsRevisionId",
 										"createdAt",
 										"updatedAt",
 										"localizations",
@@ -95765,6 +95777,10 @@
 											}
 										},
 										"latestRevisionId": { "format": "uuid", "type": "string" },
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
 										"localizations": {
@@ -102399,6 +102415,7 @@
 										"itemCount",
 										"attributions",
 										"latestRevisionId",
+										"latestItemsRevisionId",
 										"createdAt",
 										"updatedAt",
 										"localizations",
@@ -102678,6 +102695,10 @@
 											}
 										},
 										"latestRevisionId": { "format": "uuid", "type": "string" },
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
 										"localizations": {
@@ -103346,6 +103367,7 @@
 										"itemCount",
 										"attributions",
 										"latestRevisionId",
+										"latestItemsRevisionId",
 										"createdAt",
 										"updatedAt",
 										"localizations",
@@ -103625,6 +103647,10 @@
 											}
 										},
 										"latestRevisionId": { "format": "uuid", "type": "string" },
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
 										"localizations": {
@@ -104198,9 +104224,9 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseRevisionId", "items"],
+								"required": ["baseItemsRevisionId", "items"],
 								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" },
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
 									"items": {
 										"minItems": 1,
 										"maxItems": 20,
@@ -104228,7 +104254,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "latestItemsRevisionId"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -104247,6 +104273,10 @@
 													}
 												}
 											}
+										},
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
 										}
 									}
 								}
@@ -104353,9 +104383,11 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "UnitRevisionConflict",
+															"default": "CollectionStructureRevisionConflict",
 															"type": "string",
-															"enum": ["UnitRevisionConflict"]
+															"enum": [
+																"CollectionStructureRevisionConflict"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -104467,9 +104499,9 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseRevisionId", "targetIds", "placement"],
+								"required": ["baseItemsRevisionId", "targetIds", "placement"],
 								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" },
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
 									"targetIds": {
 										"minItems": 1,
 										"maxItems": 100,
@@ -104525,10 +104557,13 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["saved", "latestRevisionId"],
+									"required": ["saved", "latestItemsRevisionId"],
 									"properties": {
 										"saved": { "type": "boolean" },
-										"latestRevisionId": { "format": "uuid", "type": "string" }
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										}
 									}
 								}
 							}
@@ -104634,9 +104669,11 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "UnitRevisionConflict",
+															"default": "CollectionStructureRevisionConflict",
 															"type": "string",
-															"enum": ["UnitRevisionConflict"]
+															"enum": [
+																"CollectionStructureRevisionConflict"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -104754,9 +104791,9 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseRevisionId", "placement"],
+								"required": ["baseItemsRevisionId", "placement"],
 								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" },
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
 									"placement": {
 										"default": "direct",
 										"type": "string",
@@ -104782,10 +104819,13 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["saved", "latestRevisionId"],
+									"required": ["saved", "latestItemsRevisionId"],
 									"properties": {
 										"saved": { "type": "boolean" },
-										"latestRevisionId": { "format": "uuid", "type": "string" }
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										}
 									}
 								}
 							}
@@ -104891,9 +104931,11 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "UnitRevisionConflict",
+															"default": "CollectionStructureRevisionConflict",
 															"type": "string",
-															"enum": ["UnitRevisionConflict"]
+															"enum": [
+																"CollectionStructureRevisionConflict"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -105009,9 +105051,9 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseRevisionId"],
+								"required": ["baseItemsRevisionId"],
 								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" }
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" }
 								}
 							}
 						}
@@ -105025,10 +105067,13 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["saved", "latestRevisionId"],
+									"required": ["saved", "latestItemsRevisionId"],
 									"properties": {
 										"saved": { "type": "boolean" },
-										"latestRevisionId": { "format": "uuid", "type": "string" }
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										}
 									}
 								}
 							}
@@ -105107,9 +105152,11 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "UnitRevisionConflict",
+															"default": "CollectionStructureRevisionConflict",
 															"type": "string",
-															"enum": ["UnitRevisionConflict"]
+															"enum": [
+																"CollectionStructureRevisionConflict"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -105178,6 +105225,501 @@
 				"x-rezics-policy-operation-id": "deleteApiCollectionsByCollectionIdItemsByTargetId"
 			}
 		},
+		"/api/collections/{collectionId}/item-revisions": {
+			"get": {
+				"summary": "List Collection item revisions",
+				"tags": ["Collections"],
+				"parameters": [
+					{
+						"name": "collectionId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"parentRevisionId",
+													"sourceRevisionId",
+													"actorProfileId",
+													"kind",
+													"editSummary",
+													"minor",
+													"replayByteSize",
+													"checkpointByteSize",
+													"createdAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"parentRevisionId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"sourceRevisionId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"actorProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"kind": {
+														"default": "create",
+														"type": "string",
+														"enum": ["create", "update", "restore"]
+													},
+													"editSummary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"minor": { "type": "boolean" },
+													"replayByteSize": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"checkpointByteSize": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "CollectionNotFound",
+													"type": "string",
+													"enum": ["CollectionNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiCollectionsByCollectionIdItem-revisions",
+				"x-rezics-policy-operation-id": "getApiCollectionsByCollectionIdItem-revisions"
+			}
+		},
+		"/api/collections/{collectionId}/item-revisions/compare": {
+			"get": {
+				"summary": "Compare Collection item revisions",
+				"tags": ["Collections"],
+				"parameters": [
+					{
+						"name": "collectionId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "from",
+						"in": "query",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "to",
+						"in": "query",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["fromRevisionId", "toRevisionId", "changes"],
+									"properties": {
+										"fromRevisionId": { "format": "uuid", "type": "string" },
+										"toRevisionId": { "format": "uuid", "type": "string" },
+										"changes": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["path"],
+												"properties": {
+													"path": { "type": "string" },
+													"before": {},
+													"after": {}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "CollectionNotFound",
+													"type": "string",
+													"enum": ["CollectionNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "CollectionStructureRevisionConflict",
+													"type": "string",
+													"enum": ["CollectionStructureRevisionConflict"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiCollectionsByCollectionIdItem-revisionsCompare",
+				"x-rezics-policy-operation-id": "getApiCollectionsByCollectionIdItem-revisionsCompare"
+			}
+		},
+		"/api/collections/{collectionId}/item-revisions/{revisionId}/restore": {
+			"post": {
+				"summary": "Restore a Collection item revision",
+				"tags": ["Collections"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "collectionId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "revisionId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["baseItemsRevisionId"],
+								"properties": {
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
+									"message": { "maxLength": 500, "type": "string" },
+									"minor": { "default": false, "type": "boolean" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"updated",
+										"latestItemsRevisionId",
+										"revisionCreated"
+									],
+									"properties": {
+										"updated": { "const": true, "type": "boolean" },
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"revisionCreated": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "CollectionNotFound",
+													"type": "string",
+													"enum": ["CollectionNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "FavoritesEditForbidden",
+															"type": "string",
+															"enum": ["FavoritesEditForbidden"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "CollectionStructureRevisionConflict",
+															"type": "string",
+															"enum": [
+																"CollectionStructureRevisionConflict"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiCollectionsByCollectionIdItem-revisionsByRevisionIdRestore",
+				"x-rezics-policy-operation-id": "postApiCollectionsByCollectionIdItem-revisionsByRevisionIdRestore"
+			}
+		},
 		"/api/collections/favorites/items/{targetId}": {
 			"put": {
 				"summary": "Favorite unit",
@@ -105197,9 +105739,9 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseRevisionId"],
+								"required": ["baseItemsRevisionId"],
 								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" }
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" }
 								}
 							}
 						}
@@ -105213,11 +105755,18 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["favorited", "collectionId", "latestRevisionId"],
+									"required": [
+										"favorited",
+										"collectionId",
+										"latestItemsRevisionId"
+									],
 									"properties": {
 										"favorited": { "type": "boolean" },
 										"collectionId": { "format": "uuid", "type": "string" },
-										"latestRevisionId": { "format": "uuid", "type": "string" }
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										}
 									}
 								}
 							}
@@ -105271,9 +105820,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitRevisionConflict",
+													"default": "CollectionStructureRevisionConflict",
 													"type": "string",
-													"enum": ["UnitRevisionConflict"]
+													"enum": ["CollectionStructureRevisionConflict"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -105357,9 +105906,9 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseRevisionId"],
+								"required": ["baseItemsRevisionId"],
 								"properties": {
-									"baseRevisionId": { "format": "uuid", "type": "string" }
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" }
 								}
 							}
 						}
@@ -105373,11 +105922,18 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["favorited", "collectionId", "latestRevisionId"],
+									"required": [
+										"favorited",
+										"collectionId",
+										"latestItemsRevisionId"
+									],
 									"properties": {
 										"favorited": { "type": "boolean" },
 										"collectionId": { "format": "uuid", "type": "string" },
-										"latestRevisionId": { "format": "uuid", "type": "string" }
+										"latestItemsRevisionId": {
+											"format": "uuid",
+											"type": "string"
+										}
 									}
 								}
 							}
@@ -105404,9 +105960,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitRevisionConflict",
+													"default": "CollectionStructureRevisionConflict",
 													"type": "string",
-													"enum": ["UnitRevisionConflict"]
+													"enum": ["CollectionStructureRevisionConflict"]
 												},
 												"message": { "type": "string" },
 												"details": {}

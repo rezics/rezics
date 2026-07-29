@@ -37,6 +37,8 @@ export default {
 	UnitRevisionConflict: "수정 기준이 변경되었습니다. 새로고침하고 다시 시도하세요.",
 	ContentStructureRevisionConflict:
 		"콘텐츠 구조가 다른 곳에서 변경되었습니다. 새로고침하고 다시 시도하세요.",
+	CollectionStructureRevisionConflict:
+		"항목 구조가 다른 곳에서 변경되었습니다. 새로고침하고 다시 시도하세요.",
 	DockRevisionConflict: `${dockTerms.inline}가 다른 곳에서 변경되었습니다. 새로고침하고 다시 시도하세요.`,
 	DockNotFound: `이 ${dockTerms.inline}를 찾을 수 없습니다.`,
 	DockNotSupported: `이 콘텐츠는 해당 ${dockTerms.inline}을 지원하지 않습니다.`,

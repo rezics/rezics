@@ -37,6 +37,8 @@ export default {
 	UnitRevisionConflict: "リビジョンの基準が変更されました。更新してもう一度試してください。",
 	ContentStructureRevisionConflict:
 		"コンテンツの構造が他の場所で変更されました。更新してもう一度試してください。",
+	CollectionStructureRevisionConflict:
+		"項目の構成が他の場所で変更されました。更新してもう一度試してください。",
 	DockRevisionConflict: `${dockTerms.inline} が他の場所で変更されました。更新してもう一度試してください。`,
 	DockNotFound: `この ${dockTerms.inline} は見つかりませんでした。`,
 	DockNotSupported: `このコンテンツはその ${dockTerms.inline} をサポートしていません。`,

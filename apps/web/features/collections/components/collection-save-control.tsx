@@ -58,7 +58,7 @@ export function CollectionSaveControl({
 			string,
 			{
 				readonly containsTarget: boolean;
-				readonly latestRevisionId: string;
+				readonly latestItemsRevisionId: string;
 			}
 		>
 	>(() => new Map());
@@ -93,45 +93,51 @@ export function CollectionSaveControl({
 	async function toggleCollection(collection: CollectionListItem) {
 		setChangingCollectionId(collection.id);
 		try {
-			let latestRevisionId: string;
+			let latestItemsRevisionId: string;
 			if (collection.purpose === "favorites") {
 				if (collection.containsTarget)
-					latestRevisionId = (
+					latestItemsRevisionId = (
 						await removeFavorite.mutateAsync({
 							path: { targetId },
-							body: { baseRevisionId: collection.latestRevisionId },
+							body: {
+								baseItemsRevisionId: collection.latestItemsRevisionId,
+							},
 						})
-					).latestRevisionId;
+					).latestItemsRevisionId;
 				else
-					latestRevisionId = (
+					latestItemsRevisionId = (
 						await addFavorite.mutateAsync({
 							path: { targetId },
-							body: { baseRevisionId: collection.latestRevisionId },
+							body: {
+								baseItemsRevisionId: collection.latestItemsRevisionId,
+							},
 						})
-					).latestRevisionId;
+					).latestItemsRevisionId;
 			} else if (collection.containsTarget) {
-				latestRevisionId = (
+				latestItemsRevisionId = (
 					await remove.mutateAsync({
 						path: { collectionId: collection.id, targetId },
-						body: { baseRevisionId: collection.latestRevisionId },
+						body: {
+							baseItemsRevisionId: collection.latestItemsRevisionId,
+						},
 					})
-				).latestRevisionId;
+				).latestItemsRevisionId;
 			} else {
-				latestRevisionId = (
+				latestItemsRevisionId = (
 					await add.mutateAsync({
 						path: { collectionId: collection.id, targetId },
 						body: {
-							baseRevisionId: collection.latestRevisionId,
+							baseItemsRevisionId: collection.latestItemsRevisionId,
 							placement,
 						},
 					})
-				).latestRevisionId;
+				).latestItemsRevisionId;
 			}
 			setDestinationOverrides((current) => {
 				const next = new Map(current);
 				next.set(collection.id, {
 					containsTarget: !collection.containsTarget,
-					latestRevisionId,
+					latestItemsRevisionId,
 				});
 				return next;
 			});
@@ -173,7 +179,7 @@ export function CollectionSaveControl({
 			await add.mutateAsync({
 				path: { collectionId: created.id, targetId },
 				body: {
-					baseRevisionId: created.latestRevisionId,
+					baseItemsRevisionId: created.latestItemsRevisionId,
 					placement,
 				},
 			});

@@ -40,6 +40,8 @@ export default {
 	UnitRevisionConflict: "La version de référence a changé. Actualisez la page et réessayez.",
 	ContentStructureRevisionConflict:
 		"La structure de contenu a été modifiée ailleurs. Actualisez la page et réessayez.",
+	CollectionStructureRevisionConflict:
+		"La structure des éléments a été modifiée ailleurs. Actualisez la page et réessayez.",
 	DockRevisionConflict: `L’${dockTerms.inline} a été modifié ailleurs. Actualisez la page et réessayez.`,
 	DockNotFound: `Cet ${dockTerms.inline} est introuvable.`,
 	DockNotSupported: `Ce contenu ne prend pas en charge cet ${dockTerms.inline}.`,

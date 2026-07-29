@@ -11,6 +11,7 @@ import {
 import { DefaultContentLanguage } from "../database/schema/contract-values";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import { createCollectionStructureHistory } from "../collection-structure/history";
 
 async function findFavorites(executor: DatabaseExecutor, profileId: string) {
 	const [existing] = await executor
@@ -84,6 +85,10 @@ async function ensureFavoritesForIdentityInTransaction(
 		unitId: created.id,
 		actorProfileId: identity.profileId,
 		event: "create",
+	});
+	await createCollectionStructureHistory(tx, {
+		collectionId: created.id,
+		actorProfileId: identity.profileId,
 	});
 	return created.id;
 }

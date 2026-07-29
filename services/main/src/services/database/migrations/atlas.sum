@@ -1,4 +1,4 @@
-h1:Vn1vfrk1dr848NmObmSCht8ND5agh4Oll7R/rSlQHUA=
+h1:OOwzo+lyBKumkFYHOG7cwLmAn5LCWAHOLcaUh0B7+yw=
 20260718070400_current_baseline.sql h1:u9QkCNmNKf+J8LE4/Lz03NbMrJf4RTid39bT22xn5ew=
 20260718070401_history_invariants.sql h1:ZtbZeYtN6E3/SM2hzpdVuXS7pICASEq93v29wpj7dDs=
 20260718154924_unit_realm_restrictions.sql h1:87+KV38BAlkYD150B4fAMEe19exDPGV12bR3dfNuHjA=
@@ -88,3 +88,4 @@ h1:Vn1vfrk1dr848NmObmSCht8ND5agh4Oll7R/rSlQHUA=
 20260729130003_collection_stored_ordering.sql h1:tSCfonq0zG0lqisUbQ5B0vKxT0CuImPrfffSZjTjuaI=
 20260729140000_realm_pages_and_tag_context.sql h1:PBdgn4xlog8Y+WG8V8rDZ7+x8adJBY10PreP3XX2sVE=
 20260729150000_wiki_navigation_kind.sql h1:z9NjVjHDWLMWWBxpRCmdUFbirGeJCVMO1b9eAqRemHQ=
+20260729153640_collection_structure_history.sql h1:YHxpAbemlluR7wflak3jdaetyOACniVDwAWEZHYShfg=

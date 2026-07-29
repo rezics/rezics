@@ -22,7 +22,6 @@ import { isFirstUnitLocalization } from "./localization";
 import {
 	book,
 	collection,
-	collectionItem,
 	entity,
 	software,
 	softwareRequirement,
@@ -124,7 +123,7 @@ const RuleSnapshotSchema = z.object({
 	),
 });
 const UnitSnapshotSchema = z.object({
-	version: z.literal(6),
+	version: z.literal(7),
 	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
@@ -140,7 +139,6 @@ const UnitSnapshotSchema = z.object({
 		variants: z.array(SnapshotRowSchema),
 		seriesReleases: z.array(SnapshotRowSchema),
 		softwareRequirements: z.array(SnapshotRowSchema),
-		collectionItems: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
 		realmUnit: z.array(SnapshotRowSchema),
@@ -248,9 +246,6 @@ const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease, {
 });
 const softwareRequirementRowSchema = schemaFactory.createSelectSchema(softwareRequirement, {
 	hardware: JsonObjectSchema,
-});
-const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem, {
-	position: FractionalPositionSchema,
 });
 const pollOptionRowSchema = schemaFactory
 	.createSelectSchema(pollOption, {
@@ -465,18 +460,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(softwareRequirement.softwareId, unitId))
 						.orderBy(softwareRequirement.id)
 				: empty,
-		collectionItems:
-			record.kind === "collection"
-				? await tx
-						.select()
-						.from(collectionItem)
-						.where(eq(collectionItem.collectionId, unitId))
-						.orderBy(
-							collectionItem.parentUnitId,
-							collectionItem.position,
-							collectionItem.unitId,
-						)
-				: empty,
 		pollOptions:
 			record.kind === "poll"
 				? await tx
@@ -497,7 +480,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
-		version: 6,
+		version: 7,
 		kind: record.kind,
 		unit: unitStateSchema.parse(record),
 		localizations: localizations.map((localization) =>
@@ -814,15 +797,6 @@ export async function restoreUnitSnapshot(
 					softwareRequirementRowSchema.parse(row),
 				),
 			);
-	if (snapshot.kind === "collection") {
-		await tx.delete(collectionItem).where(eq(collectionItem.collectionId, unitId));
-		if (snapshot.owned.collectionItems.length)
-			await tx
-				.insert(collectionItem)
-				.values(
-					snapshot.owned.collectionItems.map((row) => collectionItemRowSchema.parse(row)),
-				);
-	}
 	// Dynamic Content Structure slots are restored by their content-model adapter.
 	if (snapshot.kind === "poll") await restoreSoftRows(tx, unitId, snapshot.owned.pollOptions);
 	if (snapshot.kind === "realm") {
@@ -869,7 +843,7 @@ const SlotModels = {
 	main: "rezics.unit.main.v1",
 	localization: "rezics.unit.localization.v1",
 	relations: "rezics.unit.relations.v3",
-	structure: "rezics.unit.structure.v5",
+	structure: "rezics.unit.structure.v6",
 	rules: "rezics.unit.rules.v1",
 } as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], string>;
 
@@ -901,10 +875,9 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		structure: {
 			model: SlotModels.structure,
 			payload: {
-				version: 5,
+				version: 6,
 				seriesReleases: snapshot.owned.seriesReleases,
 				softwareRequirements: snapshot.owned.softwareRequirements,
-				collectionItems: snapshot.owned.collectionItems,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
 			},
@@ -982,7 +955,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	const structure = fixedSlotPayload(documents, "structure");
 	const rules = documents.rules ? fixedSlotPayload(documents, "rules") : null;
 	return UnitSnapshotSchema.parse({
-		version: 6,
+		version: 7,
 		kind: main.kind,
 		unit: main.unit,
 		localizations: orderedLocalizationStates(documents),
@@ -998,7 +971,6 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			variants: relations.variants,
 			seriesReleases: structure.seriesReleases,
 			softwareRequirements: structure.softwareRequirements,
-			collectionItems: structure.collectionItems,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
 			realmUnit: [],

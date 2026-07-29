@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const insertUnit = vi.hoisted(() => vi.fn());
 const recordUnitRevision = vi.hoisted(() => vi.fn());
+const createCollectionStructureHistory = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", () => ({
 	database: { transaction: vi.fn() },
 }));
 vi.mock("../units/create", () => ({ insertUnit }));
 vi.mock("../units/history", () => ({ recordUnitRevision }));
+vi.mock("../collection-structure/history", () => ({ createCollectionStructureHistory }));
 
 import type { DatabaseTransaction } from "../database";
 import { ensureFixedFavoritesInTransaction } from "./favorites";
@@ -31,12 +33,16 @@ describe("Favorites identity provisioning", () => {
 	beforeEach(() => {
 		insertUnit.mockReset();
 		recordUnitRevision.mockReset();
+		createCollectionStructureHistory.mockReset();
 	});
 
 	it("creates a fixed Favorites Collection with its reserved Unit identity and epoch", async () => {
 		const { transaction, values } = transactionWithExistingFavorites();
 		insertUnit.mockResolvedValue({ id: CollectionId });
 		recordUnitRevision.mockResolvedValue({ revisionId: "revision-id" });
+		createCollectionStructureHistory.mockResolvedValue({
+			revisionId: "items-revision-id",
+		});
 
 		await ensureFixedFavoritesInTransaction(transaction, {
 			profileId: ProfileId,
@@ -63,6 +69,10 @@ describe("Favorites identity provisioning", () => {
 				},
 			]),
 		);
+		expect(createCollectionStructureHistory).toHaveBeenCalledWith(transaction, {
+			collectionId: CollectionId,
+			actorProfileId: ProfileId,
+		});
 	});
 
 	it("rejects an existing Favorites Collection with a different fixed identity", async () => {

@@ -46,7 +46,7 @@ describe("collection item mutation schema", () => {
 	it("requires a base revision and an explicit placement", () => {
 		expect(
 			Check(SaveCollectionItemBody, {
-				baseRevisionId: targetId,
+				baseItemsRevisionId: targetId,
 				placement: "review-with-subject",
 			}),
 		).toBe(true);
@@ -56,7 +56,7 @@ describe("collection item mutation schema", () => {
 	it("rejects removed item roles and raw positions", () => {
 		expect(
 			Check(SaveCollectionItemBody, {
-				baseRevisionId: targetId,
+				baseItemsRevisionId: targetId,
 				placement: "direct",
 				role: "item",
 				position: "a0",
@@ -67,14 +67,14 @@ describe("collection item mutation schema", () => {
 	it("accepts an atomic ordered multi-item move", () => {
 		expect(
 			Check(MoveCollectionItemsBody, {
-				baseRevisionId: targetId,
+				baseItemsRevisionId: targetId,
 				targetIds: [targetId],
 				placement: { kind: "end", parentTargetId: null },
 			}),
 		).toBe(true);
 		expect(
 			Check(MoveCollectionItemsBody, {
-				baseRevisionId: targetId,
+				baseItemsRevisionId: targetId,
 				targetIds: [targetId, targetId],
 				placement: { kind: "after", targetId },
 			}),

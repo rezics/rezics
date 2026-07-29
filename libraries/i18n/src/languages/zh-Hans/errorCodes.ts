@@ -36,6 +36,7 @@ export default {
 	UnitChanged: "内容已变更，请刷新后再试一次。",
 	UnitRevisionConflict: "修订基础已变更，请刷新后再试一次。",
 	ContentStructureRevisionConflict: "内容结构已在其他地方变更，请刷新后再试一次。",
+	CollectionStructureRevisionConflict: "条目结构已在其他地方变更，请刷新后再试一次。",
 	DockRevisionConflict: `${dockTerms.label}已在其他地方变更，请刷新后再试一次。`,
 	DockNotFound: `找不到这个${dockTerms.inline}。`,
 	DockNotSupported: `这个内容不支持该${dockTerms.inline}。`,
