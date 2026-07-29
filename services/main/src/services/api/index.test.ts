@@ -202,6 +202,39 @@ describe("API root", () => {
 		});
 	});
 
+	it("requires authentication before checking the Wiki navigation preview capability", async () => {
+		const response = await api.handle(
+			new Request(
+				"http://localhost/api/realms/00000000-0000-7000-8000-000000000001/wiki/navigation",
+			),
+		);
+
+		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+		expect((await readErrorBody(response)).error).toEqual({
+			code: "AuthenticationRequired",
+			message: "Authentication required",
+		});
+	});
+
+	it("documents the development preview gate on every Wiki navigation operation", () => {
+		const document = toOpenAPISchema(api);
+		const expected = [
+			["get", "/api/realms/{realmId}/wiki/navigation"],
+			["post", "/api/realms/{realmId}/wiki/navigation"],
+			["get", "/api/realms/{realmId}/wiki/navigation/{navigationId}"],
+			["put", "/api/realms/{realmId}/wiki/navigation/{navigationId}"],
+			["delete", "/api/realms/{realmId}/wiki/navigation/{navigationId}"],
+		] as const;
+
+		for (const [method, path] of expected) {
+			const operation = document.paths[path]?.[method];
+			expect(JSON.stringify(operation?.responses?.[StatusCodes.FORBIDDEN])).toContain(
+				"PlatformCapabilityRequired",
+			);
+			expect(operation?.description).toContain("Development preview");
+		}
+	});
+
 	it("documents the development preview gate on every dedicated Tag-path operation", () => {
 		const document = toOpenAPISchema(api);
 		const methods = ["delete", "get", "post", "put"] as const;

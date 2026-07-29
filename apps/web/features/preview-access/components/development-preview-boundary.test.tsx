@@ -30,10 +30,18 @@ vi.mock("@rezics/ui", () => ({
 
 import { DevelopmentPreviewBoundary } from "./development-preview-boundary";
 
+const renderProtectedContent = vi.fn();
+
+function ProtectedContent() {
+	renderProtectedContent();
+	return <div>zone-content</div>;
+}
+
 describe("DevelopmentPreviewBoundary", () => {
 	afterEach(cleanup);
 
 	beforeEach(() => {
+		renderProtectedContent.mockClear();
 		mocks.session.data = { user: { id: "viewer" } };
 		mocks.session.isPending = false;
 		mocks.profile.data.platformCapabilities = [];
@@ -45,23 +53,25 @@ describe("DevelopmentPreviewBoundary", () => {
 	it("shows the development notice without the required capability", () => {
 		render(
 			<DevelopmentPreviewBoundary>
-				<div>zone-content</div>
+				<ProtectedContent />
 			</DevelopmentPreviewBoundary>,
 		);
 
 		expect(screen.getByText("preview-access-notice")).toBeTruthy();
 		expect(screen.queryByText("zone-content")).toBeNull();
+		expect(renderProtectedContent).not.toHaveBeenCalled();
 	});
 
 	it("renders protected content when the capability is present", () => {
 		mocks.profile.data.platformCapabilities = ["platform.development_preview.access"];
 		render(
 			<DevelopmentPreviewBoundary>
-				<div>zone-content</div>
+				<ProtectedContent />
 			</DevelopmentPreviewBoundary>,
 		);
 
 		expect(screen.getByText("zone-content")).toBeTruthy();
 		expect(screen.queryByText("preview-access-notice")).toBeNull();
+		expect(renderProtectedContent).toHaveBeenCalledOnce();
 	});
 });

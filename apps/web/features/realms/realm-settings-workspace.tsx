@@ -30,7 +30,7 @@ import {
 	Tags,
 } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { RequireSession } from "@/features/auth/require-session";
@@ -42,6 +42,7 @@ import { UnitDockSettings, useDockManagementAccess } from "@/features/docks";
 import { UnitAccessManager } from "@/features/governance/components/unit-access-manager";
 import { UnitRevisionCompare } from "@/features/history/components/unit-revision-compare";
 import { UnitRevisionHistory } from "@/features/history/components/unit-revision-history";
+import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { realmHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -49,7 +50,6 @@ import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permis
 import { RealmModeration } from "./components/realm-moderation";
 import { RealmPagesSettings } from "./components/realm-configuration-settings";
 import { RealmTaxonomySettings } from "./components/realm-taxonomy-tree-editor";
-import { WikiNavigationSettings } from "./components/wiki-navigation-settings";
 import { RealmMembers } from "./realm-members";
 import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
@@ -58,6 +58,12 @@ import {
 	realmSettingsHistoryCompareHref,
 	realmSettingsSectionHref,
 } from "./routing/realm-settings-routes";
+
+const WikiNavigationSettings = lazy(() =>
+	import("./components/wiki-navigation-settings").then(({ WikiNavigationSettings }) => ({
+		default: WikiNavigationSettings,
+	})),
+);
 
 export function RealmSettingsWorkspacePage({
 	realmId,
@@ -247,7 +253,11 @@ function RealmSettingsWorkspaceContent({
 					</RealmSettingsSection>
 				) : section === "wiki" ? (
 					<RealmSettingsSection baseHref={baseHref} section="wiki">
-						<WikiNavigationSettings realmId={realmId} />
+						<DevelopmentPreviewBoundary>
+							<Suspense fallback={<QueryPending />}>
+								<WikiNavigationSettings realmId={realmId} />
+							</Suspense>
+						</DevelopmentPreviewBoundary>
 					</RealmSettingsSection>
 				) : section === "tags" ? (
 					<RealmSettingsSection baseHref={baseHref} section="tags">
