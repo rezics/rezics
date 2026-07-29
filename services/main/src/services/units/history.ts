@@ -1359,7 +1359,6 @@ const StableArrayKeys = [
 	["tagId"],
 	["unitId", "role"],
 	["entityId", "role"],
-	["sourceEntityId", "role", "position"],
 	["seriesId", "releaseUnitId"],
 	["softwareId", "kind"],
 	["zoneId", "unitId"],

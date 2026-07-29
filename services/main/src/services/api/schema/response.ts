@@ -327,18 +327,20 @@ export const UnitDetailResponse = t.Object({
 		}),
 	),
 	links: t.Array(
-		t.Object({
-			id: Uuid,
-			unitId: Uuid,
-			kind: t.String(),
-			url: t.String(),
-			sourceEntityEntryId: t.Nullable(Uuid),
-			normalizedUrl: NullableText,
-			normalizedUrlHash: NullableText,
-			position: FractionalPosition,
-			createdAt: DateTime,
-			updatedAt: DateTime,
-		}),
+		t.Object(
+			{
+				id: Uuid,
+				unitId: Uuid,
+				sourceEntityId: Uuid,
+				url: t.String(),
+				normalizedUrl: t.String(),
+				normalizedUrlHash: t.String(),
+				position: FractionalPosition,
+				createdAt: DateTime,
+				updatedAt: DateTime,
+			},
+			{ additionalProperties: false },
+		),
 	),
 	tags: t.Array(
 		t.Object({
@@ -1271,18 +1273,20 @@ export const SubjectAssociationResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const ExternalLinkResponse = t.Object({
-	id: Uuid,
-	unitId: Uuid,
-	sourceEntityId: Uuid,
-	url: t.String(),
-	normalizedUrl: t.String(),
-	normalizedUrlHash: t.String(),
-	role: t.String(),
-	position: FractionalPosition,
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
+export const UnitSourceLinkResponse = t.Object(
+	{
+		id: Uuid,
+		unitId: Uuid,
+		sourceEntityId: Uuid,
+		url: t.String(),
+		normalizedUrl: t.String(),
+		normalizedUrlHash: t.String(),
+		position: FractionalPosition,
+		createdAt: DateTime,
+		updatedAt: DateTime,
+	},
+	{ additionalProperties: false },
+);
 export const TagApplicationResponse = t.Object({
 	unitId: Uuid,
 	tagId: Uuid,

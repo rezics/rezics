@@ -60,6 +60,7 @@ import {
 	unitAccessRestriction,
 	unitFollow,
 	unitFollowNotificationPreference,
+	unitLink,
 	unitOwnership,
 	unitAliasVoteStat,
 	unitReactionStat,
@@ -381,6 +382,23 @@ describe("database schema contracts", () => {
 		expect(attribution.checks.map(({ name }) => name)).toContain(
 			"credit_attribution_role_check",
 		);
+	});
+
+	it("stores source links without arbitrary presentation or type metadata", () => {
+		const link = getTableConfig(unitLink);
+		expect(link.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining([
+				"unit_id",
+				"source_entity_id",
+				"url",
+				"normalized_url",
+				"normalized_url_hash",
+				"position",
+			]),
+		);
+		expect(link.columns.map((column) => column.name)).not.toContain("role");
+		expect(link.columns.map((column) => column.name)).not.toContain("label");
+		expect(link.checks.map(({ name }) => name)).not.toContain("unit_link_role_not_blank");
 	});
 
 	it("centralizes governance contracts and Post-identity note bindings", () => {

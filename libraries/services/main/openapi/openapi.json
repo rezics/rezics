@@ -67417,13 +67417,13 @@
 										"links": {
 											"type": "array",
 											"items": {
+												"additionalProperties": false,
 												"type": "object",
 												"required": [
 													"id",
 													"unitId",
-													"kind",
+													"sourceEntityId",
 													"url",
-													"sourceEntityEntryId",
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"position",
@@ -67436,29 +67436,13 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": { "type": "string" },
+													"sourceEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
 													"url": { "type": "string" },
-													"sourceEntityEntryId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrl": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrlHash": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
+													"normalizedUrl": { "type": "string" },
+													"normalizedUrlHash": { "type": "string" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -69462,13 +69446,13 @@
 										"links": {
 											"type": "array",
 											"items": {
+												"additionalProperties": false,
 												"type": "object",
 												"required": [
 													"id",
 													"unitId",
-													"kind",
+													"sourceEntityId",
 													"url",
-													"sourceEntityEntryId",
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"position",
@@ -69481,29 +69465,13 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": { "type": "string" },
+													"sourceEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
 													"url": { "type": "string" },
-													"sourceEntityEntryId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrl": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrlHash": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
+													"normalizedUrl": { "type": "string" },
+													"normalizedUrlHash": { "type": "string" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -71535,13 +71503,13 @@
 										"links": {
 											"type": "array",
 											"items": {
+												"additionalProperties": false,
 												"type": "object",
 												"required": [
 													"id",
 													"unitId",
-													"kind",
+													"sourceEntityId",
 													"url",
-													"sourceEntityEntryId",
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"position",
@@ -71554,29 +71522,13 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": { "type": "string" },
+													"sourceEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
 													"url": { "type": "string" },
-													"sourceEntityEntryId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrl": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrlHash": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
+													"normalizedUrl": { "type": "string" },
+													"normalizedUrlHash": { "type": "string" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -73751,13 +73703,13 @@
 										"links": {
 											"type": "array",
 											"items": {
+												"additionalProperties": false,
 												"type": "object",
 												"required": [
 													"id",
 													"unitId",
-													"kind",
+													"sourceEntityId",
 													"url",
-													"sourceEntityEntryId",
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"position",
@@ -73770,29 +73722,13 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": { "type": "string" },
+													"sourceEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
 													"url": { "type": "string" },
-													"sourceEntityEntryId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrl": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrlHash": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
+													"normalizedUrl": { "type": "string" },
+													"normalizedUrlHash": { "type": "string" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -75782,13 +75718,13 @@
 										"links": {
 											"type": "array",
 											"items": {
+												"additionalProperties": false,
 												"type": "object",
 												"required": [
 													"id",
 													"unitId",
-													"kind",
+													"sourceEntityId",
 													"url",
-													"sourceEntityEntryId",
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"position",
@@ -75801,29 +75737,13 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": { "type": "string" },
+													"sourceEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
 													"url": { "type": "string" },
-													"sourceEntityEntryId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrl": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrlHash": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
+													"normalizedUrl": { "type": "string" },
+													"normalizedUrlHash": { "type": "string" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -78162,13 +78082,13 @@
 										"links": {
 											"type": "array",
 											"items": {
+												"additionalProperties": false,
 												"type": "object",
 												"required": [
 													"id",
 													"unitId",
-													"kind",
+													"sourceEntityId",
 													"url",
-													"sourceEntityEntryId",
 													"normalizedUrl",
 													"normalizedUrlHash",
 													"position",
@@ -78181,29 +78101,13 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": { "type": "string" },
+													"sourceEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
 													"url": { "type": "string" },
-													"sourceEntityEntryId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrl": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"normalizedUrlHash": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
+													"normalizedUrl": { "type": "string" },
+													"normalizedUrlHash": { "type": "string" },
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -85717,12 +85621,12 @@
 					"content": {
 						"application/json": {
 							"schema": {
+								"additionalProperties": false,
 								"type": "object",
 								"required": ["url", "sourceEntityUnitId"],
 								"properties": {
 									"url": { "format": "uri", "type": "string" },
 									"sourceEntityUnitId": { "format": "uuid", "type": "string" },
-									"role": { "minLength": 1, "maxLength": 32, "type": "string" },
 									"position": {
 										"format": "fractional-position",
 										"minLength": 2,
@@ -85741,6 +85645,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"additionalProperties": false,
 									"type": "object",
 									"required": [
 										"id",
@@ -85749,7 +85654,6 @@
 										"url",
 										"normalizedUrl",
 										"normalizedUrlHash",
-										"role",
 										"position",
 										"createdAt",
 										"updatedAt"
@@ -85761,7 +85665,6 @@
 										"url": { "type": "string" },
 										"normalizedUrl": { "type": "string" },
 										"normalizedUrlHash": { "type": "string" },
-										"role": { "type": "string" },
 										"position": {
 											"format": "fractional-position",
 											"minLength": 2,

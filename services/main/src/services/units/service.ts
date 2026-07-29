@@ -513,11 +513,7 @@ export async function getUnit(
 		cover: presentImageAsset(selectedLocalization.coverAssetId, "cover"),
 		localizations: localizations.map(presentUnitLocalization),
 		subjectAssociations,
-		links: links.map((link) => ({
-			...link,
-			kind: link.role,
-			sourceEntityEntryId: link.sourceEntityId,
-		})),
+		links,
 		tags: tags.map((tag) => ({
 			...tag,
 			id: tag.tagId,

@@ -970,7 +970,6 @@ async function seedCatalog(
 			url,
 			normalizedUrl: url,
 			normalizedUrlHash: createHash("sha256").update(url).digest("hex"),
-			role: "official",
 			position: fractionalPositionAt(index),
 		};
 	});

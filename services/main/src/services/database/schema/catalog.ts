@@ -134,7 +134,6 @@ export const unitLink = pgTable(
 		url: text().notNull(),
 		normalizedUrl: text().notNull(),
 		normalizedUrlHash: text().notNull(),
-		role: text().default("related").notNull(),
 		position: fractionalIndexPosition()
 			.default(sql`'a0'::text`)
 			.notNull(),
@@ -154,7 +153,6 @@ export const unitLink = pgTable(
 			sql`${table.url} ~ '^https?://' and ${table.normalizedUrl} ~ '^https?://'`,
 		),
 		check("unit_link_hash_check", sql`${table.normalizedUrlHash} ~ '^[0-9a-f]{64}$'`),
-		check("unit_link_role_not_blank", sql`btrim(${table.role}) <> ''`),
 	],
 );
 

@@ -50607,16 +50607,23 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		kind: string;
+		sourceEntityId: string;
 		/**
 		 * @type string
 		 */
 		url: string;
-		sourceEntityEntryId: (string | null) | null;
-		normalizedUrl: (string | null) | null;
-		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -52527,16 +52534,23 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		kind: string;
+		sourceEntityId: string;
 		/**
 		 * @type string
 		 */
 		url: string;
-		sourceEntityEntryId: (string | null) | null;
-		normalizedUrl: (string | null) | null;
-		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -53695,16 +53709,23 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		kind: string;
+		sourceEntityId: string;
 		/**
 		 * @type string
 		 */
 		url: string;
-		sourceEntityEntryId: (string | null) | null;
-		normalizedUrl: (string | null) | null;
-		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -55310,16 +55331,23 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		kind: string;
+		sourceEntityId: string;
 		/**
 		 * @type string
 		 */
 		url: string;
-		sourceEntityEntryId: (string | null) | null;
-		normalizedUrl: (string | null) | null;
-		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -56649,16 +56677,23 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		kind: string;
+		sourceEntityId: string;
 		/**
 		 * @type string
 		 */
 		url: string;
-		sourceEntityEntryId: (string | null) | null;
-		normalizedUrl: (string | null) | null;
-		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -57998,16 +58033,23 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @description
+		 * Format: `uuid`
 		 * @type string
 		 */
-		kind: string;
+		sourceEntityId: string;
 		/**
 		 * @type string
 		 */
 		url: string;
-		sourceEntityEntryId: (string | null) | null;
-		normalizedUrl: (string | null) | null;
-		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		normalizedUrl: string;
+		/**
+		 * @type string
+		 */
+		normalizedUrlHash: string;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -64783,10 +64825,6 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 	 */
 	normalizedUrlHash: string;
 	/**
-	 * @type string
-	 */
-	role: string;
-	/**
 	 * @description
 	 * Format: `fractional-position`
 	 * @minLength 2
@@ -64927,12 +64965,6 @@ export type PostApiUnitsByTypeByUnitIdLinksBody = {
 	 * @type string
 	 */
 	sourceEntityUnitId: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 32
-	 * @type string | undefined
-	 */
-	role?: string;
 	/**
 	 * @description
 	 * Format: `fractional-position`

@@ -639,16 +639,12 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 						if (!linkSource) return;
 						const formElement = event.currentTarget;
 						const form = new FormData(formElement);
-						const role = String(form.get("role") ?? "").trim();
-						const fallbackText = String(form.get("fallbackText") ?? "").trim();
 						try {
 							await link.mutateAsync({
 								path: { type, unitId: unit.id },
 								body: {
 									url: String(form.get("url") ?? "").trim(),
 									sourceEntityUnitId: linkSource.id,
-									...(role ? { role } : {}),
-									...(fallbackText ? { fallbackText } : {}),
 								},
 							});
 							setLinkSource(undefined);
@@ -662,14 +658,6 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 					<Field required>
 						<FieldLabel>{t.units.editor.linkUrl}</FieldLabel>
 						<Input name="url" required type="url" />
-					</Field>
-					<Field>
-						<FieldLabel>{t.units.editor.linkRole}</FieldLabel>
-						<Input maxLength={32} name="role" />
-					</Field>
-					<Field>
-						<FieldLabel>{t.units.editor.linkLabel}</FieldLabel>
-						<Input name="fallbackText" />
 					</Field>
 					<Button
 						disabled={!linkSource}

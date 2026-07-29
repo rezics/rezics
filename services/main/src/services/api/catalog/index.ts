@@ -81,11 +81,11 @@ import {
 	CreditAttributionResponse,
 	EntityDetailResponse,
 	EntityListResponse,
-	ExternalLinkResponse,
 	SubjectAssociationResponse,
 	TagApplicationResponse,
 	TagListResponse,
 	toPortableTextResponse,
+	UnitSourceLinkResponse,
 	UnitVersionResponse,
 	VoteResponse,
 } from "../schema/response";
@@ -992,7 +992,6 @@ export default new Elysia()
 								unitId: params.unitId,
 								sourceEntityId: body.sourceEntityUnitId,
 								url: body.url,
-								role: body.role,
 								position:
 									body.position ??
 									fractionalPositionBetween(last?.position, null),
@@ -1017,7 +1016,7 @@ export default new Elysia()
 					params: UnitUnitParams,
 					body: AddUnitLinkBody,
 					response: {
-						[StatusCodes.OK]: ExternalLinkResponse,
+						[StatusCodes.OK]: UnitSourceLinkResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},

@@ -81,12 +81,14 @@ export const AddUnitSubjectAssociationBody = t.Object(
 );
 export type AddUnitSubjectAssociationBody = Static<typeof AddUnitSubjectAssociationBody>;
 
-export const AddUnitLinkBody = t.Object({
-	url: t.String({ format: "uri" }),
-	sourceEntityUnitId: Uuid,
-	role: t.Optional(t.String({ minLength: 1, maxLength: 32 })),
-	position: t.Optional(FractionalPosition),
-});
+export const AddUnitLinkBody = t.Object(
+	{
+		url: t.String({ format: "uri" }),
+		sourceEntityUnitId: Uuid,
+		position: t.Optional(FractionalPosition),
+	},
+	{ additionalProperties: false },
+);
 export type AddUnitLinkBody = Static<typeof AddUnitLinkBody>;
 
 export const UnitUnitParams = t.Object({ type: CatalogUnitType, unitId: Uuid });
