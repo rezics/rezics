@@ -5338,9 +5338,9 @@ export const ApiErrorCode = {
 	RealmTagContextPostNotMounted: "RealmTagContextPostNotMounted",
 	RealmTagContextPostAlreadyUsed: "RealmTagContextPostAlreadyUsed",
 	RealmTagSelfReferenceForbidden: "RealmTagSelfReferenceForbidden",
-	RealmNavigationNotFound: "RealmNavigationNotFound",
-	RealmNavigationInUse: "RealmNavigationInUse",
-	RealmNavigationDocumentInvalid: "RealmNavigationDocumentInvalid",
+	WikiNavigationNotFound: "WikiNavigationNotFound",
+	WikiNavigationInUse: "WikiNavigationInUse",
+	WikiNavigationDocumentInvalid: "WikiNavigationDocumentInvalid",
 	InvalidFeedCursor: "InvalidFeedCursor",
 	InvalidFeedFilter: "InvalidFeedFilter",
 	InvalidHistoryCursor: "InvalidHistoryCursor",
@@ -66264,7 +66264,7 @@ export const GetApiUnitsByIdByUnitIdContentStructuresStatus200ItemsKindEnum = {
 	"book.contents": "book.contents",
 	"post.contents": "post.contents",
 	"realm.taxonomy": "realm.taxonomy",
-	"realm.navigation": "realm.navigation",
+	"wiki.navigation": "wiki.navigation",
 	"zone.navigation": "zone.navigation",
 	"page-structure": "page-structure",
 } as const;
@@ -66436,7 +66436,7 @@ export const PostApiUnitsByIdByUnitIdContentStructuresStatus200StructureKindEnum
 	"book.contents": "book.contents",
 	"post.contents": "post.contents",
 	"realm.taxonomy": "realm.taxonomy",
-	"realm.navigation": "realm.navigation",
+	"wiki.navigation": "wiki.navigation",
 	"zone.navigation": "zone.navigation",
 	"page-structure": "page-structure",
 } as const;
@@ -66666,7 +66666,7 @@ export const GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200KindE
 	"book.contents": "book.contents",
 	"post.contents": "post.contents",
 	"realm.taxonomy": "realm.taxonomy",
-	"realm.navigation": "realm.navigation",
+	"wiki.navigation": "wiki.navigation",
 	"zone.navigation": "zone.navigation",
 	"page-structure": "page-structure",
 } as const;
@@ -93164,6 +93164,818 @@ export type GetApiRealmsByRealmIdTaxonomyResponse =
 /**
  * @type object
  */
+export type GetApiRealmsByRealmIdTaxonomyDraftPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetApiRealmsByRealmIdTaxonomyDraftLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTaxonomyDraftLocalizationLanguagesEnum =
+	(typeof GetApiRealmsByRealmIdTaxonomyDraftLocalizationLanguagesEnum)[keyof typeof GetApiRealmsByRealmIdTaxonomyDraftLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiRealmsByRealmIdTaxonomyDraftLocalizationLanguagesEnum[];
+};
+
+export const GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum = {
+	label: "label",
+	tag: "tag",
+	wiki: "wiki",
+} as const;
+
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum =
+	(typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum)[keyof typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum];
+
+export const GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum =
+	(typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum)[keyof typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum];
+
+export const GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum];
+
+export const GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy = {
+	global_effective: "global_effective",
+	realm_community: "realm_community",
+	realm_policy: "realm_policy",
+} as const;
+
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy =
+	(typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy)[keyof typeof GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		parentId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contentUnitId: string;
+		/**
+		 * @default 'label'
+		 * @type string
+		 */
+		contentKind: GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum;
+		/**
+		 * @type string
+		 */
+		language: GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		queryStrategy:
+			(GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null) | null;
+		contextPostId: (string | null) | null;
+		contextSummary: (string | null) | null;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: "RealmNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdTaxonomyDraftPath;
+	query?: GetApiRealmsByRealmIdTaxonomyDraftQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftResponses = {
+	"200": GetApiRealmsByRealmIdTaxonomyDraftStatus200;
+	"403": GetApiRealmsByRealmIdTaxonomyDraftStatus403;
+	"404": GetApiRealmsByRealmIdTaxonomyDraftStatus404;
+	"422": GetApiRealmsByRealmIdTaxonomyDraftStatus422;
+	"429": GetApiRealmsByRealmIdTaxonomyDraftStatus429;
+	"500": GetApiRealmsByRealmIdTaxonomyDraftStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdTaxonomyDraftResponse =
+	| GetApiRealmsByRealmIdTaxonomyDraftStatus200
+	| GetApiRealmsByRealmIdTaxonomyDraftStatus403
+	| GetApiRealmsByRealmIdTaxonomyDraftStatus404
+	| GetApiRealmsByRealmIdTaxonomyDraftStatus422
+	| GetApiRealmsByRealmIdTaxonomyDraftStatus429
+	| GetApiRealmsByRealmIdTaxonomyDraftStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum = {
+	label: "label",
+	tag: "tag",
+	wiki: "wiki",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum];
+
+export const PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum];
+
+export const PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum];
+
+export const PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy = {
+	global_effective: "global_effective",
+	realm_community: "realm_community",
+	realm_policy: "realm_policy",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	structureId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		parentId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contentUnitId: string;
+		/**
+		 * @default 'label'
+		 * @type string
+		 */
+		contentKind: PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsContentKindEnum;
+		/**
+		 * @type string
+		 */
+		language: PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsLanguageEnum;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		queryStrategy:
+			(PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null) | null;
+		contextPostId: (string | null) | null;
+		contextSummary: (string | null) | null;
+	}[];
+	/**
+	 * @type boolean
+	 */
+	revisionCreated: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus400 = MalformedRequestBody;
+
+export const PutApiRealmsByRealmIdTaxonomyDraftStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdTaxonomyDraftStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: "RealmNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ContentStructureRevisionConflict'
+		 * @type string
+		 */
+		code: "ContentStructureRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ContentStructureInvalid'
+				 * @type string
+				 */
+				code: "ContentStructureInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus500 = InternalError;
+
+export const PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy = {
+	global_effective: "global_effective",
+	realm_community: "realm_community",
+	realm_policy: "realm_policy",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy];
+
+export const PutApiRealmsByRealmIdTaxonomyDraftRequestNodesContentLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftRequestNodesContentLanguageEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftRequestNodesContentLanguageEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftRequestNodesContentLanguageEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+	/**
+	 * @type array
+	 */
+	nodes: (
+		| {
+				/**
+				 * @type string
+				 */
+				state: "existing";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				queryStrategy:
+					(PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null) | null;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				state: "new";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				/**
+				 * @type null
+				 */
+				queryStrategy: null;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					kind: "label";
+					/**
+					 * @type string
+					 */
+					language: PutApiRealmsByRealmIdTaxonomyDraftRequestNodesContentLanguageEnum;
+					/**
+					 * @minLength 1
+					 * @maxLength 500
+					 * @type string
+					 */
+					title: string;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				state: "new";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				parentId: (string | null) | null;
+				order: string | number;
+				queryStrategy:
+					(PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null) | null;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					kind: "unit";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					unitId: string;
+				};
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftOptions = {
+	body: PutApiRealmsByRealmIdTaxonomyDraftBody;
+	path: PutApiRealmsByRealmIdTaxonomyDraftPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftResponses = {
+	"200": PutApiRealmsByRealmIdTaxonomyDraftStatus200;
+	"400": PutApiRealmsByRealmIdTaxonomyDraftStatus400;
+	"403": PutApiRealmsByRealmIdTaxonomyDraftStatus403;
+	"404": PutApiRealmsByRealmIdTaxonomyDraftStatus404;
+	"409": PutApiRealmsByRealmIdTaxonomyDraftStatus409;
+	"422": PutApiRealmsByRealmIdTaxonomyDraftStatus422;
+	"429": PutApiRealmsByRealmIdTaxonomyDraftStatus429;
+	"500": PutApiRealmsByRealmIdTaxonomyDraftStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdTaxonomyDraftResponse =
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus200
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus400
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus403
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus404
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus409
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus422
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus429
+	| PutApiRealmsByRealmIdTaxonomyDraftStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiRealmsByRealmIdScoreContextPath = {
 	/**
 	 * @description
@@ -101357,7 +102169,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdResponse =
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationPath = {
+export type GetApiRealmsByRealmIdWikiNavigationPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101369,7 +102181,7 @@ export type GetApiRealmsByRealmIdNavigationPath = {
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationStatus200 = {
+export type GetApiRealmsByRealmIdWikiNavigationStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -101414,7 +102226,7 @@ export type GetApiRealmsByRealmIdNavigationStatus200 = {
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationStatus404 = {
+export type GetApiRealmsByRealmIdWikiNavigationStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -101442,19 +102254,19 @@ export type GetApiRealmsByRealmIdNavigationStatus404 = {
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationStatus422 = ValidationError;
+export type GetApiRealmsByRealmIdWikiNavigationStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationStatus500 = InternalError;
+export type GetApiRealmsByRealmIdWikiNavigationStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationOptions = {
+export type GetApiRealmsByRealmIdWikiNavigationOptions = {
 	body?: never;
-	path: GetApiRealmsByRealmIdNavigationPath;
+	path: GetApiRealmsByRealmIdWikiNavigationPath;
 	query?: never;
 	headers?: never;
 };
@@ -101462,26 +102274,26 @@ export type GetApiRealmsByRealmIdNavigationOptions = {
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationResponses = {
-	"200": GetApiRealmsByRealmIdNavigationStatus200;
-	"404": GetApiRealmsByRealmIdNavigationStatus404;
-	"422": GetApiRealmsByRealmIdNavigationStatus422;
-	"500": GetApiRealmsByRealmIdNavigationStatus500;
+export type GetApiRealmsByRealmIdWikiNavigationResponses = {
+	"200": GetApiRealmsByRealmIdWikiNavigationStatus200;
+	"404": GetApiRealmsByRealmIdWikiNavigationStatus404;
+	"422": GetApiRealmsByRealmIdWikiNavigationStatus422;
+	"500": GetApiRealmsByRealmIdWikiNavigationStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiRealmsByRealmIdNavigationResponse =
-	| GetApiRealmsByRealmIdNavigationStatus200
-	| GetApiRealmsByRealmIdNavigationStatus404
-	| GetApiRealmsByRealmIdNavigationStatus422
-	| GetApiRealmsByRealmIdNavigationStatus500;
+export type GetApiRealmsByRealmIdWikiNavigationResponse =
+	| GetApiRealmsByRealmIdWikiNavigationStatus200
+	| GetApiRealmsByRealmIdWikiNavigationStatus404
+	| GetApiRealmsByRealmIdWikiNavigationStatus422
+	| GetApiRealmsByRealmIdWikiNavigationStatus500;
 
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationPath = {
+export type PostApiRealmsByRealmIdWikiNavigationPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101493,7 +102305,7 @@ export type PostApiRealmsByRealmIdNavigationPath = {
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationStatus200 = {
+export type PostApiRealmsByRealmIdWikiNavigationStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101530,17 +102342,17 @@ export type PostApiRealmsByRealmIdNavigationStatus200 = {
 	updatedAt: string;
 };
 
-export type PostApiRealmsByRealmIdNavigationStatus400 =
+export type PostApiRealmsByRealmIdWikiNavigationStatus400 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'RealmNavigationDocumentInvalid'
+				 * @default 'WikiNavigationDocumentInvalid'
 				 * @type string
 				 */
-				code: "RealmNavigationDocumentInvalid";
+				code: "WikiNavigationDocumentInvalid";
 				/**
 				 * @type string
 				 */
@@ -101560,7 +102372,7 @@ export type PostApiRealmsByRealmIdNavigationStatus400 =
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationStatus403 = {
+export type PostApiRealmsByRealmIdWikiNavigationStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -101588,7 +102400,7 @@ export type PostApiRealmsByRealmIdNavigationStatus403 = {
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationStatus404 = {
+export type PostApiRealmsByRealmIdWikiNavigationStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -101616,12 +102428,12 @@ export type PostApiRealmsByRealmIdNavigationStatus404 = {
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationStatus422 = ValidationError;
+export type PostApiRealmsByRealmIdWikiNavigationStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationStatus429 = {
+export type PostApiRealmsByRealmIdWikiNavigationStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -101645,12 +102457,12 @@ export type PostApiRealmsByRealmIdNavigationStatus429 = {
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationStatus500 = InternalError;
+export type PostApiRealmsByRealmIdWikiNavigationStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationBody = {
+export type PostApiRealmsByRealmIdWikiNavigationBody = {
 	/**
 	 * @type object
 	 */
@@ -101660,9 +102472,9 @@ export type PostApiRealmsByRealmIdNavigationBody = {
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationOptions = {
-	body: PostApiRealmsByRealmIdNavigationBody;
-	path: PostApiRealmsByRealmIdNavigationPath;
+export type PostApiRealmsByRealmIdWikiNavigationOptions = {
+	body: PostApiRealmsByRealmIdWikiNavigationBody;
+	path: PostApiRealmsByRealmIdWikiNavigationPath;
 	query?: never;
 	headers?: never;
 };
@@ -101670,32 +102482,32 @@ export type PostApiRealmsByRealmIdNavigationOptions = {
 /**
  * @type object
  */
-export type PostApiRealmsByRealmIdNavigationResponses = {
-	"200": PostApiRealmsByRealmIdNavigationStatus200;
-	"400": PostApiRealmsByRealmIdNavigationStatus400;
-	"403": PostApiRealmsByRealmIdNavigationStatus403;
-	"404": PostApiRealmsByRealmIdNavigationStatus404;
-	"422": PostApiRealmsByRealmIdNavigationStatus422;
-	"429": PostApiRealmsByRealmIdNavigationStatus429;
-	"500": PostApiRealmsByRealmIdNavigationStatus500;
+export type PostApiRealmsByRealmIdWikiNavigationResponses = {
+	"200": PostApiRealmsByRealmIdWikiNavigationStatus200;
+	"400": PostApiRealmsByRealmIdWikiNavigationStatus400;
+	"403": PostApiRealmsByRealmIdWikiNavigationStatus403;
+	"404": PostApiRealmsByRealmIdWikiNavigationStatus404;
+	"422": PostApiRealmsByRealmIdWikiNavigationStatus422;
+	"429": PostApiRealmsByRealmIdWikiNavigationStatus429;
+	"500": PostApiRealmsByRealmIdWikiNavigationStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiRealmsByRealmIdNavigationResponse =
-	| PostApiRealmsByRealmIdNavigationStatus200
-	| PostApiRealmsByRealmIdNavigationStatus400
-	| PostApiRealmsByRealmIdNavigationStatus403
-	| PostApiRealmsByRealmIdNavigationStatus404
-	| PostApiRealmsByRealmIdNavigationStatus422
-	| PostApiRealmsByRealmIdNavigationStatus429
-	| PostApiRealmsByRealmIdNavigationStatus500;
+export type PostApiRealmsByRealmIdWikiNavigationResponse =
+	| PostApiRealmsByRealmIdWikiNavigationStatus200
+	| PostApiRealmsByRealmIdWikiNavigationStatus400
+	| PostApiRealmsByRealmIdWikiNavigationStatus403
+	| PostApiRealmsByRealmIdWikiNavigationStatus404
+	| PostApiRealmsByRealmIdWikiNavigationStatus422
+	| PostApiRealmsByRealmIdWikiNavigationStatus429
+	| PostApiRealmsByRealmIdWikiNavigationStatus500;
 
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdPath = {
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101713,7 +102525,7 @@ export type GetApiRealmsByRealmIdNavigationByNavigationIdPath = {
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus200 = {
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101750,18 +102562,18 @@ export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus200 = {
 	updatedAt: string;
 };
 
-export const GetApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum = {
+export const GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	RealmNavigationNotFound: "RealmNavigationNotFound",
+	WikiNavigationNotFound: "WikiNavigationNotFound",
 } as const;
 
-export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum =
-	(typeof GetApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum];
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -101770,7 +102582,7 @@ export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: GetApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum;
+		code: GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -101789,19 +102601,19 @@ export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus422 = ValidationError;
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdStatus500 = InternalError;
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdOptions = {
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions = {
 	body?: never;
-	path: GetApiRealmsByRealmIdNavigationByNavigationIdPath;
+	path: GetApiRealmsByRealmIdWikiNavigationByNavigationIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -101809,26 +102621,26 @@ export type GetApiRealmsByRealmIdNavigationByNavigationIdOptions = {
 /**
  * @type object
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdResponses = {
-	"200": GetApiRealmsByRealmIdNavigationByNavigationIdStatus200;
-	"404": GetApiRealmsByRealmIdNavigationByNavigationIdStatus404;
-	"422": GetApiRealmsByRealmIdNavigationByNavigationIdStatus422;
-	"500": GetApiRealmsByRealmIdNavigationByNavigationIdStatus500;
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses = {
+	"200": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200;
+	"404": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404;
+	"422": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422;
+	"500": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiRealmsByRealmIdNavigationByNavigationIdResponse =
-	| GetApiRealmsByRealmIdNavigationByNavigationIdStatus200
-	| GetApiRealmsByRealmIdNavigationByNavigationIdStatus404
-	| GetApiRealmsByRealmIdNavigationByNavigationIdStatus422
-	| GetApiRealmsByRealmIdNavigationByNavigationIdStatus500;
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponse =
+	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200
+	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdPath = {
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101846,7 +102658,7 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdPath = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus200 = {
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -101883,17 +102695,17 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus200 = {
 	updatedAt: string;
 };
 
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus400 =
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'RealmNavigationDocumentInvalid'
+				 * @default 'WikiNavigationDocumentInvalid'
 				 * @type string
 				 */
-				code: "RealmNavigationDocumentInvalid";
+				code: "WikiNavigationDocumentInvalid";
 				/**
 				 * @type string
 				 */
@@ -101913,7 +102725,7 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus400 =
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus403 = {
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -101938,18 +102750,18 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus403 = {
 	requestId: string;
 };
 
-export const PutApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum = {
+export const PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	RealmNavigationNotFound: "RealmNavigationNotFound",
+	WikiNavigationNotFound: "WikiNavigationNotFound",
 } as const;
 
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum];
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -101958,7 +102770,7 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PutApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum;
+		code: PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -101977,7 +102789,7 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus409 = {
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -102005,12 +102817,12 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus409 = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus422 = ValidationError;
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus429 = {
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -102034,12 +102846,12 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus429 = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus500 = InternalError;
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdBody = {
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdBody = {
 	/**
 	 * @type object
 	 */
@@ -102055,9 +102867,9 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdBody = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdOptions = {
-	body: PutApiRealmsByRealmIdNavigationByNavigationIdBody;
-	path: PutApiRealmsByRealmIdNavigationByNavigationIdPath;
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions = {
+	body: PutApiRealmsByRealmIdWikiNavigationByNavigationIdBody;
+	path: PutApiRealmsByRealmIdWikiNavigationByNavigationIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -102065,34 +102877,34 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdOptions = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdResponses = {
-	"200": PutApiRealmsByRealmIdNavigationByNavigationIdStatus200;
-	"400": PutApiRealmsByRealmIdNavigationByNavigationIdStatus400;
-	"403": PutApiRealmsByRealmIdNavigationByNavigationIdStatus403;
-	"404": PutApiRealmsByRealmIdNavigationByNavigationIdStatus404;
-	"409": PutApiRealmsByRealmIdNavigationByNavigationIdStatus409;
-	"422": PutApiRealmsByRealmIdNavigationByNavigationIdStatus422;
-	"429": PutApiRealmsByRealmIdNavigationByNavigationIdStatus429;
-	"500": PutApiRealmsByRealmIdNavigationByNavigationIdStatus500;
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses = {
+	"200": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200;
+	"400": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400;
+	"403": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403;
+	"404": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404;
+	"409": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409;
+	"422": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422;
+	"429": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429;
+	"500": PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiRealmsByRealmIdNavigationByNavigationIdResponse =
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus200
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
-	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500;
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponse =
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+	| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdPath = {
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -102110,17 +102922,17 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdPath = {
 /**
  * @type void
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204 = void;
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204 = void;
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400 = MalformedRequestBody;
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403 = {
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -102145,18 +102957,18 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403 = {
 	requestId: string;
 };
 
-export const DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum = {
+export const DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	RealmNavigationNotFound: "RealmNavigationNotFound",
+	WikiNavigationNotFound: "WikiNavigationNotFound",
 } as const;
 
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum];
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -102165,7 +102977,7 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404ErrorCodeEnum;
+		code: DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -102181,27 +102993,27 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404 = {
 	requestId: string;
 };
 
-export const DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409ErrorCodeEnum = {
-	RealmNavigationInUse: "RealmNavigationInUse",
+export const DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409ErrorCodeEnum = {
+	WikiNavigationInUse: "WikiNavigationInUse",
 	ContentStructureRevisionConflict: "ContentStructureRevisionConflict",
 } as const;
 
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409ErrorCodeEnum];
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409 = {
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'RealmNavigationInUse'
+		 * @default 'WikiNavigationInUse'
 		 * @type string
 		 */
-		code: DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409ErrorCodeEnum;
+		code: DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -102220,12 +103032,12 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409 = {
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422 = ValidationError;
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429 = {
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -102249,12 +103061,12 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429 = {
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500 = InternalError;
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdBody = {
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdBody = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -102266,9 +103078,9 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdBody = {
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions = {
-	body: DeleteApiRealmsByRealmIdNavigationByNavigationIdBody;
-	path: DeleteApiRealmsByRealmIdNavigationByNavigationIdPath;
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions = {
+	body: DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdBody;
+	path: DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -102276,29 +103088,29 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions = {
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses = {
-	"204": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204;
-	"400": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400;
-	"403": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403;
-	"404": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404;
-	"409": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409;
-	"422": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422;
-	"429": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429;
-	"500": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500;
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses = {
+	"204": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204;
+	"400": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400;
+	"403": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403;
+	"404": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404;
+	"409": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409;
+	"422": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422;
+	"429": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429;
+	"500": DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiRealmsByRealmIdNavigationByNavigationIdResponse =
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
-	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500;
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponse =
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+	| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 
 export const GetApiSearchFeaturesByTemplateTemplate = {
 	global: "global",

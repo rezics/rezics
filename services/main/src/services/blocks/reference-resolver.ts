@@ -68,7 +68,7 @@ export function createUnitBlockReferenceResolver(
 					input.host.kind === "zone"
 						? "zone.navigation"
 						: input.host.kind === "realm"
-							? "realm.navigation"
+							? "wiki.navigation"
 							: null;
 				if (!structureKind) return new Set<string>();
 				const rows = await tx

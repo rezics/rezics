@@ -541,6 +541,10 @@ import type {
 	PutApiRealmsByRealmIdPagesResponses,
 	GetApiRealmsByRealmIdTaxonomyOptions,
 	GetApiRealmsByRealmIdTaxonomyResponses,
+	GetApiRealmsByRealmIdTaxonomyDraftOptions,
+	GetApiRealmsByRealmIdTaxonomyDraftResponses,
+	PutApiRealmsByRealmIdTaxonomyDraftOptions,
+	PutApiRealmsByRealmIdTaxonomyDraftResponses,
 	GetApiRealmsByRealmIdScoreContextOptions,
 	GetApiRealmsByRealmIdScoreContextResponses,
 	PutApiRealmsByRealmIdScoreContextOptions,
@@ -587,16 +591,16 @@ import type {
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
-	GetApiRealmsByRealmIdNavigationOptions,
-	GetApiRealmsByRealmIdNavigationResponses,
-	PostApiRealmsByRealmIdNavigationOptions,
-	PostApiRealmsByRealmIdNavigationResponses,
-	GetApiRealmsByRealmIdNavigationByNavigationIdOptions,
-	GetApiRealmsByRealmIdNavigationByNavigationIdResponses,
-	PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
-	PutApiRealmsByRealmIdNavigationByNavigationIdResponses,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses,
+	GetApiRealmsByRealmIdWikiNavigationOptions,
+	GetApiRealmsByRealmIdWikiNavigationResponses,
+	PostApiRealmsByRealmIdWikiNavigationOptions,
+	PostApiRealmsByRealmIdWikiNavigationResponses,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses,
 	GetApiSearchFeaturesByTemplateOptions,
 	GetApiSearchFeaturesByTemplateResponses,
 	PostApiSearchFeaturesByTemplateExecuteOptions,
@@ -5934,6 +5938,46 @@ export function getApiRealmsByRealmIdTaxonomy<ThrowOnError extends boolean = tru
 }
 
 /**
+ * @summary Get complete Realm taxonomy draft
+ * {@link /api/realms/:realmId/taxonomy/draft}
+ */
+export function getApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdTaxonomyDraftOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/taxonomy/draft",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Save complete Realm taxonomy draft
+ * {@link /api/realms/:realmId/taxonomy/draft}
+ */
+export function putApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdTaxonomyDraftOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/taxonomy/draft",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Get Realm Score context
  * {@link /api/realms/:realmId/score-context}
  */
@@ -6383,102 +6427,112 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 }
 
 /**
- * @summary List Realm navigation resources
- * {@link /api/realms/:realmId/navigation}
+ * @summary List Realm Wiki navigation resources
+ * {@link /api/realms/:realmId/wiki/navigation}
  */
-export function getApiRealmsByRealmIdNavigation<ThrowOnError extends boolean = true>(
-	options: Options<GetApiRealmsByRealmIdNavigationOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdNavigationResponses, ThrowOnError>> {
+export function getApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdWikiNavigationOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/navigation",
+		url: "/api/realms/{realmId}/wiki/navigation",
 		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdNavigationResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Create Realm navigation
- * {@link /api/realms/:realmId/navigation}
+ * @summary Create Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation}
  */
-export function postApiRealmsByRealmIdNavigation<ThrowOnError extends boolean = true>(
-	options: Options<PostApiRealmsByRealmIdNavigationOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsByRealmIdNavigationResponses, ThrowOnError>> {
+export function postApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean = true>(
+	options: Options<PostApiRealmsByRealmIdWikiNavigationOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/realms/{realmId}/navigation",
+		url: "/api/realms/{realmId}/wiki/navigation",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiRealmsByRealmIdNavigationResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Get Realm navigation
- * {@link /api/realms/:realmId/navigation/:navigationId}
+ * @summary Get Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
-export function getApiRealmsByRealmIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiRealmsByRealmIdNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>> {
+export function getApiRealmsByRealmIdWikiNavigationByNavigationId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		url: "/api/realms/{realmId}/wiki/navigation/{navigationId}",
 		...config,
 	}) as Promise<
-		RequestResult<GetApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
+		RequestResult<GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Replace Realm navigation
- * {@link /api/realms/:realmId/navigation/:navigationId}
+ * @summary Replace Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
-export function putApiRealmsByRealmIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiRealmsByRealmIdNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>> {
+export function putApiRealmsByRealmIdWikiNavigationByNavigationId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		url: "/api/realms/{realmId}/wiki/navigation/{navigationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PutApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
+		RequestResult<PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Delete Realm navigation
- * {@link /api/realms/:realmId/navigation/:navigationId}
+ * @summary Delete Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
-export function deleteApiRealmsByRealmIdNavigationByNavigationId<
+export function deleteApiRealmsByRealmIdWikiNavigationByNavigationId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>> {
+	options: Options<DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		url: "/api/realms/{realmId}/wiki/navigation/{navigationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
+		RequestResult<DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
 	>;
 }
 

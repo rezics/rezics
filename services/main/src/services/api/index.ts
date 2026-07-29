@@ -10,7 +10,7 @@ import associationProposals from "./association-proposals";
 import audit from "./audit";
 import collections from "./collections";
 import realms from "./realms";
-import realmNavigation from "./realm-navigation";
+import wikiNavigation from "./wiki-navigation";
 import contentStructure from "./content-structure";
 import posts from "./posts";
 import health from "./health";
@@ -192,7 +192,7 @@ export default new Elysia({ normalize: "typebox" })
 				.use(polls)
 				.use(posts)
 				.use(realms)
-				.use(realmNavigation)
+				.use(wikiNavigation)
 				.use(search)
 				.use(imageAssets),
 		),

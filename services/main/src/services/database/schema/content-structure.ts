@@ -52,7 +52,7 @@ export const contentStructure = pgTable(
 		),
 		check(
 			"content_structure_navigation_document_key_check",
-			sql`(${table.kind} in ('realm.navigation', 'zone.navigation')) = (${table.documentKey} is not null)`,
+			sql`(${table.kind} in ('wiki.navigation', 'zone.navigation')) = (${table.documentKey} is not null)`,
 		),
 		check(
 			"content_structure_deleted_at_check",

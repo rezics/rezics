@@ -1,10 +1,11 @@
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
 	contentStructure,
 	contentStructureNode,
 	post,
+	realmUnit,
 	unit,
 	zonePage,
 	type ContentStructureKind,
@@ -105,11 +106,41 @@ export async function ensureContentStructureNodeAllowed(
 		throw new ContentStructureInvalid(`Content Unit is not valid for ${input.kind}`);
 	if (input.target.kind === "unit") {
 		const [target] = await tx
-			.select({ id: unit.id })
+			.select({ id: unit.id, kind: unit.kind, postKind: post.kind })
 			.from(unit)
+			.leftJoin(post, eq(post.id, unit.id))
 			.where(and(eq(unit.id, input.target.unitId), isNull(unit.deletedAt)))
 			.limit(1);
 		if (!target) throw new ContentStructureInvalid("Target Unit does not exist");
+		if (
+			input.kind === "wiki.navigation" &&
+			!(target.kind === "post" && target.postKind === "wiki")
+		)
+			throw new ContentStructureInvalid("Realm Wiki navigation targets must be Wiki Posts");
+	}
+	if (input.kind === "wiki.navigation") {
+		const wikiUnitIds = [
+			...(content.kind === "post" && content.postKind === "wiki"
+				? [input.contentUnitId]
+				: []),
+			...(input.target.kind === "unit" ? [input.target.unitId] : []),
+		];
+		if (wikiUnitIds.length) {
+			const mounted = await tx
+				.select({ unitId: realmUnit.unitId })
+				.from(realmUnit)
+				.where(
+					and(
+						eq(realmUnit.realmId, input.ownerUnitId),
+						inArray(realmUnit.unitId, wikiUnitIds),
+						eq(realmUnit.status, "visible"),
+					),
+				);
+			if (new Set(mounted.map(({ unitId }) => unitId)).size !== new Set(wikiUnitIds).size)
+				throw new ContentStructureInvalid(
+					"Realm Wiki navigation can only contain Wiki Posts mounted in this Realm",
+				);
+		}
 	}
 	if (input.kind === "page-structure") {
 		const [ownedPage] = await tx

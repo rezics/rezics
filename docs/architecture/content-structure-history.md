@@ -95,14 +95,14 @@ the human-facing address does not invalidate the reference.
 
 ## Content Structure kinds
 
-| Kind               | Owner | Content                    | Targets                | Progress        |
-| ------------------ | ----- | -------------------------- | ---------------------- | --------------- |
-| `book.contents`    | Book  | chapter Post or Label Unit | content                | node completion |
-| `post.contents`    | Post  | readable Unit              | content                | none            |
-| `realm.taxonomy`   | Realm | Label, Tag, or wiki Post   | content                | none            |
-| `realm.navigation` | Realm | readable Unit              | Unit, HTTPS URL, group | none            |
-| `zone.navigation`  | Zone  | readable Unit              | Unit, HTTPS URL, group | none            |
-| `page-structure`   | Zone  | owned `zone_page` Unit     | content                | none            |
+| Kind              | Owner | Content                    | Targets                  | Progress        |
+| ----------------- | ----- | -------------------------- | ------------------------ | --------------- |
+| `book.contents`   | Book  | chapter Post or Label Unit | content                  | node completion |
+| `post.contents`   | Post  | readable Unit              | content                  | none            |
+| `realm.taxonomy`  | Realm | Label, Tag, or wiki Post   | content                  | none            |
+| `wiki.navigation` | Realm | Label or mounted Wiki Post | mounted Wiki Post, group | none            |
+| `zone.navigation` | Zone  | readable Unit              | Unit, HTTPS URL, group   | none            |
+| `page-structure`  | Zone  | owned `zone_page` Unit     | content                  | none            |
 
 Within `book.contents`, a Label is always a structural display entry. Book outlines ignore any
 body that its localization may have in another context. A chapter is a readable entry whose body

@@ -224,7 +224,7 @@ export const ContentStructureKindValues = [
 	"book.contents",
 	"post.contents",
 	"realm.taxonomy",
-	"realm.navigation",
+	"wiki.navigation",
 	"zone.navigation",
 	"page-structure",
 ] as const;

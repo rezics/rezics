@@ -1,0 +1,196 @@
+import type { RealmTagQueryStrategy } from "../database/schema/contract-values";
+import { compareBytewisePositions, fractionalPositionAt } from "../ordering/position";
+import { ContentStructureInvalid } from "./errors";
+
+export type RealmTaxonomyContentKind = "label" | "tag" | "wiki";
+
+export type CurrentRealmTaxonomyDraftNode = {
+	readonly id: string;
+	readonly parentId: string | null;
+	readonly position: string;
+	readonly contentUnitId: string;
+	readonly contentKind: RealmTaxonomyContentKind;
+	readonly queryStrategy: RealmTagQueryStrategy | null;
+};
+
+export type ResolvedRealmTaxonomyDraftNode = {
+	readonly state: "existing" | "new";
+	readonly id: string;
+	readonly parentId: string | null;
+	readonly order: number;
+	readonly contentUnitId: string | null;
+	readonly contentKind: RealmTaxonomyContentKind;
+	readonly queryStrategy: RealmTagQueryStrategy | null;
+};
+
+export type PlannedRealmTaxonomyDraftNode = ResolvedRealmTaxonomyDraftNode & {
+	readonly position: string;
+};
+
+export type RealmTaxonomyDraftPlan = {
+	readonly nodes: readonly PlannedRealmTaxonomyDraftNode[];
+	readonly deletedNodeIds: ReadonlySet<string>;
+	readonly hasChanges: boolean;
+	readonly hasStructuralChanges: boolean;
+};
+
+function invalid(message: string): never {
+	throw new ContentStructureInvalid(message);
+}
+
+function compareCurrent(
+	left: CurrentRealmTaxonomyDraftNode,
+	right: CurrentRealmTaxonomyDraftNode,
+): number {
+	const position = compareBytewisePositions(left.position, right.position);
+	return position || left.id.localeCompare(right.id);
+}
+
+function sameIds(left: readonly string[], right: readonly string[]): boolean {
+	return left.length === right.length && left.every((id, index) => id === right[index]);
+}
+
+/**
+ * Proves that a complete Realm taxonomy draft is a closed, acyclic forest and
+ * derives the minimal persisted position changes.
+ */
+export function planRealmTaxonomyDraft(
+	currentNodes: readonly CurrentRealmTaxonomyDraftNode[],
+	draftNodes: readonly ResolvedRealmTaxonomyDraftNode[],
+): RealmTaxonomyDraftPlan {
+	if (draftNodes.length > 10_000) invalid("Realm taxonomy draft exceeds 10,000 nodes");
+	const currentById = new Map(currentNodes.map((node) => [node.id, node]));
+	const draftById = new Map<string, ResolvedRealmTaxonomyDraftNode>();
+	const tagUnitIds = new Set<string>();
+
+	for (const draft of draftNodes) {
+		if (draftById.has(draft.id)) invalid(`Duplicate Realm taxonomy node ${draft.id}`);
+		if (
+			!Number.isSafeInteger(draft.order) ||
+			draft.order < 0 ||
+			draft.order >= draftNodes.length
+		)
+			invalid(`Realm taxonomy node ${draft.id} has an invalid sibling order`);
+		const current = currentById.get(draft.id);
+		if (draft.state === "existing" && !current)
+			invalid(`Realm taxonomy node ${draft.id} does not belong to this structure`);
+		if (draft.state === "new" && current)
+			invalid(`New Realm taxonomy node ${draft.id} already exists`);
+		if (
+			draft.state === "existing" &&
+			current &&
+			(current.contentUnitId !== draft.contentUnitId ||
+				current.contentKind !== draft.contentKind)
+		)
+			invalid(`Realm taxonomy node ${draft.id} cannot replace its content Unit`);
+		if (draft.contentKind === "tag") {
+			if (!draft.contentUnitId)
+				invalid(`Realm taxonomy Tag node ${draft.id} has no content Unit`);
+			if (!draft.queryStrategy)
+				invalid(`Realm taxonomy Tag node ${draft.id} has no query strategy`);
+			if (tagUnitIds.has(draft.contentUnitId))
+				invalid(`Realm taxonomy contains Tag ${draft.contentUnitId} more than once`);
+			tagUnitIds.add(draft.contentUnitId);
+		} else if (draft.queryStrategy !== null) {
+			invalid(`Realm taxonomy ${draft.contentKind} node ${draft.id} has a query strategy`);
+		}
+		if (draft.contentKind !== "label" && !draft.contentUnitId)
+			invalid(`Realm taxonomy node ${draft.id} has no content Unit`);
+		draftById.set(draft.id, draft);
+	}
+
+	const visitState = new Map<string, "visiting" | "visited">();
+	for (const startId of draftById.keys()) {
+		if (visitState.get(startId) === "visited") continue;
+		const path: string[] = [];
+		let nodeId: string | null = startId;
+		while (nodeId !== null) {
+			const state = visitState.get(nodeId);
+			if (state === "visiting") invalid(`Realm taxonomy node ${nodeId} creates a cycle`);
+			if (state === "visited") break;
+			const node = draftById.get(nodeId);
+			if (!node) invalid(`Realm taxonomy node ${nodeId} does not exist`);
+			visitState.set(nodeId, "visiting");
+			path.push(nodeId);
+			if (node.parentId === node.id)
+				invalid(`Realm taxonomy node ${node.id} cannot parent itself`);
+			if (node.parentId !== null && !draftById.has(node.parentId))
+				invalid(`Realm taxonomy node ${node.id} has a missing parent`);
+			nodeId = node.parentId;
+		}
+		for (const pathNodeId of path) visitState.set(pathNodeId, "visited");
+	}
+
+	const draftSiblingIds = new Map<string | null, string[]>();
+	for (const node of draftById.values()) {
+		const siblings = draftSiblingIds.get(node.parentId) ?? [];
+		if (siblings[node.order] !== undefined)
+			invalid(
+				`Realm taxonomy siblings under ${node.parentId ?? "root"} repeat order ${node.order}`,
+			);
+		siblings[node.order] = node.id;
+		draftSiblingIds.set(node.parentId, siblings);
+	}
+	for (const [parentId, siblingIds] of draftSiblingIds) {
+		if (
+			Array.from({ length: siblingIds.length }, (_, index) => siblingIds[index]).some(
+				(id) => id === undefined,
+			)
+		)
+			invalid(
+				`Realm taxonomy siblings under ${parentId ?? "root"} must use contiguous orders`,
+			);
+	}
+
+	const retainedIds = new Set(draftById.keys());
+	const deletedNodeIds = new Set(
+		currentNodes.filter(({ id }) => !retainedIds.has(id)).map(({ id }) => id),
+	);
+	const currentSiblingIds = new Map<string | null, string[]>();
+	for (const current of currentNodes
+		.filter(({ id }) => retainedIds.has(id))
+		.toSorted(compareCurrent))
+		currentSiblingIds.set(current.parentId, [
+			...(currentSiblingIds.get(current.parentId) ?? []),
+			current.id,
+		]);
+
+	const changedParents = new Set<string | null>();
+	for (const [parentId, desiredIds] of draftSiblingIds) {
+		if (!sameIds(currentSiblingIds.get(parentId) ?? [], desiredIds))
+			changedParents.add(parentId);
+	}
+	for (const parentId of currentSiblingIds.keys())
+		if (!draftSiblingIds.has(parentId)) changedParents.add(parentId);
+
+	const nodes = [...draftById.values()]
+		.toSorted((left, right) => {
+			if (left.parentId !== right.parentId)
+				return (left.parentId ?? "").localeCompare(right.parentId ?? "");
+			return left.order - right.order || left.id.localeCompare(right.id);
+		})
+		.map((node): PlannedRealmTaxonomyDraftNode => {
+			const current = currentById.get(node.id);
+			return {
+				...node,
+				position:
+					current && !changedParents.has(node.parentId)
+						? current.position
+						: fractionalPositionAt(node.order),
+			};
+		});
+	const strategyChanged = nodes.some((node) => {
+		const current = currentById.get(node.id);
+		return current ? current.queryStrategy !== node.queryStrategy : false;
+	});
+	const hasStructuralChanges =
+		nodes.some(({ state }) => state === "new") ||
+		deletedNodeIds.size > 0 ||
+		changedParents.size > 0;
+	return {
+		nodes,
+		deletedNodeIds,
+		hasChanges: hasStructuralChanges || strategyChanged,
+		hasStructuralChanges,
+	};
+}

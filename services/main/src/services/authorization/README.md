@@ -39,7 +39,8 @@ Governance mutation is scope-aware: an actor delegated `unit.access.manage` at
 or the Unit root, and may delegate only permissions the actor holds for the same scope. Ownership
 transfer requires the current owner or platform authority. Dock surfaces use `dock/{surface}`.
 Zone resources use `zone/boundary`, `zone/theme`, `zone/settings`, `zone/page/{slug}`, and
-`zone/navigation/{navigationId}`; Realm Navigation uses `realm/navigation/{navigationId}`. The
+`zone/navigation/{navigationId}`; Wiki navigation uses
+`realm/wiki/navigation/{navigationId}`. The
 effective-access endpoint returns permission decisions and their provenance so clients do not
 duplicate policy.
 

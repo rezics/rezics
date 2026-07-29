@@ -35,6 +35,7 @@ export function getRealmSettingsSectionIds(
 	return RealmSettingsSectionIds.filter((sectionId) => {
 		if (sectionId === "profile") return capabilities.canUpdateSettings;
 		if (sectionId === "pages") return capabilities.canUpdateSettings;
+		if (sectionId === "wiki") return capabilities.canUpdateSettings;
 		if (sectionId === "tags") return capabilities.canManageTags;
 		if (sectionId === "members") return capabilities.canReadMembers;
 		if (sectionId === "rules") return capabilities.canUpdateRules;

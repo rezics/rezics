@@ -11,10 +11,10 @@ import {
 } from "@rezics/block";
 import {
 	type PostApiUnitsPresentationsStatus200,
-	type GetApiRealmsByRealmIdNavigationStatus200,
+	type GetApiRealmsByRealmIdWikiNavigationStatus200,
 	postApiUnitsPresentations,
 	useGetApiCollectionsByCollectionIdItems,
-	useGetApiRealmsByRealmIdNavigation,
+	useGetApiRealmsByRealmIdWikiNavigation,
 	useGetApiUnitsByIdByUnitIdDocksByKind,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -62,7 +62,7 @@ function collectNavigationUnitIds(items: readonly NavigationItem[]): string[] {
 }
 
 function parseNavigations(
-	items: GetApiRealmsByRealmIdNavigationStatus200 | undefined,
+	items: GetApiRealmsByRealmIdWikiNavigationStatus200 | undefined,
 ): Navigation[] {
 	if (!items) return [];
 	return items.items.flatMap((navigation) => {
@@ -104,7 +104,7 @@ export function UnitDockRenderer({
 		() => (document ? collectBlockReferences(document) : null),
 		[document],
 	);
-	const navigation = useGetApiRealmsByRealmIdNavigation(
+	const navigation = useGetApiRealmsByRealmIdWikiNavigation(
 		{ path: { realmId: ownerUnitId } },
 		{
 			query: {

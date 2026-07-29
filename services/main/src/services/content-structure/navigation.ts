@@ -24,7 +24,7 @@ import {
 	loadContentStructureSnapshot,
 } from "./storage";
 
-export type NavigationKind = "realm.navigation" | "zone.navigation";
+export type NavigationKind = "wiki.navigation" | "zone.navigation";
 
 function validateNavigationDocument(document: NavigationDocument): void {
 	try {

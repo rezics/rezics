@@ -29,20 +29,20 @@ import {
 import { getContentStructureRevision } from "../../content-structure/service";
 import { ContentStructureNotFound } from "../../content-structure/errors";
 import {
-	RealmNavigationDocumentInvalid,
-	RealmNavigationInUse,
-	RealmNavigationNotFound,
+	WikiNavigationDocumentInvalid,
+	WikiNavigationInUse,
+	WikiNavigationNotFound,
 } from "../realms/errors";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
-	RealmNavigationBody,
-	RealmNavigationListResponse,
-	RealmNavigationOwnerParams,
-	RealmNavigationParams,
-	RealmNavigationResponse,
-	RealmNavigationReplaceBody,
-	RealmNavigationRevisionBody,
+	WikiNavigationBody,
+	WikiNavigationListResponse,
+	WikiNavigationOwnerParams,
+	WikiNavigationParams,
+	WikiNavigationResponse,
+	WikiNavigationReplaceBody,
+	WikiNavigationRevisionBody,
 } from "./schema";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
@@ -58,14 +58,14 @@ async function ensureRealm(realmId: string): Promise<void> {
 
 function ensureDocument(value: unknown): asserts value is typeof NavigationDocument.static {
 	try {
-		assertNavigationDocument(value, { allowExternalNavigation: true });
+		assertNavigationDocument(value, { allowExternalNavigation: false });
 	} catch {
-		throw new RealmNavigationDocumentInvalid();
+		throw new WikiNavigationDocumentInvalid();
 	}
 }
 
-function rethrowRealmNavigationNotFound(cause: unknown): never {
-	if (cause instanceof ContentStructureNotFound) throw new RealmNavigationNotFound();
+function rethrowWikiNavigationNotFound(cause: unknown): never {
+	if (cause instanceof ContentStructureNotFound) throw new WikiNavigationNotFound();
 	throw cause;
 }
 
@@ -80,7 +80,7 @@ function present(
 		latestRevisionId,
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
-	} satisfies typeof RealmNavigationResponse.static;
+	} satisfies typeof WikiNavigationResponse.static;
 }
 
 async function ensureReferences(
@@ -99,7 +99,7 @@ async function ensureReferences(
 		);
 	} catch (cause) {
 		if (cause instanceof UnresolvedBlockReferenceError)
-			throw new RealmNavigationDocumentInvalid();
+			throw new WikiNavigationDocumentInvalid();
 		throw cause;
 	}
 }
@@ -108,7 +108,7 @@ export default new Elysia({ prefix: "/realms" })
 	.model({ NavigationDocument })
 	.use(session)
 	.get(
-		"/:realmId/navigation",
+		"/:realmId/wiki/navigation",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
@@ -120,7 +120,7 @@ export default new Elysia({ prefix: "/realms" })
 				const records = await listNavigationStructures(
 					tx,
 					params.realmId,
-					"realm.navigation",
+					"wiki.navigation",
 				);
 				const items = [];
 				for (const record of records) {
@@ -129,25 +129,25 @@ export default new Elysia({ prefix: "/realms" })
 						params.realmId,
 						record.id,
 					);
-					if (!revisionId) throw new RealmNavigationNotFound();
+					if (!revisionId) throw new WikiNavigationNotFound();
 					items.push(present(record, revisionId));
 				}
 				return { items };
 			});
 		},
 		{
-			params: RealmNavigationOwnerParams,
+			params: WikiNavigationOwnerParams,
 			response: {
-				[StatusCodes.OK]: RealmNavigationListResponse,
+				[StatusCodes.OK]: WikiNavigationListResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "List Realm navigation resources", tags: ["Realms"] },
+			detail: { summary: "List Realm Wiki navigation resources", tags: ["Realms"] },
 		},
 	)
 	.post(
-		"/:realmId/navigation",
+		"/:realmId/wiki/navigation",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanUpdate(params.realmId, [["realm", "navigation"]]);
+			await authorization.unit.ensureCanUpdate(params.realmId, [["wiki", "navigation"]]);
 			await ensureRealm(params.realmId);
 			ensureDocument(body.document);
 			return database.transaction(async (tx) => {
@@ -157,33 +157,33 @@ export default new Elysia({ prefix: "/realms" })
 				await ensureReferences(tx, params.realmId, body.document, profile.unitId);
 				const result = await createNavigationStructure(tx, {
 					ownerUnitId: params.realmId,
-					kind: "realm.navigation",
+					kind: "wiki.navigation",
 					document: body.document,
 					actorProfileId: profile.unitId,
 				});
 				const record = await presentNavigationStructure(tx, {
 					ownerUnitId: params.realmId,
 					structureId: result.structure.id,
-					kind: "realm.navigation",
+					kind: "wiki.navigation",
 				});
 				return present(record, result.revisionId);
 			});
 		},
 		{
 			access: "contribute:unit:update",
-			params: RealmNavigationOwnerParams,
-			body: RealmNavigationBody,
+			params: WikiNavigationOwnerParams,
+			body: WikiNavigationBody,
 			response: {
-				[StatusCodes.OK]: RealmNavigationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["RealmNavigationDocumentInvalid"]),
+				[StatusCodes.OK]: WikiNavigationResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["WikiNavigationDocumentInvalid"]),
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "Create Realm navigation", tags: ["Realms"] },
+			detail: { summary: "Create Realm Wiki navigation", tags: ["Realms"] },
 		},
 	)
 	.get(
-		"/:realmId/navigation/:navigationId",
+		"/:realmId/wiki/navigation/:navigationId",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
@@ -196,38 +196,38 @@ export default new Elysia({ prefix: "/realms" })
 					const record = await presentNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
-						kind: "realm.navigation",
+						kind: "wiki.navigation",
 					});
 					const revisionId = await getContentStructureRevision(
 						tx,
 						params.realmId,
 						params.navigationId,
 					);
-					if (!revisionId) throw new RealmNavigationNotFound();
+					if (!revisionId) throw new WikiNavigationNotFound();
 					return present(record, revisionId);
 				} catch (cause) {
 					if (!(cause instanceof ContentStructureNotFound)) throw cause;
-					throw new RealmNavigationNotFound();
+					throw new WikiNavigationNotFound();
 				}
 			});
 		},
 		{
-			params: RealmNavigationParams,
+			params: WikiNavigationParams,
 			response: {
-				[StatusCodes.OK]: RealmNavigationResponse,
+				[StatusCodes.OK]: WikiNavigationResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
-					"RealmNavigationNotFound",
+					"WikiNavigationNotFound",
 				]),
 			},
-			detail: { summary: "Get Realm navigation", tags: ["Realms"] },
+			detail: { summary: "Get Realm Wiki navigation", tags: ["Realms"] },
 		},
 	)
 	.put(
-		"/:realmId/navigation/:navigationId",
+		"/:realmId/wiki/navigation/:navigationId",
 		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.realmId, [
-				["realm", "navigation", params.navigationId],
+				["wiki", "navigation", params.navigationId],
 			]);
 			await ensureRealm(params.realmId);
 			ensureDocument(body.document);
@@ -240,7 +240,7 @@ export default new Elysia({ prefix: "/realms" })
 					const result = await replaceNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
-						kind: "realm.navigation",
+						kind: "wiki.navigation",
 						document: body.document,
 						actorProfileId: profile.unitId,
 						baseRevisionId: body.baseRevisionId,
@@ -248,7 +248,7 @@ export default new Elysia({ prefix: "/realms" })
 					const record = await presentNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
-						kind: "realm.navigation",
+						kind: "wiki.navigation",
 					});
 					return present(
 						record,
@@ -256,31 +256,31 @@ export default new Elysia({ prefix: "/realms" })
 					);
 				});
 			} catch (cause) {
-				rethrowRealmNavigationNotFound(cause);
+				rethrowWikiNavigationNotFound(cause);
 			}
 		},
 		{
 			access: "contribute:unit:update",
-			params: RealmNavigationParams,
-			body: RealmNavigationReplaceBody,
+			params: WikiNavigationParams,
+			body: WikiNavigationReplaceBody,
 			response: {
-				[StatusCodes.OK]: RealmNavigationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["RealmNavigationDocumentInvalid"]),
+				[StatusCodes.OK]: WikiNavigationResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["WikiNavigationDocumentInvalid"]),
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
-					"RealmNavigationNotFound",
+					"WikiNavigationNotFound",
 				]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 			},
-			detail: { summary: "Replace Realm navigation", tags: ["Realms"] },
+			detail: { summary: "Replace Realm Wiki navigation", tags: ["Realms"] },
 		},
 	)
 	.delete(
-		"/:realmId/navigation/:navigationId",
+		"/:realmId/wiki/navigation/:navigationId",
 		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.realmId, [
-				["realm", "navigation", params.navigationId],
+				["wiki", "navigation", params.navigationId],
 			]);
 			await ensureRealm(params.realmId);
 			try {
@@ -301,38 +301,38 @@ export default new Elysia({ prefix: "/realms" })
 							).navigationIds.has(params.navigationId),
 						)
 					)
-						throw new RealmNavigationInUse();
+						throw new WikiNavigationInUse();
 					await deleteNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
-						kind: "realm.navigation",
+						kind: "wiki.navigation",
 						actorProfileId: profile.unitId,
 						baseRevisionId: body.baseRevisionId,
 					});
 				});
 			} catch (cause) {
-				rethrowRealmNavigationNotFound(cause);
+				rethrowWikiNavigationNotFound(cause);
 			}
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
 			access: "contribute:unit:update",
-			params: RealmNavigationParams,
-			body: RealmNavigationRevisionBody,
+			params: WikiNavigationParams,
+			body: WikiNavigationRevisionBody,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
-					"RealmNavigationNotFound",
+					"WikiNavigationNotFound",
 				]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"RealmNavigationInUse",
+					"WikiNavigationInUse",
 					"ContentStructureRevisionConflict",
 				]),
 			},
 			detail: {
-				summary: "Delete Realm navigation",
+				summary: "Delete Realm Wiki navigation",
 				tags: ["Realms"],
 				responses: NoContentResponse,
 			},

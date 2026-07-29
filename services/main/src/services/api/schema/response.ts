@@ -1026,6 +1026,10 @@ export const RealmTaxonomyResponse = t.Object({
 		}),
 	),
 });
+export const SaveRealmTaxonomyDraftResponse = t.Object({
+	...RealmTaxonomyResponse.properties,
+	revisionCreated: t.Boolean(),
+});
 const PostThreadDetailFields = {
 	id: Uuid,
 	attributions: t.Array(UnitAttributionSummaryResponse),

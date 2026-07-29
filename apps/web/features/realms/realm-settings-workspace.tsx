@@ -17,6 +17,7 @@ import {
 	QueryPending,
 } from "@rezics/ui";
 import {
+	BookOpenText,
 	History,
 	KeyRound,
 	LayoutList,
@@ -46,10 +47,9 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./components/realm-moderation";
-import {
-	RealmPagesSettings,
-	RealmTaxonomySettings,
-} from "./components/realm-configuration-settings";
+import { RealmPagesSettings } from "./components/realm-configuration-settings";
+import { RealmTaxonomySettings } from "./components/realm-taxonomy-tree-editor";
+import { WikiNavigationSettings } from "./components/wiki-navigation-settings";
 import { RealmMembers } from "./realm-members";
 import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
@@ -129,6 +129,13 @@ function RealmSettingsWorkspaceContent({
 			label: labels.pages.label,
 			description: labels.pages.description,
 			icon: LayoutList,
+		},
+		{
+			id: "wiki",
+			href: realmSettingsSectionHref(baseHref, "wiki"),
+			label: labels.wiki.label,
+			description: labels.wiki.description,
+			icon: BookOpenText,
 		},
 		{
 			id: "tags",
@@ -237,6 +244,10 @@ function RealmSettingsWorkspaceContent({
 				) : section === "pages" ? (
 					<RealmSettingsSection baseHref={baseHref} section="pages">
 						<RealmPagesSettings realm={realm.data} />
+					</RealmSettingsSection>
+				) : section === "wiki" ? (
+					<RealmSettingsSection baseHref={baseHref} section="wiki">
+						<WikiNavigationSettings realmId={realmId} />
 					</RealmSettingsSection>
 				) : section === "tags" ? (
 					<RealmSettingsSection baseHref={baseHref} section="tags">

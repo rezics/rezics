@@ -12,6 +12,7 @@ import {
 	getApiUnitsByIdByUnitIdDocksQueryKey,
 	type GetApiUnitsByIdByUnitIdDocksByKindRevisionsStatus200,
 	useDeleteApiUnitsByIdByUnitIdDocksByKind,
+	useGetApiRealmsByRealmIdWikiNavigation,
 	useGetApiUnitsByIdByUnitIdDocksByKind,
 	useGetApiUnitsByIdByUnitIdDocksByKindRevisions,
 	usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore,
@@ -133,7 +134,7 @@ function UnitDockEditor({
 	readonly ownerUnitId: string;
 	readonly target: DockTarget;
 }) {
-	const { t } = useTranslation(["docks", "ui"]);
+	const { t } = useTranslation(["docks", "realms", "ui"]);
 	const queryClient = useQueryClient();
 	const [document, setDocument] = useState(initialDocument);
 	const [dirty, setDirty] = useState(false);
@@ -145,6 +146,23 @@ function UnitDockEditor({
 	const remove = useDeleteApiUnitsByIdByUnitIdDocksByKind({
 		mutation: { onSuccess: invalidate },
 	});
+	const wikiNavigation = useGetApiRealmsByRealmIdWikiNavigation(
+		{ path: { realmId: ownerUnitId } },
+		{
+			query: {
+				enabled: target.ownerKind === "realm" && target.dockKind === "wiki",
+			},
+		},
+	);
+	const navigationOptions =
+		target.ownerKind === "realm" && target.dockKind === "wiki"
+			? (wikiNavigation.data?.items.map((navigation, index) => ({
+					id: navigation.id,
+					label: t.realms.wikiNavigationSettings.resourceName({
+						number: index + 1,
+					}),
+				})) ?? [])
+			: undefined;
 
 	useEffect(() => {
 		if (!dirty) return;
@@ -194,6 +212,7 @@ function UnitDockEditor({
 					allowZoneSearchSource={target.ownerKind === "zone"}
 					document={document}
 					labels={t.docks.blocks}
+					navigationOptions={navigationOptions}
 					onChange={(next) => {
 						if (next._type !== "dock-document") return;
 						setDocument(next);
@@ -259,6 +278,7 @@ function UnitDockEditor({
 				</div>
 				<RequestFailure error={save.error} fallback={t.ui.retryLater} />
 				<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
+				<RequestFailure error={wikiNavigation.error} fallback={t.ui.retryLater} />
 				{hasStatus(save.error, 409) || hasStatus(remove.error, 409) ? (
 					<Button
 						onClick={() => void invalidate()}

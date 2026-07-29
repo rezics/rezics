@@ -1816,6 +1816,22 @@ import type {
 	GetApiRealmsByRealmIdTaxonomyStatus404,
 	GetApiRealmsByRealmIdTaxonomyStatus422,
 	GetApiRealmsByRealmIdTaxonomyStatus500,
+	GetApiRealmsByRealmIdTaxonomyDraftOptions,
+	GetApiRealmsByRealmIdTaxonomyDraftStatus200,
+	GetApiRealmsByRealmIdTaxonomyDraftStatus403,
+	GetApiRealmsByRealmIdTaxonomyDraftStatus404,
+	GetApiRealmsByRealmIdTaxonomyDraftStatus422,
+	GetApiRealmsByRealmIdTaxonomyDraftStatus429,
+	GetApiRealmsByRealmIdTaxonomyDraftStatus500,
+	PutApiRealmsByRealmIdTaxonomyDraftOptions,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus200,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus400,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus403,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus404,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus409,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus422,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus429,
+	PutApiRealmsByRealmIdTaxonomyDraftStatus500,
 	GetApiRealmsByRealmIdScoreContextOptions,
 	GetApiRealmsByRealmIdScoreContextStatus200,
 	GetApiRealmsByRealmIdScoreContextStatus404,
@@ -1971,42 +1987,42 @@ import type {
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus422,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus429,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus500,
-	GetApiRealmsByRealmIdNavigationOptions,
-	GetApiRealmsByRealmIdNavigationStatus200,
-	GetApiRealmsByRealmIdNavigationStatus404,
-	GetApiRealmsByRealmIdNavigationStatus422,
-	GetApiRealmsByRealmIdNavigationStatus500,
-	PostApiRealmsByRealmIdNavigationOptions,
-	PostApiRealmsByRealmIdNavigationStatus200,
-	PostApiRealmsByRealmIdNavigationStatus400,
-	PostApiRealmsByRealmIdNavigationStatus403,
-	PostApiRealmsByRealmIdNavigationStatus404,
-	PostApiRealmsByRealmIdNavigationStatus422,
-	PostApiRealmsByRealmIdNavigationStatus429,
-	PostApiRealmsByRealmIdNavigationStatus500,
-	GetApiRealmsByRealmIdNavigationByNavigationIdOptions,
-	GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
-	GetApiRealmsByRealmIdNavigationByNavigationIdStatus404,
-	GetApiRealmsByRealmIdNavigationByNavigationIdStatus422,
-	GetApiRealmsByRealmIdNavigationByNavigationIdStatus500,
-	PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus400,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus403,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus404,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus409,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus422,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus429,
-	PutApiRealmsByRealmIdNavigationByNavigationIdStatus500,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429,
-	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500,
+	GetApiRealmsByRealmIdWikiNavigationOptions,
+	GetApiRealmsByRealmIdWikiNavigationStatus200,
+	GetApiRealmsByRealmIdWikiNavigationStatus404,
+	GetApiRealmsByRealmIdWikiNavigationStatus422,
+	GetApiRealmsByRealmIdWikiNavigationStatus500,
+	PostApiRealmsByRealmIdWikiNavigationOptions,
+	PostApiRealmsByRealmIdWikiNavigationStatus200,
+	PostApiRealmsByRealmIdWikiNavigationStatus400,
+	PostApiRealmsByRealmIdWikiNavigationStatus403,
+	PostApiRealmsByRealmIdWikiNavigationStatus404,
+	PostApiRealmsByRealmIdWikiNavigationStatus422,
+	PostApiRealmsByRealmIdWikiNavigationStatus429,
+	PostApiRealmsByRealmIdWikiNavigationStatus500,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429,
+	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429,
+	DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500,
 	GetApiSearchFeaturesByTemplateOptions,
 	GetApiSearchFeaturesByTemplateStatus200,
 	GetApiSearchFeaturesByTemplateStatus422,
@@ -2433,6 +2449,8 @@ import {
 	patchApiRealmsByRealmId,
 	putApiRealmsByRealmIdPages,
 	getApiRealmsByRealmIdTaxonomy,
+	getApiRealmsByRealmIdTaxonomyDraft,
+	putApiRealmsByRealmIdTaxonomyDraft,
 	getApiRealmsByRealmIdScoreContext,
 	putApiRealmsByRealmIdScoreContext,
 	deleteApiRealmsByRealmIdScoreContext,
@@ -2456,11 +2474,11 @@ import {
 	getApiRealmsByRealmIdUnits,
 	getApiRealmsByRealmIdUnitsByUnitIdHistory,
 	patchApiRealmsByRealmIdUnitsByUnitId,
-	getApiRealmsByRealmIdNavigation,
-	postApiRealmsByRealmIdNavigation,
-	getApiRealmsByRealmIdNavigationByNavigationId,
-	putApiRealmsByRealmIdNavigationByNavigationId,
-	deleteApiRealmsByRealmIdNavigationByNavigationId,
+	getApiRealmsByRealmIdWikiNavigation,
+	postApiRealmsByRealmIdWikiNavigation,
+	getApiRealmsByRealmIdWikiNavigationByNavigationId,
+	putApiRealmsByRealmIdWikiNavigationByNavigationId,
+	deleteApiRealmsByRealmIdWikiNavigationByNavigationId,
 	getApiSearchFeaturesByTemplate,
 	postApiSearchFeaturesByTemplateExecute,
 	postApiSearchFeaturesByTemplateFeed,
@@ -30188,6 +30206,236 @@ export function useGetApiRealmsByRealmIdTaxonomy<
 	return queryResult;
 }
 
+export const getApiRealmsByRealmIdTaxonomyDraftQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdTaxonomyDraftOptions, "headers">) =>
+	[
+		{ url: "/api/realms/:realmId/taxonomy/draft", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiRealmsByRealmIdTaxonomyDraftQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdTaxonomyDraftQueryKey
+>;
+
+export function getApiRealmsByRealmIdTaxonomyDraftQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdTaxonomyDraftOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdTaxonomyDraftQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdTaxonomyDraftStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus403
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus404
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus422
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus429
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus500
+		>,
+		GetApiRealmsByRealmIdTaxonomyDraftStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdTaxonomyDraft({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get complete Realm taxonomy draft
+ * {@link /api/realms/:realmId/taxonomy/draft}
+ */
+export function useGetApiRealmsByRealmIdTaxonomyDraft<
+	TData = GetApiRealmsByRealmIdTaxonomyDraftStatus200,
+	TQueryData = GetApiRealmsByRealmIdTaxonomyDraftStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdTaxonomyDraftQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdTaxonomyDraftOptions["path"]
+			| (() => GetApiRealmsByRealmIdTaxonomyDraftOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdTaxonomyDraftOptions["query"]
+			| (() => GetApiRealmsByRealmIdTaxonomyDraftOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdTaxonomyDraftStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdTaxonomyDraftStatus403
+					| GetApiRealmsByRealmIdTaxonomyDraftStatus404
+					| GetApiRealmsByRealmIdTaxonomyDraftStatus422
+					| GetApiRealmsByRealmIdTaxonomyDraftStatus429
+					| GetApiRealmsByRealmIdTaxonomyDraftStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdTaxonomyDraftQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdTaxonomyDraftQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus403
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus404
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus422
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus429
+			| GetApiRealmsByRealmIdTaxonomyDraftStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiRealmsByRealmIdTaxonomyDraftMutationKey = () =>
+	[{ url: "/api/realms/:realmId/taxonomy/draft" }] as const;
+
+export function putApiRealmsByRealmIdTaxonomyDraftMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdTaxonomyDraftMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdTaxonomyDraftStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus400
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus403
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus404
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus409
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus422
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus429
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus500
+		>,
+		PutApiRealmsByRealmIdTaxonomyDraftOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdTaxonomyDraft({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Save complete Realm taxonomy draft
+ * {@link /api/realms/:realmId/taxonomy/draft}
+ */
+export function usePutApiRealmsByRealmIdTaxonomyDraft<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdTaxonomyDraftStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdTaxonomyDraftStatus400
+				| PutApiRealmsByRealmIdTaxonomyDraftStatus403
+				| PutApiRealmsByRealmIdTaxonomyDraftStatus404
+				| PutApiRealmsByRealmIdTaxonomyDraftStatus409
+				| PutApiRealmsByRealmIdTaxonomyDraftStatus422
+				| PutApiRealmsByRealmIdTaxonomyDraftStatus429
+				| PutApiRealmsByRealmIdTaxonomyDraftStatus500
+			>,
+			PutApiRealmsByRealmIdTaxonomyDraftOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdTaxonomyDraftMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdTaxonomyDraftMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdTaxonomyDraftStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus400
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus403
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus404
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus409
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus422
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus429
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus500
+		>,
+		PutApiRealmsByRealmIdTaxonomyDraftOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdTaxonomyDraftStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus400
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus403
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus404
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus409
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus422
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus429
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus500
+		>,
+		PutApiRealmsByRealmIdTaxonomyDraftOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdTaxonomyDraftStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus400
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus403
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus404
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus409
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus422
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus429
+			| PutApiRealmsByRealmIdTaxonomyDraftStatus500
+		>,
+		PutApiRealmsByRealmIdTaxonomyDraftOptions,
+		TContext
+	>;
+}
+
 export const getApiRealmsByRealmIdScoreContextQueryKey = ({
 	path,
 }: Omit<GetApiRealmsByRealmIdScoreContextOptions, "headers">) =>
@@ -32609,33 +32857,33 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 	>;
 }
 
-export const getApiRealmsByRealmIdNavigationQueryKey = ({
+export const getApiRealmsByRealmIdWikiNavigationQueryKey = ({
 	path,
-}: Omit<GetApiRealmsByRealmIdNavigationOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/navigation", params: path }] as const;
+}: Omit<GetApiRealmsByRealmIdWikiNavigationOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/wiki/navigation", params: path }] as const;
 
-type GetApiRealmsByRealmIdNavigationQueryKey = ReturnType<
-	typeof getApiRealmsByRealmIdNavigationQueryKey
+type GetApiRealmsByRealmIdWikiNavigationQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdWikiNavigationQueryKey
 >;
 
-export function getApiRealmsByRealmIdNavigationQueryOptions(
-	{ path }: GetApiRealmsByRealmIdNavigationOptions,
+export function getApiRealmsByRealmIdWikiNavigationQueryOptions(
+	{ path }: GetApiRealmsByRealmIdWikiNavigationOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiRealmsByRealmIdNavigationQueryKey({ path });
+	const queryKey = getApiRealmsByRealmIdWikiNavigationQueryKey({ path });
 	return queryOptions<
-		GetApiRealmsByRealmIdNavigationStatus200,
+		GetApiRealmsByRealmIdWikiNavigationStatus200,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdNavigationStatus404
-			| GetApiRealmsByRealmIdNavigationStatus422
-			| GetApiRealmsByRealmIdNavigationStatus500
+			| GetApiRealmsByRealmIdWikiNavigationStatus404
+			| GetApiRealmsByRealmIdWikiNavigationStatus422
+			| GetApiRealmsByRealmIdWikiNavigationStatus500
 		>,
-		GetApiRealmsByRealmIdNavigationStatus200,
+		GetApiRealmsByRealmIdWikiNavigationStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdNavigation({
+			const { data } = await getApiRealmsByRealmIdWikiNavigation({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -32647,29 +32895,29 @@ export function getApiRealmsByRealmIdNavigationQueryOptions(
 }
 
 /**
- * @summary List Realm navigation resources
- * {@link /api/realms/:realmId/navigation}
+ * @summary List Realm Wiki navigation resources
+ * {@link /api/realms/:realmId/wiki/navigation}
  */
-export function useGetApiRealmsByRealmIdNavigation<
-	TData = GetApiRealmsByRealmIdNavigationStatus200,
-	TQueryData = GetApiRealmsByRealmIdNavigationStatus200,
-	TQueryKey extends QueryKey = GetApiRealmsByRealmIdNavigationQueryKey,
+export function useGetApiRealmsByRealmIdWikiNavigation<
+	TData = GetApiRealmsByRealmIdWikiNavigationStatus200,
+	TQueryData = GetApiRealmsByRealmIdWikiNavigationStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdWikiNavigationQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiRealmsByRealmIdNavigationOptions["path"]
-			| (() => GetApiRealmsByRealmIdNavigationOptions["path"]);
+			| GetApiRealmsByRealmIdWikiNavigationOptions["path"]
+			| (() => GetApiRealmsByRealmIdWikiNavigationOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiRealmsByRealmIdNavigationStatus200,
+				GetApiRealmsByRealmIdWikiNavigationStatus200,
 				ResponseErrorConfig<
-					| GetApiRealmsByRealmIdNavigationStatus404
-					| GetApiRealmsByRealmIdNavigationStatus422
-					| GetApiRealmsByRealmIdNavigationStatus500
+					| GetApiRealmsByRealmIdWikiNavigationStatus404
+					| GetApiRealmsByRealmIdWikiNavigationStatus422
+					| GetApiRealmsByRealmIdWikiNavigationStatus500
 				>,
 				TData,
 				TQueryData,
@@ -32683,11 +32931,11 @@ export function useGetApiRealmsByRealmIdNavigation<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdNavigationQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdWikiNavigationQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiRealmsByRealmIdNavigationQueryOptions(resolvedParams, config),
+			...getApiRealmsByRealmIdWikiNavigationQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -32695,9 +32943,9 @@ export function useGetApiRealmsByRealmIdNavigation<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdNavigationStatus404
-			| GetApiRealmsByRealmIdNavigationStatus422
-			| GetApiRealmsByRealmIdNavigationStatus500
+			| GetApiRealmsByRealmIdWikiNavigationStatus404
+			| GetApiRealmsByRealmIdWikiNavigationStatus422
+			| GetApiRealmsByRealmIdWikiNavigationStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -32706,29 +32954,29 @@ export function useGetApiRealmsByRealmIdNavigation<
 	return queryResult;
 }
 
-export const postApiRealmsByRealmIdNavigationMutationKey = () =>
-	[{ url: "/api/realms/:realmId/navigation" }] as const;
+export const postApiRealmsByRealmIdWikiNavigationMutationKey = () =>
+	[{ url: "/api/realms/:realmId/wiki/navigation" }] as const;
 
-export function postApiRealmsByRealmIdNavigationMutationOptions<TContext = unknown>(
+export function postApiRealmsByRealmIdWikiNavigationMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiRealmsByRealmIdNavigationMutationKey();
+	const mutationKey = postApiRealmsByRealmIdWikiNavigationMutationKey();
 	return mutationOptions<
-		PostApiRealmsByRealmIdNavigationStatus200,
+		PostApiRealmsByRealmIdWikiNavigationStatus200,
 		ResponseErrorConfig<
-			| PostApiRealmsByRealmIdNavigationStatus400
-			| PostApiRealmsByRealmIdNavigationStatus403
-			| PostApiRealmsByRealmIdNavigationStatus404
-			| PostApiRealmsByRealmIdNavigationStatus422
-			| PostApiRealmsByRealmIdNavigationStatus429
-			| PostApiRealmsByRealmIdNavigationStatus500
+			| PostApiRealmsByRealmIdWikiNavigationStatus400
+			| PostApiRealmsByRealmIdWikiNavigationStatus403
+			| PostApiRealmsByRealmIdWikiNavigationStatus404
+			| PostApiRealmsByRealmIdWikiNavigationStatus422
+			| PostApiRealmsByRealmIdWikiNavigationStatus429
+			| PostApiRealmsByRealmIdWikiNavigationStatus500
 		>,
-		PostApiRealmsByRealmIdNavigationOptions,
+		PostApiRealmsByRealmIdWikiNavigationOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiRealmsByRealmIdNavigation({
+			const { data } = await postApiRealmsByRealmIdWikiNavigation({
 				...config,
 				path,
 				body,
@@ -32740,22 +32988,22 @@ export function postApiRealmsByRealmIdNavigationMutationOptions<TContext = unkno
 }
 
 /**
- * @summary Create Realm navigation
- * {@link /api/realms/:realmId/navigation}
+ * @summary Create Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation}
  */
-export function usePostApiRealmsByRealmIdNavigation<TContext>(
+export function usePostApiRealmsByRealmIdWikiNavigation<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiRealmsByRealmIdNavigationStatus200,
+			PostApiRealmsByRealmIdWikiNavigationStatus200,
 			ResponseErrorConfig<
-				| PostApiRealmsByRealmIdNavigationStatus400
-				| PostApiRealmsByRealmIdNavigationStatus403
-				| PostApiRealmsByRealmIdNavigationStatus404
-				| PostApiRealmsByRealmIdNavigationStatus422
-				| PostApiRealmsByRealmIdNavigationStatus429
-				| PostApiRealmsByRealmIdNavigationStatus500
+				| PostApiRealmsByRealmIdWikiNavigationStatus400
+				| PostApiRealmsByRealmIdWikiNavigationStatus403
+				| PostApiRealmsByRealmIdWikiNavigationStatus404
+				| PostApiRealmsByRealmIdWikiNavigationStatus422
+				| PostApiRealmsByRealmIdWikiNavigationStatus429
+				| PostApiRealmsByRealmIdWikiNavigationStatus500
 			>,
-			PostApiRealmsByRealmIdNavigationOptions,
+			PostApiRealmsByRealmIdWikiNavigationOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -32764,35 +33012,35 @@ export function usePostApiRealmsByRealmIdNavigation<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? postApiRealmsByRealmIdNavigationMutationKey();
+		mutationOptions.mutationKey ?? postApiRealmsByRealmIdWikiNavigationMutationKey();
 
-	const baseOptions = postApiRealmsByRealmIdNavigationMutationOptions(
+	const baseOptions = postApiRealmsByRealmIdWikiNavigationMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiRealmsByRealmIdNavigationStatus200,
+		PostApiRealmsByRealmIdWikiNavigationStatus200,
 		ResponseErrorConfig<
-			| PostApiRealmsByRealmIdNavigationStatus400
-			| PostApiRealmsByRealmIdNavigationStatus403
-			| PostApiRealmsByRealmIdNavigationStatus404
-			| PostApiRealmsByRealmIdNavigationStatus422
-			| PostApiRealmsByRealmIdNavigationStatus429
-			| PostApiRealmsByRealmIdNavigationStatus500
+			| PostApiRealmsByRealmIdWikiNavigationStatus400
+			| PostApiRealmsByRealmIdWikiNavigationStatus403
+			| PostApiRealmsByRealmIdWikiNavigationStatus404
+			| PostApiRealmsByRealmIdWikiNavigationStatus422
+			| PostApiRealmsByRealmIdWikiNavigationStatus429
+			| PostApiRealmsByRealmIdWikiNavigationStatus500
 		>,
-		PostApiRealmsByRealmIdNavigationOptions,
+		PostApiRealmsByRealmIdWikiNavigationOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiRealmsByRealmIdNavigationStatus200,
+		PostApiRealmsByRealmIdWikiNavigationStatus200,
 		ResponseErrorConfig<
-			| PostApiRealmsByRealmIdNavigationStatus400
-			| PostApiRealmsByRealmIdNavigationStatus403
-			| PostApiRealmsByRealmIdNavigationStatus404
-			| PostApiRealmsByRealmIdNavigationStatus422
-			| PostApiRealmsByRealmIdNavigationStatus429
-			| PostApiRealmsByRealmIdNavigationStatus500
+			| PostApiRealmsByRealmIdWikiNavigationStatus400
+			| PostApiRealmsByRealmIdWikiNavigationStatus403
+			| PostApiRealmsByRealmIdWikiNavigationStatus404
+			| PostApiRealmsByRealmIdWikiNavigationStatus422
+			| PostApiRealmsByRealmIdWikiNavigationStatus429
+			| PostApiRealmsByRealmIdWikiNavigationStatus500
 		>,
-		PostApiRealmsByRealmIdNavigationOptions,
+		PostApiRealmsByRealmIdWikiNavigationOptions,
 		TContext
 	>(
 		{
@@ -32802,47 +33050,47 @@ export function usePostApiRealmsByRealmIdNavigation<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiRealmsByRealmIdNavigationStatus200,
+		PostApiRealmsByRealmIdWikiNavigationStatus200,
 		ResponseErrorConfig<
-			| PostApiRealmsByRealmIdNavigationStatus400
-			| PostApiRealmsByRealmIdNavigationStatus403
-			| PostApiRealmsByRealmIdNavigationStatus404
-			| PostApiRealmsByRealmIdNavigationStatus422
-			| PostApiRealmsByRealmIdNavigationStatus429
-			| PostApiRealmsByRealmIdNavigationStatus500
+			| PostApiRealmsByRealmIdWikiNavigationStatus400
+			| PostApiRealmsByRealmIdWikiNavigationStatus403
+			| PostApiRealmsByRealmIdWikiNavigationStatus404
+			| PostApiRealmsByRealmIdWikiNavigationStatus422
+			| PostApiRealmsByRealmIdWikiNavigationStatus429
+			| PostApiRealmsByRealmIdWikiNavigationStatus500
 		>,
-		PostApiRealmsByRealmIdNavigationOptions,
+		PostApiRealmsByRealmIdWikiNavigationOptions,
 		TContext
 	>;
 }
 
-export const getApiRealmsByRealmIdNavigationByNavigationIdQueryKey = ({
+export const getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey = ({
 	path,
-}: Omit<GetApiRealmsByRealmIdNavigationByNavigationIdOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/navigation/:navigationId", params: path }] as const;
+}: Omit<GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/wiki/navigation/:navigationId", params: path }] as const;
 
-type GetApiRealmsByRealmIdNavigationByNavigationIdQueryKey = ReturnType<
-	typeof getApiRealmsByRealmIdNavigationByNavigationIdQueryKey
+type GetApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey
 >;
 
-export function getApiRealmsByRealmIdNavigationByNavigationIdQueryOptions(
-	{ path }: GetApiRealmsByRealmIdNavigationByNavigationIdOptions,
+export function getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(
+	{ path }: GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiRealmsByRealmIdNavigationByNavigationIdQueryKey({ path });
+	const queryKey = getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey({ path });
 	return queryOptions<
-		GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>,
-		GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdNavigationByNavigationId({
+			const { data } = await getApiRealmsByRealmIdWikiNavigationByNavigationId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -32854,29 +33102,29 @@ export function getApiRealmsByRealmIdNavigationByNavigationIdQueryOptions(
 }
 
 /**
- * @summary Get Realm navigation
- * {@link /api/realms/:realmId/navigation/:navigationId}
+ * @summary Get Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
-export function useGetApiRealmsByRealmIdNavigationByNavigationId<
-	TData = GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
-	TQueryData = GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
-	TQueryKey extends QueryKey = GetApiRealmsByRealmIdNavigationByNavigationIdQueryKey,
+export function useGetApiRealmsByRealmIdWikiNavigationByNavigationId<
+	TData = GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
+	TQueryData = GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiRealmsByRealmIdNavigationByNavigationIdOptions["path"]
-			| (() => GetApiRealmsByRealmIdNavigationByNavigationIdOptions["path"]);
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions["path"]
+			| (() => GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+				GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 				ResponseErrorConfig<
-					| GetApiRealmsByRealmIdNavigationByNavigationIdStatus404
-					| GetApiRealmsByRealmIdNavigationByNavigationIdStatus422
-					| GetApiRealmsByRealmIdNavigationByNavigationIdStatus500
+					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -32891,11 +33139,14 @@ export function useGetApiRealmsByRealmIdNavigationByNavigationId<
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
 		resolvedOptions?.queryKey ??
-		getApiRealmsByRealmIdNavigationByNavigationIdQueryKey(resolvedParams);
+		getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiRealmsByRealmIdNavigationByNavigationIdQueryOptions(resolvedParams, config),
+			...getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(
+				resolvedParams,
+				config,
+			),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -32903,9 +33154,9 @@ export function useGetApiRealmsByRealmIdNavigationByNavigationId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -32914,30 +33165,30 @@ export function useGetApiRealmsByRealmIdNavigationByNavigationId<
 	return queryResult;
 }
 
-export const putApiRealmsByRealmIdNavigationByNavigationIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/navigation/:navigationId" }] as const;
+export const putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey = () =>
+	[{ url: "/api/realms/:realmId/wiki/navigation/:navigationId" }] as const;
 
-export function putApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
+export function putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey();
 	return mutationOptions<
-		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>,
-		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdNavigationByNavigationId({
+			const { data } = await putApiRealmsByRealmIdWikiNavigationByNavigationId({
 				...config,
 				path,
 				body,
@@ -32949,138 +33200,23 @@ export function putApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<TCo
 }
 
 /**
- * @summary Replace Realm navigation
- * {@link /api/realms/:realmId/navigation/:navigationId}
+ * @summary Replace Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
-export function usePutApiRealmsByRealmIdNavigationByNavigationId<TContext>(
+export function usePutApiRealmsByRealmIdWikiNavigationByNavigationId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+			PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
-				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
-				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
-				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
-				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
-				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
-				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
+				| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+				| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+				| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+				| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+				| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+				| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+				| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 			>,
-			PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
-
-	const baseOptions = putApiRealmsByRealmIdNavigationByNavigationIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
-		>,
-		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
-		>,
-		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
-		>,
-		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
-		TContext
-	>;
-}
-
-export const deleteApiRealmsByRealmIdNavigationByNavigationIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/navigation/:navigationId" }] as const;
-
-export function deleteApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
-	return mutationOptions<
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
-		>,
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiRealmsByRealmIdNavigationByNavigationId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Delete Realm navigation
- * {@link /api/realms/:realmId/navigation/:navigationId}
- */
-export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
-				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
-				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
-				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
-				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
-				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
-				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
-			>,
-			DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+			PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -33090,37 +33226,37 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		deleteApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
+		putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey();
 
-	const baseOptions = deleteApiRealmsByRealmIdNavigationByNavigationIdMutationOptions(
+	const baseOptions = putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>,
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>,
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 		TContext
 	>(
 		{
@@ -33130,17 +33266,133 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus400
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
-			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>,
-		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey = () =>
+	[{ url: "/api/realms/:realmId/wiki/navigation/:navigationId" }] as const;
+
+export function deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await deleteApiRealmsByRealmIdWikiNavigationByNavigationId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Delete Realm Wiki navigation
+ * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
+ */
+export function useDeleteApiRealmsByRealmIdWikiNavigationByNavigationId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+				| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+				| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+				| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+				| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+				| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+				| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
+			>,
+			DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
+			| DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 		TContext
 	>;
 }

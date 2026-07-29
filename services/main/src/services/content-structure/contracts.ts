@@ -68,7 +68,7 @@ export const ContentStructureStateSchema = z
 	})
 	.superRefine((structure, context) => {
 		const navigation =
-			structure.kind === "realm.navigation" || structure.kind === "zone.navigation";
+			structure.kind === "wiki.navigation" || structure.kind === "zone.navigation";
 		if (navigation !== (structure.documentKey !== null))
 			context.addIssue({
 				code: "custom",
@@ -266,11 +266,12 @@ export const ContentStructureKindPolicies = {
 		acceptsContent: (kind, postKind) =>
 			kind === "label" || kind === "tag" || (kind === "post" && postKind === "wiki"),
 	},
-	"realm.navigation": {
+	"wiki.navigation": {
 		ownerKinds: ["realm"],
-		targets: navigationTargets,
+		targets: ["unit", "none"],
 		progress: "none",
-		acceptsContent: anyContent,
+		acceptsContent: (kind, postKind) =>
+			kind === "label" || (kind === "post" && postKind === "wiki"),
 	},
 	"zone.navigation": {
 		ownerKinds: ["zone"],

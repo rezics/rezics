@@ -50,6 +50,10 @@ export interface BlockEditorLabels {
 }
 
 export type BlockEditorDocument = UnitReferencedBlockDocument | DockDocument;
+export interface BlockEditorNavigationOption {
+	readonly id: string;
+	readonly label: string;
+}
 export type BlockEditorAddableType =
 	"post-full-view" | "unit-ref" | "realm-ref" | "zone-ref" | "feed" | "menu" | "divider";
 const DefaultAddableBlockTypes: readonly BlockEditorAddableType[] = [
@@ -131,12 +135,14 @@ export function BlockDocumentEditor({
 	allowZoneSearchSource = true,
 	document,
 	labels,
+	navigationOptions,
 	onChange,
 }: {
 	readonly addableTypes?: readonly BlockEditorAddableType[];
 	readonly allowZoneSearchSource?: boolean;
 	readonly document: BlockEditorDocument;
 	readonly labels: BlockEditorLabels;
+	readonly navigationOptions?: readonly BlockEditorNavigationOption[];
 	readonly onChange: (document: BlockEditorDocument) => void;
 }) {
 	const firstAddableType = addableTypes[0];
@@ -218,6 +224,7 @@ export function BlockDocumentEditor({
 								block={block}
 								allowZoneSearchSource={allowZoneSearchSource}
 								labels={labels}
+								navigationOptions={navigationOptions}
 								onChange={(next) => replace(index, next)}
 								relatedKind={relatedKind}
 							/>
@@ -271,12 +278,14 @@ function BlockFields({
 	allowZoneSearchSource,
 	block,
 	labels,
+	navigationOptions,
 	onChange,
 	relatedKind,
 }: {
 	readonly allowZoneSearchSource: boolean;
 	readonly block: UnitReferencedBlock;
 	readonly labels: BlockEditorLabels;
+	readonly navigationOptions?: readonly BlockEditorNavigationOption[];
 	readonly onChange: (block: UnitReferencedBlock) => void;
 	readonly relatedKind?: RelatedUnitKind;
 }) {
@@ -383,13 +392,38 @@ function BlockFields({
 			<FieldGroup className="grid gap-4 sm:grid-cols-3">
 				<Field required>
 					<FieldLabel>{labels.menuNavigation}</FieldLabel>
-					<Input
-						onChange={(event) =>
-							onChange({ ...block, navigationId: event.currentTarget.value })
-						}
-						required
-						value={block.navigationId}
-					/>
+					{navigationOptions ? (
+						<NativeSelect
+							onChange={(event) =>
+								onChange({
+									...block,
+									navigationId: event.currentTarget.value,
+								})
+							}
+							required
+							value={block.navigationId}
+						>
+							<NativeSelectOption disabled value="">
+								{labels.menuNavigation}
+							</NativeSelectOption>
+							{navigationOptions.map((option) => (
+								<NativeSelectOption key={option.id} value={option.id}>
+									{option.label}
+								</NativeSelectOption>
+							))}
+						</NativeSelect>
+					) : (
+						<Input
+							onChange={(event) =>
+								onChange({
+									...block,
+									navigationId: event.currentTarget.value,
+								})
+							}
+							required
+							value={block.navigationId}
+						/>
+					)}
 				</Field>
 				<Field>
 					<FieldLabel>{labels.orientation}</FieldLabel>

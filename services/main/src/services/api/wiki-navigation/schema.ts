@@ -9,21 +9,21 @@ const NavigationInputDocument = Type.Unsafe<Static<typeof NavigationDocument>>(
 );
 const NavigationResponseDocument = Type.Unsafe<unknown>(Type.Ref("NavigationDocument"));
 
-export const RealmNavigationOwnerParams = t.Object({ realmId: Uuid });
-export const RealmNavigationParams = t.Object({ realmId: Uuid, navigationId: Uuid });
-export const RealmNavigationBody = t.Object(
+export const WikiNavigationOwnerParams = t.Object({ realmId: Uuid });
+export const WikiNavigationParams = t.Object({ realmId: Uuid, navigationId: Uuid });
+export const WikiNavigationBody = t.Object(
 	{ document: NavigationInputDocument },
 	{ additionalProperties: false },
 );
-export const RealmNavigationReplaceBody = t.Object(
+export const WikiNavigationReplaceBody = t.Object(
 	{ document: NavigationInputDocument, baseRevisionId: Uuid },
 	{ additionalProperties: false },
 );
-export const RealmNavigationRevisionBody = t.Object(
+export const WikiNavigationRevisionBody = t.Object(
 	{ baseRevisionId: Uuid },
 	{ additionalProperties: false },
 );
-export const RealmNavigationResponse = t.Object({
+export const WikiNavigationResponse = t.Object({
 	id: Uuid,
 	realmId: Uuid,
 	document: NavigationResponseDocument,
@@ -31,6 +31,6 @@ export const RealmNavigationResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const RealmNavigationListResponse = t.Object({
-	items: t.Array(RealmNavigationResponse),
+export const WikiNavigationListResponse = t.Object({
+	items: t.Array(WikiNavigationResponse),
 });

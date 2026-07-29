@@ -10,6 +10,7 @@ import {
 	RealmPageKindValues,
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
+	RealmTagQueryStrategyValues,
 	RealmUnitStatusValues,
 	RealmUnitMutationCommandValues,
 	UnitStatusValues,
@@ -71,6 +72,66 @@ export const RealmTaxonomyQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
 export type RealmTaxonomyQuery = Static<typeof RealmTaxonomyQuery>;
+
+const RealmTaxonomyDraftNodeBase = {
+	id: Uuid,
+	parentId: t.Nullable(Uuid),
+	order: t.Integer({ minimum: 0 }),
+	queryStrategy: t.Nullable(t.UnionEnum(RealmTagQueryStrategyValues)),
+};
+
+const ExistingRealmTaxonomyDraftNode = t.Object(
+	{
+		state: t.Literal("existing"),
+		...RealmTaxonomyDraftNodeBase,
+	},
+	{ additionalProperties: false },
+);
+
+const NewRealmTaxonomyLabelDraftNode = t.Object(
+	{
+		state: t.Literal("new"),
+		...RealmTaxonomyDraftNodeBase,
+		queryStrategy: t.Null(),
+		content: t.Object(
+			{
+				kind: t.Literal("label"),
+				language: ContentLanguage,
+				title: t.String({ minLength: 1, maxLength: 500 }),
+			},
+			{ additionalProperties: false },
+		),
+	},
+	{ additionalProperties: false },
+);
+
+const NewRealmTaxonomyUnitDraftNode = t.Object(
+	{
+		state: t.Literal("new"),
+		...RealmTaxonomyDraftNodeBase,
+		content: t.Object(
+			{ kind: t.Literal("unit"), unitId: Uuid },
+			{ additionalProperties: false },
+		),
+	},
+	{ additionalProperties: false },
+);
+
+export const SaveRealmTaxonomyDraftBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		nodes: t.Array(
+			t.Union([
+				ExistingRealmTaxonomyDraftNode,
+				NewRealmTaxonomyLabelDraftNode,
+				NewRealmTaxonomyUnitDraftNode,
+			]),
+			{ maxItems: 10_000 },
+		),
+	},
+	{ additionalProperties: false },
+);
+export type SaveRealmTaxonomyDraftBody = Static<typeof SaveRealmTaxonomyDraftBody>;
 
 export const UpdateRealmBody = t.Object({
 	joinPolicy: t.Optional(RealmJoinPolicy),

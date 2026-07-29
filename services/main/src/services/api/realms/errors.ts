@@ -94,24 +94,24 @@ export class RealmTagSelfReferenceForbidden extends Data.TaggedError(
 	readonly message = "A Tag cannot be applied to itself";
 }
 
-export class RealmNavigationNotFound extends Data.TaggedError("RealmNavigationNotFound") {
+export class WikiNavigationNotFound extends Data.TaggedError("WikiNavigationNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = RealmNavigationNotFound.status;
-	readonly message = "Realm navigation not found";
+	readonly status = WikiNavigationNotFound.status;
+	readonly message = "Realm Wiki navigation not found";
 }
 
-export class RealmNavigationInUse extends Data.TaggedError("RealmNavigationInUse") {
+export class WikiNavigationInUse extends Data.TaggedError("WikiNavigationInUse") {
 	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = RealmNavigationInUse.status;
-	readonly message = "Realm navigation is still referenced by a Dock document";
+	readonly status = WikiNavigationInUse.status;
+	readonly message = "Realm Wiki navigation is still referenced by a Dock document";
 }
 
-export class RealmNavigationDocumentInvalid extends Data.TaggedError(
-	"RealmNavigationDocumentInvalid",
+export class WikiNavigationDocumentInvalid extends Data.TaggedError(
+	"WikiNavigationDocumentInvalid",
 ) {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = RealmNavigationDocumentInvalid.status;
-	readonly message = "Realm navigation document is invalid";
+	readonly status = WikiNavigationDocumentInvalid.status;
+	readonly message = "Realm Wiki navigation document is invalid";
 }
 
 export const RealmErrors = [
@@ -127,7 +127,7 @@ export const RealmErrors = [
 	RealmTagContextPostNotMounted,
 	RealmTagContextPostAlreadyUsed,
 	RealmTagSelfReferenceForbidden,
-	RealmNavigationNotFound,
-	RealmNavigationInUse,
-	RealmNavigationDocumentInvalid,
+	WikiNavigationNotFound,
+	WikiNavigationInUse,
+	WikiNavigationDocumentInvalid,
 ] as const;

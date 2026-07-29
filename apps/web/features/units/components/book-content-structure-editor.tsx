@@ -60,6 +60,10 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { writePortableText } from "@/lib/block";
+import {
+	TreeEditorRowFrame as BookContentStructureRowFrame,
+	VirtualizedTreeRows as VirtualizedBookContentStructureRows,
+} from "@/features/content-structure/components/virtualized-tree";
 import { invalidateBookContentStructure } from "../unit-cache";
 import {
 	addBookDraftNode,
@@ -101,11 +105,9 @@ import {
 } from "./book-content-structure-destination-dialog";
 import {
 	BookContentStructureChapterViewMetric,
-	BookContentStructureRowFrame,
 	BookContentStructureRowText,
 	BookContentStructureSection,
 	EmptyBookContentStructureList,
-	VirtualizedBookContentStructureRows,
 } from "./book-content-structure-list";
 import { UnitSectionHeader } from "./unit-section-header";
 

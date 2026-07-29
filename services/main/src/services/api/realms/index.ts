@@ -17,6 +17,7 @@ import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import { ContentStructureSnapshotSchema } from "../../content-structure/contracts";
 import { createContentStructureHistory } from "../../content-structure/history";
+import { saveRealmTaxonomyDraft } from "../../content-structure/realm-taxonomy-draft";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	avatarReferenceFromColumns,
@@ -90,6 +91,7 @@ import {
 	RealmDetailResponse,
 	RealmListResponse,
 	RealmTaxonomyResponse,
+	SaveRealmTaxonomyDraftResponse,
 	toPortableTextResponse,
 } from "../schema/response";
 import { realmUnitReportCaseAdvisoryLock } from "../reports/advisory-lock";
@@ -120,6 +122,7 @@ import {
 	RealmParams,
 	RealmDetailQuery,
 	RealmTaxonomyQuery,
+	SaveRealmTaxonomyDraftBody,
 	RealmRuleRevisionParams,
 	RealmRulesQuery,
 	SetRealmScoreContextBody,
@@ -302,6 +305,153 @@ async function getRealmTagVoteSummary(
 		value: presentRealmTagVote(viewerVote?.value ?? null),
 		score: toSafeInteger(stat?.score ?? 0n, "Realm Tag vote score"),
 		voteCount: toSafeInteger(stat?.voteCount ?? 0n, "Realm Tag vote count"),
+	};
+}
+
+async function readRealmTaxonomy(
+	tx: DatabaseTransaction,
+	realmId: string,
+	localizationLanguages: readonly ContentLanguage[],
+	canReadUnit?: (unitId: string) => Promise<boolean>,
+) {
+	const [structure] = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(
+			and(
+				eq(contentStructure.ownerUnitId, realmId),
+				eq(contentStructure.kind, "realm.taxonomy"),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.limit(1);
+	if (!structure) throw new RealmNotFound();
+	const rows = await tx
+		.select({
+			id: contentStructureNode.id,
+			parentId: contentStructureNode.parentId,
+			contentUnitId: contentStructureNode.contentUnitId,
+			unitKind: unit.kind,
+			postKind: post.kind,
+			language: unitLocalization.language,
+			title: unitLocalization.title,
+			summary: unitLocalization.summary,
+			avatarType: unitLocalization.avatarType,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			avatarEmoji: unitLocalization.avatarEmoji,
+			avatarIconPrefix: unitLocalization.avatarIconPrefix,
+			avatarIconName: unitLocalization.avatarIconName,
+			position: contentStructureNode.position,
+			queryStrategy: contentStructureNode.realmTagQueryStrategy,
+		})
+		.from(contentStructureNode)
+		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+		.innerJoin(
+			unitLocalization,
+			and(
+				eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
+				eq(
+					unitLocalization.language,
+					resolvedUnitLocalizationLanguage(
+						contentStructureNode.contentUnitId,
+						localizationLanguages,
+					),
+				),
+			),
+		)
+		.where(
+			and(
+				eq(contentStructureNode.structureId, structure.id),
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.orderBy(contentStructureNode.position, contentStructureNode.id);
+	const readableRows = canReadUnit
+		? (
+				await Promise.all(
+					rows.map(async (row) => ({
+						row,
+						readable: await canReadUnit(row.contentUnitId),
+					})),
+				)
+			)
+				.filter(({ readable }) => readable)
+				.map(({ row }) => row)
+		: rows;
+	const tagIds = readableRows
+		.filter((row) => row.unitKind === "tag")
+		.map((row) => row.contentUnitId);
+	const contexts = tagIds.length
+		? await tx
+				.select({
+					tagId: realmTagContext.tagId,
+					contextPostId: realmTagContext.contextPostId,
+					contextSummary: resolvedUnitLocalizationSummary(
+						realmTagContext.contextPostId,
+						localizationLanguages,
+					),
+				})
+				.from(realmTagContext)
+				.innerJoin(
+					realmUnit,
+					and(
+						eq(realmUnit.realmId, realmTagContext.realmId),
+						eq(realmUnit.unitId, realmTagContext.contextPostId),
+						eq(realmUnit.status, "visible"),
+					),
+				)
+				.where(
+					and(
+						eq(realmTagContext.realmId, realmId),
+						inArray(realmTagContext.tagId, tagIds),
+					),
+				)
+		: [];
+	const readableContexts = canReadUnit
+		? (
+				await Promise.all(
+					contexts.map(async (context) => ({
+						context,
+						readable: await canReadUnit(context.contextPostId),
+					})),
+				)
+			)
+				.filter(({ readable }) => readable)
+				.map(({ context }) => context)
+		: contexts;
+	const contextByTagId = new Map(readableContexts.map((context) => [context.tagId, context]));
+	const latestRevisionId = await getContentStructureRevision(tx, realmId, structure.id);
+	if (!latestRevisionId) throw new Error("Realm taxonomy has no Content Structure revision");
+	return {
+		structureId: structure.id,
+		latestRevisionId,
+		items: readableRows.map((row) => {
+			const contentKind =
+				row.unitKind === "tag"
+					? ("tag" as const)
+					: row.unitKind === "label"
+						? ("label" as const)
+						: row.unitKind === "post" && row.postKind === "wiki"
+							? ("wiki" as const)
+							: null;
+			if (!contentKind) throw new Error(`Invalid Realm taxonomy node ${row.id}`);
+			const context = contextByTagId.get(row.contentUnitId);
+			return {
+				id: row.id,
+				parentId: row.parentId,
+				contentUnitId: row.contentUnitId,
+				contentKind,
+				language: row.language,
+				title: row.title,
+				summary: row.summary,
+				avatar: presentAvatar(avatarReferenceFromColumns(row)),
+				position: row.position,
+				queryStrategy: row.queryStrategy,
+				contextPostId: context?.contextPostId ?? null,
+				contextSummary: context?.contextSummary ?? null,
+			};
+		}),
 	};
 }
 
@@ -712,146 +862,11 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/taxonomy",
 		async ({ params, query, request }) => {
 			const { authorization } = await ensureRealmVisible(params.realmId, request.headers);
-			const [structure] = await database
-				.select({ id: contentStructure.id })
-				.from(contentStructure)
-				.where(
-					and(
-						eq(contentStructure.ownerUnitId, params.realmId),
-						eq(contentStructure.kind, "realm.taxonomy"),
-						isNull(contentStructure.deletedAt),
-					),
-				)
-				.limit(1);
-			if (!structure) throw new RealmNotFound();
-			const rows = await database
-				.select({
-					id: contentStructureNode.id,
-					parentId: contentStructureNode.parentId,
-					contentUnitId: contentStructureNode.contentUnitId,
-					unitKind: unit.kind,
-					postKind: post.kind,
-					language: unitLocalization.language,
-					title: unitLocalization.title,
-					summary: unitLocalization.summary,
-					avatarType: unitLocalization.avatarType,
-					avatarAssetId: unitLocalization.avatarAssetId,
-					avatarEmoji: unitLocalization.avatarEmoji,
-					avatarIconPrefix: unitLocalization.avatarIconPrefix,
-					avatarIconName: unitLocalization.avatarIconName,
-					position: contentStructureNode.position,
-					queryStrategy: contentStructureNode.realmTagQueryStrategy,
-				})
-				.from(contentStructureNode)
-				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-						eq(
-							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(
-								contentStructureNode.contentUnitId,
-								query.localizationLanguages,
-							),
-						),
-					),
-				)
-				.where(
-					and(
-						eq(contentStructureNode.structureId, structure.id),
-						isNull(contentStructureNode.deletedAt),
-					),
-				)
-				.orderBy(contentStructureNode.position, contentStructureNode.id);
-			const readableRows = (
-				await Promise.all(
-					rows.map(async (row) => ({
-						row,
-						readable: await authorization.unit.canRead(row.contentUnitId),
-					})),
-				)
-			)
-				.filter(({ readable }) => readable)
-				.map(({ row }) => row);
-			const tagIds = readableRows
-				.filter((row) => row.unitKind === "tag")
-				.map((row) => row.contentUnitId);
-			const contexts = tagIds.length
-				? await database
-						.select({
-							tagId: realmTagContext.tagId,
-							contextPostId: realmTagContext.contextPostId,
-							contextSummary: resolvedUnitLocalizationSummary(
-								realmTagContext.contextPostId,
-								query.localizationLanguages,
-							),
-						})
-						.from(realmTagContext)
-						.innerJoin(
-							realmUnit,
-							and(
-								eq(realmUnit.realmId, realmTagContext.realmId),
-								eq(realmUnit.unitId, realmTagContext.contextPostId),
-								eq(realmUnit.status, "visible"),
-							),
-						)
-						.where(
-							and(
-								eq(realmTagContext.realmId, params.realmId),
-								inArray(realmTagContext.tagId, tagIds),
-							),
-						)
-				: [];
-			const readableContexts = (
-				await Promise.all(
-					contexts.map(async (context) => ({
-						context,
-						readable: await authorization.unit.canRead(context.contextPostId),
-					})),
-				)
-			)
-				.filter(({ readable }) => readable)
-				.map(({ context }) => context);
-			const contextByTagId = new Map(
-				readableContexts.map((context) => [context.tagId, context]),
+			return database.transaction((tx) =>
+				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? [], (unitId) =>
+					authorization.unit.canRead(unitId),
+				),
 			);
-			const latestRevisionId = await database.transaction((tx) =>
-				getContentStructureRevision(tx, params.realmId, structure.id),
-			);
-			if (!latestRevisionId)
-				throw new Error("Realm taxonomy has no Content Structure revision");
-			return {
-				structureId: structure.id,
-				latestRevisionId,
-				items: readableRows.map((row) => {
-					const contentKind =
-						row.unitKind === "tag"
-							? ("tag" as const)
-							: row.unitKind === "label"
-								? ("label" as const)
-								: row.unitKind === "post" && row.postKind === "wiki"
-									? ("wiki" as const)
-									: null;
-					if (!contentKind) throw new Error(`Invalid Realm taxonomy node ${row.id}`);
-					const context = contextByTagId.get(row.contentUnitId);
-					return {
-						id: row.id,
-						parentId: row.parentId,
-						contentUnitId: row.contentUnitId,
-						contentKind,
-						language: row.language,
-						title: row.title,
-						summary: row.summary,
-						avatar: presentAvatar(avatarReferenceFromColumns(row)),
-						position: row.position,
-						queryStrategy: row.queryStrategy,
-						contextPostId: context?.contextPostId ?? null,
-						contextSummary: context?.contextSummary ?? null,
-					};
-				}),
-			};
 		},
 		{
 			params: RealmParams,
@@ -861,6 +876,70 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 			},
 			detail: { summary: "Get Realm taxonomy", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/taxonomy/draft",
+		async ({ params, query, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+			return database.transaction((tx) =>
+				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? []),
+			);
+		},
+		{
+			access: "contribute:realm:manage",
+			params: RealmParams,
+			query: RealmTaxonomyQuery,
+			response: {
+				[StatusCodes.OK]: RealmTaxonomyResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+			},
+			detail: { summary: "Get complete Realm taxonomy draft", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/taxonomy/draft",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+			const referencedUnitIds = body.nodes.flatMap((node) =>
+				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
+			);
+			await Promise.all(
+				[...new Set(referencedUnitIds)].map((unitId) =>
+					authorization.unit.ensureCanRead(unitId),
+				),
+			);
+			return database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:realm-taxonomy-draft`}::text, 0))`,
+				);
+				const result = await saveRealmTaxonomyDraft(tx, {
+					ownerUnitId: params.realmId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					nodes: body.nodes,
+				});
+				const saved = await readRealmTaxonomy(tx, params.realmId, []);
+				return { ...saved, revisionCreated: result.revisionCreated };
+			});
+		},
+		{
+			access: "contribute:realm:manage",
+			params: RealmParams,
+			body: SaveRealmTaxonomyDraftBody,
+			response: {
+				[StatusCodes.OK]: SaveRealmTaxonomyDraftResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"UnitAccessRestricted",
+					"UnitPermissionForbidden",
+				]),
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: { summary: "Save complete Realm taxonomy draft", tags: ["Realms"] },
 		},
 	)
 	.get(

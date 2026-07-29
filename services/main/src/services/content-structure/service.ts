@@ -51,7 +51,7 @@ const SingletonContentStructureKinds = new Set<ContentStructureKind>([
 ]);
 
 function ensureDirectContentStructureEditing(kind: ContentStructureKind): void {
-	if (kind === "realm.navigation" || kind === "zone.navigation")
+	if (kind === "wiki.navigation" || kind === "zone.navigation")
 		throw new ContentStructureInvalid(
 			"Navigation structures must be edited through the NavigationDocument adapter",
 		);
@@ -542,7 +542,7 @@ export async function deleteContentStructure(
 			| { readonly binding: "direct" }
 			| {
 					readonly binding: "navigation";
-					readonly kind: "realm.navigation" | "zone.navigation";
+					readonly kind: "wiki.navigation" | "zone.navigation";
 			  }
 		),
 ) {

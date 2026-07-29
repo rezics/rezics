@@ -97,6 +97,24 @@ describe("realm membership permissions", () => {
 		).toEqual(["tags", "history"]);
 	});
 
+	it("keeps Wiki navigation with Realm settings management", () => {
+		expect(
+			getRealmSettingsSectionIds({
+				canCreateUnits: false,
+				canCreateReplies: false,
+				canUpdateSettings: true,
+				canReadMembers: false,
+				canManageMembers: false,
+				canUpdateRules: false,
+				canManagePins: false,
+				canManageTags: false,
+				canModerateUnits: false,
+				canManageAccess: false,
+				canRestoreHistory: false,
+			}),
+		).toEqual(["profile", "pages", "wiki", "history"]);
+	});
+
 	it.each([
 		[{ isOwner: true, state: "active" }, true],
 		[{ isOwner: true, state: "banned" }, false],
