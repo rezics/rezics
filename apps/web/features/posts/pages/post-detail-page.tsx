@@ -6,8 +6,10 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useEffect, type ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
 
-import { cn, QueryFailure, QueryPending } from "@rezics/ui";
+import { Button, cn, QueryFailure, QueryPending } from "@rezics/ui";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { UnitDockRenderer } from "@/features/docks";
 import { ReviewPostDetail } from "@/features/reviews/components/review-post-detail";
 import { useTranslation } from "@/i18n/client";
@@ -28,6 +30,8 @@ import { RelatedPostRecommendations } from "../post-list";
 import { ReplyPostThread } from "../reply-thread";
 import { postManagementSectionHref } from "../routing/post-management-routes";
 import { postHref, type PostInteractionContext } from "../url";
+import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import { catalogDetailHref } from "@/features/units/routing/catalog-detail-routes";
 
 type WikiPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "wiki" }>;
 
@@ -35,12 +39,14 @@ export function PostDetailPage({
 	context,
 	id,
 	renderWikiBody,
+	returnToDiscussion = false,
 }: {
 	readonly context?: PostInteractionContext;
 	readonly id: string;
 	readonly renderWikiBody?: (post: WikiPost) => ReactNode;
+	readonly returnToDiscussion?: boolean;
 }) {
-	const { t } = useTranslation(["posts"]);
+	const { t } = useTranslation(["posts", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const router = useApplicationRouter();
 	const realmId = context?.kind === "realm" ? context.realmId : undefined;
@@ -70,10 +76,22 @@ export function PostDetailPage({
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const post = query.data;
+	const discussionHref =
+		returnToDiscussion && post.subject && isCatalogDetailUnitType(post.subject.type)
+			? catalogDetailHref(post.subject.type, post.subject.id, "discussion")
+			: undefined;
 	if (wikiZone && context?.kind !== "zone") return <QueryPending />;
 	if (post.postKind === "review")
 		return (
 			<main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+				{discussionHref ? (
+					<Button asChild className="w-fit" variant="outline">
+						<Link href={discussionHref}>
+							<ArrowLeft aria-hidden />
+							{t.units.detail.backToDiscussion}
+						</Link>
+					</Button>
+				) : null}
 				{post.subject ? <PostSubjectHero subject={post.subject} /> : null}
 				<div className="grid min-w-0 items-start gap-10">
 					<div className="flex min-w-0 flex-col gap-8">
@@ -99,6 +117,14 @@ export function PostDetailPage({
 
 	return (
 		<main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+			{discussionHref ? (
+				<Button asChild className="w-fit" variant="outline">
+					<Link href={discussionHref}>
+						<ArrowLeft aria-hidden />
+						{t.units.detail.backToDiscussion}
+					</Link>
+				</Button>
+			) : null}
 			{post.subject ? <PostSubjectHero subject={post.subject} /> : null}
 			<div
 				className={cn(
@@ -137,7 +163,7 @@ export function PostDetailPage({
 							id: post.id,
 							postKind: post.postKind,
 							attributions: post.attributions,
-							realmId: realmId ?? post.realmId,
+							realmId: realmId ?? null,
 							language: post.language,
 							title,
 							body: post.body,

@@ -363,11 +363,12 @@ export const UnitDetailResponse = t.Object({
 		}),
 	),
 	variantContext: UnitVariantContextResponse,
+	catalogMode: t.UnionEnum(["owned_work", "public_entry"]),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageAssociations: t.Boolean(),
-		canManageTags: t.Boolean(),
+		canCurateTags: t.Boolean(),
 		hasDevelopmentPreviewAccess: t.Boolean(),
 	}),
 });

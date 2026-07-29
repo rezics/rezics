@@ -92,6 +92,10 @@ export default {
 	},
 	management: {
 		title: "タグの選定",
+		addSectionTitle: "タグを追加",
+		addSectionDescription:
+			"タグページでタグを検索して適用します。追加と投票にタグ選定権限は必要ありません。",
+		addSectionAction: "タグを追加",
 		description:
 			"最初に表示するグローバルタグを選びます。その他のタグはコミュニティ順位を維持します。",
 		featuredTitle: "注目タグ",

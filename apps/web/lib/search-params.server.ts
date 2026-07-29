@@ -1,4 +1,9 @@
-import { createSearchParamsCache, createSerializer, parseAsString } from "nuqs/server";
+import {
+	createSearchParamsCache,
+	createSerializer,
+	parseAsString,
+	parseAsStringLiteral,
+} from "nuqs/server";
 
 import { authSearchParamsParsers, urlStateOptions } from "./search-params";
 
@@ -10,6 +15,7 @@ export const postCreateSearchParams = createSearchParamsCache({
 
 export const postDetailSearchParams = createSearchParamsCache({
 	realmId: parseAsString.withOptions(urlStateOptions),
+	from: parseAsStringLiteral(["discussion"]).withOptions(urlStateOptions),
 });
 
 export const historyCompareSearchParams = createSearchParamsCache({

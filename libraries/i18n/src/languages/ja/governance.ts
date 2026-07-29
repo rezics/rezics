@@ -157,6 +157,7 @@ export default {
 			"unit.history.restore": "履歴の復元",
 			"unit.access.manage": "アクセス管理",
 			"unit.association.manage": "関連管理",
+			"unit.tag-curation.manage": "タグ選定を管理",
 			"unit.delete": "削除",
 			"realm.contribute": `${realmTerms.label} に貢献`,
 			"realm.units.create": "ユニット作成",

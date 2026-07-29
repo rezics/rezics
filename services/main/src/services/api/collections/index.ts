@@ -175,6 +175,9 @@ export default new Elysia({ prefix: "/collections" })
 						isOwnerQuery ? undefined : eq(unit.visibility, "public"),
 						isOwnerQuery ? undefined : ne(collection.source, "system"),
 						query.ownerId ? eq(collection.ownerProfileId, query.ownerId) : undefined,
+						query.containsTargetId
+							? sql`exists(select 1 from ${collectionItem} containing_item where containing_item.collection_id = ${collection.id} and containing_item.unit_id = ${query.containsTargetId})`
+							: undefined,
 					),
 				)
 				.orderBy(desc(unit.updatedAt))

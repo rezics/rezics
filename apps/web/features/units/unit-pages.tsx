@@ -169,9 +169,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
-	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">(
-		"owned_work",
-	);
+	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">("owned_work");
 	const [publisher, setPublisher] = useState<EntityPickerValue>();
 	const [versionKind, setVersionKind] = useState<"main" | "variant">("main");
 	const [mainVersion, setMainVersion] = useState<EntityPickerValue>();

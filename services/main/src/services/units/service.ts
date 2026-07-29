@@ -44,6 +44,7 @@ import {
 	subjectAssociation,
 	unitLink,
 	unitLocalization,
+	unitOwnership,
 	unitProgress,
 	unitTag,
 	unitTagVoteStat,
@@ -74,6 +75,7 @@ import { getAssociationContextPostsByAssociationIds } from "./association-contex
 import { createAssociationRequestInTransaction } from "./association-proposals";
 import { resolvePublisherAttributionCreationMode } from "./attribution-authorization";
 import { wilsonLowerBoundSql } from "../tags/ranking";
+import { OfficialProfileIds } from "../bootstrap/manifest";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
@@ -459,16 +461,22 @@ export async function getUnit(
 			: await getUnitVariantContext(base.id, authorization.profileId);
 	const [
 		canEdit,
-		canManageTags,
+		canCurateTags,
 		accessDecision,
 		associationDecision,
 		hasDevelopmentPreviewAccess,
+		activeOwnership,
 	] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
-		authorization.unit.canUpdate(base.id, ["tags"]),
+		authorization.unit.decide(base.id, "unit.tag-curation.manage"),
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 		authorization.platform.hasCapability(DevelopmentPreviewCapability),
+		database
+			.select({ profileId: unitOwnership.profileId })
+			.from(unitOwnership)
+			.where(and(eq(unitOwnership.unitId, base.id), isNull(unitOwnership.revokedAt)))
+			.limit(1),
 	]);
 	const details = await getUnitDetails(kind, base.id);
 	return {
@@ -551,11 +559,15 @@ export async function getUnit(
 								]
 							: [],
 		variantContext,
+		catalogMode:
+			activeOwnership[0]?.profileId === OfficialProfileIds.community
+				? "public_entry"
+				: "owned_work",
 		capabilities: {
 			canEdit,
 			canManageAccess: accessDecision.allowed,
 			canManageAssociations: associationDecision.allowed,
-			canManageTags,
+			canCurateTags: canCurateTags.allowed,
 			hasDevelopmentPreviewAccess,
 		},
 	};

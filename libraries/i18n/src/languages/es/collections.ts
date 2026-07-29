@@ -13,6 +13,7 @@ export default {
 	deleteCollectionPrompt:
 		"La colección y su organización no podrán recuperarse después de eliminarla.",
 	emptyCollections: "Todavía no tienes ninguna colección.",
+	containingUnitEmpty: "Todavía no hay ninguna colección pública que incluya esta obra.",
 	emptyCollectionTitle: "Esta colección está vacía",
 	emptyCollectionBody:
 		"El contenido añadido aparecerá aquí con las mismas tarjetas que en la fuente.",

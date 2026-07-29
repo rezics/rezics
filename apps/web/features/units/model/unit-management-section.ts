@@ -24,7 +24,7 @@ export function canOpenUnitManagement(capabilities: UnitCapabilities, canManageD
 		capabilities.canEdit ||
 		capabilities.canManageAccess ||
 		capabilities.canManageAssociations ||
-		capabilities.canManageTags
+		capabilities.canCurateTags
 	);
 }
 
@@ -38,12 +38,12 @@ export function getUnitManagementSectionIds(
 		capabilities.canEdit ||
 		capabilities.canManageAccess ||
 		capabilities.canManageAssociations ||
-		capabilities.canManageTags;
+		capabilities.canCurateTags;
 	return UnitManagementSectionIds.filter((sectionId) => {
 		if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
 		if (sectionId === "relationships")
 			return capabilities.canEdit || capabilities.canManageAssociations;
-		if (sectionId === "tags") return capabilities.canManageTags;
+		if (sectionId === "tags") return capabilities.canEdit || capabilities.canCurateTags;
 		if (sectionId === "content-structure")
 			return (
 				type !== "series" &&

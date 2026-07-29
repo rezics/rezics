@@ -2,9 +2,11 @@
 
 import { Card, CardContent } from "@rezics/ui";
 
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { PostList } from "@/features/posts/post-list";
 import { SubjectPostComposer } from "@/features/posts/subject-post-composer";
+import { postDiscussionHref } from "@/features/posts/url";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { CatalogDetailSectionFrame } from "../components/catalog-detail-section-frame";
@@ -12,6 +14,7 @@ import { useCatalogDetail } from "../components/catalog-detail-workspace";
 
 export function CatalogDiscussionPage() {
 	const detail = useCatalogDetail();
+	const router = useApplicationRouter();
 	const { data: session } = useHydratedSession();
 	const { t } = useTranslation(["actions", "units"]);
 	const labels =
@@ -34,9 +37,17 @@ export function CatalogDiscussionPage() {
 			<Card>
 				<CardContent className="p-5 sm:p-6">
 					{session ? (
-						<SubjectPostComposer subjectId={detail.unit.id} />
+						<SubjectPostComposer
+							onCreated={(postId) => router.push(postDiscussionHref(postId))}
+							subjectId={detail.unit.id}
+						/>
 					) : (
-						<SignInButton variant="outline">{t.actions.login}</SignInButton>
+						<SignInButton
+							className="h-11 w-full justify-start rounded-xl text-muted-foreground"
+							variant="outline"
+						>
+							{t.actions.login}
+						</SignInButton>
 					)}
 				</CardContent>
 			</Card>

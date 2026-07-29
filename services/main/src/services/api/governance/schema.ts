@@ -1,4 +1,8 @@
-import { PlatformCapabilityValues, UnitPermissionValues } from "@rezics/access";
+import {
+	AuthenticatedGrantableUnitPermissionValues,
+	PlatformCapabilityValues,
+	UnitPermissionValues,
+} from "@rezics/access";
 import { PortableTextDocument } from "@rezics/block";
 import { type Static, t } from "elysia";
 
@@ -316,6 +320,9 @@ export const UnitAccessSnapshotResponse = t.Object({
 	unitId: Uuid,
 	unitKind: t.String(),
 	permissions: t.Array(UnitPermission),
+	authenticatedGrantablePermissions: t.Array(
+		t.UnionEnum(AuthenticatedGrantableUnitPermissionValues),
+	),
 	owner: t.Nullable(t.Object({ profileId: Uuid, label: t.Nullable(t.String()) })),
 	subjects: t.Array(UnitAccessSubjectRow),
 });

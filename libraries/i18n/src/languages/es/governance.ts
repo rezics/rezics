@@ -161,6 +161,7 @@ export default {
 			"unit.history.restore": "Restaurar el historial",
 			"unit.access.manage": "Gestionar el acceso",
 			"unit.association.manage": "Gestionar las asociaciones",
+			"unit.tag-curation.manage": "Gestionar la selección de etiquetas",
 			"unit.delete": "Eliminar",
 			"realm.contribute": `Contribuir al ${realmTerms.inline}`,
 			"realm.units.create": "Crear Units",

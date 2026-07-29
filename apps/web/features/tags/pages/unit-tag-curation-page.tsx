@@ -22,15 +22,26 @@ import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
 	usePatchApiUnitsByTypeByUnitIdTagsByTagId,
 } from "@rezics/openapi-tanstack-query";
-import { Badge, Button, Card, CardContent } from "@rezics/ui";
+import {
+	Badge,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, GripVertical, Pin, PinOff } from "lucide-react";
+import { ArrowDown, ArrowUp, GripVertical, Pin, PinOff, Plus } from "lucide-react";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState } from "react";
 
 import { useUnitManagement } from "@/features/units/components/unit-management-workspace";
 import { UnitSectionHeader } from "@/features/units/components/unit-section-header";
 import { invalidateUnitDetail } from "@/features/units/unit-cache";
 import type { UnitType } from "@/features/units/unit-types";
+import { isCatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
+import { catalogTagsHref } from "@/features/units/routing/catalog-detail-routes";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
@@ -50,28 +61,43 @@ function tagTitle(tag: UnitTag, unnamedTag: string): string {
 }
 
 export function UnitTagCurationPage() {
-	const { t } = useTranslation(["errors", "tags"]);
+	const { t } = useTranslation(["tags"]);
 	const { type, unit } = useUnitManagement();
 	const [announcement, setAnnouncement] = useState("");
-	if (!unit.capabilities.canManageTags)
-		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
-
 	const groups = partitionUnitTagCuration(unit.tags);
 	const curationVersion = unit.tags.map((tag) => `${tag.tagId}:${tag.updatedAt}`).join("|");
 	return (
-		<section>
+		<section className="grid gap-8">
 			<UnitSectionHeader
 				description={t.tags.management.description}
 				title={t.tags.management.title}
 			/>
-			<UnitTagCurationEditor
-				featured={groups.featured}
-				key={curationVersion}
-				onAnnounce={setAnnouncement}
-				ranked={groups.ranked}
-				type={type}
-				unitId={unit.id}
-			/>
+			{isCatalogDetailUnitType(type) ? (
+				<Card appearance="outlined" className="max-w-3xl">
+					<CardHeader>
+						<CardTitle>{t.tags.management.addSectionTitle}</CardTitle>
+						<CardDescription>{t.tags.management.addSectionDescription}</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Button asChild variant="solid">
+							<Link href={catalogTagsHref(type, unit.id)}>
+								<Plus aria-hidden />
+								{t.tags.management.addSectionAction}
+							</Link>
+						</Button>
+					</CardContent>
+				</Card>
+			) : null}
+			{unit.capabilities.canCurateTags ? (
+				<UnitTagCurationEditor
+					featured={groups.featured}
+					key={curationVersion}
+					onAnnounce={setAnnouncement}
+					ranked={groups.ranked}
+					type={type}
+					unitId={unit.id}
+				/>
+			) : null}
 			<p aria-live="polite" className="sr-only">
 				{announcement}
 			</p>

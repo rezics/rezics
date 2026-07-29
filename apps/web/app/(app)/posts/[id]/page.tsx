@@ -6,11 +6,17 @@ export default async function Page({
 	searchParams,
 }: {
 	params: Promise<{ id: string }>;
-	searchParams: Promise<{ realmId?: string | string[] }>;
+	searchParams: Promise<{ realmId?: string | string[]; from?: string | string[] }>;
 }) {
-	const [{ id }, { realmId }] = await Promise.all([
+	const [{ id }, { from, realmId }] = await Promise.all([
 		params,
 		postDetailSearchParams.parse(searchParams),
 	]);
-	return <PostDetailPage context={realmId ? { kind: "realm", realmId } : undefined} id={id} />;
+	return (
+		<PostDetailPage
+			context={realmId ? { kind: "realm", realmId } : undefined}
+			id={id}
+			returnToDiscussion={from === "discussion"}
+		/>
+	);
 }

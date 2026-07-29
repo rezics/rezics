@@ -6,8 +6,5 @@ export function selectPostRealmContext(
 	realms: readonly PostRealmContext[],
 	requestedRealmId?: string,
 ): PostRealmContext | undefined {
-	return (
-		(requestedRealmId ? realms.find((realm) => realm.id === requestedRealmId) : undefined) ??
-		realms[0]
-	);
+	return requestedRealmId ? realms.find((realm) => realm.id === requestedRealmId) : undefined;
 }

@@ -52,6 +52,7 @@ export const UnitPermissionValues = [
 	"unit.history.restore",
 	"unit.access.manage",
 	"unit.association.manage",
+	"unit.tag-curation.manage",
 	"unit.delete",
 	...RealmPermissionValues,
 	...EntityAssociationPermissionValues,
@@ -358,6 +359,14 @@ export const UnitPermissionDefinitions = {
 		rationale:
 			"Association governance intentionally bundles the supported association mutation operations.",
 	},
+	"unit.tag-curation.manage": {
+		kind: "domain",
+		target: "unit",
+		resource: "unit.tag-curation",
+		action: "manage",
+		rationale:
+			"Tag curation independently governs pinning, ordering, and removing whole tag applications without limiting community tagging or voting.",
+	},
 	"unit.delete": {
 		kind: "standard",
 		target: "unit",
@@ -477,6 +486,7 @@ export const UnitPermissionImplications: Partial<
 	"unit.history.restore": ["unit.read", "unit.update"],
 	"unit.access.manage": ["unit.read"],
 	"unit.association.manage": ["unit.read"],
+	"unit.tag-curation.manage": ["unit.read"],
 	"unit.delete": ["unit.read"],
 	"realm.contribute": ["unit.read"],
 	"realm.units.create": ["unit.read"],

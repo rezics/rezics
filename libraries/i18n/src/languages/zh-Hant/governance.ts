@@ -156,6 +156,7 @@ export default {
 			"unit.history.restore": "還原歷史",
 			"unit.access.manage": "管理權限",
 			"unit.association.manage": "管理關聯",
+			"unit.tag-curation.manage": "管理標籤精選",
 			"unit.delete": "刪除",
 			"realm.contribute": `參與${realmTerms.label}`,
 			"realm.units.create": "建立條目",

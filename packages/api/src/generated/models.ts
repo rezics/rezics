@@ -18268,6 +18268,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18287,6 +18288,21 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 export type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum =
 	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum];
 
+export const GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum];
+
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
@@ -18294,6 +18310,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18320,6 +18337,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18346,6 +18364,7 @@ export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18383,6 +18402,10 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200 = {
 	 * @type array
 	 */
 	permissions: GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum[];
+	/**
+	 * @type array
+	 */
+	authenticatedGrantablePermissions: GetApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum[];
 	owner:
 		| ({
 				/**
@@ -18571,6 +18594,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18590,6 +18614,21 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 export type PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum =
 	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum];
 
+export const PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"realm.contribute": "realm.contribute",
+	"realm.units.create": "realm.units.create",
+	"realm.post.replies.create": "realm.post.replies.create",
+	"entity.association.credit.request": "entity.association.credit.request",
+	"entity.association.credit.direct": "entity.association.credit.direct",
+	"entity.association.subject.request": "entity.association.subject.request",
+	"entity.association.subject.direct": "entity.association.subject.direct",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum];
+
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
@@ -18597,6 +18636,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18623,6 +18663,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18649,6 +18690,7 @@ export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = 
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18686,6 +18728,10 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200 = {
 	 * @type array
 	 */
 	permissions: PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum[];
+	/**
+	 * @type array
+	 */
+	authenticatedGrantablePermissions: PutApiGovernanceUnitByUnitIdAccessStatus200AuthenticatedGrantablePermissionsEnum[];
 	owner:
 		| ({
 				/**
@@ -18903,6 +18949,7 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -18929,6 +18976,7 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -19247,6 +19295,7 @@ export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermis
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -19693,6 +19742,7 @@ export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum 
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -19858,6 +19908,7 @@ export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissi
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -20081,6 +20132,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsE
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -20335,6 +20387,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnu
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
 	"unit.association.manage": "unit.association.manage",
+	"unit.tag-curation.manage": "unit.tag-curation.manage",
 	"unit.delete": "unit.delete",
 	"realm.contribute": "realm.contribute",
 	"realm.units.create": "realm.units.create",
@@ -20447,6 +20500,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 		"unit.history.restore": "unit.history.restore",
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
+		"unit.tag-curation.manage": "unit.tag-curation.manage",
 		"unit.delete": "unit.delete",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
@@ -20689,6 +20743,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 		"unit.history.restore": "unit.history.restore",
 		"unit.access.manage": "unit.access.manage",
 		"unit.association.manage": "unit.association.manage",
+		"unit.tag-curation.manage": "unit.tag-curation.manage",
 		"unit.delete": "unit.delete",
 		"realm.contribute": "realm.contribute",
 		"realm.units.create": "realm.units.create",
@@ -42723,6 +42778,15 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204 = void;
 
+export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -42735,7 +42799,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "PlatformCapabilityRequired";
+		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -47015,6 +47079,14 @@ export const PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum = {
 export type PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum =
 	(typeof PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum)[keyof typeof PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum];
 
+export const PostApiUnitsByTypeStatus200CatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type PostApiUnitsByTypeStatus200CatalogModeEnum =
+	(typeof PostApiUnitsByTypeStatus200CatalogModeEnum)[keyof typeof PostApiUnitsByTypeStatus200CatalogModeEnum];
+
 /**
  * @type object
  */
@@ -47886,6 +47958,11 @@ export type PostApiUnitsByTypeStatus200 = {
 					  };
 		  };
 	/**
+	 * @default 'owned_work'
+	 * @type string
+	 */
+	catalogMode: PostApiUnitsByTypeStatus200CatalogModeEnum;
+	/**
 	 * @type object
 	 */
 	capabilities: {
@@ -47904,7 +47981,7 @@ export type PostApiUnitsByTypeStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canManageTags: boolean;
+		canCurateTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -48922,6 +48999,14 @@ export const GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum = 
 export type GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum];
 
+export const GetApiUnitsByTypeByUnitIdStatus200CatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200CatalogModeEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200CatalogModeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200CatalogModeEnum];
+
 /**
  * @type object
  */
@@ -49793,6 +49878,11 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 					  };
 		  };
 	/**
+	 * @default 'owned_work'
+	 * @type string
+	 */
+	catalogMode: GetApiUnitsByTypeByUnitIdStatus200CatalogModeEnum;
+	/**
 	 * @type object
 	 */
 	capabilities: {
@@ -49811,7 +49901,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canManageTags: boolean;
+		canCurateTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -50076,6 +50166,14 @@ export const PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum 
 
 export type PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200CatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200CatalogModeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200CatalogModeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200CatalogModeEnum];
 
 /**
  * @type object
@@ -50948,6 +51046,11 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 					  };
 		  };
 	/**
+	 * @default 'owned_work'
+	 * @type string
+	 */
+	catalogMode: PatchApiUnitsByTypeByUnitIdStatus200CatalogModeEnum;
+	/**
 	 * @type object
 	 */
 	capabilities: {
@@ -50966,7 +51069,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canManageTags: boolean;
+		canCurateTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -51678,6 +51781,14 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMai
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200CatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200CatalogModeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200CatalogModeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200CatalogModeEnum];
 
 /**
  * @type object
@@ -52550,6 +52661,11 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 					  };
 		  };
 	/**
+	 * @default 'owned_work'
+	 * @type string
+	 */
+	catalogMode: PatchApiUnitsByTypeByUnitIdVariantContextStatus200CatalogModeEnum;
+	/**
 	 * @type object
 	 */
 	capabilities: {
@@ -52568,7 +52684,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canManageTags: boolean;
+		canCurateTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -53004,6 +53120,14 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantCont
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200CatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200CatalogModeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200CatalogModeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200CatalogModeEnum];
 
 /**
  * @type object
@@ -53876,6 +54000,11 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 					  };
 		  };
 	/**
+	 * @default 'owned_work'
+	 * @type string
+	 */
+	catalogMode: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200CatalogModeEnum;
+	/**
 	 * @type object
 	 */
 	capabilities: {
@@ -53894,7 +54023,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canManageTags: boolean;
+		canCurateTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -54340,6 +54469,14 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantCon
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200CatalogModeEnum = {
+	owned_work: "owned_work",
+	public_entry: "public_entry",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200CatalogModeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200CatalogModeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200CatalogModeEnum];
 
 /**
  * @type object
@@ -55212,6 +55349,11 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 					  };
 		  };
 	/**
+	 * @default 'owned_work'
+	 * @type string
+	 */
+	catalogMode: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200CatalogModeEnum;
+	/**
 	 * @type object
 	 */
 	capabilities: {
@@ -55230,7 +55372,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		canManageTags: boolean;
+		canCurateTags: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -58955,6 +59097,14 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200 = {
  */
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
 
+export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -58967,7 +59117,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -59986,6 +60136,14 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
  */
 export type PostApiUnitsByTypeByUnitIdAliasesStatus400 = MalformedRequestBody;
 
+export const PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -59998,7 +60156,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -60208,6 +60366,14 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdPath = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204 = void;
 
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -60220,7 +60386,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -61132,6 +61298,14 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdPath = 
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204 = void;
 
+export const DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -61144,7 +61318,7 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus4
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -61578,6 +61752,15 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdPath =
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204 = void;
 
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum =
+	{
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+		UnitAccessRestricted: "UnitAccessRestricted",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -61590,7 +61773,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -61789,6 +61972,14 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
  */
 export type PostApiUnitsByTypeByUnitIdLinksStatus400 = MalformedRequestBody;
 
+export const PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -61801,7 +61992,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -62217,6 +62408,14 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200 = {
  */
 export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400 = MalformedRequestBody;
 
+export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -62229,7 +62428,7 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -62450,6 +62649,14 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdPath = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204 = void;
 
+export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -62462,7 +62669,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -63023,6 +63230,14 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200 = {
 	updatedAt: string;
 };
 
+export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -63035,7 +63250,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -69715,6 +69930,12 @@ export type GetApiCollectionsQuery = {
 	 * @type string | undefined
 	 */
 	targetId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	containsTargetId?: string;
 	/**
 	 * @type array | undefined
 	 */

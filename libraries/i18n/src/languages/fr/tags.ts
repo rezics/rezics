@@ -93,6 +93,10 @@ export default {
 	},
 	management: {
 		title: "Sélection des étiquettes",
+		addSectionTitle: "Ajouter des étiquettes",
+		addSectionDescription:
+			"Ouvrez la page des étiquettes pour les rechercher et les appliquer. L’ajout et le vote ne nécessitent pas le droit de sélection.",
+		addSectionAction: "Ajouter des étiquettes",
 		description:
 			"Choisissez les étiquettes globales affichées en premier. Les autres conservent le classement de la communauté.",
 		featuredTitle: "Étiquettes mises en avant",

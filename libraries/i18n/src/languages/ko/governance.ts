@@ -158,6 +158,7 @@ export default {
 			"unit.history.restore": "기록 복원",
 			"unit.access.manage": "접근 관리",
 			"unit.association.manage": "연관 관리",
+			"unit.tag-curation.manage": "태그 선별 관리",
 			"unit.delete": "삭제",
 			"realm.contribute": `${realmTerms.label}에 기여`,
 			"realm.units.create": "유닛 생성",

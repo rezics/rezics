@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+import { AuthenticatedGrantableUnitPermissionValues } from "@rezics/access";
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
@@ -275,6 +276,9 @@ async function getAccessSnapshot(unitId: string, scope: readonly string[]) {
 		unitId,
 		unitKind: target.kind,
 		permissions: orderedPermissions,
+		authenticatedGrantablePermissions: AuthenticatedGrantableUnitPermissionValues.filter(
+			(permission) => orderedPermissions.includes(permission),
+		),
 		owner: ownership[0] ?? null,
 		subjects: [...subjects.values()]
 			.map((row) => {

@@ -90,6 +90,9 @@ export default {
 	},
 	management: {
 		title: "標籤精選",
+		addSectionTitle: "新增標籤",
+		addSectionDescription: "前往標籤頁搜尋並套用標籤；新增與投票不需要標籤精選權限。",
+		addSectionAction: "新增標籤",
 		description: "選擇優先顯示的一般標籤；其他標籤仍依社群排名自動排序。",
 		featuredTitle: "精選標籤",
 		featuredDescription: "精選標籤會依你設定的順序優先顯示；可拖曳或使用移動按鈕排序。",

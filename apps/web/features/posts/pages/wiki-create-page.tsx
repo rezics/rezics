@@ -1,10 +1,7 @@
 "use client";
 
 import { toContentLanguage } from "@rezics/i18n";
-import {
-	useGetApiRealmsByRealmId,
-	usePostApiPostsWiki,
-} from "@rezics/openapi-tanstack-query";
+import { useGetApiRealmsByRealmId, usePostApiPostsWiki } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import {
 	Button,

@@ -602,6 +602,21 @@ function ChapterLocalizationEditorContent({
 	if (book.isPending) return <QueryPending />;
 	if (book.isError) return <QueryFailure error={book.error} retry={() => void book.refetch()} />;
 	if (!book.data) return <QueryPending />;
+	if (book.data.catalogMode === "public_entry")
+		return (
+			<main className="mx-auto flex min-h-64 w-full max-w-4xl flex-col items-start justify-center gap-5 px-4 py-10">
+				<PageHeading
+					description={t.units.chapter.publicEntryContentPolicyDescription}
+					title={t.units.chapter.publicEntryContentPolicyTitle}
+				/>
+				<Button asChild variant="outline">
+					<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
+						<ArrowLeftIcon aria-hidden />
+						{t.units.chapter.backToStructure}
+					</Link>
+				</Button>
+			</main>
+		);
 	if (!book.data.capabilities.canEdit)
 		return (
 			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">

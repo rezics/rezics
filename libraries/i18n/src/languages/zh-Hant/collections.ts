@@ -12,6 +12,7 @@ export default {
 	deleteCollection: "刪除收藏集",
 	deleteCollectionPrompt: "刪除後將無法恢復這個收藏集及其編排。",
 	emptyCollections: "還沒有收藏集。",
+	containingUnitEmpty: "還沒有收錄這個作品的公開收藏集。",
 	emptyCollectionTitle: "這個收藏集目前是空的",
 	emptyCollectionBody: "加入內容後，這裡會使用與動態消息相同的內容卡片呈現。",
 	contentLabel: "收藏集內容",

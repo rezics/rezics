@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isAvailableZonePageSlug, TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
 
-import { postHref } from "./url";
+import { postDiscussionHref, postHref } from "./url";
 
 describe("postHref", () => {
 	it("uses the global Post interaction route without context", () => {
@@ -12,6 +12,10 @@ describe("postHref", () => {
 		expect(postHref("post-1", { kind: "realm", realmId: "realm-1" })).toBe(
 			"/posts/post-1?realmId=realm-1",
 		);
+	});
+
+	it("links a created discussion Post back to its subject discussion", () => {
+		expect(postDiscussionHref("post-1")).toBe("/posts/post-1?from=discussion");
 	});
 
 	it("preserves Zone context in the route hierarchy", () => {

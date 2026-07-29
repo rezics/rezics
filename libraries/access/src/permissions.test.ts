@@ -91,6 +91,7 @@ describe("permission schema", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("realm.units.create")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("realm.post.replies.create")).toBe(true);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.access.manage")).toBe(false);
+		expect(isUnitPermissionGrantableToAuthenticated("unit.tag-curation.manage")).toBe(false);
 	});
 
 	it("uses one platform release gate for every development preview", () => {

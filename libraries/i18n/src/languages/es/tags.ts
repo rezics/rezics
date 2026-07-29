@@ -93,6 +93,10 @@ export default {
 	},
 	management: {
 		title: "Selección de etiquetas",
+		addSectionTitle: "Añadir etiquetas",
+		addSectionDescription:
+			"Abre la página de etiquetas para buscar y aplicar etiquetas. Añadir y votar no requiere permiso de selección.",
+		addSectionAction: "Añadir etiquetas",
 		description:
 			"Elige qué etiquetas globales aparecen primero. Las demás conservan el orden de la comunidad.",
 		featuredTitle: "Etiquetas destacadas",

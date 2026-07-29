@@ -93,6 +93,10 @@ export default {
 	},
 	management: {
 		title: "Tag-Kuratierung",
+		addSectionTitle: "Tags hinzufügen",
+		addSectionDescription:
+			"Öffne die Tag-Seite, um Tags zu suchen und anzuwenden. Hinzufügen und Abstimmen erfordern keine Kuratierungsberechtigung.",
+		addSectionAction: "Tags hinzufügen",
 		description:
 			"Wähle aus, welche globalen Tags zuerst erscheinen. Alle anderen bleiben nach der Community-Wertung sortiert.",
 		featuredTitle: "Hervorgehobene Tags",

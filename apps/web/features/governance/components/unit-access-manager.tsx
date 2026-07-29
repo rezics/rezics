@@ -50,15 +50,6 @@ type Subject = AccessSubject["subject"];
 type EditableMode = "grant" | "restrict";
 type MatrixValue = `${Permission}:${EditableMode}`;
 type SubjectFilter = "all" | "profile" | "realm";
-const AuthenticatedPermissions = new Set<Permission>([
-	"unit.read",
-	"unit.update",
-	"realm.contribute",
-	"entity.association.credit.request",
-	"entity.association.credit.direct",
-	"entity.association.subject.request",
-	"entity.association.subject.direct",
-]);
 const AccessScopeOptions = [
 	{ id: "root", scope: [] },
 	{ id: "creditAttributions", scope: ["credit-attributions"] },
@@ -131,7 +122,6 @@ export function UnitAccessManager({
 }
 
 function ScopedUnitAccessManager({ unitId, scope }: { unitId: string; scope: readonly string[] }) {
-	const { t } = useTranslation(["governance"]);
 	const query = useGetApiGovernanceUnitByUnitIdAccess({
 		path: { unitId },
 		query: { scope: [...scope] },
@@ -141,39 +131,7 @@ function ScopedUnitAccessManager({ unitId, scope }: { unitId: string; scope: rea
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 
-	const authenticated = query.data.subjects.find(
-		(subject) => subject.subject.kind === "authenticated",
-	) ?? {
-		subject: { kind: "authenticated" as const },
-		label: t.governance.access.authenticatedLabel,
-		grants: [],
-		restrictions: [],
-		inherited: [],
-		expiresAt: null,
-	};
-
-	return (
-		<div className="grid gap-6">
-			<Card appearance="outlined">
-				<CardHeader>
-					<CardTitle>{t.governance.access.publicTitle}</CardTitle>
-					<CardDescription>{t.governance.access.publicDescription}</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<InlineSubjectEditor
-						permissions={query.data.permissions.filter((permission) =>
-							AuthenticatedPermissions.has(permission),
-						)}
-						scope={scope}
-						subject={authenticated}
-						unitId={unitId}
-					/>
-				</CardContent>
-			</Card>
-
-			<SubjectAccessTable scope={scope} snapshot={query.data} unitId={unitId} />
-		</div>
-	);
+	return <SubjectAccessTable scope={scope} snapshot={query.data} unitId={unitId} />;
 }
 
 function usePermissionMatrix(
@@ -223,69 +181,6 @@ function usePermissionMatrix(
 	return { resources, labels };
 }
 
-function InlineSubjectEditor({
-	unitId,
-	permissions,
-	scope,
-	subject,
-}: {
-	unitId: string;
-	permissions: readonly Permission[];
-	scope: readonly string[];
-	subject: AccessSubject;
-}) {
-	const { t } = useTranslation(["governance"]);
-	const queryClient = useQueryClient();
-	const [value, setValue] = useState<ReadonlySet<MatrixValue>>(() => accessValues(subject));
-	const { resources, labels } = usePermissionMatrix(permissions, new Set(subject.inherited), [
-		"grant",
-	]);
-	const mutation = usePutApiGovernanceUnitByUnitIdAccess();
-
-	async function save() {
-		try {
-			const snapshot = await mutation.mutateAsync({
-				path: { unitId },
-				body: {
-					subject: subject.subject,
-					grants: permissions.filter((permission) =>
-						value.has(matrixValue(permission, "grant")),
-					),
-					restrictions: [],
-					scope: [...scope],
-				},
-			});
-			queryClient.setQueryData(
-				getApiGovernanceUnitByUnitIdAccessQueryKey({
-					path: { unitId },
-					query: { scope: [...scope] },
-				}),
-				snapshot,
-			);
-		} catch {
-			// The typed mutation state renders the request failure below.
-		}
-	}
-
-	return (
-		<div className="grid gap-4">
-			<PermissionMatrix
-				labels={labels}
-				onValueChange={setValue}
-				resources={resources}
-				singlePerResource
-				value={value}
-			/>
-			<div className="flex justify-end">
-				<Button disabled={mutation.isPending} onClick={() => void save()} type="button">
-					{mutation.isPending ? t.governance.access.saving : t.governance.access.save}
-				</Button>
-			</div>
-			<RequestFailure error={mutation.error} />
-		</div>
-	);
-}
-
 function SubjectAccessTable({
 	unitId,
 	scope,
@@ -301,18 +196,36 @@ function SubjectAccessTable({
 	const [filter, setFilter] = useState<SubjectFilter>("all");
 	const [addOpen, setAddOpen] = useState(false);
 	const [selected, setSelected] = useState<AccessSubject | null>(null);
-	const subjects = useMemo(
-		() =>
-			snapshot.subjects.filter((subject) => {
-				if (subject.subject.kind === "authenticated") return false;
+	const subjects = useMemo(() => {
+		const byKey = new Map(
+			snapshot.subjects.map((subject) => [subjectKey(subject.subject), subject]),
+		);
+		const authenticated = byKey.get("authenticated") ?? {
+			subject: { kind: "authenticated" as const },
+			label: null,
+			grants: [],
+			restrictions: [],
+			inherited: [],
+			expiresAt: null,
+		};
+		byKey.delete("authenticated");
+		const authenticatedMatches =
+			filter === "all" &&
+			(!deferredSearch ||
+				t.governance.access.authenticatedLabel
+					.toLocaleLowerCase()
+					.includes(deferredSearch));
+		return [
+			...(authenticatedMatches ? [authenticated] : []),
+			...[...byKey.values()].filter((subject) => {
 				if (filter !== "all" && subject.subject.kind !== filter) return false;
 				if (!deferredSearch) return true;
 				return displayLabel(subject, t.governance.access.authenticatedLabel)
 					.toLocaleLowerCase()
 					.includes(deferredSearch);
 			}),
-		[deferredSearch, filter, snapshot.subjects, t],
-	);
+		];
+	}, [deferredSearch, filter, snapshot.subjects, t]);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const virtualizer = useVirtualizer({
 		count: subjects.length,
@@ -479,6 +392,7 @@ function SubjectAccessTable({
 						if (!open) setSelected(null);
 					}}
 					permissions={snapshot.permissions}
+					authenticatedPermissions={snapshot.authenticatedGrantablePermissions}
 					scope={scope}
 					subject={selected}
 					unitId={unitId}
@@ -601,12 +515,14 @@ function AddSubjectDialog({
 function SubjectAccessSheet({
 	unitId,
 	permissions,
+	authenticatedPermissions,
 	scope,
 	subject,
 	onOpenChange,
 }: {
 	unitId: string;
 	permissions: readonly Permission[];
+	authenticatedPermissions: readonly Permission[];
 	scope: readonly string[];
 	subject: AccessSubject;
 	onOpenChange: (open: boolean) => void;
@@ -615,10 +531,13 @@ function SubjectAccessSheet({
 	const queryClient = useQueryClient();
 	const [value, setValue] = useState<ReadonlySet<MatrixValue>>(() => accessValues(subject));
 	const mutation = usePutApiGovernanceUnitByUnitIdAccess();
-	const { resources, labels } = usePermissionMatrix(permissions, new Set(subject.inherited), [
-		"grant",
-		"restrict",
-	]);
+	const isAuthenticated = subject.subject.kind === "authenticated";
+	const editablePermissions = isAuthenticated ? authenticatedPermissions : permissions;
+	const { resources, labels } = usePermissionMatrix(
+		editablePermissions,
+		new Set(subject.inherited),
+		isAuthenticated ? ["grant"] : ["grant", "restrict"],
+	);
 	const label = displayLabel(subject, t.governance.access.authenticatedLabel);
 
 	async function save() {
@@ -627,12 +546,14 @@ function SubjectAccessSheet({
 				path: { unitId },
 				body: {
 					subject: subject.subject,
-					grants: permissions.filter((permission) =>
+					grants: editablePermissions.filter((permission) =>
 						value.has(matrixValue(permission, "grant")),
 					),
-					restrictions: permissions.filter((permission) =>
-						value.has(matrixValue(permission, "restrict")),
-					),
+					restrictions: isAuthenticated
+						? []
+						: editablePermissions.filter((permission) =>
+								value.has(matrixValue(permission, "restrict")),
+							),
 					scope: [...scope],
 				},
 			});

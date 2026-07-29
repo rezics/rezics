@@ -12,6 +12,7 @@ export default {
 	deleteCollection: "Delete collection",
 	deleteCollectionPrompt: "The collection and its arrangement cannot be restored after deletion.",
 	emptyCollections: "You have no collections yet.",
+	containingUnitEmpty: "No public Collection includes this work yet.",
 	emptyCollectionTitle: "This collection is empty",
 	emptyCollectionBody: "Added content will appear here using the same cards as the feed.",
 	contentLabel: "Collection content",

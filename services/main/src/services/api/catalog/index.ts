@@ -106,7 +106,10 @@ const CatalogUnitMutationNotFoundResponse = toApiErrorResponse([
 	"UnitNotFound",
 	"ImageAssetNotFound",
 ]);
-const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
+const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"UnitAccessRestricted",
+]);
 const UnitInteractionForbiddenResponse = toApiErrorResponse([
 	"UnitAccessRestricted",
 	"UnitPermissionForbidden",
@@ -1096,7 +1099,7 @@ export default new Elysia()
 				"/tags/:tagId",
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, ["tags"]);
+					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					return updateDirectUnitTagCuration({
 						unitId: params.unitId,
 						tagId: params.tagId,
@@ -1131,7 +1134,7 @@ export default new Elysia()
 				"/tags/:tagId",
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, ["tags"]);
+					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					await database.transaction(async (tx) => {
 						const deleted = await tx
 							.delete(unitTag)

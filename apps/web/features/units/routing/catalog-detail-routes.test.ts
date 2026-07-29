@@ -4,6 +4,8 @@ import { CatalogDetailSections } from "../model/catalog-detail-section";
 import {
 	catalogCreditsHref,
 	catalogDetailHref,
+	catalogReviewsHref,
+	catalogTagsHref,
 	getCatalogDetailHrefs,
 	parseCatalogDetailSection,
 } from "./catalog-detail-routes";
@@ -30,6 +32,9 @@ describe("catalog detail routes", () => {
 		);
 		expect(catalogDetailHref("book", UnitId, "associations")).toBe(
 			`/units/book/${UnitId}/associations`,
+		);
+		expect(catalogDetailHref("book", UnitId, "collections")).toBe(
+			`/units/book/${UnitId}/collections`,
 		);
 	});
 
@@ -58,5 +63,8 @@ describe("catalog detail routes", () => {
 		);
 		expect(CatalogDetailSections.book).not.toContain("credits");
 		expect(CatalogDetailSections.book).not.toContain("tags");
+		expect(CatalogDetailSections.book).not.toContain("reviews");
+		expect(catalogReviewsHref("book", UnitId)).toBe(`/units/book/${UnitId}/reviews`);
+		expect(catalogTagsHref("book", UnitId)).toBe(`/units/book/${UnitId}/tags`);
 	});
 });

@@ -18,6 +18,14 @@ export function catalogCreditsHref(type: CatalogDetailUnitType, unitId: string):
 	return `/units/${type}/${unitId}/credits`;
 }
 
+export function catalogReviewsHref(type: CatalogDetailUnitType, unitId: string): string {
+	return `/units/${type}/${unitId}/reviews`;
+}
+
+export function catalogTagsHref(type: CatalogDetailUnitType, unitId: string): string {
+	return `/units/${type}/${unitId}/tags`;
+}
+
 export function parseCatalogDetailSection<Type extends CatalogDetailUnitType>(
 	pathname: string,
 	type: Type,

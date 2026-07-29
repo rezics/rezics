@@ -24,6 +24,7 @@ export default {
 	replyPost: `${postTerms.label} de respuesta`,
 	signInToReply: "Inicia sesión para responder",
 	openReplyComposer: "Participar en la conversación",
+	openDiscussionComposer: "Iniciar una conversación",
 	hideChildReplies: "Ocultar respuestas posteriores",
 	showChildReplies: "Mostrar respuestas posteriores",
 	replyingLocked: `Se han desactivado las nuevas ${postTerms.plural} de respuesta para este destino.`,

@@ -91,6 +91,10 @@ export default {
 	},
 	management: {
 		title: "Tag curation",
+		addSectionTitle: "Add Tags",
+		addSectionDescription:
+			"Open the Tag page to find and apply Tags. Adding and voting do not require Tag curation access.",
+		addSectionAction: "Add Tags",
 		description:
 			"Choose which global Tags appear first. All other Tags keep their community-ranked order.",
 		featuredTitle: "Featured Tags",

@@ -140,14 +140,16 @@ export default {
 				tags: "Tags",
 				associations: "Zuordnungen",
 				reviews: "Leserrezensionen",
-				discussion: "Lesediskussion",
+				collections: "Sammlungen",
+				discussion: "Diskussion",
 			},
 			media: {
 				overview: "Mediendetails",
 				tags: "Tags",
 				associations: "Zuordnungen",
 				reviews: "Publikumsrezensionen",
-				discussion: "Diskussion zur Wiedergabe",
+				collections: "Sammlungen",
+				discussion: "Diskussion",
 			},
 			software: {
 				overview: "Softwareinformationen",
@@ -155,7 +157,8 @@ export default {
 				tags: "Tags",
 				associations: "Zuordnungen",
 				reviews: "Benutzerrezensionen",
-				discussion: "Nutzungsdiskussion",
+				collections: "Sammlungen",
+				discussion: "Diskussion",
 			},
 		},
 		sectionDescriptions: {
@@ -166,6 +169,7 @@ export default {
 				associations:
 					"Prüfe Themen des Buchs sowie Beziehungen zwischen Haupteinträgen und Varianten.",
 				reviews: "Lies oder schreibe Leserrezensionen mit optionaler Bewertung.",
+				collections: "Entdecke öffentliche Sammlungen, die dieses Buch enthalten.",
 				discussion: `Durchsuche ${postTerms.pluralLabel}, die dieses Buch als Thema verwenden.`,
 			},
 			media: {
@@ -175,6 +179,7 @@ export default {
 				associations:
 					"Prüfe Themen dieses Werks sowie Beziehungen zwischen Haupteinträgen und Varianten.",
 				reviews: "Lies oder schreibe Publikumsrezensionen.",
+				collections: "Entdecke öffentliche Sammlungen, die dieses Werk enthalten.",
 				discussion: `Durchsuche ${postTerms.pluralLabel}, die dieses Werk als Thema verwenden.`,
 			},
 			software: {
@@ -184,6 +189,7 @@ export default {
 				associations:
 					"Prüfe Themen der Software sowie Beziehungen zwischen Haupteinträgen und Varianten.",
 				reviews: "Lies oder schreibe Rezensionen von Softwarenutzern.",
+				collections: "Entdecke öffentliche Sammlungen, die diese Software enthalten.",
 				discussion: `Durchsuche ${postTerms.pluralLabel}, die diese Software als Thema verwenden.`,
 			},
 		},
@@ -199,6 +205,7 @@ export default {
 		},
 		viewAllCredits: "Alle Mitwirkenden anzeigen",
 		backToOverview: "Zurück zur Übersicht",
+		backToDiscussion: "Zurück zur Diskussion",
 		subjectAssociations: "Themen",
 		links: "Quelllinks",
 		tags: "Tags",
@@ -341,6 +348,10 @@ export default {
 			"Erstellen, Umbenennen und Verschieben aktualisieren nur den Entwurf. Beim Speichern werden alle Änderungen auf einmal geschrieben.",
 		development: "Der Editor für die Inhaltsstruktur befindet sich in Entwicklung",
 		developmentDescription: `Die Inhaltsstruktur ist für diesen Unit-Typ noch nicht verfügbar. Der Vorschauzugriff über die ${verbatimTerms.api.value} erfordert die Berechtigung für Entwicklungsvorschauen.`,
+		post: postTerms.label,
+		attachPost: `Vorhandenen ${postTerms.label} anhängen`,
+		attachPostDescription: `Wähle einen lesbaren Kapitel-${postTerms.inline} und füge ihn der Inhaltsstruktur dieses Buchs hinzu. Eigentum und Inhalt des ${postTerms.inline}s bleiben unverändert.`,
+		attachPostAction: "Zur Inhaltsstruktur hinzufügen",
 	},
 	chapter: {
 		title: "Kapitel bearbeiten",
@@ -348,6 +359,9 @@ export default {
 		language: "Kapitelsprache",
 		useLanguage: "Sprache wechseln",
 		save: "Kapitel speichern",
+		publicEntryContentPolicyTitle:
+			"Öffentliche Einträge bieten hier keine Bearbeitung des Kapiteltexts",
+		publicEntryContentPolicyDescription: `Dieses Buch ist ein öffentlicher Katalogeintrag. Du kannst seine Inhaltsstruktur ordnen oder einen vorhandenen lesbaren ${postTerms.inline} anhängen; der Katalogeditor bietet jedoch keinen Editor für den ${postTerms.inline}-Text.`,
 		wordCount: insert("{{count}} Wörter", { count: Number }),
 		characterCount: insert("{{count}} Zeichen", { count: Number }),
 	},

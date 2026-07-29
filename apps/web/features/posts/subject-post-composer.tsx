@@ -4,10 +4,13 @@ import { toContentLanguage } from "@rezics/i18n";
 import { usePostApiPosts } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type ComponentProps, type FormEvent } from "react";
 
-import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input } from "@rezics/ui";
-import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { Button, EntityPicker, Field, FieldGroup, FieldLabel, Input, Spinner } from "@rezics/ui";
+import {
+	PortableTextEditor,
+	preloadPortableTextEditor,
+} from "@/features/editor/portable-text-editor";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
@@ -20,6 +23,12 @@ interface PickedRealm {
 	readonly label: string;
 }
 
+const editorPreloadIntentHandlers = {
+	onFocus: preloadPortableTextEditor,
+	onPointerDown: preloadPortableTextEditor,
+	onPointerEnter: preloadPortableTextEditor,
+} satisfies Pick<ComponentProps<"button">, "onFocus" | "onPointerDown" | "onPointerEnter">;
+
 export function SubjectPostComposer({
 	onCreated,
 	subjectId,
@@ -30,10 +39,22 @@ export function SubjectPostComposer({
 	const { locale, t } = useTranslation(["errors", "posts", "ui"]);
 	const create = usePostApiPosts();
 	const queryClient = useQueryClient();
+	const [expanded, setExpanded] = useState(false);
 	const [realm, setRealm] = useState<PickedRealm>();
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const [invalid, setInvalid] = useState(false);
 	const rulesAcknowledgement = useRealmRulesAcknowledgement(realm?.id);
+
+	useEffect(() => {
+		if (expanded) return;
+		const preload = () => preloadPortableTextEditor();
+		if ("requestIdleCallback" in window) {
+			const idleCallbackId = window.requestIdleCallback(preload, { timeout: 2_000 });
+			return () => window.cancelIdleCallback(idleCallbackId);
+		}
+		const timeoutId = setTimeout(preload, 1_000);
+		return () => clearTimeout(timeoutId);
+	}, [expanded]);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -65,39 +86,58 @@ export function SubjectPostComposer({
 
 	return (
 		<>
-			<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
-				<FieldGroup>
-					<Field required>
-						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input maxLength={500} name="title" required />
-					</Field>
-					<Field>
-						<FieldLabel>{t.posts.realm}</FieldLabel>
-						<EntityPicker index="realms" onChange={setRealm} value={realm} />
-					</Field>
-					<PortableTextEditor
-						label={t.ui.body}
-						onChange={setBody}
-						required
-						value={body}
-					/>
-				</FieldGroup>
-				{invalid ? (
-					<p className="text-sm text-destructive" role="alert">
-						{t.errors.invalid}
-					</p>
-				) : null}
-				<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-				<Button
-					className="w-fit"
-					disabled={!body.length}
-					isLoading={create.isPending}
-					type="submit"
-					variant="solid"
+			{expanded ? (
+				<form className="grid gap-6" onSubmit={(event) => void submit(event)}>
+					<FieldGroup>
+						<Field required>
+							<FieldLabel>{t.ui.title}</FieldLabel>
+							<Input maxLength={500} name="title" required />
+						</Field>
+						<Field>
+							<FieldLabel>{t.posts.realm}</FieldLabel>
+							<EntityPicker index="realms" onChange={setRealm} value={realm} />
+						</Field>
+						<PortableTextEditor
+							label={t.ui.body}
+							onChange={setBody}
+							required
+							value={body}
+						/>
+					</FieldGroup>
+					{invalid ? (
+						<p className="text-sm text-destructive" role="alert">
+							{t.errors.invalid}
+						</p>
+					) : null}
+					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
+					<div className="flex flex-wrap gap-2">
+						<Button
+							className="w-fit"
+							disabled={!body.length || create.isPending}
+							type="submit"
+							variant="solid"
+						>
+							{create.isPending ? <Spinner data-icon="inline-start" /> : null}
+							{t.posts.publish}
+						</Button>
+						<Button onClick={() => setExpanded(false)} type="button" variant="quiet">
+							{t.posts.cancel}
+						</Button>
+					</div>
+				</form>
+			) : (
+				<button
+					{...editorPreloadIntentHandlers}
+					className="flex h-11 w-full items-center rounded-xl border border-input bg-background px-4 text-start text-muted-foreground text-sm shadow-sm/5 outline-none transition-colors hover:bg-surface-hover focus-visible:ring-[3px] focus-visible:ring-ring/32"
+					onClick={() => {
+						preloadPortableTextEditor();
+						setExpanded(true);
+					}}
+					type="button"
 				>
-					{t.posts.publish}
-				</Button>
-			</form>
+					{t.posts.openDiscussionComposer}
+				</button>
+			)}
 			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />
 		</>
 	);

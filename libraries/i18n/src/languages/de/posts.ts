@@ -24,6 +24,7 @@ export default {
 	replyPost: `Antwort-${postTerms.inline}`,
 	signInToReply: "Zum Antworten anmelden",
 	openReplyComposer: "An der Diskussion teilnehmen",
+	openDiscussionComposer: "Diskussion beginnen",
 	hideChildReplies: "Nachfolgende Antworten ausblenden",
 	showChildReplies: "Nachfolgende Antworten anzeigen",
 	replyingLocked: `Neue Antwort-${postTerms.pluralLabel} sind für dieses Ziel deaktiviert.`,

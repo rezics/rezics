@@ -15,6 +15,7 @@ export const ListCollectionsQuery = t.Object(
 	{
 		ownerId: t.Optional(Uuid),
 		targetId: t.Optional(Uuid),
+		containsTargetId: t.Optional(Uuid),
 		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	},

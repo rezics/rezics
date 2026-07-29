@@ -90,6 +90,9 @@ export default {
 	},
 	management: {
 		title: "标签精选",
+		addSectionTitle: "添加标签",
+		addSectionDescription: "前往标签页搜索并应用标签；添加与投票不需要标签精选权限。",
+		addSectionAction: "添加标签",
 		description: "选择优先显示的一般标签；其他标签仍按社区排名自动排序。",
 		featuredTitle: "精选标签",
 		featuredDescription: "精选标签会按你设置的顺序优先显示；可拖动或使用移动按钮排序。",

@@ -301,7 +301,7 @@ export default new Elysia()
 				async ({ params, profile, authorization }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await checkUnitType(params.unitId, params.type);
-					await authorization.unit.ensureCanUpdate(params.unitId, [["tags"]]);
+					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					await removeTagStructureApplication({
 						unitId: params.unitId,
 						structureId: params.structureId,
@@ -314,7 +314,11 @@ export default new Elysia()
 					params: UnitTagStructureParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"PlatformCapabilityRequired",
+							"UnitPermissionForbidden",
+							"UnitAccessRestricted",
+						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagStructureApplicationNotFound",

@@ -12,6 +12,7 @@ export default {
 	deleteCollection: "コレクションを削除する",
 	deleteCollectionPrompt: "削除後、コレクションとその配置は復元できません。",
 	emptyCollections: "まだコレクションはありません。",
+	containingUnitEmpty: "この作品を含む公開コレクションはまだありません。",
 	emptyCollectionTitle: "このコレクションは空です",
 	emptyCollectionBody: "追加されたコンテンツは、フィードと同じカード形式でここに表示されます。",
 	contentLabel: "コレクションのコンテンツ",

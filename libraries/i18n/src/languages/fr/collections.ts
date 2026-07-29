@@ -13,6 +13,7 @@ export default {
 	deleteCollectionPrompt:
 		"La collection et son organisation ne pourront pas être restaurées après leur suppression.",
 	emptyCollections: "Vous n’avez pas encore de collection.",
+	containingUnitEmpty: "Aucune collection publique ne contient encore cette œuvre.",
 	emptyCollectionTitle: "Cette collection est vide",
 	emptyCollectionBody: "Le contenu ajouté apparaîtra ici avec les mêmes cartes que dans le flux.",
 	contentLabel: "Contenu de la collection",

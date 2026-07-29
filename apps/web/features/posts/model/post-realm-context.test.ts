@@ -21,11 +21,11 @@ describe("post Realm context selection", () => {
 		expect(selectPostRealmContext(realms, "requested")?.id).toBe("requested");
 	});
 
-	it("falls back to the first mounted Realm", () => {
+	it("does not infer a Realm without an explicit valid request", () => {
 		const realms = [realm("first"), realm("second")];
 
-		expect(selectPostRealmContext(realms)?.id).toBe("first");
-		expect(selectPostRealmContext(realms, "missing")?.id).toBe("first");
+		expect(selectPostRealmContext(realms)).toBeUndefined();
+		expect(selectPostRealmContext(realms, "missing")).toBeUndefined();
 	});
 
 	it("keeps the empty state explicit", () => {

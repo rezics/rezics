@@ -15,6 +15,7 @@ import {
 	type SearchFeedRequest,
 	type SearchFeedSource,
 } from "./search-feed-query";
+import { SearchFeedQueryKey } from "./search-feed-query-key";
 
 export type { SearchFeedRequest, SearchFeedSource } from "./search-feed-query";
 
@@ -31,7 +32,7 @@ export function useSearchFeedQuery({
 }) {
 	return useInfiniteQuery({
 		enabled,
-		queryKey: ["search-feature-feed", surface, source, request],
+		queryKey: [...SearchFeedQueryKey, surface, source, request],
 		queryFn: ({ pageParam, signal }) =>
 			fetchSearchFeedPage({
 				...(pageParam ? { cursor: pageParam } : {}),

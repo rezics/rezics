@@ -140,14 +140,16 @@ export default {
 				tags: "Étiquettes",
 				associations: "Associations",
 				reviews: "Avis des lecteurs",
-				discussion: "Discussion de lecture",
+				collections: "Collections",
+				discussion: "Discussion",
 			},
 			media: {
 				overview: "Détails du média",
 				tags: "Étiquettes",
 				associations: "Associations",
 				reviews: "Avis du public",
-				discussion: "Discussion de visionnage",
+				collections: "Collections",
+				discussion: "Discussion",
 			},
 			software: {
 				overview: "Informations sur le logiciel",
@@ -155,7 +157,8 @@ export default {
 				tags: "Étiquettes",
 				associations: "Associations",
 				reviews: "Avis des utilisateurs",
-				discussion: "Discussion d’utilisation",
+				collections: "Collections",
+				discussion: "Discussion",
 			},
 		},
 		sectionDescriptions: {
@@ -166,6 +169,7 @@ export default {
 				associations:
 					"Consultez les sujets du livre et ses relations entre éléments principaux et variantes.",
 				reviews: "Lisez ou rédigez des avis de lecteurs avec une note facultative.",
+				collections: "Parcourez les collections publiques qui contiennent ce livre.",
 				discussion: `Parcourez les ${postTerms.plural} qui utilisent ce livre comme sujet.`,
 			},
 			media: {
@@ -174,6 +178,7 @@ export default {
 				associations:
 					"Consultez les sujets de cette œuvre et ses relations entre éléments principaux et variantes.",
 				reviews: "Lisez ou rédigez des avis du public.",
+				collections: "Parcourez les collections publiques qui contiennent cette œuvre.",
 				discussion: `Parcourez les ${postTerms.plural} qui utilisent cette œuvre comme sujet.`,
 			},
 			software: {
@@ -183,6 +188,7 @@ export default {
 				associations:
 					"Consultez les sujets du logiciel et ses relations entre éléments principaux et variantes.",
 				reviews: "Lisez ou rédigez des avis d’utilisateurs du logiciel.",
+				collections: "Parcourez les collections publiques qui contiennent ce logiciel.",
 				discussion: `Parcourez les ${postTerms.plural} qui utilisent ce logiciel comme sujet.`,
 			},
 		},
@@ -198,6 +204,7 @@ export default {
 		},
 		viewAllCredits: "Afficher tous les crédits",
 		backToOverview: "Retour à la vue d’ensemble",
+		backToDiscussion: "Retour à la discussion",
 		subjectAssociations: "Sujets",
 		links: "Liens sources",
 		tags: "Étiquettes",
@@ -337,6 +344,10 @@ export default {
 			"La création, le changement de nom et le déplacement mettent uniquement le brouillon à jour. L’enregistrement applique toutes les modifications en une seule fois.",
 		development: "L’éditeur de structure du contenu est en cours de développement",
 		developmentDescription: `La structure du contenu n’est pas encore disponible pour ce type de Unit. L’accès à l’aperçu via l’${verbatimTerms.api.value} exige la capacité d’aperçu de développement.`,
+		post: postTerms.label,
+		attachPost: `Joindre un ${postTerms.inline} existant`,
+		attachPostDescription: `Choisissez un ${postTerms.inline} de chapitre lisible et ajoutez-le à la structure du contenu de ce livre. Sa propriété et son contenu restent inchangés.`,
+		attachPostAction: "Ajouter à la structure",
 	},
 	chapter: {
 		title: "Modifier le chapitre",
@@ -344,6 +355,9 @@ export default {
 		language: "Langue du chapitre",
 		useLanguage: "Changer de langue",
 		save: "Enregistrer le chapitre",
+		publicEntryContentPolicyTitle:
+			"Les entrées publiques ne permettent pas de modifier ici le corps du chapitre",
+		publicEntryContentPolicyDescription: `Ce livre est une entrée publique du catalogue. Vous pouvez organiser sa structure du contenu ou joindre un ${postTerms.inline} existant et lisible, mais l’éditeur du catalogue ne propose pas d’éditeur pour son corps.`,
 		wordCount: insert("{{count}} mots", { count: Number }),
 		characterCount: insert("{{count}} caractères", { count: Number }),
 	},

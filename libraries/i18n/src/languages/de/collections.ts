@@ -14,6 +14,7 @@ export default {
 	deleteCollectionPrompt:
 		"Die Sammlung und ihre Anordnung können nach dem Löschen nicht wiederhergestellt werden.",
 	emptyCollections: "Du hast noch keine Sammlungen.",
+	containingUnitEmpty: "Noch keine öffentliche Sammlung enthält dieses Werk.",
 	emptyCollectionTitle: "Diese Sammlung ist leer",
 	emptyCollectionBody: "Hinzugefügte Inhalte erscheinen hier in denselben Karten wie im Feed.",
 	contentLabel: "Sammlungsinhalt",

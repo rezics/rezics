@@ -27853,6 +27853,7 @@
 										"unitId",
 										"unitKind",
 										"permissions",
+										"authenticatedGrantablePermissions",
 										"owner",
 										"subjects"
 									],
@@ -27871,6 +27872,7 @@
 													"unit.history.restore",
 													"unit.access.manage",
 													"unit.association.manage",
+													"unit.tag-curation.manage",
 													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
@@ -27881,6 +27883,24 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.units.moderate",
+													"entity.association.credit.request",
+													"entity.association.credit.direct",
+													"entity.association.subject.request",
+													"entity.association.subject.direct"
+												]
+											}
+										},
+										"authenticatedGrantablePermissions": {
+											"type": "array",
+											"items": {
+												"default": "unit.read",
+												"type": "string",
+												"enum": [
+													"unit.read",
+													"unit.update",
+													"realm.contribute",
+													"realm.units.create",
+													"realm.post.replies.create",
 													"entity.association.credit.request",
 													"entity.association.credit.direct",
 													"entity.association.subject.request",
@@ -27988,6 +28008,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -28017,6 +28038,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -28046,6 +28068,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -28222,7 +28245,7 @@
 										]
 									},
 									"grants": {
-										"maxItems": 20,
+										"maxItems": 21,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -28235,6 +28258,7 @@
 												"unit.history.restore",
 												"unit.access.manage",
 												"unit.association.manage",
+												"unit.tag-curation.manage",
 												"unit.delete",
 												"realm.contribute",
 												"realm.units.create",
@@ -28253,7 +28277,7 @@
 										}
 									},
 									"restrictions": {
-										"maxItems": 20,
+										"maxItems": 21,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -28266,6 +28290,7 @@
 												"unit.history.restore",
 												"unit.access.manage",
 												"unit.association.manage",
+												"unit.tag-curation.manage",
 												"unit.delete",
 												"realm.contribute",
 												"realm.units.create",
@@ -28328,6 +28353,7 @@
 										"unitId",
 										"unitKind",
 										"permissions",
+										"authenticatedGrantablePermissions",
 										"owner",
 										"subjects"
 									],
@@ -28346,6 +28372,7 @@
 													"unit.history.restore",
 													"unit.access.manage",
 													"unit.association.manage",
+													"unit.tag-curation.manage",
 													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
@@ -28356,6 +28383,24 @@
 													"realm.rules.update",
 													"realm.pins.manage",
 													"realm.units.moderate",
+													"entity.association.credit.request",
+													"entity.association.credit.direct",
+													"entity.association.subject.request",
+													"entity.association.subject.direct"
+												]
+											}
+										},
+										"authenticatedGrantablePermissions": {
+											"type": "array",
+											"items": {
+												"default": "unit.read",
+												"type": "string",
+												"enum": [
+													"unit.read",
+													"unit.update",
+													"realm.contribute",
+													"realm.units.create",
+													"realm.post.replies.create",
 													"entity.association.credit.request",
 													"entity.association.credit.direct",
 													"entity.association.subject.request",
@@ -28463,6 +28508,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -28492,6 +28538,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -28521,6 +28568,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -28931,6 +28979,7 @@
 															"unit.history.restore",
 															"unit.access.manage",
 															"unit.association.manage",
+															"unit.tag-curation.manage",
 															"unit.delete",
 															"realm.contribute",
 															"realm.units.create",
@@ -29426,6 +29475,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -29627,6 +29677,7 @@
 																"unit.history.restore",
 																"unit.access.manage",
 																"unit.association.manage",
+																"unit.tag-curation.manage",
 																"unit.delete",
 																"realm.contribute",
 																"realm.units.create",
@@ -29842,7 +29893,7 @@
 									"invitedProfileId": { "format": "uuid", "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 20,
+										"maxItems": 21,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -29855,6 +29906,7 @@
 												"unit.history.restore",
 												"unit.access.manage",
 												"unit.association.manage",
+												"unit.tag-curation.manage",
 												"unit.delete",
 												"realm.contribute",
 												"realm.units.create",
@@ -29932,6 +29984,7 @@
 													"unit.history.restore",
 													"unit.access.manage",
 													"unit.association.manage",
+													"unit.tag-curation.manage",
 													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
@@ -30228,6 +30281,7 @@
 													"unit.history.restore",
 													"unit.access.manage",
 													"unit.association.manage",
+													"unit.tag-curation.manage",
 													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
@@ -30467,6 +30521,7 @@
 													"unit.history.restore",
 													"unit.access.manage",
 													"unit.association.manage",
+													"unit.tag-curation.manage",
 													"unit.delete",
 													"realm.contribute",
 													"realm.units.create",
@@ -55575,7 +55630,11 @@
 												"code": {
 													"default": "PlatformCapabilityRequired",
 													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -60793,6 +60852,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
+										"catalogMode",
 										"capabilities"
 									],
 									"properties": {
@@ -62547,20 +62607,25 @@
 												}
 											]
 										},
+										"catalogMode": {
+											"default": "owned_work",
+											"type": "string",
+											"enum": ["owned_work", "public_entry"]
+										},
 										"capabilities": {
 											"type": "object",
 											"required": [
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canManageTags",
+												"canCurateTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canManageTags": { "type": "boolean" },
+												"canCurateTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -62832,6 +62897,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
+										"catalogMode",
 										"capabilities"
 									],
 									"properties": {
@@ -64586,20 +64652,25 @@
 												}
 											]
 										},
+										"catalogMode": {
+											"default": "owned_work",
+											"type": "string",
+											"enum": ["owned_work", "public_entry"]
+										},
 										"capabilities": {
 											"type": "object",
 											"required": [
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canManageTags",
+												"canCurateTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canManageTags": { "type": "boolean" },
+												"canCurateTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -64899,6 +64970,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
+										"catalogMode",
 										"capabilities"
 									],
 									"properties": {
@@ -66653,20 +66725,25 @@
 												}
 											]
 										},
+										"catalogMode": {
+											"default": "owned_work",
+											"type": "string",
+											"enum": ["owned_work", "public_entry"]
+										},
 										"capabilities": {
 											"type": "object",
 											"required": [
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canManageTags",
+												"canCurateTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canManageTags": { "type": "boolean" },
+												"canCurateTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -67109,6 +67186,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
+										"catalogMode",
 										"capabilities"
 									],
 									"properties": {
@@ -68863,20 +68941,25 @@
 												}
 											]
 										},
+										"catalogMode": {
+											"default": "owned_work",
+											"type": "string",
+											"enum": ["owned_work", "public_entry"]
+										},
 										"capabilities": {
 											"type": "object",
 											"required": [
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canManageTags",
+												"canCurateTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canManageTags": { "type": "boolean" },
+												"canCurateTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -69134,6 +69217,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
+										"catalogMode",
 										"capabilities"
 									],
 									"properties": {
@@ -70888,20 +70972,25 @@
 												}
 											]
 										},
+										"catalogMode": {
+											"default": "owned_work",
+											"type": "string",
+											"enum": ["owned_work", "public_entry"]
+										},
 										"capabilities": {
 											"type": "object",
 											"required": [
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canManageTags",
+												"canCurateTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canManageTags": { "type": "boolean" },
+												"canCurateTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -71508,6 +71597,7 @@
 										"progressStatistics",
 										"versions",
 										"variantContext",
+										"catalogMode",
 										"capabilities"
 									],
 									"properties": {
@@ -73262,20 +73352,25 @@
 												}
 											]
 										},
+										"catalogMode": {
+											"default": "owned_work",
+											"type": "string",
+											"enum": ["owned_work", "public_entry"]
+										},
 										"capabilities": {
 											"type": "object",
 											"required": [
 												"canEdit",
 												"canManageAccess",
 												"canManageAssociations",
-												"canManageTags",
+												"canCurateTags",
 												"hasDevelopmentPreviewAccess"
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
-												"canManageTags": { "type": "boolean" },
+												"canCurateTags": { "type": "boolean" },
 												"hasDevelopmentPreviewAccess": { "type": "boolean" }
 											}
 										}
@@ -77715,7 +77810,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -78716,7 +78814,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -78834,7 +78935,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -79833,7 +79937,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -80258,7 +80365,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -80502,7 +80612,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -81021,7 +81134,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -81167,7 +81283,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -81805,7 +81924,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -88968,6 +89090,12 @@
 					},
 					{
 						"name": "targetId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "containsTargetId",
 						"in": "query",
 						"required": false,
 						"schema": { "format": "uuid", "type": "string" }

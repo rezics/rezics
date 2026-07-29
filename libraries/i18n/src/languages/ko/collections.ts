@@ -12,6 +12,7 @@ export default {
 	deleteCollection: "컬렉션 삭제",
 	deleteCollectionPrompt: "컬렉션 및 그 배열은 삭제 후 복구할 수 없습니다.",
 	emptyCollections: "아직 컬렉션이 없습니다.",
+	containingUnitEmpty: "이 작품을 포함한 공개 컬렉션이 아직 없습니다.",
 	emptyCollectionTitle: "이 컬렉션은 비어 있습니다.",
 	emptyCollectionBody: "추가된 콘텐츠는 피드와 동일한 카드 형식으로 여기 표시됩니다.",
 	contentLabel: "컬렉션 콘텐츠",

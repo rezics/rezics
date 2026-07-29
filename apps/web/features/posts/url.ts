@@ -31,3 +31,7 @@ export function postHref(postId: string, context?: PostInteractionContext, hash?
 		context?.kind === "realm" ? `?realmId=${encodeURIComponent(context.realmId)}` : "";
 	return `${baseHref}${query}${hash ? `#${hash}` : ""}`;
 }
+
+export function postDiscussionHref(postId: string): string {
+	return `/posts/${encodeURIComponent(postId)}?from=discussion`;
+}

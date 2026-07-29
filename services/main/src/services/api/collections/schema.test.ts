@@ -16,6 +16,7 @@ describe("collection list schema", () => {
 		expect(
 			Check(ListCollectionsQuery, {
 				targetId,
+				containsTargetId: targetId,
 				localizationLanguages: ["zh", "en"],
 				limit: 50,
 			}),
@@ -24,6 +25,7 @@ describe("collection list schema", () => {
 
 	it("requires target identities to be UUIDs", () => {
 		expect(Check(ListCollectionsQuery, { targetId: "book-1" })).toBe(false);
+		expect(Check(ListCollectionsQuery, { containsTargetId: "book-1" })).toBe(false);
 	});
 });
 

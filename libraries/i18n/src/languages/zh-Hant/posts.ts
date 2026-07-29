@@ -22,6 +22,7 @@ export default {
 	replyPost: `回覆${postTerms.label}`,
 	signInToReply: "登入後回覆",
 	openReplyComposer: "加入討論",
+	openDiscussionComposer: "發起討論",
 	hideChildReplies: "隱藏後續回覆",
 	showChildReplies: "顯示後續回覆",
 	replyingLocked: `此對象目前禁止新的回覆${postTerms.plural}。`,

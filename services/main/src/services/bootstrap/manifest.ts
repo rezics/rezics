@@ -378,6 +378,27 @@ export const RezicsRuleRealmManifest = {
 					},
 				],
 			},
+			{
+				id: "019b76da-a800-7360-8000-000000000005",
+				localizations: [
+					{
+						language: "zh",
+						title: "智慧財產權侵害",
+						content: bootstrapRuleContent(
+							"請檢舉疑似在未獲授權或欠缺其他合法依據的情況下，重製、散布或使用受著作權、商標或其他智慧財產權保護的內容。請在補充說明中列出原作或權利來源，以及疑似侵權的理由。",
+							["b00759050001", "b00759050002", "b00759050003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Intellectual property infringement",
+						content: bootstrapRuleContent(
+							"Report content that may reproduce, distribute, or use copyright-, trademark-, or other intellectual-property-protected material without authorization or another lawful basis. In the additional details, identify the original work or rights source and explain the suspected infringement.",
+							["b00759050004", "b00759050005", "b00759050006"],
+						),
+					},
+				],
+			},
 		],
 	},
 } as const;

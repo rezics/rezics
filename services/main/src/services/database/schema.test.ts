@@ -221,6 +221,7 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(UnitPermissionValues).toContain("unit.association.manage");
+		expect(UnitPermissionValues).toContain("unit.tag-curation.manage");
 		expect(UnitPermissionValues).toEqual(
 			expect.arrayContaining([
 				"unit.status.update",

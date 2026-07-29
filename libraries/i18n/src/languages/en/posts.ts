@@ -24,6 +24,7 @@ export default {
 	replyPost: `Reply ${postTerms.inline}`,
 	signInToReply: "Sign in to reply",
 	openReplyComposer: "Join the discussion",
+	openDiscussionComposer: "Start a discussion",
 	hideChildReplies: "Hide child replies",
 	showChildReplies: "Show child replies",
 	replyingLocked: `New reply ${postTerms.plural} are disabled for this target.`,

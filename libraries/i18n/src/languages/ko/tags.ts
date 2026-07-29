@@ -90,6 +90,10 @@ export default {
 	},
 	management: {
 		title: "태그 선별",
+		addSectionTitle: "태그 추가",
+		addSectionDescription:
+			"태그 페이지에서 태그를 찾아 적용하세요. 추가와 투표에는 태그 선별 권한이 필요하지 않습니다.",
+		addSectionAction: "태그 추가",
 		description:
 			"먼저 표시할 글로벌 태그를 선택합니다. 나머지 태그는 커뮤니티 순위를 유지합니다.",
 		featuredTitle: "추천 태그",

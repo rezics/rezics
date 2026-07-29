@@ -26,7 +26,7 @@ import {
 } from "../components/catalog-attribution-sections";
 import { CatalogSubjectGroups } from "../components/catalog-subject-groups";
 import { useCatalogDetail } from "../components/catalog-detail-workspace";
-import { catalogCreditsHref, catalogDetailHref } from "../routing/catalog-detail-routes";
+import { catalogCreditsHref, catalogReviewsHref } from "../routing/catalog-detail-routes";
 
 function formatDate(value: string | null, language: string): string | undefined {
 	if (!value) return undefined;
@@ -117,7 +117,7 @@ export function CatalogOverviewPage() {
 				<UnitTagSummary type={type} unitId={unit.id} />
 
 				<UnitRatingsReviewsSection
-					moreReviewsHref={catalogDetailHref(type, unit.id, "reviews")}
+					moreReviewsHref={catalogReviewsHref(type, unit.id)}
 					targetId={unit.id}
 					type={type}
 					writeReviewHref={targetedReviewCreateHref(type, unit.id)}
