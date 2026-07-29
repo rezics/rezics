@@ -9,7 +9,7 @@ import {
 	HoverCardTrigger,
 	IdentityAvatar,
 } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { Fragment } from "react";
 
 import { FollowButton } from "@/features/following/components/follow-button";

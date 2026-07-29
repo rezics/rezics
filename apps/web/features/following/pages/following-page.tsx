@@ -19,7 +19,7 @@ import {
 } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Star, UserMinus } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useQueryState } from "nuqs";
 import type { ComponentProps } from "react";
 

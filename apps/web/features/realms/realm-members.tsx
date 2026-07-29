@@ -20,7 +20,7 @@ import {
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useDeferredValue, useMemo, useState } from "react";
 
 import { profileHref } from "@/features/profiles/profile-route";

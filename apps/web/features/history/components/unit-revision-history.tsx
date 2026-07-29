@@ -19,7 +19,7 @@ import {
 	Spinner,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";

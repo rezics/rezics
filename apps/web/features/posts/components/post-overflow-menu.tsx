@@ -6,8 +6,8 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState } from "react";
 
 import {
@@ -49,7 +49,7 @@ export function PostOverflowMenu({
 	readonly rootPostId: string | null;
 }) {
 	const { t } = useTranslation(["errors", "posts", "ui"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const removePost = useDeleteApiPostsByPostId();
 	const removeReply = useDeleteApiPostsByPostIdRepliesByReplyPostId();

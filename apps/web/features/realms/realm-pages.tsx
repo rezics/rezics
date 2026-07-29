@@ -15,8 +15,8 @@ import {
 	type GetApiRealmsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { type FormEvent, useMemo, useState } from "react";
 
 import { Banner, PageHeading } from "@rezics/ui";
@@ -142,7 +142,7 @@ function RealmListCard({ realm }: { readonly realm: GetApiRealmsStatus200["items
 
 function RealmCreateContent() {
 	const { t, locale } = useTranslation(["actions", "media", "posts", "realms", "state", "ui"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);

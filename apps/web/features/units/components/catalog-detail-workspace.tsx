@@ -3,7 +3,7 @@
 import type { Translation } from "@rezics/i18n";
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 

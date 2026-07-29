@@ -46,7 +46,7 @@ import {
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowLeft, CheckCircle2, MonitorSmartphone, Search, ShieldAlert } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";

@@ -14,8 +14,8 @@ import {
 	usePutApiEntitiesByUnitIdLocalizationsByLanguage,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { type FormEvent, useState } from "react";
 import { BookOpenIcon } from "lucide-react";
 
@@ -332,7 +332,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 		"ui",
 	]);
 	const { selectedLanguage, setDirty, languagesChanged } = useContentLanguageEditor();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
 	const localization = entity.localizations.find((entry) => entry.language === selectedLanguage);
@@ -469,7 +469,7 @@ export function EntityCreatePage() {
 		"ui",
 		"units",
 	]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
 	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">("owned_work");
@@ -588,7 +588,7 @@ export function TagCreatePage() {
 		"media",
 		"ui",
 	]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
 	const create = usePostApiTags({

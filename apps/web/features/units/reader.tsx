@@ -20,7 +20,7 @@ import {
 	ListTreeIcon,
 	SettingsIcon,
 } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";

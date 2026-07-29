@@ -2,7 +2,7 @@
 
 import { Button } from "@rezics/ui";
 import { Search, X } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
 import { useTranslation } from "@/i18n/client";

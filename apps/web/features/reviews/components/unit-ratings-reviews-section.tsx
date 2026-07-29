@@ -3,7 +3,7 @@
 import { useGetApiReviews } from "@rezics/openapi-tanstack-query";
 import { Button, QueryFailure, QueryPending } from "@rezics/ui";
 import { BookOpen, ChevronRight, SlidersHorizontal } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState } from "react";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";

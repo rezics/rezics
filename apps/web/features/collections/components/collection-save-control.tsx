@@ -12,7 +12,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { BookmarkIcon, CheckIcon, LibraryIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useId, useState, type FormEvent } from "react";
 
 import {
@@ -24,7 +24,7 @@ import {
 	DialogHeader,
 	Input,
 } from "@rezics/ui";
-import { useAuthPortal } from "@/features/auth/auth-portal";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";

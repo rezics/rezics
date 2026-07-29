@@ -2,7 +2,7 @@
 
 import { useGetApiCollectionsByCollectionId } from "@rezics/openapi-tanstack-query";
 import { Badge, Button, Cover, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";

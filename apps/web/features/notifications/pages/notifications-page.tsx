@@ -11,7 +11,7 @@ import {
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Mail } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";

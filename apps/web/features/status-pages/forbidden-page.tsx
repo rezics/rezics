@@ -1,7 +1,7 @@
 "use client";
 
 import { StatusCodes } from "http-status-codes";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { Button } from "@rezics/ui";
 

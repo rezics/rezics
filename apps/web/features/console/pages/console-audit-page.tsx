@@ -23,7 +23,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState, type ReactNode } from "react";
 
 import { useTranslation } from "@/i18n/client";

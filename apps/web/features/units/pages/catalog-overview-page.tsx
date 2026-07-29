@@ -10,7 +10,7 @@ import {
 	DataListItemLabel,
 	DataListItemValue,
 } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
 
 import { UnitShelf } from "@/features/explore/unit-shelf";

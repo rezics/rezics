@@ -14,9 +14,9 @@ import {
 	type PutApiUsersMePreferencesRequestContentRatingsEnum as ContentRating,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState, type DragEvent, type FormEvent } from "react";
 import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
 
@@ -639,7 +639,7 @@ export function AccountSettings() {
 		"settings",
 		"ui",
 	]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	return (
 		<SettingsFrame title={t.settings.account}>

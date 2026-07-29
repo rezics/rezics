@@ -18,11 +18,11 @@ import {
 	LibraryIcon,
 	Share2,
 } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button, Menu, MenuContent, MenuItem, MenuTrigger, Skeleton } from "@rezics/ui";
-import { useAuthPortal } from "@/features/auth/auth-portal";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, EntityPicker, Field, FieldLabel } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState } from "react";
 
 import { ScoreOverview } from "@/features/reviews/components/score-overview";

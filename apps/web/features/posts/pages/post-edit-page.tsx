@@ -8,7 +8,7 @@ import {
 import type { PortableTextValue } from "@rezics/portable-text";
 import { Button, Field, FieldGroup, FieldLabel, Input, Spinner } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState, type FormEvent } from "react";
 
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
@@ -66,7 +66,7 @@ function OrdinaryPostEditPage() {
 
 function OrdinaryPostEditForm({ post }: { post: OrdinaryPost }) {
 	const { t } = useTranslation(["posts", "ui"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostId();
 	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
@@ -132,7 +132,7 @@ function OrdinaryPostEditForm({ post }: { post: OrdinaryPost }) {
 
 function ReplyPostEditForm({ post }: { post: ReplyPost }) {
 	const { t } = useTranslation(["posts", "ui"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
 	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =

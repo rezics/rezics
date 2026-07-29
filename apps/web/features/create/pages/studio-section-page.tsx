@@ -9,7 +9,7 @@ import {
 import { Button, ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useQueryStates } from "nuqs";
 
 import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";

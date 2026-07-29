@@ -2,7 +2,7 @@
 
 import { Button, PageHeading } from "@rezics/ui";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { ReceivedAccessInvitations } from "@/features/governance/unit-workflows";

@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { Spinner } from "@rezics/ui";
-import { useAuthPortal } from "@/features/auth/auth-portal";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 export function RequireSession({ children }: { children: ReactNode }) {
 	const { data: session, isPending } = useHydratedSession();
 	const pathname = usePathname();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const { openAuthPortal } = useAuthPortal();
 	const openedDestination = useRef<string | null>(null);
 	useEffect(() => {

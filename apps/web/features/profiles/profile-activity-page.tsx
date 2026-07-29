@@ -2,7 +2,7 @@
 
 import { useGetUserProfileActivity } from "@rezics/openapi-tanstack-query";
 import { Badge, Card, CardContent, QueryFailure, QueryPending } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";

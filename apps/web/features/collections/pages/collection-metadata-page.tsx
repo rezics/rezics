@@ -19,8 +19,8 @@ import {
 	ManagementWorkspaceSectionHeader,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import type { FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
@@ -40,7 +40,7 @@ export function CollectionMetadataPage() {
 	const { collection } = useCollectionManagement();
 	const { t } = useTranslation(["collections", "errors", "ui"]);
 	const queryClient = useQueryClient();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const update = usePatchApiCollectionsByCollectionId();
 	const remove = useDeleteApiCollectionsByCollectionId();
 	if (!collection.capabilities.canEditDetails && !collection.capabilities.canDelete)

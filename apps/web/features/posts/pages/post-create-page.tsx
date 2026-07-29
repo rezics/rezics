@@ -13,7 +13,7 @@ import {
 	PageHeading,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
@@ -31,7 +31,7 @@ type PickedEntity = { id: string; label: string };
 
 export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) {
 	const { t, locale } = useTranslation(["posts", "ui"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const create = usePostApiPosts();
 	const localizationLanguages = useLocalizationLanguages();

@@ -27,7 +27,7 @@ import {
 import { EllipsisIcon, FlagIcon } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import { useAuthPortal } from "@/features/auth/auth-portal";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";

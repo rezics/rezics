@@ -10,7 +10,7 @@ import {
 import { Banner, Button, cn, IdentityAvatar, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDaysIcon, PencilIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 

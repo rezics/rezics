@@ -1,17 +1,18 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
 
-import { useAuthPortal } from "@/features/auth/auth-portal";
+import { useOptionalAuthPortal } from "@/features/auth/auth-portal-context";
+import { useNavigationProgressSignal } from "../navigation-progress-context";
 
 type ApplicationLinkProps = ComponentPropsWithoutRef<typeof Link>;
 
 export const AppLink = forwardRef<HTMLAnchorElement, ApplicationLinkProps>(function AppLink(
-	{ href, onClick, ...props },
+	{ children, href, onClick, ...props },
 	ref,
 ) {
-	const { openAuthPortal } = useAuthPortal();
+	const authPortal = useOptionalAuthPortal();
 	return (
 		<Link
 			{...props}
@@ -30,13 +31,22 @@ export const AppLink = forwardRef<HTMLAnchorElement, ApplicationLinkProps>(funct
 				)
 					return;
 				const [pathname] = href.split("?", 1);
-				if (pathname !== "/login") return;
+				if (pathname !== "/login" || !authPortal) return;
 				event.preventDefault();
-				openAuthPortal("login", {
+				authPortal.openAuthPortal("login", {
 					destination: href === "/login?next=/create" ? "/create" : undefined,
 				});
 			}}
 			ref={ref}
-		/>
+		>
+			{children}
+			<LinkProgressSignal />
+		</Link>
 	);
 });
+
+function LinkProgressSignal() {
+	const { pending } = useLinkStatus();
+	useNavigationProgressSignal(pending);
+	return null;
+}

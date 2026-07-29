@@ -7,8 +7,8 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState } from "react";
 
 import {
@@ -42,7 +42,7 @@ type ReviewPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
 export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 	const remove = useDeleteApiReviewsByReviewId();
 	const queryClient = useQueryClient();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const managementSectionId = getPostManagementSectionIds(review)[0];

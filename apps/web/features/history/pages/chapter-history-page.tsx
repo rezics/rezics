@@ -3,7 +3,7 @@
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { RequireSession } from "@/features/auth/require-session";
 import {

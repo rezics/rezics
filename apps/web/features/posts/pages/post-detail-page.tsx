@@ -4,7 +4,7 @@ import {
 	type GetApiPostsByPostIdStatus200,
 	useGetApiPostsByPostId,
 } from "@rezics/openapi-tanstack-query";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useEffect, type ReactNode } from "react";
 
 import { cn, QueryFailure, QueryPending } from "@rezics/ui";
@@ -42,7 +42,7 @@ export function PostDetailPage({
 }) {
 	const { t } = useTranslation(["posts"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const realmId = context?.kind === "realm" ? context.realmId : undefined;
 	const query = useGetApiPostsByPostId({
 		path: { postId: id },

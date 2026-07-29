@@ -11,7 +11,7 @@ import {
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
 import { CatalogDetailSectionFrame } from "../components/catalog-detail-section-frame";

@@ -35,7 +35,7 @@ import {
 	UnitPicker,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 

@@ -3,7 +3,7 @@
 import type { ListCurrentUserStudioContentStatus200 } from "@rezics/openapi-tanstack-query";
 import { Badge, CardContent, ContentCard, Cover, LinkBox, LinkOverlay } from "@rezics/ui";
 import { ChevronRightIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
 import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";

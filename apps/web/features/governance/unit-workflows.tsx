@@ -25,7 +25,7 @@ import {
 	usePostApiUnitsByTypeByUnitIdCreditAttributions,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { type FormEvent, useState } from "react";
 
 import {

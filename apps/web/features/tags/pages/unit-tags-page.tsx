@@ -3,7 +3,7 @@
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { UnitTagExplorer } from "@/features/tags/components/unit-tag-explorer";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";

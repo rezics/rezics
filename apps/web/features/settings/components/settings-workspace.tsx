@@ -16,7 +16,7 @@ import {
 	UserRound,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";

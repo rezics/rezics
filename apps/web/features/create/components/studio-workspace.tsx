@@ -20,7 +20,7 @@ import {
 	Tags,
 	Vote,
 } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 

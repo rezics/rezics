@@ -16,7 +16,7 @@ import {
 	Star,
 	Trash2,
 } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState } from "react";
 
 import {

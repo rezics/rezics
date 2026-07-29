@@ -2,7 +2,7 @@
 
 import { useGetApiUnitsBookByUnitIdContentStructureNodes } from "@rezics/openapi-tanstack-query";
 import { ManagementWorkspaceSectionHeader, QueryFailure, QueryPending } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useUnitManagement } from "@/features/units/components/unit-management-workspace";
 import { unitManagementSectionHref } from "@/features/units/routing/unit-management-routes";

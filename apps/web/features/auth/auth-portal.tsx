@@ -1,12 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { toContentLanguage, type Translation } from "@rezics/i18n";
 import {
-	createContext,
 	useCallback,
-	useContext,
 	useEffect,
 	useMemo,
 	useRef,
@@ -26,20 +24,14 @@ import {
 	FieldGroup,
 	type ButtonProps,
 } from "@rezics/ui";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
 import { getSafeAuthDestination, type AuthPortalMode } from "@/lib/auth-redirect";
 import { authSearchParamsParsers } from "@/lib/search-params";
+import { AuthPortalContext, type AuthPortalOptions, useAuthPortal } from "./auth-portal-context";
 import { AuthPasswordField, AuthTextField } from "./components/auth-form-field";
-
-type AuthPortalOptions = {
-	destination?: string;
-	email?: string;
-	onClose?: () => void;
-	resetError?: string | null;
-	token?: string | null;
-};
 
 type AuthPortalState = {
 	destination: string;
@@ -50,18 +42,6 @@ type AuthPortalState = {
 	resetError: string | null;
 	token: string | null;
 };
-
-type AuthPortalContextValue = {
-	openAuthPortal: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
-};
-
-const AuthPortalContext = createContext<AuthPortalContextValue | null>(null);
-
-export function useAuthPortal() {
-	const context = useContext(AuthPortalContext);
-	if (!context) throw new Error("useAuthPortal must be used within an AuthPortalProvider");
-	return context;
-}
 
 export function SignInButton({
 	destination,
@@ -81,7 +61,7 @@ export function SignInButton({
 
 export function AuthPortalProvider({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const [authQuery, setAuthQuery] = useQueryStates(authSearchParamsParsers);
 	const [state, setState] = useState<AuthPortalState | null>(null);
 	const handledRequest = useRef<string | undefined>(undefined);

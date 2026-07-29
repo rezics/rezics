@@ -18,7 +18,7 @@ import {
 	PageHeading,
 	Textarea,
 } from "@rezics/ui";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { type FormEvent, useState } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
@@ -29,7 +29,7 @@ import { toApiDateTime } from "./model/zone-form";
 
 function ZoneCreateContent() {
 	const { locale, t } = useTranslation(["search", "zones"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const create = usePostApiZones();
 	const [categories, setCategories] = useState<readonly SearchCategory[]>(["units"]);
 	const [categoriesInvalid, setCategoriesInvalid] = useState(false);

@@ -18,6 +18,13 @@ and add narrower feature fallbacks where they can preserve more context. Do not
 add a root `app/loading.tsx` while the application shell is owned by
 `(app)/layout.tsx`. Delegate fallback UI to the owning feature.
 
+The fixed viewport progress bar reports the real App Router pending lifecycle;
+it remains indeterminate because a streamed route has no measurable total.
+Feature modules must use the application-shell `AppLink` and
+`useApplicationRouter` owners rather than importing `next/link` or
+`useRouter` directly. Segment fallbacks and local query states remain
+responsible for the destination content after navigation commits.
+
 ## Common commands
 
 Run from the repository root:

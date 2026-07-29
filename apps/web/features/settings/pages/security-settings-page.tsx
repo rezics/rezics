@@ -14,7 +14,7 @@ import {
 	Input,
 	ManagementWorkspaceSectionHeader,
 } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";

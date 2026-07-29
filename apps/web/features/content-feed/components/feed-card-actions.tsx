@@ -19,7 +19,7 @@ import {
 	MessageCircleIcon,
 	Share2Icon,
 } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState, type ReactNode } from "react";
 
 import {
@@ -37,7 +37,7 @@ import {
 	MenuTrigger,
 	cn,
 } from "@rezics/ui";
-import { useAuthPortal } from "@/features/auth/auth-portal";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import {
 	UnitReportDialog,
 	UnitReportMenuItem,

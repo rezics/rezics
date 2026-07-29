@@ -4,7 +4,7 @@ import { toContentLanguage } from "@rezics/i18n";
 import { usePostApiCollections } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState, type FormEvent } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
@@ -17,7 +17,7 @@ import { invalidateCollections } from "../data/collection-cache";
 export function CollectionCreatePage() {
 	const create = usePostApiCollections();
 	const queryClient = useQueryClient();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const { locale, t } = useTranslation(["collections", "ui"]);
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 

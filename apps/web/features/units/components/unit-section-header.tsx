@@ -1,7 +1,7 @@
 "use client";
 
 import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
 
 import { useTranslation } from "@/i18n/client";

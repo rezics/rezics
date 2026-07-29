@@ -15,7 +15,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { Button, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useReducer, useRef } from "react";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";

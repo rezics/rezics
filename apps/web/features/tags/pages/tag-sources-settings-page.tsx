@@ -18,7 +18,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { generateKeyBetween } from "fractional-indexing";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState } from "react";
 
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";

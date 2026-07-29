@@ -1,6 +1,6 @@
 import type { ContentLanguage } from "@rezics/i18n";
 import { Badge } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { tagDetailHref } from "../routing/tag-links";

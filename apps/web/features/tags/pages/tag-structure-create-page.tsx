@@ -2,7 +2,7 @@
 
 import { usePostApiTagStructures } from "@rezics/openapi-tanstack-query";
 import { Button, Card, CardContent, PageHeading } from "@rezics/ui";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
@@ -16,7 +16,7 @@ import { tagStructureHref } from "../routing/tag-links";
 
 export function TagStructureCreatePage() {
 	const { t } = useTranslation(["tags", "ui"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const [members, setMembers] = useState<EditableTagStructureMember[]>([]);
 	const create = usePostApiTagStructures();
 

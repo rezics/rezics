@@ -44,7 +44,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { generateKeyBetween } from "fractional-indexing";
 import { ArrowDown, ArrowUp, FileText, Home, Plus } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useMemo, useState, type FormEvent } from "react";
 
 import { BlockDocumentEditor } from "@/features/blocks/block-document-editor";

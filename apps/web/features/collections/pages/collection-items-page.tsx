@@ -20,7 +20,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { generateKeyBetween } from "fractional-indexing";
 import { ArrowDownIcon, ArrowUpIcon, StarIcon, Trash2Icon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState, type FormEvent } from "react";
 
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";

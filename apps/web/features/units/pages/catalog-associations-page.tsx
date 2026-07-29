@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, CardContent, Cover } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-actions";
 import { FeedList } from "@/features/content-feed/components/feed-list";

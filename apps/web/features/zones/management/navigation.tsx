@@ -40,7 +40,7 @@ import {
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Link as LinkIcon, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";

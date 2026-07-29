@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, PinIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useId, useRef, useState } from "react";
 
 import {

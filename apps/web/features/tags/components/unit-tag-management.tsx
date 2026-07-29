@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, CardContent, EntityPicker } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState } from "react";
 
 import { SignInButton } from "@/features/auth/auth-portal";

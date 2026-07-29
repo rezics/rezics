@@ -2,7 +2,7 @@
 
 import type { GetApiUnitsByTypeByUnitIdStatus200 } from "@rezics/openapi-tanstack-query";
 import { Badge } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
 import { groupByAssociationRole } from "../attribution-role";

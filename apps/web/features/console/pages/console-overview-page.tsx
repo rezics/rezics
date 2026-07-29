@@ -2,7 +2,7 @@
 
 import { useGetApiReady } from "@rezics/openapi-tanstack-query";
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
 import { useConsoleWorkspace } from "../components/console-workspace";

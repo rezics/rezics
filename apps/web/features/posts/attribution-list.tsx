@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { PublicSlugAddressValue } from "@rezics/slug";
 

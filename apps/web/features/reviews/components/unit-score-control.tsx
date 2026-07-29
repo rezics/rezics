@@ -21,7 +21,7 @@ import {
 } from "@rezics/ui";
 import { useMemo, useState } from "react";
 
-import { useAuthPortal } from "@/features/auth/auth-portal";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import {
 	isResourceVisibility,
 	ResourceVisibilityValues,

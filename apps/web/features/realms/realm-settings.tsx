@@ -22,7 +22,7 @@ import {
 import type { PortableTextDocument } from "@rezics/block";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
@@ -74,7 +74,7 @@ export function RealmProfileSettings({
 	const { t } = useTranslation(["errors", "locale", "media", "realms", "state", "ui"]);
 	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
 		useContentLanguageEditor();
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiRealmsByRealmId();
 	const replaceSlug = useReplaceRealmSlugAddress({

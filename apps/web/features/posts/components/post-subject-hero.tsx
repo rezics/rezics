@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRightIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import { Card, Cover } from "@rezics/ui";

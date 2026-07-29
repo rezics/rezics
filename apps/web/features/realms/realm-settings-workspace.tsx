@@ -26,7 +26,7 @@ import {
 	UserRound,
 	UsersRound,
 } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 

@@ -3,7 +3,7 @@
 import type { PresentedAvatar } from "@rezics/avatar";
 import { Button, IdentityAvatar, Popover, PopoverContent, PopoverTrigger, cn } from "@rezics/ui";
 import { ListTree, Settings } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useEffect, useState } from "react";
 
 import { FollowButton } from "@/features/following/components/follow-button";

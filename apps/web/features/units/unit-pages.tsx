@@ -10,8 +10,8 @@ import {
 	usePostApiUnitsByType,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { type FormEvent, useState } from "react";
 
 import { EntityPicker, type EntityPickerValue, PageHeading } from "@rezics/ui";
@@ -91,7 +91,7 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 
 function SeriesCreatePage() {
 	const { t, locale } = useTranslation(["actions", "media", "ui", "units"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiSeries({
@@ -166,7 +166,7 @@ function SeriesCreatePage() {
 
 function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const { t, locale } = useTranslation(["actions", "licenses", "media", "ui", "units"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	const [catalogMode, setCatalogMode] = useState<"owned_work" | "public_entry">(

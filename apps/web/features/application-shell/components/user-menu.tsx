@@ -46,8 +46,8 @@ import {
 	UserRound,
 	X,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { profileHref } from "@/features/profiles/profile-route";
@@ -107,7 +107,7 @@ function useUserMenuModel({
 	onThemePreferenceChange,
 }: UserMenuProps) {
 	const { t } = useTranslation(["locale", "nav", "ui"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const name = profile?.name?.trim() || fallbackName.trim() || t.ui.unnamed;
 	const initial = Array.from(name)[0]?.toLocaleUpperCase(locale);

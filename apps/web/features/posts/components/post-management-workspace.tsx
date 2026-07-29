@@ -15,7 +15,7 @@ import {
 	QueryPending,
 } from "@rezics/ui";
 import { BookOpenText, History, Link2, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 

@@ -7,7 +7,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { Badge, Button, Card, CardContent, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { profileHref } from "@/features/profiles/profile-route";
 import { invalidateBookContentStructure } from "@/features/units/unit-cache";

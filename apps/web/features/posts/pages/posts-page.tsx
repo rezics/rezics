@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, PageHeading } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
 import { PostList } from "../post-list";

@@ -12,7 +12,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { KeyRound, Plus, ShieldAlert, Trash2, XIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState, type FormEvent } from "react";
 
 import {

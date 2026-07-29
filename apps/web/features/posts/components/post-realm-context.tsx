@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpRightIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useMemo } from "react";
 
 import { Button, Card, CardContent, ChoiceSelect, IdentityAvatar, cn } from "@rezics/ui";

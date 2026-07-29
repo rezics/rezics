@@ -1,7 +1,7 @@
 "use client";
 
 import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { UnitAccessManager } from "@/features/governance/components/unit-access-manager";
 import { useTranslation } from "@/i18n/client";

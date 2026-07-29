@@ -22,7 +22,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { generateKeyBetween } from "fractional-indexing";
 import { ArrowDown, ArrowUp, LibraryBig } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { type FormEvent, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";

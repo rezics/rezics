@@ -10,6 +10,7 @@ import { AuthPortalProvider } from "@/features/auth/auth-portal";
 import { AuthSessionProvider } from "@/features/auth/session-provider";
 import { SessionCacheBoundary } from "@/features/auth/session-cache-boundary";
 import type { InitialAuthSession } from "@/features/auth/server/initial-session.server";
+import { NavigationProgressProvider } from "@/features/application-shell/navigation-progress";
 import { TranslatedUiProvider } from "@/features/application-shell/components/ui-provider";
 import { PwaLifecycle } from "@/features/pwa/pwa-lifecycle";
 import { TranslationProvider } from "@/i18n/client";
@@ -37,14 +38,16 @@ export function AppProviders({
 		<NuqsAdapter defaultOptions={urlStateOptions}>
 			<TranslationProvider initial={initialTranslation}>
 				<TranslatedUiProvider>
-					<AuthSessionProvider initialSession={initialSession}>
-						<QueryClientProvider client={queryClient}>
-							<SessionCacheBoundary>
-								<AuthPortalProvider>{children}</AuthPortalProvider>
-							</SessionCacheBoundary>
-						</QueryClientProvider>
-						<PwaLifecycle />
-					</AuthSessionProvider>
+					<NavigationProgressProvider>
+						<AuthSessionProvider initialSession={initialSession}>
+							<QueryClientProvider client={queryClient}>
+								<SessionCacheBoundary>
+									<AuthPortalProvider>{children}</AuthPortalProvider>
+								</SessionCacheBoundary>
+							</QueryClientProvider>
+							<PwaLifecycle />
+						</AuthSessionProvider>
+					</NavigationProgressProvider>
 				</TranslatedUiProvider>
 			</TranslationProvider>
 		</NuqsAdapter>

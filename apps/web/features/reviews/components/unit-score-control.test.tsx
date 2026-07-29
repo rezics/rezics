@@ -90,7 +90,7 @@ vi.mock("../data/review-cache", () => ({
 	invalidateReviews: state.invalidateReviews,
 }));
 
-vi.mock("@/features/auth/auth-portal", () => ({
+vi.mock("@/features/auth/auth-portal-context", () => ({
 	useAuthPortal: () => ({ openAuthPortal: state.openAuthPortal }),
 }));
 

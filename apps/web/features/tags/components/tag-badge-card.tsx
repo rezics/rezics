@@ -17,7 +17,7 @@ import {
 	cn,
 } from "@rezics/ui";
 import { Check, Info, Search, X } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useRef, useState, type MouseEvent } from "react";
 
 import { SignInButton } from "@/features/auth/auth-portal";

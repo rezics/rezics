@@ -1,9 +1,10 @@
 "use client";
 
 import { isContentLanguage, toContentLanguage, type ContentLanguage } from "@rezics/i18n";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useTranslation } from "@/i18n/client";
 import {
 	parseContentLanguageOrder,
@@ -38,7 +39,7 @@ export function ContentLanguageEditorProvider({
 	readonly children: ReactNode;
 }) {
 	const { t, locale } = useTranslation(["units"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const [dirty, setDirty] = useState(false);

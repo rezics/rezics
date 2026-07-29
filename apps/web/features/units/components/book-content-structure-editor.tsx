@@ -27,8 +27,8 @@ import {
 	SquareCheckBig,
 	Undo2,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { type DragEvent, type MouseEvent, useMemo, useState } from "react";
 
 import {
@@ -172,7 +172,7 @@ export function BookContentStructureEditor({
 	initial: BookStructureResponse & { structureId: string; latestRevisionId: string };
 }) {
 	const { t, locale } = useTranslation(["engagement", "units"]);
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const initialDraft = useMemo(() => createBookContentStructureDraft(initial.items), [initial]);
 	const initialContentMetrics = useMemo(() => indexOwnContentMetrics(initial.items), [initial]);

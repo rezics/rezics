@@ -5,7 +5,7 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
 
 import { CardContent, cn, Cover, IdentityAvatar } from "@rezics/ui";

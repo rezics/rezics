@@ -9,7 +9,7 @@ import {
 	TooltipTrigger,
 } from "@rezics/ui";
 import { BookOpen, Gamepad2, Pencil, PlaySquare } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { FollowButton } from "@/features/following/components/follow-button";

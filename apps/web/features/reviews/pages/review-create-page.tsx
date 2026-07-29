@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeading } from "@rezics/ui";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
@@ -9,7 +9,7 @@ import { useTranslation } from "@/i18n/client";
 import { ReviewComposer } from "../components/review-composer";
 
 export function ReviewCreatePage() {
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const { t } = useTranslation(["engagement"]);
 	return (
 		<RequireSession>

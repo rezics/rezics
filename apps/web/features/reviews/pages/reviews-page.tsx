@@ -2,7 +2,7 @@
 
 import { useGetApiReviews } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";

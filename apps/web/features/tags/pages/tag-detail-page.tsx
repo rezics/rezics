@@ -2,7 +2,7 @@
 
 import { useGetApiTagsByTagId } from "@rezics/openapi-tanstack-query";
 import { Badge, Card, CardContent, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import {
 	LocalizedText,

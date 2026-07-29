@@ -2,7 +2,7 @@
 
 import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { UnitRevisionHistory } from "@/features/history/components/unit-revision-history";
 import { useTranslation } from "@/i18n/client";

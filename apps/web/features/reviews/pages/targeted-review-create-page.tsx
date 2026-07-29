@@ -2,7 +2,7 @@
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import { useRouter } from "next/navigation";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
@@ -28,7 +28,7 @@ export function TargetedReviewCreatePage({
 		path: { type, unitId: targetId },
 		query: { localizationLanguages },
 	});
-	const router = useRouter();
+	const router = useApplicationRouter();
 	const { t } = useTranslation(["engagement", "ui"]);
 	useLocalizationFallbackToast({
 		actualLanguage: query.data?.language ?? null,

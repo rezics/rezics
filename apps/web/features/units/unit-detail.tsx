@@ -4,7 +4,7 @@ import { PublicationLicenseRegistry } from "@rezics/license";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { BookOpen, Gamepad2, LibraryBig, PlaySquare } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { Card, CardContent } from "@rezics/ui";
 import { Badge } from "@rezics/ui";

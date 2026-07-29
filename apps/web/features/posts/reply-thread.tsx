@@ -11,7 +11,7 @@ import {
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDownIcon, MessageCircleIcon, MessagesSquareIcon } from "lucide-react";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
 	useCallback,
 	useEffect,
