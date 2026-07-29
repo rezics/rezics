@@ -70,7 +70,7 @@ interface ComboboxInputProps
 	/**
 	 * Whether to show the trigger button.
 	 *
-	 * @default true
+	 * @default false
 	 */
 	showTrigger?: boolean;
 }
@@ -78,7 +78,7 @@ interface ComboboxInputProps
 export const ComboboxInput = (props: ComboboxInputProps) => {
 	const {
 		size = "md",
-		showTrigger = true,
+		showTrigger = false,
 		showClear = false,
 		className,
 		children,
