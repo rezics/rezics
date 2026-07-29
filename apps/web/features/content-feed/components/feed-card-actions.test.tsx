@@ -46,6 +46,10 @@ describe("FeedVoteControl", () => {
 		const downvote = screen.getByRole("button", { name: "不贊成" });
 		expect(voteGroup.classList.contains("bg-secondary")).toBe(true);
 		expect(voteGroup.classList.contains("rounded-lg")).toBe(true);
+		expect(upvote.classList.contains("size-8")).toBe(true);
+		expect(upvote.classList.contains("size-11")).toBe(false);
+		expect(downvote.classList.contains("size-8")).toBe(true);
+		expect(downvote.classList.contains("size-11")).toBe(false);
 		expect(upvote.getAttribute("aria-pressed")).toBe("false");
 		expect(downvote.getAttribute("aria-pressed")).toBe("false");
 		fireEvent.click(upvote);
@@ -92,7 +96,10 @@ describe("FeedVoteControl", () => {
 			</TranslationProvider>,
 		);
 
-		fireEvent.click(screen.getByRole("button", { name: "分享內容" }));
+		const shareButton = screen.getByRole("button", { name: "分享內容" });
+		expect(shareButton.classList.contains("min-h-8")).toBe(true);
+		expect(shareButton.classList.contains("min-h-11")).toBe(false);
+		fireEvent.click(shareButton);
 		fireEvent.click(await screen.findByRole("button", { name: "複製連結" }));
 
 		expect(onCopyLink).toHaveBeenCalledOnce();

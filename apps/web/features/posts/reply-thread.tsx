@@ -431,7 +431,7 @@ function ReplyPostNode({
 									signedIn && reply.capabilities.canReply ? (
 										<Button
 											{...editorPreloadIntentHandlers}
-											className="min-h-11 sm:min-h-8"
+											className="min-h-8"
 											onClick={() => {
 												preloadPortableTextEditor();
 												setReplying((value) => !value);

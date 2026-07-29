@@ -336,7 +336,7 @@ export function FeedCardActionBar({ className, ...props }: ComponentProps<typeof
 	return (
 		<CardFooter
 			className={cn(
-				"mt-1 flex gap-1.5 overflow-x-auto rounded-none border-0 bg-transparent px-4 pb-4 pt-3 sm:px-5",
+				"mt-1 flex gap-1.5 overflow-x-auto rounded-none border-0 bg-transparent px-4 pb-4 pt-3 [scrollbar-width:none] sm:px-5 [&::-webkit-scrollbar]:hidden",
 				className,
 			)}
 			data-slot="feed-card-action-bar"

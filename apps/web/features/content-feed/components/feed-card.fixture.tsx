@@ -63,7 +63,7 @@ function FixtureActionBar({ comments, initialScore }: { comments: number; initia
 				reaction={reaction}
 				score={new Intl.NumberFormat(locale.target, { notation: "compact" }).format(score)}
 			/>
-			<Button className="min-h-11 sm:min-h-8" pill size="sm" variant="secondary">
+			<Button className="min-h-8" pill size="sm" variant="secondary">
 				<MessageCircleIcon aria-hidden data-icon="inline-start" />
 				{t.feed.actions.comments({ count: comments })}
 			</Button>
@@ -170,7 +170,7 @@ export function BookFeedCard() {
 					reaction={null}
 					score={String(fixture.metrics.book.score)}
 				/>
-				<Button className="min-h-11 sm:min-h-8" pill size="sm" variant="secondary">
+				<Button className="min-h-8" pill size="sm" variant="secondary">
 					<LibraryIcon aria-hidden data-icon="inline-start" />
 					{feed.actions.addToCollection}
 				</Button>
@@ -206,7 +206,7 @@ export function CollectionFeedCard() {
 				/>
 				<Button
 					aria-pressed={following}
-					className="min-h-11 sm:min-h-8"
+					className="min-h-8"
 					onClick={() => setFollowing((current) => !current)}
 					pill
 					size="sm"

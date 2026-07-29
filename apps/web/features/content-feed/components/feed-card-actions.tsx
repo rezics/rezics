@@ -75,7 +75,7 @@ export function FeedVoteControl({
 				aria-label={t.engagement.upvote}
 				aria-pressed={reaction === "upvote"}
 				className={cn(
-					"size-11 border-0 sm:size-8",
+					"border-0",
 					reaction === "upvote" && "text-primary hover:text-primary",
 				)}
 				disabled={disabled}
@@ -101,10 +101,7 @@ export function FeedVoteControl({
 			<Button
 				aria-label={t.engagement.downvote}
 				aria-pressed={reaction === "downvote"}
-				className={cn(
-					"size-11 border-0 sm:size-8",
-					reaction === "downvote" && "text-info hover:text-info",
-				)}
+				className={cn("border-0", reaction === "downvote" && "text-info hover:text-info")}
 				disabled={disabled}
 				onClick={() => onReactionChange(reaction === "downvote" ? null : "downvote")}
 				size="icon-md"
@@ -195,7 +192,7 @@ export function FeedEngagementBar({
 
 	return (
 		<div className="mt-3 grid gap-1 pt-1">
-			<div className="flex items-center gap-1.5 overflow-x-auto">
+			<div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 				<FeedVoteControl
 					disabled={pending || reactionDisabled}
 					onReactionChange={(next) => void changeReaction(next)}
@@ -203,7 +200,7 @@ export function FeedEngagementBar({
 					score={formattedScore}
 				/>
 				{policy.comments && href ? (
-					<Button asChild className="min-h-11 sm:min-h-8" size="sm" variant="secondary">
+					<Button asChild className="min-h-8" size="sm" variant="secondary">
 						<Link href={href} onClick={onCommentsClick}>
 							<MessageCircleIcon aria-hidden data-icon="inline-start" />
 							{t.feed.actions.comments({ count: replyCount })}
@@ -211,11 +208,15 @@ export function FeedEngagementBar({
 					</Button>
 				) : null}
 				{policy.primary === "collect" ? (
-					<CollectionPickerButton targetId={itemId} triggerVariant="secondary" />
+					<CollectionPickerButton
+						targetId={itemId}
+						triggerClassName="min-h-8"
+						triggerVariant="secondary"
+					/>
 				) : null}
 				{policy.primary === "follow" ? (
 					<FollowButton
-						className="min-h-11 sm:min-h-8"
+						className="min-h-8"
 						size="sm"
 						unitId={itemId}
 						variant="secondary"
@@ -354,7 +355,7 @@ export function FeedOverflowMenuView({
 			<MenuTrigger asChild>
 				<Button
 					aria-label={t.feed.moreActions}
-					className="size-11 data-[state=open]:bg-accent sm:size-8"
+					className="data-[state=open]:bg-accent"
 					pill
 					size="icon-md"
 					variant="quiet"
@@ -458,7 +459,7 @@ export function FeedShareSurfaceView({
 		>
 			<Button
 				aria-label={t.feed.actions.shareTitle}
-				className="min-h-11 sm:min-h-8"
+				className="min-h-8"
 				onClick={() => setOpen(true)}
 				size="sm"
 				variant="secondary"
