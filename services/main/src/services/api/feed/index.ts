@@ -290,6 +290,14 @@ interface FeedReviewEligibilityScope extends Omit<
  */
 export type FeedEligibilityScope = FeedEligibilityBaseScope | FeedReviewEligibilityScope;
 
+/** Resolves a caller override or the authenticated viewer's canonical presentation priority. */
+export function resolveFeedLocalizationLanguages(
+	requestedLanguages: readonly ContentLanguage[] | undefined,
+	viewer: Pick<RecommendationViewer, "preferredLanguages">,
+): readonly ContentLanguage[] {
+	return requestedLanguages?.length ? requestedLanguages : viewer.preferredLanguages;
+}
+
 const FeedCursor = t.Object(
 	{
 		v: t.Literal(7),
@@ -843,7 +851,7 @@ export async function hydrateFeedItems(
 ): Promise<FeedItemResponseValue[]> {
 	const pageIds = page.map(({ id }) => id);
 	if (!pageIds.length) return [];
-	const displayLanguages = scope.localizationLanguages ?? [];
+	const displayLanguages = resolveFeedLocalizationLanguages(scope.localizationLanguages, viewer);
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -1466,7 +1474,10 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const cursor = decodeCursor(body.cursor);
 		const simpleSelection = body.filter ? readSimpleFeedFilter(body.filter) : undefined;
 		const filterLanguages = simpleSelection?.languages ?? [];
-		const localizationLanguages = body.localizationLanguages ?? [];
+		const localizationLanguages = resolveFeedLocalizationLanguages(
+			body.localizationLanguages,
+			viewer,
+		);
 		validateCursor(cursor, body, viewer.personalized, filterLanguages, localizationLanguages);
 		const scope: FeedEligibilityScope = {
 			...(body.filter ? { filter: body.filter } : {}),

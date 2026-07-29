@@ -102456,6 +102456,62 @@ export type GetApiRealmsByRealmIdWikiNavigationStatus200 = {
 /**
  * @type object
  */
+export type GetApiRealmsByRealmIdWikiNavigationStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdWikiNavigationStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiRealmsByRealmIdWikiNavigationStatus404 = {
 	/**
 	 * @type object
@@ -102489,6 +102545,30 @@ export type GetApiRealmsByRealmIdWikiNavigationStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiRealmsByRealmIdWikiNavigationStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiRealmsByRealmIdWikiNavigationStatus500 = InternalError;
 
 /**
@@ -102506,8 +102586,11 @@ export type GetApiRealmsByRealmIdWikiNavigationOptions = {
  */
 export type GetApiRealmsByRealmIdWikiNavigationResponses = {
 	"200": GetApiRealmsByRealmIdWikiNavigationStatus200;
+	"401": GetApiRealmsByRealmIdWikiNavigationStatus401;
+	"403": GetApiRealmsByRealmIdWikiNavigationStatus403;
 	"404": GetApiRealmsByRealmIdWikiNavigationStatus404;
 	"422": GetApiRealmsByRealmIdWikiNavigationStatus422;
+	"429": GetApiRealmsByRealmIdWikiNavigationStatus429;
 	"500": GetApiRealmsByRealmIdWikiNavigationStatus500;
 };
 
@@ -102516,8 +102599,11 @@ export type GetApiRealmsByRealmIdWikiNavigationResponses = {
  */
 export type GetApiRealmsByRealmIdWikiNavigationResponse =
 	| GetApiRealmsByRealmIdWikiNavigationStatus200
+	| GetApiRealmsByRealmIdWikiNavigationStatus401
+	| GetApiRealmsByRealmIdWikiNavigationStatus403
 	| GetApiRealmsByRealmIdWikiNavigationStatus404
 	| GetApiRealmsByRealmIdWikiNavigationStatus422
+	| GetApiRealmsByRealmIdWikiNavigationStatus429
 	| GetApiRealmsByRealmIdWikiNavigationStatus500;
 
 /**
@@ -102599,6 +102685,14 @@ export type PostApiRealmsByRealmIdWikiNavigationStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const PostApiRealmsByRealmIdWikiNavigationStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PostApiRealmsByRealmIdWikiNavigationStatus403ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdWikiNavigationStatus403ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdWikiNavigationStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -102608,10 +102702,10 @@ export type PostApiRealmsByRealmIdWikiNavigationStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PostApiRealmsByRealmIdWikiNavigationStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -102792,6 +102886,62 @@ export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200 = {
 	updatedAt: string;
 };
 
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	WikiNavigationNotFound: "WikiNavigationNotFound",
@@ -102836,6 +102986,30 @@ export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422 = Validat
 /**
  * @type object
  */
+export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500 = InternalError;
 
 /**
@@ -102853,8 +103027,11 @@ export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions = {
  */
 export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses = {
 	"200": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200;
+	"401": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus401;
+	"403": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403;
 	"404": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404;
 	"422": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422;
+	"429": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429;
 	"500": GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 };
 
@@ -102863,8 +103040,11 @@ export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses = {
  */
 export type GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponse =
 	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200
+	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus401
+	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
 	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
 	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
 	| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500;
 
 /**
@@ -102952,6 +103132,14 @@ export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -102961,10 +103149,10 @@ export type PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -103159,6 +103347,14 @@ export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus204 = void
  */
 export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus400 = MalformedRequestBody;
 
+export const DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -103168,10 +103364,10 @@ export type DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitPermissionForbidden'
+		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "UnitPermissionForbidden";
+		code: DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */

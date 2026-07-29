@@ -6,7 +6,6 @@ import { useEffect, useRef, type ReactNode } from "react";
 import {
 	getApiUsersMePreferencesQueryKey,
 	useGetApiUsersMe,
-	useGetApiUsersMePreferences,
 	useGetApiUsersMeFollowing,
 	usePatchApiUsersMePreferences,
 } from "@rezics/openapi-tanstack-query";
@@ -16,8 +15,12 @@ import { toStoredUiLocale, toUiLocale, UiLocaleValues } from "@rezics/i18n";
 
 import { followingManagementHref } from "@/features/following/routing/following-route";
 import { ChineseContentDisplayProvider } from "@/features/content-language-display/chinese-content-display-context";
+import {
+	setPresentationPreferencesQueryData,
+	usePresentationPreferences,
+} from "@/features/preferences/data/use-presentation-preferences";
 import { useSetLocale, useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AppLink } from "./components/app-link";
@@ -67,20 +70,33 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const localeChangedByUser = useRef(false);
 	const queryClient = useQueryClient();
 	const currentProfile = useGetApiUsersMe({}, { query: { enabled: Boolean(session) } });
-	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
-	const localizationLanguages = useLocalizationLanguages();
+	const preferences = usePresentationPreferences();
+	const localizationState = useLocalizationLanguageState();
+	const localizationLanguages =
+		localizationState.status === "ready" ? localizationState.languages : [];
 	const followedZones = useGetApiUsersMeFollowing(
 		{ query: { kind: "zone", localizationLanguages, limit: 50 } },
-		{ query: { enabled: Boolean(session) } },
+		{
+			query: {
+				enabled: Boolean(session) && localizationState.status === "ready",
+			},
+		},
 	);
 	const followedRealms = useGetApiUsersMeFollowing(
 		{ query: { kind: "realm", localizationLanguages, limit: 50 } },
-		{ query: { enabled: Boolean(session) } },
+		{
+			query: {
+				enabled: Boolean(session) && localizationState.status === "ready",
+			},
+		},
 	);
 	const updateInterfaceLocale = usePatchApiUsersMePreferences({
 		mutation: {
 			scope: { id: "interface-locale" },
-			onSuccess: (data) => queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data),
+			onSuccess: (data) => {
+				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
+				setPresentationPreferencesQueryData(queryClient, data);
+			},
 		},
 	});
 	const localeSelection = {
@@ -231,8 +247,12 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 										allHref: followingManagementHref("zone"),
 										emptyLabel: t.nav.sidebar.zonesEmpty,
 										icon: PanelsTopLeft,
-										isLoading: followedZones.isPending,
-										isError: followedZones.isError,
+										isLoading:
+											localizationState.status === "restoring" ||
+											followedZones.isPending,
+										isError:
+											localizationState.status === "error" ||
+											followedZones.isError,
 										items: zoneItems,
 									},
 									{
@@ -242,8 +262,12 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 										allHref: followingManagementHref("realm"),
 										emptyLabel: t.nav.sidebar.realmsEmpty,
 										icon: Globe2,
-										isLoading: followedRealms.isPending,
-										isError: followedRealms.isError,
+										isLoading:
+											localizationState.status === "restoring" ||
+											followedRealms.isPending,
+										isError:
+											localizationState.status === "error" ||
+											followedRealms.isError,
 										items: realmItems,
 									},
 								],

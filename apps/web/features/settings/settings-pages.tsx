@@ -59,6 +59,7 @@ import { buildLocalizationLanguages, selectLocalization } from "@/lib/localizati
 import { SettingsOverviewHref } from "./routing/settings-routes";
 import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
 import { FeedQueryKey } from "@/features/content-feed/query";
+import { setPresentationPreferencesQueryData } from "@/features/preferences/data/use-presentation-preferences";
 import { ContentRatingPreferenceField } from "./components/content-rating-preference-field";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
@@ -284,13 +285,11 @@ export function PreferenceSettings() {
 	);
 	const update = usePutApiUsersMePreferences({
 		mutation: {
-			onSuccess: () =>
-				Promise.all([
-					queryClient.invalidateQueries({
-						queryKey: getApiUsersMePreferencesQueryKey(),
-					}),
-					queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
-				]),
+			onSuccess: async (data) => {
+				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
+				setPresentationPreferencesQueryData(queryClient, data);
+				await queryClient.invalidateQueries({ queryKey: FeedQueryKey });
+			},
 		},
 	});
 	const { setLocale } = useSetLocale();

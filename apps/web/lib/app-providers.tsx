@@ -1,6 +1,10 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+	HydrationBoundary,
+	QueryClientProvider,
+	type DehydratedState,
+} from "@tanstack/react-query";
 import { Toaster } from "@rezics/ui";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useState, type ReactNode } from "react";
@@ -16,24 +20,21 @@ import { TranslatedUiProvider } from "@/features/application-shell/components/ui
 import { PwaLifecycle } from "@/features/pwa/pwa-lifecycle";
 import { TranslationProvider } from "@/i18n/client";
 import type { RootTranslationNamespaces } from "@/i18n/namespaces";
-import { QueryClientDefaultOptions } from "@/lib/query-policy";
+import { createQueryClient } from "@/lib/query-client";
 import { urlStateOptions } from "@/lib/search-params";
 
 export function AppProviders({
 	children,
+	dehydratedState,
 	initialSession,
 	initialTranslation,
 }: {
 	children: ReactNode;
+	dehydratedState: DehydratedState;
 	initialSession: InitialAuthSession;
 	initialTranslation: TranslationSnapshot<typeof resources, typeof RootTranslationNamespaces>;
 }) {
-	const [queryClient] = useState(
-		() =>
-			new QueryClient({
-				defaultOptions: QueryClientDefaultOptions,
-			}),
-	);
+	const [queryClient] = useState(createQueryClient);
 
 	return (
 		<NuqsAdapter defaultOptions={urlStateOptions}>
@@ -42,12 +43,14 @@ export function AppProviders({
 					<NavigationProgressProvider>
 						<AuthSessionProvider initialSession={initialSession}>
 							<QueryClientProvider client={queryClient}>
-								<SessionCacheBoundary>
-									<AuthPortalProvider>
-										{children}
-										<Toaster />
-									</AuthPortalProvider>
-								</SessionCacheBoundary>
+								<HydrationBoundary state={dehydratedState}>
+									<SessionCacheBoundary>
+										<AuthPortalProvider>
+											{children}
+											<Toaster />
+										</AuthPortalProvider>
+									</SessionCacheBoundary>
+								</HydrationBoundary>
 							</QueryClientProvider>
 							<PwaLifecycle />
 						</AuthSessionProvider>

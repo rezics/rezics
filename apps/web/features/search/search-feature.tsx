@@ -1,7 +1,6 @@
 "use client";
 
 import { ContentLanguageValues } from "@rezics/i18n";
-import { useGetApiUsersMePreferences } from "@rezics/openapi-tanstack-query";
 import {
 	SearchCategoryValues,
 	defaultSearchSort,
@@ -23,6 +22,7 @@ import {
 	unitFilterSearchQuery,
 	withUnitFilterSearch,
 } from "@rezics/filter";
+import { usePresentationPreferences } from "@/features/preferences/data/use-presentation-preferences";
 import {
 	Badge,
 	Button,
@@ -40,7 +40,6 @@ import { Filter, Search, Share2, SlidersHorizontal, X } from "lucide-react";
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
-import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AdvancedSearchBuilder } from "./advanced-search-builder";
 import { SearchEntityMultiSelect, type SearchEntityOption } from "./search-entity-multi-select";
 
@@ -289,10 +288,7 @@ export function SearchFeature({
 }) {
 	const { t } = useTranslation("search");
 	const { t: localeCopy } = useTranslation("locale");
-	const { data: session } = useHydratedSession();
-	const preferences = useGetApiUsersMePreferences({
-		query: { enabled: Boolean(session) },
-	});
+	const preferences = usePresentationPreferences();
 	const { t: nav } = useTranslation("nav");
 	const { t: units } = useTranslation("units");
 	const { document, controls } = definition;
@@ -544,7 +540,7 @@ export function SearchFeature({
 		const filter = withUnitFilterSearch(initialState?.filter, defaultQuery);
 		setQuery(defaultQuery);
 		setCategory([]);
-		setLanguage(preferredLanguages);
+		setLanguage([...preferredLanguages]);
 		setIncludedTags([]);
 		setExcludedTags([]);
 		setRealms([]);

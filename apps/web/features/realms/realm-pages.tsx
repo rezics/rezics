@@ -57,7 +57,10 @@ import { selectLocalization } from "@/lib/localization";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import {
+	useLocalizationLanguages,
+	useLocalizationLanguageState,
+} from "@/i18n/use-localization-languages";
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { RequestFailure } from "@/i18n/request-failure";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
@@ -252,13 +255,18 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 		"ui",
 	]);
 	const router = useApplicationRouter();
-	const localizationLanguages = useLocalizationLanguages();
+	const localizationState = useLocalizationLanguageState();
+	const localizationLanguages =
+		localizationState.status === "ready" ? localizationState.languages : [];
 	const { data: session } = useHydratedSession();
 	const dockAccess = useDockManagementAccess(id, "realm", Boolean(session));
-	const query = useGetApiRealmsByRealmId({
-		path: { realmId: id },
-		query: { localizationLanguages },
-	});
+	const query = useGetApiRealmsByRealmId(
+		{
+			path: { realmId: id },
+			query: { localizationLanguages },
+		},
+		{ query: { enabled: localizationState.status === "ready" } },
+	);
 	useLocalizationFallbackToast({
 		actualLanguage: query.data?.language ?? null,
 		localizationLanguages,
@@ -302,6 +310,9 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 		if (query.data && (page === "tags" || page === "wiki") && !query.data.pages.includes(page))
 			router.replace(realmPageHref(query.data, "main"));
 	}, [page, query.data, router]);
+	if (localizationState.status === "error")
+		return <QueryFailure error={localizationState.error} retry={localizationState.retry} />;
+	if (localizationState.status === "restoring") return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;

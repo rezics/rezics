@@ -134647,6 +134647,7 @@
 		"/api/realms/{realmId}/wiki/navigation": {
 			"get": {
 				"summary": "List Realm Wiki navigation resources",
+				"description": "Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.",
 				"tags": ["Realms"],
 				"parameters": [
 					{
@@ -134706,6 +134707,60 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -134741,6 +134796,40 @@
 							}
 						}
 					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
@@ -134751,10 +134840,12 @@
 					}
 				},
 				"operationId": "getApiRealmsByRealmIdWikiNavigation",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdWikiNavigation"
 			},
 			"post": {
 				"summary": "Create Realm Wiki navigation",
+				"description": "Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.",
 				"tags": ["Realms"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -134858,9 +134949,12 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitPermissionForbidden"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -134957,6 +135051,7 @@
 		"/api/realms/{realmId}/wiki/navigation/{navigationId}": {
 			"get": {
 				"summary": "Get Realm Wiki navigation",
+				"description": "Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.",
 				"tags": ["Realms"],
 				"parameters": [
 					{
@@ -135001,6 +135096,60 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -135039,6 +135188,40 @@
 							}
 						}
 					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Unexpected internal failure",
 						"content": {
@@ -135049,10 +135232,12 @@
 					}
 				},
 				"operationId": "getApiRealmsByRealmIdWikiNavigationByNavigationId",
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdWikiNavigationByNavigationId"
 			},
 			"put": {
 				"summary": "Replace Realm Wiki navigation",
+				"description": "Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.",
 				"tags": ["Realms"],
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -135163,9 +135348,12 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitPermissionForbidden"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -135290,6 +135478,7 @@
 			},
 			"delete": {
 				"summary": "Delete Realm Wiki navigation",
+				"description": "Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.",
 				"tags": ["Realms"],
 				"responses": {
 					"204": {
@@ -135317,9 +135506,12 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitPermissionForbidden",
+													"default": "PlatformCapabilityRequired",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitPermissionForbidden"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}

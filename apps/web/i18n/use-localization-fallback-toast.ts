@@ -1,12 +1,11 @@
 "use client";
 
 import type { ContentLanguage } from "@rezics/i18n";
-import { useGetApiUsersMePreferences } from "@rezics/openapi-tanstack-query";
 import { toast } from "@rezics/ui";
 import { useEffect, useRef } from "react";
 
-import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "./client";
+import { useLocalizationLanguageState } from "./use-localization-languages";
 
 export function useLocalizationFallbackToast(input: {
 	readonly actualLanguage: ContentLanguage | null;
@@ -14,11 +13,8 @@ export function useLocalizationFallbackToast(input: {
 	readonly unitId: string;
 }) {
 	const { t } = useTranslation(["ui"]);
-	const session = useHydratedSession();
-	const preferences = useGetApiUsersMePreferences({
-		query: { enabled: Boolean(session.data) },
-	});
-	const preferencesReady = !session.isPending && (!session.data || Boolean(preferences.data));
+	const localizationState = useLocalizationLanguageState();
+	const preferencesReady = localizationState.status === "ready";
 	const shownKey = useRef<string | undefined>(undefined);
 	const localizationLanguageKey = input.localizationLanguages.join(",");
 	const fallback =

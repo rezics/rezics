@@ -1,13 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
+import { dehydrate } from "@tanstack/react-query";
 import socialCard from "@rezics/brand/social-card.png?url&no-inline";
 import { FontAwesomeVersion, isFontAwesomeLicense, type FontAwesomeLicense } from "@rezics/avatar";
 
-import { AppProviders } from "@/lib/app-providers";
 import { getInitialAuthSession } from "@/features/auth/server/initial-session.server";
+import { presentationPreferencesQueryKey } from "@/features/preferences/model/presentation-preferences";
+import { getInitialPresentationPreferences } from "@/features/preferences/server/initial-presentation-preferences.server";
 import { RootTranslationNamespaces } from "@/i18n/namespaces";
 import { getTranslation } from "@/i18n/server";
+import { AppProviders } from "@/lib/app-providers";
+import { createQueryClient } from "@/lib/query-client";
 import { appTheme, appThemeCss } from "@/lib/theme";
 
 import "@/styles/global.css";
@@ -72,10 +76,24 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
 	const requestHeaders = await headers();
-	const [{ locale, snapshot }, initialSession] = await Promise.all([
-		getTranslation(RootTranslationNamespaces),
-		getInitialAuthSession(requestHeaders),
-	]);
+	const [{ locale, snapshot }, initialSession, initialPresentationPreferences] =
+		await Promise.all([
+			getTranslation(RootTranslationNamespaces),
+			getInitialAuthSession(requestHeaders),
+			getInitialPresentationPreferences(requestHeaders),
+		]);
+	const queryClient = createQueryClient();
+	if (
+		initialSession.status === "resolved" &&
+		initialSession.data &&
+		initialPresentationPreferences.status === "resolved" &&
+		initialPresentationPreferences.data.profileId === initialSession.data.user.id
+	)
+		queryClient.setQueryData(
+			presentationPreferencesQueryKey(initialSession.data.user.id),
+			initialPresentationPreferences.data,
+		);
+	const dehydratedState = dehydrate(queryClient);
 	const fontAwesomeCss = fontAwesomeKitCssUrl();
 	const fontAwesomeLicense = fontAwesomeKitLicense();
 	return (
@@ -116,7 +134,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 				/>
 			</head>
 			<body className="min-w-80">
-				<AppProviders initialSession={initialSession} initialTranslation={snapshot}>
+				<AppProviders
+					dehydratedState={dehydratedState}
+					initialSession={initialSession}
+					initialTranslation={snapshot}
+				>
 					{children}
 				</AppProviders>
 			</body>

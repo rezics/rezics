@@ -7,12 +7,7 @@ import {
 	type SimpleFeedContentKind,
 	type UnitPredicate,
 } from "@rezics/filter";
-import {
-	postApiFeedQuery,
-	useGetApiRealms,
-	useGetApiTags,
-	useGetApiUsersMePreferences,
-} from "@rezics/openapi-tanstack-query";
+import { postApiFeedQuery, useGetApiRealms, useGetApiTags } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListFilterIcon } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -26,8 +21,9 @@ import {
 	ChoiceSelect,
 	type ChoiceOption,
 } from "@rezics/ui";
+import { usePresentationPreferences } from "@/features/preferences/data/use-presentation-preferences";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedContentSelector } from "../components/feed-content-selector";
 import { FeedFiltersDialog } from "../components/feed-filters-dialog";
@@ -70,13 +66,11 @@ export function ApiFeedList({
 }: ApiFeedListProps) {
 	const { t } = useTranslation(["actions", "feed", "locale", "state"]);
 	const session = useHydratedSession();
-	const preferences = useGetApiUsersMePreferences({
-		query: { enabled: Boolean(session.data) },
-	});
-	const localizationLanguages = useLocalizationLanguages();
+	const preferences = usePresentationPreferences();
+	const localizationState = useLocalizationLanguageState();
 	const languageDefaultProfileId = session.data?.user.id ?? "anonymous";
 	const initializedLanguageDefault = useRef<string | undefined>(undefined);
-	const preferencesReady = !session.isPending && (!session.data || !preferences.isPending);
+	const preferencesReady = localizationState.status === "ready";
 	const filterLanguages = resolveFeedFilterLanguages({
 		allowDefault: preferencesReady && Boolean(onLanguagesChange),
 		defaultInitialized: initializedLanguageDefault.current === languageDefaultProfileId,
@@ -86,11 +80,7 @@ export function ApiFeedList({
 	});
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	useEffect(() => {
-		if (
-			initializedLanguageDefault.current === languageDefaultProfileId ||
-			session.isPending ||
-			(session.data && preferences.isPending)
-		)
+		if (initializedLanguageDefault.current === languageDefaultProfileId || !preferencesReady)
 			return;
 		initializedLanguageDefault.current = languageDefaultProfileId;
 		if (
@@ -105,13 +95,13 @@ export function ApiFeedList({
 		languages.length,
 		onLanguagesChange,
 		preferences.data,
-		preferences.isPending,
-		session.data,
-		session.isPending,
+		preferencesReady,
 	]);
 	const baseBody = {
 		limit: 20,
-		localizationLanguages,
+		...(localizationState.status === "ready"
+			? { localizationLanguages: [...localizationState.languages] }
+			: {}),
 		sort,
 		...(() => {
 			const filter = combineUnitPredicates([
@@ -135,7 +125,7 @@ export function ApiFeedList({
 			});
 			return data;
 		},
-		enabled: preferencesReady,
+		enabled: localizationState.status === "ready",
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
@@ -267,11 +257,13 @@ export function ApiFeedList({
 				)}
 				retryLabel={t.actions.retry}
 				state={
-					query.isPending
-						? { status: "pending" }
-						: query.isError && !query.data
-							? { status: "error", retry: () => void query.refetch() }
-							: { status: "ready", items: items ?? [] }
+					localizationState.status === "error"
+						? { status: "error", retry: localizationState.retry }
+						: localizationState.status === "restoring" || query.isPending
+							? { status: "pending" }
+							: query.isError && !query.data
+								? { status: "error", retry: () => void query.refetch() }
+								: { status: "ready", items: items ?? [] }
 				}
 			/>
 		</div>
@@ -303,15 +295,25 @@ export function FeedListControls({
 	| "tagIds"
 >) {
 	const { t } = useTranslation(["feed", "locale"]);
-	const localizationLanguages = useLocalizationLanguages();
+	const localizationState = useLocalizationLanguageState();
+	const localizationLanguages =
+		localizationState.status === "ready" ? localizationState.languages : [];
 	const [filtersOpen, setFiltersOpen] = useState(false);
 	const realms = useGetApiRealms(
 		{ query: { localizationLanguages, limit: 50 } },
-		{ query: { enabled: Boolean(onRealmIdsChange) } },
+		{
+			query: {
+				enabled: Boolean(onRealmIdsChange) && localizationState.status === "ready",
+			},
+		},
 	);
 	const tags = useGetApiTags(
 		{ query: { localizationLanguages, limit: 50 } },
-		{ query: { enabled: Boolean(onTagIdsChange) } },
+		{
+			query: {
+				enabled: Boolean(onTagIdsChange) && localizationState.status === "ready",
+			},
+		},
 	);
 	const sortOptions = FeedSortValues.map((value) => ({
 		value,

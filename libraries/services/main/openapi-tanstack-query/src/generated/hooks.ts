@@ -1989,8 +1989,11 @@ import type {
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus500,
 	GetApiRealmsByRealmIdWikiNavigationOptions,
 	GetApiRealmsByRealmIdWikiNavigationStatus200,
+	GetApiRealmsByRealmIdWikiNavigationStatus401,
+	GetApiRealmsByRealmIdWikiNavigationStatus403,
 	GetApiRealmsByRealmIdWikiNavigationStatus404,
 	GetApiRealmsByRealmIdWikiNavigationStatus422,
+	GetApiRealmsByRealmIdWikiNavigationStatus429,
 	GetApiRealmsByRealmIdWikiNavigationStatus500,
 	PostApiRealmsByRealmIdWikiNavigationOptions,
 	PostApiRealmsByRealmIdWikiNavigationStatus200,
@@ -2002,8 +2005,11 @@ import type {
 	PostApiRealmsByRealmIdWikiNavigationStatus500,
 	GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus401,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403,
 	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404,
 	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422,
+	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429,
 	GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500,
 	PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions,
 	PutApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
@@ -32874,8 +32880,11 @@ export function getApiRealmsByRealmIdWikiNavigationQueryOptions(
 	return queryOptions<
 		GetApiRealmsByRealmIdWikiNavigationStatus200,
 		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdWikiNavigationStatus401
+			| GetApiRealmsByRealmIdWikiNavigationStatus403
 			| GetApiRealmsByRealmIdWikiNavigationStatus404
 			| GetApiRealmsByRealmIdWikiNavigationStatus422
+			| GetApiRealmsByRealmIdWikiNavigationStatus429
 			| GetApiRealmsByRealmIdWikiNavigationStatus500
 		>,
 		GetApiRealmsByRealmIdWikiNavigationStatus200,
@@ -32895,6 +32904,7 @@ export function getApiRealmsByRealmIdWikiNavigationQueryOptions(
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary List Realm Wiki navigation resources
  * {@link /api/realms/:realmId/wiki/navigation}
  */
@@ -32915,8 +32925,11 @@ export function useGetApiRealmsByRealmIdWikiNavigation<
 			QueryObserverOptions<
 				GetApiRealmsByRealmIdWikiNavigationStatus200,
 				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdWikiNavigationStatus401
+					| GetApiRealmsByRealmIdWikiNavigationStatus403
 					| GetApiRealmsByRealmIdWikiNavigationStatus404
 					| GetApiRealmsByRealmIdWikiNavigationStatus422
+					| GetApiRealmsByRealmIdWikiNavigationStatus429
 					| GetApiRealmsByRealmIdWikiNavigationStatus500
 				>,
 				TData,
@@ -32943,8 +32956,11 @@ export function useGetApiRealmsByRealmIdWikiNavigation<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdWikiNavigationStatus401
+			| GetApiRealmsByRealmIdWikiNavigationStatus403
 			| GetApiRealmsByRealmIdWikiNavigationStatus404
 			| GetApiRealmsByRealmIdWikiNavigationStatus422
+			| GetApiRealmsByRealmIdWikiNavigationStatus429
 			| GetApiRealmsByRealmIdWikiNavigationStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -32988,6 +33004,7 @@ export function postApiRealmsByRealmIdWikiNavigationMutationOptions<TContext = u
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Create Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation}
  */
@@ -33081,8 +33098,11 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(
 	return queryOptions<
 		GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus401
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
 			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
 			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
 			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>,
 		GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
@@ -33102,6 +33122,7 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Get Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
@@ -33122,8 +33143,11 @@ export function useGetApiRealmsByRealmIdWikiNavigationByNavigationId<
 			QueryObserverOptions<
 				GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus200,
 				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus401
+					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
 					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
 					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
 					| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 				>,
 				TData,
@@ -33154,8 +33178,11 @@ export function useGetApiRealmsByRealmIdWikiNavigationByNavigationId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus401
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus403
 			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus404
 			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus422
+			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus429
 			| GetApiRealmsByRealmIdWikiNavigationByNavigationIdStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -33200,6 +33227,7 @@ export function putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Replace Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
@@ -33316,6 +33344,7 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOpti
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Delete Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */

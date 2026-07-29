@@ -6447,6 +6447,7 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary List Realm Wiki navigation resources
  * {@link /api/realms/:realmId/wiki/navigation}
  */
@@ -6458,11 +6459,16 @@ export function getApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean
 	return request({
 		method: "GET",
 		url: "/api/realms/{realmId}/wiki/navigation",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>>;
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Create Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation}
  */
@@ -6483,6 +6489,7 @@ export function postApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolea
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Get Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
@@ -6498,6 +6505,10 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationId<
 	return request({
 		method: "GET",
 		url: "/api/realms/{realmId}/wiki/navigation/{navigationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
@@ -6505,6 +6516,7 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationId<
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Replace Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */
@@ -6531,6 +6543,7 @@ export function putApiRealmsByRealmIdWikiNavigationByNavigationId<
 }
 
 /**
+ * @description Development preview. Requires platform.development_preview.access in addition to ordinary Realm Wiki navigation authorization.
  * @summary Delete Realm Wiki navigation
  * {@link /api/realms/:realmId/wiki/navigation/:navigationId}
  */

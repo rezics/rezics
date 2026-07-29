@@ -7,6 +7,7 @@ import {
 	getFeedEligibilityCondition,
 	prioritizeFeedRealmContexts,
 	resolveFeedContentSelection,
+	resolveFeedLocalizationLanguages,
 } from "./index";
 
 const dialect = new PgDialect();
@@ -276,6 +277,32 @@ describe("feed eligibility SQL", () => {
 		expect(query.params).toEqual(
 			expect.arrayContaining([tagId, realmId, 1, "review", realmId, 8, 9, 10]),
 		);
+	});
+});
+
+describe("feed localization language priority", () => {
+	it("uses an explicit presentation override in caller order", () => {
+		expect(
+			resolveFeedLocalizationLanguages(["zh", "en"], {
+				preferredLanguages: ["en"],
+			}),
+		).toEqual(["zh", "en"]);
+	});
+
+	it("defaults authenticated presentation to the viewer preference", () => {
+		expect(
+			resolveFeedLocalizationLanguages(undefined, {
+				preferredLanguages: ["en", "zh"],
+			}),
+		).toEqual(["en", "zh"]);
+	});
+
+	it("keeps anonymous presentation unspecified for Unit-order fallback", () => {
+		expect(
+			resolveFeedLocalizationLanguages(undefined, {
+				preferredLanguages: [],
+			}),
+		).toEqual([]);
 	});
 });
 

@@ -8,16 +8,16 @@ const mocks = vi.hoisted(() => ({
 	createToast: vi.fn(),
 }));
 
-vi.mock("@rezics/openapi-tanstack-query", () => ({
-	useGetApiUsersMePreferences: () => ({ data: undefined }),
-}));
-
 vi.mock("@rezics/ui", () => ({
 	toast: { create: mocks.createToast },
 }));
 
-vi.mock("@/lib/use-hydrated-session", () => ({
-	useHydratedSession: () => ({ data: null, isPending: false }),
+vi.mock("./use-localization-languages", () => ({
+	useLocalizationLanguageState: () => ({
+		status: "ready",
+		languages: ["zh"],
+		source: "anonymous",
+	}),
 }));
 
 vi.mock("./client", () => ({
