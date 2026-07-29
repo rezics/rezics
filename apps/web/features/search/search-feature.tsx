@@ -36,7 +36,7 @@ import {
 	FieldLabel,
 	Input,
 } from "@rezics/ui";
-import { Filter, Search, Share2, X } from "lucide-react";
+import { Filter, Search, Share2, SlidersHorizontal, X } from "lucide-react";
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
@@ -837,7 +837,7 @@ export function SearchFeature({
 						/>
 						{toolbarFilters}
 						<Button onClick={() => setFilterOpen(true)} type="button" variant="outline">
-							<Filter aria-hidden />
+							<SlidersHorizontal aria-hidden />
 							{t.filters}
 						</Button>
 					</div>

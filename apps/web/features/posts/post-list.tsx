@@ -8,6 +8,7 @@ import { CardContent, Skeleton } from "@rezics/ui";
 import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { FeedPostCard } from "@/features/content-feed/components/feed-item-card";
 import { FeedListItems } from "@/features/content-feed/components/feed-list";
+import { SearchFeatureFeed } from "@/features/content-feed/components/search-feature-feed";
 import { SearchFeedList } from "@/features/content-feed/data/search-feed-list";
 import type { FeedDisplayContext } from "@/features/content-feed/model/feed-display-context";
 import { useTranslation } from "@/i18n/client";
@@ -16,10 +17,12 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 export function PostList({
 	infinite = false,
 	realmId,
+	showFeedControls = false,
 	subjectId,
 }: {
 	infinite?: boolean;
 	realmId?: string;
+	showFeedControls?: boolean;
 	subjectId?: string;
 }) {
 	const injections = useMemo<SearchInjection[]>(
@@ -59,24 +62,37 @@ export function PostList({
 		],
 		[subjectId],
 	);
+	const request = useMemo(
+		() => ({
+			contexts: realmId ? [{ kind: "realm" as const, realmId }] : [],
+			injections,
+			state: {
+				pageSize: 20,
+				sort: "createdAt:desc" as const,
+			},
+		}),
+		[injections, realmId],
+	);
+	const displayContext = subjectId
+		? ({ kind: "unit", unitId: subjectId } satisfies FeedDisplayContext)
+		: undefined;
+	const requestedRealmId = realmId;
 
-	return (
-		<SearchFeedList
-			displayContext={
-				subjectId
-					? ({ kind: "unit", unitId: subjectId } satisfies FeedDisplayContext)
-					: undefined
-			}
+	return showFeedControls ? (
+		<SearchFeatureFeed
+			displayContext={displayContext}
 			infinite={infinite}
-			request={{
-				contexts: realmId ? [{ kind: "realm", realmId }] : [],
-				injections,
-				state: {
-					pageSize: 20,
-					sort: "createdAt:desc",
-				},
-			}}
-			requestedRealmId={realmId}
+			initialRequest={request}
+			key={`${realmId ?? "global"}:${subjectId ?? "all"}`}
+			requestedRealmId={requestedRealmId}
+			template="global"
+		/>
+	) : (
+		<SearchFeedList
+			displayContext={displayContext}
+			infinite={infinite}
+			request={request}
+			requestedRealmId={requestedRealmId}
 			template="global"
 		/>
 	);

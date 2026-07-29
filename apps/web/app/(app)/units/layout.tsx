@@ -17,6 +17,7 @@ export default function UnitsLayout({ children }: { children: ReactNode }) {
 				"posts",
 				"previewAccess",
 				"realms",
+				"search",
 				"tags",
 				"units",
 			]}

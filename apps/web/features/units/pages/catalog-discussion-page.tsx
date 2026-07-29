@@ -51,7 +51,7 @@ export function CatalogDiscussionPage() {
 					)}
 				</CardContent>
 			</Card>
-			<PostList subjectId={detail.unit.id} />
+			<PostList showFeedControls subjectId={detail.unit.id} />
 		</CatalogDetailSectionFrame>
 	);
 }
