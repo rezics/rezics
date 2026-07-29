@@ -1,6 +1,4 @@
-import { eq } from "drizzle-orm";
-
-import { profilePreference, score } from "../../database/schema";
+import { DefaultResourceVisibility, score } from "../../database/schema";
 import type { ResourceVisibility } from "../../database/schema/contract-values";
 import type { DatabaseTransaction } from "../../database";
 
@@ -12,16 +10,7 @@ export async function upsertScore(
 	value: number,
 	visibility?: ResourceVisibility,
 ) {
-	const resolvedVisibility =
-		visibility ??
-		(
-			await tx
-				.select({ visibility: profilePreference.scoreVisibility })
-				.from(profilePreference)
-				.where(eq(profilePreference.profileId, userId))
-				.limit(1)
-		)[0]?.visibility;
-	if (!resolvedVisibility) throw new Error("Score visibility preference was not found");
+	const resolvedVisibility = visibility ?? DefaultResourceVisibility;
 	const [entry] = await tx
 		.insert(score)
 		.values({

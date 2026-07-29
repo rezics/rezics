@@ -1,3 +1,8 @@
+import {
+	DefaultResourceVisibility,
+	type ResourceVisibility,
+} from "@/features/privacy/model/resource-visibility";
+
 export const ProgressStatuses = ["backlog", "active", "paused", "completed", "dropped"] as const;
 
 export type ProgressStatus = (typeof ProgressStatuses)[number];
@@ -44,7 +49,7 @@ const EmptyProgressRecord: UnitProgressRecord = {
 	progress: 0,
 	status: "active",
 	totalTimeMs: 0,
-	visibility: "private",
+	visibility: DefaultResourceVisibility,
 };
 const MaximumTotalMinutes = Math.floor(Number.MAX_SAFE_INTEGER / 60_000);
 
@@ -213,4 +218,3 @@ function parseTotalMinutes(value: string): number | undefined {
 	const parsed = parseNonNegativeInteger(value);
 	return parsed !== undefined && parsed <= MaximumTotalMinutes ? parsed : undefined;
 }
-import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";

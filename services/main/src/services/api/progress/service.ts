@@ -7,13 +7,13 @@ import {
 	contentStructureNode,
 	contentStructureNodeProgress,
 	contentStructureRevisionHead,
+	DefaultResourceVisibility,
 	type ProgressCurrentBasis,
 	type ProgressDatePrecision,
 	type ProgressEntryKind,
 	type ProgressStatus,
 	postProgressEntry,
 	post,
-	profilePreference,
 	unit,
 	unitProgress,
 	unitProgressEntry,
@@ -289,12 +289,6 @@ export async function refreshProgressSnapshot(
 		return;
 	}
 	const completedCount = toSafeInteger(statistics.completedCount, "progress completion count");
-	const [preference] = await tx
-		.select({ visibility: profilePreference.progressVisibility })
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, profileId))
-		.limit(1);
-	if (!preference) throw new Error("Progress visibility preference was not found");
 	const firstSeenAt =
 		readingSnapshot && readingSnapshot.firstSeenAt < statistics.firstSeenAt
 			? readingSnapshot.firstSeenAt
@@ -331,7 +325,7 @@ export async function refreshProgressSnapshot(
 			lastContentStructureNodeId,
 			currentEntryId,
 			currentBasis,
-			visibility: preference.visibility,
+			visibility: DefaultResourceVisibility,
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
@@ -490,12 +484,6 @@ export async function recordChapterReading(
 		);
 
 	const snapshot = await findProgressSnapshot(tx, input.profileId, input.unitId);
-	const [preference] = await tx
-		.select({ visibility: profilePreference.progressVisibility })
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, input.profileId))
-		.limit(1);
-	if (!preference) throw new Error("Progress visibility preference was not found");
 	const [record] = await tx
 		.insert(unitProgress)
 		.values({
@@ -510,7 +498,7 @@ export async function recordChapterReading(
 			lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
 			currentEntryId: null,
 			currentBasis: "reading",
-			visibility: snapshot?.visibility ?? preference.visibility,
+			visibility: snapshot?.visibility ?? DefaultResourceVisibility,
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
@@ -525,7 +513,7 @@ export async function recordChapterReading(
 				lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
 				currentEntryId: null,
 				currentBasis: "reading",
-				visibility: snapshot?.visibility ?? preference.visibility,
+				visibility: snapshot?.visibility ?? DefaultResourceVisibility,
 				deletedAt: null,
 				updatedAt: input.now,
 			},

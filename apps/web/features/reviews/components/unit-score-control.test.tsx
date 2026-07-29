@@ -20,7 +20,7 @@ const state = vi.hoisted(() => ({
 		visibility: "public" | "unlisted" | "private";
 	}[],
 	mutateAsync: vi.fn(() =>
-		Promise.resolve({ scoreId: "score-id", score: 8, visibility: "private" }),
+		Promise.resolve({ scoreId: "score-id", score: 8, visibility: "public" }),
 	),
 	resetMutation: vi.fn(),
 	invalidateQueries: vi.fn(() => Promise.resolve()),
@@ -106,7 +106,6 @@ vi.mock("../data/default-score-context", () => ({
 		},
 		error: null,
 		isPending: false,
-		visibility: "private",
 	}),
 }));
 
@@ -154,7 +153,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("UnitScoreControl", () => {
-	it("submits the first Hero rating and invalidates dependent review projections", async () => {
+	it("submits the first Hero rating as public and invalidates dependent review projections", async () => {
 		renderControl();
 
 		fireEvent.click(screen.getByTestId("interactive-rating"));
@@ -164,7 +163,7 @@ describe("UnitScoreControl", () => {
 			body: {
 				contextUnitId: "019b76da-a800-7300-8000-000000000002",
 				score: 8,
-				visibility: "private",
+				visibility: "public",
 			},
 			path: { targetId: "019f92b9-cb0d-7cb6-a55a-1d5ecedc0949" },
 		});
@@ -197,7 +196,24 @@ describe("UnitScoreControl", () => {
 		expect((screen.getByRole("combobox", { name: "評分語境" }) as HTMLInputElement).value).toBe(
 			"REZICS 評分",
 		);
+		expect((screen.getByRole("combobox", { name: "可見性" }) as HTMLSelectElement).value).toBe(
+			"public",
+		);
 		expect(state.mutateAsync).not.toHaveBeenCalled();
+
+		fireEvent.change(screen.getByRole("combobox", { name: "可見性" }), {
+			target: { value: "private" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "提交評分" }));
+
+		expect(state.mutateAsync).toHaveBeenCalledWith({
+			body: {
+				contextUnitId: "019b76da-a800-7300-8000-000000000002",
+				score: 8,
+				visibility: "private",
+			},
+			path: { targetId: "019f92b9-cb0d-7cb6-a55a-1d5ecedc0949" },
+		});
 	});
 
 	it("defaults context discovery to Realms unless a category is explicit", () => {

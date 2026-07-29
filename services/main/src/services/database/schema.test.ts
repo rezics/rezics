@@ -548,6 +548,10 @@ describe("database schema contracts", () => {
 			"unlisted",
 			"private",
 		]);
+		expect(profilePreference.scoreVisibility.default).toBe("public");
+		expect(profilePreference.progressVisibility.default).toBe("public");
+		expect(score.visibility.default).toBe("public");
+		expect(unitProgress.visibility.default).toBe("public");
 		expect(unitProgress.visibility.enumValues).toEqual(["public", "unlisted", "private"]);
 	});
 

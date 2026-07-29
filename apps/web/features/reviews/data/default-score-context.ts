@@ -8,7 +8,6 @@ import {
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { useTranslation } from "@/i18n/client";
-import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";
 import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
@@ -48,7 +47,6 @@ export function useDefaultScoreContext() {
 
 	return {
 		context: selection,
-		visibility: (preferences.data?.scoreVisibility ?? "private") satisfies ResourceVisibility,
 		error: realm.error,
 		isPending:
 			session.isPending ||

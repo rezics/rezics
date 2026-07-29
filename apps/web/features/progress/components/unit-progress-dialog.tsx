@@ -35,6 +35,7 @@ import { useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import {
+	DefaultResourceVisibility,
 	isResourceVisibility,
 	ResourceVisibilityValues,
 	type ResourceVisibility,
@@ -82,13 +83,14 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 	const [sourceRecord] = useState(record);
 	const [draft, setDraft] = useState(() => createProgressDraft(record));
 	const [visibility, setVisibility] = useState<ResourceVisibility>(
-		record?.visibility ?? progress.defaultVisibility,
+		record?.visibility ?? DefaultResourceVisibility,
 	);
 	const [invalid, setInvalid] = useState(false);
 	const [removeOpen, setRemoveOpen] = useState(false);
 	const copy = t.engagement.progressByType[progress.domain.type];
 	const completing = isCompletionTransition(sourceRecord, draft.status);
 	const nextCompletedCount = (sourceRecord?.completedCount ?? 0) + 1;
+	const submittedVisibility = sourceRecord ? visibility : DefaultResourceVisibility;
 
 	async function completeCurrentProgress() {
 		const update = createProgressUpdate(progress.domain.type, draft);
@@ -99,8 +101,8 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 		setInvalid(false);
 		await progress.completeCurrentProgress(
 			update.totalTimeMs === undefined
-				? { visibility }
-				: { totalTimeMs: update.totalTimeMs, visibility },
+				? { visibility: submittedVisibility }
+				: { totalTimeMs: update.totalTimeMs, visibility: submittedVisibility },
 		);
 	}
 
@@ -116,7 +118,10 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 			return;
 		}
 		setInvalid(false);
-		await progress.saveProgress({ ...update, visibility });
+		await progress.saveProgress({
+			...update,
+			visibility: submittedVisibility,
+		});
 	}
 
 	async function confirmRemove() {
@@ -139,23 +144,27 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 							t={t}
 							type={progress.domain.type}
 						/>
-						<Field>
-							<FieldLabel htmlFor="progress-visibility">{t.ui.visibility}</FieldLabel>
-							<NativeSelect
-								id="progress-visibility"
-								onChange={(event) => {
-									if (isResourceVisibility(event.target.value))
-										setVisibility(event.target.value);
-								}}
-								value={visibility}
-							>
-								{ResourceVisibilityValues.map((value) => (
-									<NativeSelectOption key={value} value={value}>
-										{t.ui[value]}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
+						{sourceRecord ? (
+							<Field>
+								<FieldLabel htmlFor="progress-visibility">
+									{t.ui.visibility}
+								</FieldLabel>
+								<NativeSelect
+									id="progress-visibility"
+									onChange={(event) => {
+										if (isResourceVisibility(event.target.value))
+											setVisibility(event.target.value);
+									}}
+									value={visibility}
+								>
+									{ResourceVisibilityValues.map((value) => (
+										<NativeSelectOption key={value} value={value}>
+											{t.ui[value]}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
+							</Field>
+						) : null}
 						{progress.domain.type === "book" ? (
 							<BookProgressFields draft={draft} onChange={setDraft} />
 						) : progress.domain.type === "media" ? (

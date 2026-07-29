@@ -8,6 +8,7 @@ import {
 	createUuidv7PrimaryKey,
 	fractionalIndexPosition,
 } from "./columns";
+import { DefaultResourceVisibility } from "./contract-values";
 import { profile, resourceVisibility, unit } from "./core";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
@@ -32,7 +33,7 @@ export const score = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		value: integer().notNull(),
-		visibility: resourceVisibility().default("private").notNull(),
+		visibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
