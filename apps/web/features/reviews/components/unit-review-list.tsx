@@ -27,8 +27,8 @@ interface UnitReviewListBaseProps {
 
 export type UnitReviewListProps = UnitReviewListBaseProps &
 	(
-		| Readonly<{ scores?: undefined; scoreContextUnitId?: undefined }>
-		| Readonly<{ scores: readonly UnitScore[]; scoreContextUnitId: string }>
+		| Readonly<{ scores?: undefined; scoreRealmId?: undefined }>
+		| Readonly<{ scores: readonly UnitScore[]; scoreRealmId: string }>
 	);
 
 export function UnitReviewList({
@@ -36,7 +36,7 @@ export function UnitReviewList({
 	limit = 50,
 	realmIds,
 	scores,
-	scoreContextUnitId,
+	scoreRealmId,
 	sort = "best",
 	targetId,
 }: UnitReviewListProps) {
@@ -47,9 +47,7 @@ export function UnitReviewList({
 			localizationLanguages,
 			...(realmIds?.length ? { realmIds: [...realmIds] } : {}),
 			...(languages?.length ? { languages: [...languages] } : {}),
-			...(scores?.length && scoreContextUnitId
-				? { scoreContextUnitId, scores: [...scores] }
-				: {}),
+			...(scores?.length && scoreRealmId ? { scoreRealmId, scores: [...scores] } : {}),
 			sort,
 			limit,
 		},

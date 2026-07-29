@@ -36,20 +36,20 @@ export default {
 	reviewScore: "Note",
 	reviewScoreOptional: "Note (facultative)",
 	reviewWithoutScore: "Sans note",
-	reviewScoreContextHint: `Lorsqu’un avis n’a pas de ${realmTerms.inline}, sa note utilise votre contexte de notation par défaut.`,
-	scoreContextHint: insert(
-		`Cette note utilise « {{context}} » comme contexte. Modifiez le contexte de notation par défaut dans les Préférences.`,
-		{ context: String },
+	reviewScoreRealmHint: `Lorsqu’un avis n’est rattaché à aucun ${realmTerms.inline}, sa note est enregistrée dans votre ${realmTerms.inline} de notation par défaut.`,
+	scoreRealmHint: insert(
+		`Cette note sera enregistrée dans « {{realm}} ». Modifiez le ${realmTerms.inline} de notation par défaut dans les Préférences.`,
+		{ realm: String },
 	),
-	scoreContext: "Contexte de notation",
+	scoreRealm: `${realmTerms.label} de notation`,
 	scoreEditorHint: `Choisissez un ${realmTerms.inline} pour mettre à jour une note existante ou ajouter une note dans un autre ${realmTerms.inline}.`,
 	editScores: "Gérer les notes",
-	noScoredContexts: "Aucune note dans un contexte pour le moment.",
+	noScoredRealms: `Aucune note dans un ${realmTerms.inline} pour le moment.`,
 	scoreAssociation: "Association de note",
 	scoreAssociationDescription:
 		"Choisissez la note à laquelle cet avis fait référence, ou supprimez son association actuelle.",
-	scoreAssociationOption: insert("{{context}} · {{score}}/10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "Enregistrer l’association de note",

@@ -32,7 +32,7 @@ export function ScoreInput({
 					</NativeSelectOption>
 				))}
 			</NativeSelect>
-			<FieldDescription>{t.engagement.reviewScoreContextHint}</FieldDescription>
+			<FieldDescription>{t.engagement.reviewScoreRealmHint}</FieldDescription>
 		</Field>
 	);
 }

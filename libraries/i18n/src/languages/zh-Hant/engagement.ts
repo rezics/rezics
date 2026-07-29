@@ -35,18 +35,21 @@ export default {
 	reviewScore: "評分",
 	reviewScoreOptional: "評分（選填）",
 	reviewWithoutScore: "不評分",
-	reviewScoreContextHint: `評論未指定${realmTerms.label}時，評分會使用你的預設評分語境。`,
-	scoreContextHint: insert("此評分使用「{{context}}」作為語境。可在偏好設定變更預設評分語境。", {
-		context: String,
-	}),
-	scoreContext: "評分語境",
+	reviewScoreRealmHint: `評論未指定${realmTerms.label}時，評分會使用你的預設評分${realmTerms.label}。`,
+	scoreRealmHint: insert(
+		`此評分會記錄在「{{realm}}」。可在偏好設定變更預設評分${realmTerms.label}。`,
+		{
+			realm: String,
+		},
+	),
+	scoreRealm: `評分${realmTerms.label}`,
 	scoreEditorHint: `選擇${realmTerms.label}以修改既有評分，或在其他${realmTerms.label}新增評分。`,
 	editScores: "管理評分",
-	noScoredContexts: "尚未在任何語境評分。",
+	noScoredRealms: `尚未在任何${realmTerms.label}評分。`,
 	scoreAssociation: "評分關聯",
 	scoreAssociationDescription: "選擇這篇評論要引用的評分，或移除目前的評分關聯。",
-	scoreAssociationOption: insert("{{context}} · {{score}}／10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}／10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "儲存評分關聯",

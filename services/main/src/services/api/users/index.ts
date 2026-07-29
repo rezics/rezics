@@ -28,7 +28,6 @@ import {
 import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
-import { ensureScoreContextParticipation } from "../../scores/context";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { assignCurrentProfileSlugAddress } from "../../units/slug-address";
@@ -101,8 +100,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 		chineseContentDisplay: preference.chineseContentDisplay,
 		defaultLicense: parseNullablePublicationLicenseId(preference.defaultLicense),
 		defaultRealmManageMode: preference.defaultRealmManageMode,
-		defaultScoreContextUnitId:
-			preference.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score,
+		defaultScoreRealmId: preference.defaultScoreRealmId ?? OfficialRealmUnitIds.score,
 		scoreVisibility: preference.scoreVisibility,
 		progressVisibility: preference.progressVisibility,
 		collectionConfig: parseCollectionConfig(preference.collectionConfig),
@@ -114,7 +112,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 }
 
 const activityScoreTargetUnit = alias(unit, "profile_activity_score_target_unit");
-const activityScoreContextUnit = alias(unit, "profile_activity_score_context_unit");
+const activityScoreRealm = alias(unit, "profile_activity_score_realm");
 const activityProgressTargetUnit = alias(unit, "profile_activity_progress_target_unit");
 
 export default new Elysia({ prefix: "/users" })
@@ -392,10 +390,7 @@ export default new Elysia({ prefix: "/users" })
 		"/me/preferences",
 		async ({ profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(profile.unitId, [["preferences"]]);
-			const defaultScoreContext = await ensureScoreContextParticipation(
-				authorization,
-				body.defaultScoreContextUnitId,
-			);
+			await authorization.realm.ensureParticipation(body.defaultScoreRealmId);
 			return database.transaction(async (tx) => {
 				const [preference] = await tx
 					.update(profilePreference)
@@ -404,7 +399,7 @@ export default new Elysia({ prefix: "/users" })
 						chineseContentDisplay: body.chineseContentDisplay,
 						defaultLicense: body.defaultLicense,
 						defaultRealmManageMode: body.defaultRealmManageMode,
-						defaultScoreContextUnitId: defaultScoreContext.contextUnitId,
+						defaultScoreRealmId: body.defaultScoreRealmId,
 						collectionConfig: body.collectionConfig,
 						personalizedFeed: body.personalizedFeed,
 						filterFeedByPreferredLanguages: body.filterFeedByPreferredLanguages,
@@ -427,9 +422,6 @@ export default new Elysia({ prefix: "/users" })
 					"RealmCapabilityRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"ScoreContextUnitUnsupported",
-				]),
 			},
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
 		},
@@ -580,9 +572,9 @@ export default new Elysia({ prefix: "/users" })
 							activityScoreTargetUnit.id,
 							localizationLanguages,
 						),
-						contextUnitId: score.contextUnitId,
-						contextTitle: resolvedUnitLocalizationTitle(
-							activityScoreContextUnit.id,
+						realmId: score.realmId,
+						realmTitle: resolvedUnitLocalizationTitle(
+							activityScoreRealm.id,
 							localizationLanguages,
 						),
 						value: score.value,
@@ -595,10 +587,7 @@ export default new Elysia({ prefix: "/users" })
 						activityScoreTargetUnit,
 						eq(activityScoreTargetUnit.id, score.unitId),
 					)
-					.innerJoin(
-						activityScoreContextUnit,
-						eq(activityScoreContextUnit.id, score.contextUnitId),
-					)
+					.innerJoin(activityScoreRealm, eq(activityScoreRealm.id, score.realmId))
 					.where(
 						and(
 							eq(score.profileId, params.id),
@@ -617,7 +606,7 @@ export default new Elysia({ prefix: "/users" })
 							getUnitReadCondition(
 								viewerProfileId,
 								referencedUnitReadOptions,
-								activityScoreContextUnit,
+								activityScoreRealm,
 							),
 						),
 					)

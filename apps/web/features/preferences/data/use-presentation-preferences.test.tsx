@@ -32,7 +32,7 @@ const response = {
 	chineseContentDisplay: "original" as const,
 	defaultLicense: null,
 	defaultRealmManageMode: false,
-	defaultScoreContextUnitId: "score-realm",
+	defaultScoreRealmId: "score-realm",
 	scoreVisibility: "public" as const,
 	progressVisibility: "public" as const,
 	collectionConfig: null,

@@ -49,7 +49,6 @@ export default {
 	InvalidSearch: "Die Suchanfrage ist ungültig.",
 	SearchUnavailable: "Die Suche ist vorübergehend nicht verfügbar. Versuche es später erneut.",
 	RealmCapabilityRequired: `Dir fehlt die erforderliche Berechtigung für den ${realmTerms.inline}.`,
-	ScoreContextUnitUnsupported: `Diese Unit kann derzeit nicht als Bewertungskontext verwendet werden. Wähle einen ${realmTerms.inline}.`,
 	RealmRulesAcceptanceRequired: `Akzeptiere die aktuellen Regeln des ${realmTerms.inline}s, um fortzufahren.`,
 	RealmRuleRevisionChanged:
 		"Die Regeln wurden geändert. Prüfe die neueste Version, bevor du zustimmst.",

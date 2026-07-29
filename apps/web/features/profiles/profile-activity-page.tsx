@@ -74,10 +74,8 @@ export function ProfileActivityPage() {
 														<p className="font-medium">{title}</p>
 													)}
 													<p className="mt-1 text-muted-foreground text-sm">
-														{t.profiles.activityScoreContext({
-															context:
-																item.contextTitle ??
-																item.contextUnitId,
+														{t.profiles.activityScoreRealm({
+															realm: item.realmTitle ?? item.realmId,
 														})}
 													</p>
 													<p className="mt-1 text-muted-foreground text-xs">

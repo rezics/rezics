@@ -45,7 +45,7 @@ describe("CommunityScoreOverview", () => {
 		render(
 			<TranslationProvider initial={translation.snapshot}>
 				<CommunityScoreOverview
-					contextUnitId="019b76da-a800-7300-8000-000000000002"
+					realmId="019b76da-a800-7300-8000-000000000002"
 					onScoreFilterToggle={onScoreFilterToggle}
 					reviewCount={2}
 					selectedScores={[8]}

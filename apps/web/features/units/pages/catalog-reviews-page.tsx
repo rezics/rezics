@@ -16,7 +16,7 @@ import { useState } from "react";
 
 import { ScoreOverview } from "@/features/reviews/components/score-overview";
 import { UnitReviewList } from "@/features/reviews/components/unit-review-list";
-import { useDefaultScoreContext } from "@/features/reviews/data/default-score-context";
+import { useDefaultScoreRealm } from "@/features/reviews/data/default-score-realm";
 import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -43,8 +43,8 @@ export function CatalogReviewsPage({
 		path: { type, unitId },
 		query: { localizationLanguages },
 	});
-	const defaultScoreContext = useDefaultScoreContext();
-	const scoreContext = realm ?? defaultScoreContext.context;
+	const defaultScoreRealm = useDefaultScoreRealm();
+	const scoreRealm = realm ?? defaultScoreRealm.realm;
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -99,9 +99,7 @@ export function CatalogReviewsPage({
 				<FieldLabel>{t.engagement.filterReviewRealm}</FieldLabel>
 				<EntityPicker index="realms" onChange={setRealm} value={realm} />
 			</Field>
-			{scoreContext ? (
-				<ScoreOverview contextUnitId={scoreContext.id} targetId={unitId} />
-			) : null}
+			{scoreRealm ? <ScoreOverview realmId={scoreRealm.id} targetId={unitId} /> : null}
 			<UnitReviewList realmIds={realm ? [realm.id] : undefined} targetId={unitId} />
 		</main>
 	);

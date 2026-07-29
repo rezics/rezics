@@ -3,6 +3,7 @@ import { insert } from "native-i18n";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: postTerms } = jaTerminology.post;
+const { forms: realmTerms } = jaTerminology.realm;
 
 export default {
 	memberSince: insert("{{date}} に参加しました", { date: String }),
@@ -21,7 +22,7 @@ export default {
 	activityEmpty: "表示できる評価や進捗はまだありません。",
 	activityScores: "評価",
 	activityProgress: "進捗",
-	activityScoreContext: insert("コンテキスト：{{context}}", { context: String }),
+	activityScoreRealm: insert(`${realmTerms.label}：{{realm}}`, { realm: String }),
 	activityScoreValue: insert("{{value}} / 10", { value: Number }),
 	activityProgressValue: insert("{{percentage}}%", { percentage: Number }),
 	progressStatuses: {

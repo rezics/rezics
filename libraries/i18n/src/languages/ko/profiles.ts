@@ -3,6 +3,7 @@ import { insert } from "native-i18n";
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: postTerms } = koTerminology.post;
+const { forms: realmTerms } = koTerminology.realm;
 
 export default {
 	memberSince: insert("{{date}} 가입", { date: String }),
@@ -21,7 +22,7 @@ export default {
 	activityEmpty: "표시할 수 있는 평점이나 진행 상황이 아직 없습니다.",
 	activityScores: "평점",
 	activityProgress: "진행 상황",
-	activityScoreContext: insert("맥락: {{context}}", { context: String }),
+	activityScoreRealm: insert(`${realmTerms.label}: {{realm}}`, { realm: String }),
 	activityScoreValue: insert("{{value}} / 10", { value: Number }),
 	activityProgressValue: insert("{{percentage}}%", { percentage: Number }),
 	progressStatuses: {

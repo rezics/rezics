@@ -97,7 +97,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			});
 			await tx.insert(profilePreference).values({
 				profileId: profileUnit.id,
-				defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+				defaultScoreRealmId: OfficialRealmUnitIds.score,
 				contentRatings: [...DefaultContentRatingValues],
 				preferredLanguages: [preferredLanguage],
 			});

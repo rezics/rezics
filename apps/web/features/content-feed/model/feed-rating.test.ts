@@ -3,14 +3,14 @@ import { describe, expect, it } from "vitest";
 import { selectFeedRating } from "./feed-rating";
 
 const preferred = {
-	contextUnitId: "00000000-0000-4000-8000-000000000001",
-	contextTitle: "Preferred",
+	realmId: "00000000-0000-4000-8000-000000000001",
+	realmTitle: "Preferred",
 	totalScore: 18,
 	totalCount: 2,
 } as const;
 const global = {
-	contextUnitId: "00000000-0000-4000-8000-000000000002",
-	contextTitle: "Global",
+	realmId: "00000000-0000-4000-8000-000000000002",
+	realmTitle: "Global",
 	totalScore: 80,
 	totalCount: 10,
 } as const;

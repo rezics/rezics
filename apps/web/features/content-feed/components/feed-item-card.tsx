@@ -442,12 +442,12 @@ function isRatedWorkKind(kind: string): kind is "book" | "media" | "software" {
 
 function toFeedTargetScore(
 	score: FeedRatingAggregate | null,
-	unnamedContext: string,
+	unnamedRealm: string,
 ): FeedTargetScore | null {
 	return score
 		? {
-				contextLabel: score.contextTitle ?? unnamedContext,
-				contextUnitId: score.contextUnitId,
+				realmLabel: score.realmTitle ?? unnamedRealm,
+				realmId: score.realmId,
 				totalCount: Number(score.totalCount),
 				totalScore: Number(score.totalScore),
 			}

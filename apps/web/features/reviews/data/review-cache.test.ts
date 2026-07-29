@@ -10,16 +10,16 @@ import { FeedQueryKey } from "@/features/content-feed/query";
 import { invalidateReviews } from "./review-cache";
 
 describe("invalidateReviews", () => {
-	it("invalidates feed, review, and contextual score projections", async () => {
+	it("invalidates feed, review, and Realm-scoped score projections", async () => {
 		const queryClient = new QueryClient();
 		const invalidateQueries = vi
 			.spyOn(queryClient, "invalidateQueries")
 			.mockResolvedValue(undefined);
 		const reviewId = "019f995d-8738-7fdf-b308-21b90be88539";
 		const targetId = "019f995d-73ad-7692-88d4-39741cbe6c34";
-		const scoreContextUnitId = "019f995d-75ab-7510-af4f-435b1a1b053c";
+		const scoreRealmId = "019f995d-75ab-7510-af4f-435b1a1b053c";
 
-		await invalidateReviews(queryClient, reviewId, targetId, scoreContextUnitId);
+		await invalidateReviews(queryClient, reviewId, targetId, scoreRealmId);
 
 		expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: FeedQueryKey });
 		expect(invalidateQueries).toHaveBeenCalledWith({
@@ -34,7 +34,7 @@ describe("invalidateReviews", () => {
 		expect(invalidateQueries).toHaveBeenCalledWith({
 			queryKey: getApiScoresByTargetIdQueryKey({
 				path: { targetId },
-				query: { contextUnitId: scoreContextUnitId },
+				query: { realmId: scoreRealmId },
 			}),
 		});
 	});

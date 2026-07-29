@@ -64,14 +64,14 @@ const common = {
 } satisfies FeedUnitCommon;
 
 const preferredAggregate = {
-	contextUnitId: realmContext.id,
-	contextTitle: realmContext.title,
+	realmId: realmContext.id,
+	realmTitle: realmContext.title,
 	totalScore: 184,
 	totalCount: 20,
 } as const;
 const globalAggregate = {
-	contextUnitId: "019b76da-a800-7300-8000-000000000002",
-	contextTitle: "REZICS 評分",
+	realmId: "019b76da-a800-7300-8000-000000000002",
+	realmTitle: "REZICS 評分",
 	totalScore: 846,
 	totalCount: 100,
 } as const;
@@ -184,7 +184,7 @@ const contextualReview = {
 	scores: [
 		{
 			scoreId: "019f9d16-1000-7000-8000-000000000061",
-			contextUnitId: realmContext.id,
+			realmId: realmContext.id,
 			value: 9,
 		},
 	],

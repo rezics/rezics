@@ -52,7 +52,6 @@ export default {
 	SearchUnavailable:
 		"La búsqueda no está disponible temporalmente. Inténtalo de nuevo más tarde.",
 	RealmCapabilityRequired: `No tienes el permiso necesario para el ${realmTerms.inline}.`,
-	ScoreContextUnitUnsupported: `Esta Unit no se puede usar actualmente como contexto de puntuación. Elige un ${realmTerms.inline}.`,
 	RealmRulesAcceptanceRequired: `Acepta las reglas actuales del ${realmTerms.inline} para continuar.`,
 	RealmRuleRevisionChanged:
 		"Las reglas han cambiado. Revisa la última versión antes de aceptarlas.",

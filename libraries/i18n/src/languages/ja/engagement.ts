@@ -36,20 +36,20 @@ export default {
 	reviewScore: "スコア",
 	reviewScoreOptional: "スコア（任意）",
 	reviewWithoutScore: "スコアなし",
-	reviewScoreContextHint: `レビューに${realmTerms.label}がない場合、スコアはあなたのデフォルトのスコア設定を使用します。`,
-	scoreContextHint: insert(
-		"このスコアは「{{context}}」をスコア設定として使用します。デフォルトのスコア設定は設定で変更できます。",
-		{ context: String },
+	reviewScoreRealmHint: `レビューに${realmTerms.label}がない場合、スコアはデフォルトのスコア${realmTerms.label}に保存されます。`,
+	scoreRealmHint: insert(
+		`このスコアは「{{realm}}」に保存されます。デフォルトのスコア${realmTerms.label}は設定で変更できます。`,
+		{ realm: String },
 	),
-	scoreContext: "スコア設定",
+	scoreRealm: `スコア${realmTerms.label}`,
 	scoreEditorHint: `${realmTerms.label}を選択して既存のスコアを更新するか、別の${realmTerms.label}でスコアを追加します。`,
 	editScores: "スコア管理",
-	noScoredContexts: "現在、どのスコア設定にもスコアはありません。",
+	noScoredRealms: `現在、どの${realmTerms.label}にもスコアはありません。`,
 	scoreAssociation: "スコアの関連付け",
 	scoreAssociationDescription:
 		"このレビューで参照されているスコアを選択するか、現在のスコアの関連付けを削除してください。",
-	scoreAssociationOption: insert("{{context}} · {{score}}/10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "スコアの関連付けを保存",

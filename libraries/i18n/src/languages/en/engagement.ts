@@ -36,20 +36,20 @@ export default {
 	reviewScore: "Score",
 	reviewScoreOptional: "Score (optional)",
 	reviewWithoutScore: "No score",
-	reviewScoreContextHint: `When a review has no ${realmTerms.label}, its Score uses your default scoring context.`,
-	scoreContextHint: insert(
-		`This Score uses “{{context}}” as its context. Change the default scoring context in Preferences.`,
-		{ context: String },
+	reviewScoreRealmHint: `When a review has no ${realmTerms.label}, its Score uses your default scoring ${realmTerms.label}.`,
+	scoreRealmHint: insert(
+		`This Score will be saved in “{{realm}}”. Change the default scoring ${realmTerms.label} in Preferences.`,
+		{ realm: String },
 	),
-	scoreContext: "Scoring context",
+	scoreRealm: `Scoring ${realmTerms.label}`,
 	scoreEditorHint: `Choose a ${realmTerms.label} to update an existing Score or add a Score in another ${realmTerms.label}.`,
 	editScores: "Manage Scores",
-	noScoredContexts: "No Scores in any context yet.",
+	noScoredRealms: `No Scores in any ${realmTerms.label} yet.`,
 	scoreAssociation: "Score association",
 	scoreAssociationDescription:
 		"Choose the Score referenced by this review, or remove its current Score association.",
-	scoreAssociationOption: insert("{{context}} · {{score}}/10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "Save Score association",

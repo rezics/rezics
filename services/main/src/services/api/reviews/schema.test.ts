@@ -37,12 +37,12 @@ describe("review creation schema", () => {
 		expect(Check(CreateReviewBody, { ...review, summary: "" })).toBe(false);
 	});
 
-	it("accepts a context-addressed Score", () => {
+	it("accepts a Realm-addressed Score", () => {
 		expect(
 			Check(CreateReviewBody, {
 				...review,
 				realmId,
-				score: { contextUnitId: realmId, value: 8 },
+				score: { realmId: realmId, value: 8 },
 			}),
 		).toBe(true);
 	});
@@ -51,13 +51,13 @@ describe("review creation schema", () => {
 		expect(
 			Check(CreateReviewBody, {
 				...review,
-				score: { contextUnitId: realmId, value: 11 },
+				score: { realmId: realmId, value: 11 },
 			}),
 		).toBe(false);
 		expect(
 			Check(CreateReviewBody, {
 				...review,
-				score: { contextUnitId: realmId, value: 8, copied: true },
+				score: { realmId: realmId, value: 8, copied: true },
 			}),
 		).toBe(false);
 	});
@@ -88,14 +88,14 @@ describe("viewer Score list schema", () => {
 	it("accepts an optional per-Score visibility control", () => {
 		expect(
 			Check(SetScoreBody, {
-				contextUnitId: realmId,
+				realmId: realmId,
 				score: 8,
 				visibility: "unlisted",
 			}),
 		).toBe(true);
 		expect(
 			Check(SetScoreBody, {
-				contextUnitId: realmId,
+				realmId: realmId,
 				score: 8,
 				visibility: "followers",
 			}),
@@ -111,7 +111,7 @@ describe("review list schema", () => {
 				realmIds: [realmId],
 				languages: ["zh", "en"],
 				localizationLanguages: ["en", "zh"],
-				scoreContextUnitId: realmId,
+				scoreRealmId: realmId,
 				scores: [8, 9, 10],
 				sort: "best",
 				cursor: "opaque",
@@ -120,14 +120,14 @@ describe("review list schema", () => {
 		).toBe(true);
 	});
 
-	it("requires Score values and their context together", () => {
-		expect(resolveReviewScoreFilter({ scoreContextUnitId: realmId, scores: [8] })).toEqual({
+	it("requires Score values and their Realm together", () => {
+		expect(resolveReviewScoreFilter({ scoreRealmId: realmId, scores: [8] })).toEqual({
 			status: "present",
-			contextUnitId: realmId,
+			realmId: realmId,
 			values: [8],
 		});
 		expect(resolveReviewScoreFilter({ scores: [8] })).toEqual({ status: "invalid" });
-		expect(resolveReviewScoreFilter({ scoreContextUnitId: realmId })).toEqual({
+		expect(resolveReviewScoreFilter({ scoreRealmId: realmId })).toEqual({
 			status: "invalid",
 		});
 		expect(resolveReviewScoreFilter({})).toEqual({ status: "absent" });
@@ -135,14 +135,12 @@ describe("review list schema", () => {
 
 	it("rejects unsupported filters, sorting, and out-of-range Scores", () => {
 		expect(Check(ListReviewsQuery, { languages: ["zh-Hant"] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [0] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [11] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scoreRealmId: realmId, scores: [0] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scoreRealmId: realmId, scores: [11] })).toBe(false);
 		expect(Check(ListReviewsQuery, { languages: [] })).toBe(false);
 		expect(Check(ListReviewsQuery, { realmIds: [] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [] })).toBe(false);
-		expect(Check(ListReviewsQuery, { scoreContextUnitId: realmId, scores: [10, 10] })).toBe(
-			false,
-		);
+		expect(Check(ListReviewsQuery, { scoreRealmId: realmId, scores: [] })).toBe(false);
+		expect(Check(ListReviewsQuery, { scoreRealmId: realmId, scores: [10, 10] })).toBe(false);
 		expect(Check(ListReviewsQuery, { realmId })).toBe(false);
 		expect(Check(ListReviewsQuery, { sort: "relevance" })).toBe(false);
 		expect(Check(ListReviewsQuery, { search: "review text" })).toBe(false);

@@ -6,7 +6,7 @@ export async function upsertScore(
 	tx: DatabaseTransaction,
 	userId: string,
 	targetId: string,
-	contextUnitId: string,
+	realmId: string,
 	value: number,
 	visibility?: ResourceVisibility,
 ) {
@@ -16,12 +16,12 @@ export async function upsertScore(
 		.values({
 			profileId: userId,
 			unitId: targetId,
-			contextUnitId,
+			realmId,
 			value,
 			visibility: resolvedVisibility,
 		})
 		.onConflictDoUpdate({
-			target: [score.profileId, score.unitId, score.contextUnitId],
+			target: [score.profileId, score.unitId, score.realmId],
 			set: {
 				value,
 				...(visibility === undefined ? {} : { visibility }),

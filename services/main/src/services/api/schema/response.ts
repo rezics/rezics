@@ -551,8 +551,8 @@ const FeedUnitItemFields = {
 } as const;
 
 const FeedRatingAggregateResponse = t.Object({
-	contextUnitId: Uuid,
-	contextTitle: NullableText,
+	realmId: Uuid,
+	realmTitle: NullableText,
 	totalScore: t.Integer({ minimum: 1 }),
 	totalCount: t.Integer({ minimum: 1 }),
 });
@@ -573,7 +573,7 @@ const PostSubjectPresentationFields = {
 
 const PostAttachedScoreResponse = t.Object({
 	scoreId: Uuid,
-	contextUnitId: Uuid,
+	realmId: Uuid,
 	value: t.Integer({ minimum: 1, maximum: 10 }),
 });
 
@@ -732,7 +732,7 @@ export const PreferencesResponse = t.Object({
 	chineseContentDisplay: ChineseContentDisplay,
 	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean(),
-	defaultScoreContextUnitId: Uuid,
+	defaultScoreRealmId: Uuid,
 	scoreVisibility: ResourceVisibility,
 	progressVisibility: ResourceVisibility,
 	collectionConfig: t.Nullable(CollectionConfigV1),
@@ -756,8 +756,8 @@ export const ProfileActivityResponse = t.Object({
 			unitKind: t.UnionEnum(UnitKindValues),
 			unitLanguage: t.Nullable(ContentLanguage),
 			unitTitle: NullableText,
-			contextUnitId: Uuid,
-			contextTitle: NullableText,
+			realmId: Uuid,
+			realmTitle: NullableText,
 			value: t.Integer({ minimum: 1, maximum: 10 }),
 			visibility: ResourceVisibility,
 			updatedAt: DateTime,

@@ -223,8 +223,8 @@ function scoreCondition(
 	filter: ScoreFilter,
 	columns: {
 		value: SqlName;
-		contextId: SqlName;
-		contextKind?: SqlName;
+		realmId: SqlName;
+		realmKind?: SqlName;
 		targetId: SqlName;
 		targetKind?: SqlName;
 		authorId: SqlName;
@@ -235,10 +235,8 @@ function scoreCondition(
 		scoreCondition(child, columns, viewerProfileId),
 	);
 	if (filter.value) conditions.push(integerCondition(columns.value, filter.value));
-	if (filter.context)
-		conditions.push(
-			unitReferenceCondition(filter.context, columns.contextId, columns.contextKind),
-		);
+	if (filter.realm)
+		conditions.push(unitReferenceCondition(filter.realm, columns.realmId, columns.realmKind));
 	if (filter.target)
 		conditions.push(
 			unitReferenceCondition(filter.target, columns.targetId, columns.targetKind),
@@ -298,7 +296,7 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 			join score filter_score on filter_score.id = filter_post_score.score_id
 			join profile_preference filter_score_preference
 				on filter_score_preference.profile_id = filter_score.profile_id
-			join unit filter_score_context on filter_score_context.id = filter_score.context_unit_id
+			join unit filter_score_realm on filter_score_realm.id = filter_score.realm_id
 			join unit filter_score_target on filter_score_target.id = filter_score.unit_id
 			where filter_post_score.post_id = filter_post.id
 				and (
@@ -306,10 +304,10 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 					or (
 						filter_score_preference.score_visibility <> 'private'
 						and filter_score.visibility <> 'private'
-						and filter_score_context.status = 'published'
-						and filter_score_context.visibility in ('public', 'unlisted')
-						and filter_score_context.moderation_status = 'approved'
-						and filter_score_context.deleted_at is null
+						and filter_score_realm.status = 'published'
+						and filter_score_realm.visibility in ('public', 'unlisted')
+						and filter_score_realm.moderation_status = 'approved'
+						and filter_score_realm.deleted_at is null
 						and filter_score_target.status = 'published'
 						and filter_score_target.visibility in ('public', 'unlisted')
 						and filter_score_target.moderation_status = 'approved'
@@ -334,8 +332,8 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 					displayedFilter,
 					{
 						value: sql`filter_score.value`,
-						contextId: sql`filter_score.context_unit_id`,
-						contextKind: sql`filter_score_context.kind`,
+						realmId: sql`filter_score.realm_id`,
+						realmKind: sql`filter_score_realm.kind`,
 						targetId: sql`filter_score.unit_id`,
 						targetKind: sql`filter_score_target.kind`,
 						authorId: sql`filter_score.profile_id`,
@@ -436,8 +434,8 @@ export function compileUnitPredicateSql(
 			from score filter_received_score
 			join profile_preference filter_received_score_preference
 				on filter_received_score_preference.profile_id = filter_received_score.profile_id
-			join unit filter_received_context
-				on filter_received_context.id = filter_received_score.context_unit_id
+			join unit filter_received_realm
+				on filter_received_realm.id = filter_received_score.realm_id
 			join unit filter_received_target
 				on filter_received_target.id = filter_received_score.unit_id
 			where filter_received_score.unit_id = ${input.unitId}
@@ -450,10 +448,10 @@ export function compileUnitPredicateSql(
 					or (
 						filter_received_score_preference.score_visibility = 'public'
 						and filter_received_score.visibility = 'public'
-						and filter_received_context.status = 'published'
-						and filter_received_context.visibility = 'public'
-						and filter_received_context.moderation_status = 'approved'
-						and filter_received_context.deleted_at is null
+						and filter_received_realm.status = 'published'
+						and filter_received_realm.visibility = 'public'
+						and filter_received_realm.moderation_status = 'approved'
+						and filter_received_realm.deleted_at is null
 						and filter_received_target.status = 'published'
 						and filter_received_target.visibility = 'public'
 						and filter_received_target.moderation_status = 'approved'
@@ -478,8 +476,8 @@ export function compileUnitPredicateSql(
 					"some" in relation ? relation.some : relation.none,
 					{
 						value: sql`filter_received_score.value`,
-						contextId: sql`filter_received_score.context_unit_id`,
-						contextKind: sql`filter_received_context.kind`,
+						realmId: sql`filter_received_score.realm_id`,
+						realmKind: sql`filter_received_realm.kind`,
 						targetId: sql`filter_received_score.unit_id`,
 						targetKind: sql`filter_received_target.kind`,
 						authorId: sql`filter_received_score.profile_id`,

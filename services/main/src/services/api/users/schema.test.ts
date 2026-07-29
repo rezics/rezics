@@ -227,7 +227,7 @@ describe("user preference inputs", () => {
 			chineseContentDisplay: "original",
 			defaultLicense: "cc-by-nc-sa-4.0",
 			defaultRealmManageMode: false,
-			defaultScoreContextUnitId: "019b76da-a800-7300-8000-000000000002",
+			defaultScoreRealmId: "019b76da-a800-7300-8000-000000000002",
 			collectionConfig: null,
 			personalizedFeed: true,
 			filterFeedByPreferredLanguages: false,

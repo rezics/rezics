@@ -54,8 +54,8 @@ export type FeedAttributionContext = FeedContextItem & {
 export type FeedRealmContext = FeedContextItem & RealmInfoCardData;
 
 export interface FeedTargetScore {
-	readonly contextLabel: string;
-	readonly contextUnitId: string;
+	readonly realmLabel: string;
+	readonly realmId: string;
 	readonly totalScore: number;
 	readonly totalCount: number;
 }
@@ -317,7 +317,7 @@ export function FeedCardRating({
 			)}
 			data-slot="feed-card-rating"
 		>
-			<span className="truncate text-muted-foreground">{score.contextLabel}</span>
+			<span className="truncate text-muted-foreground">{score.realmLabel}</span>
 			<StarIcon aria-hidden className="size-3.5 fill-warning text-warning" />
 			<span className="font-semibold tabular-nums text-foreground">
 				{t.feed.targetScore({

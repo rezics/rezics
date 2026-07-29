@@ -45,7 +45,6 @@ export default {
 	InvalidSearch: "搜索条件不符合要求。",
 	SearchUnavailable: "搜索服务暂时无法使用，请稍后再试。",
 	RealmCapabilityRequired: `你没有所需的${realmTerms.inline}权限。`,
-	ScoreContextUnitUnsupported: `当前无法使用这个条目作为评分上下文；请选择${realmTerms.inline}。`,
 	RealmRulesAcceptanceRequired: `请先同意当前的${realmTerms.inline}规则。`,
 	RealmRuleRevisionChanged: "规则已更新，请重新阅读最新版本后再同意。",
 	PlatformCapabilityRequired: "此操作需要平台权限。",

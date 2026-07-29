@@ -50,7 +50,6 @@ export default {
 	InvalidSearch: "La requête de recherche n’est pas valide.",
 	SearchUnavailable: "La recherche est temporairement indisponible. Réessayez plus tard.",
 	RealmCapabilityRequired: `Vous ne disposez pas de l’autorisation requise pour le ${realmTerms.inline}.`,
-	ScoreContextUnitUnsupported: `Cette Unit ne peut pas servir de contexte de notation pour le moment. Choisissez un ${realmTerms.inline}.`,
 	RealmRulesAcceptanceRequired: `Acceptez les règles actuelles du ${realmTerms.inline} pour continuer.`,
 	RealmRuleRevisionChanged:
 		"Les règles ont changé. Consultez la dernière version avant de les accepter.",

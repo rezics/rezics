@@ -36,20 +36,20 @@ export default {
 	reviewScore: "점수",
 	reviewScoreOptional: "점수 (선택 사항)",
 	reviewWithoutScore: "점수 없음",
-	reviewScoreContextHint: `리뷰에 ${realmTerms.label}이 없으면, 점수는 기본 점수 맥락을 사용합니다.`,
-	scoreContextHint: insert(
-		"이 점수는 “{{context}}”를 맥락으로 사용합니다. 기본 점수 맥락은 환경 설정에서 변경하세요.",
-		{ context: String },
+	reviewScoreRealmHint: `리뷰에 ${realmTerms.label}이 없으면 점수는 기본 점수 ${realmTerms.label}에 저장됩니다.`,
+	scoreRealmHint: insert(
+		`이 점수는 “{{realm}}”에 저장됩니다. 기본 점수 ${realmTerms.label}은 환경 설정에서 변경하세요.`,
+		{ realm: String },
 	),
-	scoreContext: "점수 맥락",
+	scoreRealm: `점수 ${realmTerms.label}`,
 	scoreEditorHint: `기존 점수를 업데이트하거나 다른 ${realmTerms.label}에서 점수를 추가하려면 ${realmTerms.label}을 선택하세요.`,
 	editScores: "점수 관리",
-	noScoredContexts: "아직 어떤 맥락에서도 점수가 없습니다.",
+	noScoredRealms: `아직 어떤 ${realmTerms.label}에도 점수가 없습니다.`,
 	scoreAssociation: "점수 연결",
 	scoreAssociationDescription:
 		"이 리뷰에서 참조된 점수를 선택하거나 현재 점수 연결을 제거하세요.",
-	scoreAssociationOption: insert("{{context}} · {{score}}/10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "점수 연결 저장",

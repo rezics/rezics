@@ -3,6 +3,7 @@ import { insert } from "native-i18n";
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 
 const { forms: postTerms } = frTerminology.post;
+const { forms: realmTerms } = frTerminology.realm;
 
 export default {
 	memberSince: insert("Membre depuis le {{date}}", { date: String }),
@@ -21,7 +22,7 @@ export default {
 	activityEmpty: "Aucune note ni progression visible pour le moment.",
 	activityScores: "Notes",
 	activityProgress: "Progression",
-	activityScoreContext: insert("Contexte : {{context}}", { context: String }),
+	activityScoreRealm: insert(`${realmTerms.label} : {{realm}}`, { realm: String }),
 	activityScoreValue: insert("{{value}} / 10", { value: Number }),
 	activityProgressValue: insert("{{percentage}} %", { percentage: Number }),
 	progressStatuses: {

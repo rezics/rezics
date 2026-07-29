@@ -771,7 +771,7 @@
 							}
 						]
 					},
-					"context": {
+					"realm": {
 						"minProperties": 1,
 						"additionalProperties": false,
 						"type": "object",
@@ -1212,7 +1212,7 @@
 															}
 														]
 													},
-													"context": {
+													"realm": {
 														"minProperties": 1,
 														"additionalProperties": false,
 														"type": "object",
@@ -1586,7 +1586,7 @@
 															}
 														]
 													},
-													"context": {
+													"realm": {
 														"minProperties": 1,
 														"additionalProperties": false,
 														"type": "object",
@@ -4419,7 +4419,7 @@
 															}
 														]
 													},
-													"context": {
+													"realm": {
 														"minProperties": 1,
 														"additionalProperties": false,
 														"type": "object",
@@ -4793,7 +4793,7 @@
 															}
 														]
 													},
-													"context": {
+													"realm": {
 														"minProperties": 1,
 														"additionalProperties": false,
 														"type": "object",
@@ -5400,7 +5400,7 @@
 																					}
 																				]
 																			},
-																			"context": {
+																			"realm": {
 																				"minProperties": 1,
 																				"additionalProperties": false,
 																				"type": "object",
@@ -5793,7 +5793,7 @@
 																					}
 																				]
 																			},
-																			"context": {
+																			"realm": {
 																				"minProperties": 1,
 																				"additionalProperties": false,
 																				"type": "object",
@@ -9840,7 +9840,6 @@
 					"SearchDocumentRevisionConflict",
 					"ZoneSearchFeatureNotFound",
 					"SharedSearchQueryNotFound",
-					"ScoreContextUnitUnsupported",
 					"InvalidPaginationCursor",
 					"ProfileNotFound",
 					"ProfileChanged",
@@ -15359,17 +15358,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -15421,17 +15420,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -16907,17 +16906,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -16969,17 +16968,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -17042,7 +17041,7 @@
 																	"type": "object",
 																	"required": [
 																		"scoreId",
-																		"contextUnitId",
+																		"realmId",
 																		"value"
 																	],
 																	"properties": {
@@ -17050,7 +17049,7 @@
 																			"format": "uuid",
 																			"type": "string"
 																		},
-																		"contextUnitId": {
+																		"realmId": {
 																			"format": "uuid",
 																			"type": "string"
 																		},
@@ -18485,17 +18484,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -18547,17 +18546,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -25039,17 +25038,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -25101,17 +25100,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -26825,17 +26824,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -26887,17 +26886,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -28391,17 +28390,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -28453,17 +28452,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -28526,7 +28525,7 @@
 																			"type": "object",
 																			"required": [
 																				"scoreId",
-																				"contextUnitId",
+																				"realmId",
 																				"value"
 																			],
 																			"properties": {
@@ -28534,7 +28533,7 @@
 																					"format": "uuid",
 																					"type": "string"
 																				},
-																				"contextUnitId": {
+																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
 																				},
@@ -29987,17 +29986,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -30049,17 +30048,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -52050,7 +52049,7 @@
 										"chineseContentDisplay",
 										"defaultLicense",
 										"defaultRealmManageMode",
-										"defaultScoreContextUnitId",
+										"defaultScoreRealmId",
 										"scoreVisibility",
 										"progressVisibility",
 										"collectionConfig",
@@ -52096,7 +52095,7 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
-										"defaultScoreContextUnitId": {
+										"defaultScoreRealmId": {
 											"format": "uuid",
 											"type": "string"
 										},
@@ -52275,7 +52274,7 @@
 										"chineseContentDisplay",
 										"defaultLicense",
 										"defaultRealmManageMode",
-										"defaultScoreContextUnitId",
+										"defaultScoreRealmId",
 										"scoreVisibility",
 										"progressVisibility",
 										"collectionConfig",
@@ -52321,7 +52320,7 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
-										"defaultScoreContextUnitId": {
+										"defaultScoreRealmId": {
 											"format": "uuid",
 											"type": "string"
 										},
@@ -52483,7 +52482,7 @@
 									"chineseContentDisplay",
 									"defaultLicense",
 									"defaultRealmManageMode",
-									"defaultScoreContextUnitId",
+									"defaultScoreRealmId",
 									"collectionConfig",
 									"personalizedFeed",
 									"filterFeedByPreferredLanguages",
@@ -52529,10 +52528,7 @@
 										"default": false,
 										"type": "boolean"
 									},
-									"defaultScoreContextUnitId": {
-										"format": "uuid",
-										"type": "string"
-									},
+									"defaultScoreRealmId": { "format": "uuid", "type": "string" },
 									"collectionConfig": {
 										"nullable": true,
 										"anyOf": [
@@ -52599,7 +52595,7 @@
 										"chineseContentDisplay",
 										"defaultLicense",
 										"defaultRealmManageMode",
-										"defaultScoreContextUnitId",
+										"defaultScoreRealmId",
 										"scoreVisibility",
 										"progressVisibility",
 										"collectionConfig",
@@ -52645,7 +52641,7 @@
 											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
-										"defaultScoreContextUnitId": {
+										"defaultScoreRealmId": {
 											"format": "uuid",
 											"type": "string"
 										},
@@ -52769,34 +52765,10 @@
 						}
 					},
 					"422": {
-						"description": "Response for status 422",
+						"description": "Request validation failed",
 						"content": {
 							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "ScoreContextUnitUnsupported",
-															"type": "string",
-															"enum": ["ScoreContextUnitUnsupported"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/ValidationError" }
-									]
-								}
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
 							}
 						}
 					},
@@ -54373,8 +54345,8 @@
 													"unitKind",
 													"unitLanguage",
 													"unitTitle",
-													"contextUnitId",
-													"contextTitle",
+													"realmId",
+													"realmTitle",
 													"value",
 													"visibility",
 													"updatedAt"
@@ -54437,11 +54409,11 @@
 															{ "type": "null" }
 														]
 													},
-													"contextUnitId": {
+													"realmId": {
 														"format": "uuid",
 														"type": "string"
 													},
-													"contextTitle": {
+													"realmTitle": {
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
@@ -99981,17 +99953,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -100043,17 +100015,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -101805,17 +101777,17 @@
 																											{
 																												"type": "object",
 																												"required": [
-																													"contextUnitId",
-																													"contextTitle",
+																													"realmId",
+																													"realmTitle",
 																													"totalScore",
 																													"totalCount"
 																												],
 																												"properties": {
-																													"contextUnitId": {
+																													"realmId": {
 																														"format": "uuid",
 																														"type": "string"
 																													},
-																													"contextTitle": {
+																													"realmTitle": {
 																														"nullable": true,
 																														"anyOf": [
 																															{
@@ -101867,17 +101839,17 @@
 																											{
 																												"type": "object",
 																												"required": [
-																													"contextUnitId",
-																													"contextTitle",
+																													"realmId",
+																													"realmTitle",
 																													"totalScore",
 																													"totalCount"
 																												],
 																												"properties": {
-																													"contextUnitId": {
+																													"realmId": {
 																														"format": "uuid",
 																														"type": "string"
 																													},
-																													"contextTitle": {
+																													"realmTitle": {
 																														"nullable": true,
 																														"anyOf": [
 																															{
@@ -103409,17 +103381,17 @@
 																											{
 																												"type": "object",
 																												"required": [
-																													"contextUnitId",
-																													"contextTitle",
+																													"realmId",
+																													"realmTitle",
 																													"totalScore",
 																													"totalCount"
 																												],
 																												"properties": {
-																													"contextUnitId": {
+																													"realmId": {
 																														"format": "uuid",
 																														"type": "string"
 																													},
-																													"contextTitle": {
+																													"realmTitle": {
 																														"nullable": true,
 																														"anyOf": [
 																															{
@@ -103471,17 +103443,17 @@
 																											{
 																												"type": "object",
 																												"required": [
-																													"contextUnitId",
-																													"contextTitle",
+																													"realmId",
+																													"realmTitle",
 																													"totalScore",
 																													"totalCount"
 																												],
 																												"properties": {
-																													"contextUnitId": {
+																													"realmId": {
 																														"format": "uuid",
 																														"type": "string"
 																													},
-																													"contextTitle": {
+																													"realmTitle": {
 																														"nullable": true,
 																														"anyOf": [
 																															{
@@ -103546,7 +103518,7 @@
 																					"type": "object",
 																					"required": [
 																						"scoreId",
-																						"contextUnitId",
+																						"realmId",
 																						"value"
 																					],
 																					"properties": {
@@ -103554,7 +103526,7 @@
 																							"format": "uuid",
 																							"type": "string"
 																						},
-																						"contextUnitId": {
+																						"realmId": {
 																							"format": "uuid",
 																							"type": "string"
 																						},
@@ -105043,17 +105015,17 @@
 																											{
 																												"type": "object",
 																												"required": [
-																													"contextUnitId",
-																													"contextTitle",
+																													"realmId",
+																													"realmTitle",
 																													"totalScore",
 																													"totalCount"
 																												],
 																												"properties": {
-																													"contextUnitId": {
+																													"realmId": {
 																														"format": "uuid",
 																														"type": "string"
 																													},
-																													"contextTitle": {
+																													"realmTitle": {
 																														"nullable": true,
 																														"anyOf": [
 																															{
@@ -105105,17 +105077,17 @@
 																											{
 																												"type": "object",
 																												"required": [
-																													"contextUnitId",
-																													"contextTitle",
+																													"realmId",
+																													"realmTitle",
 																													"totalScore",
 																													"totalCount"
 																												],
 																												"properties": {
-																													"contextUnitId": {
+																													"realmId": {
 																														"format": "uuid",
 																														"type": "string"
 																													},
-																													"contextTitle": {
+																													"realmTitle": {
 																														"nullable": true,
 																														"anyOf": [
 																															{
@@ -109145,7 +109117,7 @@
 						}
 					},
 					{
-						"name": "scoreContextUnitId",
+						"name": "scoreRealmId",
 						"in": "query",
 						"required": false,
 						"schema": { "format": "uuid", "type": "string" }
@@ -110557,17 +110529,17 @@
 																					{
 																						"type": "object",
 																						"required": [
-																							"contextUnitId",
-																							"contextTitle",
+																							"realmId",
+																							"realmTitle",
 																							"totalScore",
 																							"totalCount"
 																						],
 																						"properties": {
-																							"contextUnitId": {
+																							"realmId": {
 																								"format": "uuid",
 																								"type": "string"
 																							},
-																							"contextTitle": {
+																							"realmTitle": {
 																								"nullable": true,
 																								"anyOf": [
 																									{
@@ -110619,17 +110591,17 @@
 																					{
 																						"type": "object",
 																						"required": [
-																							"contextUnitId",
-																							"contextTitle",
+																							"realmId",
+																							"realmTitle",
 																							"totalScore",
 																							"totalCount"
 																						],
 																						"properties": {
-																							"contextUnitId": {
+																							"realmId": {
 																								"format": "uuid",
 																								"type": "string"
 																							},
-																							"contextTitle": {
+																							"realmTitle": {
 																								"nullable": true,
 																								"anyOf": [
 																									{
@@ -110692,7 +110664,7 @@
 															"type": "object",
 															"required": [
 																"scoreId",
-																"contextUnitId",
+																"realmId",
 																"value"
 															],
 															"properties": {
@@ -110700,7 +110672,7 @@
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"contextUnitId": {
+																"realmId": {
 																	"format": "uuid",
 																	"type": "string"
 																},
@@ -110823,9 +110795,9 @@
 									"score": {
 										"additionalProperties": false,
 										"type": "object",
-										"required": ["contextUnitId", "value"],
+										"required": ["realmId", "value"],
 										"properties": {
-											"contextUnitId": { "format": "uuid", "type": "string" },
+											"realmId": { "format": "uuid", "type": "string" },
 											"value": {
 												"minimum": 1,
 												"maximum": 10,
@@ -111215,12 +111187,9 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "ScoreContextUnitUnsupported",
+															"default": "ValidationError",
 															"type": "string",
-															"enum": [
-																"ScoreContextUnitUnsupported",
-																"ValidationError"
-															]
+															"enum": ["ValidationError"]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -111968,13 +111937,13 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["scoreId", "contextUnitId", "value"],
+												"required": ["scoreId", "realmId", "value"],
 												"properties": {
 													"scoreId": {
 														"format": "uuid",
 														"type": "string"
 													},
-													"contextUnitId": {
+													"realmId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -112723,9 +112692,9 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["contextUnitId", "score"],
+								"required": ["realmId", "score"],
 								"properties": {
-									"contextUnitId": { "format": "uuid", "type": "string" },
+									"realmId": { "format": "uuid", "type": "string" },
 									"score": {
 										"minimum": 1,
 										"maximum": 10,
@@ -112836,34 +112805,10 @@
 						}
 					},
 					"422": {
-						"description": "Response for status 422",
+						"description": "Request validation failed",
 						"content": {
 							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "ScoreContextUnitUnsupported",
-															"type": "string",
-															"enum": ["ScoreContextUnitUnsupported"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/ValidationError" }
-									]
-								}
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
 							}
 						}
 					},
@@ -112924,7 +112869,7 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
-						"name": "contextUnitId",
+						"name": "realmId",
 						"in": "query",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
@@ -113007,34 +112952,10 @@
 						}
 					},
 					"422": {
-						"description": "Response for status 422",
+						"description": "Request validation failed",
 						"content": {
 							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "ScoreContextUnitUnsupported",
-															"type": "string",
-															"enum": ["ScoreContextUnitUnsupported"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/ValidationError" }
-									]
-								}
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
 							}
 						}
 					},
@@ -113094,10 +113015,10 @@
 												"type": "object",
 												"required": [
 													"scoreId",
-													"contextUnitId",
+													"realmId",
 													"value",
 													"visibility",
-													"contextUnitTitle",
+													"realmTitle",
 													"updatedAt"
 												],
 												"properties": {
@@ -113105,7 +113026,7 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"contextUnitId": {
+													"realmId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -113129,7 +113050,7 @@
 														"type": "string",
 														"enum": ["public", "unlisted", "private"]
 													},
-													"contextUnitTitle": {
+													"realmTitle": {
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
@@ -114753,7 +114674,7 @@
 													"scoreId",
 													"profileId",
 													"unitId",
-													"contextUnitId",
+													"realmId",
 													"value",
 													"visibility",
 													"position",
@@ -114772,7 +114693,7 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"contextUnitId": {
+													"realmId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -114909,7 +114830,7 @@
 													"scoreId",
 													"profileId",
 													"unitId",
-													"contextUnitId",
+													"realmId",
 													"value",
 													"visibility",
 													"position",
@@ -114928,7 +114849,7 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"contextUnitId": {
+													"realmId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -117419,17 +117340,13 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": [
-															"scoreId",
-															"contextUnitId",
-															"value"
-														],
+														"required": ["scoreId", "realmId", "value"],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
 																"type": "string"
 															},
-															"contextUnitId": {
+															"realmId": {
 																"format": "uuid",
 																"type": "string"
 															},
@@ -118170,17 +118087,13 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": [
-															"scoreId",
-															"contextUnitId",
-															"value"
-														],
+														"required": ["scoreId", "realmId", "value"],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
 																"type": "string"
 															},
-															"contextUnitId": {
+															"realmId": {
 																"format": "uuid",
 																"type": "string"
 															},
@@ -118907,17 +118820,13 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": [
-															"scoreId",
-															"contextUnitId",
-															"value"
-														],
+														"required": ["scoreId", "realmId", "value"],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
 																"type": "string"
 															},
-															"contextUnitId": {
+															"realmId": {
 																"format": "uuid",
 																"type": "string"
 															},
@@ -119741,17 +119650,13 @@
 													"type": "array",
 													"items": {
 														"type": "object",
-														"required": [
-															"scoreId",
-															"contextUnitId",
-															"value"
-														],
+														"required": ["scoreId", "realmId", "value"],
 														"properties": {
 															"scoreId": {
 																"format": "uuid",
 																"type": "string"
 															},
-															"contextUnitId": {
+															"realmId": {
 																"format": "uuid",
 																"type": "string"
 															},
@@ -129303,17 +129208,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -129365,17 +129270,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -131089,17 +130994,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -131151,17 +131056,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -132655,17 +132560,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -132717,17 +132622,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -132790,7 +132695,7 @@
 																			"type": "object",
 																			"required": [
 																				"scoreId",
-																				"contextUnitId",
+																				"realmId",
 																				"value"
 																			],
 																			"properties": {
@@ -132798,7 +132703,7 @@
 																					"format": "uuid",
 																					"type": "string"
 																				},
-																				"contextUnitId": {
+																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
 																				},
@@ -134251,17 +134156,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -134313,17 +134218,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -146263,17 +146168,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -146325,17 +146230,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -148049,17 +147954,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -148111,17 +148016,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -149615,17 +149520,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -149677,17 +149582,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -149750,7 +149655,7 @@
 																			"type": "object",
 																			"required": [
 																				"scoreId",
-																				"contextUnitId",
+																				"realmId",
 																				"value"
 																			],
 																			"properties": {
@@ -149758,7 +149663,7 @@
 																					"format": "uuid",
 																					"type": "string"
 																				},
-																				"contextUnitId": {
+																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
 																				},
@@ -151211,17 +151116,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -151273,17 +151178,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -158789,17 +158694,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -158851,17 +158756,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -160575,17 +160480,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -160637,17 +160542,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -162141,17 +162046,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -162203,17 +162108,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -162276,7 +162181,7 @@
 																			"type": "object",
 																			"required": [
 																				"scoreId",
-																				"contextUnitId",
+																				"realmId",
 																				"value"
 																			],
 																			"properties": {
@@ -162284,7 +162189,7 @@
 																					"format": "uuid",
 																					"type": "string"
 																				},
-																				"contextUnitId": {
+																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
 																				},
@@ -163737,17 +163642,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -163799,17 +163704,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -174738,17 +174643,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -174800,17 +174705,17 @@
 																							{
 																								"type": "object",
 																								"required": [
-																									"contextUnitId",
-																									"contextTitle",
+																									"realmId",
+																									"realmTitle",
 																									"totalScore",
 																									"totalCount"
 																								],
 																								"properties": {
-																									"contextUnitId": {
+																									"realmId": {
 																										"format": "uuid",
 																										"type": "string"
 																									},
-																									"contextTitle": {
+																									"realmTitle": {
 																										"nullable": true,
 																										"anyOf": [
 																											{
@@ -176524,17 +176429,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -176586,17 +176491,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -178090,17 +177995,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -178152,17 +178057,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -178225,7 +178130,7 @@
 																			"type": "object",
 																			"required": [
 																				"scoreId",
-																				"contextUnitId",
+																				"realmId",
 																				"value"
 																			],
 																			"properties": {
@@ -178233,7 +178138,7 @@
 																					"format": "uuid",
 																					"type": "string"
 																				},
-																				"contextUnitId": {
+																				"realmId": {
 																					"format": "uuid",
 																					"type": "string"
 																				},
@@ -179686,17 +179591,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{
@@ -179748,17 +179653,17 @@
 																									{
 																										"type": "object",
 																										"required": [
-																											"contextUnitId",
-																											"contextTitle",
+																											"realmId",
+																											"realmTitle",
 																											"totalScore",
 																											"totalCount"
 																										],
 																										"properties": {
-																											"contextUnitId": {
+																											"realmId": {
 																												"format": "uuid",
 																												"type": "string"
 																											},
-																											"contextTitle": {
+																											"realmTitle": {
 																												"nullable": true,
 																												"anyOf": [
 																													{

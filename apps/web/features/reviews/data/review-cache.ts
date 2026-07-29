@@ -12,7 +12,7 @@ export async function invalidateReviews(
 	queryClient: QueryClient,
 	reviewId?: string,
 	targetId?: string,
-	scoreContextUnitId?: string,
+	scoreRealmId?: string,
 ): Promise<void> {
 	const invalidations: Promise<unknown>[] = [
 		queryClient.invalidateQueries({ queryKey: FeedQueryKey }),
@@ -33,12 +33,12 @@ export async function invalidateReviews(
 				queryKey: getApiReviewsByReviewIdQueryKey({ path: { reviewId } }),
 			}),
 		);
-	if (targetId && scoreContextUnitId)
+	if (targetId && scoreRealmId)
 		invalidations.push(
 			queryClient.invalidateQueries({
 				queryKey: getApiScoresByTargetIdQueryKey({
 					path: { targetId },
-					query: { contextUnitId: scoreContextUnitId },
+					query: { realmId: scoreRealmId },
 				}),
 			}),
 		);

@@ -7,7 +7,7 @@ import { database } from "../database";
 import { postScore, profilePreference, score, unit } from "../database/schema";
 
 const scoreTargetUnit = alias(unit, "post_score_target_unit");
-const scoreContextUnit = alias(unit, "post_score_context_unit");
+const scoreRealm = alias(unit, "post_score_realm");
 
 export function selectPostScores(postId: string, viewerProfileId?: string) {
 	return database
@@ -15,7 +15,7 @@ export function selectPostScores(postId: string, viewerProfileId?: string) {
 			scoreId: score.id,
 			profileId: score.profileId,
 			unitId: score.unitId,
-			contextUnitId: score.contextUnitId,
+			realmId: score.realmId,
 			value: score.value,
 			visibility: score.visibility,
 			position: postScore.position,
@@ -25,7 +25,7 @@ export function selectPostScores(postId: string, viewerProfileId?: string) {
 		.innerJoin(score, eq(score.id, postScore.scoreId))
 		.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
 		.innerJoin(scoreTargetUnit, eq(scoreTargetUnit.id, score.unitId))
-		.innerJoin(scoreContextUnit, eq(scoreContextUnit.id, score.contextUnitId))
+		.innerJoin(scoreRealm, eq(scoreRealm.id, score.realmId))
 		.where(
 			and(
 				eq(postScore.postId, postId),
@@ -37,7 +37,7 @@ export function selectPostScores(postId: string, viewerProfileId?: string) {
 					surface: "linked",
 				}),
 				getUnitReadCondition(viewerProfileId, {}, scoreTargetUnit),
-				getUnitReadCondition(viewerProfileId, {}, scoreContextUnit),
+				getUnitReadCondition(viewerProfileId, {}, scoreRealm),
 			),
 		)
 		.orderBy(asc(postScore.position), asc(postScore.scoreId));

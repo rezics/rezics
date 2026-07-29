@@ -7,15 +7,14 @@ import { create } from "native-i18n";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { resolveScoreContextSearchCategory } from "./score-context-picker";
 import { UnitScoreControl } from "./unit-score-control";
 
 const state = vi.hoisted(() => ({
 	viewerItems: [] as {
 		scoreId: string;
-		contextUnitId: string;
+		realmId: string;
 		value: string | number;
-		contextUnitTitle: string | null;
+		realmTitle: string | null;
 		updatedAt: string;
 		visibility: "public" | "unlisted" | "private";
 	}[],
@@ -98,9 +97,9 @@ vi.mock("@/lib/use-hydrated-session", () => ({
 	useHydratedSession: () => ({ data: { user: { id: "viewer" } }, isPending: false }),
 }));
 
-vi.mock("../data/default-score-context", () => ({
-	useDefaultScoreContext: () => ({
-		context: {
+vi.mock("../data/default-score-realm", () => ({
+	useDefaultScoreRealm: () => ({
+		realm: {
 			id: "019b76da-a800-7300-8000-000000000002",
 			label: "REZICS 評分",
 		},
@@ -161,7 +160,7 @@ describe("UnitScoreControl", () => {
 		expect(state.mutateAsync).toHaveBeenCalledOnce();
 		expect(state.mutateAsync).toHaveBeenCalledWith({
 			body: {
-				contextUnitId: "019b76da-a800-7300-8000-000000000002",
+				realmId: "019b76da-a800-7300-8000-000000000002",
 				score: 8,
 				visibility: "public",
 			},
@@ -177,13 +176,13 @@ describe("UnitScoreControl", () => {
 		);
 	});
 
-	it("opens the context-aware editor when the viewer already has a Score", async () => {
+	it("opens the Realm-aware editor when the viewer already has a Score", async () => {
 		state.viewerItems = [
 			{
 				scoreId: "019f9300-0000-7000-8000-000000000001",
-				contextUnitId: "019b76da-a800-7300-8000-000000000002",
+				realmId: "019b76da-a800-7300-8000-000000000002",
 				value: 8,
-				contextUnitTitle: "REZICS 評分",
+				realmTitle: "REZICS 評分",
 				updatedAt: "2026-07-24T14:00:00.000Z",
 				visibility: "public",
 			},
@@ -193,7 +192,7 @@ describe("UnitScoreControl", () => {
 		fireEvent.click(screen.getByRole("button", { name: "管理評分" }));
 
 		expect(await screen.findByRole("dialog")).toBeTruthy();
-		expect((screen.getByRole("combobox", { name: "評分語境" }) as HTMLInputElement).value).toBe(
+		expect((screen.getByRole("combobox", { name: "評分領域" }) as HTMLInputElement).value).toBe(
 			"REZICS 評分",
 		);
 		expect((screen.getByRole("combobox", { name: "可見性" }) as HTMLSelectElement).value).toBe(
@@ -208,16 +207,11 @@ describe("UnitScoreControl", () => {
 
 		expect(state.mutateAsync).toHaveBeenCalledWith({
 			body: {
-				contextUnitId: "019b76da-a800-7300-8000-000000000002",
+				realmId: "019b76da-a800-7300-8000-000000000002",
 				score: 8,
 				visibility: "private",
 			},
 			path: { targetId: "019f92b9-cb0d-7cb6-a55a-1d5ecedc0949" },
 		});
-	});
-
-	it("defaults context discovery to Realms unless a category is explicit", () => {
-		expect(resolveScoreContextSearchCategory()).toBe("realms");
-		expect(resolveScoreContextSearchCategory("units")).toBe("units");
 	});
 });

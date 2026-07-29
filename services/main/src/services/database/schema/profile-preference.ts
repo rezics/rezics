@@ -22,7 +22,8 @@ import {
 	type StoredUiLocale,
 	StoredUiLocaleValues,
 } from "./contract-values";
-import { contentRating, profile, resourceVisibility, unit } from "./core";
+import { contentRating, profile, resourceVisibility } from "./core";
+import { realm } from "./realm";
 
 export const profilePreference = pgTable(
 	"profile_preference",
@@ -32,7 +33,7 @@ export const profilePreference = pgTable(
 			.references(() => profile.id, { onDelete: "cascade" }),
 		defaultLicense: text().$type<PublicationLicenseId>(),
 		defaultRealmManageMode: boolean().default(false).notNull(),
-		defaultScoreContextUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
+		defaultScoreRealmId: uuid().references(() => realm.id, { onDelete: "set null" }),
 		scoreVisibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		progressVisibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		personalizedFeed: boolean().default(true).notNull(),
@@ -60,9 +61,7 @@ export const profilePreference = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		index("profile_preference_default_score_context_unit_idx").on(
-			table.defaultScoreContextUnitId,
-		),
+		index("profile_preference_default_score_realm_idx").on(table.defaultScoreRealmId),
 		check(
 			"profile_preference_default_license_check",
 			sql`${table.defaultLicense} is null or btrim(${table.defaultLicense}) <> ''`,

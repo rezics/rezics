@@ -7,16 +7,10 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 
-export function ScoreOverview({
-	contextUnitId,
-	targetId,
-}: {
-	contextUnitId: string;
-	targetId: string;
-}) {
+export function ScoreOverview({ realmId, targetId }: { realmId: string; targetId: string }) {
 	const query = useGetApiScoresByTargetId({
 		path: { targetId },
-		query: { contextUnitId },
+		query: { realmId },
 	});
 	const { t } = useTranslation(["engagement", "ui"]);
 	const count = toNonNegativeApiInteger(query.data?.totalCount);

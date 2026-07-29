@@ -335,7 +335,7 @@ export const ScoreFilter = Type.Recursive(
 			{
 				...logicFields(This),
 				value: Type.Optional(ScoreValueFilter),
-				context: Type.Optional(UnitReferenceFilter),
+				realm: Type.Optional(UnitReferenceFilter),
 				target: Type.Optional(UnitReferenceFilter),
 				author: Type.Optional(ProfileReferenceFilter),
 			},

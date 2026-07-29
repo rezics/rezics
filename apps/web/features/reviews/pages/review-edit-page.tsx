@@ -90,7 +90,7 @@ function ReviewEditForm({
 				queryClient,
 				review.id,
 				review.targetId,
-				review.scores[0]?.contextUnitId,
+				review.scores[0]?.realmId,
 			);
 			setDirty(false);
 			await languagesChanged();

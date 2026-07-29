@@ -934,7 +934,7 @@ async function ensureBootstrapRealmRules(
 	return changed;
 }
 
-async function ensureScoreContextProfileDefaults(tx: DatabaseTransaction): Promise<void> {
+async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise<void> {
 	const profiles = await tx.select({ id: profile.id }).from(profile);
 	if (profiles.length) {
 		await tx
@@ -952,15 +952,15 @@ async function ensureScoreContextProfileDefaults(tx: DatabaseTransaction): Promi
 			.values(
 				profiles.map(({ id }) => ({
 					profileId: id,
-					defaultScoreContextUnitId: RezicsScoreRealmManifest.id,
+					defaultScoreRealmId: RezicsScoreRealmManifest.id,
 				})),
 			)
 			.onConflictDoNothing();
 	}
 	await tx
 		.update(profilePreference)
-		.set({ defaultScoreContextUnitId: RezicsScoreRealmManifest.id })
-		.where(isNull(profilePreference.defaultScoreContextUnitId));
+		.set({ defaultScoreRealmId: RezicsScoreRealmManifest.id })
+		.where(isNull(profilePreference.defaultScoreRealmId));
 }
 
 async function ensureOfficialZoneAvatar(tx: DatabaseTransaction): Promise<void> {
@@ -1820,7 +1820,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		database
 			.select({
 				profileId: profilePreference.profileId,
-				defaultScoreContextUnitId: profilePreference.defaultScoreContextUnitId,
+				defaultScoreRealmId: profilePreference.defaultScoreRealmId,
 			})
 			.from(profilePreference),
 		database
@@ -2008,7 +2008,7 @@ async function isBootstrapReady(): Promise<boolean> {
 			profilePreferences.some(
 				(preference) =>
 					preference.profileId === targetProfile.id &&
-					preference.defaultScoreContextUnitId !== null,
+					preference.defaultScoreRealmId !== null,
 			),
 		) &&
 		allProfiles.every((targetProfile) => {
@@ -2093,7 +2093,7 @@ async function bootstrapDatabase(
 		await ensureBootstrapPlatformAccess(tx);
 		await ensureDefaultApiTokenPolicies(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
-		await ensureScoreContextProfileDefaults(tx);
+		await ensureScoreRealmProfileDefaults(tx);
 		await ensureOfficialZoneAvatar(tx);
 		await ensureOfficialZones(tx);
 		await ensureAllZoneExperiences(tx);

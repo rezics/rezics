@@ -30,9 +30,9 @@ export const scoreStat = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		contextUnitId: uuid()
+		realmId: uuid()
 			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+			.references(() => realm.id, { onDelete: "cascade" }),
 		totalCount: aggregateCount(),
 		totalScore: aggregateCount(),
 		score1Count: bigint("score_1_count", { mode: "bigint" }).default(0n).notNull(),
@@ -48,8 +48,8 @@ export const scoreStat = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.unitId, table.contextUnitId] }),
-		index("score_stat_context_unit_idx").on(table.contextUnitId, table.unitId),
+		primaryKey({ columns: [table.unitId, table.realmId] }),
+		index("score_stat_realm_idx").on(table.realmId, table.unitId),
 		check(
 			"score_stat_nonnegative_check",
 			sql`${table.totalCount} >= 0 and ${table.totalScore} >= 0 and ${table.score1Count} >= 0 and ${table.score2Count} >= 0 and ${table.score3Count} >= 0 and ${table.score4Count} >= 0 and ${table.score5Count} >= 0 and ${table.score6Count} >= 0 and ${table.score7Count} >= 0 and ${table.score8Count} >= 0 and ${table.score9Count} >= 0 and ${table.score10Count} >= 0`,

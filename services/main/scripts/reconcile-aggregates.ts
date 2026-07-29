@@ -8,7 +8,7 @@ const checks: readonly { name: string; query: SQL }[] = [
 		name: "score_stat",
 		query: sql`
 			with expected as (
-				select unit_id, context_unit_id, count(*) as total_count, sum(value) as total_score,
+				select unit_id, realm_id, count(*) as total_count, sum(value) as total_score,
 					count(*) filter (where value = 1) as score_1_count,
 					count(*) filter (where value = 2) as score_2_count,
 					count(*) filter (where value = 3) as score_3_count,
@@ -19,10 +19,10 @@ const checks: readonly { name: string; query: SQL }[] = [
 					count(*) filter (where value = 8) as score_8_count,
 					count(*) filter (where value = 9) as score_9_count,
 					count(*) filter (where value = 10) as score_10_count
-				from score group by unit_id, context_unit_id
+				from score group by unit_id, realm_id
 			)
 			select count(*)::text as drift_count from expected
-			full join score_stat using (unit_id, context_unit_id)
+			full join score_stat using (unit_id, realm_id)
 			where expected.unit_id is null or score_stat.unit_id is null
 				or row(expected.total_count, expected.total_score, expected.score_1_count,
 					expected.score_2_count, expected.score_3_count, expected.score_4_count,

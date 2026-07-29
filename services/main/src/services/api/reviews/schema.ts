@@ -32,7 +32,7 @@ const NullableReviewSummary = t.Nullable(t.String({ minLength: 1, maxLength: 2_0
 export const ListReviewsQuery = t.Object(
 	{
 		...ListReviewsCommonQuery,
-		scoreContextUnitId: t.Optional(Uuid),
+		scoreRealmId: t.Optional(Uuid),
 		scores: t.Optional(ReviewScores),
 	},
 	{ additionalProperties: false },
@@ -43,21 +43,21 @@ export type ReviewScoreFilterResolution =
 	| Readonly<{ status: "absent" }>
 	| Readonly<{
 			status: "present";
-			contextUnitId: string;
+			realmId: string;
 			values: readonly number[];
 	  }>
 	| Readonly<{ status: "invalid" }>;
 
 export function resolveReviewScoreFilter(
-	query: Pick<ListReviewsQuery, "scoreContextUnitId" | "scores">,
+	query: Pick<ListReviewsQuery, "scoreRealmId" | "scores">,
 ): ReviewScoreFilterResolution {
-	if (query.scoreContextUnitId && query.scores)
+	if (query.scoreRealmId && query.scores)
 		return {
 			status: "present",
-			contextUnitId: query.scoreContextUnitId,
+			realmId: query.scoreRealmId,
 			values: query.scores,
 		};
-	if (query.scoreContextUnitId || query.scores) return { status: "invalid" };
+	if (query.scoreRealmId || query.scores) return { status: "invalid" };
 	return { status: "absent" };
 }
 
@@ -68,7 +68,7 @@ export const CreateReviewBody = t.Object({
 	score: t.Optional(
 		t.Object(
 			{
-				contextUnitId: Uuid,
+				realmId: Uuid,
 				value: t.Integer({ minimum: 1, maximum: 10 }),
 			},
 			{ additionalProperties: false },
@@ -104,13 +104,13 @@ export const ScoreTargetParams = t.Object({ targetId: Uuid });
 export type ScoreTargetParams = Static<typeof ScoreTargetParams>;
 
 export const SetScoreBody = t.Object({
-	contextUnitId: Uuid,
+	realmId: Uuid,
 	score: t.Integer({ minimum: 1, maximum: 10 }),
 	visibility: t.Optional(ResourceVisibility),
 });
 export type SetScoreBody = Static<typeof SetScoreBody>;
 
-export const ScoreAggregateQuery = t.Object({ contextUnitId: Uuid });
+export const ScoreAggregateQuery = t.Object({ realmId: Uuid });
 export type ScoreAggregateQuery = Static<typeof ScoreAggregateQuery>;
 
 export const ListViewerScoresQuery = t.Object(LocalizationLanguageQuery, {

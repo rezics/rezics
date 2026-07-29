@@ -518,9 +518,9 @@ export default new Elysia()
 					] = await Promise.all([
 						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
 						selectPostScores(row.id, viewerProfileId).then((items) =>
-							items.map(({ scoreId, contextUnitId, value }) => ({
+							items.map(({ scoreId, realmId, value }) => ({
 								scoreId,
-								contextUnitId,
+								realmId,
 								value,
 							})),
 						),

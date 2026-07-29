@@ -104,7 +104,7 @@ import {
 const preferredLocalization = alias(unitLocalization, "preferred_localization");
 const feedContextRealm = alias(unit, "feed_context_realm");
 const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
-const feedReviewScoreContextUnit = alias(unit, "feed_review_score_context_unit");
+const feedReviewScoreRealm = alias(unit, "feed_review_score_realm");
 const feedRealmContextTagUnit = alias(unit, "feed_realm_context_tag_unit");
 const feedRealmContextPostUnit = alias(unit, "feed_realm_context_post_unit");
 
@@ -217,36 +217,36 @@ function isFeedRatedWorkUnitKind(
 }
 
 interface FeedScoreAggregate {
-	readonly contextUnitId: string;
+	readonly realmId: string;
 	readonly totalScore: number;
 	readonly totalCount: number;
 }
 
 export function createFeedScoreCandidates({
 	aggregates,
-	contextTitles,
-	defaultContextUnitId,
-	globalContextUnitId,
+	realmTitles,
+	defaultRealmId,
+	globalRealmId,
 	targetId,
 }: {
 	readonly aggregates: ReadonlyMap<string, FeedScoreAggregate>;
-	readonly contextTitles: ReadonlyMap<string, string | null>;
-	readonly defaultContextUnitId: string;
-	readonly globalContextUnitId: string;
+	readonly realmTitles: ReadonlyMap<string, string | null>;
+	readonly defaultRealmId: string;
+	readonly globalRealmId: string;
 	readonly targetId: string;
 }) {
-	const present = (contextUnitId: string) => {
-		const aggregate = aggregates.get(`${targetId}:${contextUnitId}`);
+	const present = (realmId: string) => {
+		const aggregate = aggregates.get(`${targetId}:${realmId}`);
 		return aggregate
 			? {
 					...aggregate,
-					contextTitle: contextTitles.get(aggregate.contextUnitId) ?? null,
+					realmTitle: realmTitles.get(aggregate.realmId) ?? null,
 				}
 			: null;
 	};
 	return {
-		preferred: present(defaultContextUnitId),
-		global: present(globalContextUnitId),
+		preferred: present(defaultRealmId),
+		global: present(globalRealmId),
 	};
 }
 
@@ -279,7 +279,7 @@ interface FeedReviewEligibilityScope extends Omit<
 > {
 	readonly content: readonly ["post:review"];
 	readonly reviewScore: Readonly<{
-		contextUnitId: string;
+		realmId: string;
 		values: readonly number[];
 	}>;
 }
@@ -420,14 +420,11 @@ export function getFeedEligibilityCondition(
 							feedReviewScoreTargetUnit,
 							eq(feedReviewScoreTargetUnit.id, score.unitId),
 						)
-						.innerJoin(
-							feedReviewScoreContextUnit,
-							eq(feedReviewScoreContextUnit.id, score.contextUnitId),
-						)
+						.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 						.where(
 							and(
 								eq(postScore.postId, post.id),
-								eq(score.contextUnitId, scope.reviewScore.contextUnitId),
+								eq(score.realmId, scope.reviewScore.realmId),
 								inArray(score.value, scope.reviewScore.values),
 								getProfileActivityReadCondition({
 									ownerProfileId: score.profileId,
@@ -441,11 +438,7 @@ export function getFeedEligibilityCondition(
 									{},
 									feedReviewScoreTargetUnit,
 								),
-								getUnitReadCondition(
-									viewer.profileId,
-									{},
-									feedReviewScoreContextUnit,
-								),
+								getUnitReadCondition(viewer.profileId, {}, feedReviewScoreRealm),
 							),
 						),
 				)
@@ -927,10 +920,8 @@ export async function hydrateFeedItems(
 		...new Set(rows.flatMap(({ subjectId }) => (subjectId ? [subjectId] : []))),
 	];
 	const scoreTargetIds = [...new Set([...ratedWorkIds, ...subjectIds])];
-	const globalScoreContextUnitId = OfficialRealmUnitIds.score;
-	const scoreContextUnitIds = [
-		...new Set([viewer.defaultScoreContextUnitId, globalScoreContextUnitId]),
-	];
+	const globalScoreRealmId = OfficialRealmUnitIds.score;
+	const scoreRealmIds = [...new Set([viewer.defaultScoreRealmId, globalScoreRealmId])];
 	const rootIds = [
 		...new Set(rows.flatMap(({ rootPostId }) => (rootPostId ? [rootPostId] : []))),
 	];
@@ -941,7 +932,7 @@ export async function hydrateFeedItems(
 		viewerReactions,
 		subjectRows,
 		scoreRows,
-		scoreContextRows,
+		scoreRealmRows,
 		rootRows,
 		collectionCounts,
 		realmMemberCounts,
@@ -1029,7 +1020,7 @@ export async function hydrateFeedItems(
 			? database
 					.select({
 						unitId: scoreStat.unitId,
-						contextUnitId: scoreStat.contextUnitId,
+						realmId: scoreStat.realmId,
 						totalScore: scoreStat.totalScore,
 						totalCount: scoreStat.totalCount,
 					})
@@ -1037,7 +1028,7 @@ export async function hydrateFeedItems(
 					.where(
 						and(
 							inArray(scoreStat.unitId, scoreTargetIds),
-							inArray(scoreStat.contextUnitId, scoreContextUnitIds),
+							inArray(scoreStat.realmId, scoreRealmIds),
 						),
 					)
 			: [],
@@ -1047,7 +1038,7 @@ export async function hydrateFeedItems(
 				title: resolvedUnitLocalizationTitle(unit.id, displayLanguages),
 			})
 			.from(unit)
-			.where(inArray(unit.id, scoreContextUnitIds)),
+			.where(inArray(unit.id, scoreRealmIds)),
 		rootIds.length
 			? database
 					.select({
@@ -1179,7 +1170,7 @@ export async function hydrateFeedItems(
 					.select({
 						postId: postScore.postId,
 						scoreId: score.id,
-						contextUnitId: score.contextUnitId,
+						realmId: score.realmId,
 						value: score.value,
 						position: postScore.position,
 					})
@@ -1190,10 +1181,7 @@ export async function hydrateFeedItems(
 						feedReviewScoreTargetUnit,
 						eq(feedReviewScoreTargetUnit.id, score.unitId),
 					)
-					.innerJoin(
-						feedReviewScoreContextUnit,
-						eq(feedReviewScoreContextUnit.id, score.contextUnitId),
-					)
+					.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 					.where(
 						and(
 							inArray(postScore.postId, reviewIds),
@@ -1205,7 +1193,7 @@ export async function hydrateFeedItems(
 								surface: "linked",
 							}),
 							getUnitReadCondition(viewer.profileId, {}, feedReviewScoreTargetUnit),
-							getUnitReadCondition(viewer.profileId, {}, feedReviewScoreContextUnit),
+							getUnitReadCondition(viewer.profileId, {}, feedReviewScoreRealm),
 						),
 					)
 					.orderBy(asc(postScore.postId), asc(postScore.position), asc(score.id))
@@ -1291,9 +1279,9 @@ export async function hydrateFeedItems(
 			return totalCount > 0
 				? [
 						[
-							`${row.unitId}:${row.contextUnitId}`,
+							`${row.unitId}:${row.realmId}`,
 							{
-								contextUnitId: row.contextUnitId,
+								realmId: row.realmId,
 								totalScore: toSafeInteger(row.totalScore, "feed total score"),
 								totalCount,
 							},
@@ -1302,21 +1290,16 @@ export async function hydrateFeedItems(
 				: [];
 		}),
 	);
-	const scoreContextTitles = new Map(
-		scoreContextRows.map(({ id, title }) => [id, title] as const),
-	);
+	const scoreRealmTitles = new Map(scoreRealmRows.map(({ id, title }) => [id, title] as const));
 	const scoresFor = (targetId: string) =>
 		createFeedScoreCandidates({
 			aggregates: scoreAggregates,
-			contextTitles: scoreContextTitles,
-			defaultContextUnitId: viewer.defaultScoreContextUnitId,
-			globalContextUnitId: globalScoreContextUnitId,
+			realmTitles: scoreRealmTitles,
+			defaultRealmId: viewer.defaultScoreRealmId,
+			globalRealmId: globalScoreRealmId,
 			targetId,
 		});
-	const scoresByPostId = new Map<
-		string,
-		{ scoreId: string; contextUnitId: string; value: number }[]
-	>();
+	const scoresByPostId = new Map<string, { scoreId: string; realmId: string; value: number }[]>();
 	for (const { postId, position: _position, ...reviewScore } of reviewScores) {
 		const current = scoresByPostId.get(postId) ?? [];
 		current.push(reviewScore);

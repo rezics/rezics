@@ -14,9 +14,8 @@ import { post } from "./post";
 import { realm, realmUnit } from "./realm";
 
 /**
- * Current Score state for a Profile, target Unit, and context Unit.
+ * Current Score state for a Profile, target Unit, and Realm.
  *
- * The backend currently permits only Realm Units as Score contexts.
  * @todo Add immutable Score history and point-in-time Post rendering when required.
  */
 export const score = pgTable(
@@ -29,26 +28,18 @@ export const score = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		contextUnitId: uuid()
+		realmId: uuid()
 			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+			.references(() => realm.id, { onDelete: "cascade" }),
 		value: integer().notNull(),
 		visibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("score_profile_unit_context_unit_key").on(
-			table.profileId,
-			table.unitId,
-			table.contextUnitId,
-		),
-		index("score_unit_context_unit_value_idx").on(
-			table.unitId,
-			table.contextUnitId,
-			table.value,
-		),
-		index("score_context_unit_idx").on(table.contextUnitId),
+		unique("score_profile_unit_realm_key").on(table.profileId, table.unitId, table.realmId),
+		index("score_unit_realm_value_idx").on(table.unitId, table.realmId, table.value),
+		index("score_realm_idx").on(table.realmId),
 		index("score_public_profile_updated_at_idx")
 			.on(table.profileId, table.updatedAt.desc(), table.id.desc())
 			.where(sql`${table.visibility} = 'public'`),

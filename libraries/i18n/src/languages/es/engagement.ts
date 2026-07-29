@@ -36,20 +36,20 @@ export default {
 	reviewScore: "Puntuación",
 	reviewScoreOptional: "Puntuación (opcional)",
 	reviewWithoutScore: "Sin puntuación",
-	reviewScoreContextHint: `Cuando una reseña no tiene ${realmTerms.inline}, su puntuación usa tu contexto de puntuación predeterminado.`,
-	scoreContextHint: insert(
-		`Esta puntuación usa «{{context}}» como contexto. Cambia el contexto de puntuación predeterminado en Preferencias.`,
-		{ context: String },
+	reviewScoreRealmHint: `Cuando una reseña no está en ningún ${realmTerms.inline}, su puntuación se guarda en tu ${realmTerms.inline} de puntuación predeterminado.`,
+	scoreRealmHint: insert(
+		`Esta puntuación se guardará en «{{realm}}». Cambia el ${realmTerms.inline} de puntuación predeterminado en Preferencias.`,
+		{ realm: String },
 	),
-	scoreContext: "Contexto de puntuación",
+	scoreRealm: `${realmTerms.label} de puntuación`,
 	scoreEditorHint: `Elige un ${realmTerms.inline} para actualizar una puntuación existente o añadir una en otro ${realmTerms.inline}.`,
 	editScores: "Gestionar puntuaciones",
-	noScoredContexts: "Todavía no hay puntuaciones en ningún contexto.",
+	noScoredRealms: `Todavía no hay puntuaciones en ningún ${realmTerms.inline}.`,
 	scoreAssociation: "Asociación de puntuación",
 	scoreAssociationDescription:
 		"Elige la puntuación a la que hace referencia esta reseña o quita su asociación actual.",
-	scoreAssociationOption: insert("{{context}} · {{score}}/10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "Guardar asociación de puntuación",

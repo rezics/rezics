@@ -192,8 +192,8 @@ describe("FeedCardTarget", () => {
 					rating={{
 						kind: "aggregate",
 						score: {
-							contextLabel: "讀書會",
-							contextUnitId: "realm-1",
+							realmLabel: "讀書會",
+							realmId: "realm-1",
 							totalScore: 184,
 							totalCount: 40,
 						},
@@ -207,10 +207,10 @@ describe("FeedCardTarget", () => {
 		expect(container.querySelector('[data-slot="item-media"]')).toBeNull();
 		expect(screen.getByText("一行作品摘要")).toBeTruthy();
 		const scoreSummary = screen.getByText("4.6／10 · 40 人評分");
-		const contextLabel = screen.getByText("讀書會", { exact: true });
+		const realmLabel = screen.getByText("讀書會", { exact: true });
 		const scoreRow = scoreSummary.closest("p");
 		const scoreIcon = scoreRow?.querySelector("svg");
-		expect(contextLabel.compareDocumentPosition(scoreIcon ?? scoreSummary)).toBe(
+		expect(realmLabel.compareDocumentPosition(scoreIcon ?? scoreSummary)).toBe(
 			Node.DOCUMENT_POSITION_FOLLOWING,
 		);
 		expect(scoreIcon?.compareDocumentPosition(scoreSummary)).toBe(

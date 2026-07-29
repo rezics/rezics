@@ -126,14 +126,14 @@ const review = {
 		...excerpt.subject,
 		scores: {
 			preferred: {
-				contextUnitId: "019f9872-bd49-7bb4-a6b7-ec621fca2036",
-				contextTitle: "我的讀書會",
+				realmId: "019f9872-bd49-7bb4-a6b7-ec621fca2036",
+				realmTitle: "我的讀書會",
 				totalScore: 18,
 				totalCount: 2,
 			},
 			global: {
-				contextUnitId: "019b76da-a800-7300-8000-000000000002",
-				contextTitle: "全域評分",
+				realmId: "019b76da-a800-7300-8000-000000000002",
+				realmTitle: "全域評分",
 				totalScore: 86,
 				totalCount: 10,
 			},
@@ -142,7 +142,7 @@ const review = {
 	scores: [
 		{
 			scoreId: "019f9872-bd49-7bb4-a6b7-ec621fca2037",
-			contextUnitId: "019f9872-bd49-7bb4-a6b7-ec621fca2038",
+			realmId: "019f9872-bd49-7bb4-a6b7-ec621fca2038",
 			value: 7,
 		},
 	],
@@ -317,8 +317,8 @@ describe("FeedUnitCard", () => {
 				scores: {
 					preferred: null,
 					global: {
-						contextUnitId: "019b76da-a800-7300-8000-000000000002",
-						contextTitle: "全域評分",
+						realmId: "019b76da-a800-7300-8000-000000000002",
+						realmTitle: "全域評分",
 						totalScore: 86,
 						totalCount: 10,
 					},
@@ -349,14 +349,14 @@ describe("FeedUnitCard", () => {
 				kind: "rated-work",
 				scores: {
 					preferred: {
-						contextUnitId: "019f9872-bd49-7bb4-a6b7-ec621fca2042",
-						contextTitle: "我的讀書會",
+						realmId: "019f9872-bd49-7bb4-a6b7-ec621fca2042",
+						realmTitle: "我的讀書會",
 						totalScore: 18,
 						totalCount: 2,
 					},
 					global: {
-						contextUnitId: "019b76da-a800-7300-8000-000000000002",
-						contextTitle: "全域評分",
+						realmId: "019b76da-a800-7300-8000-000000000002",
+						realmTitle: "全域評分",
 						totalScore: 86,
 						totalCount: 10,
 					},

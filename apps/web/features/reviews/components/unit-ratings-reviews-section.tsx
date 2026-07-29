@@ -10,7 +10,7 @@ import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detai
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
-import { useDefaultScoreContext } from "../data/default-score-context";
+import { useDefaultScoreRealm } from "../data/default-score-realm";
 import {
 	EmptyReviewFilters,
 	hasReviewFilters,
@@ -36,10 +36,10 @@ export function UnitRatingsReviewsSection({
 }) {
 	const { t } = useTranslation(["engagement"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const defaultScoreContext = useDefaultScoreContext();
+	const defaultScoreRealm = useDefaultScoreRealm();
 	const [filters, setFilters] = useState<ReviewFilterModel>(EmptyReviewFilters);
 	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-	const scoreContext = filters.realm ?? defaultScoreContext.context;
+	const scoreRealm = filters.realm ?? defaultScoreRealm.realm;
 	const baseReviewQuery = {
 		targetId,
 		localizationLanguages,
@@ -52,9 +52,9 @@ export function UnitRatingsReviewsSection({
 			...baseReviewQuery,
 			...(filters.realm ? { realmIds: [filters.realm.id] } : {}),
 			...(filters.languages.length ? { languages: [...filters.languages] } : {}),
-			...(filters.scores.length && scoreContext
+			...(filters.scores.length && scoreRealm
 				? {
-						scoreContextUnitId: scoreContext.id,
+						scoreRealmId: scoreRealm.id,
 						scores: [...filters.scores],
 					}
 				: {}),
@@ -89,7 +89,7 @@ export function UnitRatingsReviewsSection({
 					{t.engagement.communityReviews}
 				</h3>
 				<CommunityScoreOverview
-					contextUnitId={scoreContext?.id}
+					realmId={scoreRealm?.id}
 					onScoreFilterToggle={(score) =>
 						setFilters((current) => toggleReviewScore(current, score))
 					}

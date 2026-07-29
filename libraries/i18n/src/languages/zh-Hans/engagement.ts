@@ -35,21 +35,21 @@ export default {
 	reviewScore: "评分",
 	reviewScoreOptional: "评分（可选）",
 	reviewWithoutScore: "不评分",
-	reviewScoreContextHint: `评论未指定${realmTerms.label}时，评分会使用你的默认评分上下文。`,
-	scoreContextHint: insert(
-		"此评分使用“{{context}}”作为上下文。可在偏好设置中更改默认评分上下文。",
+	reviewScoreRealmHint: `评论未指定${realmTerms.label}时，评分会使用你的默认评分${realmTerms.label}。`,
+	scoreRealmHint: insert(
+		`此评分会记录在“{{realm}}”。可在偏好设置中更改默认评分${realmTerms.label}。`,
 		{
-			context: String,
+			realm: String,
 		},
 	),
-	scoreContext: "评分上下文",
+	scoreRealm: `评分${realmTerms.label}`,
 	scoreEditorHint: `选择${realmTerms.label}以修改既有评分，或在其他${realmTerms.label}添加评分。`,
 	editScores: "管理评分",
-	noScoredContexts: "尚未在任何上下文中评分。",
+	noScoredRealms: `尚未在任何${realmTerms.label}中评分。`,
 	scoreAssociation: "评分关联",
 	scoreAssociationDescription: "选择这篇评论要引用的评分，或移除当前的评分关联。",
-	scoreAssociationOption: insert("{{context}} · {{score}}／10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}／10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "保存评分关联",

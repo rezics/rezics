@@ -193,7 +193,7 @@ export const ReplacePreferencesBody = t.Object(
 		chineseContentDisplay: ChineseContentDisplay,
 		defaultLicense: t.Nullable(PublicationLicense),
 		defaultRealmManageMode: t.Boolean({ default: false }),
-		defaultScoreContextUnitId: Uuid,
+		defaultScoreRealmId: Uuid,
 		collectionConfig: t.Nullable(CollectionConfigV1),
 		personalizedFeed: t.Boolean({ default: true }),
 		filterFeedByPreferredLanguages: t.Boolean({ default: false }),

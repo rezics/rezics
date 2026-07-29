@@ -36,20 +36,20 @@ export default {
 	reviewScore: "Bewertung",
 	reviewScoreOptional: "Bewertung (optional)",
 	reviewWithoutScore: "Keine Bewertung",
-	reviewScoreContextHint: `Wenn eine Rezension keinen ${realmTerms.inline} hat, verwendet ihre Bewertung deinen standardmäßigen Bewertungskontext.`,
-	scoreContextHint: insert(
-		`Diese Bewertung verwendet „{{context}}“ als Kontext. Ändere den standardmäßigen Bewertungskontext in den Voreinstellungen.`,
-		{ context: String },
+	reviewScoreRealmHint: `Wenn eine Rezension keinem ${realmTerms.inline} zugeordnet ist, wird ihre Bewertung in deinem standardmäßigen ${realmTerms.inline} gespeichert.`,
+	scoreRealmHint: insert(
+		`Diese Bewertung wird in „{{realm}}“ gespeichert. Den standardmäßigen ${realmTerms.inline} für Bewertungen kannst du in den Voreinstellungen ändern.`,
+		{ realm: String },
 	),
-	scoreContext: "Bewertungskontext",
+	scoreRealm: `Bewertungs-${realmTerms.label}`,
 	scoreEditorHint: `Wähle einen ${realmTerms.inline}, um eine vorhandene Bewertung zu aktualisieren oder eine Bewertung in einem anderen ${realmTerms.inline} hinzuzufügen.`,
 	editScores: "Bewertungen verwalten",
-	noScoredContexts: "Noch keine Bewertungen in einem Kontext.",
+	noScoredRealms: `Noch keine Bewertungen in einem ${realmTerms.inline}.`,
 	scoreAssociation: "Bewertungszuordnung",
 	scoreAssociationDescription:
 		"Wähle die Bewertung aus, auf die diese Rezension verweist, oder entferne die aktuelle Bewertungszuordnung.",
-	scoreAssociationOption: insert("{{context}} · {{score}}/10", {
-		context: String,
+	scoreAssociationOption: insert("{{realm}} · {{score}}/10", {
+		realm: String,
 		score: String,
 	}),
 	saveScoreAssociation: "Bewertungszuordnung speichern",

@@ -11,7 +11,7 @@ export interface RecommendationViewer {
 	personalized: boolean;
 	contentRatings: (typeof ContentRatingValues)[number][];
 	preferredLanguages: ContentLanguage[];
-	defaultScoreContextUnitId: string;
+	defaultScoreRealmId: string;
 }
 
 export function resolvePersonalization(
@@ -31,14 +31,14 @@ export async function resolveRecommendationViewer(
 			personalized: false,
 			contentRatings: [],
 			preferredLanguages: [],
-			defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+			defaultScoreRealmId: OfficialRealmUnitIds.score,
 		};
 	const [preference] = await database
 		.select({
 			personalized: profilePreference.personalizedFeed,
 			contentRatings: profilePreference.contentRatings,
 			preferredLanguages: profilePreference.preferredLanguages,
-			defaultScoreContextUnitId: profilePreference.defaultScoreContextUnitId,
+			defaultScoreRealmId: profilePreference.defaultScoreRealmId,
 		})
 		.from(profilePreference)
 		.where(eq(profilePreference.profileId, profileId))
@@ -48,8 +48,7 @@ export async function resolveRecommendationViewer(
 		personalized: resolvePersonalization(preference?.personalized, personalizedOverride),
 		contentRatings: preference?.contentRatings ?? [],
 		preferredLanguages: preference?.preferredLanguages ?? [],
-		defaultScoreContextUnitId:
-			preference?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score,
+		defaultScoreRealmId: preference?.defaultScoreRealmId ?? OfficialRealmUnitIds.score,
 	};
 }
 

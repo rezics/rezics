@@ -513,7 +513,7 @@ async function seedProfiles(
 				profileId: value.id,
 				interfaceLocale,
 				defaultLicense: index % 3 === 0 ? ("cc-by-4.0" as const) : null,
-				defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+				defaultScoreRealmId: OfficialRealmUnitIds.score,
 				scoreVisibility: itemAt(["public", "unlisted", "private"] as const, index),
 				progressVisibility: itemAt(["public", "private", "unlisted"] as const, index),
 				personalizedFeed: index % 10 !== 0 || index === 0,
@@ -2154,7 +2154,7 @@ async function seedInteractions(
 				return {
 					profileId: seedProfile.id,
 					unitId: target.id,
-					contextUnitId: realmUnit.id,
+					realmId: realmUnit.id,
 					value: 1 + ((profileIndex + index * 3) % 10),
 					visibility: itemAt(
 						["public", "unlisted", "private"] as const,

@@ -14,27 +14,27 @@ const dialect = new PgDialect();
 
 describe("feed score candidates", () => {
 	const targetId = "00000000-0000-4000-8000-000000000001";
-	const preferredContextUnitId = "00000000-0000-4000-8000-000000000002";
-	const globalContextUnitId = "00000000-0000-4000-8000-000000000003";
-	const contextTitles = new Map([
-		[preferredContextUnitId, "Preferred"],
-		[globalContextUnitId, "Global"],
+	const preferredRealmId = "00000000-0000-4000-8000-000000000002";
+	const globalRealmId = "00000000-0000-4000-8000-000000000003";
+	const realmTitles = new Map([
+		[preferredRealmId, "Preferred"],
+		[globalRealmId, "Global"],
 	]);
 
 	it("returns both aggregates so presentation can prefer the viewer context", () => {
 		const aggregates = new Map([
 			[
-				`${targetId}:${preferredContextUnitId}`,
+				`${targetId}:${preferredRealmId}`,
 				{
-					contextUnitId: preferredContextUnitId,
+					realmId: preferredRealmId,
 					totalScore: 18,
 					totalCount: 2,
 				},
 			],
 			[
-				`${targetId}:${globalContextUnitId}`,
+				`${targetId}:${globalRealmId}`,
 				{
-					contextUnitId: globalContextUnitId,
+					realmId: globalRealmId,
 					totalScore: 80,
 					totalCount: 10,
 				},
@@ -44,21 +44,21 @@ describe("feed score candidates", () => {
 		expect(
 			createFeedScoreCandidates({
 				aggregates,
-				contextTitles,
-				defaultContextUnitId: preferredContextUnitId,
-				globalContextUnitId,
+				realmTitles,
+				defaultRealmId: preferredRealmId,
+				globalRealmId,
 				targetId,
 			}),
 		).toEqual({
 			preferred: {
-				contextUnitId: preferredContextUnitId,
-				contextTitle: "Preferred",
+				realmId: preferredRealmId,
+				realmTitle: "Preferred",
 				totalScore: 18,
 				totalCount: 2,
 			},
 			global: {
-				contextUnitId: globalContextUnitId,
-				contextTitle: "Global",
+				realmId: globalRealmId,
+				realmTitle: "Global",
 				totalScore: 80,
 				totalCount: 10,
 			},
@@ -68,9 +68,9 @@ describe("feed score candidates", () => {
 	it("leaves a missing preferred aggregate empty while retaining the global candidate", () => {
 		const aggregates = new Map([
 			[
-				`${targetId}:${globalContextUnitId}`,
+				`${targetId}:${globalRealmId}`,
 				{
-					contextUnitId: globalContextUnitId,
+					realmId: globalRealmId,
 					totalScore: 80,
 					totalCount: 10,
 				},
@@ -80,16 +80,16 @@ describe("feed score candidates", () => {
 		expect(
 			createFeedScoreCandidates({
 				aggregates,
-				contextTitles,
-				defaultContextUnitId: preferredContextUnitId,
-				globalContextUnitId,
+				realmTitles,
+				defaultRealmId: preferredRealmId,
+				globalRealmId,
 				targetId,
 			}),
 		).toEqual({
 			preferred: null,
 			global: {
-				contextUnitId: globalContextUnitId,
-				contextTitle: "Global",
+				realmId: globalRealmId,
+				realmTitle: "Global",
 				totalScore: 80,
 				totalCount: 10,
 			},
@@ -192,8 +192,8 @@ describe("feed eligibility SQL", () => {
 		expect(query.params).toEqual(expect.arrayContaining(["zh", "en", ...realmIds]));
 	});
 
-	it("keeps Review Score filtering context-addressed inside the internal scope", () => {
-		const contextUnitId = "00000000-0000-4000-8000-000000000003";
+	it("keeps Review Score filtering Realm-addressed inside the internal scope", () => {
+		const realmId = "00000000-0000-4000-8000-000000000003";
 		const query = dialect.sqlToQuery(
 			getFeedEligibilityCondition(
 				{
@@ -203,19 +203,19 @@ describe("feed eligibility SQL", () => {
 				},
 				{
 					content: ["post:review"],
-					reviewScore: { contextUnitId, values: [8, 9, 10] },
+					reviewScore: { realmId, values: [8, 9, 10] },
 				},
 				new Date("2026-07-16T00:00:00.000Z"),
 			),
 		);
 
 		expect(query.sql).toContain('"post_score"."post_id"');
-		expect(query.sql).toContain('"score"."context_unit_id"');
+		expect(query.sql).toContain('"score"."realm_id"');
 		expect(query.sql).toContain('"score"."value" in');
 		expect(query.sql).toContain('"profile_preference"."score_visibility"');
 		expect(query.sql).toContain('"score"."visibility"');
 		expect(query.params).toEqual(
-			expect.arrayContaining(["review", contextUnitId, 8, 9, 10, "general"]),
+			expect.arrayContaining(["review", realmId, 8, 9, 10, "general"]),
 		);
 	});
 
@@ -256,7 +256,7 @@ describe("feed eligibility SQL", () => {
 										scores: {
 											displayed: {
 												some: {
-													context: { id: { in: [realmId] } },
+													realm: { id: { in: [realmId] } },
 													value: { in: [8, 9, 10] },
 												},
 											},

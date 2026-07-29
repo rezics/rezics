@@ -202,7 +202,7 @@ describe("Profile registration defaults", () => {
 
 		expect(valuesByTable.get(profilePreference)).toEqual({
 			profileId: ProfileId,
-			defaultScoreContextUnitId: OfficialRealmUnitIds.score,
+			defaultScoreRealmId: OfficialRealmUnitIds.score,
 			contentRatings: ["general", "r15"],
 			preferredLanguages: ["en"],
 		});

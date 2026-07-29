@@ -47,7 +47,6 @@ export default {
 	InvalidSearch: "検索リクエストが無効です。",
 	SearchUnavailable: "検索は一時的に利用できません。後でもう一度お試しください。",
 	RealmCapabilityRequired: `必要な ${realmTerms.label} 権限を持っていません。`,
-	ScoreContextUnitUnsupported: `このユニットは現在、スコアリングコンテキストとして使用できません。${realmTerms.label} を選択してください。`,
 	RealmRulesAcceptanceRequired: `続行するには、現在の ${realmTerms.label} ルールを受け入れてください。`,
 	RealmRuleRevisionChanged:
 		"ルールが変更されました。同意する前に最新のリビジョンを確認してください。",

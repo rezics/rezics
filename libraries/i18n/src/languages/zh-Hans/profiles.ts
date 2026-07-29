@@ -3,6 +3,7 @@ import { insert } from "native-i18n";
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
 const { forms: postTerms } = zhHansTerminology.post;
+const { forms: realmTerms } = zhHansTerminology.realm;
 
 export default {
 	memberSince: insert("于 {{date}} 加入", { date: String }),
@@ -20,7 +21,7 @@ export default {
 	activityEmpty: "目前没有可显示的评分或进度。",
 	activityScores: "评分",
 	activityProgress: "进度",
-	activityScoreContext: insert("语境：{{context}}", { context: String }),
+	activityScoreRealm: insert(`${realmTerms.label}：{{realm}}`, { realm: String }),
 	activityScoreValue: insert("{{value}} / 10", { value: Number }),
 	activityProgressValue: insert("{{percentage}}%", { percentage: Number }),
 	progressStatuses: {

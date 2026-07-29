@@ -33,10 +33,10 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { useDefaultScoreContext } from "../data/default-score-context";
+import { useDefaultScoreRealm } from "../data/default-score-realm";
 import { invalidateReviews } from "../data/review-cache";
 import { apiValueToUnitScore, starValueToUnitScore, type UnitScore } from "../model/score-value";
-import { ScoreContextPicker, type ScoreContextOption } from "./score-context-picker";
+import { ScoreRealmPicker, type ScoreRealmOption } from "./score-realm-picker";
 
 const RatingCount = 5;
 
@@ -53,7 +53,7 @@ export function UnitScoreControl({
 	const mutation = usePutApiScoresByTargetId();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const defaultScoreContext = useDefaultScoreContext();
+	const defaultScoreRealm = useDefaultScoreRealm();
 	const viewerScores = useGetApiScoresByTargetIdViewer(
 		{
 			path: { targetId },
@@ -62,23 +62,23 @@ export function UnitScoreControl({
 		{ query: { enabled: !sessionPending && Boolean(session) } },
 	);
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [selectedContext, setSelectedContext] = useState<ScoreContextOption>();
+	const [selectedRealm, setSelectedRealm] = useState<ScoreRealmOption>();
 	const [draftScore, setDraftScore] = useState<UnitScore>();
 	const [draftVisibility, setDraftVisibility] =
 		useState<ResourceVisibility>(DefaultResourceVisibility);
 	const [pendingDefaultScore, setPendingDefaultScore] = useState<UnitScore>();
 	const copy = t.engagement.progressByType[type];
 
-	const scoredContexts = useMemo(
+	const scoredRealms = useMemo(
 		() =>
-			viewerScores.data?.items.flatMap((item): ScoreContextOption[] => {
+			viewerScores.data?.items.flatMap((item): ScoreRealmOption[] => {
 				const score = apiValueToUnitScore(item.value);
 				return score === undefined
 					? []
 					: [
 							{
-								id: item.contextUnitId,
-								label: item.contextUnitTitle ?? item.contextUnitId,
+								id: item.realmId,
+								label: item.realmTitle ?? item.realmId,
 								score,
 								visibility: item.visibility,
 							},
@@ -86,41 +86,38 @@ export function UnitScoreControl({
 			}) ?? [],
 		[viewerScores.data?.items],
 	);
-	const contextOptions = useMemo(() => {
-		const defaultContext = defaultScoreContext.context;
-		if (!defaultContext || scoredContexts.some(({ id }) => id === defaultContext.id))
-			return scoredContexts;
+	const realmOptions = useMemo(() => {
+		const defaultRealm = defaultScoreRealm.realm;
+		if (!defaultRealm || scoredRealms.some(({ id }) => id === defaultRealm.id))
+			return scoredRealms;
 		return [
 			{
-				...defaultContext,
+				...defaultRealm,
 				score: undefined,
 			},
-			...scoredContexts,
+			...scoredRealms,
 		];
-	}, [defaultScoreContext.context, scoredContexts]);
-	const defaultScore = defaultScoreContext.context
-		? scoredContexts.find(({ id }) => id === defaultScoreContext.context?.id)?.score
+	}, [defaultScoreRealm.realm, scoredRealms]);
+	const defaultScore = defaultScoreRealm.realm
+		? scoredRealms.find(({ id }) => id === defaultScoreRealm.realm?.id)?.score
 		: undefined;
 	const displayedScore = pendingDefaultScore ?? defaultScore;
-	const hasAnyScore = scoredContexts.length > 0;
+	const hasAnyScore = scoredRealms.length > 0;
 	const viewerScoresPending = Boolean(session) && viewerScores.isPending;
 	const disabled =
-		sessionPending ||
-		defaultScoreContext.isPending ||
-		viewerScoresPending ||
-		mutation.isPending;
+		sessionPending || defaultScoreRealm.isPending || viewerScoresPending || mutation.isPending;
 
 	async function saveScore(
-		context: ScoreContextOption,
+		realm: ScoreRealmOption,
 		score: UnitScore,
 		visibility: ResourceVisibility,
 		closeAfterSave: boolean,
 	) {
-		const isDefaultContext = context.id === defaultScoreContext.context?.id;
-		if (isDefaultContext) setPendingDefaultScore(score);
+		const isDefaultRealm = realm.id === defaultScoreRealm.realm?.id;
+		if (isDefaultRealm) setPendingDefaultScore(score);
 		try {
 			await mutation.mutateAsync({
-				body: { contextUnitId: context.id, score, visibility },
+				body: { realmId: realm.id, score, visibility },
 				path: { targetId },
 			});
 			await Promise.all([
@@ -129,27 +126,27 @@ export function UnitScoreControl({
 						path: { targetId },
 					}),
 				}),
-				invalidateReviews(queryClient, undefined, targetId, context.id),
+				invalidateReviews(queryClient, undefined, targetId, realm.id),
 			]);
 			if (closeAfterSave) setDialogOpen(false);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		} finally {
-			if (isDefaultContext) setPendingDefaultScore(undefined);
+			if (isDefaultRealm) setPendingDefaultScore(undefined);
 		}
 	}
 
 	function openScoreEditor() {
-		const defaultContext = defaultScoreContext.context;
-		if (!defaultContext) return;
+		const defaultRealm = defaultScoreRealm.realm;
+		if (!defaultRealm) return;
 		mutation.reset();
 		const option =
-			contextOptions.find(({ id }) => id === defaultContext.id) ??
+			realmOptions.find(({ id }) => id === defaultRealm.id) ??
 			({
-				...defaultContext,
+				...defaultRealm,
 				score: undefined,
-			} satisfies ScoreContextOption);
-		setSelectedContext(option);
+			} satisfies ScoreRealmOption);
+		setSelectedRealm(option);
 		setDraftScore(option.score);
 		setDraftVisibility(option.visibility ?? DefaultResourceVisibility);
 		setDialogOpen(true);
@@ -188,11 +185,11 @@ export function UnitScoreControl({
 								openAuthPortal("login");
 								return;
 							}
-							const context = defaultScoreContext.context;
+							const realm = defaultScoreRealm.realm;
 							const nextScore = starValueToUnitScore(value);
-							if (!context || nextScore === undefined) return;
+							if (!realm || nextScore === undefined) return;
 							mutation.reset();
-							void saveScore(context, nextScore, DefaultResourceVisibility, false);
+							void saveScore(realm, nextScore, DefaultResourceVisibility, false);
 						}}
 						value={displayedScore === undefined ? 0 : displayedScore / 2}
 					/>
@@ -224,28 +221,28 @@ export function UnitScoreControl({
 					/>
 					<DialogBody className="grid gap-5">
 						<Field>
-							<FieldLabel>{t.engagement.scoreContext}</FieldLabel>
-							<ScoreContextPicker
-								onChange={(context) => {
-									setSelectedContext(context);
-									setDraftScore(context.score);
+							<FieldLabel>{t.engagement.scoreRealm}</FieldLabel>
+							<ScoreRealmPicker
+								onChange={(realm) => {
+									setSelectedRealm(realm);
+									setDraftScore(realm.score);
 									setDraftVisibility(
-										context.visibility ?? DefaultResourceVisibility,
+										realm.visibility ?? DefaultResourceVisibility,
 									);
 									mutation.reset();
 								}}
-								options={contextOptions}
-								value={selectedContext}
+								options={realmOptions}
+								value={selectedRealm}
 							/>
-							{selectedContext ? (
+							{selectedRealm ? (
 								<p className="text-sm text-muted-foreground">
-									{t.engagement.scoreContextHint({
-										context: selectedContext.label,
+									{t.engagement.scoreRealmHint({
+										realm: selectedRealm.label,
 									})}
 								</p>
 							) : null}
 						</Field>
-						{selectedContext?.score === undefined ? null : (
+						{selectedRealm?.score === undefined ? null : (
 							<Field>
 								<FieldLabel htmlFor="score-visibility">
 									{t.ui.visibility}
@@ -272,7 +269,7 @@ export function UnitScoreControl({
 								aria-label={copy.scoreAction}
 								className="**:data-[slot=rating-item-indicator]:size-8"
 								count={RatingCount}
-								disabled={!selectedContext || mutation.isPending}
+								disabled={!selectedRealm || mutation.isPending}
 								onValueChange={({ value }) => {
 									const nextScore = starValueToUnitScore(value);
 									if (nextScore !== undefined) setDraftScore(nextScore);
@@ -288,7 +285,7 @@ export function UnitScoreControl({
 							)}
 						</div>
 						<RequestFailure
-							error={defaultScoreContext.error}
+							error={defaultScoreRealm.error}
 							fallback={t.ui.retryLater}
 						/>
 						<RequestFailure error={mutation.error} fallback={t.ui.retryLater} />
@@ -298,12 +295,12 @@ export function UnitScoreControl({
 							{t.engagement.cancel}
 						</Button>
 						<Button
-							disabled={!selectedContext || draftScore === undefined}
+							disabled={!selectedRealm || draftScore === undefined}
 							isLoading={mutation.isPending}
 							onClick={() => {
-								if (selectedContext && draftScore !== undefined)
+								if (selectedRealm && draftScore !== undefined)
 									void saveScore(
-										selectedContext,
+										selectedRealm,
 										draftScore,
 										draftVisibility,
 										true,

@@ -502,12 +502,12 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("models live Score identity, ordered Post display, and Realm context", () => {
+	it("models Realm-scoped Score identity and ordered Post display", () => {
 		const scoreConfig = getTableConfig(score);
 		expect(scoreConfig.primaryKeys).toHaveLength(0);
 		expect(score.id.primary).toBe(true);
 		expect(scoreConfig.uniqueConstraints.map((constraint) => constraint.name)).toContain(
-			"score_profile_unit_context_unit_key",
+			"score_profile_unit_realm_key",
 		);
 		expect(score.visibility.enumValues).toEqual(["public", "unlisted", "private"]);
 		expect(score.visibility.hasDefault).toBe(true);
@@ -527,13 +527,13 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("stores a Profile default Score context Unit with referential integrity", () => {
+	it("stores a Profile default Score Realm with referential integrity", () => {
 		const preference = getTableConfig(profilePreference);
 		expect(preference.foreignKeys.map((key) => key.getName())).toContain(
-			"profile_preference_default_score_context_unit_id_unit_id_fk",
+			"profile_preference_default_score_realm_id_realm_id_fk",
 		);
 		expect(preference.indexes.map((index) => index.config.name)).toContain(
-			"profile_preference_default_score_context_unit_idx",
+			"profile_preference_default_score_realm_idx",
 		);
 		expect(preference.checks.map((constraint) => constraint.name)).toContain(
 			"profile_preference_content_ratings_check",

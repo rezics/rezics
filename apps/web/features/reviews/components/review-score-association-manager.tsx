@@ -66,12 +66,7 @@ export function ReviewScoreAssociationManager() {
 				path: { postId: review.id },
 				body: selected ? [{ scoreId: selected.scoreId }] : [],
 			});
-			await invalidateReviews(
-				queryClient,
-				review.id,
-				review.targetId,
-				selected?.contextUnitId,
-			);
+			await invalidateReviews(queryClient, review.id, review.targetId, selected?.realmId);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -99,7 +94,7 @@ export function ReviewScoreAssociationManager() {
 								{options.map((option) => (
 									<NativeSelectOption key={option.scoreId} value={option.scoreId}>
 										{t.engagement.scoreAssociationOption({
-											context: option.contextLabel,
+											realm: option.realmLabel,
 											score: String(option.value),
 										})}
 									</NativeSelectOption>
@@ -107,7 +102,7 @@ export function ReviewScoreAssociationManager() {
 							</NativeSelect>
 							{options.length === 0 ? (
 								<p className="text-sm text-muted-foreground">
-									{t.engagement.noScoredContexts}
+									{t.engagement.noScoredRealms}
 								</p>
 							) : null}
 						</Field>

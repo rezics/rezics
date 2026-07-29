@@ -10,52 +10,40 @@ import {
 	ComboboxList,
 	useEntitySearch,
 } from "@rezics/ui";
-import type { SearchCategory } from "@rezics/filter";
 import { useEffect, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";
 import type { UnitScore } from "../model/score-value";
 
-export interface ScoreContextOption {
+export interface ScoreRealmOption {
 	readonly id: string;
 	readonly label: string;
 	readonly score?: UnitScore;
 	readonly visibility?: ResourceVisibility;
 }
 
-export type ScoreContextSearchCategory = SearchCategory | "all";
-export const DefaultScoreContextSearchCategory = "realms" satisfies ScoreContextSearchCategory;
-
-export function resolveScoreContextSearchCategory(
-	searchCategory?: ScoreContextSearchCategory,
-): ScoreContextSearchCategory {
-	return searchCategory ?? DefaultScoreContextSearchCategory;
-}
-
 function includeSelected(
-	options: readonly ScoreContextOption[],
-	selected: ScoreContextOption | undefined,
-): ScoreContextOption[] {
+	options: readonly ScoreRealmOption[],
+	selected: ScoreRealmOption | undefined,
+): ScoreRealmOption[] {
 	if (!selected || options.some(({ id }) => id === selected.id)) return [...options];
 	return [selected, ...options];
 }
 
-export function ScoreContextPicker({
+export function ScoreRealmPicker({
 	onChange,
 	options,
-	searchCategory,
 	value,
 }: {
-	readonly onChange: (value: ScoreContextOption) => void;
-	readonly options: readonly ScoreContextOption[];
-	readonly searchCategory?: ScoreContextSearchCategory;
-	readonly value?: ScoreContextOption;
+	readonly onChange: (value: ScoreRealmOption) => void;
+	readonly options: readonly ScoreRealmOption[];
+	readonly value?: ScoreRealmOption;
 }) {
 	const { t } = useTranslation(["engagement", "search", "state"]);
 	const searchEntities = useEntitySearch();
 	const baseOptions = useMemo(() => includeSelected(options, value), [options, value]);
-	const { collection, set } = useListCollection<ScoreContextOption>({
+	const { collection, set } = useListCollection<ScoreRealmOption>({
 		initialItems: baseOptions,
 		itemToString: (item) => item.label,
 		itemToValue: (item) => item.id,
@@ -64,7 +52,6 @@ export function ScoreContextPicker({
 	const [open, setOpen] = useState(false);
 	const [isPending, setIsPending] = useState(false);
 	const [isError, setIsError] = useState(false);
-	const resolvedSearchCategory = resolveScoreContextSearchCategory(searchCategory);
 
 	useEffect(() => {
 		if (!open) {
@@ -84,7 +71,7 @@ export function ScoreContextPicker({
 		const timer = window.setTimeout(() => {
 			setIsPending(true);
 			setIsError(false);
-			void searchEntities(resolvedSearchCategory, query, request.signal)
+			void searchEntities("realms", query, request.signal)
 				.then(
 					(hits) => {
 						if (request.signal.aborted) return;
@@ -112,16 +99,7 @@ export function ScoreContextPicker({
 			window.clearTimeout(timer);
 			request.abort();
 		};
-	}, [
-		baseOptions,
-		inputValue,
-		open,
-		options,
-		resolvedSearchCategory,
-		searchEntities,
-		set,
-		value,
-	]);
+	}, [baseOptions, inputValue, open, options, searchEntities, set, value]);
 
 	return (
 		<Combobox
@@ -142,7 +120,7 @@ export function ScoreContextPicker({
 			value={value ? [value.id] : []}
 		>
 			<ComboboxInput
-				aria-label={t.engagement.scoreContext}
+				aria-label={t.engagement.scoreRealm}
 				placeholder={t.search.placeholder}
 				type="search"
 			/>
@@ -170,7 +148,7 @@ export function ScoreContextPicker({
 							))}
 						</ComboboxList>
 						<ComboboxEmpty>
-							{inputValue.trim() ? t.state.empty : t.engagement.noScoredContexts}
+							{inputValue.trim() ? t.state.empty : t.engagement.noScoredRealms}
 						</ComboboxEmpty>
 					</>
 				)}

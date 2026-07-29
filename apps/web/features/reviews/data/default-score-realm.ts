@@ -11,24 +11,24 @@ import { useTranslation } from "@/i18n/client";
 import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
-export interface ScoreContextSelection {
+export interface ScoreRealmSelection {
 	readonly id: string;
 	readonly label: string;
 }
 
-export function useDefaultScoreContext() {
+export function useDefaultScoreRealm() {
 	const session = useHydratedSession();
 	const preferences = useGetApiUsersMePreferences({
 		query: { enabled: !session.isPending && Boolean(session.data) },
 	});
-	const contextUnitId = preferences.data?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score;
+	const realmId = preferences.data?.defaultScoreRealmId ?? OfficialRealmUnitIds.score;
 	const { locale } = useTranslation(["ui"]);
 	const localizationLanguages = buildLocalizationLanguages(
 		preferences.data?.preferredLanguages ?? [],
 		toContentLanguage(locale.target),
 	);
 	const realm = useGetApiRealmsByRealmId(
-		{ path: { realmId: contextUnitId }, query: { localizationLanguages } },
+		{ path: { realmId: realmId }, query: { localizationLanguages } },
 		{
 			query: {
 				enabled: !session.isPending && (!session.data || !preferences.isPending),
@@ -46,7 +46,7 @@ export function useDefaultScoreContext() {
 		: undefined;
 
 	return {
-		context: selection,
+		realm: selection,
 		error: realm.error,
 		isPending:
 			session.isPending ||

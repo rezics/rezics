@@ -276,11 +276,11 @@ export function PreferenceSettings() {
 		preferences.data?.preferredLanguages ?? [],
 		toContentLanguage(locale.target),
 	);
-	const storedDefaultScoreContextUnitId =
-		preferences.data?.defaultScoreContextUnitId ?? OfficialRealmUnitIds.score;
-	const storedDefaultScoreContext = useGetApiRealmsByRealmId(
+	const storedDefaultScoreRealmId =
+		preferences.data?.defaultScoreRealmId ?? OfficialRealmUnitIds.score;
+	const storedDefaultScoreRealm = useGetApiRealmsByRealmId(
 		{
-			path: { realmId: storedDefaultScoreContextUnitId },
+			path: { realmId: storedDefaultScoreRealmId },
 			query: { localizationLanguages },
 		},
 		{ query: { enabled: Boolean(preferences.data) } },
@@ -298,7 +298,7 @@ export function PreferenceSettings() {
 	const { setLocale } = useSetLocale();
 	const [saved, setSaved] = useState(false);
 	const [invalid, setInvalid] = useState(false);
-	const [selectedDefaultScoreContext, setSelectedDefaultScoreContext] = useState<PickedRealm>();
+	const [selectedDefaultScoreRealm, setSelectedDefaultScoreRealm] = useState<PickedRealm>();
 	const [editedPreferredLanguages, setEditedPreferredLanguages] = useState<ContentLanguage[]>();
 	const [editedContentRatings, setEditedContentRatings] = useState<ContentRating[]>();
 	const [pendingLanguage, setPendingLanguage] = useState<ContentLanguage>();
@@ -306,22 +306,22 @@ export function PreferenceSettings() {
 	if (preferences.isPending) return <QueryPending />;
 	if (preferences.isError || !preferences.data)
 		return <QueryFailure error={preferences.error} retry={() => void preferences.refetch()} />;
-	if (storedDefaultScoreContext.isPending) return <QueryPending />;
-	if (storedDefaultScoreContext.isError || !storedDefaultScoreContext.data)
+	if (storedDefaultScoreRealm.isPending) return <QueryPending />;
+	if (storedDefaultScoreRealm.isError || !storedDefaultScoreRealm.data)
 		return (
 			<QueryFailure
-				error={storedDefaultScoreContext.error}
-				retry={() => void storedDefaultScoreContext.refetch()}
+				error={storedDefaultScoreRealm.error}
+				retry={() => void storedDefaultScoreRealm.refetch()}
 			/>
 		);
-	const storedDefaultScoreContextLocalization = selectLocalization(
-		storedDefaultScoreContext.data.localizations,
-		storedDefaultScoreContext.data.language,
-		storedDefaultScoreContext.data.language,
+	const storedDefaultScoreRealmLocalization = selectLocalization(
+		storedDefaultScoreRealm.data.localizations,
+		storedDefaultScoreRealm.data.language,
+		storedDefaultScoreRealm.data.language,
 	);
-	const defaultScoreContext = selectedDefaultScoreContext ?? {
-		id: storedDefaultScoreContext.data.id,
-		label: storedDefaultScoreContextLocalization?.title ?? storedDefaultScoreContext.data.id,
+	const defaultScoreRealm = selectedDefaultScoreRealm ?? {
+		id: storedDefaultScoreRealm.data.id,
+		label: storedDefaultScoreRealmLocalization?.title ?? storedDefaultScoreRealm.data.id,
 	};
 	const preferredLanguages = editedPreferredLanguages ?? preferences.data.preferredLanguages;
 	const contentRatings = editedContentRatings ?? preferences.data.contentRatings;
@@ -393,7 +393,7 @@ export function PreferenceSettings() {
 						? submittedDefaultLicense
 						: null,
 					defaultRealmManageMode: data.get("defaultRealmManageMode") === "true",
-					defaultScoreContextUnitId: defaultScoreContext.id,
+					defaultScoreRealmId: defaultScoreRealm.id,
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
 					filterFeedByPreferredLanguages:
@@ -569,14 +569,14 @@ export function PreferenceSettings() {
 						</NativeSelect>
 					</Field>
 					<Field>
-						<FieldLabel>{t.settings.defaultScoreContext}</FieldLabel>
+						<FieldLabel>{t.settings.defaultScoreRealm}</FieldLabel>
 						<EntityPicker
 							index="realms"
-							onChange={setSelectedDefaultScoreContext}
-							value={defaultScoreContext}
+							onChange={setSelectedDefaultScoreRealm}
+							value={defaultScoreRealm}
 						/>
 						<p className="text-sm text-muted-foreground">
-							{t.settings.defaultScoreContextHint}
+							{t.settings.defaultScoreRealmHint}
 						</p>
 					</Field>
 					<ContentRatingPreferenceField

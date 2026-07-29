@@ -3,6 +3,7 @@ import { insert } from "native-i18n";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: postTerms } = enTerminology.post;
+const { forms: realmTerms } = enTerminology.realm;
 
 export default {
 	memberSince: insert("Joined {{date}}", { date: String }),
@@ -21,7 +22,7 @@ export default {
 	activityEmpty: "There are no visible Scores or Progress records yet.",
 	activityScores: "Scores",
 	activityProgress: "Progress",
-	activityScoreContext: insert("Context: {{context}}", { context: String }),
+	activityScoreRealm: insert(`${realmTerms.label}: {{realm}}`, { realm: String }),
 	activityScoreValue: insert("{{value}} / 10", { value: Number }),
 	activityProgressValue: insert("{{percentage}}%", { percentage: Number }),
 	progressStatuses: {
