@@ -50,6 +50,10 @@ export default {
 				label: "ルール",
 				description: "ローカライズされたルールと承認が必要なアクションを編集します。",
 			},
+			scoring: {
+				label: "評価ガイドライン",
+				description: `この${realmTerms.label}の評価尺度と基準を説明する記事を選択します。`,
+			},
 			pins: {
 				label: "固定コンテンツ",
 				description: "固定およびハイライトされたコンテンツと表示順序を管理します。",
@@ -85,6 +89,17 @@ export default {
 		moveUp: "ページを前へ移動",
 		moveDown: "ページを後ろへ移動",
 		disable: "ページを無効化",
+	},
+	scoreContextSettings: {
+		title: "評価ガイドライン",
+		description: `この${realmTerms.label}にマウントされた、表示可能な通常の${postTerms.label}またはウィキ記事を選び、評価尺度と基準を説明します。`,
+		post: "ガイドライン記事",
+		postHint: `この${realmTerms.label}にマウントされた、表示可能な通常の${postTerms.label}とウィキ記事だけを選択できます。`,
+		notConfigured: "評価ガイドラインは設定されていません。",
+		cancel: "キャンセル",
+		remove: "ガイドラインを解除",
+		removeTitle: "評価ガイドラインを解除しますか？",
+		removeDescription: `評価機能は引き続き利用できますが、この${realmTerms.label}の評価尺度と基準を読者が確認できなくなります。`,
 	},
 	taxonomy: {
 		title: `${realmTerms.label} のタグ`,

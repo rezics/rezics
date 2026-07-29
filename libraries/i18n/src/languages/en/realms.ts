@@ -51,6 +51,10 @@ export default {
 				label: "Rules",
 				description: "Edit localized rules and the actions that require acknowledgement.",
 			},
+			scoring: {
+				label: "Scoring guidelines",
+				description: `Choose the article that explains how Scores in this ${realmTerms.inline} should be interpreted.`,
+			},
 			pins: {
 				label: "Pinned content",
 				description: "Manage pinned and highlighted content and display order.",
@@ -85,6 +89,17 @@ export default {
 		moveUp: "Move page earlier",
 		moveDown: "Move page later",
 		disable: "Disable page",
+	},
+	scoreContextSettings: {
+		title: "Scoring guidelines",
+		description: `Choose a visible ordinary ${postTerms.label} or Wiki article mounted in this ${realmTerms.inline} to explain its scoring scale and criteria.`,
+		post: "Guidelines article",
+		postHint: `Only visible ordinary ${postTerms.pluralLabel} and Wiki articles mounted in this ${realmTerms.inline} can be selected.`,
+		notConfigured: "No scoring guidelines are configured.",
+		cancel: "Cancel",
+		remove: "Remove guidelines",
+		removeTitle: "Remove the scoring guidelines?",
+		removeDescription: `Scores remain available, but readers will no longer have an explanation of this ${realmTerms.inline}'s scale and criteria.`,
 	},
 	taxonomy: {
 		title: `${realmTerms.label} Tags`,

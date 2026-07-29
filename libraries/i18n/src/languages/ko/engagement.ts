@@ -42,6 +42,7 @@ export default {
 		{ realm: String },
 	),
 	scoreRealm: `점수 ${realmTerms.label}`,
+	scoreGuidelines: "평가 기준 보기",
 	scoreEditorHint: `기존 점수를 업데이트하거나 다른 ${realmTerms.label}에서 점수를 추가하려면 ${realmTerms.label}을 선택하세요.`,
 	editScores: "점수 관리",
 	noScoredRealms: `아직 어떤 ${realmTerms.label}에도 점수가 없습니다.`,

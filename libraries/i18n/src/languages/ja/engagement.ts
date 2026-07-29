@@ -42,6 +42,7 @@ export default {
 		{ realm: String },
 	),
 	scoreRealm: `スコア${realmTerms.label}`,
+	scoreGuidelines: "評価ガイドラインを見る",
 	scoreEditorHint: `${realmTerms.label}を選択して既存のスコアを更新するか、別の${realmTerms.label}でスコアを追加します。`,
 	editScores: "スコア管理",
 	noScoredRealms: `現在、どの${realmTerms.label}にもスコアはありません。`,

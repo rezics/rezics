@@ -146,6 +146,7 @@ import { getRealmUnitModerationCommands } from "../governance/moderation-contrac
 import { type CreateModerationActionBody } from "../governance/schema";
 import {
 	GovernanceReasonCodeValues,
+	RealmScoreContextPostKindValues,
 	RealmUnitStatusValues,
 } from "../../database/schema/contract-values";
 import {
@@ -154,6 +155,7 @@ import {
 	RealmMembershipNotFound,
 	RealmNotFound,
 	RealmOwnerLeaveForbidden,
+	RealmScoreContextPostKindInvalid,
 	RealmScoreContextPostNotMounted,
 	RealmTagContextNotFound,
 	RealmTagContextAlreadyExists,
@@ -974,27 +976,58 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			await authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound());
-			const [mountedPost] = await database
-				.select({ id: post.id })
-				.from(post)
-				.innerJoin(
-					realmUnit,
-					and(eq(realmUnit.realmId, params.realmId), eq(realmUnit.unitId, post.id)),
-				)
-				.where(eq(post.id, body.contextPostId))
-				.limit(1);
-			if (!mountedPost) throw new RealmScoreContextPostNotMounted();
-			await database
-				.insert(realmScoreContext)
-				.values({
-					realmId: params.realmId,
-					contextPostId: body.contextPostId,
-					createdByProfileId: profile.unitId,
-				})
-				.onConflictDoUpdate({
-					target: realmScoreContext.realmId,
-					set: { contextPostId: body.contextPostId, updatedAt: new Date() },
-				});
+			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:realm-score-context`}::text, 0))`,
+				);
+				const [candidate] = await tx
+					.select({ kind: post.kind })
+					.from(post)
+					.where(eq(post.id, body.contextPostId))
+					.limit(1);
+				if (!candidate) throw new PostNotFound();
+				if (!RealmScoreContextPostKindValues.some((kind) => kind === candidate.kind))
+					throw new RealmScoreContextPostKindInvalid();
+				const [mountedPost] = await tx
+					.select({ id: realmUnit.unitId })
+					.from(realmUnit)
+					.where(
+						and(
+							eq(realmUnit.realmId, params.realmId),
+							eq(realmUnit.unitId, body.contextPostId),
+						),
+					)
+					.limit(1);
+				if (!mountedPost) throw new RealmScoreContextPostNotMounted();
+				const [current] = await tx
+					.select({ contextPostId: realmScoreContext.contextPostId })
+					.from(realmScoreContext)
+					.where(eq(realmScoreContext.realmId, params.realmId))
+					.limit(1);
+				if (current?.contextPostId === body.contextPostId) return;
+				await tx
+					.insert(realmScoreContext)
+					.values({
+						realmId: params.realmId,
+						contextPostId: body.contextPostId,
+					})
+					.onConflictDoUpdate({
+						target: realmScoreContext.realmId,
+						set: { contextPostId: body.contextPostId, updatedAt: new Date() },
+					});
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.settings.update",
+					params.realmId,
+					{
+						fields: ["scoreContextPostId"],
+						operation: "set",
+						previousContextPostId: current?.contextPostId ?? null,
+						contextPostId: body.contextPostId,
+					},
+				);
+			});
 			return { contextPostId: body.contextPostId };
 		},
 		{
@@ -1006,6 +1039,7 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmScoreContextPostKindInvalid",
 					"RealmScoreContextPostNotMounted",
 				]),
 			},
@@ -1014,11 +1048,30 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.delete(
 		"/:realmId/score-context",
-		async ({ params, authorization }) => {
+		async ({ params, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
-			await database
-				.delete(realmScoreContext)
-				.where(eq(realmScoreContext.realmId, params.realmId));
+			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:realm-score-context`}::text, 0))`,
+				);
+				const [removed] = await tx
+					.delete(realmScoreContext)
+					.where(eq(realmScoreContext.realmId, params.realmId))
+					.returning({ contextPostId: realmScoreContext.contextPostId });
+				if (!removed) return;
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.settings.update",
+					params.realmId,
+					{
+						fields: ["scoreContextPostId"],
+						operation: "clear",
+						previousContextPostId: removed.contextPostId,
+						contextPostId: null,
+					},
+				);
+			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{

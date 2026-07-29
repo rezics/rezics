@@ -9941,6 +9941,7 @@
 					"RealmMemberNotFound",
 					"RealmUnitNotFound",
 					"RealmScoreContextPostNotMounted",
+					"RealmScoreContextPostKindInvalid",
 					"RealmTagContextNotFound",
 					"RealmTagContextAlreadyExists",
 					"RealmTagContextPostNotMounted",
@@ -126441,9 +126442,10 @@
 													"required": ["code", "message"],
 													"properties": {
 														"code": {
-															"default": "RealmScoreContextPostNotMounted",
+															"default": "RealmScoreContextPostKindInvalid",
 															"type": "string",
 															"enum": [
+																"RealmScoreContextPostKindInvalid",
 																"RealmScoreContextPostNotMounted"
 															]
 														},

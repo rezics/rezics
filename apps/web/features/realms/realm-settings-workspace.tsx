@@ -18,6 +18,7 @@ import {
 } from "@rezics/ui";
 import {
 	BookOpenText,
+	Gauge,
 	History,
 	KeyRound,
 	LayoutList,
@@ -49,6 +50,7 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./components/realm-moderation";
 import { RealmPagesSettings } from "./components/realm-configuration-settings";
+import { RealmScoreContextSettings } from "./components/realm-score-context-settings";
 import { RealmTaxonomySettings } from "./components/realm-taxonomy-tree-editor";
 import { RealmMembers } from "./realm-members";
 import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
@@ -165,6 +167,13 @@ function RealmSettingsWorkspaceContent({
 			icon: ScrollText,
 		},
 		{
+			id: "scoring",
+			href: realmSettingsSectionHref(baseHref, "scoring"),
+			label: labels.scoring.label,
+			description: labels.scoring.description,
+			icon: Gauge,
+		},
+		{
 			id: "pins",
 			href: realmSettingsSectionHref(baseHref, "pins"),
 			label: labels.pins.label,
@@ -271,6 +280,10 @@ function RealmSettingsWorkspaceContent({
 					/>
 				) : section === "rules" ? (
 					<RealmRulesSection baseHref={baseHref} realmId={realmId} />
+				) : section === "scoring" ? (
+					<RealmSettingsSection baseHref={baseHref} section="scoring">
+						<RealmScoreContextSettings realmId={realmId} />
+					</RealmSettingsSection>
 				) : section === "pins" ? (
 					<RealmPinsSection baseHref={baseHref} realmId={realmId} />
 				) : section === "docks" ? (

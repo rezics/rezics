@@ -219,6 +219,7 @@ export default {
 	PostScoreDuplicate: `Una ${postTerms.inline} no puede mostrar la misma puntuación más de una vez.`,
 	PostScoreNotFound: "No se ha encontrado una puntuación seleccionada.",
 	RealmScoreContextPostNotMounted: `La ${postTerms.inline} que sirve como contexto de puntuación debe estar incorporada al ${realmTerms.inline}.`,
+	RealmScoreContextPostKindInvalid: `El contexto de puntuación debe usar una ${postTerms.inline} normal o un artículo wiki.`,
 	RealmTagContextNotFound: `No se ha encontrado la explicación de esta etiqueta en el ${realmTerms.inline}.`,
 	RealmTagContextPostNotMounted: `La ${postTerms.inline} usada como explicación de la etiqueta debe estar visible en el ${realmTerms.inline}.`,
 	RealmTagContextAlreadyExists: `Este ${realmTerms.inline} ya tiene una explicación para esa etiqueta.`,

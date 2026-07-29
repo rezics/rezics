@@ -216,6 +216,7 @@ export default {
 	PostScoreDuplicate: `Ein ${postTerms.inline} kann dieselbe Bewertung nicht mehrmals anzeigen.`,
 	PostScoreNotFound: "Eine ausgewählte Bewertung wurde nicht gefunden.",
 	RealmScoreContextPostNotMounted: `Der als Bewertungskontext verwendete ${postTerms.inline} muss im ${realmTerms.inline} eingebunden sein.`,
+	RealmScoreContextPostKindInvalid: `Für den Bewertungskontext muss ein regulärer ${postTerms.label} oder Wiki-Artikel verwendet werden.`,
 	RealmTagContextNotFound: `Die Tag-Erklärung in diesem ${realmTerms.inline} wurde nicht gefunden.`,
 	RealmTagContextPostNotMounted: `Der ${postTerms.inline} mit der Tag-Erklärung muss im ${realmTerms.inline} sichtbar sein.`,
 	RealmTagContextAlreadyExists: `In diesem ${realmTerms.inline} gibt es bereits eine Erklärung für diesen Tag.`,

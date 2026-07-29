@@ -54,6 +54,14 @@ export class RealmScoreContextPostNotMounted extends Data.TaggedError(
 	readonly message = "The score context Post must be mounted in the Realm";
 }
 
+export class RealmScoreContextPostKindInvalid extends Data.TaggedError(
+	"RealmScoreContextPostKindInvalid",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = RealmScoreContextPostKindInvalid.status;
+	readonly message = "The score context must be an ordinary or Wiki Post";
+}
+
 export class RealmTagContextNotFound extends Data.TaggedError("RealmTagContextNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = RealmTagContextNotFound.status;
@@ -122,6 +130,7 @@ export const RealmErrors = [
 	RealmMemberNotFound,
 	RealmUnitNotFound,
 	RealmScoreContextPostNotMounted,
+	RealmScoreContextPostKindInvalid,
 	RealmTagContextNotFound,
 	RealmTagContextAlreadyExists,
 	RealmTagContextPostNotMounted,

@@ -52,6 +52,10 @@ export default {
 				description:
 					"Bearbeite lokalisierte Regeln und die Aktionen, die eine Bestätigung erfordern.",
 			},
+			scoring: {
+				label: "Bewertungsrichtlinien",
+				description: `Wähle den Artikel, der die Bewertungsskala und Kriterien dieses ${realmTerms.inline}s erklärt.`,
+			},
 			pins: {
 				label: "Fixierte Inhalte",
 				description:
@@ -89,6 +93,17 @@ export default {
 		moveUp: "Seite nach vorne verschieben",
 		moveDown: "Seite nach hinten verschieben",
 		disable: "Seite deaktivieren",
+	},
+	scoreContextSettings: {
+		title: "Bewertungsrichtlinien",
+		description: `Wähle einen sichtbaren regulären ${postTerms.label} oder Wiki-Artikel aus diesem ${realmTerms.inline}, der dessen Bewertungsskala und Kriterien erklärt.`,
+		post: "Richtlinienartikel",
+		postHint: `Es können nur sichtbare reguläre ${postTerms.pluralLabel} und Wiki-Artikel aus diesem ${realmTerms.inline} ausgewählt werden.`,
+		notConfigured: "Es sind keine Bewertungsrichtlinien eingerichtet.",
+		cancel: "Abbrechen",
+		remove: "Richtlinien entfernen",
+		removeTitle: "Bewertungsrichtlinien entfernen?",
+		removeDescription: `Bewertungen bleiben verfügbar, aber die Skala und Kriterien dieses ${realmTerms.inline}s werden nicht mehr erklärt.`,
 	},
 	taxonomy: {
 		title: `${realmTerms.label}-Tags`,

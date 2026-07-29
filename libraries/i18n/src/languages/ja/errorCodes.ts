@@ -204,6 +204,7 @@ export default {
 	PostScoreDuplicate: `${postTerms.label} は同じスコアを一度以上表示することはできません。`,
 	PostScoreNotFound: "選択されたスコアが見つかりませんでした。",
 	RealmScoreContextPostNotMounted: `スコアコンテキスト ${postTerms.label} は ${realmTerms.label} にマウントされている必要があります。`,
+	RealmScoreContextPostKindInvalid: `スコアコンテキストには通常の${postTerms.label}またはウィキ記事を使用してください。`,
 	RealmTagContextNotFound: `この ${realmTerms.label} のタグ説明が見つかりませんでした。`,
 	RealmTagContextPostNotMounted: `タグ説明として使われている ${postTerms.label} は ${realmTerms.label} に表示されている必要があります。`,
 	RealmTagContextAlreadyExists: `この ${realmTerms.label} には、そのタグの説明がすでにあります。`,

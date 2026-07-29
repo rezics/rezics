@@ -6,6 +6,7 @@ import { cn, Rating } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
+import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 import { UnitScoreValues, type UnitScore } from "../model/score-value";
 
 export function CommunityScoreOverview({
@@ -100,6 +101,7 @@ function LoadedCommunityScoreOverview({
 				reviewCount={reviewCount}
 				selectedScores={selectedScores}
 			/>
+			<RealmScoreContextLink realmId={realmId} />
 			<RequestFailure error={query.error} fallback={t.ui.retryLater} />
 		</>
 	);

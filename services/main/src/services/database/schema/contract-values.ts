@@ -219,6 +219,10 @@ export const PostKindValues = [
 	"governance_note",
 ] as const;
 export type PostKind = (typeof PostKindValues)[number];
+export const RealmScoreContextPostKindValues = [
+	"post",
+	"wiki",
+] as const satisfies readonly PostKind[];
 
 /** Persisted as text so kind schemas can evolve without a PostgreSQL enum migration. */
 export const ContentStructureKindValues = [

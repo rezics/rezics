@@ -189,6 +189,7 @@ export default {
 	PostScoreDuplicate: `一篇${postTerms.inline}不能重複顯示同一個評分。`,
 	PostScoreNotFound: "找不到所選的評分。",
 	RealmScoreContextPostNotMounted: `評分規則說明${postTerms.inline}必須掛載至該${realmTerms.inline}。`,
+	RealmScoreContextPostKindInvalid: `評分規則說明必須使用一般${postTerms.label}或百科文章。`,
 	RealmTagContextNotFound: `找不到這個${realmTerms.inline}標籤說明。`,
 	RealmTagContextPostNotMounted: `作為標籤說明的${postTerms.inline}必須在該${realmTerms.inline}中可見。`,
 	RealmTagContextAlreadyExists: `此${realmTerms.inline}已有這個標籤的說明。`,

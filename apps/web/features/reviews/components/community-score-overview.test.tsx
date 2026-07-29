@@ -32,6 +32,10 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 	}),
 }));
 
+vi.mock("@/features/realms/components/realm-score-context-link", () => ({
+	RealmScoreContextLink: () => null,
+}));
+
 const translation = await create(resources).getTranslation(
 	["betterAuthErrorCodes", "engagement", "errorCodes", "errors", "state", "ui"],
 	["zh-Hant"],

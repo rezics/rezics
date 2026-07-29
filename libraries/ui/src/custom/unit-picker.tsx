@@ -7,7 +7,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "./button";
 import { EntityPicker, type EntityPickerValue } from "./entity-picker";
 import { IdentityAvatar } from "./identity-avatar";
-import { useUiMessages, useUnitMentionResolver } from "./ui-provider";
+import { useUiMessages, useUnitMentionResolver, type EntitySearch } from "./ui-provider";
 
 interface ResolvedUnitValue {
 	readonly sourceId: string;
@@ -50,16 +50,20 @@ function useResolvedUnitValues(unitIds: readonly string[]): readonly EntityPicke
  * Unit kinds. Exact UUID lookup is supplied by the application's entity-search provider.
  */
 export function UnitPicker({
+	ariaLabel,
 	index = "units",
 	kinds,
 	name,
 	onValueChange,
+	search,
 	value,
 }: {
+	readonly ariaLabel?: string;
 	readonly index?: string;
 	readonly kinds?: readonly string[];
 	readonly name?: string;
 	readonly onValueChange: (value: string | undefined) => void;
+	readonly search?: EntitySearch;
 	readonly value: string | undefined;
 }) {
 	const resolved = useResolvedUnitValues(value ? [value] : []);
@@ -73,6 +77,7 @@ export function UnitPicker({
 	return (
 		<>
 			<EntityPicker
+				ariaLabel={ariaLabel}
 				index={index}
 				kinds={kinds}
 				onChange={(next) => {
@@ -83,6 +88,7 @@ export function UnitPicker({
 					setSelected(undefined);
 					onValueChange(undefined);
 				}}
+				search={search}
 				value={presentation}
 			/>
 			{name ? <input name={name} type="hidden" value={value ?? ""} /> : null}

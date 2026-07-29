@@ -108,6 +108,10 @@ vi.mock("../data/default-score-realm", () => ({
 	}),
 }));
 
+vi.mock("@/features/realms/components/realm-score-context-link", () => ({
+	RealmScoreContextLink: () => null,
+}));
+
 vi.stubGlobal(
 	"ResizeObserver",
 	class ResizeObserverMock {

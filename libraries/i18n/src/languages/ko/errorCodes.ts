@@ -199,6 +199,7 @@ export default {
 	PostScoreDuplicate: `${postTerms.label}는 동일한 점수를 한 번 이상 표시할 수 없습니다.`,
 	PostScoreNotFound: "선택한 점수를 찾을 수 없습니다.",
 	RealmScoreContextPostNotMounted: `점수 컨텍스트 ${postTerms.label}는 ${realmTerms.label}에 장착되어야 합니다.`,
+	RealmScoreContextPostKindInvalid: `점수 컨텍스트에는 일반 ${postTerms.label} 또는 위키 문서를 사용해야 합니다.`,
 	RealmTagContextNotFound: `이 ${realmTerms.label}의 태그 설명을 찾을 수 없습니다.`,
 	RealmTagContextPostNotMounted: `태그 설명으로 사용하는 ${postTerms.label}는 ${realmTerms.label}에서 보여야 합니다.`,
 	RealmTagContextAlreadyExists: `이 ${realmTerms.label}에는 해당 태그 설명이 이미 있습니다.`,

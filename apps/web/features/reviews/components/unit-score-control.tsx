@@ -33,6 +33,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 import { useDefaultScoreRealm } from "../data/default-score-realm";
 import { invalidateReviews } from "../data/review-cache";
 import { apiValueToUnitScore, starValueToUnitScore, type UnitScore } from "../model/score-value";
@@ -235,11 +236,14 @@ export function UnitScoreControl({
 								value={selectedRealm}
 							/>
 							{selectedRealm ? (
-								<p className="text-sm text-muted-foreground">
-									{t.engagement.scoreRealmHint({
-										realm: selectedRealm.label,
-									})}
-								</p>
+								<div className="grid gap-1.5">
+									<p className="text-sm text-muted-foreground">
+										{t.engagement.scoreRealmHint({
+											realm: selectedRealm.label,
+										})}
+									</p>
+									<RealmScoreContextLink realmId={selectedRealm.id} />
+								</div>
 							) : null}
 						</Field>
 						{selectedRealm?.score === undefined ? null : (

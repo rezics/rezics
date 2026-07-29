@@ -3,7 +3,7 @@
 import { useFilter, useListCollection } from "@ark-ui/react";
 import { useEffect, useState } from "react";
 
-import { useEntitySearch, useUiMessages } from "./ui-provider";
+import { useEntitySearch, useUiMessages, type EntitySearch } from "./ui-provider";
 import { IdentityAvatar } from "./identity-avatar";
 import {
 	Combobox,
@@ -27,22 +27,27 @@ export interface EntityPickerValue {
 }
 
 export function EntityPicker({
+	ariaLabel,
 	index,
 	kind,
 	kinds,
 	value,
 	onChange,
 	onClear,
+	search,
 }: {
+	ariaLabel?: string;
 	index: string;
 	kind?: string;
 	kinds?: readonly string[];
 	value?: EntityPickerValue;
 	onChange: (value: EntityPickerValue) => void;
 	onClear?: () => void;
+	search?: EntitySearch;
 }) {
 	const messages = useUiMessages();
-	const searchEntities = useEntitySearch();
+	const contextSearch = useEntitySearch();
+	const searchEntities = search ?? contextSearch;
 	const { contains } = useFilter({ sensitivity: "base" });
 	const { collection, filter, set } = useListCollection<EntityPickerValue>({
 		filter: contains,
@@ -124,7 +129,7 @@ export function EntityPicker({
 				value={value ? [value.id] : []}
 			>
 				<ComboboxInput
-					aria-label={messages.searchPlaceholder}
+					aria-label={ariaLabel ?? messages.searchPlaceholder}
 					placeholder={messages.searchPlaceholder}
 					type="search"
 				/>

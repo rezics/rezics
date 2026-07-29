@@ -5358,6 +5358,7 @@ export const ApiErrorCode = {
 	RealmMemberNotFound: "RealmMemberNotFound",
 	RealmUnitNotFound: "RealmUnitNotFound",
 	RealmScoreContextPostNotMounted: "RealmScoreContextPostNotMounted",
+	RealmScoreContextPostKindInvalid: "RealmScoreContextPostKindInvalid",
 	RealmTagContextNotFound: "RealmTagContextNotFound",
 	RealmTagContextAlreadyExists: "RealmTagContextAlreadyExists",
 	RealmTagContextPostNotMounted: "RealmTagContextPostNotMounted",
@@ -95942,6 +95943,14 @@ export type PutApiRealmsByRealmIdScoreContextStatus404 = {
 	requestId: string;
 };
 
+export const PutApiRealmsByRealmIdScoreContextStatus422ErrorCodeEnum = {
+	RealmScoreContextPostKindInvalid: "RealmScoreContextPostKindInvalid",
+	RealmScoreContextPostNotMounted: "RealmScoreContextPostNotMounted",
+} as const;
+
+export type PutApiRealmsByRealmIdScoreContextStatus422ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdScoreContextStatus422ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdScoreContextStatus422ErrorCodeEnum];
+
 export type PutApiRealmsByRealmIdScoreContextStatus422 =
 	| {
 			/**
@@ -95949,10 +95958,10 @@ export type PutApiRealmsByRealmIdScoreContextStatus422 =
 			 */
 			error: {
 				/**
-				 * @default 'RealmScoreContextPostNotMounted'
+				 * @default 'RealmScoreContextPostKindInvalid'
 				 * @type string
 				 */
-				code: "RealmScoreContextPostNotMounted";
+				code: PutApiRealmsByRealmIdScoreContextStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */

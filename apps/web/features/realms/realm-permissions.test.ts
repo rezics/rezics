@@ -112,7 +112,7 @@ describe("realm membership permissions", () => {
 				canManageAccess: false,
 				canRestoreHistory: false,
 			}),
-		).toEqual(["profile", "pages", "wiki", "history"]);
+		).toEqual(["profile", "pages", "wiki", "scoring", "history"]);
 	});
 
 	it.each([

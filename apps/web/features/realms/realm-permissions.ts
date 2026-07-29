@@ -39,6 +39,7 @@ export function getRealmSettingsSectionIds(
 		if (sectionId === "tags") return capabilities.canManageTags;
 		if (sectionId === "members") return capabilities.canReadMembers;
 		if (sectionId === "rules") return capabilities.canUpdateRules;
+		if (sectionId === "scoring") return capabilities.canUpdateSettings;
 		if (sectionId === "pins") return capabilities.canManagePins;
 		if (sectionId === "docks") return canManageDocks;
 		if (sectionId === "access") return capabilities.canManageAccess;

@@ -42,6 +42,7 @@ export default {
 		{ realm: String },
 	),
 	scoreRealm: `${realmTerms.label} de puntuación`,
+	scoreGuidelines: "Ver criterios de puntuación",
 	scoreEditorHint: `Elige un ${realmTerms.inline} para actualizar una puntuación existente o añadir una en otro ${realmTerms.inline}.`,
 	editScores: "Gestionar puntuaciones",
 	noScoredRealms: `Todavía no hay puntuaciones en ningún ${realmTerms.inline}.`,

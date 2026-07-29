@@ -43,6 +43,10 @@ export default {
 			},
 			members: { label: "成員", description: "管理成員狀態與參與資格，並標示條目擁有者。" },
 			rules: { label: "規則", description: "編輯多語規則與需要確認規則的操作。" },
+			scoring: {
+				label: "評分準則",
+				description: `選擇用來說明此${realmTerms.label}評分尺度與判準的文章。`,
+			},
 			pins: { label: "置頂內容", description: "管理置頂與精選內容，以及顯示順序。" },
 			access: {
 				label: "權限",
@@ -67,6 +71,17 @@ export default {
 		moveUp: "向前移動頁面",
 		moveDown: "向後移動頁面",
 		disable: "停用頁面",
+	},
+	scoreContextSettings: {
+		title: "評分準則",
+		description: `選擇掛載在此${realmTerms.label}且可見的一般${postTerms.label}或百科文章，用來說明評分尺度與判準。`,
+		post: "準則文章",
+		postHint: `只能選擇掛載在此${realmTerms.label}且可見的一般${postTerms.label}或百科文章。`,
+		notConfigured: "尚未設定評分準則文章。",
+		cancel: "取消",
+		remove: "取消設定",
+		removeTitle: "取消評分準則設定？",
+		removeDescription: `評分功能仍可使用，但讀者將無法查看此${realmTerms.label}的評分尺度與判準。`,
 	},
 	taxonomy: {
 		title: `${realmTerms.label}標籤`,

@@ -49,6 +49,10 @@ export default {
 				label: "규칙",
 				description: "현지화된 규칙과 인지 확인이 필요한 행동을 편집합니다.",
 			},
+			scoring: {
+				label: "평가 기준",
+				description: `이 ${realmTerms.label}의 평가 척도와 기준을 설명하는 문서를 선택합니다.`,
+			},
 			pins: {
 				label: "고정 콘텐츠",
 				description: "고정 및 강조된 콘텐츠와 표시 순서를 관리합니다.",
@@ -83,6 +87,17 @@ export default {
 		moveUp: "페이지를 앞으로 이동",
 		moveDown: "페이지를 뒤로 이동",
 		disable: "페이지 비활성화",
+	},
+	scoreContextSettings: {
+		title: "평가 기준",
+		description: `이 ${realmTerms.label}에 장착되어 있고 볼 수 있는 일반 ${postTerms.label}이나 위키 문서를 선택해 평가 척도와 기준을 설명합니다.`,
+		post: "기준 문서",
+		postHint: `이 ${realmTerms.label}에 장착되어 있고 볼 수 있는 일반 ${postTerms.label}과 위키 문서만 선택할 수 있습니다.`,
+		notConfigured: "설정된 평가 기준이 없습니다.",
+		cancel: "취소",
+		remove: "기준 제거",
+		removeTitle: "평가 기준을 제거할까요?",
+		removeDescription: `평가 기능은 계속 사용할 수 있지만 독자는 이 ${realmTerms.label}의 평가 척도와 기준을 확인할 수 없게 됩니다.`,
 	},
 	taxonomy: {
 		title: `${realmTerms.label} 태그`,

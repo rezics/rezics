@@ -52,6 +52,10 @@ export default {
 				description:
 					"Modifiez les règles localisées et les actions qui exigent leur acceptation.",
 			},
+			scoring: {
+				label: "Critères de notation",
+				description: `Choisissez l’article qui explique l’échelle et les critères de notation de ce ${realmTerms.inline}.`,
+			},
 			pins: {
 				label: "Contenu épinglé",
 				description:
@@ -89,6 +93,17 @@ export default {
 		moveUp: "Déplacer la page vers l’avant",
 		moveDown: "Déplacer la page vers l’arrière",
 		disable: "Désactiver la page",
+	},
+	scoreContextSettings: {
+		title: "Critères de notation",
+		description: `Choisissez une ${postTerms.inline} ordinaire ou un article wiki visible et rattaché à ce ${realmTerms.inline} pour expliquer son échelle et ses critères de notation.`,
+		post: "Article de référence",
+		postHint: `Seules les ${postTerms.plural} ordinaires et les articles wiki visibles et rattachés à ce ${realmTerms.inline} peuvent être sélectionnés.`,
+		notConfigured: "Aucun critère de notation n’est configuré.",
+		cancel: "Annuler",
+		remove: "Retirer les critères",
+		removeTitle: "Retirer les critères de notation ?",
+		removeDescription: `Les notes resteront disponibles, mais l’échelle et les critères de ce ${realmTerms.inline} ne seront plus expliqués.`,
 	},
 	taxonomy: {
 		title: `Tags du ${realmTerms.inline}`,

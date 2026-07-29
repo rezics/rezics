@@ -221,6 +221,7 @@ export default {
 	PostScoreDuplicate: `Une ${postTerms.inline} ne peut pas afficher plusieurs fois la même note.`,
 	PostScoreNotFound: "Une note sélectionnée est introuvable.",
 	RealmScoreContextPostNotMounted: `La ${postTerms.inline} servant de contexte de notation doit être rattachée au ${realmTerms.inline}.`,
+	RealmScoreContextPostKindInvalid: `Le contexte de notation doit utiliser une ${postTerms.inline} ordinaire ou un article wiki.`,
 	RealmTagContextNotFound: `L’explication de cette étiquette dans le ${realmTerms.inline} est introuvable.`,
 	RealmTagContextPostNotMounted: `La ${postTerms.inline} utilisée comme explication de l’étiquette doit être visible dans le ${realmTerms.inline}.`,
 	RealmTagContextAlreadyExists: `Ce ${realmTerms.inline} possède déjà une explication pour cette étiquette.`,

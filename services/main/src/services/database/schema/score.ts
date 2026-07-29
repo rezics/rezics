@@ -86,7 +86,6 @@ export const realmScoreContext = pgTable(
 		contextPostId: uuid()
 			.notNull()
 			.references(() => post.id, { onDelete: "restrict" }),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

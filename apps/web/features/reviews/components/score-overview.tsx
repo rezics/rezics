@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
+import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 
 export function ScoreOverview({ realmId, targetId }: { realmId: string; targetId: string }) {
 	const query = useGetApiScoresByTargetId({
@@ -44,6 +45,7 @@ export function ScoreOverview({ realmId, targetId }: { realmId: string; targetId
 								</div>
 							))}
 						</div>
+						<RealmScoreContextLink realmId={realmId} />
 					</>
 				) : null}
 				<RequestFailure error={query.error} fallback={t.ui.retryLater} />

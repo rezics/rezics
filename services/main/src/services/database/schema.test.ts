@@ -43,6 +43,7 @@ import {
 	ModerationActionKindValues,
 	NonRealmUnitKindValues,
 	PostKindValues,
+	RealmScoreContextPostKindValues,
 	SubjectAssociationRoleValues,
 	profileRealmTagSubscription,
 	realmUnitStatus,
@@ -525,6 +526,8 @@ describe("database schema contracts", () => {
 		expect(getTableConfig(realmScoreContext).foreignKeys.map((key) => key.getName())).toContain(
 			"realm_score_context_post_realm_fkey",
 		);
+		expect(RealmScoreContextPostKindValues).toEqual(["post", "wiki"]);
+		expect("createdByProfileId" in realmScoreContext).toBe(false);
 	});
 
 	it("stores a Profile default Score Realm with referential integrity", () => {

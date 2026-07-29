@@ -52,6 +52,10 @@ export default {
 				description:
 					"Edita las reglas localizadas y las acciones que requieren su aceptación.",
 			},
+			scoring: {
+				label: "Criterios de puntuación",
+				description: `Elige el artículo que explica la escala y los criterios de puntuación de este ${realmTerms.inline}.`,
+			},
 			pins: {
 				label: "Contenido fijado",
 				description:
@@ -88,6 +92,17 @@ export default {
 		moveUp: "Mover la página hacia delante",
 		moveDown: "Mover la página hacia atrás",
 		disable: "Desactivar página",
+	},
+	scoreContextSettings: {
+		title: "Criterios de puntuación",
+		description: `Elige una ${postTerms.inline} normal o un artículo wiki visible e incorporado a este ${realmTerms.inline} para explicar su escala y sus criterios de puntuación.`,
+		post: "Artículo de criterios",
+		postHint: `Solo se pueden elegir ${postTerms.plural} normales y artículos wiki visibles e incorporados a este ${realmTerms.inline}.`,
+		notConfigured: "No hay criterios de puntuación configurados.",
+		cancel: "Cancelar",
+		remove: "Quitar los criterios",
+		removeTitle: "¿Quitar los criterios de puntuación?",
+		removeDescription: `Las puntuaciones permanecerán disponibles, pero ya no se explicarán la escala ni los criterios de este ${realmTerms.inline}.`,
 	},
 	taxonomy: {
 		title: `Etiquetas del ${realmTerms.inline}`,

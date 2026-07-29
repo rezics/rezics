@@ -42,6 +42,7 @@ export default {
 		{ realm: String },
 	),
 	scoreRealm: `${realmTerms.label} de notation`,
+	scoreGuidelines: "Voir les critères de notation",
 	scoreEditorHint: `Choisissez un ${realmTerms.inline} pour mettre à jour une note existante ou ajouter une note dans un autre ${realmTerms.inline}.`,
 	editScores: "Gérer les notes",
 	noScoredRealms: `Aucune note dans un ${realmTerms.inline} pour le moment.`,

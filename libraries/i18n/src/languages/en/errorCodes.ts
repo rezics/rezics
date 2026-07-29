@@ -201,6 +201,7 @@ export default {
 	PostScoreDuplicate: `A ${postTerms.label} cannot display the same Score more than once.`,
 	PostScoreNotFound: "A selected Score could not be found.",
 	RealmScoreContextPostNotMounted: `The Score context ${postTerms.label} must be mounted in the ${realmTerms.label}.`,
+	RealmScoreContextPostKindInvalid: `The Score context must use an ordinary ${postTerms.label} or a Wiki article.`,
 	RealmTagContextNotFound: `This ${realmTerms.label} Tag explanation could not be found.`,
 	RealmTagContextPostNotMounted: `The ${postTerms.label} used as the Tag explanation must be visible in the ${realmTerms.label}.`,
 	RealmTagContextAlreadyExists: `This ${realmTerms.label} already has an explanation for that Tag.`,

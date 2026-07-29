@@ -2937,7 +2937,6 @@ async function seedCoverageContracts(
 	await tx.insert(realmScoreContext).values({
 		realmId: targetRealm.id,
 		contextPostId: contextPost.id,
-		createdByProfileId: actor.id,
 		createdAt,
 		updatedAt: createdAt,
 	});

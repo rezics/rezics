@@ -43,6 +43,7 @@ export default {
 		},
 	),
 	scoreRealm: `評分${realmTerms.label}`,
+	scoreGuidelines: "查看評分準則",
 	scoreEditorHint: `選擇${realmTerms.label}以修改既有評分，或在其他${realmTerms.label}新增評分。`,
 	editScores: "管理評分",
 	noScoredRealms: `尚未在任何${realmTerms.label}評分。`,

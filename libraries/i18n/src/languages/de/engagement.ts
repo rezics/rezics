@@ -42,6 +42,7 @@ export default {
 		{ realm: String },
 	),
 	scoreRealm: `Bewertungs-${realmTerms.label}`,
+	scoreGuidelines: "Bewertungsrichtlinien anzeigen",
 	scoreEditorHint: `Wähle einen ${realmTerms.inline}, um eine vorhandene Bewertung zu aktualisieren oder eine Bewertung in einem anderen ${realmTerms.inline} hinzuzufügen.`,
 	editScores: "Bewertungen verwalten",
 	noScoredRealms: `Noch keine Bewertungen in einem ${realmTerms.inline}.`,

@@ -43,6 +43,10 @@ export default {
 			},
 			members: { label: "成员", description: "管理成员状态与参与资格，并标明条目所有者。" },
 			rules: { label: "规则", description: "编辑多语规则与需要确认规则的操作。" },
+			scoring: {
+				label: "评分准则",
+				description: `选择用来说明此${realmTerms.label}评分尺度与标准的文章。`,
+			},
 			pins: { label: "置顶内容", description: "管理置顶与精选内容，以及显示顺序。" },
 			access: {
 				label: "权限",
@@ -67,6 +71,17 @@ export default {
 		moveUp: "向前移动页面",
 		moveDown: "向后移动页面",
 		disable: "停用页面",
+	},
+	scoreContextSettings: {
+		title: "评分准则",
+		description: `选择挂载在此${realmTerms.label}且可见的普通${postTerms.label}或百科文章，用于说明评分尺度与标准。`,
+		post: "准则文章",
+		postHint: `只能选择挂载在此${realmTerms.label}且可见的普通${postTerms.label}或百科文章。`,
+		notConfigured: "尚未设置评分准则文章。",
+		cancel: "取消",
+		remove: "取消设置",
+		removeTitle: "取消评分准则设置？",
+		removeDescription: `评分功能仍可使用，但读者将无法查看此${realmTerms.label}的评分尺度与标准。`,
 	},
 	taxonomy: {
 		title: `${realmTerms.label}标签`,
