@@ -1334,8 +1334,8 @@ export async function hydrateFeedItems(
 			realmId: ranked.realmId,
 			realms: prioritizeFeedRealmContexts(realmContexts.get(row.id) ?? [], ranked.realmId),
 			title: row.title,
-			createdAt: row.createdAt,
-			updatedAt: row.updatedAt,
+			createdAt: row.createdAt.toISOString(),
+			updatedAt: row.updatedAt.toISOString(),
 			reactions: {
 				upvote: reactionCount.get(`${row.id}:upvote`) ?? 0,
 				downvote: reactionCount.get(`${row.id}:downvote`) ?? 0,

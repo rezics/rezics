@@ -1,13 +1,16 @@
 import { Check, Decode, Encode } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { DateTime } from ".";
+import { DateTime, DateTimeString } from ".";
 import {
+	CollectionContentResponse,
 	toPortableTextResponse,
 	ChapterDetailResponse,
 	ContentMetricResponse,
 	FeedNonReviewPostItemResponse,
 	FeedReviewItemResponse,
+	FeedUnitItemResponse,
+	FeedWikiItemResponse,
 	LocalizedContentMetricResponse,
 	OrdinaryPostDetailResponse,
 	PostDetailResponse,
@@ -24,9 +27,85 @@ describe("API response values", () => {
 		const value = "2026-07-14T08:00:00.000Z";
 		const decoded = Decode(DateTime, value);
 
+		expect(Check(DateTimeString, value)).toBe(true);
 		expect(decoded).toBeInstanceOf(Date);
 		expect(decoded.toISOString()).toBe(value);
 		expect(Encode(DateTime, decoded)).toBe(value);
+	});
+
+	it("encodes every Feed union variant from an explicit wire representation", () => {
+		const createdAt = "2026-07-14T08:00:00.000Z";
+		const updatedAt = "2026-07-15T09:30:00.000Z";
+		const base = {
+			id: "00000000-0000-4000-8000-000000000001",
+			language: "en" as const,
+			attributions: [],
+			realmId: null,
+			realms: [],
+			title: null,
+			createdAt,
+			updatedAt,
+			reactions: { upvote: 0, downvote: 0 },
+			viewerReaction: null,
+			recommendationReason: null,
+			tracking: null,
+		};
+		const postBase = {
+			...base,
+			itemType: "post" as const,
+			unitKind: "post" as const,
+			summary: null,
+			cover: null,
+			subjectId: null,
+			rootPostId: null,
+			parentPostId: null,
+			body: null,
+			replyCount: 0,
+			latestRevisionId: null,
+			replyContext: null,
+			subject: null,
+		};
+		const contents = [
+			{
+				...base,
+				itemType: "unit" as const,
+				unitKind: "book" as const,
+				postKind: null,
+				summary: null,
+				cover: null,
+				collection: null,
+				presentation: { kind: "general" as const },
+			} satisfies typeof FeedUnitItemResponse.static,
+			{
+				...postBase,
+				postKind: "post" as const,
+			} satisfies typeof FeedNonReviewPostItemResponse.static,
+			{
+				...postBase,
+				postKind: "review" as const,
+				scores: [],
+			} satisfies typeof FeedReviewItemResponse.static,
+			{
+				...postBase,
+				postKind: "wiki" as const,
+				realmTagContext: null,
+			} satisfies typeof FeedWikiItemResponse.static,
+		];
+		const response = {
+			items: contents.map((content, index) => ({
+				membership: {
+					targetId: `00000000-0000-4000-8000-00000000000${index + 1}`,
+					parentTargetId: null,
+					position: `a${index}`,
+					createdAt,
+				},
+				content,
+			})),
+			nextCursor: null,
+		} satisfies typeof CollectionContentResponse.static;
+
+		expect(Check(CollectionContentResponse, response)).toBe(true);
+		expect(Encode(CollectionContentResponse, response)).toEqual(response);
 	});
 
 	it("accepts proven Portable Text and rejects malformed persisted data", () => {

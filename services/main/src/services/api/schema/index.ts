@@ -80,8 +80,10 @@ export const PublicationLicense = t.UnionEnum(PublicationLicenseIds, {
 });
 export type PublicationLicense = Static<typeof PublicationLicense>;
 
+export const DateTimeString = t.String({ format: "date-time" });
+
 export const DateTime = t
-	.Transform(t.String({ format: "date-time" }))
+	.Transform(DateTimeString)
 	.Decode((value) => new Date(value))
 	.Encode((value) => value.toISOString());
 

@@ -1,5 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { t, type UnwrapSchema } from "elysia";
+import { Check } from "@sinclair/typebox/value";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { Authorization } from "../../authorization";
@@ -18,6 +19,7 @@ import {
 } from "../../database/schema";
 import { CollectionNotFound } from "./errors";
 import { CollectionContentResponse, CollectionDetailResponse } from "../schema/response";
+import { FractionalPosition, Uuid } from "../schema";
 import { presentImageAsset } from "../../units/service";
 import { presentAvatar } from "../../units/avatar";
 import { parseJsonCursor } from "../../pagination";
@@ -36,6 +38,29 @@ const CollectionItemsCursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
+
+const CollectionMembershipDatabaseRow = t.Object(
+	{
+		targetId: Uuid,
+		parentTargetId: t.Nullable(Uuid),
+		position: FractionalPosition,
+		createdAt: t.String(),
+	},
+	{ additionalProperties: false },
+);
+
+type CollectionContentMembership = UnwrapSchema<
+	typeof CollectionContentResponse
+>["items"][number]["membership"];
+
+export function presentCollectionMembership(value: unknown): CollectionContentMembership {
+	if (!Check(CollectionMembershipDatabaseRow, value))
+		throw new Error("Collection membership query returned an invalid row");
+	const createdAt = new Date(value.createdAt);
+	if (Number.isNaN(createdAt.getTime()))
+		throw new Error("Collection membership query returned an invalid creation time");
+	return { ...value, createdAt: createdAt.toISOString() };
+}
 
 function encodeCollectionItemsCursor(value: typeof CollectionItemsCursor.static) {
 	return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -181,12 +206,7 @@ export async function getCollectionContent(
 		collection.latestRevisionId,
 	);
 	const limit = input.limit ?? 20;
-	const result = await database.execute<{
-		targetId: string;
-		parentTargetId: string | null;
-		position: string;
-		createdAt: Date;
-	}>(sql`
+	const result = await database.execute<Record<string, unknown>>(sql`
 		with recursive collection_tree (
 			unit_id,
 			parent_unit_id,
@@ -234,7 +254,7 @@ export async function getCollectionContent(
 		offset ${offset}
 		limit ${limit + 1}
 	`);
-	const memberships = result.rows;
+	const memberships = result.rows.map(presentCollectionMembership);
 	const page = memberships.slice(0, limit);
 	const viewer = await resolveRecommendationViewer(authorization.profileId, false);
 	const contents = await hydrateFeedItems(

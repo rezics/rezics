@@ -28,12 +28,18 @@ export function useLocalizationFallbackToast(input: {
 	useEffect(() => {
 		if (!preferencesReady || !fallback || !input.actualLanguage) return;
 		const key = `${input.unitId}:${input.actualLanguage}:${localizationLanguageKey}`;
-		if (shownKey.current === key) return;
-		shownKey.current = key;
-		toast.create({
-			title: t.ui.preferredLanguageUnavailable,
-			type: "info",
+		let cancelled = false;
+		queueMicrotask(() => {
+			if (cancelled || shownKey.current === key) return;
+			shownKey.current = key;
+			toast.create({
+				title: t.ui.preferredLanguageUnavailable,
+				type: "info",
+			});
 		});
+		return () => {
+			cancelled = true;
+		};
 	}, [
 		fallback,
 		input.actualLanguage,

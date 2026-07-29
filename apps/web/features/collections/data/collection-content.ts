@@ -5,6 +5,7 @@ import {
 	type GetApiCollectionsByCollectionIdItemsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery, type QueryClient } from "@tanstack/react-query";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 
@@ -12,22 +13,36 @@ export type CollectionContentItem = GetApiCollectionsByCollectionIdItemsStatus20
 
 export const CollectionContentQueryKey = ["collections", "content"] as const;
 
+export async function fetchCollectionContentPage(input: {
+	readonly collectionId: string;
+	readonly cursor?: string;
+	readonly localizationLanguages: readonly ContentLanguage[];
+	readonly signal: AbortSignal;
+}) {
+	const { data } = await getApiCollectionsByCollectionIdItems({
+		path: { collectionId: input.collectionId },
+		query: {
+			limit: 50,
+			localizationLanguages: [...input.localizationLanguages],
+			...(input.cursor ? { cursor: input.cursor } : {}),
+		},
+		signal: input.signal,
+		throwOnError: true,
+	});
+	return data;
+}
+
 export function useCollectionContent(collectionId: string, enabled = true) {
 	const localizationLanguages = useLocalizationLanguages();
 	return useInfiniteQuery({
 		queryKey: [...CollectionContentQueryKey, collectionId, localizationLanguages],
-		queryFn: async ({ pageParam, signal }) => {
-			const { data } = await getApiCollectionsByCollectionIdItems({
-				path: { collectionId },
-				query: {
-					limit: 50,
-					localizationLanguages,
-					...(pageParam ? { cursor: pageParam } : {}),
-				},
+		queryFn: ({ pageParam, signal }) =>
+			fetchCollectionContentPage({
+				collectionId,
+				cursor: pageParam || undefined,
+				localizationLanguages,
 				signal,
-			});
-			return data;
-		},
+			}),
 		enabled,
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
