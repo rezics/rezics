@@ -245,6 +245,8 @@ export const ProgressDatePrecisionValues = ["instant", "day", "month", "year", "
 export type ProgressDatePrecision = (typeof ProgressDatePrecisionValues)[number];
 export const ProgressSourceKindValues = ["rezics", "manual", "import"] as const;
 export type ProgressSourceKind = (typeof ProgressSourceKindValues)[number];
+export const ProgressCurrentSourceKindValues = ["journal", "reading"] as const;
+export type ProgressCurrentSourceKind = (typeof ProgressCurrentSourceKindValues)[number];
 export const NotificationKindValues = [
 	"reply",
 	"new_follower",

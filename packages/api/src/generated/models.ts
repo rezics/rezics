@@ -69929,6 +69929,222 @@ export type GetApiProgressByUnitIdNodesResponse =
 /**
  * @type object
  */
+export type PostApiProgressByUnitIdNodesByNodeIdReadPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nodeId: string;
+};
+
+export const PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordStatusEnum =
+	(typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordStatusEnum)[keyof typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordStatusEnum];
+
+export const PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordVisibilityEnum =
+	(typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordVisibilityEnum)[keyof typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordVisibilityEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus200 = {
+	/**
+	 * @type boolean
+	 */
+	completed: true;
+	/**
+	 * @type boolean
+	 */
+	journalEntryCreated: boolean;
+	/**
+	 * @type object
+	 */
+	record: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @default 'backlog'
+		 * @type string
+		 */
+		status: PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordStatusEnum;
+		/**
+		 * @type number
+		 */
+		progress: number;
+		/**
+		 * @type boolean
+		 */
+		isDeleted: boolean;
+		completedCount: string | number;
+		totalTimeMs: string | number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstSeenAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastSeenAt: string;
+		lastContentStructureNodeId: (string | null) | null;
+		currentEntryId: (string | null) | null;
+		lastReadAnchor: (void | null) | null;
+		/**
+		 * @type string
+		 */
+		visibility: PostApiProgressByUnitIdNodesByNodeIdReadStatus200RecordVisibilityEnum;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	};
+};
+
+export const PostApiProgressByUnitIdNodesByNodeIdReadStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
+} as const;
+
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus404ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus404ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiProgressByUnitIdNodesByNodeIdReadStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadOptions = {
+	body?: never;
+	path: PostApiProgressByUnitIdNodesByNodeIdReadPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadResponses = {
+	"200": PostApiProgressByUnitIdNodesByNodeIdReadStatus200;
+	"404": PostApiProgressByUnitIdNodesByNodeIdReadStatus404;
+	"422": PostApiProgressByUnitIdNodesByNodeIdReadStatus422;
+	"429": PostApiProgressByUnitIdNodesByNodeIdReadStatus429;
+	"500": PostApiProgressByUnitIdNodesByNodeIdReadStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiProgressByUnitIdNodesByNodeIdReadResponse =
+	| PostApiProgressByUnitIdNodesByNodeIdReadStatus200
+	| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
+	| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
+	| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
+	| PostApiProgressByUnitIdNodesByNodeIdReadStatus500;
+
+/**
+ * @type object
+ */
 export type PostApiProgressByUnitIdCompletePath = {
 	/**
 	 * @description

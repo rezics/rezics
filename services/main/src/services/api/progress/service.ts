@@ -1,17 +1,21 @@
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
 	contentStructure,
 	contentStructureNode,
+	contentStructureNodeProgress,
 	contentStructureRevisionHead,
+	type ProgressCurrentSourceKind,
 	type ProgressDatePrecision,
 	type ProgressEntryKind,
 	type ProgressSourceKind,
 	type ProgressStatus,
 	postProgressEntry,
+	post,
 	profilePreference,
+	unit,
 	unitProgress,
 	unitProgressEntry,
 } from "../../database/schema";
@@ -34,12 +38,19 @@ export interface ProgressEntryWriteInput {
 }
 
 type ProgressSnapshot = {
+	readonly completedCount: number;
 	readonly currentEntryId: string | null;
+	readonly currentSourceKind: ProgressCurrentSourceKind | null;
+	readonly firstSeenAt: Date;
+	readonly lastSeenAt: Date;
 	readonly progress: number;
 	readonly status: ProgressStatus;
 	readonly totalTimeMs: bigint;
 	readonly lastContentStructureNodeId: string | null;
+	readonly visibility: "public" | "unlisted" | "private";
 };
+
+const AutomaticProgressCheckpointIntervalMs = 24 * 60 * 60 * 1_000;
 
 export async function lockUnitProgress(
 	tx: DatabaseTransaction,
@@ -51,6 +62,21 @@ export async function lockUnitProgress(
 	);
 }
 
+/**
+ * Decides whether a rolling automatic Progress checkpoint is due.
+ *
+ * @internal
+ */
+export function isAutomaticProgressCheckpointDue(
+	lastCheckpointCreatedAt: Date | undefined,
+	now: Date,
+): boolean {
+	return (
+		lastCheckpointCreatedAt === undefined ||
+		lastCheckpointCreatedAt.getTime() <= now.getTime() - AutomaticProgressCheckpointIntervalMs
+	);
+}
+
 async function findProgressSnapshot(
 	tx: DatabaseTransaction,
 	profileId: string,
@@ -58,11 +84,16 @@ async function findProgressSnapshot(
 ): Promise<ProgressSnapshot | undefined> {
 	const [snapshot] = await tx
 		.select({
+			completedCount: unitProgress.completedCount,
 			currentEntryId: unitProgress.currentEntryId,
+			currentSourceKind: unitProgress.currentSourceKind,
+			firstSeenAt: unitProgress.firstSeenAt,
+			lastSeenAt: unitProgress.lastSeenAt,
 			progress: unitProgress.progress,
 			status: unitProgress.status,
 			totalTimeMs: unitProgress.totalTimeMs,
 			lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
+			visibility: unitProgress.visibility,
 		})
 		.from(unitProgress)
 		.where(
@@ -157,6 +188,7 @@ async function findCurrentEntry(
 	tx: DatabaseTransaction,
 	profileId: string,
 	unitId: string,
+	snapshot: ProgressSnapshot | undefined,
 	preferredCurrentEntryId: string | undefined,
 ) {
 	if (preferredCurrentEntryId) {
@@ -175,7 +207,6 @@ async function findCurrentEntry(
 			.limit(1);
 		if (preferred) return preferred;
 	}
-	const snapshot = await findProgressSnapshot(tx, profileId, unitId);
 	if (snapshot?.currentEntryId) {
 		const [retained] = await tx
 			.select()
@@ -214,7 +245,14 @@ export async function refreshProgressSnapshot(
 	unitId: string,
 	preferredCurrentEntryId?: string,
 ): Promise<void> {
-	const current = await findCurrentEntry(tx, profileId, unitId, preferredCurrentEntryId);
+	const snapshot = await findProgressSnapshot(tx, profileId, unitId);
+	const readingSnapshot =
+		preferredCurrentEntryId === undefined && snapshot?.currentSourceKind === "reading"
+			? snapshot
+			: undefined;
+	const current = readingSnapshot
+		? undefined
+		: await findCurrentEntry(tx, profileId, unitId, snapshot, preferredCurrentEntryId);
 	const [statistics] = await tx
 		.select({
 			completedCount: sql<number>`coalesce(sum(${unitProgressEntry.completionDelta})::int, 0)`,
@@ -230,9 +268,27 @@ export async function refreshProgressSnapshot(
 			),
 		);
 	if (!statistics?.firstSeenAt || !statistics.lastSeenAt) {
+		if (readingSnapshot) {
+			await tx
+				.update(unitProgress)
+				.set({
+					completedCount: 0,
+					currentEntryId: null,
+					currentSourceKind: "reading",
+					deletedAt: null,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(unitProgress.profileId, profileId), eq(unitProgress.unitId, unitId)));
+			return;
+		}
 		await tx
 			.update(unitProgress)
-			.set({ currentEntryId: null, deletedAt: new Date(), lastSeenAt: new Date() })
+			.set({
+				currentEntryId: null,
+				currentSourceKind: null,
+				deletedAt: new Date(),
+				lastSeenAt: new Date(),
+			})
 			.where(and(eq(unitProgress.profileId, profileId), eq(unitProgress.unitId, unitId)));
 		return;
 	}
@@ -243,36 +299,246 @@ export async function refreshProgressSnapshot(
 		.where(eq(profilePreference.profileId, profileId))
 		.limit(1);
 	if (!preference) throw new Error("Progress visibility preference was not found");
+	const firstSeenAt =
+		readingSnapshot && readingSnapshot.firstSeenAt < statistics.firstSeenAt
+			? readingSnapshot.firstSeenAt
+			: statistics.firstSeenAt;
+	const lastSeenAt =
+		readingSnapshot && readingSnapshot.lastSeenAt > statistics.lastSeenAt
+			? readingSnapshot.lastSeenAt
+			: statistics.lastSeenAt;
+	const status = readingSnapshot ? readingSnapshot.status : (current?.status ?? "backlog");
+	const progress = readingSnapshot ? readingSnapshot.progress : (current?.progress ?? 0);
+	const totalTimeMs = readingSnapshot
+		? readingSnapshot.totalTimeMs
+		: (current?.totalTimeMs ?? 0n);
+	const lastContentStructureNodeId = readingSnapshot
+		? readingSnapshot.lastContentStructureNodeId
+		: (current?.contentStructureNodeId ?? null);
+	const currentEntryId = readingSnapshot ? null : (current?.id ?? null);
+	const currentSourceKind = readingSnapshot
+		? ("reading" as const)
+		: current
+			? ("journal" as const)
+			: null;
 	await tx
 		.insert(unitProgress)
 		.values({
 			profileId,
 			unitId,
-			status: current?.status ?? "backlog",
-			progress: current?.progress ?? 0,
+			status,
+			progress,
 			completedCount,
-			totalTimeMs: current?.totalTimeMs ?? 0n,
-			firstSeenAt: statistics.firstSeenAt,
-			lastSeenAt: statistics.lastSeenAt,
-			lastContentStructureNodeId: current?.contentStructureNodeId ?? null,
-			currentEntryId: current?.id ?? null,
+			totalTimeMs,
+			firstSeenAt,
+			lastSeenAt,
+			lastContentStructureNodeId,
+			currentEntryId,
+			currentSourceKind,
 			visibility: preference.visibility,
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
 			target: [unitProgress.profileId, unitProgress.unitId],
 			set: {
-				status: current?.status ?? "backlog",
-				progress: current?.progress ?? 0,
+				status,
+				progress,
 				completedCount,
-				totalTimeMs: current?.totalTimeMs ?? 0n,
-				firstSeenAt: statistics.firstSeenAt,
-				lastSeenAt: statistics.lastSeenAt,
-				lastContentStructureNodeId: current?.contentStructureNodeId ?? null,
-				currentEntryId: current?.id ?? null,
+				totalTimeMs,
+				firstSeenAt,
+				lastSeenAt,
+				lastContentStructureNodeId,
+				currentEntryId,
+				currentSourceKind,
 				deletedAt: null,
 			},
 		});
+}
+
+/**
+ * Derives the aggregate Book progress represented by completed chapter nodes.
+ *
+ * @internal
+ */
+export function deriveChapterReadingProgress(
+	completedChapterCount: number,
+	totalChapterCount: number,
+): { readonly progress: number; readonly status: "active" | "completed" } {
+	if (
+		!Number.isSafeInteger(completedChapterCount) ||
+		!Number.isSafeInteger(totalChapterCount) ||
+		totalChapterCount <= 0 ||
+		completedChapterCount < 0 ||
+		completedChapterCount > totalChapterCount
+	)
+		throw new Error("Chapter completion counts must describe a non-empty bounded Book");
+	return {
+		progress: completedChapterCount / totalChapterCount,
+		status: completedChapterCount === totalChapterCount ? "completed" : "active",
+	};
+}
+
+/**
+ * Records one visible authenticated Book chapter read.
+ *
+ * @internal
+ */
+export async function recordChapterReading(
+	tx: DatabaseTransaction,
+	input: {
+		readonly canReadUnpublished: boolean;
+		readonly nodeId: string;
+		readonly now: Date;
+		readonly profileId: string;
+		readonly unitId: string;
+	},
+) {
+	await lockUnitProgress(tx, input.profileId, input.unitId);
+	const readableUnitCondition = input.canReadUnpublished
+		? undefined
+		: and(eq(unit.status, "published"), inArray(unit.visibility, ["public", "unlisted"]));
+	const [chapterNode] = await tx
+		.select({ id: contentStructureNode.id })
+		.from(contentStructureNode)
+		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
+		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+		.where(
+			and(
+				eq(contentStructureNode.id, input.nodeId),
+				eq(contentStructureNode.ownerUnitId, input.unitId),
+				eq(contentStructure.kind, "book.contents"),
+				eq(unit.kind, "post"),
+				eq(post.kind, "chapter"),
+				isNull(contentStructureNode.deletedAt),
+				isNull(contentStructure.deletedAt),
+				isNull(unit.deletedAt),
+				readableUnitCondition,
+			),
+		)
+		.limit(1);
+	if (!chapterNode) throw new ContentStructureNodeNotFound();
+
+	await tx
+		.insert(contentStructureNodeProgress)
+		.values({ profileId: input.profileId, nodeId: input.nodeId, completedAt: input.now })
+		.onConflictDoNothing();
+
+	const [chapterCounts] = await tx
+		.select({
+			completed: sql<number>`count(${contentStructureNodeProgress.nodeId})::int`,
+			total: sql<number>`count(*)::int`,
+		})
+		.from(contentStructureNode)
+		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
+		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+		.leftJoin(
+			contentStructureNodeProgress,
+			and(
+				eq(contentStructureNodeProgress.profileId, input.profileId),
+				eq(contentStructureNodeProgress.nodeId, contentStructureNode.id),
+			),
+		)
+		.where(
+			and(
+				eq(contentStructureNode.ownerUnitId, input.unitId),
+				eq(contentStructure.kind, "book.contents"),
+				eq(unit.kind, "post"),
+				eq(post.kind, "chapter"),
+				isNull(contentStructureNode.deletedAt),
+				isNull(contentStructure.deletedAt),
+				isNull(unit.deletedAt),
+				readableUnitCondition,
+			),
+		);
+	if (!chapterCounts) throw new Error("Book chapter progress aggregation returned no row");
+	const completedChapterCount = toSafeInteger(
+		chapterCounts.completed,
+		"completed Book chapter count",
+	);
+	const totalChapterCount = toSafeInteger(chapterCounts.total, "Book chapter count");
+	const reading = deriveChapterReadingProgress(completedChapterCount, totalChapterCount);
+
+	const [lastCheckpoint] = await tx
+		.select({ createdAt: unitProgressEntry.createdAt })
+		.from(unitProgressEntry)
+		.where(
+			and(
+				eq(unitProgressEntry.profileId, input.profileId),
+				eq(unitProgressEntry.unitId, input.unitId),
+				eq(unitProgressEntry.sourceKind, "rezics"),
+				isNull(unitProgressEntry.deletedAt),
+			),
+		)
+		.orderBy(desc(unitProgressEntry.createdAt), desc(unitProgressEntry.id))
+		.limit(1);
+	const journalEntryCreated = isAutomaticProgressCheckpointDue(
+		lastCheckpoint?.createdAt,
+		input.now,
+	);
+	if (journalEntryCreated)
+		await createProgressEntry(
+			tx,
+			input.profileId,
+			input.unitId,
+			{
+				entryKind: "update",
+				status: reading.status,
+				progress: reading.progress,
+				lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
+				occurredAt: input.now,
+				datePrecision: "instant",
+				sourceKind: "rezics",
+				affectsCurrent: false,
+			},
+			{ refreshSnapshot: false },
+		);
+
+	const snapshot = await findProgressSnapshot(tx, input.profileId, input.unitId);
+	const [preference] = await tx
+		.select({ visibility: profilePreference.progressVisibility })
+		.from(profilePreference)
+		.where(eq(profilePreference.profileId, input.profileId))
+		.limit(1);
+	if (!preference) throw new Error("Progress visibility preference was not found");
+	const [record] = await tx
+		.insert(unitProgress)
+		.values({
+			profileId: input.profileId,
+			unitId: input.unitId,
+			status: reading.status,
+			progress: reading.progress,
+			completedCount: snapshot?.completedCount ?? 0,
+			totalTimeMs: snapshot?.totalTimeMs ?? 0n,
+			firstSeenAt: snapshot?.firstSeenAt ?? input.now,
+			lastSeenAt: input.now,
+			lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
+			currentEntryId: null,
+			currentSourceKind: "reading",
+			visibility: snapshot?.visibility ?? preference.visibility,
+			deletedAt: null,
+		})
+		.onConflictDoUpdate({
+			target: [unitProgress.profileId, unitProgress.unitId],
+			set: {
+				status: reading.status,
+				progress: reading.progress,
+				completedCount: snapshot?.completedCount ?? 0,
+				totalTimeMs: snapshot?.totalTimeMs ?? 0n,
+				firstSeenAt: snapshot?.firstSeenAt ?? input.now,
+				lastSeenAt: input.now,
+				lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
+				currentEntryId: null,
+				currentSourceKind: "reading",
+				visibility: snapshot?.visibility ?? preference.visibility,
+				deletedAt: null,
+				updatedAt: input.now,
+			},
+		})
+		.returning();
+	if (!record) throw new Error("Chapter reading progress upsert did not return a row");
+	return { journalEntryCreated, record };
 }
 
 export async function createProgressEntry(

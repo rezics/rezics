@@ -791,6 +791,11 @@ export const ProgressResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
+export const ChapterReadingProgressResponse = t.Object({
+	completed: t.Literal(true),
+	journalEntryCreated: t.Boolean(),
+	record: ProgressResponse,
+});
 export const ProgressEntryResponse = t.Object({
 	id: Uuid,
 	profileId: Uuid,

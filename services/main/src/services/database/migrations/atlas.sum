@@ -1,4 +1,4 @@
-h1:mHY/bbb9eUvZ2ypjQg6x0xwZIRpWAAEyG+qgkqcSXgo=
+h1:1UhQvrIWQoxYjRWHmiP9e/cttZBC18lji0V+66cIu6I=
 20260718070400_current_baseline.sql h1:u9QkCNmNKf+J8LE4/Lz03NbMrJf4RTid39bT22xn5ew=
 20260718070401_history_invariants.sql h1:ZtbZeYtN6E3/SM2hzpdVuXS7pICASEq93v29wpj7dDs=
 20260718154924_unit_realm_restrictions.sql h1:87+KV38BAlkYD150B4fAMEe19exDPGV12bR3dfNuHjA=
@@ -83,3 +83,5 @@ h1:mHY/bbb9eUvZ2ypjQg6x0xwZIRpWAAEyG+qgkqcSXgo=
 20260728150004_unit_tag_curation_order_unique.sql h1:rOk5NzGL9msB2zUzkyDp10FRlsn5lIHcQWnZM2Af+CI=
 20260728150005_profile_activity_visibility.sql h1:9z9/hqiOVd9tvDHOeoKWv+5SmFaMBdXqm4wW9KncQko=
 20260729130000_unit_tag_curation_permission.sql h1:u9RpqdCd6f+7nHsKX2v2IKI5iLUTdbhtAk7TS1mHMLY=
+20260729130001_unit_follow_notification_preference.sql h1:Tzv1RrSxG2NWtP6jBsC3ZGOcnJS8uOaEygo3HXGjtxw=
+20260729130002_progress_reading_checkpoint.sql h1:RXUKCEW/IstxRyN6Rydh1BUYrBj6DpZcSHOroaYdWkw=

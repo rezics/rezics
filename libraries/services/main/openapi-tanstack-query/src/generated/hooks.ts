@@ -1458,6 +1458,12 @@ import type {
 	GetApiProgressByUnitIdNodesStatus422,
 	GetApiProgressByUnitIdNodesStatus429,
 	GetApiProgressByUnitIdNodesStatus500,
+	PostApiProgressByUnitIdNodesByNodeIdReadOptions,
+	PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
+	PostApiProgressByUnitIdNodesByNodeIdReadStatus404,
+	PostApiProgressByUnitIdNodesByNodeIdReadStatus422,
+	PostApiProgressByUnitIdNodesByNodeIdReadStatus429,
+	PostApiProgressByUnitIdNodesByNodeIdReadStatus500,
 	PostApiProgressByUnitIdCompleteOptions,
 	PostApiProgressByUnitIdCompleteStatus200,
 	PostApiProgressByUnitIdCompleteStatus400,
@@ -2344,6 +2350,7 @@ import {
 	putApiProgressByUnitIdEntriesByEntryId,
 	deleteApiProgressByUnitIdEntriesByEntryId,
 	getApiProgressByUnitIdNodes,
+	postApiProgressByUnitIdNodesByNodeIdRead,
 	postApiProgressByUnitIdComplete,
 	putApiProgressByUnitIdNodesByNodeId,
 	deleteApiProgressByUnitIdNodesByNodeId,
@@ -24726,6 +24733,105 @@ export function useGetApiProgressByUnitIdNodes<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const postApiProgressByUnitIdNodesByNodeIdReadMutationKey = () =>
+	[{ url: "/api/progress/:unitId/nodes/:nodeId/read" }] as const;
+
+export function postApiProgressByUnitIdNodesByNodeIdReadMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiProgressByUnitIdNodesByNodeIdReadMutationKey();
+	return mutationOptions<
+		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus500
+		>,
+		PostApiProgressByUnitIdNodesByNodeIdReadOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await postApiProgressByUnitIdNodesByNodeIdRead({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Record a Book chapter read
+ * {@link /api/progress/:unitId/nodes/:nodeId/read}
+ */
+export function usePostApiProgressByUnitIdNodesByNodeIdRead<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
+			ResponseErrorConfig<
+				| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
+				| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
+				| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
+				| PostApiProgressByUnitIdNodesByNodeIdReadStatus500
+			>,
+			PostApiProgressByUnitIdNodesByNodeIdReadOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiProgressByUnitIdNodesByNodeIdReadMutationKey();
+
+	const baseOptions = postApiProgressByUnitIdNodesByNodeIdReadMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus500
+		>,
+		PostApiProgressByUnitIdNodesByNodeIdReadOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus500
+		>,
+		PostApiProgressByUnitIdNodesByNodeIdReadOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus500
+		>,
+		PostApiProgressByUnitIdNodesByNodeIdReadOptions,
+		TContext
+	>;
 }
 
 export const postApiProgressByUnitIdCompleteMutationKey = () =>

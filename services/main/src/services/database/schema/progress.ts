@@ -18,6 +18,8 @@ import { pgTable } from "./base";
 import {
 	type ProgressDatePrecision,
 	ProgressDatePrecisionValues,
+	type ProgressCurrentSourceKind,
+	ProgressCurrentSourceKindValues,
 	type ProgressEntryKind,
 	ProgressEntryKindValues,
 	type ProgressSourceKind,
@@ -119,6 +121,9 @@ export const unitProgressEntry = pgTable(
 			)
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_entry_unit_idx").on(table.unitId),
+		index("unit_progress_entry_profile_unit_rezics_created_idx")
+			.on(table.profileId, table.unitId, table.createdAt.desc())
+			.where(sql`${table.deletedAt} is null and ${table.sourceKind} = 'rezics'`),
 		index("unit_progress_entry_content_structure_node_idx").on(table.contentStructureNodeId),
 		index("unit_progress_entry_content_structure_revision_idx").on(
 			table.contentStructureRevisionId,
@@ -175,6 +180,7 @@ export const unitProgress = pgTable(
 		lastSeenAt: createTimestampMsColumn().defaultNow().notNull(),
 		lastContentStructureNodeId: uuid(),
 		currentEntryId: uuid(),
+		currentSourceKind: text().$type<ProgressCurrentSourceKind>(),
 		visibility: resourceVisibility().default("private").notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
@@ -201,6 +207,22 @@ export const unitProgress = pgTable(
 			.where(sql`${table.deletedAt} is null and ${table.visibility} = 'public'`),
 		index("unit_progress_last_content_structure_node_idx").on(table.lastContentStructureNodeId),
 		index("unit_progress_current_entry_idx").on(table.currentEntryId),
+		check(
+			"unit_progress_current_source_kind_check",
+			sql`${table.currentSourceKind} is null or ${inArray(
+				table.currentSourceKind,
+				ProgressCurrentSourceKindValues,
+			)}`,
+		),
+		check(
+			"unit_progress_current_source_shape_check",
+			sql`case
+				when ${table.currentSourceKind} is null then ${table.currentEntryId} is null
+				when ${table.currentSourceKind} = 'journal' then ${table.currentEntryId} is not null
+				when ${table.currentSourceKind} = 'reading' then ${table.currentEntryId} is null
+				else false
+			end`,
+		),
 		check("unit_progress_value_check", sql`${table.progress} between 0 and 1`),
 		check(
 			"unit_progress_count_check",

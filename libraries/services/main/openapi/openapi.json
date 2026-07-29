@@ -89130,6 +89130,221 @@
 				"x-rezics-policy-operation-id": "getApiProgressByUnitIdNodes"
 			}
 		},
+		"/api/progress/{unitId}/nodes/{nodeId}/read": {
+			"post": {
+				"summary": "Record a Book chapter read",
+				"tags": ["Progress"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "nodeId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["completed", "journalEntryCreated", "record"],
+									"properties": {
+										"completed": { "const": true, "type": "boolean" },
+										"journalEntryCreated": { "type": "boolean" },
+										"record": {
+											"type": "object",
+											"required": [
+												"profileId",
+												"unitId",
+												"status",
+												"progress",
+												"isDeleted",
+												"completedCount",
+												"totalTimeMs",
+												"firstSeenAt",
+												"lastSeenAt",
+												"lastContentStructureNodeId",
+												"currentEntryId",
+												"lastReadAnchor",
+												"visibility",
+												"createdAt",
+												"updatedAt"
+											],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"unitId": { "format": "uuid", "type": "string" },
+												"status": {
+													"default": "backlog",
+													"type": "string",
+													"enum": [
+														"backlog",
+														"active",
+														"paused",
+														"completed",
+														"dropped"
+													]
+												},
+												"progress": { "type": "number" },
+												"isDeleted": { "type": "boolean" },
+												"completedCount": {
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
+												},
+												"totalTimeMs": {
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
+												},
+												"firstSeenAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"lastSeenAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"lastContentStructureNodeId": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "uuid", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"currentEntryId": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "uuid", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"lastReadAnchor": {
+													"nullable": true,
+													"anyOf": [{}, { "type": "null" }]
+												},
+												"visibility": {
+													"type": "string",
+													"enum": ["public", "unlisted", "private"]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"updatedAt": {
+													"format": "date-time",
+													"type": "string"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"ContentStructureNodeNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiProgressByUnitIdNodesByNodeIdRead",
+				"x-rezics-policy-operation-id": "postApiProgressByUnitIdNodesByNodeIdRead"
+			}
+		},
 		"/api/progress/{unitId}/complete": {
 			"post": {
 				"summary": "Complete current progress",

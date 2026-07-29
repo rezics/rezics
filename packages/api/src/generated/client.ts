@@ -435,6 +435,8 @@ import type {
 	DeleteApiProgressByUnitIdEntriesByEntryIdResponses,
 	GetApiProgressByUnitIdNodesOptions,
 	GetApiProgressByUnitIdNodesResponses,
+	PostApiProgressByUnitIdNodesByNodeIdReadOptions,
+	PostApiProgressByUnitIdNodesByNodeIdReadResponses,
 	PostApiProgressByUnitIdCompleteOptions,
 	PostApiProgressByUnitIdCompleteResponses,
 	PutApiProgressByUnitIdNodesByNodeIdOptions,
@@ -4957,6 +4959,26 @@ export function getApiProgressByUnitIdNodes<ThrowOnError extends boolean = true>
 		],
 		...config,
 	}) as Promise<RequestResult<GetApiProgressByUnitIdNodesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Record a Book chapter read
+ * {@link /api/progress/:unitId/nodes/:nodeId/read}
+ */
+export function postApiProgressByUnitIdNodesByNodeIdRead<ThrowOnError extends boolean = true>(
+	options: Options<PostApiProgressByUnitIdNodesByNodeIdReadOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiProgressByUnitIdNodesByNodeIdReadResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/progress/{unitId}/nodes/{nodeId}/read",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiProgressByUnitIdNodesByNodeIdReadResponses, ThrowOnError>>;
 }
 
 /**

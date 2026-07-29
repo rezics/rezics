@@ -34,6 +34,7 @@ import {
 } from "./schema";
 import {
 	CompletionStateResponse,
+	ChapterReadingProgressResponse,
 	ImportProgressResponse,
 	ProgressEntryListResponse,
 	ProgressEntryResponse,
@@ -48,14 +49,20 @@ import {
 	createProgressEntry,
 	deleteProgressEntry,
 	lockUnitProgress,
+	recordChapterReading,
 	refreshProgressSnapshot,
 	replaceProgressEntry,
 } from "./service";
 
 function toProgressResponse<
-	T extends { status: string; totalTimeMs: bigint; deletedAt?: Date | null },
+	T extends {
+		currentSourceKind?: string | null;
+		deletedAt?: Date | null;
+		status: string;
+		totalTimeMs: bigint;
+	},
 >(row: T) {
-	const { deletedAt, ...rest } = row;
+	const { currentSourceKind: _currentSourceKind, deletedAt, ...rest } = row;
 	return {
 		...rest,
 		status: row.status,
@@ -533,6 +540,39 @@ export default new Elysia({ prefix: "/progress" })
 			detail: { summary: "List completed Content Structure nodes", tags: ["Progress"] },
 		},
 	)
+	.post(
+		"/:unitId/nodes/:nodeId/read",
+		async ({ profile, authorization, params }) => {
+			await authorization.unit.ensureCanRead(params.unitId);
+			const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
+			const result = await database.transaction((tx) =>
+				recordChapterReading(tx, {
+					canReadUnpublished,
+					nodeId: params.nodeId,
+					now: new Date(),
+					profileId: profile.unitId,
+					unitId: params.unitId,
+				}),
+			);
+			return {
+				completed: true as const,
+				journalEntryCreated: result.journalEntryCreated,
+				record: toProgressResponse(result.record),
+			};
+		},
+		{
+			access: "write:interaction:write",
+			params: ProgressNodeParams,
+			response: {
+				[StatusCodes.OK]: ChapterReadingProgressResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNodeNotFound",
+				]),
+			},
+			detail: { summary: "Record a Book chapter read", tags: ["Progress"] },
+		},
+	)
 	.put(
 		"/:unitId",
 		async ({ profile, authorization, params, body }) => {
@@ -648,7 +688,12 @@ export default new Elysia({ prefix: "/progress" })
 					);
 				await tx
 					.update(unitProgress)
-					.set({ currentEntryId: null, deletedAt: now, lastSeenAt: now })
+					.set({
+						currentEntryId: null,
+						currentSourceKind: null,
+						deletedAt: now,
+						lastSeenAt: now,
+					})
 					.where(
 						and(
 							eq(unitProgress.profileId, profile.unitId),

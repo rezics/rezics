@@ -48,6 +48,7 @@ import { ContentLanguageControl } from "@/features/content-languages/components/
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { ChapterReadingProgress } from "@/features/progress/components/chapter-reading-progress";
 import { ReplyPostThread } from "@/features/posts/reply-thread";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
@@ -343,6 +344,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 			className="fixed inset-0 z-50 grid grid-rows-[3.75rem_minmax(0,1fr)] overflow-hidden bg-background"
 			id="main-content"
 		>
+			<ChapterReadingProgress nodeId={query.data.nodeId} unitId={query.data.bookId} />
 			<header className="flex min-w-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:px-5">
 				<Button asChild className="size-11 sm:size-10" size="icon-xl" variant="quiet">
 					<Link
@@ -434,7 +436,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 									onValueChange={({ value }) => {
 										if (value === "automatic") setLanguageSelection(null);
 										else if (isContentLanguage(value))
-											setLanguageSelection({ chapterId, language: value });
+											setLanguageSelection({
+												chapterId,
+												language: value,
+											});
 									}}
 									value={selectedLanguage ?? "automatic"}
 								>
