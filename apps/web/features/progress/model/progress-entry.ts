@@ -10,9 +10,6 @@ export type ProgressEntryKind = (typeof ProgressEntryKinds)[number];
 export const ProgressDatePrecisions = ["instant", "day", "month", "year", "unknown"] as const;
 export type ProgressDatePrecision = (typeof ProgressDatePrecisions)[number];
 
-export const ProgressSourceKinds = ["rezics", "manual", "import"] as const;
-export type ProgressSourceKind = (typeof ProgressSourceKinds)[number];
-
 export interface ProgressEntryDraft {
 	readonly affectsCurrent: boolean;
 	readonly datePrecision: ProgressDatePrecision;
@@ -20,9 +17,6 @@ export interface ProgressEntryDraft {
 	readonly entryKind: ProgressEntryKind;
 	readonly lastNodeId: string;
 	readonly percentage: string;
-	readonly sourceExternalId: string;
-	readonly sourceKind: ProgressSourceKind;
-	readonly sourceProvider: string;
 	readonly status: ProgressStatus;
 	readonly totalMinutes: string;
 }
@@ -34,9 +28,6 @@ export interface ProgressEntryWrite {
 	readonly lastContentStructureNodeId: string | null;
 	readonly occurredAt: string | null;
 	readonly progress: number;
-	readonly sourceExternalId: string | null;
-	readonly sourceKind: ProgressSourceKind;
-	readonly sourceProvider: string | null;
 	readonly status: ProgressStatus;
 	readonly totalTimeMs: number;
 }
@@ -53,9 +44,6 @@ export function createProgressEntryDraft(
 			entryKind: "update",
 			lastNodeId: "",
 			percentage: "0",
-			sourceExternalId: "",
-			sourceKind: "manual",
-			sourceProvider: "",
 			status: "active",
 			totalMinutes: "0",
 		};
@@ -68,9 +56,6 @@ export function createProgressEntryDraft(
 		entryKind: entry.entryKind,
 		lastNodeId: entry.lastContentStructureNodeId ?? "",
 		percentage: String(Math.round(clampProgress(entry.progress) * 100)),
-		sourceExternalId: entry.sourceExternalId ?? "",
-		sourceKind: entry.sourceKind,
-		sourceProvider: entry.sourceProvider ?? "",
 		status: toProgressStatus(entry.status),
 		totalMinutes: String(Math.round(Math.max(0, Number(entry.totalTimeMs)) / 60_000)),
 	};
@@ -99,9 +84,6 @@ export function createProgressEntryWrite(
 		lastContentStructureNodeId: completion ? null : draft.lastNodeId || null,
 		occurredAt,
 		progress: percentage / 100,
-		sourceExternalId: draft.sourceExternalId.trim() || null,
-		sourceKind: draft.sourceKind,
-		sourceProvider: draft.sourceProvider.trim() || null,
 		status: completion ? "completed" : draft.status,
 		totalTimeMs: totalMinutes * 60_000,
 	};

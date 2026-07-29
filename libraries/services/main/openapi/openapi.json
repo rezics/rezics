@@ -87072,285 +87072,6 @@
 				"x-rezics-policy-operation-id": "getApiProgress"
 			}
 		},
-		"/api/progress/import": {
-			"post": {
-				"summary": "Import Progress journal entries",
-				"tags": ["Progress"],
-				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["items", "sourceProvider"],
-								"properties": {
-									"items": {
-										"minItems": 1,
-										"maxItems": 500,
-										"type": "array",
-										"items": {
-											"additionalProperties": false,
-											"type": "object",
-											"required": [
-												"unitId",
-												"entryKind",
-												"status",
-												"occurredAt",
-												"datePrecision"
-											],
-											"properties": {
-												"unitId": { "format": "uuid", "type": "string" },
-												"entryKind": {
-													"default": "update",
-													"type": "string",
-													"enum": ["update", "completion"]
-												},
-												"status": {
-													"type": "string",
-													"enum": [
-														"backlog",
-														"active",
-														"paused",
-														"completed",
-														"dropped"
-													]
-												},
-												"progress": {
-													"minimum": 0,
-													"maximum": 1,
-													"type": "number"
-												},
-												"totalTimeMs": {
-													"minimum": 0,
-													"maximum": 9007199254740991,
-													"anyOf": [
-														{
-															"format": "integer",
-															"default": 0,
-															"type": "string"
-														},
-														{
-															"minimum": 0,
-															"maximum": 9007199254740991,
-															"type": "integer"
-														}
-													]
-												},
-												"lastContentStructureNodeId": {
-													"nullable": true,
-													"anyOf": [
-														{ "format": "uuid", "type": "string" },
-														{ "type": "null" }
-													]
-												},
-												"occurredAt": {
-													"nullable": true,
-													"anyOf": [
-														{ "format": "date-time", "type": "string" },
-														{ "type": "null" }
-													]
-												},
-												"datePrecision": {
-													"default": "instant",
-													"type": "string",
-													"enum": [
-														"instant",
-														"day",
-														"month",
-														"year",
-														"unknown"
-													]
-												},
-												"sourceProvider": {
-													"nullable": true,
-													"anyOf": [
-														{
-															"minLength": 1,
-															"maxLength": 100,
-															"type": "string"
-														},
-														{ "type": "null" }
-													]
-												},
-												"sourceExternalId": {
-													"nullable": true,
-													"anyOf": [
-														{
-															"minLength": 1,
-															"maxLength": 500,
-															"type": "string"
-														},
-														{ "type": "null" }
-													]
-												},
-												"affectsCurrent": {
-													"default": false,
-													"type": "boolean"
-												}
-											}
-										}
-									},
-									"sourceProvider": {
-										"minLength": 1,
-										"maxLength": 100,
-										"type": "string"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["createdCount", "entryIds"],
-									"properties": {
-										"createdCount": {
-											"minimum": 1,
-											"maximum": 500,
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
-												},
-												{ "minimum": 1, "maximum": 500, "type": "integer" }
-											]
-										},
-										"entryIds": {
-											"minItems": 1,
-											"maxItems": 500,
-											"type": "array",
-											"items": { "format": "uuid", "type": "string" }
-										}
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Request body could not be parsed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": [
-														"UnitNotFound",
-														"ContentStructureNodeNotFound"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Response for status 422",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "ValidationError",
-															"type": "string",
-															"enum": ["ValidationError"]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/ValidationError" }
-									]
-								}
-							}
-						}
-					},
-					"429": {
-						"description": "API token resource limit exceeded",
-						"headers": {
-							"Retry-After": {
-								"description": "Seconds until the limiting window or concurrency lease can be retried",
-								"schema": { "type": "integer", "minimum": 1 }
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"type": "string",
-													"enum": ["ApiTokenRateLimitExceeded"]
-												},
-												"message": { "type": "string" },
-												"details": {
-													"$ref": "#/components/schemas/JsonValue"
-												}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "postApiProgressImport",
-				"x-rezics-policy-operation-id": "postApiProgressImport"
-			}
-		},
 		"/api/progress/{unitId}": {
 			"get": {
 				"summary": "Get progress state",
@@ -87964,9 +87685,6 @@
 													"contentStructureRevisionId",
 													"occurredAt",
 													"datePrecision",
-													"sourceKind",
-													"sourceProvider",
-													"sourceExternalId",
 													"affectsCurrent",
 													"reviewId",
 													"createdAt",
@@ -88063,25 +87781,6 @@
 															"month",
 															"year",
 															"unknown"
-														]
-													},
-													"sourceKind": {
-														"default": "rezics",
-														"type": "string",
-														"enum": ["rezics", "manual", "import"]
-													},
-													"sourceProvider": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"sourceExternalId": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
 														]
 													},
 													"affectsCurrent": { "type": "boolean" },
@@ -88287,22 +87986,7 @@
 										"type": "string",
 										"enum": ["instant", "day", "month", "year", "unknown"]
 									},
-									"sourceProvider": {
-										"nullable": true,
-										"anyOf": [
-											{ "minLength": 1, "maxLength": 100, "type": "string" },
-											{ "type": "null" }
-										]
-									},
-									"sourceExternalId": {
-										"nullable": true,
-										"anyOf": [
-											{ "minLength": 1, "maxLength": 500, "type": "string" },
-											{ "type": "null" }
-										]
-									},
-									"affectsCurrent": { "default": false, "type": "boolean" },
-									"sourceKind": { "type": "string", "enum": ["manual", "import"] }
+									"affectsCurrent": { "default": false, "type": "boolean" }
 								}
 							}
 						}
@@ -88329,9 +88013,6 @@
 										"contentStructureRevisionId",
 										"occurredAt",
 										"datePrecision",
-										"sourceKind",
-										"sourceProvider",
-										"sourceExternalId",
 										"affectsCurrent",
 										"reviewId",
 										"createdAt",
@@ -88410,19 +88091,6 @@
 											"default": "instant",
 											"type": "string",
 											"enum": ["instant", "day", "month", "year", "unknown"]
-										},
-										"sourceKind": {
-											"default": "rezics",
-											"type": "string",
-											"enum": ["rezics", "manual", "import"]
-										},
-										"sourceProvider": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
-										"sourceExternalId": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
 										"affectsCurrent": { "type": "boolean" },
 										"reviewId": {
@@ -88581,13 +88249,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": [
-									"entryKind",
-									"status",
-									"occurredAt",
-									"datePrecision",
-									"sourceKind"
-								],
+								"required": ["entryKind", "status", "occurredAt", "datePrecision"],
 								"properties": {
 									"entryKind": {
 										"default": "update",
@@ -88636,26 +88298,7 @@
 										"type": "string",
 										"enum": ["instant", "day", "month", "year", "unknown"]
 									},
-									"sourceProvider": {
-										"nullable": true,
-										"anyOf": [
-											{ "minLength": 1, "maxLength": 100, "type": "string" },
-											{ "type": "null" }
-										]
-									},
-									"sourceExternalId": {
-										"nullable": true,
-										"anyOf": [
-											{ "minLength": 1, "maxLength": 500, "type": "string" },
-											{ "type": "null" }
-										]
-									},
-									"affectsCurrent": { "default": false, "type": "boolean" },
-									"sourceKind": {
-										"default": "rezics",
-										"type": "string",
-										"enum": ["rezics", "manual", "import"]
-									}
+									"affectsCurrent": { "default": false, "type": "boolean" }
 								}
 							}
 						}
@@ -88682,9 +88325,6 @@
 										"contentStructureRevisionId",
 										"occurredAt",
 										"datePrecision",
-										"sourceKind",
-										"sourceProvider",
-										"sourceExternalId",
 										"affectsCurrent",
 										"reviewId",
 										"createdAt",
@@ -88763,19 +88403,6 @@
 											"default": "instant",
 											"type": "string",
 											"enum": ["instant", "day", "month", "year", "unknown"]
-										},
-										"sourceKind": {
-											"default": "rezics",
-											"type": "string",
-											"enum": ["rezics", "manual", "import"]
-										},
-										"sourceProvider": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
-										"sourceExternalId": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
 										"affectsCurrent": { "type": "boolean" },
 										"reviewId": {

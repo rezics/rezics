@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
 
@@ -241,7 +242,7 @@ export default {
 	viewProgressHistory: "查看足迹",
 	progressJournal: {
 		title: "我的足迹",
-		description: "每次状态变更都是一条可编辑的事件，也可以保留其他平台的旧记录。",
+		description: "每次状态变更都是一条可编辑的事件。",
 		backToUnit: "返回作品",
 		backToProgress: "返回进度列表",
 		historyTitle: "进度历程",
@@ -255,6 +256,8 @@ export default {
 		addHistory: "添加过往记录",
 		addHistoryDescription: "补记一次过往的进度变更，默认不会改动当前进度。",
 		importHistory: "导入历史",
+		importHelpDescription: `如果您需要批量导入，可以前往 ${verbatimTerms.api.value} 令牌页面创建令牌；必要时，也可以寻求 ${verbatimTerms.ai.value} 帮助。`,
+		openApiTokens: `前往 ${verbatimTerms.api.value} 令牌页面`,
 		noEntries: "还没有进度足迹。",
 		loadMore: "加载更多",
 		unknownDate: "日期不详",
@@ -274,17 +277,11 @@ export default {
 			year: "年份",
 			unknown: "日期不详",
 		},
-		source: "来源",
-		sourceKinds: { rezics: "在本站记录", manual: "手动补记", import: "外部导入" },
-		sourceProvider: "来源平台",
-		sourceProviderPlaceholder: "例如：原来使用的平台",
-		sourceProviderDescription: "选填；用于说明这条记录最初来自哪个平台。",
-		sourceExternalId: "外部记录标识符",
 		affectsCurrent: "将这条事件设为当前进度",
 		affectsCurrentDescription: "开启后，这条事件会更新该作品当前显示的状态与进度。",
 		saveEntry: "保存事件",
 		editEntry: "编辑事件",
-		editDescription: "修正这次状态变更的日期、进度或来源。",
+		editDescription: "修正这次状态变更的日期或进度。",
 		deleteEntry: "删除事件",
 		deletePrompt: "这条进度事件将被删除，汇总进度与完成次数也会重新计算。",
 		completionIncrement: "完成次数增加",
@@ -292,18 +289,6 @@ export default {
 		viewReview: "查看绑定的评论",
 		linkedReview: "这篇评论对应的足迹",
 		reviewBindingNotice: "这篇评论会绑定到你从进度页面选择的那一次足迹。",
-		importDescription: "从其他平台带入过往足迹；导入记录默认不改变当前进度。",
-		importFormat: "文件格式",
-		importFormatDescription: "第一行必须完全按照以下字段顺序，之后每行代表一条事件。",
-		importFormatRules: insert(
-			"{{format}} 的进度字段使用 0 到 1 的小数；日期按对应精确度填写完整时间、日期、月份或年份。",
-			{ format: String },
-		),
-		importProviderDescription: "本次导入的所有事件都会标记为来自这个平台。",
-		importFile: "导入文件",
-		importInvalidLine: insert("第 {{line}} 行格式不正确，请修正后重试。", { line: Number }),
-		importReady: insert("已读取 {{count}} 条事件，可以导入。", { count: Number }),
-		importComplete: insert("已成功导入 {{count}} 条事件。", { count: Number }),
 	},
 	progressNotRecorded: "尚未记录",
 	completionCountChange: insert("完成次数将由 {{current}} 增加为 {{next}}。", {

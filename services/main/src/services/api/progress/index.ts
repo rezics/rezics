@@ -22,7 +22,6 @@ import { InvalidPaginationCursor } from "../../pagination/errors";
 import {
 	CompleteProgressBody,
 	CreateProgressEntryBody,
-	ImportProgressBody,
 	ListProgressQuery,
 	ListProgressEntriesQuery,
 	ProgressEntryParams,
@@ -35,7 +34,6 @@ import {
 import {
 	CompletionStateResponse,
 	ChapterReadingProgressResponse,
-	ImportProgressResponse,
 	ProgressEntryListResponse,
 	ProgressEntryResponse,
 	ProgressListResponse,
@@ -50,19 +48,18 @@ import {
 	deleteProgressEntry,
 	lockUnitProgress,
 	recordChapterReading,
-	refreshProgressSnapshot,
 	replaceProgressEntry,
 } from "./service";
 
 function toProgressResponse<
 	T extends {
-		currentSourceKind?: string | null;
+		currentBasis?: string | null;
 		deletedAt?: Date | null;
 		status: string;
 		totalTimeMs: bigint;
 	},
 >(row: T) {
-	const { currentSourceKind: _currentSourceKind, deletedAt, ...rest } = row;
+	const { currentBasis: _currentBasis, deletedAt, ...rest } = row;
 	return {
 		...rest,
 		status: row.status,
@@ -87,9 +84,6 @@ function toProgressEntryResponse<
 		profileId: string;
 		progress: number;
 		reviewId?: string | null;
-		sourceExternalId: string | null;
-		sourceKind: string;
-		sourceProvider: string | null;
 		status: string;
 		totalTimeMs: bigint;
 		unitId: string;
@@ -228,64 +222,6 @@ export default new Elysia({ prefix: "/progress" })
 			detail: { summary: "List current profile progress", tags: ["Progress"] },
 		},
 	)
-	.post(
-		"/import",
-		async ({ profile, authorization, body }) => {
-			const unitIds = [...new Set(body.items.map((item) => item.unitId))].sort();
-			await Promise.all(unitIds.map((unitId) => authorization.unit.ensureCanRead(unitId)));
-			const entryIds = await database.transaction(async (tx) => {
-				for (const unitId of unitIds) await lockUnitProgress(tx, profile.unitId, unitId);
-				const ids: string[] = [];
-				const preferredCurrentEntryByUnitId = new Map<string, string>();
-				for (const item of body.items) {
-					const entry = await createProgressEntry(
-						tx,
-						profile.unitId,
-						item.unitId,
-						{
-							entryKind: item.entryKind,
-							status: item.status,
-							progress: item.progress,
-							totalTimeMs: item.totalTimeMs,
-							lastContentStructureNodeId: item.lastContentStructureNodeId,
-							occurredAt: item.occurredAt,
-							datePrecision: item.datePrecision,
-							sourceKind: "import",
-							sourceProvider: body.sourceProvider,
-							sourceExternalId: item.sourceExternalId,
-							affectsCurrent: item.affectsCurrent ?? false,
-						},
-						{ refreshSnapshot: false },
-					);
-					ids.push(entry.id);
-					if (entry.affectsCurrent)
-						preferredCurrentEntryByUnitId.set(item.unitId, entry.id);
-				}
-				for (const unitId of unitIds)
-					await refreshProgressSnapshot(
-						tx,
-						profile.unitId,
-						unitId,
-						preferredCurrentEntryByUnitId.get(unitId),
-					);
-				return ids;
-			});
-			return { createdCount: entryIds.length, entryIds };
-		},
-		{
-			access: "write:interaction:write",
-			body: ImportProgressBody,
-			response: {
-				[StatusCodes.OK]: ImportProgressResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNodeNotFound",
-				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-			},
-			detail: { summary: "Import Progress journal entries", tags: ["Progress"] },
-		},
-	)
 	.get(
 		"/:unitId",
 		async ({ profile, authorization, params }) => {
@@ -337,9 +273,6 @@ export default new Elysia({ prefix: "/progress" })
 					contentStructureRevisionId: unitProgressEntry.contentStructureRevisionId,
 					occurredAt: unitProgressEntry.occurredAt,
 					datePrecision: unitProgressEntry.datePrecision,
-					sourceKind: unitProgressEntry.sourceKind,
-					sourceProvider: unitProgressEntry.sourceProvider,
-					sourceExternalId: unitProgressEntry.sourceExternalId,
 					affectsCurrent: unitProgressEntry.affectsCurrent,
 					reviewId: postProgressEntry.postId,
 					createdAt: unitProgressEntry.createdAt,
@@ -406,9 +339,6 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: body.lastContentStructureNodeId,
 					occurredAt: body.occurredAt,
 					datePrecision: body.datePrecision,
-					sourceKind: body.sourceKind ?? "manual",
-					sourceProvider: body.sourceProvider,
-					sourceExternalId: body.sourceExternalId,
 					affectsCurrent: body.affectsCurrent ?? false,
 				});
 			});
@@ -443,9 +373,6 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: body.lastContentStructureNodeId,
 					occurredAt: body.occurredAt,
 					datePrecision: body.datePrecision,
-					sourceKind: body.sourceKind ?? "manual",
-					sourceProvider: body.sourceProvider,
-					sourceExternalId: body.sourceExternalId,
 					affectsCurrent: body.affectsCurrent ?? false,
 				});
 			});
@@ -589,7 +516,6 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: body.lastContentStructureNodeId,
 					occurredAt: now,
 					datePrecision: "instant",
-					sourceKind: "rezics",
 					affectsCurrent: true,
 				});
 				if (body.visibility !== undefined)
@@ -634,7 +560,6 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: null,
 					occurredAt: now,
 					datePrecision: "instant",
-					sourceKind: "rezics",
 					affectsCurrent: true,
 				});
 				if (body.visibility !== undefined)
@@ -691,7 +616,7 @@ export default new Elysia({ prefix: "/progress" })
 					.update(unitProgress)
 					.set({
 						currentEntryId: null,
-						currentSourceKind: null,
+						currentBasis: null,
 						deletedAt: now,
 						lastSeenAt: now,
 					})

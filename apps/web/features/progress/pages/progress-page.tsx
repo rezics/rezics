@@ -6,7 +6,6 @@ import {
 	type GetApiProgressStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { Import } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import {
@@ -39,6 +38,7 @@ import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { invalidateProgressQueries } from "../data/progress-cache";
 import { toProgressStatus } from "../model/progress-record";
 import { unitProgressHref } from "../routing/progress-routes";
+import { ProgressImportDialog } from "../components/progress-import-dialog";
 
 export function ProgressPage() {
 	return (
@@ -72,14 +72,7 @@ function ProgressList() {
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
-				action={
-					<Button asChild variant="outline">
-						<Link href="/me/progress/import">
-							<Import aria-hidden />
-							{t.engagement.progressJournal.importHistory}
-						</Link>
-					</Button>
-				}
+				action={<ProgressImportDialog variant="outline" />}
 				title={t.engagement.progress}
 			/>
 			{query.data?.items.length ? (

@@ -12,9 +12,6 @@ CREATE TABLE "unit_progress_entry" (
   "content_structure_revision_id" uuid NULL,
   "occurred_at" timestamptz(3) NULL,
   "date_precision" text NOT NULL,
-  "source_kind" text NOT NULL,
-  "source_provider" text NULL,
-  "source_external_id" text NULL,
   "affects_current" boolean NOT NULL DEFAULT true,
   "deleted_at" timestamptz(3) NULL,
   "created_at" timestamptz(3) NOT NULL DEFAULT now(),
@@ -31,8 +28,6 @@ CREATE TABLE "unit_progress_entry" (
   CONSTRAINT "unit_progress_entry_deleted_at_check" CHECK ((deleted_at IS NULL) OR (deleted_at >= created_at)),
   CONSTRAINT "unit_progress_entry_kind_check" CHECK (entry_kind = ANY (ARRAY['update'::text, 'completion'::text])),
   CONSTRAINT "unit_progress_entry_occurred_at_check" CHECK ((date_precision = 'unknown'::text) = (occurred_at IS NULL)),
-  CONSTRAINT "unit_progress_entry_source_kind_check" CHECK (source_kind = ANY (ARRAY['rezics'::text, 'manual'::text, 'import'::text])),
-  CONSTRAINT "unit_progress_entry_source_length_check" CHECK (((source_provider IS NULL) OR ((char_length(source_provider) >= 1) AND (char_length(source_provider) <= 100))) AND ((source_external_id IS NULL) OR ((char_length(source_external_id) >= 1) AND (char_length(source_external_id) <= 500)))),
   CONSTRAINT "unit_progress_entry_total_time_check" CHECK (total_time_ms >= 0),
   CONSTRAINT "unit_progress_entry_value_check" CHECK ((progress >= (0)::double precision) AND (progress <= (1)::double precision))
 );

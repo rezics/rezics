@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = jaTerminology.realm;
 
@@ -245,7 +246,7 @@ export default {
 	viewProgressHistory: "足跡を見る",
 	progressJournal: {
 		title: "私の足跡",
-		description: "状態の変更を編集可能なイベントとして残し、他のサービスの履歴も保存できます。",
+		description: "状態の変更を編集可能なイベントとして残します。",
 		backToUnit: "作品に戻る",
 		backToProgress: "進捗一覧に戻る",
 		historyTitle: "進捗履歴",
@@ -259,6 +260,8 @@ export default {
 		addHistory: "過去の記録を追加",
 		addHistoryDescription: "過去の進捗変更を追加します。初期設定では現在の進捗は変わりません。",
 		importHistory: "履歴をインポート",
+		importHelpDescription: `履歴を一括でインポートする場合は、${verbatimTerms.api.value}トークンのページでトークンを作成してください。必要に応じて、${verbatimTerms.ai.value}に相談することもできます。`,
+		openApiTokens: `${verbatimTerms.api.value}トークンのページへ`,
 		noEntries: "進捗の足跡はまだありません。",
 		loadMore: "さらに読み込む",
 		unknownDate: "日付不明",
@@ -278,18 +281,12 @@ export default {
 			year: "年",
 			unknown: "日付不明",
 		},
-		source: "出典",
-		sourceKinds: { rezics: "このサイトで記録", manual: "手動で追加", import: "インポート" },
-		sourceProvider: "移行元サービス",
-		sourceProviderPlaceholder: "例：以前使っていたサービス",
-		sourceProviderDescription: "任意。この記録が元々どのサービスにあったかを示します。",
-		sourceExternalId: "外部記録の識別子",
 		affectsCurrent: "このイベントを現在の進捗にする",
 		affectsCurrentDescription:
 			"有効にすると、この作品に表示される現在の状態と進捗が更新されます。",
 		saveEntry: "イベントを保存",
 		editEntry: "イベントを編集",
-		editDescription: "この状態変更の日付、進捗、出典を修正します。",
+		editDescription: "この状態変更の日付や進捗を修正します。",
 		deleteEntry: "イベントを削除",
 		deletePrompt: "この進捗イベントを削除し、進捗の集計と完了回数を再計算します。",
 		completionIncrement: "完了回数の増加",
@@ -297,26 +294,6 @@ export default {
 		viewReview: "紐づいたレビューを見る",
 		linkedReview: "このレビューに紐づく足跡",
 		reviewBindingNotice: "このレビューは進捗ページで選択した足跡に紐づきます。",
-		importDescription:
-			"他のサービスから過去の足跡を取り込みます。初期設定では現在の進捗は変わりません。",
-		importFormat: "ファイル形式",
-		importFormatDescription:
-			"1行目は次の列順と完全に一致させ、以降は1行につき1イベントを記述します。",
-		importFormatRules: insert(
-			"{{format}} の進捗欄は 0〜1 の値です。日付は指定した精度に合わせて日時、日、月、年で入力します。",
-			{ format: String },
-		),
-		importProviderDescription:
-			"今回取り込むすべてのイベントに、この移行元サービスが記録されます。",
-		importFile: "インポートファイル",
-		importInvalidLine: insert(
-			"{{line}} 行目の形式が正しくありません。修正して再試行してください。",
-			{
-				line: Number,
-			},
-		),
-		importReady: insert("{{count}} 件のイベントを読み込みました。", { count: Number }),
-		importComplete: insert("{{count}} 件のイベントをインポートしました。", { count: Number }),
 	},
 	progressNotRecorded: "記録されていません",
 	completionCountChange: insert("完了回数は {{current}} から {{next}} に増加します。", {

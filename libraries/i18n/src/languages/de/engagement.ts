@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { deTerminology } from "@rezics/i18n/terminology/de";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = deTerminology.realm;
 
@@ -247,8 +248,7 @@ export default {
 	viewProgressHistory: "Fortschrittsverlauf ansehen",
 	progressJournal: {
 		title: "Mein Fortschrittsverlauf",
-		description:
-			"Jede Statusänderung bleibt als bearbeitbares Ereignis erhalten, auch aus anderen Plattformen.",
+		description: "Jede Statusänderung bleibt als bearbeitbares Ereignis erhalten.",
 		backToUnit: "Zurück zum Werk",
 		backToProgress: "Zurück zum Fortschritt",
 		historyTitle: "Fortschrittsverlauf",
@@ -263,6 +263,8 @@ export default {
 		addHistoryDescription:
 			"Füge eine frühere Änderung hinzu, ohne standardmäßig den aktuellen Fortschritt zu ändern.",
 		importHistory: "Verlauf importieren",
+		importHelpDescription: `Wenn du Datensätze gesammelt importieren möchtest, erstelle auf der Seite für ${verbatimTerms.api.value}-Token ein Token. Bei Bedarf kannst du dabei ${verbatimTerms.ai.value}-Unterstützung nutzen.`,
+		openApiTokens: `Zur Seite für ${verbatimTerms.api.value}-Token`,
 		noEntries: "Noch keine Fortschrittsereignisse.",
 		loadMore: "Mehr laden",
 		unknownDate: "Datum unbekannt",
@@ -282,19 +284,12 @@ export default {
 			year: "Jahr",
 			unknown: "Datum unbekannt",
 		},
-		source: "Quelle",
-		sourceKinds: { rezics: "Hier erfasst", manual: "Manuell ergänzt", import: "Importiert" },
-		sourceProvider: "Quellplattform",
-		sourceProviderPlaceholder: "Zum Beispiel deine frühere Plattform",
-		sourceProviderDescription:
-			"Optional; bezeichnet die Plattform, auf der dieses Ereignis ursprünglich erfasst wurde.",
-		sourceExternalId: "Externe Datensatzkennung",
 		affectsCurrent: "Dieses Ereignis als aktuellen Fortschritt verwenden",
 		affectsCurrentDescription:
 			"Wenn aktiviert, aktualisiert dieses Ereignis den derzeit angezeigten Status und Fortschritt.",
 		saveEntry: "Ereignis speichern",
 		editEntry: "Ereignis bearbeiten",
-		editDescription: "Korrigiere Datum, Fortschritt oder Quelle dieser Statusänderung.",
+		editDescription: "Korrigiere Datum oder Fortschritt dieser Statusänderung.",
 		deleteEntry: "Ereignis löschen",
 		deletePrompt:
 			"Dieses Fortschrittsereignis wird gelöscht; Fortschritt und Abschlüsse werden neu berechnet.",
@@ -304,28 +299,6 @@ export default {
 		linkedReview: "Mit dieser Rezension verknüpfter Fortschritt",
 		reviewBindingNotice:
 			"Diese Rezension wird mit dem auf der Fortschrittsseite gewählten Ereignis verknüpft.",
-		importDescription:
-			"Übernimm frühere Ereignisse von einer anderen Plattform. Der aktuelle Fortschritt bleibt standardmäßig unverändert.",
-		importFormat: "Dateiformat",
-		importFormatDescription:
-			"Die erste Zeile muss genau diese Spaltenreihenfolge verwenden. Jede weitere Zeile ist ein Ereignis.",
-		importFormatRules: insert(
-			"Der Fortschrittswert in {{format}} liegt zwischen 0 und 1. Datumswerte werden passend zur Genauigkeit als Zeitpunkt, Tag, Monat oder Jahr angegeben.",
-			{ format: String },
-		),
-		importProviderDescription:
-			"Alle Ereignisse dieses Imports werden mit dieser Quellplattform markiert.",
-		importFile: "Importdatei",
-		importInvalidLine: insert(
-			"Zeile {{line}} ist ungültig. Bitte korrigieren und erneut versuchen.",
-			{
-				line: Number,
-			},
-		),
-		importReady: insert("{{count}} Ereignisse gelesen und zum Import bereit.", {
-			count: Number,
-		}),
-		importComplete: insert("{{count}} Ereignisse erfolgreich importiert.", { count: Number }),
 	},
 	progressNotRecorded: "Nicht erfasst",
 	completionCountChange: insert(

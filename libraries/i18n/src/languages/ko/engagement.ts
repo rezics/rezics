@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { koTerminology } from "@rezics/i18n/terminology/ko";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = koTerminology.realm;
 
@@ -245,8 +246,7 @@ export default {
 	viewProgressHistory: "발자취 보기",
 	progressJournal: {
 		title: "나의 발자취",
-		description:
-			"상태 변경을 편집 가능한 이벤트로 남기고 다른 플랫폼의 기록도 보관할 수 있습니다.",
+		description: "상태 변경을 편집 가능한 이벤트로 남깁니다.",
 		backToUnit: "작품으로 돌아가기",
 		backToProgress: "진행 목록으로 돌아가기",
 		historyTitle: "진행 기록",
@@ -261,6 +261,8 @@ export default {
 		addHistoryDescription:
 			"과거 진행 변경을 추가합니다. 기본적으로 현재 진행률은 바뀌지 않습니다.",
 		importHistory: "기록 가져오기",
+		importHelpDescription: `기록을 일괄로 가져오려면 ${verbatimTerms.api.value} 토큰 페이지에서 토큰을 만드세요. 필요한 경우 ${verbatimTerms.ai.value}의 도움을 받을 수 있습니다.`,
+		openApiTokens: `${verbatimTerms.api.value} 토큰 페이지로 이동`,
 		noEntries: "아직 진행 발자취가 없습니다.",
 		loadMore: "더 불러오기",
 		unknownDate: "날짜 미상",
@@ -280,18 +282,12 @@ export default {
 			year: "연도",
 			unknown: "날짜 미상",
 		},
-		source: "출처",
-		sourceKinds: { rezics: "여기에서 기록", manual: "직접 추가", import: "가져온 기록" },
-		sourceProvider: "출처 플랫폼",
-		sourceProviderPlaceholder: "예: 이전에 사용하던 플랫폼",
-		sourceProviderDescription: "선택 사항입니다. 이 기록이 원래 있던 플랫폼을 표시합니다.",
-		sourceExternalId: "외부 기록 식별자",
 		affectsCurrent: "이 이벤트를 현재 진행률로 사용",
 		affectsCurrentDescription:
 			"사용하면 이 작품에 표시되는 현재 상태와 진행률이 업데이트됩니다.",
 		saveEntry: "이벤트 저장",
 		editEntry: "이벤트 편집",
-		editDescription: "이 상태 변경의 날짜, 진행률 또는 출처를 수정합니다.",
+		editDescription: "이 상태 변경의 날짜나 진행률을 수정합니다.",
 		deleteEntry: "이벤트 삭제",
 		deletePrompt: "이 진행 이벤트를 삭제하고 진행률 집계와 완료 횟수를 다시 계산합니다.",
 		completionIncrement: "완료 횟수 증가",
@@ -299,27 +295,6 @@ export default {
 		viewReview: "연결된 리뷰 보기",
 		linkedReview: "이 리뷰에 연결된 발자취",
 		reviewBindingNotice: "이 리뷰는 진행 페이지에서 선택한 발자취에 연결됩니다.",
-		importDescription:
-			"다른 플랫폼의 과거 발자취를 가져옵니다. 기본적으로 현재 진행률은 바뀌지 않습니다.",
-		importFormat: "파일 형식",
-		importFormatDescription:
-			"첫 행은 다음 열 순서와 정확히 같아야 하며 이후 각 행은 하나의 이벤트입니다.",
-		importFormatRules: insert(
-			"{{format}}의 진행 값은 0~1입니다. 날짜는 지정한 정확도에 맞춰 시각, 날짜, 월 또는 연도로 입력하세요.",
-			{ format: String },
-		),
-		importProviderDescription: "이번에 가져오는 모든 이벤트에 이 출처 플랫폼이 표시됩니다.",
-		importFile: "가져올 파일",
-		importInvalidLine: insert(
-			"{{line}}번째 행의 형식이 올바르지 않습니다. 수정 후 다시 시도하세요.",
-			{
-				line: Number,
-			},
-		),
-		importReady: insert("이벤트 {{count}}개를 읽었으며 가져올 준비가 되었습니다.", {
-			count: Number,
-		}),
-		importComplete: insert("이벤트 {{count}}개를 성공적으로 가져왔습니다.", { count: Number }),
 	},
 	progressNotRecorded: "기록되지 않음",
 	completionCountChange: insert("완료 횟수가 {{current}}에서 {{next}}로 증가합니다.", {

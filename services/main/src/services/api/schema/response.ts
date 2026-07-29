@@ -30,7 +30,6 @@ import {
 	CreditAttributionRoleValues,
 	ProgressDatePrecisionValues,
 	ProgressEntryKindValues,
-	ProgressSourceKindValues,
 	ProgressStatusValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
@@ -754,7 +753,6 @@ export const ProfileActivityResponse = t.Object({
 const ProgressStatusResponse = t.UnionEnum(ProgressStatusValues);
 const ProgressEntryKindResponse = t.UnionEnum(ProgressEntryKindValues);
 const ProgressDatePrecisionResponse = t.UnionEnum(ProgressDatePrecisionValues);
-const ProgressSourceKindResponse = t.UnionEnum(ProgressSourceKindValues);
 export const ProgressListResponse = t.Object({
 	items: t.Array(
 		t.Object({
@@ -809,9 +807,6 @@ export const ProgressEntryResponse = t.Object({
 	contentStructureRevisionId: t.Nullable(Uuid),
 	occurredAt: t.Nullable(DateTime),
 	datePrecision: ProgressDatePrecisionResponse,
-	sourceKind: ProgressSourceKindResponse,
-	sourceProvider: NullableText,
-	sourceExternalId: NullableText,
 	affectsCurrent: t.Boolean(),
 	reviewId: t.Nullable(Uuid),
 	createdAt: DateTime,
@@ -829,10 +824,6 @@ const ReviewProgressEntryResponse = t.Object({
 	completionDelta: t.Integer({ minimum: 0, maximum: 1 }),
 	occurredAt: t.Nullable(DateTime),
 	datePrecision: ProgressDatePrecisionResponse,
-});
-export const ImportProgressResponse = t.Object({
-	createdCount: t.Integer({ minimum: 1, maximum: 500 }),
-	entryIds: t.Array(Uuid, { minItems: 1, maxItems: 500 }),
 });
 export const ProgressNodeListResponse = t.Object({
 	items: t.Array(

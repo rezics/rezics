@@ -85,23 +85,16 @@ function ProgressEntryEditor({
 			return;
 		}
 		setInvalid(false);
-		const body = {
-			...write,
-			sourceKind: write.sourceKind,
-		};
 		try {
 			if (entry)
 				await replace.mutateAsync({
 					path: { unitId: progress.domain.unitId, entryId: entry.id },
-					body,
+					body: write,
 				});
 			else
 				await create.mutateAsync({
 					path: { unitId: progress.domain.unitId },
-					body: {
-						...body,
-						sourceKind: body.sourceKind === "rezics" ? "manual" : body.sourceKind,
-					},
+					body: write,
 				});
 			await invalidateProgressQueries(queryClient, progress.domain.unitId);
 			onClose();
@@ -159,40 +152,6 @@ function ProgressEntryEditor({
 							</>
 						)}
 						<DateFields draft={draft} onChange={setDraft} />
-						<Field>
-							<FieldLabel htmlFor="progress-entry-source-provider">
-								{copy.sourceProvider}
-							</FieldLabel>
-							<Input
-								id="progress-entry-source-provider"
-								maxLength={100}
-								onChange={(event) =>
-									setDraft((current) => ({
-										...current,
-										sourceProvider: event.currentTarget.value,
-									}))
-								}
-								placeholder={copy.sourceProviderPlaceholder}
-								value={draft.sourceProvider}
-							/>
-							<FieldDescription>{copy.sourceProviderDescription}</FieldDescription>
-						</Field>
-						<Field>
-							<FieldLabel htmlFor="progress-entry-source-id">
-								{copy.sourceExternalId}
-							</FieldLabel>
-							<Input
-								id="progress-entry-source-id"
-								maxLength={500}
-								onChange={(event) =>
-									setDraft((current) => ({
-										...current,
-										sourceExternalId: event.currentTarget.value,
-									}))
-								}
-								value={draft.sourceExternalId}
-							/>
-						</Field>
 						<label className="flex items-start gap-3 rounded-lg border border-border-weak p-4">
 							<Checkbox
 								checked={draft.affectsCurrent}

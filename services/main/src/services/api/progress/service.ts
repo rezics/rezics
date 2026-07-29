@@ -7,10 +7,9 @@ import {
 	contentStructureNode,
 	contentStructureNodeProgress,
 	contentStructureRevisionHead,
-	type ProgressCurrentSourceKind,
+	type ProgressCurrentBasis,
 	type ProgressDatePrecision,
 	type ProgressEntryKind,
-	type ProgressSourceKind,
 	type ProgressStatus,
 	postProgressEntry,
 	post,
@@ -31,16 +30,13 @@ export interface ProgressEntryWriteInput {
 	readonly lastContentStructureNodeId?: string | null;
 	readonly occurredAt: Date | null;
 	readonly datePrecision: ProgressDatePrecision;
-	readonly sourceKind: ProgressSourceKind;
-	readonly sourceProvider?: string | null;
-	readonly sourceExternalId?: string | null;
 	readonly affectsCurrent: boolean;
 }
 
 type ProgressSnapshot = {
 	readonly completedCount: number;
 	readonly currentEntryId: string | null;
-	readonly currentSourceKind: ProgressCurrentSourceKind | null;
+	readonly currentBasis: ProgressCurrentBasis | null;
 	readonly firstSeenAt: Date;
 	readonly lastSeenAt: Date;
 	readonly progress: number;
@@ -86,7 +82,7 @@ async function findProgressSnapshot(
 		.select({
 			completedCount: unitProgress.completedCount,
 			currentEntryId: unitProgress.currentEntryId,
-			currentSourceKind: unitProgress.currentSourceKind,
+			currentBasis: unitProgress.currentBasis,
 			firstSeenAt: unitProgress.firstSeenAt,
 			lastSeenAt: unitProgress.lastSeenAt,
 			progress: unitProgress.progress,
@@ -247,7 +243,7 @@ export async function refreshProgressSnapshot(
 ): Promise<void> {
 	const snapshot = await findProgressSnapshot(tx, profileId, unitId);
 	const readingSnapshot =
-		preferredCurrentEntryId === undefined && snapshot?.currentSourceKind === "reading"
+		preferredCurrentEntryId === undefined && snapshot?.currentBasis === "reading"
 			? snapshot
 			: undefined;
 	const current = readingSnapshot
@@ -274,7 +270,7 @@ export async function refreshProgressSnapshot(
 				.set({
 					completedCount: 0,
 					currentEntryId: null,
-					currentSourceKind: "reading",
+					currentBasis: "reading",
 					deletedAt: null,
 					updatedAt: new Date(),
 				})
@@ -285,7 +281,7 @@ export async function refreshProgressSnapshot(
 			.update(unitProgress)
 			.set({
 				currentEntryId: null,
-				currentSourceKind: null,
+				currentBasis: null,
 				deletedAt: new Date(),
 				lastSeenAt: new Date(),
 			})
@@ -316,7 +312,7 @@ export async function refreshProgressSnapshot(
 		? readingSnapshot.lastContentStructureNodeId
 		: (current?.contentStructureNodeId ?? null);
 	const currentEntryId = readingSnapshot ? null : (current?.id ?? null);
-	const currentSourceKind = readingSnapshot
+	const currentBasis = readingSnapshot
 		? ("reading" as const)
 		: current
 			? ("journal" as const)
@@ -334,7 +330,7 @@ export async function refreshProgressSnapshot(
 			lastSeenAt,
 			lastContentStructureNodeId,
 			currentEntryId,
-			currentSourceKind,
+			currentBasis,
 			visibility: preference.visibility,
 			deletedAt: null,
 		})
@@ -349,7 +345,7 @@ export async function refreshProgressSnapshot(
 				lastSeenAt,
 				lastContentStructureNodeId,
 				currentEntryId,
-				currentSourceKind,
+				currentBasis,
 				deletedAt: null,
 			},
 		});
@@ -467,7 +463,6 @@ export async function recordChapterReading(
 			and(
 				eq(unitProgressEntry.profileId, input.profileId),
 				eq(unitProgressEntry.unitId, input.unitId),
-				eq(unitProgressEntry.sourceKind, "rezics"),
 				isNull(unitProgressEntry.deletedAt),
 			),
 		)
@@ -489,7 +484,6 @@ export async function recordChapterReading(
 				lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
 				occurredAt: input.now,
 				datePrecision: "instant",
-				sourceKind: "rezics",
 				affectsCurrent: false,
 			},
 			{ refreshSnapshot: false },
@@ -515,7 +509,7 @@ export async function recordChapterReading(
 			lastSeenAt: input.now,
 			lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
 			currentEntryId: null,
-			currentSourceKind: "reading",
+			currentBasis: "reading",
 			visibility: snapshot?.visibility ?? preference.visibility,
 			deletedAt: null,
 		})
@@ -530,7 +524,7 @@ export async function recordChapterReading(
 				lastSeenAt: input.now,
 				lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
 				currentEntryId: null,
-				currentSourceKind: "reading",
+				currentBasis: "reading",
 				visibility: snapshot?.visibility ?? preference.visibility,
 				deletedAt: null,
 				updatedAt: input.now,
@@ -570,9 +564,6 @@ export async function createProgressEntry(
 			contentStructureRevisionId,
 			occurredAt: input.occurredAt,
 			datePrecision: input.datePrecision,
-			sourceKind: input.sourceKind,
-			sourceProvider: input.sourceProvider,
-			sourceExternalId: input.sourceExternalId,
 			affectsCurrent: input.affectsCurrent,
 		})
 		.returning();
@@ -627,9 +618,6 @@ export async function replaceProgressEntry(
 			contentStructureRevisionId,
 			occurredAt: input.occurredAt,
 			datePrecision: input.datePrecision,
-			sourceKind: input.sourceKind,
-			sourceProvider: input.sourceProvider,
-			sourceExternalId: input.sourceExternalId,
 			affectsCurrent: input.affectsCurrent,
 			updatedAt: new Date(),
 		})

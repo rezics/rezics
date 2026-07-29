@@ -16,14 +16,12 @@ import {
 
 import { pgTable } from "./base";
 import {
+	type ProgressCurrentBasis,
+	ProgressCurrentBasisValues,
 	type ProgressDatePrecision,
 	ProgressDatePrecisionValues,
-	type ProgressCurrentSourceKind,
-	ProgressCurrentSourceKindValues,
 	type ProgressEntryKind,
 	ProgressEntryKindValues,
-	type ProgressSourceKind,
-	ProgressSourceKindValues,
 	ProgressStatusValues,
 	toEnumValues,
 } from "./contract-values";
@@ -87,9 +85,6 @@ export const unitProgressEntry = pgTable(
 		contentStructureRevisionId: uuid(),
 		occurredAt: createTimestampMsColumn(),
 		datePrecision: text().$type<ProgressDatePrecision>().notNull(),
-		sourceKind: text().$type<ProgressSourceKind>().notNull(),
-		sourceProvider: text(),
-		sourceExternalId: text(),
 		affectsCurrent: boolean().default(true).notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
@@ -121,9 +116,9 @@ export const unitProgressEntry = pgTable(
 			)
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_entry_unit_idx").on(table.unitId),
-		index("unit_progress_entry_profile_unit_rezics_created_idx")
+		index("unit_progress_entry_profile_unit_created_idx")
 			.on(table.profileId, table.unitId, table.createdAt.desc())
-			.where(sql`${table.deletedAt} is null and ${table.sourceKind} = 'rezics'`),
+			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_entry_content_structure_node_idx").on(table.contentStructureNodeId),
 		index("unit_progress_entry_content_structure_revision_idx").on(
 			table.contentStructureRevisionId,
@@ -132,10 +127,6 @@ export const unitProgressEntry = pgTable(
 		check(
 			"unit_progress_entry_date_precision_check",
 			inArray(table.datePrecision, ProgressDatePrecisionValues),
-		),
-		check(
-			"unit_progress_entry_source_kind_check",
-			inArray(table.sourceKind, ProgressSourceKindValues),
 		),
 		check("unit_progress_entry_value_check", sql`${table.progress} between 0 and 1`),
 		check(
@@ -150,11 +141,6 @@ export const unitProgressEntry = pgTable(
 		check(
 			"unit_progress_entry_occurred_at_check",
 			sql`(${table.datePrecision} = 'unknown') = (${table.occurredAt} is null)`,
-		),
-		check(
-			"unit_progress_entry_source_length_check",
-			sql`(${table.sourceProvider} is null or char_length(${table.sourceProvider}) between 1 and 100)
-				and (${table.sourceExternalId} is null or char_length(${table.sourceExternalId}) between 1 and 500)`,
 		),
 		check(
 			"unit_progress_entry_deleted_at_check",
@@ -180,7 +166,7 @@ export const unitProgress = pgTable(
 		lastSeenAt: createTimestampMsColumn().defaultNow().notNull(),
 		lastContentStructureNodeId: uuid(),
 		currentEntryId: uuid(),
-		currentSourceKind: text().$type<ProgressCurrentSourceKind>(),
+		currentBasis: text().$type<ProgressCurrentBasis>(),
 		visibility: resourceVisibility().default("private").notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
@@ -208,18 +194,18 @@ export const unitProgress = pgTable(
 		index("unit_progress_last_content_structure_node_idx").on(table.lastContentStructureNodeId),
 		index("unit_progress_current_entry_idx").on(table.currentEntryId),
 		check(
-			"unit_progress_current_source_kind_check",
-			sql`${table.currentSourceKind} is null or ${inArray(
-				table.currentSourceKind,
-				ProgressCurrentSourceKindValues,
+			"unit_progress_current_basis_check",
+			sql`${table.currentBasis} is null or ${inArray(
+				table.currentBasis,
+				ProgressCurrentBasisValues,
 			)}`,
 		),
 		check(
-			"unit_progress_current_source_shape_check",
+			"unit_progress_current_basis_shape_check",
 			sql`case
-				when ${table.currentSourceKind} is null then ${table.currentEntryId} is null
-				when ${table.currentSourceKind} = 'journal' then ${table.currentEntryId} is not null
-				when ${table.currentSourceKind} = 'reading' then ${table.currentEntryId} is null
+				when ${table.currentBasis} is null then ${table.currentEntryId} is null
+				when ${table.currentBasis} = 'journal' then ${table.currentEntryId} is not null
+				when ${table.currentBasis} = 'reading' then ${table.currentEntryId} is null
 				else false
 			end`,
 		),

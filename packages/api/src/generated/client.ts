@@ -417,8 +417,6 @@ import type {
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses,
 	GetApiProgressOptions,
 	GetApiProgressResponses,
-	PostApiProgressImportOptions,
-	PostApiProgressImportResponses,
 	GetApiProgressByUnitIdOptions,
 	GetApiProgressByUnitIdResponses,
 	PutApiProgressByUnitIdOptions,
@@ -4779,26 +4777,6 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<GetApiProgressResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Import Progress journal entries
- * {@link /api/progress/import}
- */
-export function postApiProgressImport<ThrowOnError extends boolean = true>(
-	options: Options<PostApiProgressImportOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiProgressImportResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/progress/import",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiProgressImportResponses, ThrowOnError>>;
 }
 
 /**

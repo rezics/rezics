@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { enTerminology } from "@rezics/i18n/terminology/en";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = enTerminology.realm;
 
@@ -245,8 +246,7 @@ export default {
 	viewProgressHistory: "View progress journal",
 	progressJournal: {
 		title: "My progress journal",
-		description:
-			"Every status change is an editable event, including history from other platforms.",
+		description: "Every status change remains an editable event.",
 		backToUnit: "Back to work",
 		backToProgress: "Back to progress",
 		historyTitle: "Progress history",
@@ -261,6 +261,8 @@ export default {
 		addHistoryDescription:
 			"Add a past progress change without changing your current progress by default.",
 		importHistory: "Import history",
+		importHelpDescription: `If you need to import records in bulk, go to the ${verbatimTerms.api.value} token page to create a token. You can ask ${verbatimTerms.ai.value} for help if needed.`,
+		openApiTokens: `Go to ${verbatimTerms.api.value} tokens`,
 		noEntries: "No progress events yet.",
 		loadMore: "Load more",
 		unknownDate: "Unknown date",
@@ -283,23 +285,12 @@ export default {
 			year: "Year",
 			unknown: "Unknown date",
 		},
-		source: "Source",
-		sourceKinds: {
-			rezics: "Recorded here",
-			manual: "Added manually",
-			import: "Imported",
-		},
-		sourceProvider: "Source platform",
-		sourceProviderPlaceholder: "For example, your previous platform",
-		sourceProviderDescription:
-			"Optional; identifies the platform where this event was originally recorded.",
-		sourceExternalId: "External record identifier",
 		affectsCurrent: "Use this event as current progress",
 		affectsCurrentDescription:
 			"When enabled, this event updates the status and progress currently shown for this work.",
 		saveEntry: "Save event",
 		editEntry: "Edit event",
-		editDescription: "Correct the date, progress, or source for this status change.",
+		editDescription: "Correct the date or progress for this status change.",
 		deleteEntry: "Delete event",
 		deletePrompt:
 			"This progress event will be deleted, and progress totals and completions will be recalculated.",
@@ -309,23 +300,6 @@ export default {
 		linkedReview: "Progress linked to this review",
 		reviewBindingNotice:
 			"This review will be linked to the progress event you selected from the progress page.",
-		importDescription:
-			"Bring in history from another platform. Imported events do not change current progress by default.",
-		importFormat: "File format",
-		importFormatDescription:
-			"The first row must use this exact column order. Every later row is one event.",
-		importFormatRules: insert(
-			"Progress in {{format}} is a value from 0 to 1. Format each date as an instant, day, month, or year to match its precision.",
-			{ format: String },
-		),
-		importProviderDescription:
-			"Every event in this import will be marked as coming from this platform.",
-		importFile: "Import file",
-		importInvalidLine: insert("Row {{line}} is invalid. Correct it and try again.", {
-			line: Number,
-		}),
-		importReady: insert("Read {{count}} events and ready to import.", { count: Number }),
-		importComplete: insert("Successfully imported {{count}} events.", { count: Number }),
 	},
 	progressNotRecorded: "Not recorded",
 	completionCountChange: insert("Completion count will increase from {{current}} to {{next}}.", {

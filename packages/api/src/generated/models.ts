@@ -67988,230 +67988,6 @@ export type GetApiProgressResponse =
 /**
  * @type object
  */
-export type PostApiProgressImportStatus200 = {
-	createdCount: string | number;
-	/**
-	 * @type array
-	 */
-	entryIds: string[];
-};
-
-/**
- * @type object
- */
-export type PostApiProgressImportStatus400 = MalformedRequestBody;
-
-export const PostApiProgressImportStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
-} as const;
-
-export type PostApiProgressImportStatus404ErrorCodeEnum =
-	(typeof PostApiProgressImportStatus404ErrorCodeEnum)[keyof typeof PostApiProgressImportStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiProgressImportStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PostApiProgressImportStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type PostApiProgressImportStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'ValidationError'
-				 * @type string
-				 */
-				code: "ValidationError";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
-
-/**
- * @type object
- */
-export type PostApiProgressImportStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: "ApiTokenRateLimitExceeded";
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiProgressImportStatus500 = InternalError;
-
-export const PostApiProgressImportRequestItemsEntryKindEnum = {
-	update: "update",
-	completion: "completion",
-} as const;
-
-export type PostApiProgressImportRequestItemsEntryKindEnum =
-	(typeof PostApiProgressImportRequestItemsEntryKindEnum)[keyof typeof PostApiProgressImportRequestItemsEntryKindEnum];
-
-export const PostApiProgressImportRequestItemsStatusEnum = {
-	backlog: "backlog",
-	active: "active",
-	paused: "paused",
-	completed: "completed",
-	dropped: "dropped",
-} as const;
-
-export type PostApiProgressImportRequestItemsStatusEnum =
-	(typeof PostApiProgressImportRequestItemsStatusEnum)[keyof typeof PostApiProgressImportRequestItemsStatusEnum];
-
-export const PostApiProgressImportRequestItemsDatePrecisionEnum = {
-	instant: "instant",
-	day: "day",
-	month: "month",
-	year: "year",
-	unknown: "unknown",
-} as const;
-
-export type PostApiProgressImportRequestItemsDatePrecisionEnum =
-	(typeof PostApiProgressImportRequestItemsDatePrecisionEnum)[keyof typeof PostApiProgressImportRequestItemsDatePrecisionEnum];
-
-/**
- * @type object
- */
-export type PostApiProgressImportBody = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @default 'update'
-		 * @type string
-		 */
-		entryKind: PostApiProgressImportRequestItemsEntryKindEnum;
-		/**
-		 * @type string
-		 */
-		status: PostApiProgressImportRequestItemsStatusEnum;
-		/**
-		 * @minLength 0
-		 * @maxLength 1
-		 * @type number | undefined
-		 */
-		progress?: number;
-		totalTimeMs?: string | number;
-		lastContentStructureNodeId?: (string | null) | null;
-		occurredAt: (string | null) | null;
-		/**
-		 * @default 'instant'
-		 * @type string
-		 */
-		datePrecision: PostApiProgressImportRequestItemsDatePrecisionEnum;
-		sourceProvider?: (string | null) | null;
-		sourceExternalId?: (string | null) | null;
-		/**
-		 * @default false
-		 * @type boolean | undefined
-		 */
-		affectsCurrent?: boolean;
-	}[];
-	/**
-	 * @minLength 1
-	 * @maxLength 100
-	 * @type string
-	 */
-	sourceProvider: string;
-};
-
-/**
- * @type object
- */
-export type PostApiProgressImportOptions = {
-	body: PostApiProgressImportBody;
-	path?: never;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiProgressImportResponses = {
-	"200": PostApiProgressImportStatus200;
-	"400": PostApiProgressImportStatus400;
-	"404": PostApiProgressImportStatus404;
-	"422": PostApiProgressImportStatus422;
-	"429": PostApiProgressImportStatus429;
-	"500": PostApiProgressImportStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiProgressImportResponse =
-	| PostApiProgressImportStatus200
-	| PostApiProgressImportStatus400
-	| PostApiProgressImportStatus404
-	| PostApiProgressImportStatus422
-	| PostApiProgressImportStatus429
-	| PostApiProgressImportStatus500;
-
-/**
- * @type object
- */
 export type GetApiProgressByUnitIdPath = {
 	/**
 	 * @description
@@ -68809,15 +68585,6 @@ export const GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum = {
 export type GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum =
 	(typeof GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum)[keyof typeof GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum];
 
-export const GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum = {
-	rezics: "rezics",
-	manual: "manual",
-	import: "import",
-} as const;
-
-export type GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum =
-	(typeof GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum)[keyof typeof GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum];
-
 /**
  * @type object
  */
@@ -68870,13 +68637,6 @@ export type GetApiProgressByUnitIdEntriesStatus200 = {
 		 * @type string
 		 */
 		datePrecision: GetApiProgressByUnitIdEntriesStatus200ItemsDatePrecisionEnum;
-		/**
-		 * @default 'rezics'
-		 * @type string
-		 */
-		sourceKind: GetApiProgressByUnitIdEntriesStatus200ItemsSourceKindEnum;
-		sourceProvider: (string | null) | null;
-		sourceExternalId: (string | null) | null;
 		/**
 		 * @type boolean
 		 */
@@ -69063,15 +68823,6 @@ export const PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum = {
 export type PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum =
 	(typeof PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum];
 
-export const PostApiProgressByUnitIdEntriesStatus200SourceKindEnum = {
-	rezics: "rezics",
-	manual: "manual",
-	import: "import",
-} as const;
-
-export type PostApiProgressByUnitIdEntriesStatus200SourceKindEnum =
-	(typeof PostApiProgressByUnitIdEntriesStatus200SourceKindEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus200SourceKindEnum];
-
 /**
  * @type object
  */
@@ -69120,13 +68871,6 @@ export type PostApiProgressByUnitIdEntriesStatus200 = {
 	 * @type string
 	 */
 	datePrecision: PostApiProgressByUnitIdEntriesStatus200DatePrecisionEnum;
-	/**
-	 * @default 'rezics'
-	 * @type string
-	 */
-	sourceKind: PostApiProgressByUnitIdEntriesStatus200SourceKindEnum;
-	sourceProvider: (string | null) | null;
-	sourceExternalId: (string | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -69273,14 +69017,6 @@ export const PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum = {
 export type PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum =
 	(typeof PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum)[keyof typeof PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum];
 
-export const PostApiProgressByUnitIdEntriesRequestSourceKindEnum = {
-	manual: "manual",
-	import: "import",
-} as const;
-
-export type PostApiProgressByUnitIdEntriesRequestSourceKindEnum =
-	(typeof PostApiProgressByUnitIdEntriesRequestSourceKindEnum)[keyof typeof PostApiProgressByUnitIdEntriesRequestSourceKindEnum];
-
 /**
  * @type object
  */
@@ -69308,17 +69044,11 @@ export type PostApiProgressByUnitIdEntriesBody = {
 	 * @type string
 	 */
 	datePrecision: PostApiProgressByUnitIdEntriesRequestDatePrecisionEnum;
-	sourceProvider?: (string | null) | null;
-	sourceExternalId?: (string | null) | null;
 	/**
 	 * @default false
 	 * @type boolean | undefined
 	 */
 	affectsCurrent?: boolean;
-	/**
-	 * @type string | undefined
-	 */
-	sourceKind?: PostApiProgressByUnitIdEntriesRequestSourceKindEnum;
 };
 
 /**
@@ -69402,15 +69132,6 @@ export const PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum = 
 export type PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum =
 	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum];
 
-export const PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum = {
-	rezics: "rezics",
-	manual: "manual",
-	import: "import",
-} as const;
-
-export type PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum =
-	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum];
-
 /**
  * @type object
  */
@@ -69459,13 +69180,6 @@ export type PutApiProgressByUnitIdEntriesByEntryIdStatus200 = {
 	 * @type string
 	 */
 	datePrecision: PutApiProgressByUnitIdEntriesByEntryIdStatus200DatePrecisionEnum;
-	/**
-	 * @default 'rezics'
-	 * @type string
-	 */
-	sourceKind: PutApiProgressByUnitIdEntriesByEntryIdStatus200SourceKindEnum;
-	sourceProvider: (string | null) | null;
-	sourceExternalId: (string | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -69613,15 +69327,6 @@ export const PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum = {
 export type PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum =
 	(typeof PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum];
 
-export const PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum = {
-	rezics: "rezics",
-	manual: "manual",
-	import: "import",
-} as const;
-
-export type PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum =
-	(typeof PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum];
-
 /**
  * @type object
  */
@@ -69649,18 +69354,11 @@ export type PutApiProgressByUnitIdEntriesByEntryIdBody = {
 	 * @type string
 	 */
 	datePrecision: PutApiProgressByUnitIdEntriesByEntryIdRequestDatePrecisionEnum;
-	sourceProvider?: (string | null) | null;
-	sourceExternalId?: (string | null) | null;
 	/**
 	 * @default false
 	 * @type boolean | undefined
 	 */
 	affectsCurrent?: boolean;
-	/**
-	 * @default 'rezics'
-	 * @type string
-	 */
-	sourceKind: PutApiProgressByUnitIdEntriesByEntryIdRequestSourceKindEnum;
 };
 
 /**

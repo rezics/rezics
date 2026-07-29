@@ -5,17 +5,7 @@ import {
 	useGetApiUnitsByTypeByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowLeft,
-	CheckCircle2,
-	Clock3,
-	History,
-	Import,
-	Pencil,
-	Plus,
-	Star,
-	Trash2,
-} from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock3, History, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState } from "react";
 
@@ -59,15 +49,12 @@ import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { selectLocalization } from "@/lib/localization";
 import { ProgressEntryDialog } from "../components/progress-entry-dialog";
 import { ProgressEventDescription } from "../components/progress-event-description";
+import { ProgressImportDialog } from "../components/progress-import-dialog";
 import { UnitProgressDialog } from "../components/unit-progress-dialog";
 import { UnitProgressProvider, useUnitProgress } from "../components/unit-progress-provider";
 import { useProgressEntries } from "../data/progress-entries";
 import { invalidateProgressQueries } from "../data/progress-cache";
-import {
-	formatProgressEntryDate,
-	type ProgressEntry,
-	type ProgressSourceKind,
-} from "../model/progress-entry";
+import { formatProgressEntryDate, type ProgressEntry } from "../model/progress-entry";
 import { progressRecordFromEditableState } from "../model/progress-state";
 import {
 	AllProgressHistoryStatuses,
@@ -169,12 +156,7 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 							<Plus aria-hidden data-icon="inline-start" />
 							{t.engagement.progressJournal.addHistory}
 						</Button>
-						<Button asChild variant="quiet">
-							<Link href="/me/progress/import">
-								<Import aria-hidden data-icon="inline-start" />
-								{t.engagement.progressJournal.importHistory}
-							</Link>
-						</Button>
+						<ProgressImportDialog variant="quiet" />
 					</div>
 				}
 				description={title ?? t.ui.unnamed}
@@ -442,7 +424,6 @@ function ProgressEntryDetails({
 	const progress = useUnitProgress();
 	const { locale, t } = useTranslation(["engagement"]);
 	const copy = t.engagement.progressJournal;
-	const sourceKind: ProgressSourceKind = entry.sourceKind;
 	const chapter =
 		type === "book"
 			? progress.chapters.find(
@@ -492,10 +473,6 @@ function ProgressEntryDetails({
 							<dd className="text-right tabular-nums">{minutes}</dd>
 						</>
 					)}
-					<dt className="text-muted-foreground">{copy.source}</dt>
-					<dd className="text-right">
-						{entry.sourceProvider || copy.sourceKinds[sourceKind]}
-					</dd>
 					<dt className="text-muted-foreground">{copy.entryKind}</dt>
 					<dd className="text-right">{copy.kinds[entry.entryKind]}</dd>
 					{entry.entryKind === "completion" ? (

@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import {
 	CompleteProgressBody,
 	CreateProgressEntryBody,
-	ImportProgressBody,
 	ListProgressEntriesQuery,
 	ProgressLookupResponse,
 	ReplaceProgressEntryBody,
@@ -72,39 +71,23 @@ describe("progress API contract", () => {
 		);
 	});
 
-	it("keeps native provenance when an existing journal event is edited", () => {
+	it("keeps record provenance out of the journal contract", () => {
 		const event = {
 			entryKind: "update",
 			status: "active",
 			progress: 0.4,
 			occurredAt: "2026-07-26T00:00:00.000Z",
 			datePrecision: "instant",
-			sourceKind: "rezics",
 			affectsCurrent: true,
 		};
-		expect(Check(CreateProgressEntryBody, event)).toBe(false);
+		expect(Check(CreateProgressEntryBody, event)).toBe(true);
 		expect(Check(ReplaceProgressEntryBody, event)).toBe(true);
-	});
-
-	it("accepts a bounded batch of externally sourced journal events", () => {
+		expect(Check(CreateProgressEntryBody, { ...event, sourceKind: "manual" })).toBe(false);
 		expect(
-			Check(ImportProgressBody, {
+			Check(ReplaceProgressEntryBody, {
+				...event,
 				sourceProvider: "Previous platform",
-				items: [
-					{
-						unitId: "00000000-0000-7000-8000-000000000002",
-						entryKind: "completion",
-						status: "completed",
-						progress: 1,
-						occurredAt: "2020-01-01T00:00:00.000Z",
-						datePrecision: "year",
-						affectsCurrent: false,
-					},
-				],
 			}),
-		).toBe(true);
-		expect(Check(ImportProgressBody, { sourceProvider: "Previous platform", items: [] })).toBe(
-			false,
-		);
+		).toBe(false);
 	});
 });

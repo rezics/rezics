@@ -1400,13 +1400,6 @@ import type {
 	GetApiProgressStatus422,
 	GetApiProgressStatus429,
 	GetApiProgressStatus500,
-	PostApiProgressImportOptions,
-	PostApiProgressImportStatus200,
-	PostApiProgressImportStatus400,
-	PostApiProgressImportStatus404,
-	PostApiProgressImportStatus422,
-	PostApiProgressImportStatus429,
-	PostApiProgressImportStatus500,
 	GetApiProgressByUnitIdOptions,
 	GetApiProgressByUnitIdStatus200,
 	GetApiProgressByUnitIdStatus404,
@@ -2341,7 +2334,6 @@ import {
 	getApiChaptersByChapterId,
 	putApiChaptersByChapterIdLocalizationsByLanguageContent,
 	getApiProgress,
-	postApiProgressImport,
 	getApiProgressByUnitId,
 	putApiProgressByUnitId,
 	deleteApiProgressByUnitId,
@@ -23834,102 +23826,6 @@ export function useGetApiProgress<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
-}
-
-export const postApiProgressImportMutationKey = () => [{ url: "/api/progress/import" }] as const;
-
-export function postApiProgressImportMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = postApiProgressImportMutationKey();
-	return mutationOptions<
-		PostApiProgressImportStatus200,
-		ResponseErrorConfig<
-			| PostApiProgressImportStatus400
-			| PostApiProgressImportStatus404
-			| PostApiProgressImportStatus422
-			| PostApiProgressImportStatus429
-			| PostApiProgressImportStatus500
-		>,
-		PostApiProgressImportOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiProgressImport({ ...config, body, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Import Progress journal entries
- * {@link /api/progress/import}
- */
-export function usePostApiProgressImport<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiProgressImportStatus200,
-			ResponseErrorConfig<
-				| PostApiProgressImportStatus400
-				| PostApiProgressImportStatus404
-				| PostApiProgressImportStatus422
-				| PostApiProgressImportStatus429
-				| PostApiProgressImportStatus500
-			>,
-			PostApiProgressImportOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiProgressImportMutationKey();
-
-	const baseOptions = postApiProgressImportMutationOptions(config) as UseMutationOptions<
-		PostApiProgressImportStatus200,
-		ResponseErrorConfig<
-			| PostApiProgressImportStatus400
-			| PostApiProgressImportStatus404
-			| PostApiProgressImportStatus422
-			| PostApiProgressImportStatus429
-			| PostApiProgressImportStatus500
-		>,
-		PostApiProgressImportOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiProgressImportStatus200,
-		ResponseErrorConfig<
-			| PostApiProgressImportStatus400
-			| PostApiProgressImportStatus404
-			| PostApiProgressImportStatus422
-			| PostApiProgressImportStatus429
-			| PostApiProgressImportStatus500
-		>,
-		PostApiProgressImportOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiProgressImportStatus200,
-		ResponseErrorConfig<
-			| PostApiProgressImportStatus400
-			| PostApiProgressImportStatus404
-			| PostApiProgressImportStatus422
-			| PostApiProgressImportStatus429
-			| PostApiProgressImportStatus500
-		>,
-		PostApiProgressImportOptions,
-		TContext
-	>;
 }
 
 export const getApiProgressByUnitIdQueryKey = ({

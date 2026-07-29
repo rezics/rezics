@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { frTerminology } from "@rezics/i18n/terminology/fr";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = frTerminology.realm;
 
@@ -251,8 +252,7 @@ export default {
 	viewProgressHistory: "Voir le journal de progression",
 	progressJournal: {
 		title: "Mon journal de progression",
-		description:
-			"Chaque changement d’état devient un événement modifiable, y compris l’historique d’autres plateformes.",
+		description: "Chaque changement d’état devient un événement modifiable.",
 		backToUnit: "Retour à l’œuvre",
 		backToProgress: "Retour aux progressions",
 		historyTitle: "Historique de progression",
@@ -267,6 +267,8 @@ export default {
 		addHistoryDescription:
 			"Ajoutez un ancien changement sans modifier la progression actuelle par défaut.",
 		importHistory: "Importer l’historique",
+		importHelpDescription: `Pour importer des enregistrements en masse, créez un jeton depuis la page des jetons ${verbatimTerms.api.value}. Vous pouvez solliciter l’aide de ${verbatimTerms.ai.value} si nécessaire.`,
+		openApiTokens: `Accéder aux jetons ${verbatimTerms.api.value}`,
 		noEntries: "Aucun événement de progression.",
 		loadMore: "Charger la suite",
 		unknownDate: "Date inconnue",
@@ -286,19 +288,12 @@ export default {
 			year: "Année",
 			unknown: "Date inconnue",
 		},
-		source: "Source",
-		sourceKinds: { rezics: "Enregistré ici", manual: "Ajout manuel", import: "Importé" },
-		sourceProvider: "Plateforme source",
-		sourceProviderPlaceholder: "Par exemple, votre ancienne plateforme",
-		sourceProviderDescription:
-			"Facultatif ; indique la plateforme où cet événement a été enregistré à l’origine.",
-		sourceExternalId: "Identifiant de l’enregistrement externe",
 		affectsCurrent: "Utiliser cet événement comme progression actuelle",
 		affectsCurrentDescription:
 			"Cette option met à jour l’état et la progression actuellement affichés pour cette œuvre.",
 		saveEntry: "Enregistrer l’événement",
 		editEntry: "Modifier l’événement",
-		editDescription: "Corrigez la date, la progression ou la source de ce changement d’état.",
+		editDescription: "Corrigez la date ou la progression de ce changement d’état.",
 		deleteEntry: "Supprimer l’événement",
 		deletePrompt:
 			"Cet événement sera supprimé, puis la progression et les achèvements seront recalculés.",
@@ -308,25 +303,6 @@ export default {
 		linkedReview: "Progression liée à cette critique",
 		reviewBindingNotice:
 			"Cette critique sera liée à l’événement choisi depuis la page de progression.",
-		importDescription:
-			"Importez un historique provenant d’une autre plateforme. Il ne modifie pas la progression actuelle par défaut.",
-		importFormat: "Format du fichier",
-		importFormatDescription:
-			"La première ligne doit respecter exactement cet ordre de colonnes. Chaque ligne suivante représente un événement.",
-		importFormatRules: insert(
-			"Dans le fichier {{format}}, la progression est comprise entre 0 et 1. La date est indiquée selon sa précision : date et heure, jour, mois ou année.",
-			{ format: String },
-		),
-		importProviderDescription:
-			"Tous les événements importés seront associés à cette plateforme source.",
-		importFile: "Fichier à importer",
-		importInvalidLine: insert("La ligne {{line}} est incorrecte. Corrigez-la puis réessayez.", {
-			line: Number,
-		}),
-		importReady: insert("{{count}} événements lus et prêts à être importés.", {
-			count: Number,
-		}),
-		importComplete: insert("{{count}} événements importés avec succès.", { count: Number }),
 	},
 	progressNotRecorded: "Non enregistré",
 	completionCountChange: insert("Le nombre d’achèvements passera de {{current}} à {{next}}.", {

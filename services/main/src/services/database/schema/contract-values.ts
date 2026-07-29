@@ -243,10 +243,8 @@ export const ProgressEntryKindValues = ["update", "completion"] as const;
 export type ProgressEntryKind = (typeof ProgressEntryKindValues)[number];
 export const ProgressDatePrecisionValues = ["instant", "day", "month", "year", "unknown"] as const;
 export type ProgressDatePrecision = (typeof ProgressDatePrecisionValues)[number];
-export const ProgressSourceKindValues = ["rezics", "manual", "import"] as const;
-export type ProgressSourceKind = (typeof ProgressSourceKindValues)[number];
-export const ProgressCurrentSourceKindValues = ["journal", "reading"] as const;
-export type ProgressCurrentSourceKind = (typeof ProgressCurrentSourceKindValues)[number];
+export const ProgressCurrentBasisValues = ["journal", "reading"] as const;
+export type ProgressCurrentBasis = (typeof ProgressCurrentBasisValues)[number];
 export const NotificationKindValues = [
 	"reply",
 	"new_follower",

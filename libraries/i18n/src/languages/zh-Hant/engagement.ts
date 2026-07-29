@@ -1,6 +1,7 @@
 import { insert } from "native-i18n";
 
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 
@@ -238,7 +239,7 @@ export default {
 	viewProgressHistory: "查看足跡",
 	progressJournal: {
 		title: "我的足跡",
-		description: "每次狀態變更都是一筆可編輯的事件，可保留外部平台的舊紀錄。",
+		description: "每次狀態變更都是一筆可編輯的事件。",
 		backToUnit: "返回作品",
 		backToProgress: "返回進度清單",
 		historyTitle: "進度歷程",
@@ -252,6 +253,8 @@ export default {
 		addHistory: "新增過往紀錄",
 		addHistoryDescription: "補記一次過往的進度變更，不會預設改動目前進度。",
 		importHistory: "匯入歷史",
+		importHelpDescription: `如果您需要批次匯入，可以前往 ${verbatimTerms.api.value} 權杖頁面建立權杖；必要時，也可以尋求 ${verbatimTerms.ai.value} 協助。`,
+		openApiTokens: `前往 ${verbatimTerms.api.value} 權杖頁面`,
 		noEntries: "還沒有進度足跡。",
 		loadMore: "載入更多",
 		unknownDate: "日期不詳",
@@ -274,21 +277,11 @@ export default {
 			year: "年份",
 			unknown: "日期不詳",
 		},
-		source: "來源",
-		sourceKinds: {
-			rezics: "在本站記錄",
-			manual: "手動補記",
-			import: "外部匯入",
-		},
-		sourceProvider: "來源平台",
-		sourceProviderPlaceholder: "例如：原本使用的平台",
-		sourceProviderDescription: "選填；用來標示這筆紀錄原先來自哪個平台。",
-		sourceExternalId: "外部紀錄識別碼",
 		affectsCurrent: "將這筆事件設為目前進度",
 		affectsCurrentDescription: "開啟後，這筆事件會更新此作品現在顯示的狀態與進度。",
 		saveEntry: "儲存事件",
 		editEntry: "編輯事件",
-		editDescription: "修正這次狀態變更的日期、進度或來源。",
+		editDescription: "修正這次狀態變更的日期或進度。",
 		deleteEntry: "刪除事件",
 		deletePrompt: "這筆進度事件將被刪除，彙總進度與完成次數也會重新計算。",
 		completionIncrement: "完成次數增加",
@@ -296,18 +289,6 @@ export default {
 		viewReview: "查看綁定的評論",
 		linkedReview: "這篇評論所對應的足跡",
 		reviewBindingNotice: "這篇評論會綁定到你從進度頁選擇的那一次足跡。",
-		importDescription: "從其他平台帶入過往足跡；匯入紀錄預設不改動目前進度。",
-		importFormat: "檔案格式",
-		importFormatDescription: "第一列必須完全依照下列欄位順序，後續每列代表一筆事件。",
-		importFormatRules: insert(
-			"{{format}} 的進度欄使用 0 到 1 小數；日期依對應精確度填入完整時間、日期、月份或年份。",
-			{ format: String },
-		),
-		importProviderDescription: "所有這次匯入的事件都會標記為來自這個平台。",
-		importFile: "匯入檔案",
-		importInvalidLine: insert("第 {{line}} 列格式不正確，請修正後再試。", { line: Number }),
-		importReady: insert("已讀取 {{count}} 筆事件，準備匯入。", { count: Number }),
-		importComplete: insert("已成功匯入 {{count}} 筆事件。", { count: Number }),
 	},
 	progressNotRecorded: "尚未記錄",
 	completionCountChange: insert("完成次數將由 {{current}} 增加為 {{next}}。", {
