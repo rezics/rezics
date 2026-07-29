@@ -68,21 +68,21 @@ export function ApiFeedList({
 	const session = useHydratedSession();
 	const preferences = usePresentationPreferences();
 	const localizationState = useLocalizationLanguageState();
-	const languageDefaultProfileId = session.data?.user.id ?? "anonymous";
+	const languageDefaultAccountId = session.data?.user.id ?? "anonymous";
 	const initializedLanguageDefault = useRef<string | undefined>(undefined);
 	const preferencesReady = localizationState.status === "ready";
 	const filterLanguages = resolveFeedFilterLanguages({
 		allowDefault: preferencesReady && Boolean(onLanguagesChange),
-		defaultInitialized: initializedLanguageDefault.current === languageDefaultProfileId,
+		defaultInitialized: initializedLanguageDefault.current === languageDefaultAccountId,
 		filterByPreferredLanguages: preferences.data?.filterFeedByPreferredLanguages ?? false,
 		preferredLanguages: preferences.data?.preferredLanguages ?? [],
 		requestedLanguages: languages,
 	});
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	useEffect(() => {
-		if (initializedLanguageDefault.current === languageDefaultProfileId || !preferencesReady)
+		if (initializedLanguageDefault.current === languageDefaultAccountId || !preferencesReady)
 			return;
-		initializedLanguageDefault.current = languageDefaultProfileId;
+		initializedLanguageDefault.current = languageDefaultAccountId;
 		if (
 			onLanguagesChange &&
 			languages.length === 0 &&
@@ -91,7 +91,7 @@ export function ApiFeedList({
 		)
 			onLanguagesChange(preferences.data.preferredLanguages);
 	}, [
-		languageDefaultProfileId,
+		languageDefaultAccountId,
 		languages.length,
 		onLanguagesChange,
 		preferences.data,

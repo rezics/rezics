@@ -23,29 +23,25 @@ function selectPresentationPreferences(
 
 export function usePresentationPreferences() {
 	const session = useHydratedSession();
-	const profileId = session.data?.user.id ?? null;
+	const accountId = session.data?.user.id ?? null;
 
 	return useQuery({
-		queryKey: presentationPreferencesQueryKey(profileId),
-		queryFn: profileId
+		queryKey: presentationPreferencesQueryKey(accountId),
+		queryFn: accountId
 			? async ({ signal }) => {
 					const { data } = await getApiUsersMePreferences({ signal, throwOnError: true });
-					const preferences = selectPresentationPreferences(data);
-					if (preferences.profileId !== profileId)
-						throw new Error(
-							"The current-user presentation preferences do not match the authenticated profile",
-						);
-					return preferences;
+					return selectPresentationPreferences(data);
 				}
 			: skipToken,
-		enabled: Boolean(profileId),
+		enabled: Boolean(accountId),
 	});
 }
 
 export function setPresentationPreferencesQueryData(
 	queryClient: QueryClient,
+	accountId: string,
 	preferences: GetApiUsersMePreferencesStatus200,
 ) {
 	const selected = selectPresentationPreferences(preferences);
-	queryClient.setQueryData(presentationPreferencesQueryKey(selected.profileId), selected);
+	queryClient.setQueryData(presentationPreferencesQueryKey(accountId), selected);
 }

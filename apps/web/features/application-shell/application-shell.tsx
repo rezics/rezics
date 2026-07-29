@@ -95,7 +95,8 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 			scope: { id: "interface-locale" },
 			onSuccess: (data) => {
 				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
-				setPresentationPreferencesQueryData(queryClient, data);
+				if (session)
+					setPresentationPreferencesQueryData(queryClient, session.user.id, data);
 			},
 		},
 	});

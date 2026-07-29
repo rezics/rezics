@@ -41,9 +41,9 @@ describe("presentation preferences", () => {
 		).toBeUndefined();
 	});
 
-	it("scopes the cache key to the authenticated profile", () => {
-		expect(presentationPreferencesQueryKey("profile-a")).not.toEqual(
-			presentationPreferencesQueryKey("profile-b"),
+	it("scopes the cache key to the authenticated account", () => {
+		expect(presentationPreferencesQueryKey("account-a")).not.toEqual(
+			presentationPreferencesQueryKey("account-b"),
 		);
 	});
 });

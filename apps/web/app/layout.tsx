@@ -6,8 +6,10 @@ import socialCard from "@rezics/brand/social-card.png?url&no-inline";
 import { FontAwesomeVersion, isFontAwesomeLicense, type FontAwesomeLicense } from "@rezics/avatar";
 
 import { getInitialAuthSession } from "@/features/auth/server/initial-session.server";
-import { presentationPreferencesQueryKey } from "@/features/preferences/model/presentation-preferences";
-import { getInitialPresentationPreferences } from "@/features/preferences/server/initial-presentation-preferences.server";
+import {
+	getInitialPresentationPreferences,
+	seedInitialPresentationPreferences,
+} from "@/features/preferences/server/initial-presentation-preferences.server";
 import { RootTranslationNamespaces } from "@/i18n/namespaces";
 import { getTranslation } from "@/i18n/server";
 import { AppProviders } from "@/lib/app-providers";
@@ -83,16 +85,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 			getInitialPresentationPreferences(requestHeaders),
 		]);
 	const queryClient = createQueryClient();
-	if (
-		initialSession.status === "resolved" &&
-		initialSession.data &&
-		initialPresentationPreferences.status === "resolved" &&
-		initialPresentationPreferences.data.profileId === initialSession.data.user.id
-	)
-		queryClient.setQueryData(
-			presentationPreferencesQueryKey(initialSession.data.user.id),
-			initialPresentationPreferences.data,
-		);
+	seedInitialPresentationPreferences(queryClient, initialSession, initialPresentationPreferences);
 	const dehydratedState = dehydrate(queryClient);
 	const fontAwesomeCss = fontAwesomeKitCssUrl();
 	const fontAwesomeLicense = fontAwesomeKitLicense();

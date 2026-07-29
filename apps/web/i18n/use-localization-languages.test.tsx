@@ -64,9 +64,9 @@ describe("localization language state", () => {
 
 	it("preserves the authenticated preference order before the interface fallback", () => {
 		mocks.session.status = "authenticated";
-		mocks.session.data = { user: { id: "profile-a" } };
+		mocks.session.data = { user: { id: "account-a" } };
 		mocks.preferences.data = {
-			profileId: "profile-a",
+			profileId: "profile-unit-a",
 			interfaceLocale: "zh-Hant",
 			chineseContentDisplay: "original",
 			filterFeedByPreferredLanguages: false,
@@ -84,7 +84,7 @@ describe("localization language state", () => {
 
 	it("keeps authenticated consumers restoring until preferences are proven", () => {
 		mocks.session.status = "authenticated";
-		mocks.session.data = { user: { id: "profile-a" } };
+		mocks.session.data = { user: { id: "account-a" } };
 
 		const { result } = renderHook(useLocalizationLanguageState);
 
@@ -94,7 +94,7 @@ describe("localization language state", () => {
 	it("exposes preference failures and their retry operation", () => {
 		const error = new Error("preferences unavailable");
 		mocks.session.status = "authenticated";
-		mocks.session.data = { user: { id: "profile-a" } };
+		mocks.session.data = { user: { id: "account-a" } };
 		mocks.preferences.isError = true;
 		mocks.preferences.error = error;
 
@@ -109,9 +109,9 @@ describe("localization language state", () => {
 
 	it("keeps the last validated preference usable after a background refresh failure", () => {
 		mocks.session.status = "authenticated";
-		mocks.session.data = { user: { id: "profile-a" } };
+		mocks.session.data = { user: { id: "account-a" } };
 		mocks.preferences.data = {
-			profileId: "profile-a",
+			profileId: "profile-unit-a",
 			interfaceLocale: "zh-Hant",
 			chineseContentDisplay: "original",
 			filterFeedByPreferredLanguages: false,

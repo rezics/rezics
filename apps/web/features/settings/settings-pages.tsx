@@ -65,6 +65,7 @@ import { ContentLanguageControl } from "@/features/content-languages/components/
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
 import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 function SettingsFrame({
 	title,
@@ -269,6 +270,7 @@ export function PreferenceSettings() {
 		"ui",
 	]);
 	const queryClient = useQueryClient();
+	const { data: session } = useHydratedSession();
 	const preferences = useGetApiUsersMePreferences();
 	const localizationLanguages = buildLocalizationLanguages(
 		preferences.data?.preferredLanguages ?? [],
@@ -287,7 +289,8 @@ export function PreferenceSettings() {
 		mutation: {
 			onSuccess: async (data) => {
 				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
-				setPresentationPreferencesQueryData(queryClient, data);
+				if (session)
+					setPresentationPreferencesQueryData(queryClient, session.user.id, data);
 				await queryClient.invalidateQueries({ queryKey: FeedQueryKey });
 			},
 		},

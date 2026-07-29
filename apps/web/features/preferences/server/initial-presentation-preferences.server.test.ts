@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { QueryClient } from "@tanstack/react-query";
 
-import { getInitialPresentationPreferences } from "./initial-presentation-preferences.server";
+import {
+	getInitialPresentationPreferences,
+	seedInitialPresentationPreferences,
+} from "./initial-presentation-preferences.server";
+import { presentationPreferencesQueryKey } from "../model/presentation-preferences";
 
 const payload = {
 	profileId: "00000000-0000-4000-8000-000000000001",
@@ -8,7 +13,7 @@ const payload = {
 	chineseContentDisplay: "original",
 	filterFeedByPreferredLanguages: false,
 	preferredLanguages: ["en"],
-};
+} as const;
 
 const originalApiOrigin = process.env.REZICS_API_ORIGIN;
 
@@ -19,6 +24,42 @@ afterEach(() => {
 });
 
 describe("initial presentation preferences", () => {
+	it("hydrates a Profile Unit's preferences under its distinct auth account", () => {
+		const queryClient = new QueryClient();
+		seedInitialPresentationPreferences(
+			queryClient,
+			{
+				status: "resolved",
+				data: {
+					session: {
+						id: "session-a",
+						userId: "account-a",
+						token: "token-a",
+						createdAt: new Date("2026-07-28T00:00:00.000Z"),
+						updatedAt: new Date("2026-07-28T00:00:00.000Z"),
+						expiresAt: new Date("2026-08-04T00:00:00.000Z"),
+					},
+					user: {
+						id: "account-a",
+						email: "member@example.com",
+						emailVerified: true,
+						name: "Member",
+						createdAt: new Date("2026-07-28T00:00:00.000Z"),
+						updatedAt: new Date("2026-07-28T00:00:00.000Z"),
+					},
+				},
+			},
+			{ status: "resolved", data: payload },
+		);
+
+		expect(queryClient.getQueryData(presentationPreferencesQueryKey("account-a"))).toEqual(
+			payload,
+		);
+		expect(queryClient.getQueryData(presentationPreferencesQueryKey(payload.profileId))).toBe(
+			undefined,
+		);
+	});
+
 	it("does not call the backend without a session cookie", async () => {
 		const fetch = vi.fn();
 		vi.stubGlobal("fetch", fetch);

@@ -17,8 +17,8 @@ export interface PresentationPreferences {
 
 export const PresentationPreferencesQueryKey = ["current-user-presentation-preferences"] as const;
 
-export function presentationPreferencesQueryKey(profileId: string | null) {
-	return [...PresentationPreferencesQueryKey, profileId] as const;
+export function presentationPreferencesQueryKey(accountId: string | null) {
+	return [...PresentationPreferencesQueryKey, accountId] as const;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -1,26 +1,21 @@
 "use client";
 
-import {
-	HydrationBoundary,
-	QueryClientProvider,
-	type DehydratedState,
-} from "@tanstack/react-query";
+import type { DehydratedState } from "@tanstack/react-query";
 import { Toaster } from "@rezics/ui";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { TranslationSnapshot } from "native-i18n";
 import type { resources } from "@rezics/i18n/resources";
 
 import { AuthPortalProvider } from "@/features/auth/auth-portal";
 import { AuthSessionProvider } from "@/features/auth/session-provider";
-import { SessionCacheBoundary } from "@/features/auth/session-cache-boundary";
+import { SessionQueryClientBoundary } from "@/features/auth/session-query-client-boundary";
 import type { InitialAuthSession } from "@/features/auth/server/initial-session.server";
 import { NavigationProgressProvider } from "@/features/application-shell/navigation-progress";
 import { TranslatedUiProvider } from "@/features/application-shell/components/ui-provider";
 import { PwaLifecycle } from "@/features/pwa/pwa-lifecycle";
 import { TranslationProvider } from "@/i18n/client";
 import type { RootTranslationNamespaces } from "@/i18n/namespaces";
-import { createQueryClient } from "@/lib/query-client";
 import { urlStateOptions } from "@/lib/search-params";
 
 export function AppProviders({
@@ -34,24 +29,21 @@ export function AppProviders({
 	initialSession: InitialAuthSession;
 	initialTranslation: TranslationSnapshot<typeof resources, typeof RootTranslationNamespaces>;
 }) {
-	const [queryClient] = useState(createQueryClient);
-
 	return (
 		<NuqsAdapter defaultOptions={urlStateOptions}>
 			<TranslationProvider initial={initialTranslation}>
 				<TranslatedUiProvider>
 					<NavigationProgressProvider>
 						<AuthSessionProvider initialSession={initialSession}>
-							<QueryClientProvider client={queryClient}>
-								<HydrationBoundary state={dehydratedState}>
-									<SessionCacheBoundary>
-										<AuthPortalProvider>
-											{children}
-											<Toaster />
-										</AuthPortalProvider>
-									</SessionCacheBoundary>
-								</HydrationBoundary>
-							</QueryClientProvider>
+							<SessionQueryClientBoundary
+								dehydratedState={dehydratedState}
+								initialSession={initialSession}
+							>
+								<AuthPortalProvider>
+									{children}
+									<Toaster />
+								</AuthPortalProvider>
+							</SessionQueryClientBoundary>
 							<PwaLifecycle />
 						</AuthSessionProvider>
 					</NavigationProgressProvider>
