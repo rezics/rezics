@@ -471,6 +471,7 @@ export const CollectionListResponse = t.Object({
 			updatedAt: DateTime,
 		}),
 	),
+	nextCursor: NullableText,
 });
 export const RealmListResponse = t.Object({
 	items: t.Array(

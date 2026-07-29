@@ -89143,6 +89143,12 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "acceptsItemsOnly",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "boolean" }
+					},
+					{
 						"name": "localizationLanguages",
 						"in": "query",
 						"required": false,
@@ -89156,6 +89162,18 @@
 								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
 							}
 						}
+					},
+					{
+						"name": "search",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 200, "type": "string" }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "maxLength": 4096, "type": "string" }
 					},
 					{
 						"name": "limit",
@@ -89179,7 +89197,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "nextCursor"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -89286,7 +89304,38 @@
 													}
 												}
 											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -105397,8 +105446,11 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["saved"],
-									"properties": { "saved": { "type": "boolean" } }
+									"required": ["saved", "latestRevisionId"],
+									"properties": {
+										"saved": { "type": "boolean" },
+										"latestRevisionId": { "format": "uuid", "type": "string" }
+									}
 								}
 							}
 						}
@@ -105637,8 +105689,11 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["saved"],
-									"properties": { "saved": { "type": "boolean" } }
+									"required": ["saved", "latestRevisionId"],
+									"properties": {
+										"saved": { "type": "boolean" },
+										"latestRevisionId": { "format": "uuid", "type": "string" }
+									}
 								}
 							}
 						}
@@ -105822,10 +105877,11 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["favorited", "collectionId"],
+									"required": ["favorited", "collectionId", "latestRevisionId"],
 									"properties": {
 										"favorited": { "type": "boolean" },
-										"collectionId": { "format": "uuid", "type": "string" }
+										"collectionId": { "format": "uuid", "type": "string" },
+										"latestRevisionId": { "format": "uuid", "type": "string" }
 									}
 								}
 							}
@@ -105981,10 +106037,11 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["favorited", "collectionId"],
+									"required": ["favorited", "collectionId", "latestRevisionId"],
 									"properties": {
 										"favorited": { "type": "boolean" },
-										"collectionId": { "format": "uuid", "type": "string" }
+										"collectionId": { "format": "uuid", "type": "string" },
+										"latestRevisionId": { "format": "uuid", "type": "string" }
 									}
 								}
 							}

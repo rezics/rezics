@@ -3,9 +3,11 @@ import { and, eq } from "drizzle-orm";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
+import { ensureFavorites, ensureFavoritesInTransaction } from "../collections/favorites";
 import { database } from "../database";
 import { isFirstUnitLocalization } from "../units/localization";
 import {
+	collection,
 	profile,
 	profilePreference,
 	realmMember,
@@ -27,12 +29,24 @@ export interface SessionProfile {
 	email: string | null;
 }
 
-async function findProfile(authUserId: string): Promise<SessionProfile | undefined> {
+interface StoredSessionProfile extends SessionProfile {
+	favoritesId: string | null;
+}
+
+function presentSessionProfile({
+	favoritesId: _favoritesId,
+	...sessionProfile
+}: StoredSessionProfile): SessionProfile {
+	return sessionProfile;
+}
+
+async function findProfile(authUserId: string): Promise<StoredSessionProfile | undefined> {
 	const [record] = await database
 		.select({
 			unitId: profile.id,
 			name: unitLocalization.title,
 			email: users.email,
+			favoritesId: collection.id,
 		})
 		.from(profile)
 		.innerJoin(unit, eq(unit.id, profile.id))
@@ -44,6 +58,10 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 				isFirstUnitLocalization(unitLocalization.unitId),
 			),
 		)
+		.leftJoin(
+			collection,
+			and(eq(collection.ownerProfileId, profile.id), eq(collection.systemKey, "favorites")),
+		)
 		.where(eq(profile.authUserId, authUserId))
 		.limit(1);
 	return record;
@@ -51,7 +69,10 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 
 export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name" | "image">) {
 	const existing = await findProfile(authUser.id);
-	if (existing) return existing;
+	if (existing) {
+		if (!existing.favoritesId) await ensureFavorites(existing.unitId);
+		return presentSessionProfile(existing);
+	}
 	const [registration] = await database
 		.select({ contentLanguage: users.registrationContentLanguage })
 		.from(users)
@@ -94,6 +115,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 				assignedByProfileId: profileUnit.id,
 			});
 			await ensureOfficialZoneFollows(tx, [profileUnit.id], { sequenceIsEmpty: true });
+			await ensureFavoritesInTransaction(tx, profileUnit.id);
 			await recordUnitRevision(tx, {
 				unitId: profileUnit.id,
 				actorProfileId: profileUnit.id,
@@ -107,7 +129,10 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 		});
 	} catch (error) {
 		const raced = await findProfile(authUser.id);
-		if (raced) return raced;
+		if (raced) {
+			if (!raced.favoritesId) await ensureFavorites(raced.unitId);
+			return presentSessionProfile(raced);
+		}
 		throw error;
 	}
 }

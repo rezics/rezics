@@ -4,8 +4,6 @@ import type { ContentLanguage } from "@rezics/i18n";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
-	createCollectionPresentationDocument,
-	createSystemCollectionDefinitionDocument,
 	parseDocument,
 } from "@rezics/block";
 
@@ -20,13 +18,9 @@ import {
 	collection as collectionTable,
 	collectionItem,
 	unit,
-	unitOwnership,
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
-import { recordUnitRevision } from "../../units/history";
-import { insertUnit } from "../../units/create";
-import { DefaultContentLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
 import { CollectionContentResponse, CollectionDetailResponse } from "../schema/response";
 import { presentImageAsset } from "../../units/service";
@@ -64,62 +58,6 @@ function decodeCollectionItemsCursor(
 		return cursor.offset;
 	} catch {
 		throw new InvalidPaginationCursor();
-	}
-}
-
-export async function ensureFavorites(ownerId: string) {
-	const find = () =>
-		database
-			.select({ id: collectionTable.id })
-			.from(collectionTable)
-			.where(
-				and(
-					eq(collectionTable.ownerProfileId, ownerId),
-					eq(collectionTable.systemKey, "favorites"),
-				),
-			)
-			.limit(1);
-	const [existing] = await find();
-	if (existing) return existing.id;
-
-	try {
-		return await database.transaction(async (tx) => {
-			const created = await insertUnit(tx, {
-				kind: "collection",
-				status: "published",
-				visibility: "private",
-				publishedAt: new Date(),
-				statusActor: { kind: "profile", profileId: ownerId },
-			});
-			await tx.insert(collectionTable).values({
-				id: created.id,
-				ownerProfileId: ownerId,
-				source: "system",
-				systemKey: "favorites",
-				definitionDocument: createSystemCollectionDefinitionDocument("favorites"),
-				presentationDocument: createCollectionPresentationDocument("flat", "added-at"),
-			});
-			await tx.insert(unitLocalization).values({
-				unitId: created.id,
-				language: DefaultContentLanguage,
-				title: "Favorites",
-			});
-			await tx.insert(unitOwnership).values({
-				unitId: created.id,
-				profileId: ownerId,
-				assignedByProfileId: ownerId,
-			});
-			await recordUnitRevision(tx, {
-				unitId: created.id,
-				actorProfileId: ownerId,
-				event: "create",
-			});
-			return created.id;
-		});
-	} catch (error) {
-		const [raced] = await find();
-		if (raced) return raced.id;
-		throw error;
 	}
 }
 

@@ -1,37 +1,28 @@
 "use client";
 
-import { useGetApiCollections, useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
+import { useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending, UnitList } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { collectionListItems, useCollectionList } from "../data/collection-list";
 
 export function CollectionsPage() {
-	const localizationLanguages = useLocalizationLanguages();
 	const session = useHydratedSession();
 	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session.data) } });
-	const query = useGetApiCollections(
-		{
-			query: {
-				...(me.data?.id ? { ownerId: me.data.id } : {}),
-				limit: 50,
-				localizationLanguages,
-			},
-		},
-		{ query: { enabled: !session.data || Boolean(me.data?.id) } },
-	);
-	const { t } = useTranslation(["collections"]);
-	if (session.isPending || (session.data && me.isPending) || query.isPending)
-		return <QueryPending />;
-	if (me.isError || query.isError)
-		return (
-			<QueryFailure
-				error={me.error ?? query.error}
-				retry={() => void Promise.all([me.refetch(), query.refetch()])}
-			/>
-		);
+	const query = useCollectionList({
+		enabled: !session.data || Boolean(me.data?.id),
+		ownerId: me.data?.id,
+	});
+	const { t } = useTranslation(["actions", "collections"]);
+	if (session.isPending || (session.data && me.isPending)) return <QueryPending />;
+	if (me.isError) return <QueryFailure error={me.error} retry={() => void me.refetch()} />;
+	if (query.isPending) return <QueryPending />;
+	if (query.isError && !query.data)
+		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	const items = collectionListItems(query);
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
@@ -45,7 +36,7 @@ export function CollectionsPage() {
 			<UnitList
 				error={false}
 				href={(collection) => `/collections/${collection.id}`}
-				items={query.data.items.map((collection) =>
+				items={items.map((collection) =>
 					collection.systemKey === "favorites"
 						? { ...collection, title: t.collections.favorites }
 						: collection,
@@ -53,6 +44,17 @@ export function CollectionsPage() {
 				pending={false}
 				variant="shelf"
 			/>
+			{query.hasNextPage ? (
+				<Button
+					className="self-center"
+					isLoading={query.isFetchingNextPage}
+					onClick={() => void query.fetchNextPage()}
+					variant="outline"
+				>
+					{t.actions.loadMore}
+				</Button>
+			) : null}
+			<RequestFailure error={query.isFetchNextPageError ? query.error : null} />
 		</main>
 	);
 }

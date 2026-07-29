@@ -70192,9 +70192,24 @@ export type GetApiCollectionsQuery = {
 	 */
 	containsTargetId?: string;
 	/**
+	 * @type boolean | undefined
+	 */
+	acceptsItemsOnly?: boolean;
+	/**
 	 * @type array | undefined
 	 */
 	localizationLanguages?: GetApiCollectionsLocalizationLanguagesEnum[];
+	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string | undefined
+	 */
+	search?: string;
+	/**
+	 * @maxLength 4096
+	 * @type string | undefined
+	 */
+	cursor?: string;
 	/**
 	 * @default 20
 	 */
@@ -70291,6 +70306,35 @@ export type GetApiCollectionsStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiCollectionsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -70318,6 +70362,7 @@ export type GetApiCollectionsOptions = {
  */
 export type GetApiCollectionsResponses = {
 	"200": GetApiCollectionsStatus200;
+	"400": GetApiCollectionsStatus400;
 	"422": GetApiCollectionsStatus422;
 	"500": GetApiCollectionsStatus500;
 };
@@ -70326,7 +70371,10 @@ export type GetApiCollectionsResponses = {
  * @description Union of all possible responses
  */
 export type GetApiCollectionsResponse =
-	GetApiCollectionsStatus200 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500;
+	| GetApiCollectionsStatus200
+	| GetApiCollectionsStatus400
+	| GetApiCollectionsStatus422
+	| GetApiCollectionsStatus500;
 
 export const PostApiCollectionsStatus200LanguageEnum = {
 	zh: "zh",
@@ -77939,6 +77987,12 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus200 = {
 	 * @type boolean
 	 */
 	saved: boolean;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
 };
 
 /**
@@ -78227,6 +78281,12 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200 = {
 	 * @type boolean
 	 */
 	saved: boolean;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
 };
 
 /**
@@ -78427,6 +78487,12 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus200 = {
 	 * @type string
 	 */
 	collectionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
 };
 
 /**
@@ -78597,6 +78663,12 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus200 = {
 	 * @type string
 	 */
 	collectionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	latestRevisionId: string;
 };
 
 /**

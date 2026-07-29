@@ -11,6 +11,7 @@ import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
 	apiAccessPolicy,
+	collection,
 	platformCapabilityGrant,
 	contentStructure,
 	contentStructureNode,
@@ -59,6 +60,7 @@ import {
 import type { ContentLanguage } from "../database/schema/contract-values";
 import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
 import { recordAuditEvent } from "../audit";
+import { ensureFavoritesInTransaction } from "../collections/favorites";
 import { lockPlatformAccess } from "../platform-access";
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
@@ -542,6 +544,11 @@ async function ensureBootstrapProfiles(
 			});
 	}
 	return issuedCredentials;
+}
+
+async function ensureProfileFavorites(tx: DatabaseTransaction): Promise<void> {
+	const profiles = await tx.select({ id: profile.id }).from(profile);
+	for (const targetProfile of profiles) await ensureFavoritesInTransaction(tx, targetProfile.id);
 }
 
 async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Promise<void> {
@@ -1601,6 +1608,7 @@ async function isBootstrapReady(): Promise<boolean> {
 		officialZoneNavigations,
 		officialZoneAvatar,
 		allProfiles,
+		profileFavorites,
 		profileScoreMemberships,
 		profilePreferences,
 		profileFollows,
@@ -1783,6 +1791,13 @@ async function isBootstrapReady(): Promise<boolean> {
 			.limit(1),
 		database.select({ id: profile.id }).from(profile),
 		database
+			.select({
+				id: collection.id,
+				ownerProfileId: collection.ownerProfileId,
+			})
+			.from(collection)
+			.where(eq(collection.systemKey, "favorites")),
+		database
 			.select({ profileId: realmMember.profileId })
 			.from(realmMember)
 			.where(eq(realmMember.realmId, RezicsScoreRealmManifest.id)),
@@ -1959,6 +1974,10 @@ async function isBootstrapReady(): Promise<boolean> {
 		officialZoneAvatar[0]?.access === "public" &&
 		officialZoneAvatar[0]?.objectId === OfficialZoneAvatarAsset.objectId &&
 		officialZoneAvatar[0]?.storageKey === OfficialZoneAvatarAsset.storageKey &&
+		profileFavorites.length === allProfiles.length &&
+		allProfiles.every((targetProfile) =>
+			profileFavorites.some((favorites) => favorites.ownerProfileId === targetProfile.id),
+		) &&
 		allProfiles.every((targetProfile) =>
 			profileScoreMemberships.some((membership) => membership.profileId === targetProfile.id),
 		) &&
@@ -2047,6 +2066,7 @@ async function bootstrapDatabase(
 		);
 		await ensureSlugNamespaces(tx);
 		const credentials = await ensureBootstrapProfiles(tx, options.credentialMode);
+		await ensureProfileFavorites(tx);
 		await ensureBootstrapPlatformAccess(tx);
 		await ensureDefaultApiTokenPolicies(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);

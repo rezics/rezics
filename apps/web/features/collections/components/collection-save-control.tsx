@@ -4,32 +4,28 @@ import { toContentLanguage } from "@rezics/i18n";
 import {
 	useDeleteApiCollectionsByCollectionIdItemsByTargetId,
 	useDeleteApiCollectionsFavoritesItemsByTargetId,
-	useGetApiCollections,
 	useGetApiUsersMe,
 	usePostApiCollections,
 	usePutApiCollectionsByCollectionIdItemsByTargetId,
 	usePutApiCollectionsFavoritesItemsByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookmarkIcon, CheckIcon, LibraryIcon, PlusIcon } from "lucide-react";
+import { BookmarkIcon, PlusIcon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useId, useState, type FormEvent } from "react";
+import { useCallback, useDeferredValue, useId, useState, type FormEvent } from "react";
 
-import {
-	Button,
-	Dialog,
-	DialogBody,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	Input,
-} from "@rezics/ui";
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, Input } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { invalidateCollections } from "../data/collection-cache";
+import {
+	collectionListItems,
+	type CollectionListItem,
+	useCollectionList,
+} from "../data/collection-list";
+import { CollectionDestinationList } from "./collection-destination-list";
 
 export type CollectionSavePlacement = "direct" | "review-with-subject";
 
@@ -48,30 +44,35 @@ export function CollectionSaveControl({
 	readonly triggerClassName?: string;
 	readonly triggerVariant?: "outline" | "secondary" | "quiet";
 }) {
-	const { locale, t } = useTranslation(["collections", "ui"]);
+	const { locale, t } = useTranslation(["actions", "collections", "ui"]);
 	const { data: session } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
 	const queryClient = useQueryClient();
-	const localizationLanguages = useLocalizationLanguages();
 	const formId = useId();
 	const [internalOpen, setInternalOpen] = useState(false);
 	const [changingCollectionId, setChangingCollectionId] = useState<string>();
 	const [destinationQuery, setDestinationQuery] = useState("");
+	const deferredDestinationQuery = useDeferredValue(destinationQuery.trim());
+	const [destinationOverrides, setDestinationOverrides] = useState<
+		ReadonlyMap<
+			string,
+			{
+				readonly containsTarget: boolean;
+				readonly latestRevisionId: string;
+			}
+		>
+	>(() => new Map());
 	const [newCollectionTitle, setNewCollectionTitle] = useState("");
 	const open = controlledOpen ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
 	const me = useGetApiUsersMe({}, { query: { enabled: open && Boolean(session) } });
-	const collections = useGetApiCollections(
-		{
-			query: {
-				...(me.data?.id ? { ownerId: me.data.id } : {}),
-				targetId,
-				localizationLanguages,
-				limit: 50,
-			},
-		},
-		{ query: { enabled: open && Boolean(me.data?.id) } },
-	);
+	const collections = useCollectionList({
+		acceptsItemsOnly: true,
+		enabled: open && Boolean(me.data?.id),
+		ownerId: me.data?.id,
+		search: deferredDestinationQuery,
+		targetId,
+	});
 	const create = usePostApiCollections();
 	const add = usePutApiCollectionsByCollectionIdItemsByTargetId();
 	const remove = useDeleteApiCollectionsByCollectionIdItemsByTargetId();
@@ -89,43 +90,71 @@ export function CollectionSaveControl({
 		else setOpen(true);
 	}
 
-	async function toggleCollection(
-		collection: NonNullable<typeof collections.data>["items"][number],
-	) {
+	async function toggleCollection(collection: CollectionListItem) {
 		setChangingCollectionId(collection.id);
 		try {
+			let latestRevisionId: string;
 			if (collection.systemKey === "favorites") {
 				if (collection.containsTarget)
-					await removeFavorite.mutateAsync({
-						path: { targetId },
-						body: { baseRevisionId: collection.latestRevisionId },
-					});
+					latestRevisionId = (
+						await removeFavorite.mutateAsync({
+							path: { targetId },
+							body: { baseRevisionId: collection.latestRevisionId },
+						})
+					).latestRevisionId;
 				else
-					await addFavorite.mutateAsync({
-						path: { targetId },
-						body: { baseRevisionId: collection.latestRevisionId },
-					});
+					latestRevisionId = (
+						await addFavorite.mutateAsync({
+							path: { targetId },
+							body: { baseRevisionId: collection.latestRevisionId },
+						})
+					).latestRevisionId;
 			} else if (collection.containsTarget) {
-				await remove.mutateAsync({
-					path: { collectionId: collection.id, targetId },
-					body: { baseRevisionId: collection.latestRevisionId },
-				});
+				latestRevisionId = (
+					await remove.mutateAsync({
+						path: { collectionId: collection.id, targetId },
+						body: { baseRevisionId: collection.latestRevisionId },
+					})
+				).latestRevisionId;
 			} else {
-				await add.mutateAsync({
-					path: { collectionId: collection.id, targetId },
-					body: {
-						baseRevisionId: collection.latestRevisionId,
-						placement,
-						role: "item",
-					},
-				});
+				latestRevisionId = (
+					await add.mutateAsync({
+						path: { collectionId: collection.id, targetId },
+						body: {
+							baseRevisionId: collection.latestRevisionId,
+							placement,
+							role: "item",
+						},
+					})
+				).latestRevisionId;
 			}
-			await invalidateCollections(queryClient, collection.id);
+			setDestinationOverrides((current) => {
+				const next = new Map(current);
+				next.set(collection.id, {
+					containsTarget: !collection.containsTarget,
+					latestRevisionId,
+				});
+				return next;
+			});
+			void invalidateCollections(queryClient, collection.id);
 		} catch {
-			// Queries remain the source of confirmed membership state.
+			// The visible mutation error preserves the last confirmed membership state.
 		} finally {
 			setChangingCollectionId(undefined);
 		}
+	}
+
+	const loadNextPage = useCallback(() => {
+		void collections.fetchNextPage();
+	}, [collections.fetchNextPage]);
+
+	function updateOpen(nextOpen: boolean) {
+		if (!nextOpen) {
+			setDestinationQuery("");
+			setDestinationOverrides(new Map());
+			setChangingCollectionId(undefined);
+		}
+		setOpen(nextOpen);
 	}
 
 	async function createAndSave(event: FormEvent<HTMLFormElement>) {
@@ -157,28 +186,23 @@ export function CollectionSaveControl({
 		}
 	}
 
-	const allDestinations = [...(collections.data?.items ?? [])]
-		.filter(({ acceptsItems }) => acceptsItems)
-		.sort(
-			(left, right) =>
-				Number(right.systemKey === "favorites") - Number(left.systemKey === "favorites"),
-		);
-	const normalizedDestinationQuery = destinationQuery.trim().toLocaleLowerCase(locale.target);
-	const destinations = allDestinations.filter((collection) => {
-		if (!normalizedDestinationQuery) return true;
-		const title =
-			collection.systemKey === "favorites"
-				? t.collections.favorites
-				: (collection.title ?? t.ui.unnamed);
-		return title.toLocaleLowerCase(locale.target).includes(normalizedDestinationQuery);
+	const destinations = collectionListItems(collections).map((collection) => {
+		const override = destinationOverrides.get(collection.id);
+		return override ? { ...collection, ...override } : collection;
 	});
+	const listEmptyLabel =
+		collections.isPending || me.isPending
+			? t.ui.loading
+			: deferredDestinationQuery
+				? t.collections.save.noMatches
+				: t.collections.save.noCollections;
 	const description =
 		placement === "review-with-subject"
 			? t.collections.save.reviewDescription
 			: t.collections.save.directDescription;
 
 	return (
-		<Dialog onOpenChange={({ open: nextOpen }) => setOpen(nextOpen)} open={open}>
+		<Dialog onOpenChange={({ open: nextOpen }) => updateOpen(nextOpen)} open={open}>
 			{triggerVariant ? (
 				<Button
 					className={triggerClassName}
@@ -190,10 +214,14 @@ export function CollectionSaveControl({
 					{t.collections.save.action}
 				</Button>
 			) : null}
-			<DialogContent showCloseButton={false} size="sm">
+			<DialogContent
+				className="h-[min(44rem,calc(100svh-2rem))]"
+				showCloseButton={false}
+				size="sm"
+			>
 				<DialogHeader description={description} title={t.collections.save.title} />
-				<DialogBody className="grid gap-4">
-					<div className="grid gap-2">
+				<div className="flex min-h-0 flex-1 flex-col gap-4 p-(--space) pt-0">
+					<div className="grid shrink-0 gap-2">
 						<label className="font-medium text-sm" htmlFor={`${formId}-search`}>
 							{t.collections.save.searchLabel}
 						</label>
@@ -204,56 +232,25 @@ export function CollectionSaveControl({
 							value={destinationQuery}
 						/>
 					</div>
-					<div className="grid gap-2">
-						{collections.isPending || me.isPending ? (
-							<p className="text-sm text-muted-foreground">{t.ui.loading}</p>
-						) : destinations.length ? (
-							destinations.map((collection) => {
-								const isFavorite = collection.systemKey === "favorites";
-								const selfReference = collection.id === targetId;
-								return (
-									<Button
-										aria-pressed={collection.containsTarget}
-										className="h-auto min-h-11 justify-between whitespace-normal py-2 text-start"
-										disabled={
-											selfReference ||
-											pending ||
-											changingCollectionId === collection.id
-										}
-										key={collection.id}
-										onClick={() => void toggleCollection(collection)}
-										variant={
-											collection.containsTarget ? "secondary" : "outline"
-										}
-									>
-										<span className="flex min-w-0 items-center gap-2">
-											{isFavorite ? (
-												<BookmarkIcon aria-hidden className="shrink-0" />
-											) : (
-												<LibraryIcon aria-hidden className="shrink-0" />
-											)}
-											<span className="truncate">
-												{isFavorite
-													? t.collections.favorites
-													: (collection.title ?? t.ui.unnamed)}
-											</span>
-										</span>
-										{collection.containsTarget ? (
-											<CheckIcon aria-hidden className="shrink-0" />
-										) : null}
-									</Button>
-								);
-							})
-						) : (
-							<p className="text-sm text-muted-foreground">
-								{allDestinations.length
-									? t.collections.save.noMatches
-									: t.collections.save.noCollections}
-							</p>
-						)}
-					</div>
+					<CollectionDestinationList
+						ariaLabel={t.collections.save.title}
+						changingCollectionId={changingCollectionId}
+						disabled={pending}
+						emptyLabel={listEmptyLabel}
+						favoritesLabel={t.collections.favorites}
+						hasNextPage={collections.hasNextPage}
+						isFetchingNextPage={collections.isFetchingNextPage}
+						items={destinations}
+						loadingLabel={t.ui.loading}
+						nextPageError={collections.isFetchNextPageError ? collections.error : null}
+						onLoadNextPage={loadNextPage}
+						onToggle={(collection) => void toggleCollection(collection)}
+						retryLabel={t.actions.retry}
+						targetId={targetId}
+						unnamedLabel={t.ui.unnamed}
+					/>
 					<form
-						className="grid gap-2 rounded-xl border border-border-weak p-3"
+						className="grid shrink-0 gap-2 rounded-xl border border-border-weak p-3"
 						onSubmit={(event) => void createAndSave(event)}
 					>
 						<label className="font-medium text-sm" htmlFor={`${formId}-new-title`}>
@@ -284,7 +281,7 @@ export function CollectionSaveControl({
 					<RequestFailure
 						error={
 							me.error ??
-							collections.error ??
+							(collections.isError && !collections.data ? collections.error : null) ??
 							create.error ??
 							add.error ??
 							remove.error ??
@@ -293,12 +290,12 @@ export function CollectionSaveControl({
 						}
 						fallback={t.ui.retryLater}
 					/>
-				</DialogBody>
+				</div>
 				<DialogFooter className="justify-between border-t">
 					<Button asChild variant="quiet">
 						<Link href="/collections">{t.collections.save.manage}</Link>
 					</Button>
-					<Button onClick={() => setOpen(false)} variant="secondary">
+					<Button onClick={() => updateOpen(false)} variant="secondary">
 						{t.collections.close}
 					</Button>
 				</DialogFooter>

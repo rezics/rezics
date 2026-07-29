@@ -17,7 +17,10 @@ describe("collection list schema", () => {
 			Check(ListCollectionsQuery, {
 				targetId,
 				containsTargetId: targetId,
+				acceptsItemsOnly: true,
 				localizationLanguages: ["zh", "en"],
+				search: "reading",
+				cursor: "next-page",
 				limit: 50,
 			}),
 		).toBe(true);
@@ -26,6 +29,12 @@ describe("collection list schema", () => {
 	it("requires target identities to be UUIDs", () => {
 		expect(Check(ListCollectionsQuery, { targetId: "book-1" })).toBe(false);
 		expect(Check(ListCollectionsQuery, { containsTargetId: "book-1" })).toBe(false);
+	});
+
+	it("bounds server-side title search", () => {
+		expect(Check(ListCollectionsQuery, { search: "books" })).toBe(true);
+		expect(Check(ListCollectionsQuery, { search: "" })).toBe(false);
+		expect(Check(ListCollectionsQuery, { search: "x".repeat(201) })).toBe(false);
 	});
 });
 

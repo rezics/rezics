@@ -24,8 +24,15 @@ export const NoContentResponse = {
 	[StatusCodes.NO_CONTENT]: { description: "No Content" },
 } as const;
 
-export const SavedResponse = t.Object({ saved: t.Boolean() });
-export const FavoriteResponse = t.Object({ favorited: t.Boolean(), collectionId: Uuid });
+export const SavedResponse = t.Object({
+	saved: t.Boolean(),
+	latestRevisionId: Uuid,
+});
+export const FavoriteResponse = t.Object({
+	favorited: t.Boolean(),
+	collectionId: Uuid,
+	latestRevisionId: Uuid,
+});
 
 export const ScoreResponse = t.Object({
 	scoreId: Uuid,

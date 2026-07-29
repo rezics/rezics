@@ -3,7 +3,7 @@ import {
 	createCollectionPresentationDocument,
 	createManualCollectionDefinitionDocument,
 } from "@rezics/block";
-import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, ne, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -42,7 +42,8 @@ import {
 	SaveCollectionItemBody,
 	UpdateCollectionBody,
 } from "./schema";
-import { ensureFavorites, getCollection, getCollectionContent } from "./service";
+import { ensureFavorites } from "../../collections/favorites";
+import { getCollection, getCollectionContent } from "./service";
 import { validateCollectionParent } from "./hierarchy";
 import { canListAllOwnedCollections } from "./list-access";
 import { FavoriteResponse, NoContentResponse, SavedResponse } from "../schema/action-response";
@@ -53,6 +54,7 @@ import {
 	CollectionListResponse,
 } from "../schema/response";
 import { FavoritesDeleteForbidden, FavoritesEditForbidden } from "./errors";
+import { decodeCollectionListCursor, encodeCollectionListCursor } from "./cursor";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { ValidationError } from "../errors";
 import { createProfilePublisherAttribution } from "../../units/attribution";
@@ -139,12 +141,44 @@ export default new Elysia({ prefix: "/collections" })
 				ownerId: query.ownerId,
 				viewerId,
 			});
-			const items = await database
+			if (isOwnerQuery && viewerId) await ensureFavorites(viewerId);
+			const cursorContext = { ownerListing: isOwnerQuery, query };
+			const cursor = decodeCollectionListCursor(query.cursor, cursorContext);
+			const limit = query.limit ?? 20;
+			const systemRank = sql<number>`case
+				when ${collection.systemKey} = 'favorites'::collection_system_key then 1
+				else 0
+			end`;
+			const search = query.search?.trim();
+			const titleMatchesSearch = search
+				? sql<boolean>`position(lower(${search}) in lower(coalesce(${unitLocalization.title}, ''))) > 0`
+				: undefined;
+			const searchCondition = titleMatchesSearch
+				? isOwnerQuery
+					? or(eq(collection.systemKey, "favorites"), titleMatchesSearch)
+					: titleMatchesSearch
+				: undefined;
+			const cursorCondition = cursor
+				? or(
+						lt(systemRank, cursor.systemRank),
+						and(
+							eq(systemRank, cursor.systemRank),
+							lt(unit.updatedAt, cursor.updatedAt),
+						),
+						and(
+							eq(systemRank, cursor.systemRank),
+							eq(unit.updatedAt, cursor.updatedAt),
+							lt(collection.id, cursor.id),
+						),
+					)
+				: undefined;
+			const candidates = await database
 				.select({
 					id: collection.id,
 					ownerId: collection.ownerProfileId,
 					source: collection.source,
 					systemKey: collection.systemKey,
+					systemRank,
 					language: unitLocalization.language,
 					itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collection.id})::int`,
 					containsTarget: query.targetId
@@ -178,12 +212,24 @@ export default new Elysia({ prefix: "/collections" })
 						query.containsTargetId
 							? sql`exists(select 1 from ${collectionItem} containing_item where containing_item.collection_id = ${collection.id} and containing_item.unit_id = ${query.containsTargetId})`
 							: undefined,
+						query.acceptsItemsOnly
+							? isOwnerQuery
+								? or(
+										eq(collection.source, "manual"),
+										eq(collection.systemKey, "favorites"),
+									)
+								: sql`false`
+							: undefined,
+						searchCondition,
+						cursorCondition,
 					),
 				)
-				.orderBy(desc(unit.updatedAt))
-				.limit(query.limit ?? 20);
+				.orderBy(desc(systemRank), desc(unit.updatedAt), desc(collection.id))
+				.limit(limit + 1);
+			const items = candidates.slice(0, limit);
+			const last = items.at(-1);
 			return {
-				items: items.map(({ coverAssetId, ...item }) => ({
+				items: items.map(({ coverAssetId, systemRank: _systemRank, ...item }) => ({
 					...item,
 					acceptsItems:
 						isOwnerQuery &&
@@ -191,11 +237,25 @@ export default new Elysia({ prefix: "/collections" })
 							(item.source === "system" && item.systemKey === "favorites")),
 					cover: presentImageAsset(coverAssetId, "cover"),
 				})),
+				nextCursor:
+					candidates.length > limit && last
+						? encodeCollectionListCursor(
+								{
+									systemRank: last.systemRank,
+									updatedAt: last.updatedAt,
+									id: last.id,
+								},
+								cursorContext,
+							)
+						: null,
 			};
 		},
 		{
 			query: ListCollectionsQuery,
-			response: { [StatusCodes.OK]: CollectionListResponse },
+			response: {
+				[StatusCodes.OK]: CollectionListResponse,
+				[StatusCodes.BAD_REQUEST]: InvalidPaginationCursorResponse,
+			},
 			detail: { summary: "List collections", tags: ["Collections"] },
 		},
 	)
@@ -545,7 +605,7 @@ export default new Elysia({ prefix: "/collections" })
 			if (params.targetId === params.collectionId)
 				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
 			await authorization.unit.ensureCanRead(params.targetId);
-			await database.transaction(async (tx) => {
+			const latestRevisionId = await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
 				);
@@ -670,14 +730,15 @@ export default new Elysia({ prefix: "/collections" })
 							},
 						});
 				}
-				await recordUnitRevision(tx, {
+				const revision = await recordUnitRevision(tx, {
 					unitId: params.collectionId,
 					actorProfileId: profile.unitId,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 				});
+				return revision.revisionId;
 			});
-			return { saved: true };
+			return { saved: true, latestRevisionId };
 		},
 		{
 			access: "write:unit:update",
@@ -700,7 +761,7 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId/items/:targetId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
-			await database.transaction(async (tx) => {
+			const latestRevisionId = await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
 				);
@@ -722,14 +783,15 @@ export default new Elysia({ prefix: "/collections" })
 							eq(collectionItem.unitId, params.targetId),
 						),
 					);
-				await recordUnitRevision(tx, {
+				const revision = await recordUnitRevision(tx, {
 					unitId: params.collectionId,
 					actorProfileId: profile.unitId,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 				});
+				return revision.revisionId;
 			});
-			return { saved: false };
+			return { saved: false, latestRevisionId };
 		},
 		{
 			access: "write:unit:update",
@@ -751,7 +813,7 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanRead(params.targetId);
 			const collectionId = await ensureFavorites(profile.unitId);
-			await database.transaction(async (tx) => {
+			const latestRevisionId = await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${collectionId}::text, 0))`,
 				);
@@ -766,14 +828,15 @@ export default new Elysia({ prefix: "/collections" })
 						addedByProfileId: profile.unitId,
 					})
 					.onConflictDoNothing();
-				await recordUnitRevision(tx, {
+				const revision = await recordUnitRevision(tx, {
 					unitId: collectionId,
 					actorProfileId: profile.unitId,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 				});
+				return revision.revisionId;
 			});
-			return { favorited: true, collectionId };
+			return { favorited: true, collectionId, latestRevisionId };
 		},
 		{
 			access: "write:unit:update",
@@ -791,7 +854,7 @@ export default new Elysia({ prefix: "/collections" })
 		"/favorites/items/:targetId",
 		async ({ params, profile, body }) => {
 			const collectionId = await ensureFavorites(profile.unitId);
-			await database.transaction(async (tx) => {
+			const latestRevisionId = await database.transaction(async (tx) => {
 				await tx
 					.delete(collectionItem)
 					.where(
@@ -800,14 +863,15 @@ export default new Elysia({ prefix: "/collections" })
 							eq(collectionItem.unitId, params.targetId),
 						),
 					);
-				await recordUnitRevision(tx, {
+				const revision = await recordUnitRevision(tx, {
 					unitId: collectionId,
 					actorProfileId: profile.unitId,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 				});
+				return revision.revisionId;
 			});
-			return { favorited: false, collectionId };
+			return { favorited: false, collectionId, latestRevisionId };
 		},
 		{
 			access: "write:unit:update",

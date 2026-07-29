@@ -4,6 +4,8 @@ const findProfileLimit = vi.hoisted(() => vi.fn());
 const registrationLanguageLimit = vi.hoisted(() => vi.fn());
 const insert = vi.hoisted(() => vi.fn());
 const insertUnit = vi.hoisted(() => vi.fn());
+const ensureFavorites = vi.hoisted(() => vi.fn());
+const ensureFavoritesInTransaction = vi.hoisted(() => vi.fn());
 const onConflictDoNothing = vi.hoisted(() => vi.fn());
 const recordUnitRevision = vi.hoisted(() => vi.fn());
 const valuesByTable = vi.hoisted(() => new Map<unknown, unknown>());
@@ -22,7 +24,9 @@ vi.mock("../database", () => ({
 							innerJoin: vi.fn(() => ({
 								innerJoin: vi.fn(() => ({
 									leftJoin: vi.fn(() => ({
-										where: vi.fn(() => ({ limit: findProfileLimit })),
+										leftJoin: vi.fn(() => ({
+											where: vi.fn(() => ({ limit: findProfileLimit })),
+										})),
 									})),
 								})),
 							})),
@@ -37,6 +41,10 @@ vi.mock("../database", () => ({
 
 vi.mock("../units/create", () => ({ insertUnit }));
 vi.mock("../units/history", () => ({ recordUnitRevision }));
+vi.mock("../collections/favorites", () => ({
+	ensureFavorites,
+	ensureFavoritesInTransaction,
+}));
 
 import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
 import {
@@ -72,6 +80,57 @@ describe("Profile registration defaults", () => {
 		onConflictDoNothing.mockResolvedValue(undefined);
 		recordUnitRevision.mockReset();
 		recordUnitRevision.mockResolvedValue(undefined);
+		ensureFavoritesInTransaction.mockReset();
+		ensureFavoritesInTransaction.mockResolvedValue("favorites-id");
+		ensureFavorites.mockReset();
+		ensureFavorites.mockResolvedValue("favorites-id");
+	});
+
+	it("repairs Favorites for an existing Profile before returning it", async () => {
+		const existing = {
+			unitId: ProfileId,
+			name: "Reader",
+			email: "reader@example.com",
+		};
+		findProfileLimit.mockResolvedValue([
+			{
+				...existing,
+				favoritesId: null,
+			},
+		]);
+
+		await expect(
+			ensureProfile({
+				id: "019f82aa-db8f-7962-9924-7369b17f5501",
+				email: "reader@example.com",
+				name: "Reader",
+				image: null,
+			}),
+		).resolves.toEqual(existing);
+		expect(ensureFavorites).toHaveBeenCalledOnce();
+		expect(ensureFavorites).toHaveBeenCalledWith(ProfileId);
+		expect(ensureFavoritesInTransaction).not.toHaveBeenCalled();
+	});
+
+	it("does not query Favorites again when the existing Profile already has them", async () => {
+		findProfileLimit.mockResolvedValue([
+			{
+				unitId: ProfileId,
+				name: "Reader",
+				email: "reader@example.com",
+				favoritesId: "019f82aa-db8f-7962-9924-7369b17f5503",
+			},
+		]);
+
+		await ensureProfile({
+			id: "019f82aa-db8f-7962-9924-7369b17f5501",
+			email: "reader@example.com",
+			name: "Reader",
+			image: null,
+		});
+
+		expect(ensureFavorites).not.toHaveBeenCalled();
+		expect(ensureFavoritesInTransaction).not.toHaveBeenCalled();
 	});
 
 	it("idempotently follows only the official Zones in manifest order", async () => {
@@ -116,6 +175,21 @@ describe("Profile registration defaults", () => {
 			profileId: ProfileId,
 			assignedByProfileId: ProfileId,
 		});
+	});
+
+	it("creates the required Favorites Collection in the Profile transaction", async () => {
+		await ensureProfile({
+			id: "019f82aa-db8f-7962-9924-7369b17f5501",
+			email: "reader@example.com",
+			name: "Reader",
+			image: null,
+		});
+
+		expect(ensureFavoritesInTransaction).toHaveBeenCalledOnce();
+		expect(ensureFavoritesInTransaction).toHaveBeenCalledWith(
+			expect.objectContaining({ insert }),
+			ProfileId,
+		);
 	});
 
 	it("joins the REZICS Score Realm and stores it as the default scoring Realm", async () => {
