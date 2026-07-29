@@ -1,6 +1,5 @@
-import { eq, sql } from "drizzle-orm";
+import { and, asc, eq, gt, or, sql } from "drizzle-orm";
 import { t, type UnwrapSchema } from "elysia";
-import { Check } from "@sinclair/typebox/value";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { Authorization } from "../../authorization";
@@ -33,19 +32,10 @@ import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 const CollectionItemsCursor = t.Object(
 	{
 		v: t.Literal(1),
-		collectionId: t.String(),
-		revisionId: t.String(),
-		offset: t.Integer({ minimum: 1 }),
-	},
-	{ additionalProperties: false },
-);
-
-const CollectionMembershipDatabaseRow = t.Object(
-	{
-		targetId: Uuid,
-		parentTargetId: t.Nullable(Uuid),
+		collectionId: Uuid,
+		revisionId: Uuid,
 		position: FractionalPosition,
-		createdAt: t.String(),
+		targetId: Uuid,
 	},
 	{ additionalProperties: false },
 );
@@ -54,13 +44,12 @@ type CollectionContentMembership = UnwrapSchema<
 	typeof CollectionContentResponse
 >["items"][number]["membership"];
 
-export function presentCollectionMembership(value: unknown): CollectionContentMembership {
-	if (!Check(CollectionMembershipDatabaseRow, value))
-		throw new Error("Collection membership query returned an invalid row");
-	const createdAt = new Date(value.createdAt);
-	if (Number.isNaN(createdAt.getTime()))
-		throw new Error("Collection membership query returned an invalid creation time");
-	return { ...value, createdAt: createdAt.toISOString() };
+export function presentCollectionMembership(value: {
+	readonly targetId: string;
+	readonly position: string;
+	readonly createdAt: Date;
+}): CollectionContentMembership {
+	return { ...value, createdAt: value.createdAt.toISOString() };
 }
 
 function encodeCollectionItemsCursor(value: typeof CollectionItemsCursor.static) {
@@ -72,12 +61,12 @@ function decodeCollectionItemsCursor(
 	collectionId: string,
 	revisionId: string,
 ) {
-	if (!value) return 0;
+	if (!value) return null;
 	try {
 		const cursor = parseJsonCursor(value, CollectionItemsCursor);
 		if (cursor.collectionId !== collectionId || cursor.revisionId !== revisionId)
 			throw new InvalidPaginationCursor();
-		return cursor.offset;
+		return cursor;
 	} catch {
 		throw new InvalidPaginationCursor();
 	}
@@ -206,61 +195,37 @@ export async function getCollectionContent(
 ): Promise<UnwrapSchema<typeof CollectionContentResponse>> {
 	const localizationLanguages = input.localizationLanguages ?? [];
 	const collection = await getCollection(collectionId, authorization, localizationLanguages);
-	const offset = decodeCollectionItemsCursor(
+	const cursor = decodeCollectionItemsCursor(
 		input.cursor,
 		collectionId,
 		collection.latestItemsRevisionId,
 	);
 	const limit = input.limit ?? 20;
-	const result = await database.execute<Record<string, unknown>>(sql`
-		with recursive collection_tree (
-			unit_id,
-			parent_unit_id,
-			position,
-			created_at,
-			visited_ids,
-			order_path
-		) as (
-			select
-				root_item.unit_id,
-				root_item.parent_unit_id,
-				root_item.position,
-				root_item.created_at,
-				array[root_item.unit_id],
-				array[root_item.position collate "C", root_item.unit_id::text collate "C"]
-			from ${collectionItem} root_item
-			where root_item.collection_id = ${collectionId}
-				and root_item.parent_unit_id is null
-
-			union all
-
-			select
-				child_item.unit_id,
-				child_item.parent_unit_id,
-				child_item.position,
-				child_item.created_at,
-				parent_item.visited_ids || child_item.unit_id,
-				parent_item.order_path || array[
-					child_item.position collate "C",
-					child_item.unit_id::text collate "C"
-				]
-			from collection_tree parent_item
-			inner join ${collectionItem} child_item
-				on child_item.collection_id = ${collectionId}
-				and child_item.parent_unit_id = parent_item.unit_id
-			where child_item.unit_id <> all(parent_item.visited_ids)
-		)
-		select
-			unit_id as "targetId",
-			parent_unit_id as "parentTargetId",
-			position,
-			created_at as "createdAt"
-		from collection_tree
-		order by order_path collate "C"
-		offset ${offset}
-		limit ${limit + 1}
-	`);
-	const memberships = result.rows.map(presentCollectionMembership);
+	const memberships = (
+		await database
+			.select({
+				targetId: collectionItem.unitId,
+				position: collectionItem.position,
+				createdAt: collectionItem.createdAt,
+			})
+			.from(collectionItem)
+			.where(
+				and(
+					eq(collectionItem.collectionId, collectionId),
+					cursor
+						? or(
+								gt(collectionItem.position, cursor.position),
+								and(
+									eq(collectionItem.position, cursor.position),
+									gt(collectionItem.unitId, cursor.targetId),
+								),
+							)
+						: undefined,
+				),
+			)
+			.orderBy(asc(collectionItem.position), asc(collectionItem.unitId))
+			.limit(limit + 1)
+	).map(presentCollectionMembership);
 	const page = memberships.slice(0, limit);
 	const viewer = await resolveRecommendationViewer(authorization.profileId, false);
 	const contents = await hydrateFeedItems(
@@ -285,7 +250,8 @@ export async function getCollectionContent(
 						v: 1,
 						collectionId,
 						revisionId: collection.latestItemsRevisionId,
-						offset: offset + limit,
+						position: page.at(-1)!.position,
+						targetId: page.at(-1)!.targetId,
 					})
 				: null,
 	};

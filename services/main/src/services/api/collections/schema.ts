@@ -61,11 +61,7 @@ export const CollectionItemParams = t.Object({ collectionId: Uuid, targetId: Uui
 export type CollectionItemParams = Static<typeof CollectionItemParams>;
 
 export const SaveCollectionItemBody = t.Object(
-	{
-		baseItemsRevisionId: Uuid,
-		placement: t.UnionEnum(["direct", "review-with-subject"]),
-		parentTargetId: t.Optional(t.Nullable(Uuid)),
-	},
+	{ baseItemsRevisionId: Uuid },
 	{ additionalProperties: false },
 );
 export type SaveCollectionItemBody = Static<typeof SaveCollectionItemBody>;
@@ -88,13 +84,7 @@ export const AddCollectionItemsBatchBody = t.Object(
 export type AddCollectionItemsBatchBody = Static<typeof AddCollectionItemsBatchBody>;
 
 export const CollectionItemPlacement = t.Union([
-	t.Object(
-		{
-			kind: t.UnionEnum(["start", "end"]),
-			parentTargetId: t.Nullable(Uuid),
-		},
-		{ additionalProperties: false },
-	),
+	t.Object({ kind: t.UnionEnum(["start", "end"]) }, { additionalProperties: false }),
 	t.Object(
 		{
 			kind: t.Literal("after"),

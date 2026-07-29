@@ -17,7 +17,6 @@ export async function loadCollectionStructureSnapshot(
 	const items = await tx
 		.select({
 			targetUnitId: collectionItem.unitId,
-			parentTargetUnitId: collectionItem.parentUnitId,
 			position: collectionItem.position,
 			addedByProfileId: collectionItem.addedByProfileId,
 			addedAt: collectionItem.createdAt,
@@ -26,25 +25,6 @@ export async function loadCollectionStructureSnapshot(
 		.where(eq(collectionItem.collectionId, collectionId))
 		.orderBy(asc(collectionItem.unitId));
 	return parseCollectionStructureSnapshot({ version: 1, collectionId, items });
-}
-
-function orderItemsParentsFirst(snapshot: CollectionStructureSnapshot) {
-	const remaining = new Map(snapshot.items.map((item) => [item.targetUnitId, item]));
-	const inserted = new Set<string>();
-	const ordered: CollectionStructureSnapshot["items"] = [];
-	while (remaining.size) {
-		let progressed = false;
-		for (const [targetUnitId, item] of remaining) {
-			if (item.parentTargetUnitId !== null && !inserted.has(item.parentTargetUnitId))
-				continue;
-			ordered.push(item);
-			inserted.add(targetUnitId);
-			remaining.delete(targetUnitId);
-			progressed = true;
-		}
-		if (!progressed) throw new TypeError("Collection Structure contains a cycle");
-	}
-	return ordered;
 }
 
 export async function restoreCollectionStructureSnapshot(
@@ -56,13 +36,11 @@ export async function restoreCollectionStructureSnapshot(
 	if (snapshot.collectionId !== collectionId)
 		throw new TypeError("Collection Structure checkpoint contains another Collection");
 	await tx.delete(collectionItem).where(eq(collectionItem.collectionId, collectionId));
-	const ordered = orderItemsParentsFirst(snapshot);
-	if (ordered.length)
+	if (snapshot.items.length)
 		await tx.insert(collectionItem).values(
-			ordered.map((item) => ({
+			snapshot.items.map((item) => ({
 				collectionId,
 				unitId: item.targetUnitId,
-				parentUnitId: item.parentTargetUnitId,
 				position: item.position,
 				addedByProfileId: item.addedByProfileId,
 				createdAt: item.addedAt,

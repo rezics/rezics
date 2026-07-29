@@ -43,10 +43,7 @@ import {
 	UnitReportMenuItem,
 	type UnitReportTarget,
 } from "@/features/reports/components/unit-report-dialog";
-import {
-	CollectionPickerButton,
-	type CollectionSavePlacement,
-} from "@/features/collections/components/collection-picker-button";
+import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -124,7 +121,6 @@ export function FeedVoteControl({
 
 export function FeedEngagementBar({
 	actions,
-	collectionPlacement = "direct",
 	href,
 	initialReaction,
 	itemId,
@@ -138,7 +134,6 @@ export function FeedEngagementBar({
 	showErrors = true,
 }: {
 	actions?: ReactNode;
-	collectionPlacement?: CollectionSavePlacement;
 	href?: string;
 	initialReaction: FeedReaction;
 	itemId: string;
@@ -216,11 +211,7 @@ export function FeedEngagementBar({
 					</Button>
 				) : null}
 				{policy.primary === "collect" ? (
-					<CollectionPickerButton
-						placement={collectionPlacement}
-						targetId={itemId}
-						triggerVariant="secondary"
-					/>
+					<CollectionPickerButton targetId={itemId} triggerVariant="secondary" />
 				) : null}
 				{policy.primary === "follow" ? (
 					<FollowButton
@@ -298,14 +289,12 @@ export function FeedOverflowMenu({
 	children,
 	itemId,
 	onNotInterested,
-	placement = "direct",
 	reportTarget,
 }: {
 	canExclude: boolean;
 	children?: ReactNode;
 	itemId: string;
 	onNotInterested?: () => void;
-	placement?: CollectionSavePlacement;
 	reportTarget?: UnitReportTarget;
 }) {
 	const { data: session } = useHydratedSession();
@@ -334,7 +323,6 @@ export function FeedOverflowMenu({
 			<CollectionPickerButton
 				onOpenChange={setCollectionOpen}
 				open={collectionOpen}
-				placement={placement}
 				targetId={itemId}
 			/>
 			{reportTarget ? (

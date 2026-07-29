@@ -30,10 +30,8 @@ export default {
 	save: {
 		action: "Enregistrer",
 		title: "Enregistrer dans des collections",
-		directDescription: "Choisissez les Favoris ou une collection personnalisée.",
-		reviewDescription:
-			"Dans les collections personnalisées, l’avis sera placé sous l’œuvre qu’il évalue.",
-		favoritesDescription: "Enregistrez rapidement sans créer d’organisation parent-enfant.",
+		directDescription:
+			"Choisissez les Favoris ou une collection personnalisée. Lorsqu’un avis est enregistré dans une collection personnalisée, son objet est ajouté d’abord si nécessaire.",
 		searchLabel: "Rechercher une collection",
 		searchPlaceholder: "Saisissez le nom d’une collection",
 		noMatches: "Aucune collection correspondante.",
@@ -63,8 +61,8 @@ export default {
 				description: `Définissez les ${metadataTerms.inline} de statut et de visibilité, ou supprimez la collection.`,
 			},
 			items: {
-				label: "Contenu et structure",
-				description: "Ajoutez, supprimez, sélectionnez, ordonnez et imbriquez le contenu.",
+				label: "Contenu et ordre",
+				description: "Ajoutez, supprimez, sélectionnez et ordonnez le contenu.",
 			},
 			publishers: {
 				label: "Éditeurs",
@@ -84,17 +82,13 @@ export default {
 	items: {
 		add: "Ajouter du contenu",
 		target: "Contenu",
-		parent: "Élément parent",
-		topLevel: "Niveau supérieur",
 		selectAll: "Sélectionner tous les éléments chargés",
 		clearSelection: "Effacer la sélection",
 		selectedCount: insert("{{count}} éléments sélectionnés", { count: Number }),
 		selectItem: insert("Sélectionner {{title}}", { title: String }),
 		removeItem: insert("Supprimer {{title}}", { title: String }),
 		move: "Déplacer",
-		setAsChild: "Définir comme enfant",
 		moveTitle: "Déplacer les éléments sélectionnés",
-		childTitle: "Définir comme enfants d’un élément",
 		moveDescription:
 			"L’ordre relatif est conservé et la modification est appliquée atomiquement.",
 		destination: "Destination",

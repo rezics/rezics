@@ -99200,7 +99200,6 @@
 														"type": "object",
 														"required": [
 															"targetId",
-															"parentTargetId",
 															"position",
 															"createdAt"
 														],
@@ -99208,16 +99207,6 @@
 															"targetId": {
 																"format": "uuid",
 																"type": "string"
-															},
-															"parentTargetId": {
-																"nullable": true,
-																"anyOf": [
-																	{
-																		"format": "uuid",
-																		"type": "string"
-																	},
-																	{ "type": "null" }
-																]
 															},
 															"position": {
 																"format": "fractional-position",
@@ -107580,19 +107569,12 @@
 											{
 												"additionalProperties": false,
 												"type": "object",
-												"required": ["kind", "parentTargetId"],
+												"required": ["kind"],
 												"properties": {
 													"kind": {
 														"default": "start",
 														"type": "string",
 														"enum": ["start", "end"]
-													},
-													"parentTargetId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
 													}
 												}
 											},
@@ -107857,21 +107839,9 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["baseItemsRevisionId", "placement"],
+								"required": ["baseItemsRevisionId"],
 								"properties": {
-									"baseItemsRevisionId": { "format": "uuid", "type": "string" },
-									"placement": {
-										"default": "direct",
-										"type": "string",
-										"enum": ["direct", "review-with-subject"]
-									},
-									"parentTargetId": {
-										"nullable": true,
-										"anyOf": [
-											{ "format": "uuid", "type": "string" },
-											{ "type": "null" }
-										]
-									}
+									"baseItemsRevisionId": { "format": "uuid", "type": "string" }
 								}
 							}
 						}

@@ -986,7 +986,6 @@ export const CollectionContentResponse = t.Object({
 		t.Object({
 			membership: t.Object({
 				targetId: Uuid,
-				parentTargetId: t.Nullable(Uuid),
 				position: FractionalPosition,
 				createdAt: DateTimeString,
 			}),

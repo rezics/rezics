@@ -31,11 +31,8 @@ export default {
 	save: {
 		action: "Guardar",
 		title: "Guardar en colecciones",
-		directDescription: "Elige Favoritos o cualquier colección personalizada.",
-		reviewDescription:
-			"En las colecciones personalizadas, la reseña se colocará debajo de la obra que evalúa.",
-		favoritesDescription:
-			"Guarda rápidamente sin crear una estructura de elementos superiores y subordinados.",
+		directDescription:
+			"Elige Favoritos o una colección personalizada. Al guardar una reseña en una colección personalizada, su objeto se añade primero si es necesario.",
 		searchLabel: "Buscar una colección",
 		searchPlaceholder: "Introduce el nombre de una colección",
 		noMatches: "No hay colecciones coincidentes.",
@@ -65,8 +62,8 @@ export default {
 				description: `Define los ${metadataTerms.inline} de estado y visibilidad o elimina la colección.`,
 			},
 			items: {
-				label: "Contenido y estructura",
-				description: "Añade, elimina, selecciona varios elementos, ordénalos y anídalos.",
+				label: "Contenido y orden",
+				description: "Añade, elimina, selecciona y ordena varios elementos.",
 			},
 			publishers: {
 				label: "Editoriales",
@@ -85,17 +82,13 @@ export default {
 	items: {
 		add: "Añadir contenido",
 		target: "Contenido",
-		parent: "Elemento superior",
-		topLevel: "Nivel superior",
 		selectAll: "Seleccionar todos los elementos cargados",
 		clearSelection: "Borrar selección",
 		selectedCount: insert("{{count}} elementos seleccionados", { count: Number }),
 		selectItem: insert("Seleccionar {{title}}", { title: String }),
 		removeItem: insert("Quitar {{title}}", { title: String }),
 		move: "Mover",
-		setAsChild: "Convertir en subordinado",
 		moveTitle: "Mover los elementos seleccionados",
-		childTitle: "Subordinar a otro elemento",
 		moveDescription:
 			"Se conserva el orden relativo de los elementos y el cambio se aplica de forma atómica.",
 		destination: "Destino",

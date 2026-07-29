@@ -27,9 +27,8 @@ export default {
 	save: {
 		action: "收藏",
 		title: "收藏到收藏集",
-		directDescription: "選擇「我的收藏」或任一自訂收藏集。",
-		reviewDescription: "加入自訂收藏集時，評論會放在被評論對象之下。",
-		favoritesDescription: "快速儲存，不建立父子編排。",
+		directDescription:
+			"選擇「我的收藏」或任一自訂收藏集。將評論加入自訂收藏集時，如有需要，會先加入被評論對象。",
 		searchLabel: "尋找收藏集",
 		searchPlaceholder: "輸入收藏集名稱",
 		noMatches: "找不到符合的收藏集。",
@@ -43,7 +42,7 @@ export default {
 	},
 	workspace: {
 		title: "收藏集管理",
-		description: `管理內容、${metadataTerms.label}、排序結構、發行者、存取權與版本紀錄。`,
+		description: `管理內容、${metadataTerms.label}、排序、發行者、存取權與版本紀錄。`,
 		navigation: "收藏集管理導覽",
 		overview: "收藏集管理項目",
 		backToCollection: "返回收藏集",
@@ -58,8 +57,8 @@ export default {
 				description: `設定狀態與可見性${metadataTerms.inline}，或刪除收藏集。`,
 			},
 			items: {
-				label: "內容與結構",
-				description: "新增、移除與多選排序內容，並設定父子關係。",
+				label: "內容與排序",
+				description: "新增、移除、多選與排序內容。",
 			},
 			publishers: {
 				label: "發行者",
@@ -78,17 +77,13 @@ export default {
 	items: {
 		add: "新增內容",
 		target: "內容",
-		parent: "父項目",
-		topLevel: "最上層",
 		selectAll: "全選已載入項目",
 		clearSelection: "清除選取",
 		selectedCount: insert("已選取 {{count}} 個項目", { count: Number }),
 		selectItem: insert("選取「{{title}}」", { title: String }),
 		removeItem: insert("移除「{{title}}」", { title: String }),
 		move: "移動",
-		setAsChild: "設為子項目",
 		moveTitle: "移動選取項目",
-		childTitle: "設為另一項目的子項目",
 		moveDescription: "所選項目的相對順序會保持不變，變更將一次完成。",
 		destination: "移動位置",
 		moveToStart: "移到開頭",

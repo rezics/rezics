@@ -49,14 +49,6 @@ export type FeedItem = PostApiFeedQueryStatus200["items"][number];
 export type FeedPost = Extract<FeedItem, { itemType: "post" }>;
 export type FeedUnit = Extract<FeedItem, { itemType: "unit" }>;
 
-export function collectionPlacementForFeedItem(
-	item: Pick<FeedPost, "itemType" | "postKind"> | Pick<FeedUnit, "itemType" | "postKind">,
-): "direct" | "review-with-subject" {
-	return item.itemType === "post" && item.postKind === "review"
-		? "review-with-subject"
-		: "direct";
-}
-
 export function FeedItemCard({
 	canExclude = false,
 	displayContext = UnscopedFeedDisplayContext,
@@ -504,7 +496,6 @@ function FeedItemOverflowMenu({
 			canExclude={canExclude && Boolean(item.tracking) && !exclude.isPending}
 			itemId={item.id}
 			onNotInterested={markNotInterested}
-			placement={collectionPlacementForFeedItem(item)}
 			reportTarget={{ unitId: item.id, realmId }}
 		>
 			{actions}
@@ -550,7 +541,6 @@ function FeedItemActions({
 	);
 	return (
 		<FeedEngagementBar
-			collectionPlacement={collectionPlacementForFeedItem(item)}
 			href={href}
 			initialReaction={parseFeedReaction(item.viewerReaction)}
 			itemId={item.id}

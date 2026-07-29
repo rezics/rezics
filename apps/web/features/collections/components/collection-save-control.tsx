@@ -27,19 +27,15 @@ import {
 } from "../data/collection-list";
 import { CollectionDestinationList } from "./collection-destination-list";
 
-export type CollectionSavePlacement = "direct" | "review-with-subject";
-
 export function CollectionSaveControl({
 	onOpenChange,
 	open: controlledOpen,
-	placement = "direct",
 	targetId,
 	triggerClassName,
 	triggerVariant,
 }: {
 	readonly onOpenChange?: (open: boolean) => void;
 	readonly open?: boolean;
-	readonly placement?: CollectionSavePlacement;
 	readonly targetId: string;
 	readonly triggerClassName?: string;
 	readonly triggerVariant?: "outline" | "secondary" | "quiet";
@@ -128,7 +124,6 @@ export function CollectionSaveControl({
 						path: { collectionId: collection.id, targetId },
 						body: {
 							baseItemsRevisionId: collection.latestItemsRevisionId,
-							placement,
 						},
 					})
 				).latestItemsRevisionId;
@@ -180,7 +175,6 @@ export function CollectionSaveControl({
 				path: { collectionId: created.id, targetId },
 				body: {
 					baseItemsRevisionId: created.latestItemsRevisionId,
-					placement,
 				},
 			});
 			setNewCollectionTitle("");
@@ -200,11 +194,6 @@ export function CollectionSaveControl({
 			: deferredDestinationQuery
 				? t.collections.save.noMatches
 				: t.collections.save.noCollections;
-	const description =
-		placement === "review-with-subject"
-			? t.collections.save.reviewDescription
-			: t.collections.save.directDescription;
-
 	return (
 		<Dialog onOpenChange={({ open: nextOpen }) => updateOpen(nextOpen)} open={open}>
 			{triggerVariant ? (
@@ -223,7 +212,10 @@ export function CollectionSaveControl({
 				showCloseButton={false}
 				size="sm"
 			>
-				<DialogHeader description={description} title={t.collections.save.title} />
+				<DialogHeader
+					description={t.collections.save.directDescription}
+					title={t.collections.save.title}
+				/>
 				<div className="flex min-h-0 flex-1 flex-col gap-4 p-(--space) pt-0">
 					<div className="grid shrink-0 gap-2">
 						<label className="font-medium text-sm" htmlFor={`${formId}-search`}>

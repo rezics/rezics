@@ -31,11 +31,8 @@ export default {
 	save: {
 		action: "Speichern",
 		title: "In Sammlungen speichern",
-		directDescription: "Wähle Favoriten oder eine eigene Sammlung.",
-		reviewDescription:
-			"In eigenen Sammlungen wird die Rezension unter dem Werk eingeordnet, das sie bespricht.",
-		favoritesDescription:
-			"Speichere schnell, ohne eine über- und untergeordnete Struktur anzulegen.",
+		directDescription:
+			"Wähle Favoriten oder eine eigene Sammlung. Beim Speichern einer Rezension in einer eigenen Sammlung wird ihr Gegenstand bei Bedarf zuerst hinzugefügt.",
 		searchLabel: "Sammlung suchen",
 		searchPlaceholder: "Namen einer Sammlung eingeben",
 		noMatches: "Keine passenden Sammlungen.",
@@ -64,9 +61,8 @@ export default {
 				description: `Lege Status- und Sichtbarkeits-${metadataTerms.inline} fest oder lösche die Sammlung.`,
 			},
 			items: {
-				label: "Inhalt und Struktur",
-				description:
-					"Füge Inhalte hinzu, entferne, wähle mehrere aus, sortiere und verschachtle sie.",
+				label: "Inhalt und Reihenfolge",
+				description: "Füge Inhalte hinzu, entferne und sortiere sie per Mehrfachauswahl.",
 			},
 			publishers: {
 				label: "Herausgeber",
@@ -85,17 +81,13 @@ export default {
 	items: {
 		add: "Inhalt hinzufügen",
 		target: "Inhalt",
-		parent: "Übergeordnetes Element",
-		topLevel: "Oberste Ebene",
 		selectAll: "Alle geladenen Elemente auswählen",
 		clearSelection: "Auswahl aufheben",
 		selectedCount: insert("{{count}} Elemente ausgewählt", { count: Number }),
 		selectItem: insert("{{title}} auswählen", { title: String }),
 		removeItem: insert("{{title}} entfernen", { title: String }),
 		move: "Verschieben",
-		setAsChild: "Als untergeordnet festlegen",
 		moveTitle: "Ausgewählte Elemente verschieben",
-		childTitle: "Einem Element unterordnen",
 		moveDescription:
 			"Die relative Reihenfolge bleibt erhalten und die Änderung wird atomar ausgeführt.",
 		destination: "Ziel",

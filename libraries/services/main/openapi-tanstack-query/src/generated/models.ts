@@ -76038,7 +76038,6 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 			 * @type string
 			 */
 			targetId: string;
-			parentTargetId: (string | null) | null;
 			/**
 			 * @description
 			 * Format: `fractional-position`
@@ -80915,7 +80914,6 @@ export type PostApiCollectionsByCollectionIdItemsMoveBody = {
 				 * @type string
 				 */
 				kind: PostApiCollectionsByCollectionIdItemsMoveRequestPlacementKindEnum;
-				parentTargetId: (string | null) | null;
 		  }
 		| {
 				/**
@@ -81177,14 +81175,6 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus429 = {
  */
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus500 = InternalError;
 
-export const PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum = {
-	direct: "direct",
-	"review-with-subject": "review-with-subject",
-} as const;
-
-export type PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum =
-	(typeof PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum)[keyof typeof PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum];
-
 /**
  * @type object
  */
@@ -81195,12 +81185,6 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdBody = {
 	 * @type string
 	 */
 	baseItemsRevisionId: string;
-	/**
-	 * @default 'direct'
-	 * @type string
-	 */
-	placement: PutApiCollectionsByCollectionIdItemsByTargetIdRequestPlacementEnum;
-	parentTargetId?: (string | null) | null;
 };
 
 /**

@@ -1,4 +1,1 @@
-export {
-	CollectionSaveControl as CollectionPickerButton,
-	type CollectionSavePlacement,
-} from "./collection-save-control";
+export { CollectionSaveControl as CollectionPickerButton } from "./collection-save-control";

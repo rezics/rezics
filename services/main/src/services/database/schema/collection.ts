@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, foreignKey, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
+import { check, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
@@ -7,6 +7,17 @@ import { profile, unit } from "./core";
 
 /**
  * Marks a Unit as a stored, explicitly ordered Collection.
+ *
+ * @remarks
+ *
+ * Collection membership is one flat sequence. Domain relationships such as a
+ * Review's subject remain authoritative on the member Unit; saving a Review
+ * may add its missing subject immediately before it, but does not create a
+ * second hierarchy inside the Collection.
+ *
+ * If richer grouped rendering later proves necessary, an optional parent
+ * pointer may be considered as presentation metadata. It should not replace
+ * the authoritative domain relationship or make ordinary ordering recursive.
  *
  * Dynamic Collections are intentionally not represented here. If query-backed
  * Collections are introduced, they must use a separate model whose membership
@@ -41,7 +52,6 @@ export const collectionItem = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		parentUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
 		position: fractionalIndexPosition()
 			.default(sql`'a0'::text`)
 			.notNull(),
@@ -55,24 +65,12 @@ export const collectionItem = pgTable(
 		primaryKey({ columns: [table.collectionId, table.unitId] }),
 		index("collection_item_collection_position_idx").on(
 			table.collectionId,
-			table.parentUnitId,
 			table.position,
 			table.unitId,
 		),
-		unique("collection_item_sibling_position_unique")
-			.on(table.collectionId, table.parentUnitId, table.position)
-			.nullsNotDistinct(),
+		unique("collection_item_position_unique").on(table.collectionId, table.position),
 		index("collection_item_unit_idx").on(table.unitId),
 		index("collection_item_added_by_idx").on(table.addedByProfileId),
-		foreignKey({
-			name: "collection_item_parent_membership_fk",
-			columns: [table.collectionId, table.parentUnitId],
-			foreignColumns: [table.collectionId, table.unitId],
-		}),
 		check("collection_item_not_self_check", sql`${table.collectionId} <> ${table.unitId}`),
-		check(
-			"collection_item_parent_not_self_check",
-			sql`${table.parentUnitId} is null or ${table.parentUnitId} <> ${table.unitId}`,
-		),
 	],
 );

@@ -28,9 +28,8 @@ export default {
 	save: {
 		action: "저장",
 		title: "컬렉션에 저장",
-		directDescription: "즐겨찾기 또는 사용자 지정 컬렉션을 선택하세요.",
-		reviewDescription: "사용자 지정 컬렉션에서는 리뷰가 리뷰 대상 작품 아래에 배치됩니다.",
-		favoritesDescription: "상하 관계를 만들지 않고 빠르게 저장하세요.",
+		directDescription:
+			"즐겨찾기 또는 사용자 지정 컬렉션을 선택하세요. 리뷰를 사용자 지정 컬렉션에 저장하면 필요한 경우 리뷰 대상이 먼저 추가됩니다.",
 		searchLabel: "컬렉션 찾기",
 		searchPlaceholder: "컬렉션 이름 입력",
 		noMatches: "일치하는 컬렉션이 없습니다.",
@@ -59,8 +58,8 @@ export default {
 				description: `상태 및 가시성 ${metadataTerms.inline} 설정 또는 컬렉션 삭제`,
 			},
 			items: {
-				label: "콘텐츠 및 구조",
-				description: "콘텐츠를 추가, 제거, 다중 선택하여 정렬하고 계층화합니다.",
+				label: "콘텐츠 및 순서",
+				description: "콘텐츠를 추가, 제거, 다중 선택하여 정렬합니다.",
 			},
 			publishers: {
 				label: "발행자",
@@ -79,17 +78,13 @@ export default {
 	items: {
 		add: "콘텐츠 추가",
 		target: "콘텐츠",
-		parent: "상위 항목",
-		topLevel: "최상위",
 		selectAll: "불러온 항목 모두 선택",
 		clearSelection: "선택 해제",
 		selectedCount: insert("{{count}}개 항목 선택됨", { count: Number }),
 		selectItem: insert("{{title}} 선택", { title: String }),
 		removeItem: insert("{{title}} 제거", { title: String }),
 		move: "이동",
-		setAsChild: "하위 항목으로 설정",
 		moveTitle: "선택한 항목 이동",
-		childTitle: "다른 항목의 하위로 설정",
 		moveDescription: "선택한 항목의 상대적 순서를 유지한 채 한 번에 변경합니다.",
 		destination: "이동 위치",
 		moveToStart: "맨 앞으로 이동",

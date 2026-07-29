@@ -29,10 +29,8 @@ export default {
 	save: {
 		action: "保存",
 		title: "コレクションに保存",
-		directDescription: "お気に入りまたは任意のカスタムコレクションを選択してください。",
-		reviewDescription:
-			"カスタムコレクションでは、レビューはレビュー対象の作品の下に配置されます。",
-		favoritesDescription: "親子関係を作成せずに素早く保存できます。",
+		directDescription:
+			"お気に入りまたはカスタムコレクションを選択してください。レビューをカスタムコレクションに保存すると、必要に応じてレビュー対象が先に追加されます。",
 		searchLabel: "コレクションを探す",
 		searchPlaceholder: "コレクション名を入力",
 		noMatches: "一致するコレクションはありません。",
@@ -61,8 +59,8 @@ export default {
 				description: `状態と可視性 ${metadataTerms.inline} を設定するか、コレクションを削除します。`,
 			},
 			items: {
-				label: "コンテンツと構造",
-				description: "コンテンツを追加、削除、複数選択して並べ替え、階層化します。",
+				label: "コンテンツと並び順",
+				description: "コンテンツを追加、削除、複数選択して並べ替えます。",
 			},
 			publishers: {
 				label: "発行者",
@@ -81,17 +79,13 @@ export default {
 	items: {
 		add: "コンテンツを追加",
 		target: "コンテンツ",
-		parent: "親項目",
-		topLevel: "最上位",
 		selectAll: "読み込み済みの項目をすべて選択",
 		clearSelection: "選択を解除",
 		selectedCount: insert("{{count}} 件を選択中", { count: Number }),
 		selectItem: insert("「{{title}}」を選択", { title: String }),
 		removeItem: insert("「{{title}}」を削除", { title: String }),
 		move: "移動",
-		setAsChild: "子項目に設定",
 		moveTitle: "選択した項目を移動",
-		childTitle: "別の項目の子に設定",
 		moveDescription: "選択した項目の相対的な順序を保ったまま、一括で変更します。",
 		destination: "移動先",
 		moveToStart: "先頭へ移動",

@@ -95,7 +95,6 @@ describe("API response values", () => {
 			items: contents.map((content, index) => ({
 				membership: {
 					targetId: `00000000-0000-4000-8000-00000000000${index + 1}`,
-					parentTargetId: null,
 					position: `a${index}`,
 					createdAt,
 				},

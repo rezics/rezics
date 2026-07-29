@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -53,7 +53,7 @@ import {
 } from "./schema";
 import { ensureFavorites } from "../../collections/favorites";
 import { getCollection, getCollectionContent } from "./service";
-import { validateCollectionParent } from "./hierarchy";
+import { planCollectionItemInsertions } from "./save";
 import {
 	FavoriteResponse,
 	NoContentResponse,
@@ -72,7 +72,6 @@ import { ValidationError } from "../errors";
 import { createProfilePublisherAttribution } from "../../units/attribution";
 import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { getUnitUpdateCondition } from "../../authorization/unit/query";
-import { collectionSubtreeIds, orderedCollectionMoveRoots } from "./move";
 import {
 	createCollectionStructureHistory,
 	getCollectionStructureRevisionState,
@@ -123,12 +122,7 @@ function compareCollectionStructureStates(
 			changes.push({ path, before: previous });
 			continue;
 		}
-		for (const field of [
-			"parentTargetUnitId",
-			"position",
-			"addedByProfileId",
-			"addedAt",
-		] as const) {
+		for (const field of ["position", "addedByProfileId", "addedAt"] as const) {
 			const previousValue = previous[field];
 			const nextValue = next[field];
 			const equal =
@@ -164,56 +158,105 @@ async function ensureEditableCollection(tx: DatabaseTransaction, collectionId: s
 	return record;
 }
 
-async function nextCollectionItemPosition(
-	tx: DatabaseTransaction,
-	collectionId: string,
-	parentUnitId: string | null = null,
-) {
+async function nextCollectionItemPosition(tx: DatabaseTransaction, collectionId: string) {
 	const [last] = await tx
 		.select({ position: collectionItem.position })
 		.from(collectionItem)
-		.where(
-			and(
-				eq(collectionItem.collectionId, collectionId),
-				parentUnitId
-					? eq(collectionItem.parentUnitId, parentUnitId)
-					: isNull(collectionItem.parentUnitId),
-			),
-		)
+		.where(eq(collectionItem.collectionId, collectionId))
 		.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
 		.limit(1);
 	return fractionalPositionBetween(last?.position, null);
 }
 
-async function ensureValidCollectionParent(
+async function reviewSubjectsForTargets(tx: DatabaseTransaction, targetIds: readonly string[]) {
+	const rows = await tx
+		.select({
+			id: post.id,
+			kind: post.kind,
+			subjectUnitId: post.subjectUnitId,
+		})
+		.from(post)
+		.where(inArray(post.id, targetIds));
+	const subjects = new Map<string, string>();
+	for (const row of rows) {
+		if (row.kind !== "review") continue;
+		if (!row.subjectUnitId) throw new Error("A Review must have an authoritative subject Unit");
+		subjects.set(row.id, row.subjectUnitId);
+	}
+	return subjects;
+}
+
+async function planAndInsertCollectionItems(
 	tx: DatabaseTransaction,
 	input: {
 		readonly collectionId: string;
-		readonly targetId: string;
-		readonly parentTargetId: string | null | undefined;
+		readonly requestedTargetIds: readonly string[];
+		readonly addedByProfileId: string;
+		readonly reviewSubjectByTargetId: ReadonlyMap<string, string>;
 	},
 ) {
-	if (!input.parentTargetId) return;
-	if (input.targetId === input.parentTargetId)
-		throw new ValidationError({ parentTargetId: "an item cannot be its own parent" });
-	const memberships = await tx
+	if (!input.requestedTargetIds.length)
+		throw new TypeError("At least one Collection target ID must be requested");
+	const relevantTargetIds = [
+		...new Set([...input.requestedTargetIds, ...input.reviewSubjectByTargetId.values()]),
+	];
+	const existingMemberships = await tx
 		.select({
-			unitId: collectionItem.unitId,
-			parentUnitId: collectionItem.parentUnitId,
+			targetId: collectionItem.unitId,
+			position: collectionItem.position,
 		})
 		.from(collectionItem)
-		.where(eq(collectionItem.collectionId, input.collectionId));
-	const failure = validateCollectionParent(input, memberships);
-	if (failure === "self-parent")
-		throw new ValidationError({ parentTargetId: "an item cannot be its own parent" });
-	if (failure === "missing-parent")
-		throw new ValidationError({
-			parentTargetId: "the parent must already belong to this Collection",
-		});
-	if (failure === "would-cycle")
-		throw new ValidationError({ parentTargetId: "the parent would create a cycle" });
-	if (failure === "existing-cycle")
-		throw new ValidationError({ parentTargetId: "the Collection hierarchy is cyclic" });
+		.where(
+			and(
+				eq(collectionItem.collectionId, input.collectionId),
+				inArray(collectionItem.unitId, relevantTargetIds),
+			),
+		);
+	const existingPositionByTargetId = new Map(
+		existingMemberships.map(({ targetId, position }) => [targetId, position]),
+	);
+	const [last] = await tx
+		.select({ position: collectionItem.position })
+		.from(collectionItem)
+		.where(eq(collectionItem.collectionId, input.collectionId))
+		.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+		.limit(1);
+	const positionBeforeReviewByTargetId = new Map<string, string | null>();
+	for (const targetId of input.requestedTargetIds) {
+		const subjectId = input.reviewSubjectByTargetId.get(targetId);
+		const reviewPosition = existingPositionByTargetId.get(targetId);
+		if (!subjectId || reviewPosition === undefined || existingPositionByTargetId.has(subjectId))
+			continue;
+		const [previous] = await tx
+			.select({ position: collectionItem.position })
+			.from(collectionItem)
+			.where(
+				and(
+					eq(collectionItem.collectionId, input.collectionId),
+					lt(collectionItem.position, reviewPosition),
+				),
+			)
+			.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+			.limit(1);
+		positionBeforeReviewByTargetId.set(targetId, previous?.position ?? null);
+	}
+	const planned = planCollectionItemInsertions({
+		requestedTargetIds: input.requestedTargetIds,
+		existingPositionByTargetId,
+		lastPosition: last?.position,
+		positionBeforeReviewByTargetId,
+		reviewSubjectByTargetId: input.reviewSubjectByTargetId,
+	});
+	if (planned.insertions.length)
+		await tx.insert(collectionItem).values(
+			planned.insertions.map(({ targetId, position }) => ({
+				collectionId: input.collectionId,
+				unitId: targetId,
+				position,
+				addedByProfileId: input.addedByProfileId,
+			})),
+		);
+	return planned;
 }
 
 export default new Elysia({ prefix: "/collections" })
@@ -625,65 +668,38 @@ export default new Elysia({ prefix: "/collections" })
 					},
 					async () => {
 						await ensureEditableCollection(tx, params.collectionId);
-						for (const item of body.items) {
+						const targetIds = body.items.map(({ targetId }) => targetId);
+						const reviewSubjectByTargetId = await reviewSubjectsForTargets(
+							tx,
+							targetIds,
+						);
+						const authorizedTargetIds = new Set([
+							...targetIds,
+							...reviewSubjectByTargetId.values(),
+						]);
+						if (authorizedTargetIds.has(params.collectionId))
+							throw new ValidationError({
+								items: "a Collection cannot contain itself",
+							});
+						for (const targetId of authorizedTargetIds) {
 							const decision = await authorization.unit.decideInTransaction(
 								tx,
-								item.targetId,
+								targetId,
 								"unit.read",
 							);
 							if (!decision.allowed) throw new UnitNotFound();
 						}
-						const targetIds = body.items.map(({ targetId }) => targetId);
-						const existing = await tx
-							.select({ unitId: collectionItem.unitId })
-							.from(collectionItem)
-							.where(
-								and(
-									eq(collectionItem.collectionId, params.collectionId),
-									inArray(collectionItem.unitId, targetIds),
-								),
-							);
-						const existingIds = new Set(existing.map(({ unitId }) => unitId));
-						const pending = body.items.filter(
-							({ targetId }) => !existingIds.has(targetId),
-						);
-						const [last] = await tx
-							.select({ position: collectionItem.position })
-							.from(collectionItem)
-							.where(
-								and(
-									eq(collectionItem.collectionId, params.collectionId),
-									isNull(collectionItem.parentUnitId),
-								),
-							)
-							.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
-							.limit(1);
-						let lastPosition = last?.position;
-						const values = pending.map((item) => {
-							const position = fractionalPositionBetween(lastPosition, null);
-							lastPosition = position;
-							return {
-								collectionId: params.collectionId,
-								unitId: item.targetId,
-								parentUnitId: null,
-								position,
-								addedByProfileId: profile.unitId,
-							};
+						const planned = await planAndInsertCollectionItems(tx, {
+							collectionId: params.collectionId,
+							requestedTargetIds: targetIds,
+							addedByProfileId: profile.unitId,
+							reviewSubjectByTargetId,
 						});
-						if (values.length)
-							await tx.insert(collectionItem).values(values).onConflictDoNothing();
-						return {
-							items: body.items.map(({ targetId }) => ({
-								targetId,
-								state: existingIds.has(targetId)
-									? ("existing" as const)
-									: ("created" as const),
-							})),
-						};
+						return { items: planned.requestedItems };
 					},
 				);
 				return {
-					items: result.items,
+					items: [...result.items],
 					latestItemsRevisionId: result.revisionId,
 				};
 			});
@@ -722,16 +738,11 @@ export default new Elysia({ prefix: "/collections" })
 						const memberships = await tx
 							.select({
 								unitId: collectionItem.unitId,
-								parentUnitId: collectionItem.parentUnitId,
 								position: collectionItem.position,
 							})
 							.from(collectionItem)
 							.where(eq(collectionItem.collectionId, params.collectionId))
-							.orderBy(
-								asc(collectionItem.parentUnitId),
-								asc(collectionItem.position),
-								asc(collectionItem.unitId),
-							);
+							.orderBy(asc(collectionItem.position), asc(collectionItem.unitId));
 						const membershipById = new Map(
 							memberships.map((membership) => [membership.unitId, membership]),
 						);
@@ -744,10 +755,13 @@ export default new Elysia({ prefix: "/collections" })
 							throw new ValidationError({
 								targetIds: "every moved item must belong to this Collection",
 							});
-						const moveRootIds = orderedCollectionMoveRoots(selectedIds, memberships);
-						const movingSubtreeIds = collectionSubtreeIds(moveRootIds, memberships);
+						const movingIds = memberships
+							.filter(({ unitId }) => selectedIds.has(unitId))
+							.map(({ unitId }) => unitId);
+						const remaining = memberships.filter(
+							({ unitId }) => !selectedIds.has(unitId),
+						);
 
-						let destinationParentId: string | null;
 						let beforePosition: string | null;
 						let afterPosition: string | null;
 						if (body.placement.kind === "after") {
@@ -757,17 +771,11 @@ export default new Elysia({ prefix: "/collections" })
 									placement:
 										"the destination item must belong to this Collection",
 								});
-							if (movingSubtreeIds.has(anchor.unitId))
+							if (selectedIds.has(anchor.unitId))
 								throw new ValidationError({
-									placement: "the destination cannot be inside a moved subtree",
+									placement: "the destination cannot be a moved item",
 								});
-							destinationParentId = anchor.parentUnitId;
-							const siblings = memberships.filter(
-								(membership) =>
-									membership.parentUnitId === destinationParentId &&
-									!moveRootIds.includes(membership.unitId),
-							);
-							const anchorIndex = siblings.findIndex(
+							const anchorIndex = remaining.findIndex(
 								(membership) => membership.unitId === anchor.unitId,
 							);
 							if (anchorIndex < 0)
@@ -775,49 +783,32 @@ export default new Elysia({ prefix: "/collections" })
 									placement: "the destination is invalid",
 								});
 							beforePosition = anchor.position;
-							afterPosition = siblings[anchorIndex + 1]?.position ?? null;
+							afterPosition = remaining[anchorIndex + 1]?.position ?? null;
 						} else {
-							destinationParentId = body.placement.parentTargetId;
-							if (
-								destinationParentId &&
-								(!membershipById.has(destinationParentId) ||
-									movingSubtreeIds.has(destinationParentId))
-							)
-								throw new ValidationError({
-									placement: "the parent must be outside every moved subtree",
-								});
-							const siblings = memberships.filter(
-								(membership) =>
-									membership.parentUnitId === destinationParentId &&
-									!moveRootIds.includes(membership.unitId),
-							);
 							if (body.placement.kind === "start") {
 								beforePosition = null;
-								afterPosition = siblings[0]?.position ?? null;
+								afterPosition = remaining[0]?.position ?? null;
 							} else {
-								beforePosition = siblings.at(-1)?.position ?? null;
+								beforePosition = remaining.at(-1)?.position ?? null;
 								afterPosition = null;
 							}
 						}
 						const positions = fractionalPositionsBetween(
 							beforePosition,
 							afterPosition,
-							moveRootIds.length,
+							movingIds.length,
 						);
-						for (const unitId of moveRootIds)
+						for (const unitId of movingIds)
 							await tx
 								.update(collectionItem)
-								.set({
-									parentUnitId: destinationParentId,
-									position: `~moving-${unitId}`,
-								})
+								.set({ position: `~moving-${unitId}` })
 								.where(
 									and(
 										eq(collectionItem.collectionId, params.collectionId),
 										eq(collectionItem.unitId, unitId),
 									),
 								);
-						for (const [index, unitId] of moveRootIds.entries()) {
+						for (const [index, unitId] of movingIds.entries()) {
 							const position = positions[index];
 							if (!position)
 								throw new Error(
@@ -825,10 +816,7 @@ export default new Elysia({ prefix: "/collections" })
 								);
 							await tx
 								.update(collectionItem)
-								.set({
-									parentUnitId: destinationParentId,
-									position,
-								})
+								.set({ position })
 								.where(
 									and(
 										eq(collectionItem.collectionId, params.collectionId),
@@ -876,140 +864,28 @@ export default new Elysia({ prefix: "/collections" })
 					},
 					async () => {
 						await ensureEditableCollection(tx, params.collectionId);
-						if (body.placement === "review-with-subject") {
-							if (body.parentTargetId !== undefined)
-								throw new ValidationError({
-									placement: "review placement derives its parent and position",
-								});
-							const [review] = await tx
-								.select({ kind: post.kind, subjectUnitId: post.subjectUnitId })
-								.from(post)
-								.where(eq(post.id, params.targetId))
-								.limit(1);
-							if (review?.kind !== "review" || !review.subjectUnitId)
-								throw new ValidationError({
-									targetId: "review placement requires a Review target",
-								});
-							if (review.subjectUnitId === params.collectionId)
-								throw new ValidationError({
-									targetId:
-										"a Collection cannot contain itself as a Review subject",
-								});
-							const subjectDecision = await authorization.unit.decideInTransaction(
+						const reviewSubjectByTargetId = await reviewSubjectsForTargets(tx, [
+							params.targetId,
+						]);
+						const subjectId = reviewSubjectByTargetId.get(params.targetId);
+						if (subjectId === params.collectionId)
+							throw new ValidationError({
+								targetId: "a Collection cannot contain itself as a Review subject",
+							});
+						if (subjectId) {
+							const decision = await authorization.unit.decideInTransaction(
 								tx,
-								review.subjectUnitId,
+								subjectId,
 								"unit.read",
 							);
-							if (!subjectDecision.allowed) throw new UnitNotFound();
-							const [subjectMembership] = await tx
-								.select({ unitId: collectionItem.unitId })
-								.from(collectionItem)
-								.where(
-									and(
-										eq(collectionItem.collectionId, params.collectionId),
-										eq(collectionItem.unitId, review.subjectUnitId),
-									),
-								)
-								.limit(1);
-							if (!subjectMembership) {
-								await tx.insert(collectionItem).values({
-									collectionId: params.collectionId,
-									unitId: review.subjectUnitId,
-									parentUnitId: null,
-									position: await nextCollectionItemPosition(
-										tx,
-										params.collectionId,
-									),
-									addedByProfileId: profile.unitId,
-								});
-							}
-							await ensureValidCollectionParent(tx, {
-								collectionId: params.collectionId,
-								targetId: params.targetId,
-								parentTargetId: review.subjectUnitId,
-							});
-							const [reviewMembership] = await tx
-								.select({
-									parentUnitId: collectionItem.parentUnitId,
-									position: collectionItem.position,
-								})
-								.from(collectionItem)
-								.where(
-									and(
-										eq(collectionItem.collectionId, params.collectionId),
-										eq(collectionItem.unitId, params.targetId),
-									),
-								)
-								.limit(1);
-							const position =
-								reviewMembership?.parentUnitId === review.subjectUnitId
-									? reviewMembership.position
-									: await nextCollectionItemPosition(
-											tx,
-											params.collectionId,
-											review.subjectUnitId,
-										);
-							await tx
-								.insert(collectionItem)
-								.values({
-									collectionId: params.collectionId,
-									unitId: params.targetId,
-									parentUnitId: review.subjectUnitId,
-									position,
-									addedByProfileId: profile.unitId,
-								})
-								.onConflictDoUpdate({
-									target: [collectionItem.collectionId, collectionItem.unitId],
-									set: {
-										parentUnitId: review.subjectUnitId,
-										position,
-									},
-								});
-						} else {
-							const parentTargetId = body.parentTargetId ?? null;
-							await ensureValidCollectionParent(tx, {
-								collectionId: params.collectionId,
-								targetId: params.targetId,
-								parentTargetId,
-							});
-							const [existing] = await tx
-								.select({
-									parentUnitId: collectionItem.parentUnitId,
-									position: collectionItem.position,
-								})
-								.from(collectionItem)
-								.where(
-									and(
-										eq(collectionItem.collectionId, params.collectionId),
-										eq(collectionItem.unitId, params.targetId),
-									),
-								)
-								.limit(1);
-							const position =
-								existing?.parentUnitId === parentTargetId
-									? existing.position
-									: await nextCollectionItemPosition(
-											tx,
-											params.collectionId,
-											parentTargetId,
-										);
-							await tx
-								.insert(collectionItem)
-								.values({
-									collectionId: params.collectionId,
-									unitId: params.targetId,
-									parentUnitId: parentTargetId,
-									position,
-									addedByProfileId: profile.unitId,
-								})
-								.onConflictDoUpdate({
-									target: [collectionItem.collectionId, collectionItem.unitId],
-									set: {
-										parentUnitId: parentTargetId,
-										position,
-									},
-								});
+							if (!decision.allowed) throw new UnitNotFound();
 						}
+						await planAndInsertCollectionItems(tx, {
+							collectionId: params.collectionId,
+							requestedTargetIds: [params.targetId],
+							addedByProfileId: profile.unitId,
+							reviewSubjectByTargetId,
+						});
 						return { saved: true };
 					},
 				),
@@ -1047,67 +923,6 @@ export default new Elysia({ prefix: "/collections" })
 					},
 					async () => {
 						await ensureEditableCollection(tx, params.collectionId);
-						const children = await tx
-							.select({
-								unitId: collectionItem.unitId,
-								position: collectionItem.position,
-							})
-							.from(collectionItem)
-							.where(
-								and(
-									eq(collectionItem.collectionId, params.collectionId),
-									eq(collectionItem.parentUnitId, params.targetId),
-								),
-							)
-							.orderBy(asc(collectionItem.position), asc(collectionItem.unitId));
-						if (children.length) {
-							const [lastRoot] = await tx
-								.select({ position: collectionItem.position })
-								.from(collectionItem)
-								.where(
-									and(
-										eq(collectionItem.collectionId, params.collectionId),
-										isNull(collectionItem.parentUnitId),
-										ne(collectionItem.unitId, params.targetId),
-									),
-								)
-								.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
-								.limit(1);
-							const positions = fractionalPositionsBetween(
-								lastRoot?.position,
-								null,
-								children.length,
-							);
-							for (const child of children)
-								await tx
-									.update(collectionItem)
-									.set({
-										parentUnitId: null,
-										position: `~promoting-${child.unitId}`,
-									})
-									.where(
-										and(
-											eq(collectionItem.collectionId, params.collectionId),
-											eq(collectionItem.unitId, child.unitId),
-										),
-									);
-							for (const [index, child] of children.entries()) {
-								const position = positions[index];
-								if (!position)
-									throw new Error(
-										"Fractional position generation returned too few values",
-									);
-								await tx
-									.update(collectionItem)
-									.set({ position })
-									.where(
-										and(
-											eq(collectionItem.collectionId, params.collectionId),
-											eq(collectionItem.unitId, child.unitId),
-										),
-									);
-							}
-						}
 						await tx
 							.delete(collectionItem)
 							.where(
@@ -1250,7 +1065,6 @@ export default new Elysia({ prefix: "/collections" })
 							.values({
 								collectionId,
 								unitId: params.targetId,
-								parentUnitId: null,
 								position: await nextCollectionItemPosition(tx, collectionId),
 								addedByProfileId: profile.unitId,
 							})

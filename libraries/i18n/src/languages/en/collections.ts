@@ -29,10 +29,8 @@ export default {
 	save: {
 		action: "Save",
 		title: "Save to collections",
-		directDescription: "Choose Favorites or any custom collection.",
-		reviewDescription:
-			"In custom collections, the review will be placed under the work it reviews.",
-		favoritesDescription: "Save quickly without creating a parent-child arrangement.",
+		directDescription:
+			"Choose Favorites or a custom collection. When saving a Review to a custom collection, its subject is added first if needed.",
 		searchLabel: "Find a collection",
 		searchPlaceholder: "Enter a collection name",
 		noMatches: "No matching collections.",
@@ -61,8 +59,8 @@ export default {
 				description: `Set status and visibility ${metadataTerms.inline}, or delete the collection.`,
 			},
 			items: {
-				label: "Content & structure",
-				description: "Add, remove, multi-select, order, and nest content.",
+				label: "Content & order",
+				description: "Add, remove, multi-select, and order content.",
 			},
 			publishers: {
 				label: "Publishers",
@@ -81,17 +79,13 @@ export default {
 	items: {
 		add: "Add content",
 		target: "Content",
-		parent: "Parent item",
-		topLevel: "Top level",
 		selectAll: "Select all loaded items",
 		clearSelection: "Clear selection",
 		selectedCount: insert("{{count}} items selected", { count: Number }),
 		selectItem: insert("Select {{title}}", { title: String }),
 		removeItem: insert("Remove {{title}}", { title: String }),
 		move: "Move",
-		setAsChild: "Set as child",
 		moveTitle: "Move selected items",
-		childTitle: "Set as children of an item",
 		moveDescription:
 			"The relative order of selected items is preserved and the change is applied atomically.",
 		destination: "Destination",

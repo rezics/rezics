@@ -43,21 +43,21 @@ describe("collection list schema", () => {
 });
 
 describe("collection item mutation schema", () => {
-	it("requires a base revision and an explicit placement", () => {
+	it("requires only the base revision for a save", () => {
 		expect(
 			Check(SaveCollectionItemBody, {
 				baseItemsRevisionId: targetId,
-				placement: "review-with-subject",
 			}),
 		).toBe(true);
-		expect(Check(SaveCollectionItemBody, { placement: "direct" })).toBe(false);
+		expect(Check(SaveCollectionItemBody, {})).toBe(false);
 	});
 
-	it("rejects removed item roles and raw positions", () => {
+	it("rejects removed hierarchy controls, item roles, and raw positions", () => {
 		expect(
 			Check(SaveCollectionItemBody, {
 				baseItemsRevisionId: targetId,
 				placement: "direct",
+				parentTargetId: targetId,
 				role: "item",
 				position: "a0",
 			}),
@@ -69,7 +69,7 @@ describe("collection item mutation schema", () => {
 			Check(MoveCollectionItemsBody, {
 				baseItemsRevisionId: targetId,
 				targetIds: [targetId],
-				placement: { kind: "end", parentTargetId: null },
+				placement: { kind: "end" },
 			}),
 		).toBe(true);
 		expect(

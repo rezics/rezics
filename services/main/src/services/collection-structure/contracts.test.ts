@@ -19,14 +19,9 @@ const ThirdTargetId = "019b1234-1234-7000-8000-000000000004";
 const ActorId = "019b1234-1234-7000-8000-000000000005";
 const AddedAt = new Date("2026-07-29T00:00:00.000Z");
 
-function item(input: {
-	targetUnitId: string;
-	parentTargetUnitId?: string | null;
-	position: string;
-}): CollectionStructureItemState {
+function item(input: { targetUnitId: string; position: string }): CollectionStructureItemState {
 	return {
 		targetUnitId: input.targetUnitId,
-		parentTargetUnitId: input.parentTargetUnitId ?? null,
 		position: input.position,
 		addedByProfileId: ActorId,
 		addedAt: AddedAt,
@@ -45,19 +40,11 @@ describe("Collection Structure History contract", () => {
 	it("replays insert, move, and delete by stable target identity", () => {
 		const before = snapshot([
 			item({ targetUnitId: FirstTargetId, position: "a0" }),
-			item({
-				targetUnitId: SecondTargetId,
-				parentTargetUnitId: FirstTargetId,
-				position: "a0",
-			}),
+			item({ targetUnitId: SecondTargetId, position: "a1" }),
 		]);
 		const after = snapshot([
-			item({ targetUnitId: SecondTargetId, position: "a1" }),
-			item({
-				targetUnitId: ThirdTargetId,
-				parentTargetUnitId: SecondTargetId,
-				position: "a0",
-			}),
+			item({ targetUnitId: SecondTargetId, position: "a2" }),
+			item({ targetUnitId: ThirdTargetId, position: "a3" }),
 		]);
 
 		const delta = diffCollectionStructureSnapshots(before, after);
@@ -82,36 +69,13 @@ describe("Collection Structure History contract", () => {
 		expect(() => applyCollectionStructureDelta(changedBase, delta)).toThrow(/base changed/);
 	});
 
-	it("rejects duplicate positions, missing parents, and cycles", () => {
+	it("rejects duplicate positions", () => {
 		expect(() =>
 			snapshot([
 				item({ targetUnitId: FirstTargetId, position: "a0" }),
 				item({ targetUnitId: SecondTargetId, position: "a0" }),
 			]),
-		).toThrow(/duplicate sibling position/);
-		expect(() =>
-			snapshot([
-				item({
-					targetUnitId: FirstTargetId,
-					parentTargetUnitId: SecondTargetId,
-					position: "a0",
-				}),
-			]),
-		).toThrow(/missing parent/);
-		expect(() =>
-			snapshot([
-				item({
-					targetUnitId: FirstTargetId,
-					parentTargetUnitId: SecondTargetId,
-					position: "a0",
-				}),
-				item({
-					targetUnitId: SecondTargetId,
-					parentTargetUnitId: FirstTargetId,
-					position: "a0",
-				}),
-			]),
-		).toThrow(/cycle/);
+		).toThrow(/duplicate position/);
 	});
 
 	it("creates adaptive checkpoints at every replay bound", () => {

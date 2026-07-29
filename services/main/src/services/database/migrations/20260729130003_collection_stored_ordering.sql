@@ -63,12 +63,10 @@ DROP INDEX "collection_owner_system_key";
 ALTER TABLE "collection" DROP CONSTRAINT "collection_source_system_key_check", DROP COLUMN "owner_profile_id", DROP COLUMN "source", DROP COLUMN "system_key", DROP COLUMN "definition_document", DROP COLUMN "presentation_document", DROP COLUMN "created_at", DROP COLUMN "updated_at";
 -- Drop index "collection_item_collection_position_idx" from table: "collection_item"
 DROP INDEX "collection_item_collection_position_idx";
--- Drop index "collection_item_parent_idx" from table: "collection_item"
-DROP INDEX "collection_item_parent_idx";
 -- Modify "collection_item" table
-ALTER TABLE "collection_item" DROP COLUMN "role", ADD CONSTRAINT "collection_item_sibling_position_unique" UNIQUE NULLS NOT DISTINCT ("collection_id", "parent_unit_id", "position");
+ALTER TABLE "collection_item" DROP COLUMN "role", ADD CONSTRAINT "collection_item_position_unique" UNIQUE ("collection_id", "position");
 -- Create index "collection_item_collection_position_idx" to table: "collection_item"
-CREATE INDEX "collection_item_collection_position_idx" ON "collection_item" ("collection_id", "parent_unit_id", "position", "unit_id");
+CREATE INDEX "collection_item_collection_position_idx" ON "collection_item" ("collection_id", "position", "unit_id");
 -- Drop enum type "collection_source"
 DROP TYPE "collection_source";
 -- Drop enum type "collection_system_key"

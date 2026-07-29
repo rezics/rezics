@@ -36,7 +36,6 @@ const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 
 export const CollectionStructureItemStateSchema = z.object({
 	targetUnitId: UuidSchema,
-	parentTargetUnitId: UuidSchema.nullable(),
 	position: FractionalPositionSchema,
 	addedByProfileId: UuidSchema.nullable(),
 	addedAt: z.coerce.date(),
@@ -51,44 +50,16 @@ export const CollectionStructureSnapshotSchema = z
 	})
 	.superRefine((snapshot, context) => {
 		const ids = new Set(snapshot.items.map((item) => item.targetUnitId));
-		const parentById = new Map(
-			snapshot.items.map((item) => [item.targetUnitId, item.parentTargetUnitId]),
-		);
 		if (ids.size !== snapshot.items.length)
 			context.addIssue({ code: "custom", message: "Duplicate Collection item target" });
-		const siblingPositions = new Set<string>();
+		const positions = new Set<string>();
 		for (const item of snapshot.items) {
-			if (item.parentTargetUnitId === item.targetUnitId)
+			if (positions.has(item.position))
 				context.addIssue({
 					code: "custom",
-					message: `Collection item ${item.targetUnitId} is its own parent`,
+					message: `Collection item ${item.targetUnitId} has a duplicate position`,
 				});
-			if (item.parentTargetUnitId !== null && !ids.has(item.parentTargetUnitId))
-				context.addIssue({
-					code: "custom",
-					message: `Collection item ${item.targetUnitId} has a missing parent`,
-				});
-			const siblingPosition = `${item.parentTargetUnitId ?? ""}\u0000${item.position}`;
-			if (siblingPositions.has(siblingPosition))
-				context.addIssue({
-					code: "custom",
-					message: `Collection item ${item.targetUnitId} has a duplicate sibling position`,
-				});
-			siblingPositions.add(siblingPosition);
-
-			const visited = new Set<string>([item.targetUnitId]);
-			let parentTargetUnitId = item.parentTargetUnitId;
-			while (parentTargetUnitId !== null) {
-				if (visited.has(parentTargetUnitId)) {
-					context.addIssue({
-						code: "custom",
-						message: `Collection item ${item.targetUnitId} belongs to a cycle`,
-					});
-					break;
-				}
-				visited.add(parentTargetUnitId);
-				parentTargetUnitId = parentById.get(parentTargetUnitId) ?? null;
-			}
+			positions.add(item.position);
 		}
 	});
 export type CollectionStructureSnapshot = z.infer<typeof CollectionStructureSnapshotSchema>;
