@@ -86,10 +86,13 @@ export function useUnitProgress(): UnitProgressContextValue {
 export function UnitProgressProvider({
 	children,
 	domain,
+	initialEditorOpen = false,
 	onEditorClosed,
 }: {
 	readonly children: ReactNode;
 	readonly domain: UnitProgressDomain;
+	/** Whether the editor is open on this provider's initial render. */
+	readonly initialEditorOpen?: boolean;
 	readonly onEditorClosed?: () => void;
 }) {
 	const session = useHydratedSession();
@@ -103,12 +106,26 @@ export function UnitProgressProvider({
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
 		{ query: { enabled: authenticated && domain.type === "book" } },
 	);
-	const saveMutation = usePutApiProgressByUnitId();
-	const completionMutation = usePostApiProgressByUnitIdComplete();
-	const removeMutation = useDeleteApiProgressByUnitId();
+	const {
+		error: saveError,
+		isPending: isSaving,
+		mutateAsync: saveProgressRequest,
+		reset: resetSaveProgress,
+	} = usePutApiProgressByUnitId();
+	const {
+		error: completionError,
+		mutateAsync: completeProgressRequest,
+		reset: resetCompletion,
+	} = usePostApiProgressByUnitIdComplete();
+	const {
+		error: removeError,
+		isPending: isRemoving,
+		mutateAsync: removeProgressRequest,
+		reset: resetRemoveProgress,
+	} = useDeleteApiProgressByUnitId();
 	const queryClient = useQueryClient();
 	const { t } = useTranslation(["engagement"]);
-	const [editorOpen, setEditorOpen] = useState(false);
+	const [editorOpen, setEditorOpen] = useState(initialEditorOpen);
 	const [completionPreview, setCompletionPreview] = useState<UnitProgressRecord>();
 	const [completionFeedbackCount, setCompletionFeedbackCount] = useState<number>();
 	const completionInFlight = useRef(false);
@@ -187,22 +204,21 @@ export function UnitProgressProvider({
 	}, [recordQuery.refetch]);
 
 	const openEditor = useCallback(() => {
-		saveMutation.reset();
-		completionMutation.reset();
-		removeMutation.reset();
+		resetSaveProgress();
+		resetCompletion();
+		resetRemoveProgress();
 		setEditorOpen(true);
-	}, [completionMutation, removeMutation, saveMutation]);
+	}, [resetCompletion, resetRemoveProgress, resetSaveProgress]);
 
 	const closeEditor = useCallback(() => {
-		if (saveMutation.isPending || completionInFlight.current || removeMutation.isPending)
-			return;
+		if (isSaving || completionInFlight.current || isRemoving) return;
 		setEditorOpen(false);
-	}, [removeMutation.isPending, saveMutation.isPending]);
+	}, [isRemoving, isSaving]);
 
 	const saveProgress = useCallback(
 		async (update: UnitProgressUpdate): Promise<boolean> => {
 			try {
-				const updated = await saveMutation.mutateAsync({
+				const updated = await saveProgressRequest({
 					path: { unitId: domain.unitId },
 					body: update,
 				});
@@ -217,7 +233,7 @@ export function UnitProgressProvider({
 				return false;
 			}
 		},
-		[domain.unitId, progressQueryKey, queryClient, refreshProgress, saveMutation],
+		[domain.unitId, progressQueryKey, queryClient, refreshProgress, saveProgressRequest],
 	);
 
 	const completeCurrentProgress = useCallback(
@@ -229,7 +245,7 @@ export function UnitProgressProvider({
 			setCompletionFeedbackCount(undefined);
 			setCompletionPreview(completeProgressOptimistically(confirmedRecord));
 			try {
-				const updated = await completionMutation.mutateAsync({
+				const updated = await completeProgressRequest({
 					path: { unitId: domain.unitId },
 					body: {
 						...(update?.totalTimeMs === undefined
@@ -256,7 +272,7 @@ export function UnitProgressProvider({
 			}
 		},
 		[
-			completionMutation,
+			completeProgressRequest,
 			confirmedRecord,
 			domain.unitId,
 			progressQueryKey,
@@ -267,7 +283,7 @@ export function UnitProgressProvider({
 
 	const removeProgress = useCallback(async (): Promise<boolean> => {
 		try {
-			await removeMutation.mutateAsync({ path: { unitId: domain.unitId } });
+			await removeProgressRequest({ path: { unitId: domain.unitId } });
 			setEditorOpen(false);
 			setCompletionFeedbackCount(undefined);
 			queryClient.setQueryData(progressQueryKey, {
@@ -278,7 +294,7 @@ export function UnitProgressProvider({
 		} catch {
 			return false;
 		}
-	}, [domain.unitId, progressQueryKey, queryClient, refreshProgress, removeMutation]);
+	}, [domain.unitId, progressQueryKey, queryClient, refreshProgress, removeProgressRequest]);
 
 	const startAgain = useCallback(
 		() => saveProgress(createRereadUpdate(domain.type)),
@@ -304,20 +320,20 @@ export function UnitProgressProvider({
 			chaptersPending: chaptersQuery.isPending,
 			closeEditor,
 			completeCurrentProgress,
-			completionError: completionMutation.error,
+			completionError,
 			completionFeedbackCount,
 			currentEntryId,
 			domain,
 			editorOpen,
 			isCompleting: completionPreview !== undefined,
-			isRemoving: removeMutation.isPending,
-			isSaving: saveMutation.isPending,
+			isRemoving,
+			isSaving,
 			openEditor,
-			removeError: removeMutation.error,
+			removeError,
 			removeProgress,
 			resumeProgress,
 			retryProgress,
-			saveError: saveMutation.error,
+			saveError,
 			saveProgress,
 			startAgain,
 			state,
@@ -329,20 +345,20 @@ export function UnitProgressProvider({
 			chaptersQuery.isPending,
 			closeEditor,
 			completeCurrentProgress,
+			completionError,
 			completionFeedbackCount,
-			completionMutation.error,
 			completionPreview,
 			currentEntryId,
 			domain,
 			editorOpen,
+			isRemoving,
+			isSaving,
 			openEditor,
-			removeMutation.error,
-			removeMutation.isPending,
+			removeError,
 			removeProgress,
 			resumeProgress,
 			retryProgress,
-			saveMutation.error,
-			saveMutation.isPending,
+			saveError,
 			saveProgress,
 			startAgain,
 			state,

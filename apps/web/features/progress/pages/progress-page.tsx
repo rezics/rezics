@@ -35,7 +35,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { ProgressImportDialog } from "../components/progress-import-dialog";
 import { UnitProgressDialog } from "../components/unit-progress-dialog";
-import { UnitProgressProvider, useUnitProgress } from "../components/unit-progress-provider";
+import { UnitProgressProvider } from "../components/unit-progress-provider";
 import { clampProgress, type UnitProgressDomain } from "../model/progress-record";
 import { unitProgressHref } from "../routing/progress-routes";
 
@@ -341,18 +341,8 @@ function ProgressEditorHost({
 	readonly onClosed: () => void;
 }) {
 	return (
-		<UnitProgressProvider domain={domain} onEditorClosed={onClosed}>
-			<OpenProgressEditor />
+		<UnitProgressProvider domain={domain} initialEditorOpen onEditorClosed={onClosed}>
+			<UnitProgressDialog />
 		</UnitProgressProvider>
 	);
-}
-
-function OpenProgressEditor() {
-	const progress = useUnitProgress();
-
-	useEffect(() => {
-		progress.openEditor();
-	}, [progress.openEditor]);
-
-	return <UnitProgressDialog />;
 }
