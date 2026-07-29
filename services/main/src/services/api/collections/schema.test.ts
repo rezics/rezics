@@ -1,3 +1,4 @@
+import { createCollectionPresentationDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
@@ -6,6 +7,7 @@ import {
 	CollectionItemsQuery,
 	ListCollectionsQuery,
 	SaveCollectionItemBody,
+	UpdateCollectionBody,
 } from "./schema";
 
 const targetId = "019b76da-a800-7300-8000-000000000001";
@@ -63,6 +65,17 @@ describe("collection item mutation schema", () => {
 	it("accepts bounded content pagination", () => {
 		expect(Check(CollectionItemsQuery, { limit: 100 })).toBe(true);
 		expect(Check(CollectionItemsQuery, { limit: 101 })).toBe(false);
+	});
+});
+
+describe("collection update schema", () => {
+	it("accepts a presentation-only partial update", () => {
+		expect(
+			Check(UpdateCollectionBody, {
+				baseRevisionId: targetId,
+				presentationDocument: createCollectionPresentationDocument("shelf", "name"),
+			}),
+		).toBe(true);
 	});
 });
 

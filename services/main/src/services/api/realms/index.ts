@@ -61,6 +61,7 @@ import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import { transitionUnitStatus } from "../../units/status";
+import { toUnitVisibilityUpdate } from "../../units/visibility-update";
 import {
 	getPublicCanonicalUnitSlugAddress,
 	getPublicCanonicalUnitSlugAddresses,
@@ -747,14 +748,15 @@ export default new Elysia({ prefix: "/realms" })
 						profile.unitId,
 						unitLocalizationImageAssetReferences(body.localization),
 					);
-				const updated = await tx
-					.update(unit)
-					.set({
-						visibility: body.visibility,
-					})
-					.where(and(eq(unit.id, params.realmId), eq(unit.kind, "realm")))
-					.returning({ id: unit.id });
-				if (!updated.length) throw new RealmNotFound();
+				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
+				if (unitUpdate) {
+					const updated = await tx
+						.update(unit)
+						.set(unitUpdate)
+						.where(and(eq(unit.id, params.realmId), eq(unit.kind, "realm")))
+						.returning({ id: unit.id });
+					if (!updated.length) throw new RealmNotFound();
+				}
 				if (body.joinPolicy)
 					await tx
 						.update(realm)

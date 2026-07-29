@@ -28,6 +28,7 @@ import { insertUnit } from "../../units/create";
 import { transitionUnitStatus } from "../../units/status";
 import { UnitNotFound } from "../../units/errors";
 import { presentImageAsset } from "../../units/service";
+import { toUnitVisibilityUpdate } from "../../units/visibility-update";
 import {
 	AddCollectionItemsBatchBody,
 	AddCollectionItemsBatchResponse,
@@ -398,12 +399,9 @@ export default new Elysia({ prefix: "/collections" })
 						profile.unitId,
 						unitLocalizationImageAssetReferences(body.localization),
 					);
-				await tx
-					.update(unit)
-					.set({
-						visibility: body.visibility,
-					})
-					.where(eq(unit.id, params.collectionId));
+				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
+				if (unitUpdate)
+					await tx.update(unit).set(unitUpdate).where(eq(unit.id, params.collectionId));
 				if (body.definitionDocument || body.presentationDocument) {
 					await tx
 						.update(collection)

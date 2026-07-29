@@ -11,6 +11,7 @@ import {
 	RealmRulesQuery,
 	RealmUnitListResponse,
 	RealmUnitModerationActionResponse,
+	UpdateRealmBody,
 	UpdateRealmRulesBody,
 } from "./schema";
 
@@ -95,6 +96,12 @@ describe("Realm member API contract", () => {
 		).toBe(true);
 		expect(Check(AcknowledgeRealmRulesBody, { language: "zh" })).toBe(true);
 		expect(Check(AcknowledgeRealmRulesBody, {})).toBe(false);
+	});
+});
+
+describe("Realm update API contract", () => {
+	it("accepts a join-policy-only partial update", () => {
+		expect(Check(UpdateRealmBody, { joinPolicy: "approval" })).toBe(true);
 	});
 });
 
