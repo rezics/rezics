@@ -64,6 +64,10 @@ export default {
 			description: "Zeige Umfragen zu deiner Arbeit an und verwalte sie.",
 		},
 	},
+	realmTagContext: {
+		label: `${realmTerms.label}-Tag-Erklärung`,
+		description: `Erstelle die Wiki-Erklärung dieses ${realmTerms.inline}s zu einem Tag.`,
+	},
 	list: {
 		create: "Erstellen",
 		empty: "Keine Inhalte entsprechen den aktuellen Filtern.",

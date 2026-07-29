@@ -24,11 +24,15 @@ vi.mock("@/features/content-feed/data/api-feed-list", () => ({
 	),
 }));
 
+vi.mock("./realm-feed-management-actions", () => ({
+	RealmFeedManagementActions: () => null,
+}));
+
 afterEach(cleanup);
 
 describe("RealmFeed", () => {
 	it("fixes the Realm scope while exposing every other Feed control", () => {
-		render(<RealmFeed realmId="realm-1" />);
+		render(<RealmFeed canManagePins={false} canManageTags={false} realmId="realm-1" />);
 
 		const feed = screen.getByTestId("realm-feed");
 		expect(feed.getAttribute("data-realm-ids")).toBe("realm-1");

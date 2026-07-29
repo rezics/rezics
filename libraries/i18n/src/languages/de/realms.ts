@@ -30,6 +30,14 @@ export default {
 				description:
 					"Verwalte Name, Zusammenfassung, Bilder, Lebenszyklus, Beitrittsregeln und öffentliche Adresse.",
 			},
+			pages: {
+				label: "Seiten",
+				description: `Aktiviere, deaktiviere und sortiere die festen Seiten des ${realmTerms.inline}s.`,
+			},
+			tags: {
+				label: "Tag-Taxonomie",
+				description: `Verwalte ${realmTerms.label}-Tags über die Inhaltsstruktur und wähle ihre Abfragestrategie.`,
+			},
 			members: {
 				label: "Mitglieder",
 				description:
@@ -60,6 +68,61 @@ export default {
 					"Prüfe, vergleiche, widerrufe oder stelle Einstellungsversionen wieder her.",
 			},
 		},
+	},
+	pages: {
+		navigation: `${realmTerms.label}-Seiten`,
+		main: "Hauptseite",
+		tags: "Tags",
+		wiki: "Wiki",
+		info: "Info",
+	},
+	pageSettings: {
+		title: "Aktivierte Seiten",
+		description:
+			"Die Hauptseite ist immer aktiv. Tags und Wiki können aktiviert und die Tabs sortiert werden.",
+		mainRequired: "Immer aktiviert",
+		enableDescription: `Diese Seite in der Navigation des ${realmTerms.inline}s anzeigen.`,
+		moveUp: "Seite nach vorne verschieben",
+		moveDown: "Seite nach hinten verschieben",
+		disable: "Seite deaktivieren",
+	},
+	taxonomy: {
+		title: `${realmTerms.label}-Tags`,
+		description: `Wähle einen Tag, um Inhalte mit der in diesem ${realmTerms.inline} festgelegten Strategie zu filtern.`,
+		empty: `In diesem ${realmTerms.label} sind keine Tags eingerichtet.`,
+		filter: "Filtern",
+		filteredBy: insert("Abfragestrategie: {{strategy}}", { strategy: String }),
+		strategies: {
+			global_effective: { label: "Global wirksame Tags" },
+			realm_community: { label: `Konsens der ${realmTerms.label}-Mitglieder` },
+			realm_policy: { label: `${realmTerms.label}-Richtlinien-Tags` },
+		},
+	},
+	taxonomySettings: {
+		title: "Tag-Taxonomie und Abfragestrategien",
+		description: `Tag-Knoten liegen in der Inhaltsstruktur des ${realmTerms.inline}s. Die Strategie bestimmt die Autorität des Filters.`,
+		addTag: "Tag hinzufügen",
+		queryStrategy: "Abfragestrategie",
+		empty: "Die Inhaltsstruktur enthält keine Tag-Knoten.",
+	},
+	wiki: {
+		description: `Durchsuche Wiki-Artikel dieses ${realmTerms.inline}s oder zeige genau eine ${realmTerms.label}-Tag-Erklärung.`,
+		contextFilter: `${realmTerms.label}-Tag-Erklärung`,
+		allArticles: "Alle Wiki-Artikel",
+	},
+	tagContext: {
+		createTitle: `${realmTerms.label}-Tag-Erklärung erstellen`,
+		createDescription: `Eine ${realmTerms.label}-Tag-Erklärung ist die maßgebliche Beschreibung eines Tags in diesem ${realmTerms.inline}. Sie ist immer ein Wiki-Artikel und liefert Zusammenfassung und Detailziel der Tag-Karte.`,
+		tag: "Zu erklärender Tag",
+		publish: "Tag-Erklärung veröffentlichen",
+	},
+	feedManagement: {
+		pin: `In diesem ${realmTerms.label} fixieren`,
+		pinned: `Im ${realmTerms.label} fixiert`,
+		addPolicyTag: `${realmTerms.label}-Richtlinien-Tag hinzufügen`,
+		policyTagDescription: `Suche einen Tag, den die Richtlinie dieses ${realmTerms.inline}s anwenden soll.`,
+		applyPolicyTag: "Tag anwenden",
+		policyTagAdded: `${realmTerms.label}-Richtlinien-Tag hinzugefügt`,
 	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,

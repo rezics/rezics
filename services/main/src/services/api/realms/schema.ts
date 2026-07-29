@@ -7,6 +7,7 @@ import {
 	RealmModerationCommandValues,
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
+	RealmPageKindValues,
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
 	RealmUnitStatusValues,
@@ -31,6 +32,7 @@ const RealmJoinPolicy = t.Union(RealmJoinPolicyValues.map((value) => t.Literal(v
 const RealmStatus = t.Union(UnitStatusValues.map((value) => t.Literal(value)));
 
 const RealmMemberState = t.Union(RealmMemberStateValues.map((value) => t.Literal(value)));
+const RealmPageKind = t.UnionEnum(RealmPageKindValues);
 
 const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues, { default: undefined });
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
@@ -65,6 +67,11 @@ export const RealmDetailQuery = t.Object(LocalizationLanguageQuery, {
 });
 export type RealmDetailQuery = Static<typeof RealmDetailQuery>;
 
+export const RealmTaxonomyQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
+export type RealmTaxonomyQuery = Static<typeof RealmTaxonomyQuery>;
+
 export const UpdateRealmBody = t.Object({
 	joinPolicy: t.Optional(RealmJoinPolicy),
 	visibility: t.Optional(RealmVisibility),
@@ -72,6 +79,29 @@ export const UpdateRealmBody = t.Object({
 	localization: t.Optional(LocalizationInput),
 });
 export type UpdateRealmBody = Static<typeof UpdateRealmBody>;
+
+const RealmPages = t.Array(RealmPageKind, {
+	minItems: 1,
+	maxItems: 3,
+	uniqueItems: true,
+	contains: t.Literal("main"),
+	minContains: 1,
+	maxContains: 1,
+});
+
+export const UpdateRealmPagesBody = t.Object(
+	{
+		pages: RealmPages,
+		baseRevisionId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+export type UpdateRealmPagesBody = Static<typeof UpdateRealmPagesBody>;
+
+export const RealmPagesResponse = t.Object({
+	pages: t.Array(RealmPageKind, { minItems: 1, maxItems: 3, uniqueItems: true }),
+	latestRevisionId: Uuid,
+});
 
 export const ListRealmMembersQuery = t.Object(
 	{
@@ -146,12 +176,18 @@ export type RemoveRealmPinQuery = Static<typeof RemoveRealmPinQuery>;
 export const RealmUnitParams = t.Object({ realmId: Uuid, unitId: Uuid });
 export type RealmUnitParams = Static<typeof RealmUnitParams>;
 
-export const RealmTagParams = t.Object({
+export const RealmTagVoteParams = t.Object({
 	realmId: Uuid,
 	unitId: Uuid,
 	tagId: Uuid,
 });
-export type RealmTagParams = Static<typeof RealmTagParams>;
+export type RealmTagVoteParams = Static<typeof RealmTagVoteParams>;
+
+export const RealmTagContextParams = t.Object({
+	realmId: Uuid,
+	tagId: Uuid,
+});
+export type RealmTagContextParams = Static<typeof RealmTagContextParams>;
 
 export const PutRealmTagContextBody = t.Object(
 	{ contextPostId: Uuid },
@@ -159,23 +195,57 @@ export const PutRealmTagContextBody = t.Object(
 );
 export type PutRealmTagContextBody = Static<typeof PutRealmTagContextBody>;
 
+export const CreateRealmTagContextBody = t.Object(
+	{
+		tagId: Uuid,
+		accessMode: t.Union([t.Literal("public_entry"), t.Literal("restricted")]),
+		title: t.String({ minLength: 1, maxLength: 500 }),
+		summary: t.String({ minLength: 1, maxLength: 2_000 }),
+		body: PortableTextDocument,
+		language: ContentLanguage,
+	},
+	{ additionalProperties: false },
+);
+export type CreateRealmTagContextBody = Static<typeof CreateRealmTagContextBody>;
+
 export const RealmTagVoteBody = t.Object(
 	{ value: t.Union([t.Literal(-1), t.Literal(1)]) },
 	{ additionalProperties: false },
 );
 export type RealmTagVoteBody = Static<typeof RealmTagVoteBody>;
 
-export const RealmTagContextResponse = t.Object({
+export const ApplyRealmPolicyTagBody = t.Object(
+	{ position: t.Optional(FractionalPosition) },
+	{ additionalProperties: false },
+);
+export type ApplyRealmPolicyTagBody = Static<typeof ApplyRealmPolicyTagBody>;
+
+export const RealmPolicyTagResponse = t.Object({
 	realmId: Uuid,
 	unitId: Uuid,
 	tagId: Uuid,
+	position: FractionalPosition,
+	createdByProfileId: Uuid,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+
+export const RealmTagContextResponse = t.Object({
+	realmId: Uuid,
+	tagId: Uuid,
 	contextPostId: Uuid,
 	createdByProfileId: t.Nullable(Uuid),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+
+export const RealmTagVoteResponse = t.Object({
+	realmId: Uuid,
+	unitId: Uuid,
+	tagId: Uuid,
 	value: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
 	score: t.Integer(),
 	voteCount: t.Integer(),
-	createdAt: DateTime,
-	updatedAt: DateTime,
 });
 
 export const ListRealmUnitsQuery = t.Object(

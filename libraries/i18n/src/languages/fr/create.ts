@@ -63,6 +63,10 @@ export default {
 			description: "Consultez et gérez les sondages liés à votre travail.",
 		},
 	},
+	realmTagContext: {
+		label: `Explication de Tag du ${realmTerms.label}`,
+		description: `Créez l’explication wiki de ce ${realmTerms.inline} pour un Tag.`,
+	},
 	list: {
 		create: "Créer",
 		empty: "Aucun contenu ne correspond aux filtres actuels.",

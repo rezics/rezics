@@ -107,6 +107,7 @@ export default {
 	continueReading: "Continue reading",
 	viewAll: "View all",
 	relatedWork: "Related work",
+	realmTagContext: `${realmTerms.label} Tag explanation`,
 	excerptSource: "Excerpt source",
 	excerptSourceMark: "―",
 	myRealms: `My ${realmTerms.pluralLabel}`,

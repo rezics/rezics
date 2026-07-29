@@ -30,6 +30,14 @@ export default {
 				description:
 					"Gestiona el nombre, el resumen, las imágenes, el ciclo de vida, la política de acceso y la dirección pública.",
 			},
+			pages: {
+				label: "Páginas",
+				description: `Activa, desactiva y ordena las páginas fijas del ${realmTerms.inline}.`,
+			},
+			tags: {
+				label: "Taxonomía de etiquetas",
+				description: `Gestiona las etiquetas del ${realmTerms.inline} mediante la estructura de contenido y elige su estrategia de consulta.`,
+			},
 			members: {
 				label: "Miembros",
 				description:
@@ -59,6 +67,61 @@ export default {
 				description: "Revisa, compara, deshace o restaura versiones de la configuración.",
 			},
 		},
+	},
+	pages: {
+		navigation: `Páginas del ${realmTerms.inline}`,
+		main: "Principal",
+		tags: "Etiquetas",
+		wiki: "Wiki",
+		info: "Información",
+	},
+	pageSettings: {
+		title: "Páginas activadas",
+		description:
+			"La página Principal siempre está activa. Puedes activar Etiquetas y Wiki y ordenar las pestañas.",
+		mainRequired: "Siempre activada",
+		enableDescription: `Muestra esta página en la navegación del ${realmTerms.inline}.`,
+		moveUp: "Mover la página hacia delante",
+		moveDown: "Mover la página hacia atrás",
+		disable: "Desactivar página",
+	},
+	taxonomy: {
+		title: `Etiquetas del ${realmTerms.inline}`,
+		description: `Selecciona una etiqueta para filtrar el contenido con la estrategia configurada por este ${realmTerms.inline}.`,
+		empty: `Este ${realmTerms.label} no tiene etiquetas configuradas.`,
+		filter: "Filtrar",
+		filteredBy: insert("Estrategia de consulta: {{strategy}}", { strategy: String }),
+		strategies: {
+			global_effective: { label: "Etiquetas globales vigentes" },
+			realm_community: { label: `Consenso de miembros del ${realmTerms.label}` },
+			realm_policy: { label: `Etiquetas de política del ${realmTerms.label}` },
+		},
+	},
+	taxonomySettings: {
+		title: "Taxonomía de etiquetas y estrategias de consulta",
+		description: `Los nodos de etiqueta viven en la estructura de contenido del ${realmTerms.inline}. La estrategia elige la autoridad del filtro.`,
+		addTag: "Añadir etiqueta",
+		queryStrategy: "Estrategia de consulta",
+		empty: "La estructura de contenido no contiene nodos de etiqueta.",
+	},
+	wiki: {
+		description: `Explora los artículos wiki publicados en este ${realmTerms.inline} o muestra una explicación de etiqueta concreta.`,
+		contextFilter: `Explicación de etiqueta del ${realmTerms.label}`,
+		allArticles: "Todos los artículos wiki",
+	},
+	tagContext: {
+		createTitle: `Crear una explicación de etiqueta del ${realmTerms.label}`,
+		createDescription: `Es la explicación canónica de una etiqueta en este ${realmTerms.inline}. Siempre es un artículo wiki y aporta el resumen y el destino de detalle de la tarjeta.`,
+		tag: "Etiqueta que se explicará",
+		publish: "Publicar explicación",
+	},
+	feedManagement: {
+		pin: `Fijar en este ${realmTerms.label}`,
+		pinned: `Fijado en el ${realmTerms.label}`,
+		addPolicyTag: `Añadir etiqueta de política del ${realmTerms.label}`,
+		policyTagDescription: `Busca la etiqueta que aplicará la política de este ${realmTerms.inline}.`,
+		applyPolicyTag: "Aplicar etiqueta",
+		policyTagAdded: `Etiqueta de política del ${realmTerms.label} añadida`,
 	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,

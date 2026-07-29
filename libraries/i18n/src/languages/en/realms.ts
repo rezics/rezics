@@ -30,6 +30,14 @@ export default {
 				description:
 					"Manage the name, summary, images, lifecycle, join policy, and public address.",
 			},
+			pages: {
+				label: "Pages",
+				description: `Enable, disable, and order the ${realmTerms.inline}'s fixed pages.`,
+			},
+			tags: {
+				label: "Tag taxonomy",
+				description: `Manage ${realmTerms.label} Tags through Content Structure and choose each Tag's query strategy.`,
+			},
 			members: {
 				label: "Members",
 				description:
@@ -56,6 +64,61 @@ export default {
 				description: "Review, compare, undo, or restore settings revisions.",
 			},
 		},
+	},
+	pages: {
+		navigation: `${realmTerms.label} pages`,
+		main: "Main",
+		tags: "Tags",
+		wiki: "Wiki",
+		info: "Info",
+	},
+	pageSettings: {
+		title: "Enabled pages",
+		description:
+			"The Main page is always enabled. You can enable Tags and Wiki, then order the tabs.",
+		mainRequired: "Always enabled",
+		enableDescription: `Show this page in the ${realmTerms.inline} navigation.`,
+		moveUp: "Move page earlier",
+		moveDown: "Move page later",
+		disable: "Disable page",
+	},
+	taxonomy: {
+		title: `${realmTerms.label} Tags`,
+		description: `Select a Tag to filter content with the query strategy configured by this ${realmTerms.inline}.`,
+		empty: `This ${realmTerms.label} has no configured Tags.`,
+		filter: "Filter",
+		filteredBy: insert("Query strategy: {{strategy}}", { strategy: String }),
+		strategies: {
+			global_effective: { label: "Global effective Tags" },
+			realm_community: { label: `${realmTerms.label} member consensus` },
+			realm_policy: { label: `${realmTerms.label} policy Tags` },
+		},
+	},
+	taxonomySettings: {
+		title: "Tag taxonomy and query strategies",
+		description: `Tag nodes live in the ${realmTerms.label} Content Structure. Each strategy chooses the authority used to filter the Tags page.`,
+		addTag: "Add Tag",
+		queryStrategy: "Query strategy",
+		empty: "The Content Structure has no Tag nodes.",
+	},
+	wiki: {
+		description: `Browse Wiki articles published in this ${realmTerms.inline}, or show one ${realmTerms.label} Tag explanation.`,
+		contextFilter: `${realmTerms.label} Tag explanation`,
+		allArticles: "All Wiki articles",
+	},
+	tagContext: {
+		createTitle: `Create a ${realmTerms.label} Tag explanation`,
+		createDescription: `A ${realmTerms.label} Tag explanation is this ${realmTerms.inline}'s canonical account of a Tag. It is always a Wiki article and supplies the Tag card summary and detail destination.`,
+		tag: "Tag to explain",
+		publish: "Publish Tag explanation",
+	},
+	feedManagement: {
+		pin: `Pin in this ${realmTerms.label}`,
+		pinned: `Pinned in the ${realmTerms.label}`,
+		addPolicyTag: `Add ${realmTerms.label} policy Tag`,
+		policyTagDescription: `Search for a Tag to apply under this ${realmTerms.inline}'s policy authority.`,
+		applyPolicyTag: "Apply Tag",
+		policyTagAdded: `${realmTerms.label} policy Tag added`,
 	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,

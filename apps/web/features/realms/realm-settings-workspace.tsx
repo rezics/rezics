@@ -19,12 +19,14 @@ import {
 import {
 	History,
 	KeyRound,
+	LayoutList,
 	PanelRight,
 	Pin,
 	ScrollText,
 	ShieldCheck,
 	UserRound,
 	UsersRound,
+	Tags,
 } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
@@ -44,6 +46,10 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { canOpenRealmSettings, getRealmSettingsSectionIds } from "./realm-permissions";
 import { RealmModeration } from "./components/realm-moderation";
+import {
+	RealmPagesSettings,
+	RealmTaxonomySettings,
+} from "./components/realm-configuration-settings";
 import { RealmMembers } from "./realm-members";
 import { RealmPins, RealmProfileSettings, RealmRules } from "./realm-settings";
 import type { RealmSettingsSectionId } from "./model/realm-settings-section";
@@ -116,6 +122,20 @@ function RealmSettingsWorkspaceContent({
 			label: labels.profile.label,
 			description: labels.profile.description,
 			icon: UserRound,
+		},
+		{
+			id: "pages",
+			href: realmSettingsSectionHref(baseHref, "pages"),
+			label: labels.pages.label,
+			description: labels.pages.description,
+			icon: LayoutList,
+		},
+		{
+			id: "tags",
+			href: realmSettingsSectionHref(baseHref, "tags"),
+			label: labels.tags.label,
+			description: labels.tags.description,
+			icon: Tags,
 		},
 		{
 			id: "members",
@@ -213,6 +233,14 @@ function RealmSettingsWorkspaceContent({
 				) : section === "profile" ? (
 					<RealmSettingsSection baseHref={baseHref} section="profile">
 						<RealmProfileSettingsForLanguage realm={realm.data} />
+					</RealmSettingsSection>
+				) : section === "pages" ? (
+					<RealmSettingsSection baseHref={baseHref} section="pages">
+						<RealmPagesSettings realm={realm.data} />
+					</RealmSettingsSection>
+				) : section === "tags" ? (
+					<RealmSettingsSection baseHref={baseHref} section="tags">
+						<RealmTaxonomySettings realmId={realmId} />
 					</RealmSettingsSection>
 				) : section === "members" ? (
 					<RealmMembersSection

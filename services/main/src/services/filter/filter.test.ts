@@ -10,6 +10,7 @@ import {
 	mergeUnitFilter,
 	parseUnitFilter,
 	readSimpleFeedFilter,
+	realmTagQueryPredicate,
 	SimpleFeedContentKindValues,
 	unitFilterSearchQuery,
 } from "@rezics/filter";
@@ -113,6 +114,73 @@ describe("domain Filter contract", () => {
 			assertUnitPredicate({
 				publishers: {
 					some: { kind: "profile", id: { in: [RealmId] } },
+				},
+			}),
+		).not.toThrow();
+	});
+
+	it("maps Realm taxonomy query strategies to independent Tag authorities", () => {
+		expect(
+			realmTagQueryPredicate({
+				realmId: RealmId,
+				tagId: TagId,
+				strategy: "global_effective",
+			}),
+		).toEqual({
+			tags: {
+				some: {
+					tag: { id: { in: [TagId] } },
+					authority: { kind: "global", view: { kind: "effective" } },
+				},
+			},
+		});
+		expect(
+			realmTagQueryPredicate({
+				realmId: RealmId,
+				tagId: TagId,
+				strategy: "realm_community",
+			}),
+		).toMatchObject({
+			tags: {
+				some: {
+					authority: {
+						kind: "realm",
+						view: {
+							kind: "community",
+							consensus: { score: { range: { minimum: 1 } } },
+						},
+					},
+				},
+			},
+		});
+		expect(
+			realmTagQueryPredicate({
+				realmId: RealmId,
+				tagId: TagId,
+				strategy: "realm_policy",
+			}),
+		).toMatchObject({
+			tags: {
+				some: {
+					authority: {
+						kind: "realm",
+						view: { kind: "policy" },
+					},
+				},
+			},
+		});
+	});
+
+	it("accepts Realm Tag explanation filters at the runtime boundary", () => {
+		expect(() =>
+			assertUnitPredicate({
+				post: {
+					is: {
+						explainsRealmTag: {
+							realm: { id: { in: [RealmId] } },
+							tag: { id: { in: [TagId] } },
+						},
+					},
 				},
 			}),
 		).not.toThrow();

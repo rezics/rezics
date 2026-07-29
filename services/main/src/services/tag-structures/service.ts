@@ -24,11 +24,13 @@ import {
 import { insertUnit } from "../units/create";
 import { lockUnitHistory, recordUnitRevision } from "../units/history";
 import {
+	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 	type LocalizationLanguageQuery,
 } from "../units/localization";
+import { presentAvatar } from "../units/avatar";
 import {
 	InvalidTagStructure,
 	TagNotFound,
@@ -351,6 +353,7 @@ async function listStructureMembers(
 			language: resolvedUnitLocalizationLanguage(memberUnit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(memberUnit.id, localizationLanguages),
 			summary: resolvedUnitLocalizationSummary(memberUnit.id, localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(memberUnit.id, localizationLanguages),
 		})
 		.from(unitStructureMember)
 		.innerJoin(memberUnit, eq(memberUnit.id, unitStructureMember.memberUnitId))
@@ -365,6 +368,7 @@ async function listStructureMembers(
 			language: row.language,
 			title: row.title,
 			summary: row.summary,
+			avatar: presentAvatar(row.avatar),
 		});
 		grouped.set(row.structureId, items);
 	}
@@ -377,6 +381,7 @@ export type TagStructureMember = {
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
+	readonly avatar: ReturnType<typeof presentAvatar>;
 };
 
 export async function getTagStructure(input: {

@@ -24,7 +24,7 @@ import {
 	type ContentStructureLogicalState,
 } from "./contracts";
 import { ContentStructureRevisionConflict } from "./errors";
-import { restoreContentStructureState } from "./storage";
+import { loadContentStructureSnapshot, restoreContentStructureState } from "./storage";
 
 export type ContentStructureRevisionKind = "create" | "update" | "delete" | "restore";
 
@@ -304,11 +304,20 @@ export async function restoreContentStructureRevision(
 		revisionId: input.sourceRevisionId,
 	});
 	await restoreContentStructureState(tx, input.structureId, state);
+	// Database defaults and invariant triggers may normalize older revision
+	// payloads during restore. Commit the normalized physical state so the new
+	// head remains a valid base for the next semantic delta.
+	const restoredState =
+		"deleted" in state
+			? state
+			: await loadContentStructureSnapshot(tx, {
+					structureId: input.structureId,
+				});
 	return commitContentStructureRevision(tx, {
 		...input,
 		revisionKind: "restore",
 		expectedRevisionId: input.baseRevisionId,
-		change: { kind: "checkpoint", state },
+		change: { kind: "checkpoint", state: restoredState },
 	});
 }
 

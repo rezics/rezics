@@ -139,22 +139,16 @@ export const unitTagVote = pgTable(
 	],
 );
 
-/**
- * Realm-scoped voting context. The context is a Post and must itself be
- * mounted in the Realm; it carries explanations and discussion for the vote.
- */
+/** The canonical Wiki explanation of one Tag in one Realm. */
 export const realmTagContext = pgTable(
 	"realm_tag_context",
 	{
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
 		tagId: uuid()
 			.notNull()
-			.references(() => tag.id, { onDelete: "cascade" }),
+			.references(() => tag.id, { onDelete: "restrict" }),
 		contextPostId: uuid()
 			.notNull()
 			.references(() => post.id, { onDelete: "restrict" }),
@@ -165,15 +159,14 @@ export const realmTagContext = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.realmId, table.unitId, table.tagId] }),
+		primaryKey({ columns: [table.realmId, table.tagId] }),
+		uniqueIndex("realm_tag_context_post_unique").on(table.contextPostId),
 		foreignKey({
 			columns: [table.realmId, table.contextPostId],
 			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
 			name: "realm_tag_context_post_realm_fkey",
 		}).onDelete("restrict"),
-		index("realm_tag_context_tag_idx").on(table.realmId, table.tagId),
 		index("realm_tag_context_post_idx").on(table.contextPostId),
-		check("realm_tag_context_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 	],
 );
 
@@ -195,15 +188,23 @@ export const realmTagVote = pgTable(
 			columns: [table.realmId, table.unitId, table.tagId, table.profileId],
 		}),
 		foreignKey({
-			columns: [table.realmId, table.unitId, table.tagId],
-			foreignColumns: [
-				realmTagContext.realmId,
-				realmTagContext.unitId,
-				realmTagContext.tagId,
-			],
-			name: "realm_tag_vote_context_fkey",
+			columns: [table.realmId],
+			foreignColumns: [realm.id],
+			name: "realm_tag_vote_realm_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.unitId],
+			foreignColumns: [unit.id],
+			name: "realm_tag_vote_unit_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.tagId],
+			foreignColumns: [tag.id],
+			name: "realm_tag_vote_tag_fkey",
 		}).onDelete("cascade"),
 		index("realm_tag_vote_profile_idx").on(table.profileId),
+		index("realm_tag_vote_realm_tag_unit_idx").on(table.realmId, table.tagId, table.unitId),
+		check("realm_tag_vote_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 		check("realm_tag_vote_value_check", sql`${table.value} in (-1, 1)`),
 	],
 );
@@ -233,7 +234,7 @@ export const realmUnitTag = pgTable(
 			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
 			name: "realm_unit_tag_realm_unit_fkey",
 		}).onDelete("cascade"),
-		index("realm_unit_tag_tag_idx").on(table.realmId, table.tagId),
+		index("realm_unit_tag_tag_idx").on(table.realmId, table.tagId, table.unitId),
 		check("realm_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 	],
 );

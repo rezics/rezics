@@ -71,6 +71,7 @@ export default {
 		"realm.members.manage": `管理${realmTerms.label}成員`,
 		"realm.rules.update": `更新${realmTerms.label}規則`,
 		"realm.pins.manage": `管理${realmTerms.label}置頂內容`,
+		"realm.tags.manage": `管理${realmTerms.label}標籤`,
 		"realm.units.moderate": `治理${realmTerms.label}內容`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -166,6 +167,7 @@ export default {
 			"realm.members.manage": "管理成員",
 			"realm.rules.update": "更新規則",
 			"realm.pins.manage": "管理置頂",
+			"realm.tags.manage": `管理${realmTerms.label}標籤`,
 			"realm.units.moderate": "治理內容",
 			"entity.association.credit.request": "申請署名關聯",
 			"entity.association.credit.direct": "直接建立署名關聯",

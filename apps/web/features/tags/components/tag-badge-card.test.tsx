@@ -41,6 +41,7 @@ const pinnedTag = {
 		language: "zh",
 		title: "置頂標籤",
 		summary: null,
+		avatar: null,
 	},
 	context: { kind: "global", pinned: true },
 	vote: {

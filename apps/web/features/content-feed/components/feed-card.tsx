@@ -217,6 +217,7 @@ export function FeedCardMedia({
 }
 
 export function FeedCardTarget({
+	avatar,
 	href,
 	label,
 	title,
@@ -226,6 +227,7 @@ export function FeedCardTarget({
 	imageFallback = <BookOpenIcon aria-hidden />,
 	rating,
 }: {
+	avatar?: PresentedAvatar | null;
 	href: string;
 	label: string;
 	title: string;
@@ -240,12 +242,21 @@ export function FeedCardTarget({
 			<div className="mb-3 border-border-weak border-t" />
 			<Item asChild className="p-0 hover:bg-transparent">
 				<a data-slot="feed-card-target-link" href={href}>
-					<Cover
-						alt={imageAlt || title}
-						className="w-14 rounded-lg border border-border-weak shadow-sm/5"
-						fallback={imageFallback}
-						src={imageUrl}
-					/>
+					{avatar !== undefined ? (
+						<IdentityAvatar
+							avatar={avatar}
+							className="size-14 border border-border-weak shadow-sm/5"
+							fallback={Array.from(title)[0]?.toLocaleUpperCase() ?? title}
+							imageAlt={imageAlt || title}
+						/>
+					) : (
+						<Cover
+							alt={imageAlt || title}
+							className="w-14 rounded-lg border border-border-weak shadow-sm/5"
+							fallback={imageFallback}
+							src={imageUrl}
+						/>
+					)}
 					<ItemContent className="min-w-0">
 						<ItemDescription className="text-xs">{label}</ItemDescription>
 						<ItemTitle>{title}</ItemTitle>

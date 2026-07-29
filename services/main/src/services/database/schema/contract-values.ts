@@ -232,6 +232,13 @@ export type ContentStructureKind = (typeof ContentStructureKindValues)[number];
 
 export const ContentStructureTargetKindValues = ["content", "none", "unit", "external"] as const;
 export type ContentStructureTargetKind = (typeof ContentStructureTargetKindValues)[number];
+
+export const RealmTagQueryStrategyValues = [
+	"global_effective",
+	"realm_community",
+	"realm_policy",
+] as const;
+export type RealmTagQueryStrategy = (typeof RealmTagQueryStrategyValues)[number];
 export const ProgressStatusValues = [
 	"backlog",
 	"active",
@@ -284,6 +291,8 @@ export const RealmRuleAcknowledgementModeValues = ["explicit", "implicit_on_foll
  * @tag low-priority
  */
 export const RealmMemberStateValues = ["active", "pending", "muted", "removed", "banned"] as const;
+export const RealmPageKindValues = ["main", "tags", "wiki"] as const;
+export type RealmPageKind = (typeof RealmPageKindValues)[number];
 export const RealmPinKindValues = ["pinned", "highlight"] as const;
 export const RealmUnitStatusValues = ["pending", "visible", "hidden", "removed"] as const;
 export const UserAccountStateValues = ["active", "suspended", "closed"] as const;

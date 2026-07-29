@@ -38,6 +38,7 @@ import {
 	collectionItem,
 	unitFollow,
 	realmMember,
+	realmTagContext,
 	realmUnit,
 	recommendationProfileInterest,
 	recommendationUnitEdge,
@@ -104,6 +105,8 @@ const preferredLocalization = alias(unitLocalization, "preferred_localization");
 const feedContextRealm = alias(unit, "feed_context_realm");
 const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
 const feedReviewScoreContextUnit = alias(unit, "feed_review_score_context_unit");
+const feedRealmContextTagUnit = alias(unit, "feed_realm_context_tag_unit");
+const feedRealmContextPostUnit = alias(unit, "feed_realm_context_post_unit");
 
 interface FeedRealmContextSummary {
 	readonly id: string;
@@ -899,6 +902,9 @@ export async function hydrateFeedItems(
 		.map(({ id }) => id);
 	const replyIds = rows.filter(({ postKind }) => postKind === "reply").map(({ id }) => id);
 	const reviewIds = rows.filter(({ postKind }) => postKind === "review").map(({ id }) => id);
+	const wikiIds = rows.filter(({ postKind }) => postKind === "wiki").map(({ id }) => id);
+	const tagIds = rows.filter(({ unitKind }) => unitKind === "tag").map(({ id }) => id);
+	const scopedRealmIds = [...new Set(page.flatMap(({ realmId }) => (realmId ? [realmId] : [])))];
 	const collectionIds = rows
 		.filter(({ unitKind }) => unitKind === "collection")
 		.map(({ id }) => id);
@@ -931,6 +937,8 @@ export async function hydrateFeedItems(
 		rootRows,
 		collectionCounts,
 		realmMemberCounts,
+		realmTagContextRows,
+		realmTagUnitContextRows,
 		reviewScores,
 	] = await Promise.all([
 		rootPostIds.length
@@ -1083,6 +1091,81 @@ export async function hydrateFeedItems(
 					)
 					.groupBy(realmMember.realmId)
 			: [],
+		wikiIds.length
+			? database
+					.select({
+						contextPostId: realmTagContext.contextPostId,
+						realmId: realmTagContext.realmId,
+						tagId: realmTagContext.tagId,
+						language: resolvedUnitLocalizationLanguage(
+							feedRealmContextTagUnit.id,
+							displayLanguages,
+						),
+						title: resolvedUnitLocalizationTitle(
+							feedRealmContextTagUnit.id,
+							displayLanguages,
+						),
+						avatar: resolvedUnitLocalizationAvatar(
+							feedRealmContextTagUnit.id,
+							displayLanguages,
+						),
+					})
+					.from(realmTagContext)
+					.innerJoin(
+						realmUnit,
+						and(
+							eq(realmUnit.realmId, realmTagContext.realmId),
+							eq(realmUnit.unitId, realmTagContext.contextPostId),
+							eq(realmUnit.status, "visible"),
+						),
+					)
+					.innerJoin(
+						feedRealmContextTagUnit,
+						eq(feedRealmContextTagUnit.id, realmTagContext.tagId),
+					)
+					.where(
+						and(
+							inArray(realmTagContext.contextPostId, wikiIds),
+							getUnitReadCondition(viewer.profileId, {}, feedRealmContextTagUnit),
+						),
+					)
+			: [],
+		tagIds.length && scopedRealmIds.length
+			? database
+					.select({
+						realmId: realmTagContext.realmId,
+						tagId: realmTagContext.tagId,
+						contextPostId: realmTagContext.contextPostId,
+						language: resolvedUnitLocalizationLanguage(
+							feedRealmContextPostUnit.id,
+							displayLanguages,
+						),
+						summary: resolvedUnitLocalizationSummary(
+							feedRealmContextPostUnit.id,
+							displayLanguages,
+						),
+					})
+					.from(realmTagContext)
+					.innerJoin(
+						realmUnit,
+						and(
+							eq(realmUnit.realmId, realmTagContext.realmId),
+							eq(realmUnit.unitId, realmTagContext.contextPostId),
+							eq(realmUnit.status, "visible"),
+						),
+					)
+					.innerJoin(
+						feedRealmContextPostUnit,
+						eq(feedRealmContextPostUnit.id, realmTagContext.contextPostId),
+					)
+					.where(
+						and(
+							inArray(realmTagContext.realmId, scopedRealmIds),
+							inArray(realmTagContext.tagId, tagIds),
+							getUnitReadCondition(viewer.profileId, {}, feedRealmContextPostUnit),
+						),
+					)
+			: [],
 		reviewIds.length
 			? database
 					.select({
@@ -1162,6 +1245,29 @@ export async function hydrateFeedItems(
 		collectionCounts.map((row) => [row.collectionId, row.count]),
 	);
 	const realmMemberCount = new Map(realmMemberCounts.map((row) => [row.realmId, row.count]));
+	const realmTagContextByPostId = new Map(
+		realmTagContextRows.flatMap(({ contextPostId, avatar, ...context }) =>
+			context.language
+				? [
+						[
+							contextPostId,
+							{
+								realmId: context.realmId,
+								tag: {
+									id: context.tagId,
+									language: context.language,
+									title: context.title,
+									avatar: presentAvatar(avatar),
+								},
+							},
+						] as const,
+					]
+				: [],
+		),
+	);
+	const realmTagContextByRealmTag = new Map(
+		realmTagUnitContextRows.map((context) => [`${context.realmId}:${context.tagId}`, context]),
+	);
 	const reactionCount = new Map(
 		reactions.map((row) => [
 			`${row.unitId}:${row.reaction}`,
@@ -1264,7 +1370,7 @@ export async function hydrateFeedItems(
 						},
 					},
 				];
-			if (row.unitKind === "realm" || row.unitKind === "zone")
+			if (row.unitKind === "realm" || row.unitKind === "zone" || row.unitKind === "tag")
 				return [
 					{
 						...unitItem,
@@ -1276,6 +1382,12 @@ export async function hydrateFeedItems(
 							memberCount:
 								row.unitKind === "realm"
 									? (realmMemberCount.get(row.id) ?? 0)
+									: null,
+							realmTagContext:
+								row.unitKind === "tag" && ranked.realmId
+									? (realmTagContextByRealmTag.get(
+											`${ranked.realmId}:${row.id}`,
+										) ?? null)
 									: null,
 						},
 					},
@@ -1323,12 +1435,20 @@ export async function hydrateFeedItems(
 						scores: scoresByPostId.get(row.id) ?? [],
 					},
 				]
-			: [
-					{
-						...postItem,
-						postKind: row.postKind,
-					},
-				];
+			: row.postKind === "wiki"
+				? [
+						{
+							...postItem,
+							postKind: row.postKind,
+							realmTagContext: realmTagContextByPostId.get(row.id) ?? null,
+						},
+					]
+				: [
+						{
+							...postItem,
+							postKind: row.postKind,
+						},
+					];
 	});
 }
 

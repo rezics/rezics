@@ -215,8 +215,11 @@ export default {
 	PostScoreDuplicate: `Ein ${postTerms.inline} kann dieselbe Bewertung nicht mehrmals anzeigen.`,
 	PostScoreNotFound: "Eine ausgewählte Bewertung wurde nicht gefunden.",
 	RealmScoreContextPostNotMounted: `Der als Bewertungskontext verwendete ${postTerms.inline} muss im ${realmTerms.inline} eingebunden sein.`,
-	RealmTagContextNotFound: `Dieser Tag-Abstimmungskontext des ${realmTerms.inline}s wurde nicht gefunden.`,
-	RealmTagContextPostNotMounted: `Der ${postTerms.inline} des Tag-Abstimmungskontexts muss im ${realmTerms.inline} sichtbar sein.`,
+	RealmTagContextNotFound: `Die Tag-Erklärung in diesem ${realmTerms.inline} wurde nicht gefunden.`,
+	RealmTagContextPostNotMounted: `Der ${postTerms.inline} mit der Tag-Erklärung muss im ${realmTerms.inline} sichtbar sein.`,
+	RealmTagContextAlreadyExists: `In diesem ${realmTerms.inline} gibt es bereits eine Erklärung für diesen Tag.`,
+	RealmTagContextPostAlreadyUsed: `Dieser ${postTerms.inline} erklärt bereits einen anderen Tag in einem ${realmTerms.inline}.`,
+	RealmTagSelfReferenceForbidden: "Ein Tag kann nicht auf sich selbst angewendet werden.",
 	SearchDocumentRevisionConflict:
 		"Die Suchkonfiguration wurde geändert. Lade sie vor dem Speichern neu.",
 	ZoneSearchFeatureNotFound: `Dieser ${zoneTerms.inline} hat keine aktivierte Suchfunktion.`,

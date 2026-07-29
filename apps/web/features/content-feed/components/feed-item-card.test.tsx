@@ -404,6 +404,7 @@ describe("FeedUnitCard", () => {
 			presentation: {
 				kind: "identity",
 				avatar: { type: "emoji", emoji: "🧠" },
+				realmTagContext: null,
 				banner: {
 					id: "019f9872-bd49-7bb4-a6b7-ec621fca2044",
 					url: "/banner.jpg",
@@ -424,5 +425,48 @@ describe("FeedUnitCard", () => {
 		expect(container.querySelector("time")).toBeNull();
 		expect(screen.queryByText("未知署名")).toBeNull();
 		expect(screen.getByText("128 位成員")).toBeTruthy();
+	});
+
+	it("renders a Realm-aware Tag through its avatar and Context Wiki presentation", () => {
+		const realmId = "019f9872-bd49-7bb4-a6b7-ec621fca2045";
+		const contextPostId = "019f9872-bd49-7bb4-a6b7-ec621fca2046";
+		const tag = {
+			...unitCommon,
+			id: "019f9872-bd49-7bb4-a6b7-ec621fca2047",
+			unitKind: "tag",
+			title: "值得重讀",
+			summary: "全站標籤摘要",
+			cover: null,
+			presentation: {
+				kind: "identity",
+				avatar: { type: "emoji", emoji: "🔖" },
+				banner: null,
+				memberCount: null,
+				realmTagContext: {
+					realmId,
+					contextPostId,
+					language: "zh",
+					summary: "本領域對這個標籤的正式解釋",
+				},
+			},
+		} satisfies FeedUnit;
+
+		const { container } = render(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedUnitCard canExclude={false} unit={tag} />
+			</TranslationProvider>,
+		);
+
+		expect(container.querySelector('[data-slot="avatar-emoji"]')?.textContent).toBe("🔖");
+		expect(screen.getByText("本領域對這個標籤的正式解釋")).toBeTruthy();
+		expect(screen.queryByText("全站標籤摘要")).toBeNull();
+		expect(
+			screen
+				.getAllByRole("link")
+				.some(
+					(link) =>
+						link.getAttribute("href") === `/posts/${contextPostId}?realmId=${realmId}`,
+				),
+		).toBe(true);
 	});
 });

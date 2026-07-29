@@ -1,5 +1,6 @@
 "use client";
 
+import type { PresentedAvatar } from "@rezics/avatar";
 import type { ReactNode } from "react";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, PinIcon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
@@ -15,6 +16,7 @@ import {
 	CarouselContent,
 	CarouselItem,
 	cn,
+	IdentityAvatar,
 	Skeleton,
 	useCarousel,
 	useIsMobile,
@@ -28,9 +30,12 @@ export interface RealmPinnedContentItem {
 	readonly id: string;
 	readonly body?: Parameters<typeof readPortableText>[0];
 	readonly href?: string;
+	readonly avatar?: PresentedAvatar | null;
+	readonly identity?: boolean;
 	readonly imageUrl?: string | null;
 	readonly language?: ContentLanguage | null;
 	readonly summary?: string | null;
+	readonly summaryLanguage?: ContentLanguage | null;
 	readonly title?: string | null;
 }
 
@@ -238,7 +243,28 @@ function RealmPinnedItemCard({
 	const title = item.title?.trim() || untitledLabel;
 	const content = (
 		<Card appearance="outlined" className="h-44 min-w-0 gap-0 overflow-hidden py-0 shadow-none">
-			{item.imageUrl ? (
+			{item.identity ? (
+				<CardContent className="min-h-0 p-4">
+					<div className="flex items-center gap-3">
+						<IdentityAvatar
+							avatar={item.avatar}
+							className="size-12"
+							fallback={Array.from(title)[0]?.toLocaleUpperCase() ?? title}
+						/>
+						<h3 className="line-clamp-2 min-w-0 font-semibold leading-5">
+							<LocalizedText language={item.language} value={title} />
+						</h3>
+					</div>
+					{item.summary ? (
+						<p className="mt-3 line-clamp-3 text-muted-foreground text-sm leading-5">
+							<LocalizedText
+								language={item.summaryLanguage ?? item.language}
+								value={item.summary}
+							/>
+						</p>
+					) : null}
+				</CardContent>
+			) : item.imageUrl ? (
 				<>
 					<CardMedia className="h-28 px-0" variant="image">
 						<img alt="" loading="lazy" src={item.imageUrl} />
@@ -256,7 +282,10 @@ function RealmPinnedItemCard({
 					</h3>
 					{item.summary ? (
 						<p className="mt-2 line-clamp-4 text-muted-foreground text-sm leading-5">
-							<LocalizedText language={item.language} value={item.summary} />
+							<LocalizedText
+								language={item.summaryLanguage ?? item.language}
+								value={item.summary}
+							/>
 						</p>
 					) : item.body ? (
 						<LocalizedPortableTextContent

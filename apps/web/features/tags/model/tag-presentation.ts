@@ -1,3 +1,4 @@
+import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
@@ -10,6 +11,7 @@ export interface TagIdentity {
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
+	readonly avatar: PresentedAvatar | null;
 }
 
 export type TagVoteTarget =

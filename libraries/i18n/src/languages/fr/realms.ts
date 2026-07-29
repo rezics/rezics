@@ -30,6 +30,14 @@ export default {
 				description:
 					"Gérez le nom, le résumé, les images, le cycle de vie, la règle d’adhésion et l’adresse publique.",
 			},
+			pages: {
+				label: "Pages",
+				description: `Activez, désactivez et ordonnez les pages fixes du ${realmTerms.inline}.`,
+			},
+			tags: {
+				label: "Taxonomie des Tags",
+				description: `Gérez les Tags du ${realmTerms.inline} dans la structure de contenu et choisissez leur stratégie de requête.`,
+			},
 			members: {
 				label: "Membres",
 				description:
@@ -60,6 +68,61 @@ export default {
 				description: "Consultez, comparez, annulez ou restaurez les versions des réglages.",
 			},
 		},
+	},
+	pages: {
+		navigation: `Pages du ${realmTerms.inline}`,
+		main: "Principal",
+		tags: "Tags",
+		wiki: "Wiki",
+		info: "Infos",
+	},
+	pageSettings: {
+		title: "Pages activées",
+		description:
+			"La page principale est toujours active. Vous pouvez activer Tags et Wiki, puis ordonner les onglets.",
+		mainRequired: "Toujours activée",
+		enableDescription: `Afficher cette page dans la navigation du ${realmTerms.inline}.`,
+		moveUp: "Déplacer la page vers l’avant",
+		moveDown: "Déplacer la page vers l’arrière",
+		disable: "Désactiver la page",
+	},
+	taxonomy: {
+		title: `Tags du ${realmTerms.inline}`,
+		description: `Sélectionnez un Tag pour filtrer le contenu avec la stratégie configurée par ce ${realmTerms.inline}.`,
+		empty: `Ce ${realmTerms.label} ne comporte aucun Tag configuré.`,
+		filter: "Filtrer",
+		filteredBy: insert("Stratégie de requête : {{strategy}}", { strategy: String }),
+		strategies: {
+			global_effective: { label: "Tags globaux effectifs" },
+			realm_community: { label: `Consensus des membres du ${realmTerms.label}` },
+			realm_policy: { label: `Tags de politique du ${realmTerms.label}` },
+		},
+	},
+	taxonomySettings: {
+		title: "Taxonomie des Tags et stratégies de requête",
+		description: `Les nœuds Tag résident dans la structure de contenu du ${realmTerms.inline}. La stratégie choisit l’autorité du filtre.`,
+		addTag: "Ajouter un Tag",
+		queryStrategy: "Stratégie de requête",
+		empty: "La structure de contenu ne contient aucun nœud Tag.",
+	},
+	wiki: {
+		description: `Parcourez les articles wiki de ce ${realmTerms.inline} ou affichez une explication de Tag précise.`,
+		contextFilter: `Explication de Tag du ${realmTerms.label}`,
+		allArticles: "Tous les articles wiki",
+	},
+	tagContext: {
+		createTitle: `Créer une explication de Tag du ${realmTerms.label}`,
+		createDescription: `Il s’agit de l’explication canonique d’un Tag dans ce ${realmTerms.inline}. Elle est toujours un article wiki et fournit le résumé et la destination de la carte.`,
+		tag: "Tag à expliquer",
+		publish: "Publier l’explication",
+	},
+	feedManagement: {
+		pin: `Épingler dans ce ${realmTerms.label}`,
+		pinned: `Épinglé dans le ${realmTerms.label}`,
+		addPolicyTag: `Ajouter un Tag de politique du ${realmTerms.label}`,
+		policyTagDescription: `Recherchez le Tag à appliquer sous l’autorité de ce ${realmTerms.inline}.`,
+		applyPolicyTag: "Appliquer le Tag",
+		policyTagAdded: `Tag de politique du ${realmTerms.label} ajouté`,
 	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,

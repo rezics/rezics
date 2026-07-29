@@ -8,6 +8,7 @@ import {
 	Uuid,
 } from "../schema";
 import { CatalogUnitType } from "../units/schema";
+import { AvatarResponse } from "../schema/response";
 
 const TagVoteValue = t.Nullable(t.Union([t.Literal(-1), t.Literal(1)]));
 const BinaryVote = t.Union([t.Literal(-1), t.Literal(1)]);
@@ -16,6 +17,7 @@ const LocalizedTagSummary = {
 	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
+	avatar: AvatarResponse,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 } as const;
@@ -53,6 +55,7 @@ export const TagStructureMemberResponse = t.Object({
 	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
+	avatar: AvatarResponse,
 });
 
 const UnitTagStructureResponse = t.Object({
@@ -72,7 +75,7 @@ const UnitTagStructureResponse = t.Object({
 const RealmVotedTagResponse = t.Object({
 	...LocalizedTagSummary,
 	realmId: Uuid,
-	contextPostId: Uuid,
+	contextPostId: t.Nullable(Uuid),
 	score: t.Integer(),
 	voteCount: t.Integer({ minimum: 0 }),
 	viewerVote: TagVoteValue,
@@ -81,6 +84,7 @@ const RealmVotedTagResponse = t.Object({
 const RealmPolicyTagResponse = t.Object({
 	...LocalizedTagSummary,
 	realmId: Uuid,
+	contextPostId: t.Nullable(Uuid),
 	position: FractionalPosition,
 });
 

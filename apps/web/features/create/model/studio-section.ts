@@ -1,6 +1,7 @@
 import type { ListCurrentUserStudioContentSection } from "@rezics/openapi-tanstack-query";
 
 export const StudioSectionIds = [
+	"post",
 	"book",
 	"software",
 	"media",
@@ -8,7 +9,6 @@ export const StudioSectionIds = [
 	"tag",
 	"realm",
 	"zone",
-	"post",
 	"wiki",
 	"collection",
 	"review",

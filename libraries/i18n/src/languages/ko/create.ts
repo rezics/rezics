@@ -51,6 +51,10 @@ export default {
 		review: { label: "리뷰", description: "귀하의 작업과 관련된 리뷰 보기 및 관리" },
 		poll: { label: "설문조사", description: "귀하의 작업과 관련된 설문조사 보기 및 관리" },
 	},
+	realmTagContext: {
+		label: `${realmTerms.label} 태그 설명`,
+		description: `이 ${realmTerms.label}에서 태그를 설명하는 위키 문서를 만듭니다.`,
+	},
 	list: {
 		create: "생성",
 		empty: "현재 필터와 일치하는 콘텐츠가 없습니다",

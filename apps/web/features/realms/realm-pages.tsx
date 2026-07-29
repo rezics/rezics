@@ -17,7 +17,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Banner, PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
@@ -30,12 +30,17 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
-import { UsersIcon } from "lucide-react";
+import { BookOpenIcon, InfoIcon, LayoutListIcon, TagsIcon, UsersIcon } from "lucide-react";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { FollowButton } from "@/features/following/components/follow-button";
-import { realmHref, realmSettingsHref } from "@/features/slugs/unit-route";
+import {
+	realmHref,
+	realmPageHref,
+	realmSettingsHref,
+	type RealmPageId,
+} from "@/features/slugs/unit-route";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
@@ -60,6 +65,8 @@ import { useChineseContentText } from "@/features/content-language-display/chine
 import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 import { RealmFeed } from "./components/realm-feed";
+import { RealmTaxonomyPage } from "./components/realm-taxonomy-page";
+import { RealmWikiPage } from "./components/realm-wiki-page";
 import { RealmPinnedContentSection } from "./components/realm-pinned-content-section";
 import { RealmRulesCard, type RealmRulePresentation } from "./components/realm-rules-card";
 import { RealmRulesAcknowledgementPrompt } from "./components/realm-rules-acknowledgement-prompt";
@@ -234,7 +241,7 @@ export function RealmCreatePage() {
 	return <RealmCreateContent />;
 }
 
-export function RealmDetailPage({ id }: { id: string }) {
+export function RealmDetailPage({ id, page = "main" }: { id: string; page?: RealmPageId }) {
 	const { t, locale } = useTranslation([
 		"actions",
 		"media",
@@ -244,6 +251,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 		"state",
 		"ui",
 	]);
+	const router = useApplicationRouter();
 	const localizationLanguages = useLocalizationLanguages();
 	const { data: session } = useHydratedSession();
 	const dockAccess = useDockManagementAccess(id, "realm", Boolean(session));
@@ -290,10 +298,16 @@ export function RealmDetailPage({ id }: { id: string }) {
 			query: { enabled: Boolean(query.data) },
 		},
 	);
+	useEffect(() => {
+		if (query.data && (page === "tags" || page === "wiki") && !query.data.pages.includes(page))
+			router.replace(realmPageHref(query.data, "main"));
+	}, [page, query.data, router]);
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const realm = query.data;
+	const enabledPage = page === "info" || page === "main" || realm.pages.includes(page);
+	const currentPage = enabledPage ? page : "main";
 	const canManage = canOpenRealmSettings(realm.capabilities, dockAccess.allowedKinds.length > 0);
 	const canPost = realm.capabilities.canCreateUnits;
 	return (
@@ -343,63 +357,180 @@ export function RealmDetailPage({ id }: { id: string }) {
 				<RealmActions canManage={canManage} canPost={canPost} realm={realm} />
 			</header>
 
-			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
-				<div className="grid min-w-0 gap-5">
-					<RealmPinnedContentSection
-						emptyLabel={t.realms.pinnedContentEmpty}
-						nextLabel={t.realms.pinnedCarouselNext}
-						previousLabel={t.realms.pinnedCarouselPrevious}
-						state={
-							pins.isError
-								? {
-										status: "error",
-										feedback: <RequestFailure error={pins.error} />,
-									}
-								: pins.data
+			<RealmPageNavigation currentPage={currentPage} realm={realm} />
+
+			{currentPage === "main" ? (
+				<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
+					<div className="grid min-w-0 gap-5">
+						<RealmPinnedContentSection
+							emptyLabel={t.realms.pinnedContentEmpty}
+							nextLabel={t.realms.pinnedCarouselNext}
+							previousLabel={t.realms.pinnedCarouselPrevious}
+							state={
+								pins.isError
 									? {
-											status: "ready",
-											items: pins.data.contentItems.map((item) => ({
-												id: item.id,
-												body:
-													item.itemType === "post"
-														? item.body
-														: undefined,
-												href: realmPinnedContentHref(item, realm.id),
-												imageUrl: item.cover?.url,
-												language: item.language,
-												summary: item.summary,
-												title: item.title,
-											})),
+											status: "error",
+											feedback: <RequestFailure error={pins.error} />,
 										}
-									: { status: "loading" }
-						}
-						title={t.realms.pins}
-						untitledLabel={t.ui.unnamed}
-					/>
+									: pins.data
+										? {
+												status: "ready",
+												items: pins.data.contentItems.map((item) => ({
+													id: item.id,
+													body:
+														item.itemType === "post"
+															? item.body
+															: undefined,
+													href: realmPinnedContentHref(item, realm.id),
+													avatar:
+														item.itemType === "unit" &&
+														item.presentation.kind === "identity"
+															? item.presentation.avatar
+															: null,
+													identity:
+														item.itemType === "unit" &&
+														item.presentation.kind === "identity",
+													imageUrl:
+														item.itemType === "unit" &&
+														item.presentation.kind === "identity"
+															? null
+															: item.cover?.url,
+													language: item.language,
+													summary:
+														item.itemType === "unit" &&
+														item.unitKind === "tag" &&
+														item.presentation.kind === "identity"
+															? (item.presentation.realmTagContext
+																	?.summary ?? item.summary)
+															: item.summary,
+													summaryLanguage:
+														item.itemType === "unit" &&
+														item.unitKind === "tag" &&
+														item.presentation.kind === "identity"
+															? (item.presentation.realmTagContext
+																	?.language ?? item.language)
+															: item.language,
+													title: item.title,
+												})),
+											}
+										: { status: "loading" }
+							}
+							title={t.realms.pins}
+							untitledLabel={t.ui.unnamed}
+						/>
 
-					<RealmFeed realmId={realm.id} />
+						<RealmFeed
+							canManagePins={realm.capabilities.canManagePins}
+							canManageTags={realm.capabilities.canManageTags}
+							realmId={realm.id}
+						/>
+					</div>
+
+					<aside className="hidden min-w-0 max-w-full gap-5 overflow-hidden lg:sticky lg:top-20 lg:grid">
+						<RealmInfoSections
+							realm={realm}
+							rules={{
+								error: rules.error,
+								isError: rules.isError,
+								items: rules.data?.items,
+							}}
+						/>
+					</aside>
 				</div>
-
-				<aside className="grid min-w-0 max-w-full gap-5 overflow-hidden lg:sticky lg:top-20">
-					<RealmSidebarRulesSection
-						error={rules.error}
-						isError={rules.isError}
-						rules={rules.data?.items}
-						title={t.realms.rules}
+			) : currentPage === "tags" ? (
+				<RealmTaxonomyPage realm={realm} />
+			) : currentPage === "wiki" ? (
+				<RealmWikiPage realm={realm} />
+			) : (
+				<div className="grid max-w-xl gap-5">
+					<RealmInfoSections
+						realm={realm}
+						rules={{
+							error: rules.error,
+							isError: rules.isError,
+							items: rules.data?.items,
+						}}
 					/>
-					<RealmSidebarMembersSection
-						label={t.realms.members}
-						valueLabel={t.realms.memberCount({
-							count: toNonNegativeApiInteger(realm.memberCount),
-						})}
-					/>
-					<UnitDockRenderer
-						ownerUnitId={realm.id}
-						target={{ ownerKind: "realm", dockKind: "main" }}
-					/>
-				</aside>
-			</div>
+				</div>
+			)}
 		</main>
+	);
+}
+
+function RealmPageNavigation({
+	currentPage,
+	realm,
+}: {
+	readonly currentPage: RealmPageId;
+	readonly realm: GetApiRealmsByRealmIdStatus200;
+}) {
+	const { t } = useTranslation(["realms"]);
+	const icons = {
+		main: LayoutListIcon,
+		tags: TagsIcon,
+		wiki: BookOpenIcon,
+		info: InfoIcon,
+	} satisfies Record<RealmPageId, typeof LayoutListIcon>;
+	const pages = [...realm.pages, "info"] as const;
+	return (
+		<nav
+			aria-label={t.realms.pages.navigation}
+			className="flex max-w-full gap-1 overflow-x-auto border-b"
+		>
+			{pages.map((pageId) => {
+				const Icon = icons[pageId];
+				return (
+					<Button
+						asChild
+						className={pageId === "info" ? "lg:hidden" : undefined}
+						key={pageId}
+						variant={currentPage === pageId ? "secondary" : "quiet"}
+					>
+						<Link
+							aria-current={currentPage === pageId ? "page" : undefined}
+							href={realmPageHref(realm, pageId)}
+						>
+							<Icon aria-hidden data-icon="inline-start" />
+							{t.realms.pages[pageId]}
+						</Link>
+					</Button>
+				);
+			})}
+		</nav>
+	);
+}
+
+function RealmInfoSections({
+	realm,
+	rules,
+}: {
+	readonly realm: GetApiRealmsByRealmIdStatus200;
+	readonly rules: {
+		readonly error: unknown;
+		readonly isError: boolean;
+		readonly items?: readonly RealmRulePresentation[];
+	};
+}) {
+	const { t } = useTranslation(["realms"]);
+	return (
+		<>
+			<RealmSidebarRulesSection
+				error={rules.error}
+				isError={rules.isError}
+				rules={rules.items}
+				title={t.realms.rules}
+			/>
+			<RealmSidebarMembersSection
+				label={t.realms.members}
+				valueLabel={t.realms.memberCount({
+					count: toNonNegativeApiInteger(realm.memberCount),
+				})}
+			/>
+			<UnitDockRenderer
+				ownerUnitId={realm.id}
+				target={{ ownerKind: "realm", dockKind: "main" }}
+			/>
+		</>
 	);
 }
 
@@ -463,7 +594,13 @@ function realmPinnedContentHref(
 		if (item.postKind === "review") return postHref(item.id, { kind: "realm", realmId });
 		return undefined;
 	}
-	if (item.unitKind === "tag") return tagDetailHref(item.id);
+	if (item.unitKind === "tag")
+		return item.presentation.kind === "identity" && item.presentation.realmTagContext
+			? postHref(item.presentation.realmTagContext.contextPostId, {
+					kind: "realm",
+					realmId: item.presentation.realmTagContext.realmId,
+				})
+			: tagDetailHref(item.id);
 	return publicUnitHref(item.unitKind, item);
 }
 
@@ -523,7 +660,7 @@ function RealmActions({
 					)}
 					{canPost ? (
 						<Button variant="solid" asChild>
-							<Link href={`/posts/new?realmId=${realm.id}`}>{t.posts.create}</Link>
+							<Link href={`/create?realmId=${realm.id}`}>{t.posts.create}</Link>
 						</Button>
 					) : null}
 					{canManage && (

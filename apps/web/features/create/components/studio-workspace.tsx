@@ -45,6 +45,13 @@ export function StudioWorkspace({ children }: { readonly children: ReactNode }) 
 	const labels = t.create.sections;
 	const sections = [
 		{
+			id: "post",
+			href: studioSectionHref("post"),
+			label: labels.post.label,
+			description: labels.post.description,
+			icon: MessageSquareText,
+		},
+		{
 			id: "book",
 			href: studioSectionHref("book"),
 			label: labels.book.label,
@@ -93,13 +100,6 @@ export function StudioWorkspace({ children }: { readonly children: ReactNode }) 
 			description: labels.zone.description,
 			icon: PanelsTopLeft,
 			badge: t.create.developmentBadge,
-		},
-		{
-			id: "post",
-			href: studioSectionHref("post"),
-			label: labels.post.label,
-			description: labels.post.description,
-			icon: MessageSquareText,
 		},
 		{
 			id: "wiki",

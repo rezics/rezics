@@ -74,6 +74,7 @@ export default {
 		"realm.members.manage": `Gestionar los miembros de los ${realmTerms.plural}`,
 		"realm.rules.update": `Actualizar las reglas de los ${realmTerms.plural}`,
 		"realm.pins.manage": `Gestionar el contenido fijado de los ${realmTerms.plural}`,
+		"realm.tags.manage": `Gestionar las etiquetas de los ${realmTerms.plural}`,
 		"realm.units.moderate": `Moderar el contenido de los ${realmTerms.plural}`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -171,6 +172,7 @@ export default {
 			"realm.members.manage": "Gestionar miembros",
 			"realm.rules.update": "Actualizar reglas",
 			"realm.pins.manage": "Gestionar elementos fijados",
+			"realm.tags.manage": `Gestionar etiquetas del ${realmTerms.inline}`,
 			"realm.units.moderate": "Moderar contenido",
 			"entity.association.credit.request": "Solicitar asociación de crédito",
 			"entity.association.credit.direct": "Crear directamente una asociación de crédito",

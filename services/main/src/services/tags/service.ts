@@ -11,6 +11,7 @@ import {
 	realmTagContext,
 	realmTagVote,
 	realmTagVoteStat,
+	realmUnit,
 	realmUnitTag,
 	tag,
 	unit,
@@ -22,10 +23,12 @@ import {
 import { listVisibleUnitTagStructures } from "../tag-structures/service";
 import {
 	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 	type LocalizationLanguageQuery,
 } from "../units/localization";
+import { presentAvatar } from "../units/avatar";
 import { selectPopulatedRealmTagSources } from "./landscape";
 import { compareGlobalTagRank } from "./ranking";
 
@@ -43,6 +46,7 @@ const realmSourceUnit = alias(unit, "realm_tag_source_unit");
 const votedTagUnit = alias(unit, "realm_voted_tag_unit");
 const policyTagUnit = alias(unit, "realm_policy_tag_unit");
 const contextPostUnit = alias(unit, "realm_tag_context_post_unit");
+const contextRealmUnit = alias(realmUnit, "realm_tag_context_realm_unit");
 const unitTagWilsonConfidence = sql<number>`case
 	when coalesce(${unitTagVoteStat.voteCount}, 0) = 0 then 0
 	else (
@@ -103,6 +107,10 @@ export async function listGlobalUnitTags(input: {
 				unitEffectiveTag.tagId,
 				input.localizationLanguages,
 			),
+			avatar: resolvedUnitLocalizationAvatar(
+				unitEffectiveTag.tagId,
+				input.localizationLanguages,
+			),
 			pinned: sql<boolean>`coalesce(${unitTag.pinned}, false)`,
 			position: unitTag.position,
 			score: unitTagVoteStat.score,
@@ -159,6 +167,7 @@ export async function listGlobalUnitTags(input: {
 
 	return rows.map((row) => ({
 		...row,
+		avatar: presentAvatar(row.avatar),
 		score: toSafeInteger(row.score ?? 0n, "Unit Tag score"),
 		voteCount: toSafeInteger(row.voteCount ?? 0n, "Unit Tag vote count"),
 		viewerVote: presentTagVote(row.viewerVote),
@@ -260,7 +269,8 @@ type RealmVotedTag = {
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
-	readonly contextPostId: string;
+	readonly avatar: ReturnType<typeof presentAvatar>;
+	readonly contextPostId: string | null;
 	readonly score: number;
 	readonly voteCount: number;
 	readonly viewerVote: TagVoteValue;
@@ -276,50 +286,67 @@ async function listRealmVotedTags(input: {
 	readonly perRealmLimit: number;
 }) {
 	if (input.realmIds.length === 0) return new Map<string, RealmVotedTag[]>();
+	const contextIsReadable = sql<boolean>`
+		${contextRealmUnit.status} = 'visible'
+		and ${getUnitReadCondition(input.viewerProfileId, {}, contextPostUnit)}
+	`;
 	const rows = await database
 		.select({
-			realmId: realmTagContext.realmId,
-			tagId: realmTagContext.tagId,
+			realmId: realmTagVoteStat.realmId,
+			tagId: realmTagVoteStat.tagId,
 			language: resolvedUnitLocalizationLanguage(
 				votedTagUnit.id,
 				input.localizationLanguages,
 			),
 			title: resolvedUnitLocalizationTitle(votedTagUnit.id, input.localizationLanguages),
-			summary: resolvedUnitLocalizationSummary(votedTagUnit.id, input.localizationLanguages),
-			contextPostId: realmTagContext.contextPostId,
+			summary: sql<string | null>`case
+				when ${contextIsReadable}
+				then ${resolvedUnitLocalizationSummary(contextPostUnit.id, input.localizationLanguages)}
+				else null
+			end`,
+			avatar: resolvedUnitLocalizationAvatar(votedTagUnit.id, input.localizationLanguages),
+			contextPostId: sql<string | null>`case
+				when ${contextIsReadable} then ${realmTagContext.contextPostId}
+				else null
+			end`,
 			score: realmTagVoteStat.score,
 			voteCount: realmTagVoteStat.voteCount,
 			viewerVote: viewerRealmTagVote.value,
-			createdAt: realmTagContext.createdAt,
-			updatedAt: realmTagContext.updatedAt,
+			createdAt: sql<Date>`coalesce(${realmTagContext.createdAt}, ${realmTagVoteStat.updatedAt})`,
+			updatedAt: sql<Date>`greatest(coalesce(${realmTagContext.updatedAt}, ${realmTagVoteStat.updatedAt}), ${realmTagVoteStat.updatedAt})`,
 		})
-		.from(realmTagContext)
-		.innerJoin(tag, eq(tag.id, realmTagContext.tagId))
-		.innerJoin(votedTagUnit, eq(votedTagUnit.id, realmTagContext.tagId))
-		.innerJoin(contextPostUnit, eq(contextPostUnit.id, realmTagContext.contextPostId))
+		.from(realmTagVoteStat)
+		.innerJoin(tag, eq(tag.id, realmTagVoteStat.tagId))
+		.innerJoin(votedTagUnit, eq(votedTagUnit.id, realmTagVoteStat.tagId))
 		.leftJoin(
-			realmTagVoteStat,
+			realmTagContext,
 			and(
-				eq(realmTagVoteStat.realmId, realmTagContext.realmId),
-				eq(realmTagVoteStat.unitId, realmTagContext.unitId),
-				eq(realmTagVoteStat.tagId, realmTagContext.tagId),
+				eq(realmTagContext.realmId, realmTagVoteStat.realmId),
+				eq(realmTagContext.tagId, realmTagVoteStat.tagId),
+			),
+		)
+		.leftJoin(contextPostUnit, eq(contextPostUnit.id, realmTagContext.contextPostId))
+		.leftJoin(
+			contextRealmUnit,
+			and(
+				eq(contextRealmUnit.realmId, realmTagContext.realmId),
+				eq(contextRealmUnit.unitId, realmTagContext.contextPostId),
 			),
 		)
 		.leftJoin(
 			viewerRealmTagVote,
 			and(
-				eq(viewerRealmTagVote.realmId, realmTagContext.realmId),
-				eq(viewerRealmTagVote.unitId, realmTagContext.unitId),
-				eq(viewerRealmTagVote.tagId, realmTagContext.tagId),
+				eq(viewerRealmTagVote.realmId, realmTagVoteStat.realmId),
+				eq(viewerRealmTagVote.unitId, realmTagVoteStat.unitId),
+				eq(viewerRealmTagVote.tagId, realmTagVoteStat.tagId),
 				eq(viewerRealmTagVote.profileId, input.viewerProfileId),
 			),
 		)
 		.where(
 			and(
-				eq(realmTagContext.unitId, input.unitId),
-				inArray(realmTagContext.realmId, [...input.realmIds]),
+				eq(realmTagVoteStat.unitId, input.unitId),
+				inArray(realmTagVoteStat.realmId, [...input.realmIds]),
 				getUnitReadCondition(input.viewerProfileId, {}, votedTagUnit),
-				getUnitReadCondition(input.viewerProfileId, {}, contextPostUnit),
 			),
 		);
 
@@ -327,6 +354,7 @@ async function listRealmVotedTags(input: {
 	for (const row of rows) {
 		const item = {
 			...row,
+			avatar: presentAvatar(row.avatar),
 			score: toSafeInteger(row.score ?? 0n, "Realm Tag score"),
 			voteCount: toSafeInteger(row.voteCount ?? 0n, "Realm Tag vote count"),
 			viewerVote: presentTagVote(row.viewerVote),
@@ -358,6 +386,10 @@ async function listRealmPolicyTags(input: {
 	readonly perRealmLimit: number;
 }) {
 	if (input.realmIds.length === 0) return new Map<string, RealmPolicyTag[]>();
+	const contextIsReadable = sql<boolean>`
+		${contextRealmUnit.status} = 'visible'
+		and ${getUnitReadCondition(input.viewerProfileId, {}, contextPostUnit)}
+	`;
 	const rows = await database
 		.select({
 			realmId: realmUnitTag.realmId,
@@ -367,7 +399,16 @@ async function listRealmPolicyTags(input: {
 				input.localizationLanguages,
 			),
 			title: resolvedUnitLocalizationTitle(policyTagUnit.id, input.localizationLanguages),
-			summary: resolvedUnitLocalizationSummary(policyTagUnit.id, input.localizationLanguages),
+			summary: sql<string | null>`case
+				when ${contextIsReadable}
+				then ${resolvedUnitLocalizationSummary(contextPostUnit.id, input.localizationLanguages)}
+				else null
+			end`,
+			avatar: resolvedUnitLocalizationAvatar(policyTagUnit.id, input.localizationLanguages),
+			contextPostId: sql<string | null>`case
+				when ${contextIsReadable} then ${realmTagContext.contextPostId}
+				else null
+			end`,
 			position: realmUnitTag.position,
 			createdAt: realmUnitTag.createdAt,
 			updatedAt: realmUnitTag.updatedAt,
@@ -375,6 +416,21 @@ async function listRealmPolicyTags(input: {
 		.from(realmUnitTag)
 		.innerJoin(tag, eq(tag.id, realmUnitTag.tagId))
 		.innerJoin(policyTagUnit, eq(policyTagUnit.id, realmUnitTag.tagId))
+		.leftJoin(
+			realmTagContext,
+			and(
+				eq(realmTagContext.realmId, realmUnitTag.realmId),
+				eq(realmTagContext.tagId, realmUnitTag.tagId),
+			),
+		)
+		.leftJoin(contextPostUnit, eq(contextPostUnit.id, realmTagContext.contextPostId))
+		.leftJoin(
+			contextRealmUnit,
+			and(
+				eq(contextRealmUnit.realmId, realmTagContext.realmId),
+				eq(contextRealmUnit.unitId, realmTagContext.contextPostId),
+			),
+		)
 		.where(
 			and(
 				eq(realmUnitTag.unitId, input.unitId),
@@ -386,7 +442,8 @@ async function listRealmPolicyTags(input: {
 	const grouped = new Map<string, RealmPolicyTag[]>();
 	for (const row of rows) {
 		const items = grouped.get(row.realmId) ?? [];
-		if (items.length < input.perRealmLimit) items.push(row);
+		if (items.length < input.perRealmLimit)
+			items.push({ ...row, avatar: presentAvatar(row.avatar) });
 		grouped.set(row.realmId, items);
 	}
 	return grouped;
@@ -398,6 +455,8 @@ type RealmPolicyTag = {
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly summary: string | null;
+	readonly avatar: ReturnType<typeof presentAvatar>;
+	readonly contextPostId: string | null;
 	readonly position: string;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;

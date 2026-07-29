@@ -19,6 +19,7 @@ export function presentGlobalTags(input: {
 			language: tag.language,
 			title: tag.title,
 			summary: tag.summary,
+			avatar: tag.avatar,
 		},
 		context: { kind: "global", pinned: tag.pinned },
 		vote: {
@@ -52,6 +53,7 @@ export function presentRealmTagGroups(input: {
 					language: tag.language,
 					title: tag.title,
 					summary: tag.summary,
+					avatar: tag.avatar,
 				},
 				context: {
 					kind: "realm",
@@ -59,6 +61,7 @@ export function presentRealmTagGroups(input: {
 					realmLanguage: realm.language,
 					realmTitle: realm.title,
 					policy: true,
+					...(tag.contextPostId ? { contextPostId: tag.contextPostId } : {}),
 				},
 				vote: { kind: "not-applicable", reason: "policy" },
 			});
@@ -72,6 +75,7 @@ export function presentRealmTagGroups(input: {
 					language: tag.language,
 					title: tag.title,
 					summary: tag.summary,
+					avatar: tag.avatar,
 				},
 				context: {
 					kind: "realm",
@@ -79,7 +83,7 @@ export function presentRealmTagGroups(input: {
 					realmLanguage: realm.language,
 					realmTitle: realm.title,
 					policy,
-					contextPostId: tag.contextPostId,
+					...(tag.contextPostId ? { contextPostId: tag.contextPostId } : {}),
 				},
 				vote: {
 					kind: "available",

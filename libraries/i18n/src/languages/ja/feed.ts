@@ -107,6 +107,7 @@ export default {
 	continueReading: "読み続ける",
 	viewAll: "すべて表示",
 	relatedWork: "関連作",
+	realmTagContext: `${realmTerms.label}タグ解説`,
 	excerptSource: "抜粋元",
 	excerptSourceMark: "―",
 	myRealms: `私の ${realmTerms.pluralLabel}`,

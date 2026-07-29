@@ -1,7 +1,12 @@
 "use client";
 
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
-import { createSimpleFeedFilter, type SimpleFeedContentKind } from "@rezics/filter";
+import {
+	combineUnitPredicates,
+	createSimpleFeedFilter,
+	type SimpleFeedContentKind,
+	type UnitPredicate,
+} from "@rezics/filter";
 import {
 	postApiFeedQuery,
 	useGetApiRealms,
@@ -10,7 +15,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListFilterIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import {
 	Alert,
@@ -26,13 +31,14 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedContentSelector } from "../components/feed-content-selector";
 import { FeedFiltersDialog } from "../components/feed-filters-dialog";
-import { FeedItemCard } from "../components/feed-item-card";
+import { FeedItemCard, type FeedItem } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
 import { FeedSortValues, type FeedSort } from "../model/feed-sort";
 import { resolveFeedFilterLanguages } from "../model/feed-language-filter";
 import { FeedQueryKey } from "../query";
 
 export interface ApiFeedListProps {
+	additionalFilter?: UnitPredicate;
 	contentKinds?: readonly SimpleFeedContentKind[];
 	infinite?: boolean;
 	languages?: readonly ContentLanguage[];
@@ -42,11 +48,13 @@ export interface ApiFeedListProps {
 	onSortChange?: (sort: FeedSort) => void;
 	onTagIdsChange?: (tagIds: readonly string[]) => void;
 	realmIds?: readonly string[];
+	renderOverflowActions?: (item: FeedItem) => ReactNode;
 	sort?: FeedSort;
 	tagIds?: readonly string[];
 }
 
 export function ApiFeedList({
+	additionalFilter,
 	contentKinds = [],
 	infinite = false,
 	languages = [],
@@ -56,6 +64,7 @@ export function ApiFeedList({
 	onSortChange,
 	onTagIdsChange,
 	realmIds = [],
+	renderOverflowActions,
 	sort = "best",
 	tagIds = [],
 }: ApiFeedListProps) {
@@ -105,12 +114,15 @@ export function ApiFeedList({
 		localizationLanguages,
 		sort,
 		...(() => {
-			const filter = createSimpleFeedFilter({
-				contentKinds,
-				languages: filterLanguages,
-				realmIds,
-				tagIds,
-			});
+			const filter = combineUnitPredicates([
+				createSimpleFeedFilter({
+					contentKinds,
+					languages: filterLanguages,
+					realmIds,
+					tagIds,
+				}),
+				additionalFilter,
+			]);
 			return filter ? { filter } : {};
 		})(),
 	};
@@ -249,6 +261,7 @@ export function ApiFeedList({
 						onHiddenChange={(value) => setItemHidden(item.id, value)}
 						position={metadata.position}
 						requestedRealmId={requestedRealmId}
+						overflowActions={renderOverflowActions?.(item)}
 						setSize={metadata.setSize}
 					/>
 				)}

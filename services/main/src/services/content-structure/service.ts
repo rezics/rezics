@@ -1,10 +1,12 @@
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
 	contentStructure,
 	contentStructureNode,
+	tag,
 	type ContentStructureKind,
+	type RealmTagQueryStrategy,
 } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
 import {
@@ -53,6 +55,61 @@ function ensureDirectContentStructureEditing(kind: ContentStructureKind): void {
 		throw new ContentStructureInvalid(
 			"Navigation structures must be edited through the NavigationDocument adapter",
 		);
+}
+
+async function resolveRealmTagQueryStrategy(
+	tx: DatabaseTransaction,
+	input: {
+		readonly structureKind: ContentStructureKind;
+		readonly contentUnitId: string;
+		readonly requested?: RealmTagQueryStrategy;
+		readonly current?: RealmTagQueryStrategy | null;
+	},
+): Promise<RealmTagQueryStrategy | null> {
+	if (input.structureKind !== "realm.taxonomy") {
+		if (input.requested !== undefined)
+			throw new ContentStructureInvalid(
+				"Realm Tag query strategies are only valid in a Realm taxonomy",
+			);
+		return null;
+	}
+	const [tagContent] = await tx
+		.select({ id: tag.id })
+		.from(tag)
+		.where(eq(tag.id, input.contentUnitId))
+		.limit(1);
+	if (!tagContent) {
+		if (input.requested !== undefined)
+			throw new ContentStructureInvalid(
+				"Realm Tag query strategies are only valid on Tag nodes",
+			);
+		return null;
+	}
+	return input.requested ?? input.current ?? "global_effective";
+}
+
+async function ensureRealmTaxonomyTagOccurrenceUnique(
+	tx: DatabaseTransaction,
+	input: {
+		readonly structureId: string;
+		readonly contentUnitId: string;
+		readonly nodeId?: string;
+	},
+): Promise<void> {
+	const [duplicate] = await tx
+		.select({ id: contentStructureNode.id })
+		.from(contentStructureNode)
+		.where(
+			and(
+				eq(contentStructureNode.structureId, input.structureId),
+				eq(contentStructureNode.contentUnitId, input.contentUnitId),
+				input.nodeId ? ne(contentStructureNode.id, input.nodeId) : undefined,
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.limit(1);
+	if (duplicate)
+		throw new ContentStructureInvalid("A Realm taxonomy can contain a Tag only once");
 }
 
 export async function getContentStructureRevision(
@@ -189,6 +246,7 @@ export async function insertContentStructureNode(
 		readonly target?: ContentStructureTarget;
 		readonly position?: string;
 		readonly contentRating?: ContentStructureNodeState["contentRating"];
+		readonly realmTagQueryStrategy?: RealmTagQueryStrategy;
 	},
 ) {
 	return mutateContentStructureWithHistory(
@@ -242,6 +300,16 @@ export async function insertContentStructureNode(
 						)
 						.orderBy(desc(contentStructureNode.position), desc(contentStructureNode.id))
 						.limit(1);
+			const realmTagQueryStrategy = await resolveRealmTagQueryStrategy(tx, {
+				structureKind: structure.kind,
+				contentUnitId: input.contentUnitId,
+				requested: input.realmTagQueryStrategy,
+			});
+			if (realmTagQueryStrategy)
+				await ensureRealmTaxonomyTagOccurrenceUnique(tx, {
+					structureId: structure.id,
+					contentUnitId: input.contentUnitId,
+				});
 			const [created] = await tx
 				.insert(contentStructureNode)
 				.values({
@@ -253,6 +321,7 @@ export async function insertContentStructureNode(
 					...contentStructureTargetColumns(target),
 					position: input.position ?? fractionalPositionBetween(last?.position, null),
 					contentRating: input.contentRating ?? null,
+					realmTagQueryStrategy,
 				})
 				.returning();
 			if (!created) throw new Error("Content Structure node insertion returned no row");
@@ -293,6 +362,7 @@ export async function updateContentStructureNode(
 		readonly target?: ContentStructureTarget;
 		readonly position?: string;
 		readonly contentRating?: ContentStructureNodeState["contentRating"];
+		readonly realmTagQueryStrategy?: RealmTagQueryStrategy;
 	},
 ) {
 	return mutateContentStructureWithHistory(
@@ -324,6 +394,18 @@ export async function updateContentStructureNode(
 			}
 			const target = input.target ?? contentStructureTargetFromRow(current);
 			const contentUnitId = input.contentUnitId ?? current.contentUnitId;
+			const realmTagQueryStrategy = await resolveRealmTagQueryStrategy(tx, {
+				structureKind: structure.kind,
+				contentUnitId,
+				requested: input.realmTagQueryStrategy,
+				current: input.contentUnitId === undefined ? current.realmTagQueryStrategy : null,
+			});
+			if (realmTagQueryStrategy)
+				await ensureRealmTaxonomyTagOccurrenceUnique(tx, {
+					structureId: structure.id,
+					contentUnitId,
+					nodeId: current.id,
+				});
 			await ensureContentStructureNodeAllowed(tx, {
 				kind: structure.kind,
 				structureId: structure.id,
@@ -341,6 +423,7 @@ export async function updateContentStructureNode(
 					...(input.target ? contentStructureTargetColumns(input.target) : {}),
 					position: input.position,
 					contentRating: input.contentRating,
+					realmTagQueryStrategy,
 				})
 				.where(eq(contentStructureNode.id, current.id))
 				.returning();
@@ -481,6 +564,10 @@ export async function deleteContentStructure(
 			if (input.binding === "direct")
 				ensureDirectContentStructureEditing(before.structure.kind);
 			else if (before.structure.kind !== input.kind) throw new ContentStructureNotFound();
+			if (input.binding === "direct" && before.structure.kind === "realm.taxonomy")
+				throw new ContentStructureInvalid(
+					"A Realm taxonomy is a required Realm resource and cannot be deleted",
+				);
 			const deletedAt = new Date();
 			await tx
 				.update(contentStructureNode)

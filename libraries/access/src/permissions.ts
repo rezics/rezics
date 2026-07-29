@@ -22,6 +22,7 @@ export const RealmPermissionValues = [
 	"realm.members.manage",
 	"realm.rules.update",
 	"realm.pins.manage",
+	"realm.tags.manage",
 	"realm.units.moderate",
 ] as const;
 export type RealmPermission = (typeof RealmPermissionValues)[number];
@@ -246,6 +247,12 @@ export const PlatformCapabilityDefinitions = {
 		action: "manage",
 		rationale: "Provides recovery authority to administer pins in any Realm.",
 	},
+	"realm.tags.manage": {
+		resource: "realm.tags",
+		action: "manage",
+		rationale:
+			"Provides recovery authority to administer Realm taxonomy, Tag contexts, and policy Tag assertions.",
+	},
 	"realm.units.moderate": {
 		resource: "realm.units",
 		action: "moderate",
@@ -427,6 +434,14 @@ export const UnitPermissionDefinitions = {
 		rationale:
 			"Pin governance intentionally bundles adding, ordering, changing, and removing Realm pins.",
 	},
+	"realm.tags.manage": {
+		kind: "domain",
+		target: "realm",
+		resource: "realm.tags",
+		action: "manage",
+		rationale:
+			"Realm Tag governance independently controls Realm taxonomy, Tag explanations, and direct Realm policy Tag assertions without changing global Tags.",
+	},
 	"realm.units.moderate": {
 		kind: "domain",
 		target: "realm",
@@ -496,6 +511,7 @@ export const UnitPermissionImplications: Partial<
 	"realm.members.manage": ["unit.read", "realm.members.read"],
 	"realm.rules.update": ["unit.read"],
 	"realm.pins.manage": ["unit.read"],
+	"realm.tags.manage": ["unit.read"],
 	"realm.units.moderate": ["unit.read"],
 	"entity.association.credit.request": ["unit.read"],
 	"entity.association.credit.direct": ["unit.read", "entity.association.credit.request"],

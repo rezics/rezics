@@ -62,6 +62,7 @@ export function FeedItemCard({
 	displayContext = UnscopedFeedDisplayContext,
 	item,
 	onHiddenChange,
+	overflowActions,
 	postContext,
 	position,
 	requestedRealmId,
@@ -71,6 +72,7 @@ export function FeedItemCard({
 	displayContext?: FeedDisplayContext;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
+	overflowActions?: ReactNode;
 	postContext?: PostInteractionContext;
 	position?: number;
 	requestedRealmId?: string;
@@ -81,6 +83,7 @@ export function FeedItemCard({
 			canExclude={canExclude}
 			displayContext={displayContext}
 			onHiddenChange={onHiddenChange}
+			overflowActions={overflowActions}
 			post={item}
 			postContext={postContext}
 			position={position}
@@ -91,6 +94,7 @@ export function FeedItemCard({
 		<FeedUnitCard
 			canExclude={canExclude}
 			onHiddenChange={onHiddenChange}
+			overflowActions={overflowActions}
 			position={position}
 			setSize={setSize}
 			unit={item}
@@ -104,6 +108,7 @@ export function FeedPostCard({
 	canExclude = false,
 	displayContext = UnscopedFeedDisplayContext,
 	onHiddenChange,
+	overflowActions,
 	postContext,
 	position,
 	setSize,
@@ -113,6 +118,7 @@ export function FeedPostCard({
 	canExclude?: boolean;
 	displayContext?: FeedDisplayContext;
 	onHiddenChange?: (hidden: boolean) => void;
+	overflowActions?: ReactNode;
 	postContext?: PostInteractionContext;
 	position?: number;
 	setSize?: number;
@@ -170,6 +176,11 @@ export function FeedPostCard({
 					}
 			: undefined;
 	const subjectIsCurrentUnit = isCurrentFeedSubject(displayContext, post.subject?.id);
+	const realmTagContext = post.postKind === "wiki" ? post.realmTagContext : null;
+	const realmTagTitle = useChineseContentText(
+		realmTagContext?.tag.title ?? t.ui.unnamed,
+		realmTagContext?.tag.language,
+	);
 
 	return (
 		<FeedCard
@@ -260,6 +271,16 @@ export function FeedPostCard({
 					title={subjectTitle}
 				/>
 			) : null}
+			{realmTagContext ? (
+				<FeedCardTarget
+					avatar={realmTagContext.tag.avatar}
+					description={displayedSummary || undefined}
+					href={href}
+					imageAlt={realmTagTitle}
+					label={t.feed.realmTagContext}
+					title={realmTagTitle}
+				/>
+			) : null}
 			<CardContent className="px-4 pb-4 sm:px-5">
 				<FeedItemActions
 					href={href}
@@ -270,6 +291,7 @@ export function FeedPostCard({
 							canExclude={canExclude}
 							item={post}
 							onHiddenChange={onHiddenChange}
+							actions={overflowActions}
 							realmId={realmId}
 						/>
 					}
@@ -283,19 +305,20 @@ export function FeedUnitCard({
 	unit,
 	canExclude,
 	onHiddenChange,
+	overflowActions,
 	position,
 	setSize,
 }: {
 	unit: FeedUnit;
 	canExclude: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
+	overflowActions?: ReactNode;
 	position?: number;
 	setSize?: number;
 }) {
 	const { t, locale } = useTranslation(["feed", "posts", "realms", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(unit.id, unit.tracking);
 	const reason = recommendationReasonLabel(unit.recommendationReason, t.feed);
-	const href = unitHref(unit.unitKind, unit.id);
 	const title = unit.title ?? t.ui.unnamed;
 	const attributions = toFeedAttributionContexts(unit.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(unit.realms, t.ui.unnamed);
@@ -310,6 +333,17 @@ export function FeedUnitCard({
 				}
 			: undefined;
 	const identityPresentation = unit.presentation.kind === "identity" ? unit.presentation : null;
+	const realmTagContext = unit.unitKind === "tag" ? identityPresentation?.realmTagContext : null;
+	const href = realmTagContext
+		? postHref(realmTagContext.contextPostId, {
+				kind: "realm",
+				realmId: realmTagContext.realmId,
+			})
+		: unitHref(unit.unitKind, unit.id);
+	const displayedSummary = useChineseContentText(
+		realmTagContext?.summary ?? unit.summary ?? "",
+		realmTagContext?.language ?? unit.language,
+	);
 	const isRealm = unit.unitKind === "realm";
 
 	return (
@@ -366,9 +400,9 @@ export function FeedUnitCard({
 							{title}
 						</h2>
 						{rating ? <FeedCardRating rating={rating} /> : null}
-						{unit.summary ? (
+						{displayedSummary ? (
 							<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
-								{unit.summary}
+								{displayedSummary}
 							</p>
 						) : null}
 						{isRealm && identityPresentation?.memberCount !== null ? (
@@ -400,6 +434,7 @@ export function FeedUnitCard({
 							canExclude={canExclude}
 							item={unit}
 							onHiddenChange={onHiddenChange}
+							actions={overflowActions}
 							realmId={unit.realmId ?? undefined}
 						/>
 					}
@@ -428,11 +463,13 @@ function toFeedTargetScore(
 }
 
 function FeedItemOverflowMenu({
+	actions,
 	canExclude,
 	item,
 	onHiddenChange,
 	realmId,
 }: {
+	actions?: ReactNode;
 	canExclude: boolean;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
@@ -469,7 +506,9 @@ function FeedItemOverflowMenu({
 			onNotInterested={markNotInterested}
 			placement={collectionPlacementForFeedItem(item)}
 			reportTarget={{ unitId: item.id, realmId }}
-		/>
+		>
+			{actions}
+		</FeedOverflowMenu>
 	);
 }
 

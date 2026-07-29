@@ -20,7 +20,7 @@ import { post } from "./post";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";
 import { unitEffectiveTag, unitStructure, unitStructureApplication } from "./structure";
-import { realmTagContext } from "./tag";
+import { tag } from "./tag";
 
 const aggregateCount = () => bigint({ mode: "bigint" }).default(0n).notNull();
 
@@ -158,14 +158,25 @@ export const realmTagVoteStat = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.realmId, table.unitId, table.tagId] }),
 		foreignKey({
-			columns: [table.realmId, table.unitId, table.tagId],
-			foreignColumns: [
-				realmTagContext.realmId,
-				realmTagContext.unitId,
-				realmTagContext.tagId,
-			],
-			name: "realm_tag_vote_stat_context_fkey",
+			columns: [table.realmId],
+			foreignColumns: [realm.id],
+			name: "realm_tag_vote_stat_realm_fkey",
 		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.unitId],
+			foreignColumns: [unit.id],
+			name: "realm_tag_vote_stat_unit_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.tagId],
+			foreignColumns: [tag.id],
+			name: "realm_tag_vote_stat_tag_fkey",
+		}).onDelete("cascade"),
+		index("realm_tag_vote_stat_realm_tag_unit_idx").on(
+			table.realmId,
+			table.tagId,
+			table.unitId,
+		),
 		check("realm_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("realm_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
 	],

@@ -539,6 +539,10 @@ import type {
 	GetApiRealmsByRealmIdResponses,
 	PatchApiRealmsByRealmIdOptions,
 	PatchApiRealmsByRealmIdResponses,
+	PutApiRealmsByRealmIdPagesOptions,
+	PutApiRealmsByRealmIdPagesResponses,
+	GetApiRealmsByRealmIdTaxonomyOptions,
+	GetApiRealmsByRealmIdTaxonomyResponses,
 	GetApiRealmsByRealmIdScoreContextOptions,
 	GetApiRealmsByRealmIdScoreContextResponses,
 	PutApiRealmsByRealmIdScoreContextOptions,
@@ -565,10 +569,16 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdResponses,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdResponses,
-	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
-	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses,
+	PostApiRealmsByRealmIdTagContextsOptions,
+	PostApiRealmsByRealmIdTagContextsResponses,
+	GetApiRealmsByRealmIdTagsByTagIdContextOptions,
+	GetApiRealmsByRealmIdTagsByTagIdContextResponses,
+	PutApiRealmsByRealmIdTagsByTagIdContextOptions,
+	PutApiRealmsByRealmIdTagsByTagIdContextResponses,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses,
 	DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions,
@@ -4470,10 +4480,7 @@ export function postApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends b
 	return request({
 		method: "POST",
 		url: "/api/units/by-id/{unitId}/content-structures",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
 }
@@ -4516,10 +4523,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	return request({
 		method: "DELETE",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -4582,10 +4586,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 	return request({
 		method: "POST",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -4617,10 +4618,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
 	return request({
 		method: "POST",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -4652,10 +4650,7 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 	return request({
 		method: "PATCH",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -4687,10 +4682,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 	return request({
 		method: "DELETE",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -5931,6 +5923,37 @@ export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Replace enabled Realm pages
+ * {@link /api/realms/:realmId/pages}
+ */
+export function putApiRealmsByRealmIdPages<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdPagesOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdPagesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/pages",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdPagesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Realm taxonomy
+ * {@link /api/realms/:realmId/taxonomy}
+ */
+export function getApiRealmsByRealmIdTaxonomy<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdTaxonomyOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/realms/{realmId}/taxonomy", ...config }) as Promise<
+		RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary Get Realm Score context
  * {@link /api/realms/:realmId/score-context}
  */
@@ -6175,50 +6198,101 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 }
 
 /**
- * @summary Get Realm-scoped Tag voting context
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/context}
+ * @summary Create Realm Tag Context Wiki
+ * {@link /api/realms/:realmId/tag-contexts}
  */
-export function getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions, ThrowOnError>,
-): Promise<
-	RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
-> {
+export function postApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = true>(
+	options: Options<PostApiRealmsByRealmIdTagContextsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiRealmsByRealmIdTagContextsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "GET",
-		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/context",
-		...config,
-	}) as Promise<
-		RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Set Realm-scoped Tag voting context
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/context}
- */
-export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/context",
+		method: "POST",
+		url: "/api/realms/{realmId}/tag-contexts",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
+	}) as Promise<RequestResult<PostApiRealmsByRealmIdTagContextsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Realm Tag Context
+ * {@link /api/realms/:realmId/tags/:tagId/context}
+ */
+export function getApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/tags/{tagId}/context",
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Set Realm Tag Context
+ * {@link /api/realms/:realmId/tags/:tagId/context}
+ */
+export function putApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/tags/{tagId}/context",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Apply Realm Policy Tag
+ * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ */
+export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
 	}) as Promise<
-		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
+		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Remove Realm Policy Tag
+ * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ */
+export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
 	>;
 }
 

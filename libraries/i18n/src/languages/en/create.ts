@@ -51,6 +51,10 @@ export default {
 		review: { label: "Reviews", description: "View and manage reviews related to your work." },
 		poll: { label: "Polls", description: "View and manage polls related to your work." },
 	},
+	realmTagContext: {
+		label: `${realmTerms.label} Tag explanation`,
+		description: `Create this ${realmTerms.label}'s Wiki explanation of a Tag.`,
+	},
 	list: {
 		create: "Create",
 		empty: "No content matches the current filters.",

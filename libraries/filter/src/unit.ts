@@ -322,6 +322,13 @@ export const TagAssertionFilter = Type.Recursive(
 );
 export type TagAssertionFilter = Static<typeof TagAssertionFilter>;
 
+export const RealmTagQueryStrategyValues = [
+	"global_effective",
+	"realm_community",
+	"realm_policy",
+] as const;
+export type RealmTagQueryStrategy = (typeof RealmTagQueryStrategyValues)[number];
+
 export const ScoreFilter = Type.Recursive(
 	(This) =>
 		Type.Object(
@@ -337,6 +344,15 @@ export const ScoreFilter = Type.Recursive(
 	{ $id: "ScoreFilter" },
 );
 export type ScoreFilter = Static<typeof ScoreFilter>;
+
+export const RealmTagContextFilter = Type.Object(
+	{
+		realm: UnitReferenceFilter,
+		tag: Type.Optional(UnitReferenceFilter),
+	},
+	{ additionalProperties: false },
+);
+export type RealmTagContextFilter = Static<typeof RealmTagContextFilter>;
 
 function toMany<Schema extends TSchema>(schema: Schema) {
 	return Type.Union([
@@ -366,6 +382,7 @@ export const PostFilter = Type.Recursive(
 						{ minProperties: 1, additionalProperties: false },
 					),
 				),
+				explainsRealmTag: Type.Optional(RealmTagContextFilter),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
@@ -429,6 +446,58 @@ export const UnitPredicate = Type.Recursive(
 export type UnitPredicate = Static<typeof UnitPredicate>;
 
 /**
+ * Resolve a Realm taxonomy Tag node's stored query strategy to the canonical
+ * Unit predicate. Callers do not need to duplicate authority semantics.
+ */
+export function realmTagQueryPredicate(input: {
+	readonly realmId: string;
+	readonly tagId: string;
+	readonly strategy: RealmTagQueryStrategy;
+}): UnitPredicate {
+	const tag = { id: { in: [input.tagId] } };
+	switch (input.strategy) {
+		case "global_effective":
+			return {
+				tags: {
+					some: {
+						tag,
+						authority: { kind: "global", view: { kind: "effective" } },
+					},
+				},
+			};
+		case "realm_community":
+			return {
+				tags: {
+					some: {
+						tag,
+						authority: {
+							kind: "realm",
+							realm: { id: { in: [input.realmId] } },
+							view: {
+								kind: "community",
+								consensus: { score: { range: { minimum: 1 } } },
+							},
+						},
+					},
+				},
+			};
+		case "realm_policy":
+			return {
+				tags: {
+					some: {
+						tag,
+						authority: {
+							kind: "realm",
+							realm: { id: { in: [input.realmId] } },
+							view: { kind: "policy" },
+						},
+					},
+				},
+			};
+	}
+}
+
+/**
  * Named schemas used by API adapters when exposing the Filter AST through a
  * component-based contract. Domain validation continues to use the exact
  * schemas above.
@@ -439,6 +508,7 @@ export const UnitPredicateSchemaModels = {
 	TagAssertionFilter,
 	ScoreFilter,
 	PostFilter,
+	RealmTagContextFilter,
 	CollectionFilter,
 	UnitPredicate,
 } as const;

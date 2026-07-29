@@ -19,6 +19,7 @@ import {
 	ContentLanguageValues,
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
+	RealmPageKindValues,
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
 	RealmUnitStatusValues,
@@ -36,6 +37,7 @@ import { profile, unit } from "./core";
 
 export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoinPolicyValues));
 export const realmMemberState = pgEnum("realm_member_state", toEnumValues(RealmMemberStateValues));
+export const realmPageKind = pgEnum("realm_page_kind", toEnumValues(RealmPageKindValues));
 export const realmPinKind = pgEnum("realm_pin_kind", toEnumValues(RealmPinKindValues));
 export const realmRuleAcknowledgementMode = pgEnum(
 	"realm_rule_acknowledgement_mode",
@@ -47,14 +49,43 @@ export const platformCapability = pgEnum(
 	toEnumValues(PlatformCapabilityValues),
 );
 
-export const realm = pgTable("realm", {
-	id: uuid()
-		.primaryKey()
-		.references(() => unit.id, { onDelete: "cascade" }),
-	joinPolicy: realmJoinPolicy().default("open").notNull(),
-	createdAt: createCreatedAtColumn(),
-	updatedAt: createUpdatedAtColumn(),
-});
+export const realm = pgTable(
+	"realm",
+	{
+		id: uuid()
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		joinPolicy: realmJoinPolicy().default("open").notNull(),
+		enabledPages: realmPageKind("enabled_pages")
+			.array()
+			.default(sql`array['main']::realm_page_kind[]`)
+			.notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check(
+			"realm_enabled_pages_cardinality_check",
+			sql`cardinality(${table.enabledPages}) between 1 and ${RealmPageKindValues.length}`,
+		),
+		check(
+			"realm_enabled_pages_main_check",
+			sql`cardinality(array_positions(${table.enabledPages}, 'main'::realm_page_kind)) = 1`,
+		),
+		check(
+			"realm_enabled_pages_no_null_check",
+			sql`array_position(${table.enabledPages}, null) is null`,
+		),
+		check(
+			"realm_enabled_pages_tags_unique_check",
+			sql`cardinality(array_positions(${table.enabledPages}, 'tags'::realm_page_kind)) <= 1`,
+		),
+		check(
+			"realm_enabled_pages_wiki_unique_check",
+			sql`cardinality(array_positions(${table.enabledPages}, 'wiki'::realm_page_kind)) <= 1`,
+		),
+	],
+);
 
 export const realmMember = pgTable(
 	"realm_member",

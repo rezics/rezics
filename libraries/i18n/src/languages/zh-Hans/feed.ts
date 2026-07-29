@@ -107,6 +107,7 @@ export default {
 	continueReading: "继续阅读",
 	viewAll: "查看全部",
 	relatedWork: "讨论关联作品",
+	realmTagContext: `${realmTerms.label}标签解释`,
 	excerptSource: "摘录来源",
 	excerptSourceMark: "―",
 	myRealms: `我的${realmTerms.pluralLabel}`,

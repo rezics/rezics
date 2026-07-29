@@ -74,6 +74,7 @@ export default {
 		"realm.members.manage": `Mitglieder der ${realmTerms.plural} verwalten`,
 		"realm.rules.update": `Regeln der ${realmTerms.plural} aktualisieren`,
 		"realm.pins.manage": `Fixierte Inhalte der ${realmTerms.plural} verwalten`,
+		"realm.tags.manage": `Tags der ${realmTerms.plural} verwalten`,
 		"realm.units.moderate": `Inhalte der ${realmTerms.plural} moderieren`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -171,6 +172,7 @@ export default {
 			"realm.members.manage": "Mitglieder verwalten",
 			"realm.rules.update": "Regeln aktualisieren",
 			"realm.pins.manage": "Fixierte Inhalte verwalten",
+			"realm.tags.manage": `${realmTerms.label}-Tags verwalten`,
 			"realm.units.moderate": "Inhalte moderieren",
 			"entity.association.credit.request": "Mitwirkendenzuordnung anfragen",
 			"entity.association.credit.direct": "Mitwirkendenzuordnung direkt erstellen",

@@ -128,6 +128,7 @@ const realm = {
 	presentation: {
 		kind: "identity",
 		avatar: { type: "emoji", emoji: "🧠" },
+		realmTagContext: null,
 		banner: {
 			id: "019f9d16-1000-7000-8000-000000000041",
 			url: "/fixtures/content-feed/post-media.svg",
@@ -143,7 +144,13 @@ const zoneWithoutAvatar = {
 	title: "開放研究專區",
 	summary: "沒有 avatar 時使用穩定的文字 fallback；標準 Feed 不渲染 banner。",
 	cover: null,
-	presentation: { kind: "identity", avatar: null, banner: null, memberCount: null },
+	presentation: {
+		kind: "identity",
+		avatar: null,
+		realmTagContext: null,
+		banner: null,
+		memberCount: null,
+	},
 } satisfies FeedUnit;
 
 const contextualReview = {

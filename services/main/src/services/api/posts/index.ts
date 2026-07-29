@@ -76,11 +76,7 @@ import {
 } from "./errors";
 import { selectReplyTree } from "./reply-tree-query";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
-import {
-	createProfileOwnedUnitAccess,
-	createPublicEditableUnitAccess,
-} from "../../authorization/unit/ownership";
-import { OfficialProfileIds } from "../../bootstrap/manifest";
+import { createWikiPost } from "../../posts/wiki";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
@@ -401,63 +397,15 @@ export default new Elysia()
 					);
 					if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
 					const id = await database.transaction(async (tx) => {
-						if (body.subjectId)
-							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
-								tx,
-								body.subjectId,
-							);
-						const created = await insertUnit(tx, {
-							kind: "post",
-							status: "published",
-							visibility: "public",
-							publishedAt: new Date(),
-							statusActor: { kind: "profile", profileId: profile.unitId },
-						});
-						await ensureSubjectPostTargetingAllowed(tx, {
-							sourcePostId: created.id,
-							subjectUnitId: body.subjectId,
-							...(body.realmId ? { realmId: body.realmId } : {}),
-						});
-						await tx.insert(post).values({
-							id: created.id,
-							kind: "wiki",
-							subjectUnitId: body.subjectId,
-						});
-						await tx.insert(unitLocalization).values({
-							unitId: created.id,
-							language: body.language,
-							title: body.title,
-							content: body.body,
-							contentStatus: "published",
-						});
-						await applyNewPostTagMentionVotes(tx, {
-							postId: created.id,
+						const created = await createWikiPost(tx, {
 							profileId: profile.unitId,
-							nextBody: body.body,
-						});
-						if (body.accessMode === "public_entry")
-							await createPublicEditableUnitAccess(tx, created.id);
-						else await createProfileOwnedUnitAccess(tx, created.id, profile.unitId);
-						await createProfilePublisherAttribution(tx, {
-							sourceUnitId: created.id,
-							profileId:
-								body.accessMode === "public_entry"
-									? OfficialProfileIds.community
-									: profile.unitId,
-						});
-						if (body.realmId) {
-							await ensurePostMountTargetingAllowed(tx, {
-								postId: created.id,
-								realmId: body.realmId,
-							});
-							await tx
-								.insert(realmUnit)
-								.values({ realmId: body.realmId, unitId: created.id });
-						}
-						await recordUnitRevision(tx, {
-							unitId: created.id,
-							actorProfileId: profile.unitId,
-							event: "create",
+							authorization,
+							accessMode: body.accessMode,
+							title: body.title,
+							body: body.body,
+							language: body.language,
+							...(body.realmId ? { realmId: body.realmId } : {}),
+							...(body.subjectId ? { subjectId: body.subjectId } : {}),
 						});
 						return created.id;
 					});

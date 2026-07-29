@@ -72,6 +72,7 @@ export default {
 		"realm.members.manage": `Manage ${realmTerms.label} members`,
 		"realm.rules.update": `Update ${realmTerms.label} rules`,
 		"realm.pins.manage": `Manage ${realmTerms.label} pinned content`,
+		"realm.tags.manage": `Manage ${realmTerms.label} Tags`,
 		"realm.units.moderate": `Moderate ${realmTerms.label} content`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -170,6 +171,7 @@ export default {
 			"realm.members.manage": "Manage members",
 			"realm.rules.update": "Update rules",
 			"realm.pins.manage": "Manage pins",
+			"realm.tags.manage": `Manage ${realmTerms.label} Tags`,
 			"realm.units.moderate": "Moderate content",
 			"entity.association.credit.request": "Request credit association",
 			"entity.association.credit.direct": "Create credit association directly",

@@ -14,6 +14,7 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
+	IdentityAvatar,
 	cn,
 } from "@rezics/ui";
 import { Check, Info, Search, X } from "lucide-react";
@@ -22,6 +23,7 @@ import { useRef, useState, type MouseEvent } from "react";
 
 import { SignInButton } from "@/features/auth/auth-portal";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { postHref } from "@/features/posts/url";
 import { useTranslation } from "@/i18n/client";
 import type { TagPresentation } from "../model/tag-presentation";
 import { isModifiedLinkActivation } from "../model/tag-selection";
@@ -52,7 +54,13 @@ export function TagBadgeCard({
 	const { t } = useTranslation(["tags"]);
 	const [open, setOpen] = useState(false);
 	const nativeNavigation = useRef(false);
-	const detailHref = tagDetailHref(item.identity.tagId);
+	const detailHref =
+		item.context.kind === "realm" && item.context.contextPostId
+			? postHref(item.context.contextPostId, {
+					kind: "realm",
+					realmId: item.context.realmId,
+				})
+			: tagDetailHref(item.identity.tagId);
 	const score = item.vote.kind === "available" ? item.vote.score : undefined;
 	const label = useChineseContentText(
 		item.identity.title ?? fallbackLabel,
@@ -83,6 +91,7 @@ export function TagBadgeCard({
 			: item.context.kind === "realm"
 				? realmTitle
 				: t.tags.card.structureContext;
+	const avatarFallback = label.trim().slice(0, 1).toUpperCase() || "#";
 
 	return (
 		<Badge
@@ -118,6 +127,12 @@ export function TagBadgeCard({
 						href={detailHref}
 						onClick={handleLinkClick}
 					>
+						<IdentityAvatar
+							avatar={item.identity.avatar}
+							className="size-5 text-[0.625rem]"
+							fallback={avatarFallback}
+							size="sm"
+						/>
 						<span className="min-w-0 truncate">{label}</span>
 						{score === undefined ? null : (
 							<span className="shrink-0 tabular-nums text-[0.6875rem] opacity-75">
@@ -232,9 +247,7 @@ export function TagBadgeCard({
 							*/}
 							{item.context.kind === "realm" && item.context.contextPostId ? (
 								<Button asChild className="w-fit" size="sm" variant="quiet">
-									<Link href={`/posts/${item.context.contextPostId}`}>
-										{t.tags.realms.context}
-									</Link>
+									<Link href={detailHref}>{t.tags.realms.context}</Link>
 								</Button>
 							) : null}
 							{/* Temporarily hidden while selection remains available from selection mode.

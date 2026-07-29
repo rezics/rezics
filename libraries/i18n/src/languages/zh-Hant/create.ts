@@ -33,6 +33,10 @@ export default {
 		review: { label: "評論", description: "查看及管理與您相關的評論。" },
 		poll: { label: "投票", description: "查看及管理與您相關的投票。" },
 	},
+	realmTagContext: {
+		label: `${realmTerms.label}標籤解釋`,
+		description: `建立此${realmTerms.label}對某個標籤的百科說明。`,
+	},
 	list: {
 		create: "建立",
 		empty: "沒有符合目前篩選條件的內容。",

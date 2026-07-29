@@ -108,6 +108,7 @@ export default {
 	continueReading: "Weiterlesen",
 	viewAll: "Alle anzeigen",
 	relatedWork: "Zugehöriges Werk",
+	realmTagContext: `${realmTerms.label}-Tag-Erklärung`,
 	excerptSource: "Quelle des Auszugs",
 	excerptSourceMark: "―",
 	myRealms: `Meine ${realmTerms.pluralLabel}`,

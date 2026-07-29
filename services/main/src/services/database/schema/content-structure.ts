@@ -14,6 +14,8 @@ import {
 	ContentStructureKindValues,
 	type ContentStructureTargetKind,
 	ContentStructureTargetKindValues,
+	type RealmTagQueryStrategy,
+	RealmTagQueryStrategyValues,
 } from "./contract-values";
 import { contentRating, unit } from "./core";
 
@@ -81,6 +83,11 @@ export const contentStructureNode = pgTable(
 		targetUrl: text(),
 		position: fractionalIndexPosition().notNull(),
 		contentRating: contentRating(),
+		/**
+		 * Query authority for Tag nodes in a Realm taxonomy. Null for every
+		 * other Content Structure node.
+		 */
+		realmTagQueryStrategy: text().$type<RealmTagQueryStrategy>(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -123,6 +130,13 @@ export const contentStructureNode = pgTable(
 		check(
 			"content_structure_node_target_kind_check",
 			inArray(table.targetKind, ContentStructureTargetKindValues),
+		),
+		check(
+			"content_structure_node_realm_tag_query_strategy_check",
+			sql`${table.realmTagQueryStrategy} is null or ${inArray(
+				table.realmTagQueryStrategy,
+				RealmTagQueryStrategyValues,
+			)}`,
 		),
 		check(
 			"content_structure_node_target_shape_check",

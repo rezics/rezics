@@ -11,6 +11,7 @@ type RealmCapabilities = GetApiRealmsByRealmIdStatus200["capabilities"];
 function hasRealmManagementCapability(capabilities: RealmCapabilities) {
 	return (
 		capabilities.canUpdateSettings ||
+		capabilities.canManageTags ||
 		capabilities.canReadMembers ||
 		capabilities.canManageMembers ||
 		capabilities.canUpdateRules ||
@@ -33,6 +34,8 @@ export function getRealmSettingsSectionIds(
 	const hasRealmCapability = hasRealmManagementCapability(capabilities);
 	return RealmSettingsSectionIds.filter((sectionId) => {
 		if (sectionId === "profile") return capabilities.canUpdateSettings;
+		if (sectionId === "pages") return capabilities.canUpdateSettings;
+		if (sectionId === "tags") return capabilities.canManageTags;
 		if (sectionId === "members") return capabilities.canReadMembers;
 		if (sectionId === "rules") return capabilities.canUpdateRules;
 		if (sectionId === "pins") return capabilities.canManagePins;

@@ -108,6 +108,7 @@ export default {
 	continueReading: "Continuar leyendo",
 	viewAll: "Ver todo",
 	relatedWork: "Obra relacionada",
+	realmTagContext: `Explicación de etiqueta del ${realmTerms.label}`,
 	excerptSource: "Fuente del fragmento",
 	excerptSourceMark: "―",
 	myRealms: `Mis ${realmTerms.pluralLabel}`,

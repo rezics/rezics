@@ -57,6 +57,10 @@ export default {
 		},
 		poll: { label: "投票", description: "あなたの作業に関連する投票を表示および管理します。" },
 	},
+	realmTagContext: {
+		label: `${realmTerms.label}タグ解説`,
+		description: `この${realmTerms.label}におけるタグのウィキ解説を作成します。`,
+	},
 	list: {
 		create: "作成",
 		empty: "現在のフィルターに一致するコンテンツはありません。",

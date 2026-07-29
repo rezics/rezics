@@ -24,12 +24,14 @@ import {
 	resolveUnitLocalizationFromOrdered,
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import {
 	contentStructure,
+	contentStructureNode,
 	ActiveReportCaseStateValues,
 	moderationAction,
 	moderationCase,
@@ -47,12 +49,14 @@ import {
 	realmTagContext,
 	realmTagVote,
 	realmTagVoteStat,
+	realmUnitTag,
 	tag,
 	unitFollow,
 	unit,
 	unitAccessGrant,
 	unitOwnership,
 	unitLocalization,
+	unitRevisionHead,
 } from "../../database/schema";
 import { listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
@@ -85,12 +89,15 @@ import {
 	toApiErrorResponse,
 	RealmDetailResponse,
 	RealmListResponse,
+	RealmTaxonomyResponse,
 	toPortableTextResponse,
 } from "../schema/response";
 import { realmUnitReportCaseAdvisoryLock } from "../reports/advisory-lock";
 import {
 	AcknowledgeRealmRulesBody,
+	ApplyRealmPolicyTagBody,
 	CreateRealmBody,
+	CreateRealmTagContextBody,
 	CreateRealmPinBody,
 	ListRealmMembersQuery,
 	ListRealmUnitsQuery,
@@ -98,10 +105,13 @@ import {
 	ModerateRealmUnitBody,
 	UpdateRealmRulesBody,
 	RealmUnitParams,
-	RealmTagParams,
+	RealmTagContextParams,
+	RealmTagVoteParams,
 	PutRealmTagContextBody,
 	RealmTagVoteBody,
 	RealmTagContextResponse,
+	RealmTagVoteResponse,
+	RealmPolicyTagResponse,
 	RealmUnitListResponse,
 	RealmUnitHistoryQuery,
 	RealmUnitModerationActionResponse,
@@ -109,12 +119,15 @@ import {
 	RealmMemberParams,
 	RealmParams,
 	RealmDetailQuery,
+	RealmTaxonomyQuery,
 	RealmRuleRevisionParams,
 	RealmRulesQuery,
 	SetRealmScoreContextBody,
 	RealmPinParams,
 	RemoveRealmPinQuery,
+	RealmPagesResponse,
 	UpdateRealmBody,
+	UpdateRealmPagesBody,
 	UpdateRealmMemberBody,
 } from "./schema";
 import {
@@ -140,7 +153,10 @@ import {
 	RealmOwnerLeaveForbidden,
 	RealmScoreContextPostNotMounted,
 	RealmTagContextNotFound,
+	RealmTagContextAlreadyExists,
+	RealmTagContextPostAlreadyUsed,
 	RealmTagContextPostNotMounted,
+	RealmTagSelfReferenceForbidden,
 } from "./errors";
 import { PostNotFound } from "../posts/errors";
 import { UnitNotFound } from "../../units/errors";
@@ -152,6 +168,8 @@ import { replaceRealmSlugAddress } from "../../units/slug-address";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
+import { createWikiPost } from "../../posts/wiki";
+import { getContentStructureRevision } from "../../content-structure/service";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -224,59 +242,66 @@ function presentRealmTagVote(value: number | null): -1 | 1 | null {
 	throw new Error("Realm Tag vote has an invalid persisted value");
 }
 
-async function getRealmTagContextSummary(
+async function getRealmTagContextSummary(realmId: string, tagId: string) {
+	const [record] = await database
+		.select({
+			realmId: realmTagContext.realmId,
+			tagId: realmTagContext.tagId,
+			contextPostId: realmTagContext.contextPostId,
+			createdByProfileId: realmTagContext.createdByProfileId,
+			createdAt: realmTagContext.createdAt,
+			updatedAt: realmTagContext.updatedAt,
+		})
+		.from(realmTagContext)
+		.where(and(eq(realmTagContext.realmId, realmId), eq(realmTagContext.tagId, tagId)))
+		.limit(1);
+	if (!record) throw new RealmTagContextNotFound();
+	return record;
+}
+
+async function getRealmTagVoteSummary(
 	realmId: string,
 	unitId: string,
 	tagId: string,
 	profileId?: string,
 ) {
-	const [record] = await database
-		.select({
-			realmId: realmTagContext.realmId,
-			unitId: realmTagContext.unitId,
-			tagId: realmTagContext.tagId,
-			contextPostId: realmTagContext.contextPostId,
-			createdByProfileId: realmTagContext.createdByProfileId,
-			value: realmTagVote.value,
-			score: realmTagVoteStat.score,
-			voteCount: realmTagVoteStat.voteCount,
-			createdAt: realmTagContext.createdAt,
-			updatedAt: realmTagContext.updatedAt,
-		})
-		.from(realmTagContext)
-		.leftJoin(
-			realmTagVoteStat,
-			and(
-				eq(realmTagVoteStat.realmId, realmTagContext.realmId),
-				eq(realmTagVoteStat.unitId, realmTagContext.unitId),
-				eq(realmTagVoteStat.tagId, realmTagContext.tagId),
-			),
-		)
-		.leftJoin(
-			realmTagVote,
-			profileId
-				? and(
-						eq(realmTagVote.realmId, realmTagContext.realmId),
-						eq(realmTagVote.unitId, realmTagContext.unitId),
-						eq(realmTagVote.tagId, realmTagContext.tagId),
-						eq(realmTagVote.profileId, profileId),
+	const [[stat], [viewerVote]] = await Promise.all([
+		database
+			.select({
+				score: realmTagVoteStat.score,
+				voteCount: realmTagVoteStat.voteCount,
+			})
+			.from(realmTagVoteStat)
+			.where(
+				and(
+					eq(realmTagVoteStat.realmId, realmId),
+					eq(realmTagVoteStat.unitId, unitId),
+					eq(realmTagVoteStat.tagId, tagId),
+				),
+			)
+			.limit(1),
+		profileId
+			? database
+					.select({ value: realmTagVote.value })
+					.from(realmTagVote)
+					.where(
+						and(
+							eq(realmTagVote.realmId, realmId),
+							eq(realmTagVote.unitId, unitId),
+							eq(realmTagVote.tagId, tagId),
+							eq(realmTagVote.profileId, profileId),
+						),
 					)
-				: sql`false`,
-		)
-		.where(
-			and(
-				eq(realmTagContext.realmId, realmId),
-				eq(realmTagContext.unitId, unitId),
-				eq(realmTagContext.tagId, tagId),
-			),
-		)
-		.limit(1);
-	if (!record) throw new RealmTagContextNotFound();
+					.limit(1)
+			: Promise.resolve([]),
+	]);
 	return {
-		...record,
-		value: presentRealmTagVote(record.value),
-		score: toSafeInteger(record.score ?? 0n, "Realm Tag vote score"),
-		voteCount: toSafeInteger(record.voteCount ?? 0n, "Realm Tag vote count"),
+		realmId,
+		unitId,
+		tagId,
+		value: presentRealmTagVote(viewerVote?.value ?? null),
+		score: toSafeInteger(stat?.score ?? 0n, "Realm Tag vote score"),
+		voteCount: toSafeInteger(stat?.voteCount ?? 0n, "Realm Tag vote count"),
 	};
 }
 
@@ -499,6 +524,8 @@ export default new Elysia({ prefix: "/realms" })
 					status: unit.status,
 					visibility: unit.visibility,
 					joinPolicy: realm.joinPolicy,
+					pages: realm.enabledPages,
+					latestRevisionId: unitRevisionHead.revisionId,
 					memberCount: sql<number>`(
 						select count(*)::int
 						from ${realmMember}
@@ -510,6 +537,7 @@ export default new Elysia({ prefix: "/realms" })
 				})
 				.from(realm)
 				.innerJoin(unit, eq(unit.id, realm.id))
+				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, realm.id))
 				.where(eq(realm.id, params.realmId))
 				.limit(1);
 			if (!record) throw new RealmNotFound();
@@ -565,6 +593,7 @@ export default new Elysia({ prefix: "/realms" })
 					"realm.members.manage",
 					"realm.rules.update",
 					"realm.pins.manage",
+					"realm.tags.manage",
 					"realm.units.moderate",
 				]),
 				authorization.unit.decide(params.realmId, "unit.access.manage"),
@@ -619,6 +648,7 @@ export default new Elysia({ prefix: "/realms" })
 					canManageMembers: realmCapabilities.get("realm.members.manage") ?? false,
 					canUpdateRules: realmCapabilities.get("realm.rules.update") ?? false,
 					canManagePins: realmCapabilities.get("realm.pins.manage") ?? false,
+					canManageTags: realmCapabilities.get("realm.tags.manage") ?? false,
 					canModerateUnits: realmCapabilities.get("realm.units.moderate") ?? false,
 					canManageAccess: accessDecision.allowed,
 					canRestoreHistory: historyDecision.allowed,
@@ -633,6 +663,204 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 			},
 			detail: { summary: "Get Realm", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/pages",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
+			const latestRevisionId = await database.transaction(async (tx) => {
+				const updated = await tx
+					.update(realm)
+					.set({ enabledPages: [...body.pages], updatedAt: new Date() })
+					.where(eq(realm.id, params.realmId))
+					.returning({ id: realm.id });
+				if (!updated.length) throw new RealmNotFound();
+				const revision = await recordUnitRevision(tx, {
+					unitId: params.realmId,
+					actorProfileId: profile.unitId,
+					event: "update",
+					baseRevisionId: body.baseRevisionId,
+				});
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.settings.update",
+					params.realmId,
+					{
+						fields: ["pages"],
+					},
+				);
+				return revision.revisionId;
+			});
+			return { pages: [...body.pages], latestRevisionId };
+		},
+		{
+			access: "session-only",
+			params: RealmParams,
+			body: UpdateRealmPagesBody,
+			response: {
+				[StatusCodes.OK]: RealmPagesResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+			},
+			detail: { summary: "Replace enabled Realm pages", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/taxonomy",
+		async ({ params, query, request }) => {
+			const { authorization } = await ensureRealmVisible(params.realmId, request.headers);
+			const [structure] = await database
+				.select({ id: contentStructure.id })
+				.from(contentStructure)
+				.where(
+					and(
+						eq(contentStructure.ownerUnitId, params.realmId),
+						eq(contentStructure.kind, "realm.taxonomy"),
+						isNull(contentStructure.deletedAt),
+					),
+				)
+				.limit(1);
+			if (!structure) throw new RealmNotFound();
+			const rows = await database
+				.select({
+					id: contentStructureNode.id,
+					parentId: contentStructureNode.parentId,
+					contentUnitId: contentStructureNode.contentUnitId,
+					unitKind: unit.kind,
+					postKind: post.kind,
+					language: unitLocalization.language,
+					title: unitLocalization.title,
+					summary: unitLocalization.summary,
+					avatarType: unitLocalization.avatarType,
+					avatarAssetId: unitLocalization.avatarAssetId,
+					avatarEmoji: unitLocalization.avatarEmoji,
+					avatarIconPrefix: unitLocalization.avatarIconPrefix,
+					avatarIconName: unitLocalization.avatarIconName,
+					position: contentStructureNode.position,
+					queryStrategy: contentStructureNode.realmTagQueryStrategy,
+				})
+				.from(contentStructureNode)
+				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+				.innerJoin(
+					unitLocalization,
+					and(
+						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(
+								contentStructureNode.contentUnitId,
+								query.localizationLanguages,
+							),
+						),
+					),
+				)
+				.where(
+					and(
+						eq(contentStructureNode.structureId, structure.id),
+						isNull(contentStructureNode.deletedAt),
+					),
+				)
+				.orderBy(contentStructureNode.position, contentStructureNode.id);
+			const readableRows = (
+				await Promise.all(
+					rows.map(async (row) => ({
+						row,
+						readable: await authorization.unit.canRead(row.contentUnitId),
+					})),
+				)
+			)
+				.filter(({ readable }) => readable)
+				.map(({ row }) => row);
+			const tagIds = readableRows
+				.filter((row) => row.unitKind === "tag")
+				.map((row) => row.contentUnitId);
+			const contexts = tagIds.length
+				? await database
+						.select({
+							tagId: realmTagContext.tagId,
+							contextPostId: realmTagContext.contextPostId,
+							contextSummary: resolvedUnitLocalizationSummary(
+								realmTagContext.contextPostId,
+								query.localizationLanguages,
+							),
+						})
+						.from(realmTagContext)
+						.innerJoin(
+							realmUnit,
+							and(
+								eq(realmUnit.realmId, realmTagContext.realmId),
+								eq(realmUnit.unitId, realmTagContext.contextPostId),
+								eq(realmUnit.status, "visible"),
+							),
+						)
+						.where(
+							and(
+								eq(realmTagContext.realmId, params.realmId),
+								inArray(realmTagContext.tagId, tagIds),
+							),
+						)
+				: [];
+			const readableContexts = (
+				await Promise.all(
+					contexts.map(async (context) => ({
+						context,
+						readable: await authorization.unit.canRead(context.contextPostId),
+					})),
+				)
+			)
+				.filter(({ readable }) => readable)
+				.map(({ context }) => context);
+			const contextByTagId = new Map(
+				readableContexts.map((context) => [context.tagId, context]),
+			);
+			const latestRevisionId = await database.transaction((tx) =>
+				getContentStructureRevision(tx, params.realmId, structure.id),
+			);
+			if (!latestRevisionId)
+				throw new Error("Realm taxonomy has no Content Structure revision");
+			return {
+				structureId: structure.id,
+				latestRevisionId,
+				items: readableRows.map((row) => {
+					const contentKind =
+						row.unitKind === "tag"
+							? ("tag" as const)
+							: row.unitKind === "label"
+								? ("label" as const)
+								: row.unitKind === "post" && row.postKind === "wiki"
+									? ("wiki" as const)
+									: null;
+					if (!contentKind) throw new Error(`Invalid Realm taxonomy node ${row.id}`);
+					const context = contextByTagId.get(row.contentUnitId);
+					return {
+						id: row.id,
+						parentId: row.parentId,
+						contentUnitId: row.contentUnitId,
+						contentKind,
+						language: row.language,
+						title: row.title,
+						summary: row.summary,
+						avatar: presentAvatar(avatarReferenceFromColumns(row)),
+						position: row.position,
+						queryStrategy: row.queryStrategy,
+						contextPostId: context?.contextPostId ?? null,
+						contextSummary: context?.contextSummary ?? null,
+					};
+				}),
+			};
+		},
+		{
+			params: RealmParams,
+			query: RealmTaxonomyQuery,
+			response: {
+				[StatusCodes.OK]: RealmTaxonomyResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+			},
+			detail: { summary: "Get Realm taxonomy", tags: ["Realms"] },
 		},
 	)
 	.get(
@@ -1408,52 +1636,147 @@ export default new Elysia({ prefix: "/realms" })
 			},
 		},
 	)
-	.get(
-		"/:realmId/units/:unitId/tags/:tagId/context",
-		async ({ params, request }) => {
-			const { profile, authorization } = await ensureRealmVisible(
-				params.realmId,
-				request.headers,
-			);
+	.post(
+		"/:realmId/tag-contexts",
+		async ({ params, body, profile, authorization }) => {
 			await Promise.all([
-				authorization.unit.ensureCanRead(params.unitId),
-				authorization.unit.ensureCanRead(params.tagId),
+				authorization.realm.ensureCapability(params.realmId, "realm.tags.manage"),
+				authorization.realm.ensureUnitCreation(params.realmId, "realm.units.create"),
+				authorization.unit.ensureCanRead(body.tagId),
 			]);
-			const record = await getRealmTagContextSummary(
-				params.realmId,
-				params.unitId,
-				params.tagId,
-				profile?.unitId,
-			);
+			const contextPostId = await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:${body.tagId}:realm-tag-context`}::text, 0))`,
+				);
+				const [existing] = await tx
+					.select({ contextPostId: realmTagContext.contextPostId })
+					.from(realmTagContext)
+					.where(
+						and(
+							eq(realmTagContext.realmId, params.realmId),
+							eq(realmTagContext.tagId, body.tagId),
+						),
+					)
+					.limit(1);
+				if (existing) throw new RealmTagContextAlreadyExists(existing);
+				const [tagRecord] = await tx
+					.select({ id: tag.id })
+					.from(tag)
+					.where(eq(tag.id, body.tagId))
+					.limit(1);
+				if (!tagRecord) throw new UnitNotFound("Tag");
+				const created = await createWikiPost(tx, {
+					profileId: profile.unitId,
+					authorization,
+					accessMode: body.accessMode,
+					title: body.title,
+					summary: body.summary,
+					body: body.body,
+					language: body.language,
+					realmId: params.realmId,
+				});
+				await tx.insert(realmTagContext).values({
+					realmId: params.realmId,
+					tagId: body.tagId,
+					contextPostId: created.id,
+					createdByProfileId: profile.unitId,
+				});
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.tags.context.create",
+					body.tagId,
+					{
+						realmId: params.realmId,
+						contextPostId: created.id,
+					},
+				);
+				return created.id;
+			});
+			const context = await getRealmTagContextSummary(params.realmId, body.tagId);
+			if (context.contextPostId !== contextPostId)
+				throw new Error("Created Realm Tag Context resolved to another Wiki Post");
+			return context;
+		},
+		{
+			access: "contribute:unit:create",
+			params: RealmParams,
+			body: CreateRealmTagContextBody,
+			response: {
+				[StatusCodes.OK]: RealmTagContextResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"UnitAccessRestricted",
+					"UnitPermissionForbidden",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"RealmTagContextAlreadyExists",
+					"RealmRulesAcceptanceRequired",
+					"PostTargetingLocked",
+				]),
+			},
+			detail: { summary: "Create Realm Tag Context Wiki", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/tags/:tagId/context",
+		async ({ params, request }) => {
+			const { authorization } = await ensureRealmVisible(params.realmId, request.headers);
+			await authorization.unit.ensureCanRead(params.tagId);
+			const record = await getRealmTagContextSummary(params.realmId, params.tagId);
+			const [mounted] = await database
+				.select({ unitId: realmUnit.unitId })
+				.from(realmUnit)
+				.where(
+					and(
+						eq(realmUnit.realmId, params.realmId),
+						eq(realmUnit.unitId, record.contextPostId),
+						eq(realmUnit.status, "visible"),
+					),
+				)
+				.limit(1);
+			if (!mounted) throw new RealmTagContextNotFound();
 			await authorization.unit.ensureCanRead(record.contextPostId, () => new PostNotFound());
 			return record;
 		},
 		{
-			params: RealmTagParams,
+			params: RealmTagContextParams,
 			response: {
 				[StatusCodes.OK]: RealmTagContextResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"RealmNotFound",
-					"UnitNotFound",
 					"PostNotFound",
 					"RealmTagContextNotFound",
 				]),
 			},
-			detail: { summary: "Get Realm-scoped Tag voting context", tags: ["Realms"] },
+			detail: { summary: "Get Realm Tag Context", tags: ["Realms"] },
 		},
 	)
 	.put(
-		"/:realmId/units/:unitId/tags/:tagId/context",
+		"/:realmId/tags/:tagId/context",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.realm.ensureParticipation(params.realmId);
+			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			await Promise.all([
-				authorization.unit.ensureCanRead(params.unitId),
 				authorization.unit.ensureCanRead(params.tagId),
 				authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound()),
 			]);
-			const [[tagRecord], [mounted]] = await Promise.all([
-				database.select({ id: tag.id }).from(tag).where(eq(tag.id, params.tagId)).limit(1),
-				database
+			await database.transaction(async (tx) => {
+				const lockKeys = [
+					`${params.realmId}:${params.tagId}:realm-tag-context`,
+					`${body.contextPostId}:realm-tag-context-post`,
+				].sort();
+				for (const lockKey of lockKeys)
+					await tx.execute(
+						sql`select pg_advisory_xact_lock(hashtextextended(${lockKey}::text, 0))`,
+					);
+				const [tagRecord] = await tx
+					.select({ id: tag.id })
+					.from(tag)
+					.where(eq(tag.id, params.tagId))
+					.limit(1);
+				if (!tagRecord) throw new UnitNotFound("Tag");
+				const [mounted] = await tx
 					.select({ unitId: realmUnit.unitId })
 					.from(realmUnit)
 					.innerJoin(post, eq(post.id, realmUnit.unitId))
@@ -1462,43 +1785,53 @@ export default new Elysia({ prefix: "/realms" })
 							eq(realmUnit.realmId, params.realmId),
 							eq(realmUnit.unitId, body.contextPostId),
 							eq(realmUnit.status, "visible"),
+							eq(post.kind, "wiki"),
 						),
 					)
-					.limit(1),
-			]);
-			if (!tagRecord) throw new UnitNotFound("Tag");
-			if (!mounted) throw new RealmTagContextPostNotMounted();
-			await database
-				.insert(realmTagContext)
-				.values({
-					realmId: params.realmId,
-					unitId: params.unitId,
-					tagId: params.tagId,
-					contextPostId: body.contextPostId,
-					createdByProfileId: profile.unitId,
-				})
-				.onConflictDoUpdate({
-					target: [
-						realmTagContext.realmId,
-						realmTagContext.unitId,
-						realmTagContext.tagId,
-					],
-					set: {
+					.limit(1);
+				if (!mounted) throw new RealmTagContextPostNotMounted();
+				const [reused] = await tx
+					.select({
+						realmId: realmTagContext.realmId,
+						tagId: realmTagContext.tagId,
+					})
+					.from(realmTagContext)
+					.where(eq(realmTagContext.contextPostId, body.contextPostId))
+					.limit(1);
+				if (reused && (reused.realmId !== params.realmId || reused.tagId !== params.tagId))
+					throw new RealmTagContextPostAlreadyUsed();
+				await tx
+					.insert(realmTagContext)
+					.values({
+						realmId: params.realmId,
+						tagId: params.tagId,
 						contextPostId: body.contextPostId,
 						createdByProfileId: profile.unitId,
-						updatedAt: new Date(),
+					})
+					.onConflictDoUpdate({
+						target: [realmTagContext.realmId, realmTagContext.tagId],
+						set: {
+							contextPostId: body.contextPostId,
+							createdByProfileId: profile.unitId,
+							updatedAt: new Date(),
+						},
+					});
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.tags.context.update",
+					params.tagId,
+					{
+						realmId: params.realmId,
+						contextPostId: body.contextPostId,
 					},
-				});
-			return getRealmTagContextSummary(
-				params.realmId,
-				params.unitId,
-				params.tagId,
-				profile.unitId,
-			);
+				);
+			});
+			return getRealmTagContextSummary(params.realmId, params.tagId);
 		},
 		{
-			access: "contribute:interaction:write",
-			params: RealmTagParams,
+			access: "session-only",
+			params: RealmTagContextParams,
 			body: PutRealmTagContextBody,
 			response: {
 				[StatusCodes.OK]: RealmTagContextResponse,
@@ -1508,22 +1841,147 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitPermissionForbidden",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PostNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagContextPostAlreadyUsed"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 					"RealmTagContextPostNotMounted",
 				]),
 			},
-			detail: { summary: "Set Realm-scoped Tag voting context", tags: ["Realms"] },
+			detail: { summary: "Set Realm Tag Context", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/units/:unitId/policy-tags/:tagId",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+			if (params.unitId === params.tagId) throw new RealmTagSelfReferenceForbidden();
+			await Promise.all([
+				authorization.unit.ensureCanRead(params.unitId),
+				authorization.unit.ensureCanRead(params.tagId),
+			]);
+			return database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:${params.unitId}:realm-policy-tags`}::text, 0))`,
+				);
+				const [[mounted], [tagRecord]] = await Promise.all([
+					tx
+						.select({ unitId: realmUnit.unitId })
+						.from(realmUnit)
+						.where(
+							and(
+								eq(realmUnit.realmId, params.realmId),
+								eq(realmUnit.unitId, params.unitId),
+								eq(realmUnit.status, "visible"),
+							),
+						)
+						.limit(1),
+					tx.select({ id: tag.id }).from(tag).where(eq(tag.id, params.tagId)).limit(1),
+				]);
+				if (!mounted) throw new RealmUnitNotFound();
+				if (!tagRecord) throw new UnitNotFound("Tag");
+				const [last] = body.position
+					? []
+					: await tx
+							.select({ position: realmUnitTag.position })
+							.from(realmUnitTag)
+							.where(
+								and(
+									eq(realmUnitTag.realmId, params.realmId),
+									eq(realmUnitTag.unitId, params.unitId),
+								),
+							)
+							.orderBy(desc(realmUnitTag.position), desc(realmUnitTag.tagId))
+							.limit(1);
+				const position =
+					body.position ?? fractionalPositionBetween(last?.position ?? null, null);
+				const [record] = await tx
+					.insert(realmUnitTag)
+					.values({
+						realmId: params.realmId,
+						unitId: params.unitId,
+						tagId: params.tagId,
+						position,
+						createdByProfileId: profile.unitId,
+					})
+					.onConflictDoUpdate({
+						target: [realmUnitTag.realmId, realmUnitTag.unitId, realmUnitTag.tagId],
+						set: { position, updatedAt: new Date() },
+					})
+					.returning();
+				if (!record) throw new Error("Realm Policy Tag upsert returned no row");
+				await recordAuditEvent(
+					tx,
+					profile.unitId,
+					"realm.tags.policy.upsert",
+					params.unitId,
+					{ realmId: params.realmId, tagId: params.tagId },
+				);
+				return record;
+			});
+		},
+		{
+			access: "session-only",
+			params: RealmTagVoteParams,
+			body: ApplyRealmPolicyTagBody,
+			response: {
+				[StatusCodes.OK]: RealmPolicyTagResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound", "UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmTagSelfReferenceForbidden",
+				]),
+			},
+			detail: { summary: "Apply Realm Policy Tag", tags: ["Realms"] },
+		},
+	)
+	.delete(
+		"/:realmId/units/:unitId/policy-tags/:tagId",
+		async ({ params, profile, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+			await database.transaction(async (tx) => {
+				const deleted = await tx
+					.delete(realmUnitTag)
+					.where(
+						and(
+							eq(realmUnitTag.realmId, params.realmId),
+							eq(realmUnitTag.unitId, params.unitId),
+							eq(realmUnitTag.tagId, params.tagId),
+						),
+					)
+					.returning({ tagId: realmUnitTag.tagId });
+				if (deleted.length)
+					await recordAuditEvent(
+						tx,
+						profile.unitId,
+						"realm.tags.policy.delete",
+						params.unitId,
+						{ realmId: params.realmId, tagId: params.tagId },
+					);
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "session-only",
+			params: RealmTagVoteParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: {
+				summary: "Remove Realm Policy Tag",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
 		},
 	)
 	.put(
 		"/:realmId/units/:unitId/tags/:tagId/vote",
 		async ({ params, body, profile, authorization }) => {
 			await authorization.realm.ensureParticipation(params.realmId);
+			if (params.unitId === params.tagId) throw new RealmTagSelfReferenceForbidden();
 			await Promise.all([
 				authorization.unit.ensureCanRead(params.unitId),
 				authorization.unit.ensureCanRead(params.tagId),
 			]);
-			await getRealmTagContextSummary(params.realmId, params.unitId, params.tagId);
 			await database
 				.insert(realmTagVote)
 				.values({
@@ -1542,7 +2000,7 @@ export default new Elysia({ prefix: "/realms" })
 					],
 					set: { value: body.value, updatedAt: new Date() },
 				});
-			return getRealmTagContextSummary(
+			return getRealmTagVoteSummary(
 				params.realmId,
 				params.unitId,
 				params.tagId,
@@ -1551,18 +2009,18 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		{
 			access: "contribute:interaction:write",
-			params: RealmTagParams,
+			params: RealmTagVoteParams,
 			body: RealmTagVoteBody,
 			response: {
-				[StatusCodes.OK]: RealmTagContextResponse,
+				[StatusCodes.OK]: RealmTagVoteResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"RealmCapabilityRequired",
 					"UnitAccessRestricted",
 					"UnitPermissionForbidden",
 				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"RealmTagContextNotFound",
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmTagSelfReferenceForbidden",
 				]),
 			},
 			detail: { summary: "Vote on a Realm-scoped Unit Tag", tags: ["Realms"] },
@@ -1576,7 +2034,6 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.ensureCanRead(params.unitId),
 				authorization.unit.ensureCanRead(params.tagId),
 			]);
-			await getRealmTagContextSummary(params.realmId, params.unitId, params.tagId);
 			await database
 				.delete(realmTagVote)
 				.where(
@@ -1587,7 +2044,7 @@ export default new Elysia({ prefix: "/realms" })
 						eq(realmTagVote.profileId, profile.unitId),
 					),
 				);
-			return getRealmTagContextSummary(
+			return getRealmTagVoteSummary(
 				params.realmId,
 				params.unitId,
 				params.tagId,
@@ -1596,18 +2053,15 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		{
 			access: "contribute:interaction:write",
-			params: RealmTagParams,
+			params: RealmTagVoteParams,
 			response: {
-				[StatusCodes.OK]: RealmTagContextResponse,
+				[StatusCodes.OK]: RealmTagVoteResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"RealmCapabilityRequired",
 					"UnitAccessRestricted",
 					"UnitPermissionForbidden",
 				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"RealmTagContextNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Remove a Realm-scoped Unit Tag vote", tags: ["Realms"] },
 		},

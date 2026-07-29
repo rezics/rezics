@@ -218,8 +218,11 @@ export default {
 	PostScoreDuplicate: `Una ${postTerms.inline} no puede mostrar la misma puntuación más de una vez.`,
 	PostScoreNotFound: "No se ha encontrado una puntuación seleccionada.",
 	RealmScoreContextPostNotMounted: `La ${postTerms.inline} que sirve como contexto de puntuación debe estar incorporada al ${realmTerms.inline}.`,
-	RealmTagContextNotFound: `No se ha encontrado este contexto de votación de etiquetas del ${realmTerms.inline}.`,
-	RealmTagContextPostNotMounted: `La ${postTerms.inline} que sirve como contexto de votación de etiquetas debe estar visible en el ${realmTerms.inline}.`,
+	RealmTagContextNotFound: `No se ha encontrado la explicación de esta etiqueta en el ${realmTerms.inline}.`,
+	RealmTagContextPostNotMounted: `La ${postTerms.inline} usada como explicación de la etiqueta debe estar visible en el ${realmTerms.inline}.`,
+	RealmTagContextAlreadyExists: `Este ${realmTerms.inline} ya tiene una explicación para esa etiqueta.`,
+	RealmTagContextPostAlreadyUsed: `Esa ${postTerms.inline} ya explica otra etiqueta en un ${realmTerms.inline}.`,
+	RealmTagSelfReferenceForbidden: "Una etiqueta no se puede aplicar a sí misma.",
 	SearchDocumentRevisionConflict:
 		"La configuración de búsqueda ha cambiado. Vuelve a cargarla antes de guardar.",
 	ZoneSearchFeatureNotFound: `Esta ${zoneTerms.inline} no tiene ninguna función de búsqueda habilitada.`,

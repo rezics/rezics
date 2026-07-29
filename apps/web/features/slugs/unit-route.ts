@@ -27,6 +27,13 @@ export function realmSettingsHref(realm: AddressableUnit): string {
 	return `${realmHref(realm)}/settings`;
 }
 
+export type RealmPageId = "main" | "tags" | "wiki" | "info";
+
+export function realmPageHref(realm: AddressableUnit, page: RealmPageId): string {
+	const baseHref = realmHref(realm);
+	return page === "main" ? baseHref : `${baseHref}/${page}`;
+}
+
 export function zoneHref(zone: AddressableUnit): string {
 	return addressableUnitHref("zone", zone);
 }

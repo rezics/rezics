@@ -37,6 +37,7 @@ export type FeedRatedWorkUnitKind = (typeof FeedRatedWorkUnitKindValues)[number]
 export const FeedIdentityUnitKindValues = [
 	"zone",
 	"realm",
+	"tag",
 ] as const satisfies readonly FeedUnitKind[];
 export type FeedIdentityUnitKind = (typeof FeedIdentityUnitKindValues)[number];
 
@@ -44,7 +45,6 @@ export const FeedGeneralUnitKindValues = [
 	"profile",
 	"release",
 	"entity",
-	"tag",
 	"structure",
 	"series",
 	"collection",
@@ -67,9 +67,8 @@ export const FeedNonReviewPostKindValues = [
 	"reply",
 	"excerpt",
 	"chapter",
-	"wiki",
 	"picture",
-] as const satisfies readonly Exclude<FeedPostKind, "review">[];
+] as const satisfies readonly Exclude<FeedPostKind, "review" | "wiki">[];
 
 export const FeedContentKindValues = [
 	"unit:profile",

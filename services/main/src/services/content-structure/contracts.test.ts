@@ -38,6 +38,7 @@ function node(input: {
 		targetUrl: null,
 		position: input.position,
 		contentRating: null,
+		realmTagQueryStrategy: null,
 		deletedAt: null,
 		createdAt: CreatedAt,
 		updatedAt: CreatedAt,

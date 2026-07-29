@@ -2,7 +2,10 @@ import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import { FractionalPosition, ContentLanguage, LocalizationLanguageQuery, Uuid } from "../schema";
-import { ContentRatingValues } from "../../database/schema/contract-values";
+import {
+	ContentRatingValues,
+	RealmTagQueryStrategyValues,
+} from "../../database/schema/contract-values";
 
 export const UnitContentStructuresParams = t.Object({ unitId: Uuid });
 export const ContentStructureParams = t.Object({ unitId: Uuid, structureId: Uuid });
@@ -66,6 +69,7 @@ export const CreateGenericContentStructureNodeBody = t.Object(
 		target: t.Optional(ContentStructureTarget),
 		position: t.Optional(FractionalPosition),
 		contentRating: t.Optional(t.UnionEnum(ContentRatingValues)),
+		realmTagQueryStrategy: t.Optional(t.UnionEnum(RealmTagQueryStrategyValues)),
 	},
 	{ additionalProperties: false },
 );
@@ -79,6 +83,7 @@ export const UpdateGenericContentStructureNodeBody = t.Object(
 		target: t.Optional(ContentStructureTarget),
 		position: t.Optional(FractionalPosition),
 		contentRating: t.Optional(t.Nullable(t.UnionEnum(ContentRatingValues))),
+		realmTagQueryStrategy: t.Optional(t.UnionEnum(RealmTagQueryStrategyValues)),
 	},
 	{ additionalProperties: false, minProperties: 2 },
 );

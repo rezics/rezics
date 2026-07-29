@@ -16,6 +16,7 @@ describe("realm membership permissions", () => {
 			canManageMembers: false,
 			canUpdateRules: false,
 			canManagePins: true,
+			canManageTags: false,
 			canModerateUnits: false,
 			canManageAccess: false,
 			canRestoreHistory: false,
@@ -34,6 +35,7 @@ describe("realm membership permissions", () => {
 				canManageMembers: false,
 				canUpdateRules: false,
 				canManagePins: false,
+				canManageTags: false,
 				canModerateUnits: false,
 				canManageAccess: false,
 				canRestoreHistory: false,
@@ -50,6 +52,7 @@ describe("realm membership permissions", () => {
 			canManageMembers: false,
 			canUpdateRules: false,
 			canManagePins: false,
+			canManageTags: false,
 			canModerateUnits: false,
 			canManageAccess: false,
 			canRestoreHistory: false,
@@ -68,11 +71,30 @@ describe("realm membership permissions", () => {
 				canManageMembers: true,
 				canUpdateRules: false,
 				canManagePins: false,
+				canManageTags: false,
 				canModerateUnits: false,
 				canManageAccess: false,
 				canRestoreHistory: false,
 			}),
 		).toEqual(["members", "history"]);
+	});
+
+	it("exposes Realm taxonomy settings only to Tag managers", () => {
+		expect(
+			getRealmSettingsSectionIds({
+				canCreateUnits: false,
+				canCreateReplies: false,
+				canUpdateSettings: false,
+				canReadMembers: false,
+				canManageMembers: false,
+				canUpdateRules: false,
+				canManagePins: false,
+				canManageTags: true,
+				canModerateUnits: false,
+				canManageAccess: false,
+				canRestoreHistory: false,
+			}),
+		).toEqual(["tags", "history"]);
 	});
 
 	it.each([

@@ -1308,7 +1308,6 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresStatus403,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus422,
-	PostApiUnitsByIdByUnitIdContentStructuresStatus429,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
@@ -1323,7 +1322,6 @@ import type {
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422,
-	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
@@ -1338,7 +1336,6 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422,
-	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
@@ -1347,7 +1344,6 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422,
-	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
@@ -1356,7 +1352,6 @@ import type {
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422,
-	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
@@ -1365,7 +1360,6 @@ import type {
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422,
-	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500,
 	GetApiUnitsBookByUnitIdContentStructureNodesOptions,
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
@@ -1809,6 +1803,19 @@ import type {
 	PatchApiRealmsByRealmIdStatus422,
 	PatchApiRealmsByRealmIdStatus429,
 	PatchApiRealmsByRealmIdStatus500,
+	PutApiRealmsByRealmIdPagesOptions,
+	PutApiRealmsByRealmIdPagesStatus200,
+	PutApiRealmsByRealmIdPagesStatus400,
+	PutApiRealmsByRealmIdPagesStatus403,
+	PutApiRealmsByRealmIdPagesStatus404,
+	PutApiRealmsByRealmIdPagesStatus409,
+	PutApiRealmsByRealmIdPagesStatus422,
+	PutApiRealmsByRealmIdPagesStatus500,
+	GetApiRealmsByRealmIdTaxonomyOptions,
+	GetApiRealmsByRealmIdTaxonomyStatus200,
+	GetApiRealmsByRealmIdTaxonomyStatus404,
+	GetApiRealmsByRealmIdTaxonomyStatus422,
+	GetApiRealmsByRealmIdTaxonomyStatus500,
 	GetApiRealmsByRealmIdScoreContextOptions,
 	GetApiRealmsByRealmIdScoreContextStatus200,
 	GetApiRealmsByRealmIdScoreContextStatus404,
@@ -1894,19 +1901,40 @@ import type {
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus422,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus429,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus500,
-	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
-	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
-	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404,
-	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422,
-	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500,
+	PostApiRealmsByRealmIdTagContextsOptions,
+	PostApiRealmsByRealmIdTagContextsStatus200,
+	PostApiRealmsByRealmIdTagContextsStatus400,
+	PostApiRealmsByRealmIdTagContextsStatus403,
+	PostApiRealmsByRealmIdTagContextsStatus404,
+	PostApiRealmsByRealmIdTagContextsStatus409,
+	PostApiRealmsByRealmIdTagContextsStatus422,
+	PostApiRealmsByRealmIdTagContextsStatus429,
+	PostApiRealmsByRealmIdTagContextsStatus500,
+	GetApiRealmsByRealmIdTagsByTagIdContextOptions,
+	GetApiRealmsByRealmIdTagsByTagIdContextStatus200,
+	GetApiRealmsByRealmIdTagsByTagIdContextStatus404,
+	GetApiRealmsByRealmIdTagsByTagIdContextStatus422,
+	GetApiRealmsByRealmIdTagsByTagIdContextStatus500,
+	PutApiRealmsByRealmIdTagsByTagIdContextOptions,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus200,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus400,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus403,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus404,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus409,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus422,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus500,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus400,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus404,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422,
+	PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus204,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200,
 	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus400,
@@ -2403,6 +2431,8 @@ import {
 	replaceRealmSlugAddress,
 	getApiRealmsByRealmId,
 	patchApiRealmsByRealmId,
+	putApiRealmsByRealmIdPages,
+	getApiRealmsByRealmIdTaxonomy,
 	getApiRealmsByRealmIdScoreContext,
 	putApiRealmsByRealmIdScoreContext,
 	deleteApiRealmsByRealmIdScoreContext,
@@ -2416,8 +2446,11 @@ import {
 	getApiRealmsByRealmIdPins,
 	putApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdPinsByUnitId,
-	getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext,
-	putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext,
+	postApiRealmsByRealmIdTagContexts,
+	getApiRealmsByRealmIdTagsByTagIdContext,
+	putApiRealmsByRealmIdTagsByTagIdContext,
+	putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId,
+	deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId,
 	putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
 	deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
 	getApiRealmsByRealmIdUnits,
@@ -22396,7 +22429,6 @@ export function postApiUnitsByIdByUnitIdContentStructuresMutationOptions<TContex
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -22428,7 +22460,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus422
-				| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -22451,7 +22482,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -22465,7 +22495,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -22484,7 +22513,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -22611,7 +22639,6 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdMutation
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
-			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -22644,7 +22671,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
-				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 			>,
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -22669,7 +22695,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
-			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -22684,7 +22709,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
-			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -22704,7 +22728,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
-			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -22853,7 +22876,6 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -22886,7 +22908,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
-				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -22912,7 +22933,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
-				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -22927,7 +22947,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -22947,7 +22966,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -22970,7 +22988,6 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutat
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -23003,7 +23020,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
-				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -23028,7 +23044,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -23043,7 +23058,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -23063,7 +23077,6 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
-			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -23087,7 +23100,6 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23121,7 +23133,6 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23147,7 +23158,6 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23162,7 +23172,6 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23182,7 +23191,6 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23209,7 +23217,6 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23243,7 +23250,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23269,7 +23275,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23284,7 +23289,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -23304,7 +23308,6 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
-			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -29972,6 +29975,219 @@ export function usePatchApiRealmsByRealmId<TContext>(
 	>;
 }
 
+export const putApiRealmsByRealmIdPagesMutationKey = () =>
+	[{ url: "/api/realms/:realmId/pages" }] as const;
+
+export function putApiRealmsByRealmIdPagesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdPagesMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdPagesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPagesStatus400
+			| PutApiRealmsByRealmIdPagesStatus403
+			| PutApiRealmsByRealmIdPagesStatus404
+			| PutApiRealmsByRealmIdPagesStatus409
+			| PutApiRealmsByRealmIdPagesStatus422
+			| PutApiRealmsByRealmIdPagesStatus500
+		>,
+		PutApiRealmsByRealmIdPagesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdPages({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace enabled Realm pages
+ * {@link /api/realms/:realmId/pages}
+ */
+export function usePutApiRealmsByRealmIdPages<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdPagesStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdPagesStatus400
+				| PutApiRealmsByRealmIdPagesStatus403
+				| PutApiRealmsByRealmIdPagesStatus404
+				| PutApiRealmsByRealmIdPagesStatus409
+				| PutApiRealmsByRealmIdPagesStatus422
+				| PutApiRealmsByRealmIdPagesStatus500
+			>,
+			PutApiRealmsByRealmIdPagesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiRealmsByRealmIdPagesMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdPagesMutationOptions(config) as UseMutationOptions<
+		PutApiRealmsByRealmIdPagesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPagesStatus400
+			| PutApiRealmsByRealmIdPagesStatus403
+			| PutApiRealmsByRealmIdPagesStatus404
+			| PutApiRealmsByRealmIdPagesStatus409
+			| PutApiRealmsByRealmIdPagesStatus422
+			| PutApiRealmsByRealmIdPagesStatus500
+		>,
+		PutApiRealmsByRealmIdPagesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdPagesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPagesStatus400
+			| PutApiRealmsByRealmIdPagesStatus403
+			| PutApiRealmsByRealmIdPagesStatus404
+			| PutApiRealmsByRealmIdPagesStatus409
+			| PutApiRealmsByRealmIdPagesStatus422
+			| PutApiRealmsByRealmIdPagesStatus500
+		>,
+		PutApiRealmsByRealmIdPagesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdPagesStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdPagesStatus400
+			| PutApiRealmsByRealmIdPagesStatus403
+			| PutApiRealmsByRealmIdPagesStatus404
+			| PutApiRealmsByRealmIdPagesStatus409
+			| PutApiRealmsByRealmIdPagesStatus422
+			| PutApiRealmsByRealmIdPagesStatus500
+		>,
+		PutApiRealmsByRealmIdPagesOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdTaxonomyQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdTaxonomyOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/taxonomy", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiRealmsByRealmIdTaxonomyQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdTaxonomyQueryKey
+>;
+
+export function getApiRealmsByRealmIdTaxonomyQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdTaxonomyOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdTaxonomyQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdTaxonomyStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTaxonomyStatus404
+			| GetApiRealmsByRealmIdTaxonomyStatus422
+			| GetApiRealmsByRealmIdTaxonomyStatus500
+		>,
+		GetApiRealmsByRealmIdTaxonomyStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdTaxonomy({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Realm taxonomy
+ * {@link /api/realms/:realmId/taxonomy}
+ */
+export function useGetApiRealmsByRealmIdTaxonomy<
+	TData = GetApiRealmsByRealmIdTaxonomyStatus200,
+	TQueryData = GetApiRealmsByRealmIdTaxonomyStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdTaxonomyQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdTaxonomyOptions["path"]
+			| (() => GetApiRealmsByRealmIdTaxonomyOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdTaxonomyOptions["query"]
+			| (() => GetApiRealmsByRealmIdTaxonomyOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdTaxonomyStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdTaxonomyStatus404
+					| GetApiRealmsByRealmIdTaxonomyStatus422
+					| GetApiRealmsByRealmIdTaxonomyStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdTaxonomyQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdTaxonomyQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTaxonomyStatus404
+			| GetApiRealmsByRealmIdTaxonomyStatus422
+			| GetApiRealmsByRealmIdTaxonomyStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const getApiRealmsByRealmIdScoreContextQueryKey = ({
 	path,
 }: Omit<GetApiRealmsByRealmIdScoreContextOptions, "headers">) =>
@@ -31318,33 +31534,148 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	>;
 }
 
-export const getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryKey = ({
-	path,
-}: Omit<GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/units/:unitId/tags/:tagId/context", params: path }] as const;
+export const postApiRealmsByRealmIdTagContextsMutationKey = () =>
+	[{ url: "/api/realms/:realmId/tag-contexts" }] as const;
 
-type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryKey = ReturnType<
-	typeof getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryKey
->;
-
-export function getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryOptions(
-	{ path }: GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+export function postApiRealmsByRealmIdTagContextsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryKey({ path });
-	return queryOptions<
-		GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+	const mutationKey = postApiRealmsByRealmIdTagContextsMutationKey();
+	return mutationOptions<
+		PostApiRealmsByRealmIdTagContextsStatus200,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-			| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-			| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+			| PostApiRealmsByRealmIdTagContextsStatus400
+			| PostApiRealmsByRealmIdTagContextsStatus403
+			| PostApiRealmsByRealmIdTagContextsStatus404
+			| PostApiRealmsByRealmIdTagContextsStatus409
+			| PostApiRealmsByRealmIdTagContextsStatus422
+			| PostApiRealmsByRealmIdTagContextsStatus429
+			| PostApiRealmsByRealmIdTagContextsStatus500
 		>,
-		GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+		PostApiRealmsByRealmIdTagContextsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiRealmsByRealmIdTagContexts({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create Realm Tag Context Wiki
+ * {@link /api/realms/:realmId/tag-contexts}
+ */
+export function usePostApiRealmsByRealmIdTagContexts<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiRealmsByRealmIdTagContextsStatus200,
+			ResponseErrorConfig<
+				| PostApiRealmsByRealmIdTagContextsStatus400
+				| PostApiRealmsByRealmIdTagContextsStatus403
+				| PostApiRealmsByRealmIdTagContextsStatus404
+				| PostApiRealmsByRealmIdTagContextsStatus409
+				| PostApiRealmsByRealmIdTagContextsStatus422
+				| PostApiRealmsByRealmIdTagContextsStatus429
+				| PostApiRealmsByRealmIdTagContextsStatus500
+			>,
+			PostApiRealmsByRealmIdTagContextsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiRealmsByRealmIdTagContextsMutationKey();
+
+	const baseOptions = postApiRealmsByRealmIdTagContextsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiRealmsByRealmIdTagContextsStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdTagContextsStatus400
+			| PostApiRealmsByRealmIdTagContextsStatus403
+			| PostApiRealmsByRealmIdTagContextsStatus404
+			| PostApiRealmsByRealmIdTagContextsStatus409
+			| PostApiRealmsByRealmIdTagContextsStatus422
+			| PostApiRealmsByRealmIdTagContextsStatus429
+			| PostApiRealmsByRealmIdTagContextsStatus500
+		>,
+		PostApiRealmsByRealmIdTagContextsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiRealmsByRealmIdTagContextsStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdTagContextsStatus400
+			| PostApiRealmsByRealmIdTagContextsStatus403
+			| PostApiRealmsByRealmIdTagContextsStatus404
+			| PostApiRealmsByRealmIdTagContextsStatus409
+			| PostApiRealmsByRealmIdTagContextsStatus422
+			| PostApiRealmsByRealmIdTagContextsStatus429
+			| PostApiRealmsByRealmIdTagContextsStatus500
+		>,
+		PostApiRealmsByRealmIdTagContextsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiRealmsByRealmIdTagContextsStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdTagContextsStatus400
+			| PostApiRealmsByRealmIdTagContextsStatus403
+			| PostApiRealmsByRealmIdTagContextsStatus404
+			| PostApiRealmsByRealmIdTagContextsStatus409
+			| PostApiRealmsByRealmIdTagContextsStatus422
+			| PostApiRealmsByRealmIdTagContextsStatus429
+			| PostApiRealmsByRealmIdTagContextsStatus500
+		>,
+		PostApiRealmsByRealmIdTagContextsOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdTagsByTagIdContextQueryKey = ({
+	path,
+}: Omit<GetApiRealmsByRealmIdTagsByTagIdContextOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/tags/:tagId/context", params: path }] as const;
+
+type GetApiRealmsByRealmIdTagsByTagIdContextQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdTagsByTagIdContextQueryKey
+>;
+
+export function getApiRealmsByRealmIdTagsByTagIdContextQueryOptions(
+	{ path }: GetApiRealmsByRealmIdTagsByTagIdContextOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdTagsByTagIdContextQueryKey({ path });
+	return queryOptions<
+		GetApiRealmsByRealmIdTagsByTagIdContextStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| GetApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| GetApiRealmsByRealmIdTagsByTagIdContextStatus500
+		>,
+		GetApiRealmsByRealmIdTagsByTagIdContextStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext({
+			const { data } = await getApiRealmsByRealmIdTagsByTagIdContext({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -31356,29 +31687,29 @@ export function getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryOptions
 }
 
 /**
- * @summary Get Realm-scoped Tag voting context
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/context}
+ * @summary Get Realm Tag Context
+ * {@link /api/realms/:realmId/tags/:tagId/context}
  */
-export function useGetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
-	TData = GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
-	TQueryData = GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
-	TQueryKey extends QueryKey = GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryKey,
+export function useGetApiRealmsByRealmIdTagsByTagIdContext<
+	TData = GetApiRealmsByRealmIdTagsByTagIdContextStatus200,
+	TQueryData = GetApiRealmsByRealmIdTagsByTagIdContextStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdTagsByTagIdContextQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions["path"]
-			| (() => GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions["path"]);
+			| GetApiRealmsByRealmIdTagsByTagIdContextOptions["path"]
+			| (() => GetApiRealmsByRealmIdTagsByTagIdContextOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+				GetApiRealmsByRealmIdTagsByTagIdContextStatus200,
 				ResponseErrorConfig<
-					| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-					| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-					| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+					| GetApiRealmsByRealmIdTagsByTagIdContextStatus404
+					| GetApiRealmsByRealmIdTagsByTagIdContextStatus422
+					| GetApiRealmsByRealmIdTagsByTagIdContextStatus500
 				>,
 				TData,
 				TQueryData,
@@ -31393,14 +31724,11 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
 		resolvedOptions?.queryKey ??
-		getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryKey(resolvedParams);
+		getApiRealmsByRealmIdTagsByTagIdContextQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextQueryOptions(
-				resolvedParams,
-				config,
-			),
+			...getApiRealmsByRealmIdTagsByTagIdContextQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -31408,9 +31736,9 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-			| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-			| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+			| GetApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| GetApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| GetApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -31419,29 +31747,29 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
 	return queryResult;
 }
 
-export const putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextMutationKey = () =>
-	[{ url: "/api/realms/:realmId/units/:unitId/tags/:tagId/context" }] as const;
+export const putApiRealmsByRealmIdTagsByTagIdContextMutationKey = () =>
+	[{ url: "/api/realms/:realmId/tags/:tagId/context" }] as const;
 
-export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextMutationKey();
+export function putApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdTagsByTagIdContextMutationKey();
 	return mutationOptions<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+		PutApiRealmsByRealmIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus400
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext({
+			const { data } = await putApiRealmsByRealmIdTagsByTagIdContext({
 				...config,
 				path,
 				body,
@@ -31453,22 +31781,22 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextMutationOpti
 }
 
 /**
- * @summary Set Realm-scoped Tag voting context
- * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/context}
+ * @summary Set Realm Tag Context
+ * {@link /api/realms/:realmId/tags/:tagId/context}
  */
-export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<TContext>(
+export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+			PutApiRealmsByRealmIdTagsByTagIdContextStatus200,
 			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+				| PutApiRealmsByRealmIdTagsByTagIdContextStatus400
+				| PutApiRealmsByRealmIdTagsByTagIdContextStatus403
+				| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
+				| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
+				| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+				| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 			>,
-			PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+			PutApiRealmsByRealmIdTagsByTagIdContextOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -31477,36 +31805,35 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<TContext
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextMutationKey();
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdTagsByTagIdContextMutationKey();
 
-	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextMutationOptions(
+	const baseOptions = putApiRealmsByRealmIdTagsByTagIdContextMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+		PutApiRealmsByRealmIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus400
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+		PutApiRealmsByRealmIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus400
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
 		TContext
 	>(
 		{
@@ -31516,16 +31843,217 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<TContext
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200,
+		PutApiRealmsByRealmIdTagsByTagIdContextStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus400
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus403
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
+		TContext
+	>;
+}
+
+export const putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey = () =>
+	[{ url: "/api/realms/:realmId/units/:unitId/policy-tags/:tagId" }] as const;
+
+export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Apply Realm Policy Tag
+ * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ */
+export function usePutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus400
+				| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+				| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus404
+				| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+				| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+			>,
+			PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey = () =>
+	[{ url: "/api/realms/:realmId/units/:unitId/policy-tags/:tagId" }] as const;
+
+export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove Realm Policy Tag
+ * {@link /api/realms/:realmId/units/:unitId/policy-tags/:tagId}
+ */
+export function useDeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+			>,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions,
 		TContext
 	>;
 }

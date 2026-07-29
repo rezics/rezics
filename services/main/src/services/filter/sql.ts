@@ -181,24 +181,17 @@ function tagAssertionCondition(
 		const consensus = view.consensus;
 		conditions.push(sql`exists (
 			select 1
-			from realm_tag_context filter_realm_tag
-			join unit filter_tag on filter_tag.id = filter_realm_tag.tag_id
-			join unit filter_authority_realm on filter_authority_realm.id = filter_realm_tag.realm_id
-			${
-				consensus
-					? sql`join realm_tag_vote_stat filter_realm_tag_stat
-						on filter_realm_tag_stat.realm_id = filter_realm_tag.realm_id
-						and filter_realm_tag_stat.unit_id = filter_realm_tag.unit_id
-						and filter_realm_tag_stat.tag_id = filter_realm_tag.tag_id`
-					: sql``
-			}
-			where filter_realm_tag.unit_id = ${unitId}
+			from realm_tag_vote_stat filter_realm_tag_stat
+			join unit filter_tag on filter_tag.id = filter_realm_tag_stat.tag_id
+			join unit filter_authority_realm
+				on filter_authority_realm.id = filter_realm_tag_stat.realm_id
+			where filter_realm_tag_stat.unit_id = ${unitId}
 				and ${unitReferenceCondition(
 					authority.realm,
-					sql`filter_realm_tag.realm_id`,
+					sql`filter_realm_tag_stat.realm_id`,
 					sql`filter_authority_realm.kind`,
 				)}
-				and ${tagReference(sql`filter_realm_tag.tag_id`, sql`filter_tag.kind`)}
+				and ${tagReference(sql`filter_realm_tag_stat.tag_id`, sql`filter_tag.kind`)}
 				${
 					consensus
 						? sql`and ${voteSummaryCondition(
@@ -272,6 +265,30 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 					: unitReferenceCondition(filter.subject.is, sql`filter_post.subject_unit_id`)
 				: sql`filter_post.subject_unit_id is null`,
 		);
+	if (filter.explainsRealmTag)
+		conditions.push(sql`exists (
+			select 1
+			from realm_tag_context filter_realm_tag_context
+			join unit filter_context_realm
+				on filter_context_realm.id = filter_realm_tag_context.realm_id
+			join unit filter_context_tag
+				on filter_context_tag.id = filter_realm_tag_context.tag_id
+			where filter_realm_tag_context.context_post_id = filter_post.id
+				and ${unitReferenceCondition(
+					filter.explainsRealmTag.realm,
+					sql`filter_realm_tag_context.realm_id`,
+					sql`filter_context_realm.kind`,
+				)}
+				and ${
+					filter.explainsRealmTag.tag
+						? unitReferenceCondition(
+								filter.explainsRealmTag.tag,
+								sql`filter_realm_tag_context.tag_id`,
+								sql`filter_context_tag.kind`,
+							)
+						: sql`true`
+				}
+		)`);
 	const displayed = filter.scores?.displayed;
 	if (displayed) {
 		const displayedFilter = "some" in displayed ? displayed.some : displayed.none;

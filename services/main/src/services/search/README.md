@@ -62,11 +62,11 @@ empty successful search.
 Lifecycle commands:
 
 ```sh
-task services-main:search:index -- check --projection current --index rezics_units_v7_20260728
-task services-main:search:index -- prepare --projection current --index rezics_units_v7_20260728_143000
-task services-main:search:index -- reconcile --projection current --index rezics_units_v7_20260728_143000
-task services-main:search:index -- promote --projection current --index rezics_units_v7_20260728_143000
-task services-main:search:index -- retire --projection current --index rezics_units_v7_20260728_143000
+task services-main:search:index -- check --projection current --index rezics_units_v8_20260729
+task services-main:search:index -- prepare --projection current --index rezics_units_v8_20260729_143000
+task services-main:search:index -- reconcile --projection current --index rezics_units_v8_20260729_143000
+task services-main:search:index -- promote --projection current --index rezics_units_v8_20260729_143000
+task services-main:search:index -- retire --projection current --index rezics_units_v8_20260729_143000
 task services-main:search:config:check
 ```
 

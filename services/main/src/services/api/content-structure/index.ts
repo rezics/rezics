@@ -86,6 +86,7 @@ import {
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ContentStructureForbiddenResponse = toApiErrorResponse([
+	"RealmCapabilityRequired",
 	"UnitPermissionForbidden",
 	"PlatformCapabilityRequired",
 ]);
@@ -112,6 +113,7 @@ async function presentGenericContentStructureNode(node: typeof contentStructureN
 		target: storedTarget,
 		position: node.position,
 		contentRating: node.contentRating,
+		realmTagQueryStrategy: node.realmTagQueryStrategy,
 		createdAt: node.createdAt,
 		updatedAt: node.updatedAt,
 	};
@@ -143,6 +145,36 @@ async function ensureContentStructureOwner(
 		.where(and(eq(contentStructure.id, structureId), eq(contentStructure.ownerUnitId, unitId)))
 		.limit(1);
 	if (!owned) throw new ContentStructureNotFound();
+}
+
+async function ensureCanMutateContentStructure(
+	authorization: Authorization<string>,
+	input: {
+		readonly ownerUnitId: string;
+		readonly structureId?: string;
+		readonly kind?: "realm.taxonomy";
+	},
+): Promise<void> {
+	const [existing] = input.structureId
+		? await database
+				.select({ kind: contentStructure.kind })
+				.from(contentStructure)
+				.where(
+					and(
+						eq(contentStructure.id, input.structureId),
+						eq(contentStructure.ownerUnitId, input.ownerUnitId),
+						isNull(contentStructure.deletedAt),
+					),
+				)
+				.limit(1)
+		: [];
+	if (input.kind === "realm.taxonomy" || existing?.kind === "realm.taxonomy") {
+		await authorization.realm.ensureCapability(input.ownerUnitId, "realm.tags.manage");
+		return;
+	}
+	await authorization.unit.ensureCanUpdate(input.ownerUnitId, [
+		input.structureId ? ["content-structure", input.structureId] : ["content-structure"],
+	]);
 }
 
 async function ensureReleasedContentStructureApi(
@@ -305,7 +337,10 @@ export default new Elysia()
 	.post(
 		"/units/by-id/:unitId/content-structures",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
+			await ensureCanMutateContentStructure(authorization, {
+				ownerUnitId: params.unitId,
+				kind: body.kind === "realm.taxonomy" ? body.kind : undefined,
+			});
 			const result = await database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				return createContentStructure(tx, {
@@ -320,7 +355,7 @@ export default new Elysia()
 			};
 		},
 		{
-			access: "contribute:unit:update",
+			access: "session-only",
 			params: UnitContentStructuresParams,
 			body: CreateContentStructureBody,
 			response: {
@@ -403,9 +438,10 @@ export default new Elysia()
 	.post(
 		"/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [
-				["content-structure", params.structureId],
-			]);
+			await ensureCanMutateContentStructure(authorization, {
+				ownerUnitId: params.unitId,
+				structureId: params.structureId,
+			});
 			const result = await database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				await ensureContentStructureOwner(tx, params.unitId, params.structureId);
@@ -425,7 +461,7 @@ export default new Elysia()
 			};
 		},
 		{
-			access: "contribute:unit:update",
+			access: "session-only",
 			params: ContentStructureRevisionParams,
 			body: RestoreContentStructureRevisionBody,
 			response: {
@@ -446,9 +482,10 @@ export default new Elysia()
 	.post(
 		"/units/by-id/:unitId/content-structures/:structureId/nodes",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [
-				["content-structure", params.structureId],
-			]);
+			await ensureCanMutateContentStructure(authorization, {
+				ownerUnitId: params.unitId,
+				structureId: params.structureId,
+			});
 			if (body.content.kind === "unit")
 				await authorization.unit.ensureCanRead(body.content.unitId);
 			if (body.target?.kind === "unit")
@@ -494,6 +531,7 @@ export default new Elysia()
 					target: body.target,
 					position: body.position,
 					contentRating: body.contentRating,
+					realmTagQueryStrategy: body.realmTagQueryStrategy,
 				});
 			});
 			return {
@@ -503,7 +541,7 @@ export default new Elysia()
 			};
 		},
 		{
-			access: "contribute:unit:update",
+			access: "session-only",
 			params: ContentStructureParams,
 			body: CreateGenericContentStructureNodeBody,
 			response: {
@@ -522,9 +560,10 @@ export default new Elysia()
 	.patch(
 		"/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [
-				["content-structure", params.structureId],
-			]);
+			await ensureCanMutateContentStructure(authorization, {
+				ownerUnitId: params.unitId,
+				structureId: params.structureId,
+			});
 			if (body.contentUnitId) await authorization.unit.ensureCanRead(body.contentUnitId);
 			if (body.target?.kind === "unit")
 				await authorization.unit.ensureCanRead(body.target.unitId);
@@ -542,6 +581,7 @@ export default new Elysia()
 					target: body.target,
 					position: body.position,
 					contentRating: body.contentRating,
+					realmTagQueryStrategy: body.realmTagQueryStrategy,
 				});
 			});
 			return {
@@ -551,7 +591,7 @@ export default new Elysia()
 			};
 		},
 		{
-			access: "contribute:unit:update",
+			access: "session-only",
 			params: GenericContentStructureNodeParams,
 			body: UpdateGenericContentStructureNodeBody,
 			response: {
@@ -570,9 +610,10 @@ export default new Elysia()
 	.delete(
 		"/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [
-				["content-structure", params.structureId],
-			]);
+			await ensureCanMutateContentStructure(authorization, {
+				ownerUnitId: params.unitId,
+				structureId: params.structureId,
+			});
 			const result = await database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				return deleteContentStructureNode(tx, {
@@ -590,7 +631,7 @@ export default new Elysia()
 			};
 		},
 		{
-			access: "contribute:unit:update",
+			access: "session-only",
 			params: GenericContentStructureNodeParams,
 			body: ContentStructureRevisionBody,
 			response: {
@@ -611,9 +652,10 @@ export default new Elysia()
 	.delete(
 		"/units/by-id/:unitId/content-structures/:structureId",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [
-				["content-structure", params.structureId],
-			]);
+			await ensureCanMutateContentStructure(authorization, {
+				ownerUnitId: params.unitId,
+				structureId: params.structureId,
+			});
 			const result = await database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				return deleteContentStructure(tx, {
@@ -631,7 +673,7 @@ export default new Elysia()
 			};
 		},
 		{
-			access: "contribute:unit:update",
+			access: "session-only",
 			params: ContentStructureParams,
 			body: ContentStructureRevisionBody,
 			response: {

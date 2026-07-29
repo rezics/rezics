@@ -71,6 +71,7 @@ export default {
 		"realm.members.manage": `${realmTerms.label} のメンバーを管理する`,
 		"realm.rules.update": `${realmTerms.label} のルールを更新する`,
 		"realm.pins.manage": `${realmTerms.label} の固定コンテンツを管理する`,
+		"realm.tags.manage": `${realmTerms.label} のタグを管理する`,
 		"realm.units.moderate": `${realmTerms.label} のコンテンツを管理する`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -167,6 +168,7 @@ export default {
 			"realm.members.manage": "メンバー管理",
 			"realm.rules.update": "ルールを更新",
 			"realm.pins.manage": "ピン管理",
+			"realm.tags.manage": `${realmTerms.label} のタグを管理`,
 			"realm.units.moderate": "コンテンツのモデレーション",
 			"entity.association.credit.request": "クレジット関連のリクエスト",
 			"entity.association.credit.direct": "直接にクレジット関連を作成",

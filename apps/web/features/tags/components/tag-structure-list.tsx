@@ -23,6 +23,7 @@ export function presentStructureMembers(structure: TagStructure): readonly TagPr
 			language: member.language,
 			title: member.title,
 			summary: member.summary,
+			avatar: member.avatar,
 		},
 		context: { kind: "structure", structureId: structure.structureId },
 		vote: { kind: "not-applicable", reason: "structure-member" },

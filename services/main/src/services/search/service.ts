@@ -32,7 +32,6 @@ import {
 	profile,
 	unitFollowStat,
 	realm,
-	realmTagContext,
 	realmTagVoteStat,
 	realmUnit,
 	software,
@@ -294,9 +293,9 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 	resolveCurrentSearchFilterDefinition(category, filter);
 	if (filter.field === "realm-tag-vote") {
 		const conditions: SQL[] = [
-			sql`${realmTagContext.unitId} = ${unit.id}`,
-			sql`${realmTagContext.realmId} = ${filter.realmId}::uuid`,
-			sql`${realmTagContext.tagId} = ${filter.tagId}::uuid`,
+			sql`${realmTagVoteStat.unitId} = ${unit.id}`,
+			sql`${realmTagVoteStat.realmId} = ${filter.realmId}::uuid`,
+			sql`${realmTagVoteStat.tagId} = ${filter.tagId}::uuid`,
 		];
 		const addBounds = (
 			column: SQL,
@@ -305,15 +304,11 @@ function compileFilter(category: SearchCategory, filter: SearchControlPredicate)
 			if (range?.lower !== undefined) conditions.push(sql`${column} >= ${range.lower}`);
 			if (range?.upper !== undefined) conditions.push(sql`${column} <= ${range.upper}`);
 		};
-		addBounds(sql`coalesce(${realmTagVoteStat.score}, 0)`, filter.score);
-		addBounds(sql`coalesce(${realmTagVoteStat.voteCount}, 0)`, filter.voteCount);
+		addBounds(sql`${realmTagVoteStat.score}`, filter.score);
+		addBounds(sql`${realmTagVoteStat.voteCount}`, filter.voteCount);
 		return sql`exists (
 			select 1
-			from ${realmTagContext}
-			left join ${realmTagVoteStat}
-				on ${realmTagVoteStat.realmId} = ${realmTagContext.realmId}
-				and ${realmTagVoteStat.unitId} = ${realmTagContext.unitId}
-				and ${realmTagVoteStat.tagId} = ${realmTagContext.tagId}
+			from ${realmTagVoteStat}
 			where ${sql.join(conditions, sql` and `)}
 		)`;
 	}

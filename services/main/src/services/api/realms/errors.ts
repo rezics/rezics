@@ -57,7 +57,17 @@ export class RealmScoreContextPostNotMounted extends Data.TaggedError(
 export class RealmTagContextNotFound extends Data.TaggedError("RealmTagContextNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = RealmTagContextNotFound.status;
-	readonly message = "Realm Tag voting context not found";
+	readonly message = "Realm Tag Context not found";
+}
+
+export class RealmTagContextAlreadyExists extends Data.TaggedError("RealmTagContextAlreadyExists") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = RealmTagContextAlreadyExists.status;
+	readonly message = "A Realm Tag Context already exists for this Tag";
+
+	constructor(readonly details: { readonly contextPostId: string }) {
+		super();
+	}
 }
 
 export class RealmTagContextPostNotMounted extends Data.TaggedError(
@@ -65,7 +75,23 @@ export class RealmTagContextPostNotMounted extends Data.TaggedError(
 ) {
 	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
 	readonly status = RealmTagContextPostNotMounted.status;
-	readonly message = "The Realm Tag voting context Post must be visible in the Realm";
+	readonly message = "The Realm Tag Context must be a visible Wiki Post in the Realm";
+}
+
+export class RealmTagContextPostAlreadyUsed extends Data.TaggedError(
+	"RealmTagContextPostAlreadyUsed",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = RealmTagContextPostAlreadyUsed.status;
+	readonly message = "The Wiki Post already explains another Realm Tag";
+}
+
+export class RealmTagSelfReferenceForbidden extends Data.TaggedError(
+	"RealmTagSelfReferenceForbidden",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = RealmTagSelfReferenceForbidden.status;
+	readonly message = "A Tag cannot be applied to itself";
 }
 
 export class RealmNavigationNotFound extends Data.TaggedError("RealmNavigationNotFound") {
@@ -97,7 +123,10 @@ export const RealmErrors = [
 	RealmUnitNotFound,
 	RealmScoreContextPostNotMounted,
 	RealmTagContextNotFound,
+	RealmTagContextAlreadyExists,
 	RealmTagContextPostNotMounted,
+	RealmTagContextPostAlreadyUsed,
+	RealmTagSelfReferenceForbidden,
 	RealmNavigationNotFound,
 	RealmNavigationInUse,
 	RealmNavigationDocumentInvalid,

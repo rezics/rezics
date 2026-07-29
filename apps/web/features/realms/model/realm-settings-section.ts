@@ -1,5 +1,7 @@
 export const RealmSettingsSectionIds = [
 	"profile",
+	"pages",
+	"tags",
 	"members",
 	"rules",
 	"pins",

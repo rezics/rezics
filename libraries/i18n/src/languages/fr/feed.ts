@@ -114,6 +114,7 @@ export default {
 	continueReading: "Continuer la lecture",
 	viewAll: "Tout afficher",
 	relatedWork: "Œuvre associée",
+	realmTagContext: `Explication de Tag du ${realmTerms.label}`,
 	excerptSource: "Source de l’extrait",
 	excerptSourceMark: "―",
 	myRealms: `Mes ${realmTerms.pluralLabel}`,

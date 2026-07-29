@@ -29,6 +29,8 @@ import {
 	ProgressDatePrecisionValues,
 	ProgressEntryKindValues,
 	ProgressStatusValues,
+	RealmPageKindValues,
+	RealmTagQueryStrategyValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
@@ -583,6 +585,14 @@ const FeedUnitPresentationResponse = t.Union([
 		avatar: AvatarResponse,
 		banner: ImageAssetResponse,
 		memberCount: t.Nullable(t.Integer({ minimum: 0 })),
+		realmTagContext: t.Nullable(
+			t.Object({
+				realmId: Uuid,
+				contextPostId: Uuid,
+				language: t.Nullable(ContentLanguage),
+				summary: NullableText,
+			}),
+		),
 	}),
 	t.Object({
 		kind: t.Literal("general"),
@@ -633,15 +643,33 @@ export const FeedReviewItemResponse = t.Object({
 	scores: t.Array(PostAttachedScoreResponse),
 });
 
+export const FeedWikiItemResponse = t.Object({
+	...FeedPostItemFields,
+	postKind: t.Literal("wiki"),
+	realmTagContext: t.Nullable(
+		t.Object({
+			realmId: Uuid,
+			tag: t.Object({
+				id: Uuid,
+				language: ContentLanguage,
+				title: NullableText,
+				avatar: AvatarResponse,
+			}),
+		}),
+	),
+});
+
 export const FeedPostItemResponse = t.Union([
 	FeedNonReviewPostItemResponse,
 	FeedReviewItemResponse,
+	FeedWikiItemResponse,
 ]);
 
 export type FeedItemResponseValue =
 	| Static<typeof FeedUnitItemResponse>
 	| Static<typeof FeedNonReviewPostItemResponse>
-	| Static<typeof FeedReviewItemResponse>;
+	| Static<typeof FeedReviewItemResponse>
+	| Static<typeof FeedWikiItemResponse>;
 
 export const FeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
@@ -948,6 +976,12 @@ export const RealmDetailResponse = t.Object({
 	visibility: t.String(),
 	language: t.Nullable(ContentLanguage),
 	joinPolicy: t.String(),
+	pages: t.Array(t.UnionEnum(RealmPageKindValues), {
+		minItems: 1,
+		maxItems: 3,
+		uniqueItems: true,
+	}),
+	latestRevisionId: Uuid,
 	memberCount: t.Integer({ minimum: 0 }),
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -965,10 +999,31 @@ export const RealmDetailResponse = t.Object({
 		canManageMembers: t.Boolean(),
 		canUpdateRules: t.Boolean(),
 		canManagePins: t.Boolean(),
+		canManageTags: t.Boolean(),
 		canModerateUnits: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canRestoreHistory: t.Boolean(),
 	}),
+});
+export const RealmTaxonomyResponse = t.Object({
+	structureId: Uuid,
+	latestRevisionId: Uuid,
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			parentId: t.Nullable(Uuid),
+			contentUnitId: Uuid,
+			contentKind: t.UnionEnum(["label", "tag", "wiki"]),
+			language: ContentLanguage,
+			title: NullableText,
+			summary: NullableText,
+			avatar: AvatarResponse,
+			position: FractionalPosition,
+			queryStrategy: t.Nullable(t.UnionEnum(RealmTagQueryStrategyValues)),
+			contextPostId: t.Nullable(Uuid),
+			contextSummary: NullableText,
+		}),
+	),
 });
 const PostThreadDetailFields = {
 	id: Uuid,
@@ -1073,6 +1128,7 @@ export const GenericContentStructureNodeResponse = t.Object({
 	target: GenericContentStructureTargetResponse,
 	position: FractionalPosition,
 	contentRating: t.Nullable(t.UnionEnum(ContentRatingValues)),
+	realmTagQueryStrategy: t.Nullable(t.UnionEnum(RealmTagQueryStrategyValues)),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

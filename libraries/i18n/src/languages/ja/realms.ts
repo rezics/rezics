@@ -30,6 +30,14 @@ export default {
 				description:
 					"名前、概要、画像、ライフサイクル、参加ポリシー、および公開アドレスを管理します。",
 			},
+			pages: {
+				label: "ページ",
+				description: `${realmTerms.label}の固定ページを有効化、無効化、並べ替えします。`,
+			},
+			tags: {
+				label: "タグ分類",
+				description: `コンテンツ構造で${realmTerms.label}のタグを管理し、各タグのクエリ方針を選択します。`,
+			},
 			members: {
 				label: "メンバー",
 				description: "メンバーの状態と参加資格を管理し、ユニット所有権を表示します。",
@@ -56,6 +64,61 @@ export default {
 				description: "設定の変更履歴を確認、比較、元に戻す、または復元します。",
 			},
 		},
+	},
+	pages: {
+		navigation: `${realmTerms.label} ページ`,
+		main: "メイン",
+		tags: "タグ",
+		wiki: "ウィキ",
+		info: "情報",
+	},
+	pageSettings: {
+		title: "有効なページ",
+		description:
+			"メインページは常に有効です。タグとウィキを有効にし、タブの順序を変更できます。",
+		mainRequired: "常に有効",
+		enableDescription: `${realmTerms.inline} のナビゲーションにこのページを表示します。`,
+		moveUp: "ページを前へ移動",
+		moveDown: "ページを後ろへ移動",
+		disable: "ページを無効化",
+	},
+	taxonomy: {
+		title: `${realmTerms.label} のタグ`,
+		description: `タグを選択すると、この${realmTerms.label}のクエリ方針でコンテンツを絞り込みます。`,
+		empty: `この${realmTerms.label}には設定済みのタグがありません。`,
+		filter: "絞り込む",
+		filteredBy: insert("クエリ方針：{{strategy}}", { strategy: String }),
+		strategies: {
+			global_effective: { label: "全体で有効なタグ" },
+			realm_community: { label: `${realmTerms.label}メンバーの合意` },
+			realm_policy: { label: `${realmTerms.label}ポリシータグ` },
+		},
+	},
+	taxonomySettings: {
+		title: "タグ分類とクエリ方針",
+		description: `タグノードは${realmTerms.label}のコンテンツ構造に保存されます。方針は絞り込みに使う権威を決めます。`,
+		addTag: "タグを追加",
+		queryStrategy: "クエリ方針",
+		empty: "コンテンツ構造にタグノードがありません。",
+	},
+	wiki: {
+		description: `この${realmTerms.label}のウィキ記事、または特定の${realmTerms.label}タグ解説を表示します。`,
+		contextFilter: `${realmTerms.label}タグ解説`,
+		allArticles: "すべてのウィキ記事",
+	},
+	tagContext: {
+		createTitle: `${realmTerms.label}タグ解説を作成`,
+		createDescription: `この${realmTerms.label}におけるタグの正式な解説です。必ずウィキ記事として作成され、タグカードの概要と詳細リンクになります。`,
+		tag: "解説するタグ",
+		publish: "タグ解説を公開",
+	},
+	feedManagement: {
+		pin: `この${realmTerms.label}に固定`,
+		pinned: `${realmTerms.label}に固定しました`,
+		addPolicyTag: `${realmTerms.label}ポリシータグを追加`,
+		policyTagDescription: `この${realmTerms.label}のポリシーとして適用するタグを検索します。`,
+		applyPolicyTag: "タグを適用",
+		policyTagAdded: `${realmTerms.label}ポリシータグを追加しました`,
 	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,

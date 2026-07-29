@@ -19,6 +19,9 @@ import {
 	unitDock,
 	conversationParticipantStat,
 	realmTagVoteStat,
+	realmTagContext,
+	realmTagVote,
+	realm,
 	realmScoreContext,
 	realmRuleAcceptance,
 	realmRuleRevision,
@@ -679,8 +682,38 @@ describe("database schema contracts", () => {
 			"unit_id",
 			"tag_id",
 		]);
-		expect(realmTag.foreignKeys.map((key) => key.getName())).toContain(
-			"realm_tag_vote_stat_context_fkey",
+		expect(realmTag.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"realm_tag_vote_stat_realm_fkey",
+				"realm_tag_vote_stat_unit_fkey",
+				"realm_tag_vote_stat_tag_fkey",
+			]),
+		);
+		expect(getTableConfig(realmTagVote).foreignKeys.map((key) => key.getName())).not.toContain(
+			"realm_tag_vote_context_fkey",
+		);
+		const context = getTableConfig(realmTagContext);
+		expect(context.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"realm_id",
+			"tag_id",
+		]);
+		expect(
+			context.indexes.find((index) => index.config.name === "realm_tag_context_post_unique")
+				?.config.unique,
+		).toBe(true);
+	});
+
+	it("stores enabled Realm Pages as one constrained ordered value", () => {
+		const config = getTableConfig(realm);
+		expect(realm.enabledPages.enumValues).toEqual(["main", "tags", "wiki"]);
+		expect(config.checks.map((check) => check.name)).toEqual(
+			expect.arrayContaining([
+				"realm_enabled_pages_cardinality_check",
+				"realm_enabled_pages_main_check",
+				"realm_enabled_pages_no_null_check",
+				"realm_enabled_pages_tags_unique_check",
+				"realm_enabled_pages_wiki_unique_check",
+			]),
 		);
 	});
 

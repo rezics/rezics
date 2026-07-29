@@ -2865,6 +2865,13 @@ async function seedCoverageContracts(
 				createdAt,
 				updatedAt: createdAt,
 			},
+			{
+				realmId: targetRealm.id,
+				unitId: associationContextPost.id,
+				status: "visible",
+				createdAt,
+				updatedAt: createdAt,
+			},
 		])
 		.onConflictDoUpdate({
 			target: [realmUnit.realmId, realmUnit.unitId],
@@ -2881,9 +2888,8 @@ async function seedCoverageContracts(
 	});
 	await tx.insert(realmTagContext).values({
 		realmId: targetRealm.id,
-		unitId: target.id,
 		tagId: secondTag.id,
-		contextPostId: contextPost.id,
+		contextPostId: associationContextPost.id,
 		createdByProfileId: actor.id,
 		createdAt,
 		updatedAt: createdAt,

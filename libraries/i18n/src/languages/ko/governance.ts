@@ -71,6 +71,7 @@ export default {
 		"realm.members.manage": `${realmTerms.label} 회원 관리`,
 		"realm.rules.update": `${realmTerms.label} 규칙 업데이트`,
 		"realm.pins.manage": `${realmTerms.label} 고정 콘텐츠 관리`,
+		"realm.tags.manage": `${realmTerms.label} 태그 관리`,
 		"realm.units.moderate": `${realmTerms.label} 콘텐츠 중재`,
 	} satisfies Record<PlatformCapability, string>,
 	direction: {
@@ -168,6 +169,7 @@ export default {
 			"realm.members.manage": "구성원 관리",
 			"realm.rules.update": "규칙 업데이트",
 			"realm.pins.manage": "핀 관리",
+			"realm.tags.manage": `${realmTerms.label} 태그 관리`,
 			"realm.units.moderate": "콘텐츠 중재",
 			"entity.association.credit.request": "신용 연관 요청",
 			"entity.association.credit.direct": "신용 연관성 직접 생성",

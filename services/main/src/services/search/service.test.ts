@@ -39,7 +39,7 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v7_20260728",
+		indexUid: "rezics_units_v8_20260729",
 		projectionVersion: 6,
 		settingsFingerprint: "a".repeat(64),
 	}),
@@ -424,10 +424,9 @@ describe("domain search SQL", () => {
 		const query = lastQuery();
 		expect(query).toContain('from "realm_unit"');
 		expect(query).toContain("@> ARRAY[");
-		expect(query).toContain('from "realm_tag_context"');
-		expect(query).toContain('left join "realm_tag_vote_stat"');
-		expect(query).toContain('coalesce("realm_tag_vote_stat"."score", 0) >=');
-		expect(query).toContain('coalesce("realm_tag_vote_stat"."vote_count", 0) <=');
+		expect(query).toContain('from "realm_tag_vote_stat"');
+		expect(query).toContain('"realm_tag_vote_stat"."score" >=');
+		expect(query).toContain('"realm_tag_vote_stat"."vote_count" <=');
 	});
 
 	it("hides Variants from browse discovery but annotates exact Unit results", async () => {

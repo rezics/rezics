@@ -107,6 +107,7 @@ export default {
 	continueReading: "계속 읽기",
 	viewAll: "모두 보기",
 	relatedWork: "관련 작품",
+	realmTagContext: `${realmTerms.label} 태그 설명`,
 	excerptSource: "발췌 출처",
 	excerptSourceMark: "―",
 	myRealms: `내 ${realmTerms.pluralLabel}`,
