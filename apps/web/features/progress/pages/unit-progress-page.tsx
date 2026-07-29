@@ -40,8 +40,12 @@ import {
 	Progress,
 	QueryFailure,
 	QueryPending,
+	RadioGroup,
+	RadioGroupItem,
+	RadioGroupLabel,
 	cn,
 } from "@rezics/ui";
+import { useQueryState } from "nuqs";
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
 import type { CatalogDetailUnitType } from "@/features/units/model/catalog-detail-section";
@@ -65,7 +69,13 @@ import {
 	type ProgressSourceKind,
 } from "../model/progress-entry";
 import { progressRecordFromEditableState } from "../model/progress-state";
-import { progressEntryReviewHref } from "../routing/progress-routes";
+import {
+	AllProgressHistoryStatuses,
+	ProgressHistoryFilters,
+	progressEntryReviewHref,
+	progressHistoryFilterParser,
+	toProgressHistoryFilter,
+} from "../routing/progress-routes";
 
 export function UnitProgressPage({
 	type,
@@ -121,7 +131,11 @@ function UnitProgressPageContent({
 
 function ProgressJournal({ title }: { readonly title?: string }) {
 	const progress = useUnitProgress();
-	const entries = useProgressEntries(progress.domain.unitId);
+	const [historyFilter, setHistoryFilter] = useQueryState("status", progressHistoryFilterParser);
+	const entries = useProgressEntries(
+		progress.domain.unitId,
+		historyFilter === AllProgressHistoryStatuses ? undefined : historyFilter,
+	);
 	const { t } = useTranslation(["engagement", "ui"]);
 	const [selectedId, setSelectedId] = useState<string>();
 	const [editorOpen, setEditorOpen] = useState(false);
@@ -170,13 +184,41 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 			<CurrentProgressCard />
 
 			<section aria-labelledby="progress-history-heading" className="grid gap-4">
-				<div>
-					<h2 className="font-heading text-xl font-bold" id="progress-history-heading">
-						{t.engagement.progressJournal.historyTitle}
-					</h2>
-					<p className="mt-1 text-muted-foreground text-sm">
-						{t.engagement.progressJournal.description}
-					</p>
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+					<div>
+						<h2
+							className="font-heading text-xl font-bold"
+							id="progress-history-heading"
+						>
+							{t.engagement.progressJournal.historyTitle}
+						</h2>
+						<p className="mt-1 text-muted-foreground text-sm">
+							{t.engagement.progressJournal.description}
+						</p>
+					</div>
+					<RadioGroup
+						className="gap-2"
+						onValueChange={({ value }) => {
+							setSelectedId(undefined);
+							void setHistoryFilter(toProgressHistoryFilter(value));
+						}}
+						value={historyFilter}
+					>
+						<RadioGroupLabel>
+							{t.engagement.progressJournal.filterLabel}
+						</RadioGroupLabel>
+						<div className="flex flex-wrap gap-2">
+							{ProgressHistoryFilters.map((status) => (
+								<RadioGroupItem
+									className="min-h-10 rounded-full border border-input px-3 py-1.5 data-[state=checked]:border-primary data-[state=checked]:bg-primary/8"
+									key={status}
+									value={status}
+								>
+									{t.engagement.progressJournal.filters[status]}
+								</RadioGroupItem>
+							))}
+						</div>
+					</RadioGroup>
 				</div>
 				{entries.isPending ? (
 					<QueryPending />

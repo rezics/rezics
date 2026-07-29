@@ -256,6 +256,12 @@ export default {
 		backToUnit: "Retour à l’œuvre",
 		backToProgress: "Retour aux progressions",
 		historyTitle: "Historique de progression",
+		filterLabel: "Filtrer l’historique de progression",
+		filters: {
+			all: "Tout",
+			active: "En cours",
+			completed: "Terminé",
+		},
 		updateNow: "Mettre à jour la progression actuelle",
 		addHistory: "Ajouter une entrée passée",
 		addHistoryDescription:

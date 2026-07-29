@@ -245,6 +245,12 @@ export default {
 		backToUnit: "返回作品",
 		backToProgress: "返回进度列表",
 		historyTitle: "进度历程",
+		filterLabel: "筛选进度历程",
+		filters: {
+			all: "全部",
+			active: "进行中",
+			completed: "已完成",
+		},
 		updateNow: "更新当前进度",
 		addHistory: "添加过往记录",
 		addHistoryDescription: "补记一次过往的进度变更，默认不会改动当前进度。",

@@ -68,6 +68,7 @@ export const ListProgressEntriesQuery = t.Object(
 	{
 		cursor: t.Optional(t.String({ maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
+		status: t.Optional(ProgressStatus),
 	},
 	{ additionalProperties: false },
 );

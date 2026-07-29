@@ -252,6 +252,12 @@ export default {
 		backToUnit: "Zurück zum Werk",
 		backToProgress: "Zurück zum Fortschritt",
 		historyTitle: "Fortschrittsverlauf",
+		filterLabel: "Fortschrittsverlauf filtern",
+		filters: {
+			all: "Alle",
+			active: "In Bearbeitung",
+			completed: "Abgeschlossen",
+		},
 		updateNow: "Aktuellen Fortschritt ändern",
 		addHistory: "Früheren Eintrag hinzufügen",
 		addHistoryDescription:

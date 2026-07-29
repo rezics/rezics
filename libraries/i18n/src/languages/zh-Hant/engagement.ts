@@ -242,6 +242,12 @@ export default {
 		backToUnit: "返回作品",
 		backToProgress: "返回進度清單",
 		historyTitle: "進度歷程",
+		filterLabel: "篩選進度歷程",
+		filters: {
+			all: "全部",
+			active: "進行中",
+			completed: "已完成",
+		},
 		updateNow: "更新目前進度",
 		addHistory: "新增過往紀錄",
 		addHistoryDescription: "補記一次過往的進度變更，不會預設改動目前進度。",

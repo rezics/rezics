@@ -68749,6 +68749,17 @@ export type GetApiProgressByUnitIdEntriesPath = {
 	unitId: string;
 };
 
+export const GetApiProgressByUnitIdEntriesStatus = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type GetApiProgressByUnitIdEntriesStatus =
+	(typeof GetApiProgressByUnitIdEntriesStatus)[keyof typeof GetApiProgressByUnitIdEntriesStatus];
+
 /**
  * @type object
  */
@@ -68762,6 +68773,10 @@ export type GetApiProgressByUnitIdEntriesQuery = {
 	 * @default 30
 	 */
 	limit?: string | number;
+	/**
+	 * @type string | undefined
+	 */
+	status?: GetApiProgressByUnitIdEntriesStatus;
 };
 
 export const GetApiProgressByUnitIdEntriesStatus200ItemsEntryKindEnum = {

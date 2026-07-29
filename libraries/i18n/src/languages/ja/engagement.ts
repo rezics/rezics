@@ -249,6 +249,12 @@ export default {
 		backToUnit: "作品に戻る",
 		backToProgress: "進捗一覧に戻る",
 		historyTitle: "進捗履歴",
+		filterLabel: "進捗履歴を絞り込む",
+		filters: {
+			all: "すべて",
+			active: "進行中",
+			completed: "完了",
+		},
 		updateNow: "現在の進捗を更新",
 		addHistory: "過去の記録を追加",
 		addHistoryDescription: "過去の進捗変更を追加します。初期設定では現在の進捗は変わりません。",

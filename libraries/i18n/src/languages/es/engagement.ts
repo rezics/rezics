@@ -250,6 +250,12 @@ export default {
 		backToUnit: "Volver a la obra",
 		backToProgress: "Volver al progreso",
 		historyTitle: "Historial de progreso",
+		filterLabel: "Filtrar el historial de progreso",
+		filters: {
+			all: "Todo",
+			active: "En curso",
+			completed: "Completado",
+		},
 		updateNow: "Actualizar progreso actual",
 		addHistory: "Añadir entrada anterior",
 		addHistoryDescription:

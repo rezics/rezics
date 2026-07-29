@@ -250,6 +250,12 @@ export default {
 		backToUnit: "작품으로 돌아가기",
 		backToProgress: "진행 목록으로 돌아가기",
 		historyTitle: "진행 기록",
+		filterLabel: "진행 기록 필터",
+		filters: {
+			all: "전체",
+			active: "진행 중",
+			completed: "완료",
+		},
 		updateNow: "현재 진행률 업데이트",
 		addHistory: "과거 기록 추가",
 		addHistoryDescription:

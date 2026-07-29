@@ -5,6 +5,7 @@ import {
 	CompleteProgressBody,
 	CreateProgressEntryBody,
 	ImportProgressBody,
+	ListProgressEntriesQuery,
 	ProgressLookupResponse,
 	ReplaceProgressEntryBody,
 	UpsertProgressBody,
@@ -51,6 +52,13 @@ describe("progress API contract", () => {
 				completedCount: 3,
 			}),
 		).toBe(false);
+	});
+
+	it("accepts typed journal status filters", () => {
+		expect(Check(ListProgressEntriesQuery, {})).toBe(true);
+		expect(Check(ListProgressEntriesQuery, { status: "active" })).toBe(true);
+		expect(Check(ListProgressEntriesQuery, { status: "completed" })).toBe(true);
+		expect(Check(ListProgressEntriesQuery, { status: "all" })).toBe(false);
 	});
 
 	it("allows completion to retain an updated cumulative time", () => {

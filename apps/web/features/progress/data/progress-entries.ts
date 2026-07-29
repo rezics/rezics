@@ -7,8 +7,13 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-export function useProgressEntries(unitId: string) {
-	const baseQuery = { limit: 30 } satisfies GetApiProgressByUnitIdEntriesQuery;
+export type ProgressHistoryStatus = "active" | "completed";
+
+export function useProgressEntries(unitId: string, status?: ProgressHistoryStatus) {
+	const baseQuery = {
+		limit: 30,
+		...(status ? { status } : {}),
+	} satisfies GetApiProgressByUnitIdEntriesQuery;
 	return useInfiniteQuery({
 		queryKey: getApiProgressByUnitIdEntriesQueryKey({
 			path: { unitId },

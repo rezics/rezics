@@ -355,6 +355,7 @@ export default new Elysia({ prefix: "/progress" })
 						eq(unitProgressEntry.profileId, profile.unitId),
 						eq(unitProgressEntry.unitId, params.unitId),
 						isNull(unitProgressEntry.deletedAt),
+						query.status ? eq(unitProgressEntry.status, query.status) : undefined,
 						progressEntryCursorCondition(cursor),
 					),
 				)

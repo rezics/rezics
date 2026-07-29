@@ -250,6 +250,12 @@ export default {
 		backToUnit: "Back to work",
 		backToProgress: "Back to progress",
 		historyTitle: "Progress history",
+		filterLabel: "Filter progress history",
+		filters: {
+			all: "All",
+			active: "In progress",
+			completed: "Completed",
+		},
 		updateNow: "Update current progress",
 		addHistory: "Add past entry",
 		addHistoryDescription:
