@@ -87,8 +87,8 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 		: new Intl.DateTimeFormat(locale.target, { dateStyle: "medium" }).format(joinedAt);
 	const tabs = [
 		{ value: "profile", label: t.profiles.tabs.profile, href: profileHref(user) },
-		{ value: "activity", label: t.profiles.tabs.activity, href: activityHref },
 		{ value: "content", label: t.profiles.tabs.content, href: contentHref },
+		{ value: "activity", label: t.profiles.tabs.activity, href: activityHref },
 	] as const;
 
 	return (

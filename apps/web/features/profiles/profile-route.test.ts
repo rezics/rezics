@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
 
-import { profileHref } from "./profile-route";
+import { profileHref, ProfileSections } from "./profile-route";
 
 describe("profile routes", () => {
+	it("orders profile sections by personal details, content, then activity", () => {
+		expect(ProfileSections).toEqual(["profile", "content", "activity"]);
+	});
+
 	it("uses the long profile route for an ID-only profile", () => {
 		expect(profileHref("profile-id")).toBe("/user/profile-id");
 		expect(profileHref("profile-id", "profile")).toBe("/user/profile-id");

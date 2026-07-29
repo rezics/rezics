@@ -1,6 +1,6 @@
 import { addressableUnitHref, type AddressableUnit } from "@/features/slugs/unit-route";
 
-export const ProfileSections = ["profile", "activity", "content"] as const;
+export const ProfileSections = ["profile", "content", "activity"] as const;
 
 export type ProfileSection = (typeof ProfileSections)[number];
 
